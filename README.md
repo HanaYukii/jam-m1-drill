@@ -17,8 +17,8 @@ visitor's own browser (`localStorage`).
 
 ## Deploy
 
-Pushing to `main` publishes to GitHub Pages via `.github/workflows/pages.yml`
-(enable it once under **Settings → Pages → Source: GitHub Actions**).
+Live at **https://hanayukii.github.io/jam-m1-drill/** — GitHub Pages serves `main` at `/ (root)`,
+so any commit to `main` republishes it (**Settings → Pages → Deploy from a branch → main / (root)**).
 
 Any static host works just as well:
 
