@@ -9,9 +9,11 @@ Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, bu
   cryptography, constants, ecosystem), searchable and cross-linked.
 - Explanations in Traditional Chinese with English protocol terms, each citing the section or
   equation it comes from; 52 items are tagged **0.7.2 → 0.8.0** for the version delta.
-- Four study modes: practice (instant feedback), **Q&A** (read straight through — question, then
-  tap for the model answer and explanation, no options to pick), mock exam (interview weighting:
-  two random chapters + architecture + appendices), and a Leitner-style wrong-answer box.
+- Study modes: **practice** (instant feedback), **Q&A** (read straight through — question, then tap
+  for the model answer and explanation, no options to pick), **cheat sheet** (one condensed page per
+  chapter: flow, constants, key equations, the questions examiners keep asking, 0.7.2→0.8.0 deltas),
+  **mock exam** (interview weighting: two random chapters + architecture + appendices), and a
+  Leitner-style wrong-answer box.
 
 Also shipped as a printable handout: **[`jam-m1-qa.md`](jam-m1-qa.md)** — every question with its
 model answer, explanation and GP reference, plus the full glossary, in one read-through file. The
