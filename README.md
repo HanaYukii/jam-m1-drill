@@ -13,6 +13,11 @@ Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, bu
   tap for the model answer and explanation, no options to pick), mock exam (interview weighting:
   two random chapters + architecture + appendices), and a Leitner-style wrong-answer box.
 
+Also shipped as a printable handout: **[`jam-m1-qa.md`](jam-m1-qa.md)** — every question with its
+model answer, explanation and GP reference, plus the full glossary, in one read-through file. The
+Q&A mode's **列印 / 存 PDF** button prints the same thing (answers expanded, chrome hidden) straight
+from the browser.
+
 Everything is one self-contained `index.html` — no build step, no backend. Progress lives in the
 visitor's own browser (`localStorage`).
 

@@ -70,6 +70,18 @@ code,pre,.mono{font-family:var(--mono)}
 .card.qa.open .qa-caret{transform:rotate(180deg)}
 .qa-ans{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid var(--accent);line-height:1.65}
 .qa-ans b{display:block;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+@media print{
+  .app{display:block}
+  .rail,#status,.qa-bar,.drawer-toggle,.qa-caret{display:none!important}
+  body,.stage,.card{background:#fff!important;color:#000!important}
+  .card{max-width:none;border:0;border-bottom:1px solid #ccc;border-radius:0;box-shadow:none;padding:10px 0 14px;margin:0;break-inside:avoid;page-break-inside:avoid}
+  .qa-a[hidden]{display:block!important}
+  .qa-q .qa-qt{font-size:13pt}
+  .expl,.qa-ans,.trap{border-color:#bbb!important;background:#fafafa!important;color:#000!important}
+  .code{background:#f4f4f4!important;color:#000!important;border:1px solid #ddd}
+  .tag,.ref,.code-cap{color:#555!important}
+  @page{margin:14mm}
+}
 .ch{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;border:1px solid transparent;background:transparent;text-align:left;cursor:pointer;width:100%}
 .ch:hover{background:var(--surface-2)}
 .ch[aria-pressed="true"]{border-color:var(--line-2);background:var(--surface-2)}
@@ -709,7 +721,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       el.innerHTML = '<div class="empty"><h3>沒有符合篩選的題目</h3>調整章節或篩選條件，或清空搜尋。</div>'; return;
     }
     let h = '<div class="qa-bar"><span>共 <b>'+list.length+'</b> 題 — 先自己在心裡答一遍，再點題目看標準答案與詳解。</span>'
-      + '<button class="btn ghost" id="qaToggle">'+(state.qaOpen?'全部收合':'全部展開')+'</button></div>';
+      + '<span style="display:flex;gap:8px"><button class="btn ghost" id="qaPrint">列印 / 存 PDF</button>'
+      + '<button class="btn ghost" id="qaToggle">'+(state.qaOpen?'全部收合':'全部展開')+'</button></span></div>';
     list.forEach((it, i) => {
       const open = state.qaOpen || state.qaSeen.has(it.id);
       h += '<div class="card qa'+(open?' open':'')+'" data-qid="'+esc(it.id)+'">';
@@ -738,6 +751,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         renderStatus();
       };
     });
+    $('#qaPrint').onclick = () => { state.qaOpen = true; renderQA(); renderStatus(); setTimeout(()=>window.print(), 150); };
     $('#qaToggle').onclick = () => {
       state.qaOpen = !state.qaOpen;
       if (!state.qaOpen) state.qaSeen.clear();
