@@ -9,8 +9,9 @@ Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, bu
   cryptography, constants, ecosystem), searchable and cross-linked.
 - Explanations in Traditional Chinese with English protocol terms, each citing the section or
   equation it comes from; 52 items are tagged **0.7.2 → 0.8.0** for the version delta.
-- Three study modes: practice (instant feedback), mock exam (interview weighting: two random
-  chapters + architecture + appendices), and a Leitner-style wrong-answer box.
+- Four study modes: practice (instant feedback), **Q&A** (read straight through — question, then
+  tap for the model answer and explanation, no options to pick), mock exam (interview weighting:
+  two random chapters + architecture + appendices), and a Leitner-style wrong-answer box.
 
 Everything is one self-contained `index.html` — no build step, no backend. Progress lives in the
 visitor's own browser (`localStorage`).
