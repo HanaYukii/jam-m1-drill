@@ -1,12 +1,13 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 267 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+Gray Paper **0.8.0** · 21 章速記 · 267 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
 線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-08-27
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
 ## 目錄
 
+- [速記（考前濃縮）](#cheat)
 - [§3 Notation](#ch-3) — 10 題
 - [§4 Overview](#ch-4) — 13 題
 - [§5 The Header](#ch-5) — 11 題
@@ -29,6 +30,1036 @@ Gray Paper **0.8.0** · 267 題 · 92 條名詞解釋 · New-JAMneration M1 面�
 - [附錄 H · Erasure Coding](#ch-h) — 5 題
 - [★ Architecture & Rationale](#ch-arch) — 23 題
 - [名詞解釋](#glossary)
+
+
+<a id="cheat"></a>
+
+# 速記　<sub>考前濃縮 · 21 章</sub>
+
+## §3 Notation
+
+讀 Gray Paper 的語法課。這一章沒有協定內容，但每一條公式都靠它 —— 面試被抽到時，考的是你能不能當場把一條式子的型別與量詞唸清楚。
+
+**流程**
+
+1. 型別：N 自然數、N_n 嚴格小於 n、Z 整數、𝔹 blob（octet 序列）、𝔹_x 固定長度、H hash
+2. 序列集合：⟦T⟧ 任意長、⟦T⟧_n 剛好 n、⟦T⟧_{:n} 至多 n、⟦T⟧_{n:} 至少 n
+3. 字典 {K ↦ V}；K(d) 取 keys、V(d) 取 values；d[k] 取值（缺鍵是未定義，不是 ∅）
+4. optional：A? ≡ A ∪ {∅}；∅ 表示「合法地沒有值」，∇ 表示「意外的失敗」
+5. 撇與匕首：無撇 = prior、′ = posterior、† ‡ = 章內中間態；讀公式先確認自己在哪一段
+6. 序列運算：⌢ 串接、↕ 排序、⊰ 依序取出（ordered in）、|x| 長度
+7. 編碼：E(·) 是附錄 C 的序列化，E_n(·) 是固定 n 位元組的小端整數
+
+**常數與門檻**
+
+- `⟦T⟧_{:n} vs ⟦T⟧_n` — 冒號＝至多，沒冒號＝剛好。α 用前者、φ 用後者，這是最常被抓的細節
+- `∅ vs ∇` — 前者是 optional 的空值，後者代表錯誤／未定義，兩者不可互換
+- `𝒰(a, b, …)` — substitute-if-nothing：回傳第一個不是 ∅ 的引數
+- `N_L` — octet 序列長度的集合，等價於 N_{2^32}
+
+**核心公式**
+
+- `§3.3` — ∅ / ∇ / A? 與 𝒰 的定義
+- `§3.4` — 數值與 blob 型別 N、N_n、Z、𝔹、𝔹_x、𝔹_$
+- `§3.7` — 序列集合的四種下標寫法
+- `§3.8` — 型別宣告用 ∈ 具名欄位、具體值用三冒號綁定
+
+**最常被追問**
+
+- **為什麼要區分 ∅ 和 ∇？**  
+  ∅ 是協定明確允許的「這裡本來就可以沒有值」，例如 epoch marker 平時不存在、core 上沒有 pending report。∇ 是「這裡不該發生的情況」，例如查一個不存在的字典鍵。把兩者混用會讓錯誤被靜默吞掉 —— 實作上前者是 Option，後者應該是 panic 或 error。
+- **撇、匕首、雙匕首在讀公式時怎麼判斷？**  
+  同一個符號在一章裡最多會出現四種：σ（prior）、σ†、σ‡（章內中間態）、σ′（posterior）。匕首的意義由該章自己定義，不同章不通用（ρ† 是 disputes 清完，δ† 是 accumulate 前）。讀式子時先問「這條在算哪一段」，答錯段落等於整條理解錯。
+- **為什麼要有 ⊰（ordered in）這個記號？**  
+  集合建構式若用 ∈，元素順序未定義；但很多地方（如 verdicts、culprits、E_G）要求輸出是有序序列。⊰ 明示「依原序列的順序取出」，讓結果是確定的序列而不是集合，這對「所有節點要算出同一個 state root」是必要的。
+- **E(x) 和 E_4(x) 差在哪？**  
+  E 是通用序列化（附錄 C），對整數用變長編碼；E_4 是固定 4 位元組小端。狀態序列化裡兩者混用：timeslot 用 E_4、可變長度欄位用 var(·)。看到公式裡哪個都要能立刻說出輸出的位元組數。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的符號表在 preamble.tex，是唯一權威；坊間 0.7.x 筆記的符號（ϑ、W 當 work-report）都會扣分
+
+**對應程式碼**
+
+- 把 GP 的型別直接對到 Go 型別時，⟦T⟧_{:n} 要用「有上限的 slice + 檢查」，不要只用 slice
+- optional 欄位用指標或 Option 包裝，不要用零值代表 ∅ —— 零值在編碼時會產生不同的位元組
+
+---
+
+## §4 Overview
+
+把整條協定壓成一行：σ′ = Υ(σ, B)。σ 拆成 17 個大致獨立的元件，每個元件由哪一章負責、讀誰寫誰，是這一章唯一要記牢的東西 —— 也是面試最愛拿來當開場的地圖題。
+
+**流程**
+
+1. α authorizer pool（§8）、φ authorizer queue（§8）
+2. β recent history（§7）、γ Safrole 狀態（§6）、η entropy 四格（§6）
+3. ι 待入 validator、κ 現任 validator、λ 前任 validator（§6 輪替）
+4. ρ availability assignments（§11）、τ 最近 timeslot（§6）
+5. δ service accounts（§9）、χ 特權服務（§12）
+6. ψ disputes 的四個集合（§10）、π 統計（§13）
+7. ω ready queue、ξ accumulated history、θ accumulation output log（§12）
+
+**常數與門檻**
+
+- `17` — σ 的元件數
+- `σ′ = Υ(σ, B)` — 整個協定就是這個函數；每一章負責它的一塊
+- `prior / posterior` — 無撇＝執行前，撇＝執行後；† ‡ 是章內的中間態（ρ†、ρ‡、δ†、δ‡、β†）
+
+**核心公式**
+
+- `eq. 4.1–4.4` — B 的組成、σ 的組成與 Υ 的型別
+- `§4.9.1` — guaranteeing / assuring / auditing / judging 四階段的原文定義
+- `§4.9.2` — in-core 執行要有與 on-chain 相當的 crypto-economic security
+
+**最常被追問**
+
+- **請用一分鐘描述 JAM 的狀態轉移。**  
+  從 header 驗簽與 slot 檢查開始；先處理 disputes（ρ†、ψ′），再處理 assurance（ρ‡、可用的報告）、接著 guarantees 塞入新報告（ρ′）；然後 Safrole 推進 γ / η / κ / λ；可用的報告進 accumulation 改 δ / χ / ι / φ 並產出 θ；最後更新 β、π。順序不是任意的：後面每一步都依賴前面產生的中間態。
+- **為什麼 σ 要拆這麼多元件，不用一棵大樹就好？**  
+  拆開之後每個元件有自己的 state key（附錄 D），修改一個元件只會動到樹上一條路徑，而且不同章節能各自證明自己的轉移；合成一大坨會讓「這一章到底改了什麼」無法形式化。
+- **哪些元件是「每塊都會動」，哪些是「偶爾才動」？**  
+  每塊都動：τ、β、η_0、π、ρ（幾乎必動）。epoch 才動：κ / λ / γ_K / η_1..3。只有被使用時才動：α / φ、δ / χ / ι、ψ、ω / ξ / θ。面試常從這裡切入問你懂不懂管線。
+- **為什麼 disputes 要排在最前面處理？**  
+  因為它會清掉 ρ 上的壞 assignment，也會改變 offender 集合。如果先處理 guarantees，就可能把新報告塞進一個「這一塊稍後才被判定要清空」的 core，或讓已被剔除的 validator 的簽章被接受。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 把 ϑ 改名為 ω，並新增 θ（accumulation output log）作為獨立元件
+- χ 由 bless 三元組擴成 manager / assigners / delegator / registrar
+
+**對應程式碼**
+
+- internal/state/ — 元件與 state key 的對應表；C(n) 的編號一錯，整個 state root 就錯
+- 建議面試前把「元件 → 章節 → state key → 誰會寫它」做成一張表背下來
+
+---
+
+## §5 The Header
+
+區塊的「可獨立驗證」摘要：只看 header 就能驗簽、定位時間、確認 extrinsic 內容，並在 epoch 邊界宣告新的 validator set 與抽籤結果。header 帶的是 prior state root，這是整條管線化設計的關鍵。
+
+**流程**
+
+1. H_P parent hash、H_R prior state root、H_X extrinsic hash 三者釘住鏈的結構
+2. H_T timeslot 決定 epoch/slot 與該由誰出塊；H_I author index 指向 κ′ 裡的位置
+3. H_V 是 VRF 輸出（entropy source），累積進 η′_0；H_S 是對 header 的 seal 簽章
+4. H_E epoch marker：epoch 邊界時宣告下一組 validator 的 bandersnatch key 與 entropy
+5. H_W winning tickets：抽籤成功時宣告本 epoch 的 ticket 序列（票不足則不出現）
+6. H_O offenders：本塊新增的 offender key（來自 §10 的 culprits/faults）
+7. 驗證順序：先確認 H_T 對應的 slot sealer 是 H_I、再用該 key 驗 H_S 與 H_V，最後才談內容
+
+**常數與門檻**
+
+- `H_S / H_V` — seal 與 entropy source 都是 bandersnatch 簽章，但用途不同：一個證明出塊權、一個貢獻隨機
+- `H_R` — prior state root：本塊執行「之前」的狀態根
+- `H_E / H_W` — 只在 epoch 邊界／抽籤成功時出現，平時是 ∅（optional 欄位）
+
+**核心公式**
+
+- `eq. 5.1` — H 的十個欄位與型別
+- `§5.x seal` — H_S 對「除了 seal 以外的 header」簽名；H_V 的輸入含 X_ 前綴 domain separator
+- `§D.1` — header 不進狀態樹，但 H_R 是狀態樹的根 —— 別把兩者搞混
+
+**最常被追問**
+
+- **為什麼是 prior state root 而不是 posterior？**  
+  posterior root 必須等本塊全部執行完才算得出，出塊者就得在 slot 內跑完 STF 才能簽章封塊。改帶 prior root，出塊、傳播、狀態計算就能重疊成管線；代價是要驗證第 n 塊的狀態，得等第 n+1 塊的 header。這是 JAM 為了 6 秒 slot 做的核心取捨。
+- **H_S 和 H_V 為什麼要兩個簽章？**  
+  H_S 證明「這個 slot 的確輪到我」，輸入綁 slot sealer；H_V 是熵的來源，輸入綁 entropy domain。如果共用一個，出塊者就能靠「要不要出這塊」同時操縱出塊權證明與隨機數；分開之後，H_V 的值在 H_S 決定的那一刻就已經被鎖住。
+- **epoch marker 為什麼要放在 header，而不是等狀態自己算出來？**  
+  輕客戶端只同步 header。沒有 H_E，它就無法在不重放狀態的情況下知道 validator set 換人了，後續的簽章也就無從驗起。H_W 同理：它讓輕客戶端能自行推出誰該出塊。
+- **H_O（offenders）為什麼要上 header？**  
+  剔除 validator 會直接影響後續所有簽章的驗證。放進 header 讓這件事對只看 header 的人也是明確的，同時它也是 H_X 之外少數會影響 κ 的欄位。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 統一把 header 欄位下標寫成大寫（H_T / H_I / H_P / H_R / H_X / H_E / H_W / H_O / H_V / H_S）
+
+**對應程式碼**
+
+- internal/types/header.go — seal 驗證要先把 H_S 欄位清空再編碼，順序錯了簽章一定過不了
+- epoch marker 與 winning tickets 是 optional，編碼時是 0/1 前綴，不是固定長度
+
+---
+
+## §6 Safrole
+
+決定「每個 slot 由誰出塊」。用 ring VRF 讓 validator 匿名投票券（ticket）進來，epoch 結束前抽出 E 張、以 Z 函數重排成 slot-sealer 序列 γ_S；票不夠就 fallback 成公鑰輪流。
+
+**流程**
+
+1. validator 用 bandersnatch ring VRF 產 ticket，證明自己屬於 γ_K 但不洩漏是誰
+2. ticket 進 extrinsic E_T → 累積在 γ_A（accumulator，上限 E 張，依 ticket id 排序保留最小的）
+3. epoch 邊界（e′ ≠ e）：κ′ ← γ_K、γ_K ← ι、λ′ ← κ，四組 validator set 整體輪一格
+4. γ_S 的決定：γ_A 滿 E 張 → Z(γ_A) 外洗牌；否則 fallback F(η′_2, κ′) 用公鑰
+5. 出塊時 H_V 要對得上 γ_S[H_T mod E]；H_S 是 seal，H_E 是 entropy source
+6. η 四格輪替：η′_0 由 H_V 累積，η′_1←η_0、η′_2←η_1、η′_3←η_2 只在 epoch 邊界發生
+
+**常數與門檻**
+
+- `E = 600` — 一個 epoch 的 slot 數，也是 ticket 目標張數與 γ_A 容量
+- `Y = 500` — ticket 提交截止 slot；之後的 E_T 不再收（保證抽籤前有安定期）
+- `N = 2` — 每個 validator 每 epoch 最多 2 張 ticket entry index（i_e ∈ {0,1}）
+- `K = 16` — 單塊 E_T 最多 16 張票
+
+**核心公式**
+
+- `eq. 6.8` — 𝕍 ≡ {3c | c ∈ N_[2,C+1]} —— validator 數必須是 3 的倍數
+- `eq. 6.22` — η ∈ ⟦H⟧_4，四格 entropy 的型別
+- `eq. 6.25` — γ′_S 的三分支：epoch 未換就保持 γ_S；換了且票滿用 Z；票不足用 fallback
+- `eq. 6.27` — Z(γ_A)：outside-in 重排，讓相鄰 slot 的出塊者在 accumulator 裡距離最遠
+
+**最常被追問**
+
+- **為什麼要 ring VRF，不能用普通 VRF？**  
+  普通 VRF 的證明會綁定公鑰，等於提前公告「第 N 個 slot 是我出」，讓攻擊者能針對性 DoS 或賄賂。ring VRF 只證明「我屬於這個 ring」，直到出塊那一刻才揭露身分。GP 0.8.0 的行文只講 anonymity，DoS/賄賂是 Sassafras 論文的動機。
+- **票不足時的 fallback 有什麼安全代價？**  
+  fallback 直接用 η′_2 對 κ′ 洗牌，出塊順序在 epoch 一開始就公開可算 —— 匿名性歸零。這是刻意的可用性優先：寧可退化也不要停鏈。所以 Y = 500 的截止設計就是為了盡量不走到這條路。
+- **為什麼用 η′_2 而不是 η′_0 來抽籤？**  
+  η′_0 是本 epoch 還在累積的熵，出塊者能用「要不要出這塊」來影響它。退兩格取 η′_2 表示抽籤所依據的隨機數在兩個 epoch 前就凍結了，操縱成本高到不划算。
+- **Z 的 outside-in 重排在防什麼？**  
+  γ_A 是依 ticket id 排序的。如果直接照序當出塊順序，同一個人手上的兩張票很可能落在相鄰 slot，形成連續出塊、方便做短鏈重組。outside-in 把序列首尾交錯，讓 id 相近的票在時間上被拉開。
+
+**0.7.2 → 0.8.0**
+
+- ticket entry index 在 0.8.0 明確寫成 i_e（0.7.x 文獻常寫成 r），型別 N_N
+- γ 的四個欄位在 0.8.0 定名為 γ_K / γ_Z / γ_S / γ_A（ring root 落在 𝔹_144，不是 𝕐_144）
+
+**對應程式碼**
+
+- internal/safrole/ — ticket 驗證、γ_A 的排序插入、Z 重排、fallback
+- 測試向量 safrole/ 的 tiny 版本 E 與 validator 數都不同，別把 600 / 1023 寫死
+
+---
+
+## §7 Recent History
+
+鏈上保留最近 H = 8 個區塊的摘要 β_H，加上 accumulation output 的 MMR（β_B）。它讓 §11 能在不翻歷史區塊的情況下做反重複、prerequisite 與 segment-root lookup，也是 BEEFY 對外證明的來源。
+
+**流程**
+
+1. 每個 β_H item = (h header hash, s state root, b accumulation-output MMR 的 super-peak, t timeslot, p reported package map)
+2. 出塊時 β† ：把上一筆 item 的 state root 用本塊 header 的 H_R 補上（prior state root 的時間差修正）
+3. 接著把本塊的新 item append 進去；超過 H = 8 就從頭端丟棄
+4. p = {package hash ↦ segment root}，來自本塊 E_G 的每份報告
+5. β_B 是 accumulation output 的 MMR，append 後取 super-peak 放進 item 的 b
+6. BEEFY（eq. 18.1）簽的是 X_B ⌢ last(β_H)_b，也就是最新的 super-peak
+
+**常數與門檻**
+
+- `H = 8` — β_H 保留的區塊數；這也是 anchor 能往回指多遠的硬上限
+- `L = 14,400` — lookup anchor 能往回指的 slot 數 —— 比 H 大得多，兩者別混
+- `C(3)` — β 在狀態樹裡的 key（附錄 D）
+
+**核心公式**
+
+- `eq. 7.2` — β_H item 的型別 ⟨h, s, b, t, p⟩
+- `eq. 7.5` — β† ：先補上一筆的 state root，再 append 本塊
+- `eq. 7.8` — p ≡ {((g_r)_s)_p ↦ ((g_r)_s)_e | g ∈ E_G}
+- `§D.1 C(3)` — 序列化順序是 ⟨h, b, s, E_4(t), var(p)⟩ —— 與 eq. 7.2 的欄位順序不一致，實作以 D.1 為準
+- `eq. 11.36 / 11.41–11.44` — §11 端的四種使用：anchor、反重複、prerequisite、segment-root lookup
+
+**最常被追問**
+
+- **為什麼只留 8 個區塊？多留一點不是更安全嗎？**  
+  β 是鏈上狀態，每一筆都要進 Merkle 樹、每個節點都要存。8 個區塊剛好覆蓋 guarantee → assure → accumulate 這條管線的深度加上一點餘裕，足以做反重複；再往前的資料由 lookup anchor（L = 14,400 slot）以「證明」的方式提供，不必常駐狀態。這是「常駐成本 vs 證明成本」的取捨。
+- **β† 這一步在補什麼？為什麼會有時間差？**  
+  header 帶的是 prior state root（為了管線化），所以某塊執行完當下，它自己在 β_H 裡那一筆的 state root 還是未知的。要等下一塊的 header 帶著 H_R 進來，才能回填給上一筆。β† 就是這個回填動作。實作上最常見的 bug 是先 append 再回填，導致補到剛加進去的那一筆身上。
+- **p（reported package map）為什麼要上鏈？**  
+  §11 每塊都要檢查「這個 package 是不是最近報過了」「prerequisite 指到的 package 存不存在」「segment-root lookup 的值對不對」。如果不上鏈，就得去解碼最近 8 個區塊的 extrinsic 才能回答，那會讓狀態轉移依賴區塊體而不只是狀態，違反 STF 的封閉性。
+- **為什麼 accumulation output 要做成 MMR，不是普通 Merkle 樹？**  
+  MMR 只 append 不改寫，新增一筆的成本是 O(log n) 且舊的證明依然有效。對「持續產出、外部要長期驗證」的 accumulation output 而言，這正好；普通 Merkle 樹每次加葉子都要重算整棵樹，舊證明全部失效。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的 β_H item 多了 4-byte 的 timeslot 欄位（0.7.2 沒有）
+- b 欄位存的是 accumulation-output MMR 的 super-peak，BEEFY 直接對它簽名
+
+**對應程式碼**
+
+- internal/types/encode.go 的 BlockInfo.Encode 要照 §D.1 的 ⟨h, b, s, t, p⟩ 順序，不是 §7.2 的文字順序
+- internal/.../recent_history_controller.go — beefyBelt / BeefyRoot 就是 β_B 與 super-peak
+
+---
+
+## §8 Authorization
+
+決定「誰有資格用某個 core」。每個 core 有一個大小 ≤ O 的 authorizer pool α 與長度 Q 的 queue φ；報告必須帶一個落在該 core pool 裡的 authorizer hash，用掉就從 pool 移除，並從 queue 依序補一個進來。
+
+**流程**
+
+1. α ∈ ⟦⟦H⟧_{:O}⟧_C：每個 core 目前可用的 authorizer hash（至多 O 個）
+2. φ ∈ ⟦⟦H⟧_Q⟧_C：每個 core 的補充佇列，長度固定 Q，被 assigner 特權服務填
+3. 報告合法性（eq. 11.32）要求 r_a ∈ α[r_c] —— 用的是本塊的 authorizer pool
+4. 用掉的 authorizer 從 α 移除；接著把 φ[c][H_T mod Q] 推進 α 尾端
+5. α 超過 O 就從頭端丟棄，形成一個「先進先出＋隨用隨補」的滑動視窗
+6. authorizer 本身是一段 PVM 程式（is-authorized，Ψ_I），由 guarantor 在 refine 前先跑，決定這個 work-package 能不能用這個 core
+
+**常數與門檻**
+
+- `O = 8` — authorizer pool 上限（每 core）
+- `Q = 80` — authorizer queue 長度（每 core），固定長度、以 H_T mod Q 取用
+- `χ_A` — assigners：唯一能改 φ 的特權服務，每個 core 各有一個指派者
+- `G_I` — is-authorized 的 gas 上限；跑超過就視為未授權
+
+**核心公式**
+
+- `eq. 8.1` — α ∈ ⟦⟦H⟧_{:O}⟧_C、φ ∈ ⟦⟦H⟧_Q⟧_C 的型別（注意 :O 是「至多」，Q 是「剛好」）
+- `§8.2` — 「The portion of state...」—— φ 只能由對應 core 的 assigner 修改
+- `eq. B.1` — Ψ_I : (P, N_C) → (𝔹 ∪ 𝔼, N_G)：吃 work-package 與 core index，回傳 blob 或錯誤，外加耗用 gas
+- `eq. 11.32` — 報告端的檢查：r_a ∈ α[r_c]
+
+**最常被追問**
+
+- **authorization 到底在防什麼？沒有它會怎樣？**  
+  core time 是稀缺資源。沒有 authorization，任何人都能把任意 work-package 丟到任意 core 上，guarantor 得先跑完 refine 才知道該不該做，等於免費的 DoS。authorizer 是一段便宜、有 gas 上限的前置程式，先用低成本擋掉沒付費／不合規的請求。
+- **為什麼 pool 是「至多 O」而 queue 是「剛好 Q」？**  
+  pool 是動態的：用掉就少一個、補進就多一個，所以只能給上限。queue 是 assigner 預先排好的固定長度環形排程，用 H_T mod Q 取用，這樣「第 t 個 slot 該補哪個 authorizer」對所有節點都是同一個確定答案，不需要額外共識。
+- **is-authorized 為什麼要跑在 PVM 裡，不是一個固定的規則？**  
+  不同 service 的付費模型不同——有的賣訂閱、有的按次、有的白名單。把授權邏輯做成可編程的一小段程式，鏈本身就不用內建任何商業模型，同時因為它有 gas 上限且無副作用，濫用成本可控。
+- **authorizer 用完後如果 queue 還沒補進來會怎樣？**  
+  pool 會暫時變小，該 core 的可用授權變少，但不會停擺——下一個 slot 依然照 H_T mod Q 補。這是刻意的：assigner 沒跟上就自然限流，不需要任何例外處理路徑。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的特權角色分家後，改 φ 的是 assigners χ_A（不是 manager χ_M）—— 兩者別混
+- GP 0.8.0 的 authorizer queue 符號仍是 φ，沒有改名（ω 是 §12 的 ready queue）
+
+**對應程式碼**
+
+- internal/authorization/ — pool 的移除與補充順序要嚴格照 GP：先移除再補，且補的是 H_T mod Q
+- 測試向量 authorizations/ 對「同一塊用掉兩個同 core authorizer」的情況特別敏感
+
+---
+
+## §9 Service Accounts
+
+δ 裡的每個 service 就是一個帳戶：一份 code、一份 storage、一組 preimage、餘額與兩個 gas 上限。重點在「什麼東西是存起來的、什麼是推導出來的」，以及 preimage 的四階段生命週期。
+
+**流程**
+
+1. 帳戶欄位：storage s、preimages p、lookup meta l、code hash c、balance b、accumulate gas g、on-transfer gas m
+2. 另有計數類欄位（item 數、octet 數、threshold）——它們是可推導的，序列化時放在 C(255, s) 的 info 裡
+3. threshold balance：帳戶餘額必須 ≥ 由 storage 與 preimage 用量算出的押金，否則不能再寫入
+4. storage 每一項的計價是 34 + |key| + |value| octets（eq. 9.8）
+5. preimage 生命週期看 l[(h, z)] 的形狀：[] = 已請求未提供、[x] = 自 x 起可用、[x, y] = 於 y 被遺忘、[x, y, z] = 遺忘後又被請求
+6. forget 之後要等 D 個 slot 才真正 expunge（D ≡ L + 4,800 = 19,200），期間資料仍可被 lookup
+7. service index 由 check() 推導並避開既有索引；registrar χ_R 負責新服務的註冊範圍
+
+**常數與門檻**
+
+- `34 + |k| + |v|` — 單筆 storage 的押金計價（含 key 長度，別只算 value）
+- `D = 19,200` — preimage 從 forget 到 expunge 的延遲（= L + 4,800 slot）
+- `L = 14,400` — lookup anchor 的回溯上限；D 比它大是刻意的
+- `C(255, s)` — service info 在狀態樹裡的 key 形狀
+
+**核心公式**
+
+- `eq. 9.3` — 帳戶的欄位與型別
+- `eq. 9.8` — storage 用量與 threshold balance 的計算
+- `eq. 9.9–9.10` — Ω_W（write）與 Ω_F（forget）的狀態轉移；餘額不足時 s′ = s 且回傳 FULL
+- `§D.2` — service 的 storage / preimage / lookup 各自的 state key 建構
+
+**最常被追問**
+
+- **為什麼 forget 不是立即刪除，要等 D 個 slot？**  
+  因為 refine 可以用 lookup anchor 回看 L = 14,400 slot 之內的 preimage。如果 forget 立刻生效，一份還在有效 anchor 範圍內的 work-package 就會突然變成無法重現，auditor 也就無法重跑驗證。D > L 保證「只要 anchor 還有效，資料就一定還在」。
+- **threshold balance 的意義是什麼？餘額掉到門檻以下會怎樣？**  
+  它是狀態租金的押金化：你占用多少鏈上空間，就得押多少錢。掉到門檻以下不會被自動清除，而是「不能再增加占用」——寫入直接失敗回 FULL。這讓失敗是可預期的、局部的，不需要任何全域的垃圾回收流程。
+- **哪些欄位是存的、哪些是算的？為什麼要區分？**  
+  storage、preimages、lookup meta、code hash、balance、兩個 gas 上限是真正存的；item 數、octet 數、threshold 是從前者推導的。區分的理由是狀態樹只該存最小充分集合，推導值若也存起來就可能與本體不一致；但序列化時為了讓讀取端不必掃全部 storage，會把它們一起寫進 info。
+- **誰能改一個 service 的什麼？**  
+  service 只能改自己的 storage 與 preimage（透過自己的 accumulate）；code hash、gas 上限這類設定要由自己或有權限的特權服務改；0.8.0 之後只有 manager χ_M 能改 bless 設定，assigners χ_A 改 authorizer queue，registrar χ_R 管新服務。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 把 bless 的修改權收斂到 manager，且 new service 可帶 gratis 額度
+- 帳戶欄位在 0.8.0 有調整，別直接照 0.7.2 的欄位表背；info 的序列化內容也跟著變
+
+**對應程式碼**
+
+- CalcStorageItemFootprint / CalcOctets — 註解寫成只算 value，實際程式碼算 34+key+value（程式碼才對）
+- issue #979 / #980 就是這一塊的計價與 FULL 回傳
+
+---
+
+## §10 Disputes
+
+把鏈下 auditing 的爭議搬上鏈做最終裁決：verdict 決定某份 work-report 是好是壞，culprits / faults 指認簽錯的人，結果沉澱進 ψ（good/bad/wonky/offenders），並清掉 ρ 上還掛著的壞 assignment。
+
+**流程**
+
+1. E_D = (v, c, f)：verdicts、culprits、faults 三段各自獨立，但打包在同一個 extrinsic 裡
+2. 每個 verdict = (report hash, epoch index, judgments)，judgments 剛好 ⌊2|k|/3⌋+1 筆，k = 該 epoch 的 validator set（κ′ 或 λ′）
+3. V 函數看正票數 t：t = ⌊2|k|/3⌋+1 → ⊤ good；t = 0 → ⊥ bad；t = ⌊|k|/3⌋ → ∅ wonky（三者以外的票數直接不合法）
+4. ⊤ 的 verdict 必須在 faults 裡至少有一筆同 report hash 的紀錄（有人簽了「無效」卻被推翻）
+5. culprit = guarantee 了一份被判無效的 report；fault = 簽了與最終判決相反的 judgment，兩者都算 offence
+6. ρ† ：verdict 為 ⊥ 或 ∅ 的 core，availability assignment 直接清成 ∅（⊤ 不清，因為報告是好的）
+7. ψ′_G / ψ′_B / ψ′_W 收 report hash，ψ′_O 收所有 offender 的 Ed25519 key，之後輪替時被排除
+
+**常數與門檻**
+
+- `⌊2|k|/3⌋+1` — 一份 verdict 要帶的 judgment 筆數，也是判 good 的正票數（|k| = 1023 時 = 683）
+- `⌊|k|/3⌋` — 判 wonky 的正票數（|k| = 1023 時 = 341）—— 注意是「剛好等於」，不是「小於」
+- `0` — 判 bad 的正票數：一票贊成都沒有
+- `排序規則` — verdicts 依 report hash；culprits / faults 各依 validator 的 Ed25519 key，且不得重複
+
+**核心公式**
+
+- `eq. 10.3` — E_D ≡ (v, c, f) 的型別與各段長度上限
+- `eq. 10.10–10.11` — verdicts 依 hash、offender 依 key 排序且去重；report hash 不得與過去judged 過的重複
+- `eq. 10.12` — V(epoch index, judgments) 的三分支（⊤ / ⊥ / ∅）
+- `eq. 10.14` — ⊤ ⇒ faults 中存在同 hash 的項
+- `eq. 10.15` — ρ† ：⊥ 或 ∅ 的 core 清空
+
+**最常被追問**
+
+- **為什麼判 bad 需要「零票贊成」這麼極端的門檻？**  
+  因為 ELVES 的設計是「只要有一個誠實的 auditor 就會發現問題」。一份真的無效的 report，沒有任何誠實 validator 會投贊成；反過來說只要有一票贊成，就代表要嘛報告其實有效、要嘛投票者說謊——後者屬於 fault，該走 fault 流程指認個人，而不是把整份報告打成 bad。
+- **wonky（∅）存在的意義是什麼？**  
+  它代表「validator 之間對這份 report 的看法分裂到剛好 ⌊|k|/3⌋」，通常是網路分割或資料不可得，而不是有人作惡。wonky 一樣會清掉 core assignment（報告不能用），但不會產生 offender —— 不確定不等於有罪。
+- **culprit 和 fault 差在哪？**  
+  culprit 是「當初 guarantee 了這份壞報告」的 guarantor，罪在生產端；fault 是「judgment 投得跟最終判決相反」的裁決者，罪在裁決端。兩者都進 ψ_O，但證據形態不同：culprit 附的是 guarantee 簽名，fault 附的是 judgment 簽名。
+- **為什麼 judgment 要帶 epoch index？**  
+  judgment 可能來自本 epoch 的 κ′ 或上一個 epoch 的 λ′（爭議往往跨 epoch 才被發現）。epoch index 決定用哪一組 key 驗簽、以及 |k| 是多少，少了它連門檻都算不出來。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 只保留「⊤ ⇒ 至少一筆 fault」，沒有「⊥ ⇒ 至少兩筆 culprit」這條——別照舊版寫法答
+- ρ 現在存的是完整的 guarantee 𝔾（含 credentials），所以 ρ† 判斷時要從 guarantee 裡取 work-report 再 hash
+
+**對應程式碼**
+
+- internal/disputes/ — verdict 計票、offender 累積、ρ† 清除
+- 驗簽時 κ′ / λ′ 要依 judgment 的 epoch index 選，寫死成 κ′ 是常見 bug
+
+---
+
+## §11 Reporting & Assurance
+
+core 上的計算怎麼被「認證」與「保存」：guarantor 跑完 refine 產出 work-report 並連署進 E_G，占住該 core 的 availability assignment ρ；validator 再用 E_A 表態自己持有 shard，超過 2/3 就算 available，交棒給 §12。
+
+**流程**
+
+1. 每 R = 10 個 slot 一次 rotation：依 η′_2 把 validator 洗牌並指派到 C 個 core，每 core 3 個 guarantor
+2. guarantor 取 work-package → 跑 Ψ_I（is-authorized）→ 跑 Ψ_R（refine）→ 得到 work-report（含 avspec、refinement context、results）
+3. 同 core 的 ≥2 個 guarantor 連署 → 進 E_G；驗簽時該 validator 的 assignment 必須真的等於 report 的 core
+4. ρ 三段：ρ†（disputes 清過）→ ρ‡（assurance 清過，達標與逾時的都拿掉）→ ρ′（塞入本塊新 guarantee）
+5. E_A：每個 validator 對 parent header hash 簽名，附一個 C-bit 的 bitfield 表示自己手上有哪些 core 的 shard
+6. 某 core 的 assurance 數 > 2/3 |V| → 該 report 變 available，離開 ρ，成為 §12 的 R
+7. 逾時：報告進 ρ 超過 U = 5 個 slot 還沒 available，直接清掉，該 core 重新可用
+
+**常數與門檻**
+
+- `C = 341` — core 數；ρ 是長度 C 的序列，每 core 至多一份 pending 報告
+- `R = 10` — rotation period（slot）；跨 rotation 邊界驗簽要用 prior assignment
+- `U = 5` — assurance timeout：報告在 ρ 上最多待 5 個 slot
+- `> 2/3 |V|` — available 門檻；每 core 3 個 guarantor、平均每 report 30 次 audit 是同一套 1/3 假設的另一面
+- `W_R / W_B / W_G` — work-report 各部分的大小上限（結果 blob、bundle、總量），超過就不是合法報告
+
+**核心公式**
+
+- `eq. 11.1` — ρ ∈ ⟦?(guarantee 𝔾, timeslot)⟧_C —— 0.8.0 存的是完整 guarantee，不只 report
+- `eq. 11.22–11.23` — M：本 rotation 的 core assignment；prior assignment 用於跨邊界的簽名驗證
+- `eq. 11.28` — 連署者 v 的 assignment c[v] 必須等於 report 的 core w_c
+- `eq. 11.31` — ∀r ∈ I：(r_s)_v = |κ′| —— avspec 的 shard 數要對得上 validator 數
+- `eq. 11.32` — ∀r ∈ I：ρ‡[r_c] = ∅ ∧ r_a ∈ α[r_c] —— core 必須是空的，且 authorizer 在該 core 的 pool 裡
+- `eq. 11.36` — anchor 檢查：refinement context 的 anchor 要對得上 β† 裡某一筆的 h / s / b / t
+- `eq. 11.41–11.44` — 反重複（β_H ∪ ξ ∪ ω ∪ ρ）、prerequisite 必須可解、segment-root lookup 必須是子字典
+
+**最常被追問**
+
+- **為什麼 guarantee 和 assurance 要拆成兩件事？**  
+  guarantee 回答「這個計算結果是對的嗎」，靠的是 guarantor 的質押與後續 auditing；assurance 回答「這份資料還拿得到嗎」，靠的是 erasure code 的分片持有。兩者的失敗模式不同：算錯要罰人，資料不見要重建。混成一件事的話，惡意 guarantor 只要把 bundle 藏起來就能讓沒人能查驗它算得對不對。
+- **assurance 為什麼用 bitfield，不是每份 report 各簽一次？**  
+  一個 validator 每個 slot 可能同時持有數百個 core 的 shard，逐一簽名的頻寬與驗簽成本都是 C 倍。bitfield 讓它一次簽 parent header hash + 一整排位元，鏈上只要驗一次簽章就能得到 C 個表態。
+- **ρ 為什麼要 †、‡、′ 三段？**  
+  同一塊裡三種力量會動 ρ：disputes 要清掉被判壞的、assurance 要清掉已達標與逾時的、guarantees 要塞新的。定義成有序的三段，是為了讓「這一塊到底能不能報這個 core」有唯一答案——eq. 11.32 檢查的是 ρ‡（assurance 清完之後），所以同一塊裡剛騰出的 core 可以馬上再被用。
+- **為什麼一份報告至少要兩個 guarantor 連署？**  
+  單一 guarantor 等於單點作惡，而 auditing 是抽樣的、有延遲。兩個以上的連署把「一起說謊」的成本拉高，同時每個連署者都獨立質押；三個 guarantor 的配置則是留一個冗餘，避免一個節點離線就報不出來。
+
+**0.7.2 → 0.8.0**
+
+- ρ 的內容由 (work-report, timeslot) 改成 (完整 guarantee, timeslot)，credentials 也上鏈了
+- refinement context 欄位擴充（a, n, s, b, l, t, r, p），別照 0.7.2 的六欄背
+- eq. 11.32 的量詞在 0.8.0 是 ∀r ∈ I（I 於 eq. 11.30 定義），不是舊版的 ∀w ∈ W
+
+**對應程式碼**
+
+- internal/extrinsic/guarantee_controller.go — ValidateWorkReports，反重複與 anchor 檢查都在這
+- assurance 的 bitfield 與 ValidatorIndex 對應要用 κ′；跨 rotation 邊界請確認用的是 prior assignment
+
+---
+
+## §12 Accumulation
+
+把已 available 的 work-report 依 dependency 解鎖，排成序列後逐 service 呼叫 accumulate，在 gas 上限內產出新的 δ / χ / ι / φ 與本塊 output log θ。這是 JAM「鏈上」真正改狀態的唯一入口。
+
+**流程**
+
+1. R = 本塊剛變 available 的 reports（來自 ρ‡ 被 assurance 清掉的那些）
+2. R! = 無 prerequisite 且 l = ∅ → 立刻可累積；R^Q = 其餘進佇列
+3. ω（ready queue，長度 E 的環狀緩衝）存「已 available 但依賴未滿足」的 (report, 未滿足依賴集)
+4. ξ（accumulated history，長度 E）存過去每個 slot 累積過的 package hash，用來解鎖與擋重複
+5. R* = Q(ω 由舊到新展開) ⌢ R!　→ 這就是本塊要餵給 Δ 的序列
+6. Δ+ 依 gas 上限決定「這塊能吃幾個」→ Δ* 對單一 service 跑一輪 → Δ1 真正呼叫 PVM 的 accumulate
+7. δ† → δ‡ → δ′：deferred transfer 在 δ‡ 之後才套用；θ′ 收 (service, hash) 的 output log
+
+**常數與門檻**
+
+- `E = 600` — ω 與 ξ 的長度＝一個 epoch 的 slot 數
+- `G_A / G_T / G_I` — 單次 accumulate 上限 / 整塊總 gas / is-authorized 上限；Δ+ 用的是總量門檻
+- `χ_M / χ_A / χ_V / χ_R` — manager / assigners / delegator / registrar 四個特權 service（0.8.0 的 χ 形狀）
+- `χ_Z` — always-accumulate 集合：即使本塊沒有 report 也會被呼叫，帶各自的 gas 配額
+
+**核心公式**
+
+- `eq. 12.1–12.3` — ξ ∈ ⟦{H}⟧_E、ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 的型別與長度
+- `eq. 12.4–12.6` — R! / R^Q / R* 三段切法與 Q 函數（依賴解鎖）
+- `eq. 12.18` — deferred transfer 要以 s ↕ s 排序後處理 —— 不是 map 迭代順序
+- `eq. 12.24` — (n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ 取 Δ+ 回傳的 output log
+
+**最常被追問**
+
+- **為什麼要 ω / ξ 兩個環狀緩衝，不能只用一個集合？**  
+  ξ 是「已累積」的歷史，用來擋重複與解鎖依賴；ω 是「已 available 但還不能累積」的待辦。兩者都做成長度 E 的環，是為了讓過期自動掉出去、狀態有界，且 O(1) 就能回答「這個 package 最近累積過沒」。
+- **Δ+ / Δ* / Δ1 為什麼要分三層？**  
+  Δ1 = 對單一 service 呼叫 PVM 的 accumulate（真正執行）；Δ* = 把同一輪裡每個 service 各跑一次並合併狀態；Δ+ = 在 gas 上限下決定「這一塊到底能吃 R* 的前幾個」，回傳吃掉的個數 n。分層是為了讓 gas 上限的截斷只發生在最外層，內層保持純函數。
+- **accumulate 失敗（panic / OOG）會怎樣？**  
+  該 service 這一輪的狀態變更整批丟棄，但 report 仍算「已累積」進 ξ，不會無限重試；gas 照扣（block-level 預扣），output log 記空。這是刻意的：否則一個壞 service 可以卡住整條鏈。
+- **為什麼 deferred transfer 要另外一個 δ‡ 階段？**  
+  accumulate 期間 service 之間若能直接互改餘額，結果就會依賴執行順序。先全部收集成 transfer，再以固定排序統一套用，才能讓所有節點得到相同的 δ′。
+
+**0.7.2 → 0.8.0**
+
+- ready queue 由 0.7.2 的 ϑ 更名為 ω（state key 與型別都沒動），為了不跟 output log θ 撞符號
+- χ 由單純 bless 三元組擴成 manager / assigners / delegator / registrar 四個角色，且只有 manager 能改 bless
+- accumulate 的 gas 改成 block-level 預扣（見附錄 A 的 0.8.0 gas model）
+
+**對應程式碼**
+
+- internal/accumulate/ — Δ+/Δ*/Δ1 的對應實作；注意 Vartheta 欄位就是 ω
+- ⚠ 團隊實作用 Go map 迭代順序處理 transfer，eq. 12.18 要求 s ↕ s 排序，且 sort.Slice 不穩定 → state root 可能分歧
+
+---
+
+## §13 Statistics
+
+鏈上記帳：π = (π_V, π_L, π_C, π_S)，分別是本 epoch 的 validator 計數、上一個 epoch 的快照、每 core 的用量與每 service 的用量。它不影響共識規則，但是獎勵與監測的唯一事實來源，也是最容易寫錯的一章。
+
+**流程**
+
+1. π_V 是本 epoch 進行中的計數；epoch 邊界時 π_L ← π_V、π_V 歸零
+2. 每個 validator 六個計數：b 出塊數、t ticket 數、p preimage 數、d preimage octets、g guarantee 數、a assurance 數
+3. b / t / p / d 記在「author」身上，也就是 H_I 指到的那個人
+4. g 記在 guarantee 的「簽署者」身上（從 credential 裡的 Ed25519 key 反查），不是 author
+5. a 記在 assurance 的簽署者身上（用 assurance 的 ValidatorIndex）
+6. π_C 每 core 記 import / extrinsic / export / bundle / gas 等用量；π_S 每 service 記各自的累計
+
+**常數與門檻**
+
+- `6` — 每個 validator 的計數欄位數 (b, t, p, d, g, a)
+- `E = 600` — epoch 長度；π_V → π_L 的搬移點
+- `C(13)` — π 在狀態樹裡的 key
+
+**核心公式**
+
+- `eq. 13.1–13.2` — π 的組成與 (π_V, π_L) ∈ ⟦(b, t, p, d, g, a)⟧²
+- `eq. 13.4` — π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v) —— assurance 是「存在性」判斷，每人每塊最多 +1
+- `eq. 13.5` — epoch 邊界的搬移條件（e′ = e 時不動）
+- `eq. 13.6` — author 那組計數：b += 1、t += |E_T|、p += |E_P|、d += Σ|d|
+
+**最常被追問**
+
+- **為什麼 assurance 是「每人每塊最多 +1」，不是按 core 數加？**  
+  一個 validator 每塊只送一次 assurance，裡面的 bitfield 可能同時表態幾百個 core。統計要記的是「他有沒有盡到這個 slot 的責任」，不是他持有多少 shard；若按位元數加，持有較多 shard 的節點會被系統性高估。
+- **為什麼 guarantee 記在簽署者、preimage 記在 author？**  
+  guarantee 是連署行為，功勞屬於實際簽名的 guarantor（可能有兩三個，都要加）；preimage 是 author 把它打包進區塊的貢獻，跟誰產生 preimage 無關。這也是實作最常搞混的地方：把 g 記給 author 會讓統計整組偏掉。
+- **ticket 為什麼記給 author，而不是產生 ticket 的人？**  
+  ring VRF 的重點就是匿名——鏈上根本不知道 ticket 是誰產的。eq. 13.6 因此把 |E_T| 記給 H_I，這是「打包進區塊」的貢獻計數，不是「產生」的計數。
+- **統計寫錯會怎樣？它不影響共識吧？**  
+  π 是狀態的一部分，會進 Merkle 樹。算錯不會讓區塊「邏輯上」失敗，但 state root 會與其他實作不一致 —— 也就是說，它照樣會讓你分叉。這是為什麼統計題在 conformance 測試裡權重不低。
+
+**0.7.2 → 0.8.0**
+
+- 0.7.0 修過「每個 validator 只算一次」的 assurance 計數（issue #710）
+- #869 修 guarantee 計數的歸屬；照舊版寫法會把 g 加到錯的人身上
+
+**對應程式碼**
+
+- statistics.go — UpdateTicketStatistics / UpdatePreimageStatistics / UpdateReportStatistics / UpdateAvailabilityStatistics
+- UpdateReportStatistics 要用 reporters set（credential 裡的 Ed25519 key 是否在 κ′ 內），不是 author index
+
+---
+
+## §14 Work Packages & Reports
+
+鏈下的資料格式與 refine 的輸入輸出：work-package 帶著 authorizer 與若干 work-item 進 core，refine 後產出 work-report；中間的 import / export segment 與 paged proof 是可得性系統的實際負載。
+
+**流程**
+
+1. work-package ⟨j auth token, h host service, u auth code hash, f auth config, c refinement context, w items⟩
+2. 每個 work-item 指定 service、payload、gas 上限，以及它要 import 的 segment 與會 export 幾個 segment
+3. guarantor 先跑 Ψ_I（用 u / f / j 決定授權），再對每個 item 跑 Ψ_R（refine）
+4. refine 的輸出組成 work-report 的 results；avspec (p, l, u, v, e, n) 描述 bundle 與 segment 的可得性參數
+5. bundle = work-package + 所有 extrinsic + 所有 import segment 的證明，這才是被 erasure code 的東西
+6. export segment 被組成 segment tree，其 root（e）進 avspec，供下游 package 以 lookup 取用
+7. paged proof：把 segment 以固定頁大小分組做證明，讓 importer 只需拉一頁而不是整棵樹
+
+**常數與門檻**
+
+- `4,104` — segment 大小（octet）；erasure coding 的 6 路資料平行度由它與 1023 推出
+- `W_R / W_B / W_G` — report 結果、bundle、總量的大小上限
+- `avspec = (p, l, u, v, e, n)` — package hash、bundle 長度、erasure root、shard 數、segment root、segment 數
+- `refinement context (a, n, s, b, l, t, r, p)` — anchor 與 lookup anchor 相關的八個欄位
+
+**核心公式**
+
+- `eq. 14.2` — work-package 的六個欄位
+- `eq. 14.11` — authorizer code 由 Λ(δ[p_h], (p_c)_t, p_u) 取得 —— 用的是 context 的 lookup anchor timeslot
+- `eq. 14.12` — paged proofs 函數 P（注意 GP 用的符號與 §D 的 P 不同義）
+- `eq. 14.19` — 零填充 𝒫_n：把資料補到頁邊界
+
+**最常被追問**
+
+- **為什麼要區分 import segment 和 extrinsic？**  
+  extrinsic 是 package 自帶的資料，作者說了算；import segment 是「別人先前 export 出來的」資料，必須用 segment root 證明它確實來自某個已被報告的 package。兩者的信任模型不同：前者只要跟著 bundle 一起可得，後者還要能被追溯到鏈上的 segment root。
+- **paged proof 解決什麼問題？**  
+  一個 package 可能 export 上千個 segment。若下游只要一個 segment 卻得拉整棵樹的證明，頻寬會爆。分頁之後 importer 拉「該 segment 所在的那一頁 + 一條到 root 的路徑」就夠了，代價是頁內的 segment 綁在一起 —— 這是常見的空間 / 頻寬取捨題。
+- **為什麼 bundle（而不是 work-report）才是被 erasure code 的東西？**  
+  auditor 要重跑 refine，就必須拿到 refine 的完整輸入：package、extrinsic、import segment 及其證明。work-report 只是輸出摘要，拿到它無法重現計算。所以可得性保的是輸入，不是輸出。
+- **refinement context 的 anchor 和 lookup anchor 差在哪？**  
+  anchor 指的是「這個 package 基於哪個近期區塊的狀態」，受 §7 的 H = 8 限制，由 eq. 11.36 對著 β† 驗證；lookup anchor 決定「preimage 要用哪個時間點的可見性」，可回溯 L = 14,400 slot。把兩者混為一談是很典型的失分點。
+
+**0.7.2 → 0.8.0**
+
+- refinement context 在 0.8.0 是八欄（a, n, s, b, l, t, r, p），別照 0.7.2 的六欄背
+- avspec 的 segment root 欄位是 e（s 是整個 avspec，也是 service storage 的符號，容易撞）
+
+**對應程式碼**
+
+- makeBundle / paged proof 的實作要注意零填充與頁邊界，差一個 byte 整個 erasure root 就不同
+- ⚠ merkle_tree.T 用 len(v)/2 切，GP eq. E.1 的 N 是 ⌈|v|/2⌉；ce140.go 對未補齊的 chunk slice 呼叫 T 會產生錯的 co-path
+
+---
+
+## 附錄 A · PVM
+
+JAM 的確定性執行引擎：RISC-V RV64EM 子集、13 個暫存器、分頁式 RAM，以 basic block 為單位「預先」扣 gas。所有 service 的 refine / accumulate / on-transfer 都跑在它上面。
+
+**流程**
+
+1. 程式 blob 解出三段：唯讀資料、可寫資料（含 heap）、程式碼＋jump table；標準初始化把它們鋪進 2^16 對齊的區段
+2. 執行狀態 = (ı 指令指標, φ 13 個暫存器, μ 記憶體, ϱ gas counter, 以及 0.8.0 新增的 gas-charged flag)
+3. 每個 basic block 進入時（第一步、跳進新 block、跳回本 block 開頭）先扣整塊的 ϱ^Δ；不夠就 ∞ 退出且 gas 不動
+4. 單步 Ψ_1 回傳 continue / halt / panic / OOG，或 (page-fault, 位址) / (host-call, 編號)
+5. host call 中斷後可續跑，gas-charged flag 保證同一個 block 不會被重複收費
+6. 四種對外呼叫：Ψ_I is-authorized、Ψ_R refine、Ψ_A accumulate、Ψ_T on-transfer，各有自己的 gas 上限與可用 host call 集合
+
+**常數與門檻**
+
+- `13` — 暫存器數量 φ ∈ ⟦N_R⟧_13（RV64E 的 16 個扣掉三個）
+- `Z_P = 2^12` — 記憶體分頁大小；page fault 回報的是對齊到分頁的位址
+- `Z_I = 2^16` — 標準程式初始化的區段對齊單位
+- `ϱ^Δ = max(cycles − 3, 1)` — basic block 的 gas 價格，cycles 由 §A.9 的亂序 CPU 模擬算出
+- `ROB = 32` — 微架構模擬的 reorder buffer 上限；4 decode slots、5 issue starts
+
+**核心公式**
+
+- `eq. A.5–A.8` — 單步語意與 gas 不足時的 (∞, ϱ, ⊥)：OOG 時 gas counter 原封不動
+- `eq. A.54` — ϱ^Δ = max(cycles_final − 3, 1)
+- `§A.3` — basic block 邊界＝terminator（trap / fallthrough / jump / jump_ind / load_imm_jump(_ind) / 所有 branch_*）之後
+- `§A.10` — 每條指令的 cycles / decode slots / execution units 表 —— 那是餵給模擬器的，不是 gas
+
+**最常被追問**
+
+- **為什麼是 block-level 預扣，而不是每條指令扣？**  
+  每條指令扣的話，直譯器每一步都要動 gas counter，也擋不掉 JIT——編譯後的原生碼沒有「一條指令」的概念。整個 basic block 一次扣清，JIT 只要在 block 入口插一次檢查就完全等價，效能差好幾倍，而且 block 的成本是靜態可算的，不同實作能得到位元一致的結果。
+- **為什麼 OOG 時 gas counter 不扣？**  
+  因為這塊根本沒執行。若扣了，餘額會變負或需要飽和處理，兩者都會讓不同實作在邊界上分歧；保持不動則「退出時的 ϱ」有唯一定義，也讓上層能精確知道還剩多少。
+- **為什麼用 RISC-V 而不是 WASM 或 EVM？**  
+  RISC-V 的指令集小、暫存器機、沒有隱藏控制流，容易做確定性的 gas 計價與 JIT；WASM 的結構化控制流與 host 綁定太肥、實作間差異大；EVM 的 256-bit 字長與 stack 機在現代 CPU 上代價高。PVM 再往下砍：no floating point、no dynamic linking，換來跨實作可重現。
+- **page fault 為什麼要當成一種「退出理由」，而不是直接 panic？**  
+  refine 需要按需載入 import segment，accumulate 需要按需取 storage。把 fault 做成可回復的退出，host 就能把資料填進那一頁再續跑，避免一開始就把所有可能用到的資料塞進記憶體（那會讓 work-package 大到不可行）。
+
+**0.7.2 → 0.8.0**
+
+- gas model 是 0.8.0 最大的改動（PR #508）：0.7.2 是每指令 1 gas，0.8.0 改成 block-level 預扣 max(c−3,1)
+- 新增 gas-charged flag 作為 Ψ 的 bool 參數，處理 host call 中斷後續跑不重複收費
+- 記憶體存取模式維持 ∅ / R / W 三種；別把它跟 0.7.x 的舊命名混用
+
+**對應程式碼**
+
+- internal/pvm/ — 團隊實作目前是 GasCost = InstrCount（0.7.2 語意），對應 issue #1046，需整段重寫
+- 重寫時注意：ϱ^Δ 要能靜態算出來並快取在 block 表上，否則每次進 block 都跑一次模擬會很慢
+
+---
+
+## 附錄 B · Host Calls
+
+PVM 與外界的唯一介面。三組呼叫依 invocation 種類分開：通用（gas / fetch / lookup / read / write / info / log）、refine 專用（historical_lookup、export、machine / peek / poke / invoke 這組 inner PVM）、accumulate 專用（bless / assign / designate / new / upgrade / transfer / solicit / forget / yield / provide …）。
+
+**流程**
+
+1. 呼叫慣例：引數放 φ_7 起的暫存器，回傳值寫回 φ_7；記憶體位址與長度也走暫存器傳
+2. 失敗不是 panic，而是把錯誤常數寫進 φ_7 —— 呼叫端必須自己檢查
+3. 讀寫記憶體越界回 OOB，不是直接殺掉程式（真正的 page fault 才是退出理由）
+4. refine 能開 inner PVM：machine 建機器、peek / poke 讀寫它的記憶體、invoke 執行、expunge 銷毀
+5. accumulate 的呼叫多半有副作用且受權限限制，權限不足回 HUH
+6. transfer 產生的是 deferred transfer，不會立刻改餘額（見 §12 的 δ‡）
+
+**常數與門檻**
+
+- `NONE = 2^64−1` — 項目不存在
+- `WHAT = 2^64−2` — 名稱／host call 編號不明
+- `OOB = 2^64−3` — 記憶體索引不可存取
+- `WHO = 2^64−4` — 索引不明（service / validator index）
+- `FULL = 2^64−5` — 儲存已滿或資源已配置
+- `CORE / CASH / LOW / HUH` — 2^64−6 / −7 / −8 / −9：core 不明、餘額不足、gas 上限太低、操作不合法
+- `OK = 0` — 一般成功
+
+**核心公式**
+
+- `eq. B.1` — Ψ_I : (P, N_C) → (𝔹 ∪ 𝔼, N_G)
+- `§B.x Ψ_R / Ψ_A / Ψ_T` — refine / accumulate / on-transfer 三種 invocation 的簽名與可用呼叫集合
+- `eq. B.14` — service info 的欄位布局（read / info 類呼叫回傳的東西）
+
+**最常被追問**
+
+- **為什麼錯誤要用 2^64−k 這種魔術數字，不用負數或旗標？**  
+  暫存器是無號 64-bit，沒有負數；用最高的幾個值當哨兵，正常回傳（長度、索引、gas）幾乎不可能撞到。而且錯誤與成功共用同一個暫存器，呼叫慣例只有一條路徑，JIT 也不必為錯誤處理生額外的分支。
+- **為什麼 refine 不能改狀態，只有 accumulate 可以？**  
+  refine 跑在 core 上、可以被任何人重跑，本質上是純函數；只有純函數才能被 auditor 重跑並比對結果。一旦讓 refine 改鏈上狀態，重跑就會有副作用，整個 ELVES 的稽核模型就垮了。所以 refine 只能讀（historical_lookup）與輸出（export）。
+- **inner PVM（machine / invoke）是幹嘛用的？**  
+  讓一個 service 在 refine 裡跑「別人的程式」，例如 parachain 的 runtime 或 zk 驗證器。把它做成受控的巢狀 PVM，gas 與記憶體都由外層配額，比讓 service 自己寫直譯器安全也便宜得多。
+- **transfer 為什麼要 deferred？**  
+  同一輪 accumulate 裡多個 service 若能即時互轉，結果就依賴執行順序。改成先收集、後統一以 eq. 12.18 的排序套用，才能保證所有節點得到同一個 δ′。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 把 sbrk 改名為 grow_heap；照舊名答會被聽出來
+- gas 相關呼叫的語意跟著新的 block-level gas model 調整（見附錄 A）
+
+**對應程式碼**
+
+- host call 的 dispatch 表要用 GP 的編號，不能自己排；未知編號一律回 WHAT 而不是 panic
+- 每個呼叫都要先扣自己的 gas 再執行，OOG 的處理與附錄 A 一致（不扣、直接退出）
+
+---
+
+## 附錄 C · Codec
+
+E(·) 把所有型別編成 octet 序列，並且必須是雙射 —— 因為 state root 直接建立在編碼結果上，任何「兩種寫法都合法」的空間都是分叉風險。
+
+**流程**
+
+1. 整數：固定長度用 E_n（小端）；一般整數用變長編碼，長度由第一個位元組的前綴決定
+2. 序列：長度前綴 + 逐項編碼；固定長度的序列不帶長度前綴
+3. 字典：先依 key 排序再編碼 —— 排序是編碼的一部分，不是實作細節
+4. optional：0 表示 ∅、1 表示有值再接內容
+5. tuple：逐欄位串接，沒有分隔符，所以欄位順序就是規格
+6. 位元序列打包成位元組時採 LSB-first（與附錄 D trie 節點判斷位元用的 MSB-first 相反）
+
+**常數與門檻**
+
+- `雙射（bijective）` — 每個值只有一種編碼、每個合法編碼只對應一個值
+- `小端` — 固定長度整數一律小端
+- `LSB-first` — 位元序列 → 位元組的打包方向（§C）；別跟 §D 的 MSB-first 混
+
+**核心公式**
+
+- `§C.1` — E 的遞迴定義與各型別的規則
+- `§C.x 變長整數` — 前綴長度編碼的分界值
+- `§D.2` — 反例對照：state key 的位元判斷是 MSB-first
+
+**最常被追問**
+
+- **為什麼編碼一定要是雙射？**  
+  state root 是對編碼結果做 hash。如果同一個狀態能編出兩種位元組，兩個誠實節點就會算出不同的 root；反過來，如果兩個不同狀態能編出同一串位元組，攻擊者就能拿一份證明去證另一件事。雙射同時堵住這兩個方向。
+- **字典為什麼要排序後編碼？**  
+  字典本身沒有順序，但編碼必須是確定的。以 key 排序是最簡單的正規化，任何實作（不論內部用 hash map 還是 tree）都能得到同一串位元組。實作上最常見的 bug 就是直接照 map 的迭代順序編碼。
+- **變長整數編碼為什麼不用固定 8 bytes 就好？**  
+  狀態裡絕大多數整數都很小（索引、長度、計數）。固定 8 bytes 會讓狀態與證明肥好幾倍，而 Merkle 證明的大小是直接的頻寬成本。變長編碼在小數值上省很多，代價是要小心「同一個值只有一種寫法」。
+- **LSB-first 和 MSB-first 各用在哪？**  
+  附錄 C 的位元序列打包成位元組是 LSB-first（例如 assurance 的 bitfield）；附錄 D 走 state trie 時把 key 展開成位元流是 MSB-first。兩者方向相反是刻意的，也是實作最容易寫反的地方之一。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的編碼規則本身變動不大，但被編碼的結構（ρ、β item、refinement context）變了，序列化要跟著改
+
+**對應程式碼**
+
+- encode.go 的每個 Encode 都應該有對應的 Decode 並做 round-trip 測試，這是抓非雙射的最快方法
+- bitfield 的打包方向錯了，assurance 全部會驗不過，但單元測試如果自己編自己解會看不出來
+
+---
+
+## 附錄 D · State Merklization
+
+σ 怎麼變成一個 32-byte 的 state root：先把每個狀態元件序列化並算出它的 state key，再把 (key, value) 放進一棵固定 64-byte 節點的二元 Patricia trie。key 的建構規則是這一章的重點。
+
+**流程**
+
+1. 章節級元件用 C(n)：α = C(1)、β = C(3)、γ = C(4)…（編號錯了 root 就錯）
+2. service 的資料用 C(s, ·) 的交錯規則：service index 與 hash 交錯成 31 bytes 的 key
+3. service 的三類子項用不同標記：storage、preimage、lookup 各有自己的前綴（E_4(2^32−1) / E_4(2^32−2) / E_4(l)）
+4. 節點固定 512 bit = 64 bytes：第 1 個 bit 分 branch / leaf，第 2 個 bit 分 embedded-value leaf / regular leaf
+5. embedded-value leaf：首位元組低 6 bits 存值長度（≤ 32），接 31 bytes key，最後 32 bytes 是值（不足補零）
+6. regular leaf：低 6 bits 歸零，接 31 bytes key，最後 32 bytes 存值的 hash
+7. 走 trie 時 key 展開成位元流是 MSB-first（與附錄 C 的 LSB-first 打包相反）
+
+**常數與門檻**
+
+- `64 bytes` — 節點固定大小；1 + 31 + 32 的佈局讓 key 恰好 31 bytes
+- `32` — embedded value 的長度上限；33 bytes 起改存 hash
+- `0xA0 / 0xC0` — 32-byte 值的 embedded leaf 首位元組 / regular leaf 首位元組
+- `MSB-first` — trie 走訪的位元順序
+
+**核心公式**
+
+- `§D.1` — C(n) 與各章節元件的對應表；C(3) 的 β item 是 ⟨h, b, s, E_4(t), var(p)⟩
+- `§D.2` — service 子項的 key 建構（交錯規則）
+- `§D.2.1` — 節點編碼：branch / embedded leaf / regular leaf 三種
+
+**最常被追問**
+
+- **為什麼 key 是 31 bytes 而不是 32？**  
+  節點要塞進固定的 64 bytes：1 byte 標頭 + 31 bytes key + 32 bytes 值/雜湊 = 64。固定大小讓節點可以直接以陣列索引存取、無需長度前綴，也讓證明大小完全可預測。代價是 key 只有 248 bit —— 對狀態樹的碰撞安全仍綽綽有餘。
+- **為什麼要有 embedded-value leaf 這種東西？**  
+  大多數狀態值（餘額、索引、小型 metadata）都不到 32 bytes。直接內嵌可以省掉一次 hash 與一次額外的資料庫查詢，而超過 32 bytes 就退回存 hash，證明大小仍然有界。
+- **state key 為什麼要把 service index 和 hash 交錯，不用簡單串接？**  
+  交錯讓同一個 service 的資料在 trie 上不會全部擠在同一條子路徑上，避免某個熱門 service 讓樹嚴重不平衡、證明變長；同時也讓不同 service 的資料自然分散。
+- **state root 為什麼要能增量計算？**  
+  每塊只有少數元件改變。若每次都重建整棵樹，出塊時間會被 hash 吃光。節點編碼與合併順序被定義成與插入順序無關，才能只沿著被改動的路徑往上重算。實作若把葉子的合併順序搞錯，單獨測試可能過，但跟別人算出來的 root 不一樣。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的 C(10)（ρ）現在存完整的 guarantee（含 credentials）——PR #494
+- key 建構規則本身在 0.7.2 → 0.8.0 沒有改；別把「欄位變了」誤當成「規則變了」
+
+**對應程式碼**
+
+- state_key_constructor.go — 交錯規則用 Blake2bHashPartial(h, 27)，與 GP 一致
+- partitionByBit / merklizeWithCache — 位元判斷是 MSB-first，跟附錄 C 的打包方向相反，別共用同一個 helper
+
+---
+
+## 附錄 E · General Merklization / MMR
+
+通用的 Merkle 工具箱：well-balanced 樹 M、常數深度子樹分頁 C、trace 函數 T，以及只 append 的 Mountain Range（MMR）—— accumulation output 與 BEEFY 用的就是後者。
+
+**流程**
+
+1. M：well-balanced Merkle 樹，最大深度最小、且該深度的葉子數也最小
+2. C：常數化前處理，把每個資料項冠上 $leaf 前綴 hash，再用 zero hash 補到 2 的冪次
+3. T：trace 函數，從根走到某個索引的葉子，沿途回傳每一層的兄弟節點 —— 這就是證明
+4. MMR：只 append；新增一筆合併相鄰同高的峰，舊證明依然有效
+5. super-peak：把 MMR 的所有峰合成單一 hash，放進 β_H item 的 b 欄位供 BEEFY 簽名
+
+**常數與門檻**
+
+- `N(v) = ⌈|v|/2⌉` — 樹的左右切分點 —— 是 ceil，不是 floor
+- `$leaf / $node` — 常數化前處理用的 domain separator
+- `M_R` — hard-wire Keccak 的變體；A 系列則以 hash 函數為參數
+
+**核心公式**
+
+- `eq. E.1` — N 的定義（⌈|v|/2⌉）
+- `§E.2` — C 的零填充與 $leaf 前綴
+- `§E.3` — MMR 的 append 與 super-peak
+
+**最常被追問**
+
+- **為什麼 accumulation output 用 MMR 而不是普通 Merkle 樹？**  
+  輸出是持續 append 的，而外部（BEEFY 的消費者）需要長期有效的證明。MMR 新增一筆只影響 O(log n) 個節點且舊證明不失效；普通樹每次都要重建、舊證明全廢。
+- **為什麼要 $leaf 前綴？**  
+  沒有 domain separator 的話，一個「葉子的值」有可能剛好等於某個內部節點的 hash，攻擊者就能把內部節點偽裝成葉子做第二原像攻擊。前綴讓兩者的輸入空間不相交。
+- **切分點寫成 ⌊|v|/2⌋ 會怎樣？**  
+  奇數長度的那一層會左右顛倒，co-path 的兄弟節點就取錯，證明驗不過。若上層剛好都先補齊成 2 的冪次可能會意外躲過，但只要有一處對未補齊的序列呼叫就會出錯。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 明確區分以 hash 為參數的 A 系列與 hard-wire Keccak 的 M_R
+
+**對應程式碼**
+
+- ⚠ merkle_tree.T 用 len(v)/2，應為 ⌈|v|/2⌉；ce140.go 對未補齊的 chunk slice 呼叫 T
+
+---
+
+## 附錄 F · Shuffling
+
+Fisher–Yates 的確定性版本：吃一個 hash 當種子展開成數字流，產生可重現的排列。validator → core 的指派、auditor 的抽選都靠它。
+
+**流程**
+
+1. 由 32-byte 種子用 hash 展開成足夠長的 32-bit 數字序列
+2. 以標準 Fisher–Yates 由後往前取模抽換
+3. 同樣的種子在任何實作上都必須得到同一個排列
+
+**常數與門檻**
+
+- `確定性` — 沒有任何實作自由度；用系統 RNG 一定會分叉
+- `種子來源` — 多半是 η′_2 或其衍生值，見 §6 與 §11
+
+**核心公式**
+
+- `§F` — 洗牌函數的定義與數字流展開
+- `eq. 11.22` — core assignment 的實際使用處
+
+**最常被追問**
+
+- **為什麼不能用語言內建的 shuffle？**  
+  內建 shuffle 的 RNG 與取模策略因語言與版本而異，兩個實作會得到不同排列，進而對「誰該 guarantee 哪個 core」有不同看法 —— 直接分叉。
+- **洗牌的隨機來源為什麼要用退兩格的熵？**  
+  用當前 epoch 還在累積的熵，出塊者可以靠出不出塊來偏移自己的指派；退兩格（η′_2）讓抽籤依據在兩個 epoch 前就凍結。
+
+**0.7.2 → 0.8.0**
+
+- 符號與定義在 0.8.0 沒有實質變動
+
+**對應程式碼**
+
+- 自己實作，不要呼叫 rand.Shuffle；並用測試向量比對整個排列而不只是抽樣
+
+---
+
+## 附錄 G · Bandersnatch VRF
+
+Safrole 的密碼學基礎：ring VRF 讓 validator 證明「我屬於這組人」並產生可驗證的隨機輸出，但不洩漏自己是誰，直到出塊那一刻才揭露。
+
+**流程**
+
+1. ring root 由 γ_K 這組 bandersnatch 公鑰算出，型別是 𝔹_144
+2. ticket = ring VRF 證明 + 輸出；輸出的 hash 決定 ticket id（排序用）
+3. 每個 validator 每 epoch 有 N = 2 個 entry index i_e，可產兩張不同的票
+4. 出塊時改用一般（非 ring）簽章：H_S 證明出塊權、H_V 貢獻熵
+
+**常數與門檻**
+
+- `𝔹_144` — ring root 的型別（144 bytes 的 blob，不是 𝕐）
+- `i_e ∈ {0, 1}` — ticket entry index，讓一人最多兩張票
+- `X_ 前綴` — 各種簽章的 domain separator，混用會讓簽章可跨用途重放
+
+**核心公式**
+
+- `§G` — ring VRF 的建構與驗證
+- `eq. 6.25–6.27` — ticket 如何變成 slot sealer 序列
+
+**最常被追問**
+
+- **ring VRF 比普通 VRF 多給了什麼？**  
+  普通 VRF 的證明綁定單一公鑰，等於公告身分；ring VRF 只證明「簽名者屬於這個 ring」。在 Safrole 裡這代表：票投進來時沒人知道是誰的，出塊時才揭露 —— 攻擊者無法提前針對特定人下手。
+- **為什麼一人只給兩張票？**  
+  票數上限決定了單一 validator 在一個 epoch 能占多少出塊機會。給太多會讓運氣好的人連續出塊、方便短鏈重組；給一張則在票源不足時太容易掉進 fallback。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 明確把 ticket entry index 寫作 i_e；ring root 的型別是 𝔹_144
+
+**對應程式碼**
+
+- 用官方 bandersnatch 綁定；ring root 的重算成本高，要在 γ_K 變動時才重算並快取
+
+---
+
+## 附錄 H · Erasure Coding
+
+把 bundle 切成 shard 發給全體 validator，使得任何約 1/3 的 validator 就能重建。基於 16-bit Galois field 的 Reed–Solomon，是可得性系統的底層。
+
+**流程**
+
+1. 原始資料補齊後切成 𝒟(v) 個原始 shard，編碼成 v 個 shard（v = validator 數）
+2. 任意 𝒟(v) 個 shard 即可還原；𝒟(v) = v/3 + 1 時 rate 最佳
+3. 每個 validator 拿一個 shard，assurance 的 bitfield 就是在宣告「我手上有這些 core 的 shard」
+4. segment 大小 4,104 octet，在 1023 validator 下得到 6 路資料平行
+
+**常數與門檻**
+
+- `GF(2^16)` — 編碼所在的有限體
+- `𝒟(v) = v/3 + 1` — 最佳 rate 的原始 shard 數；v ∈ 𝕍 時成立
+- `4,104` — segment 大小（octet）
+- `v = 1023` — 建議的 validator 數之一；1022 的 rate 會掉到約 1:4.5
+
+**核心公式**
+
+- `eq. H.1` — 𝒟(v) 的定義與 rate 討論
+- `§H` — 16-bit GF 的選擇理由與 segment 不需補零的性質
+
+**最常被追問**
+
+- **為什麼是 1/3 就能重建，而不是 1/2？**  
+  因為安全假設是「最多不到 1/3 的 validator 作惡或離線」。門檻設在 1/3 + 1 代表：即使近 2/3 的節點不合作，剩下的誠實節點仍足以還原資料。這與 assurance 的 > 2/3 表態門檻是同一組假設的兩面。
+- **為什麼 validator 數要從特定集合裡選？**  
+  rate 只有在 v/3 + 1 剛好整除相關參數時才最佳（6, 9, 15, …, 1023）。選在這些值上冗餘最小；稍微低於某個值時（如 1022）rate 會明顯變差，白白多存資料。
+- **為什麼用 16-bit 而不是 8-bit Galois field？**  
+  8-bit 體最多只能有 255 個 shard，撐不起 1023 個 validator。16-bit 體同時讓 4,104 octet 的 segment 不必補零就能整除，是規模與實作簡潔的折衷。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的 𝕍 ≡ {3c | c ∈ N_[2,C+1]} 讓較小的 validator set 也合法，別把 1023 寫死
+
+**對應程式碼**
+
+- 解碼函數是 𝓔⁻¹（𝒟 是 shard 數函數，兩個符號別混）；shard 索引與 validator index 的對應要與 assurance 一致
+
+---
+
+## ★ Architecture & Rationale
+
+JAM = 一條「不做通用計算」的中繼鏈，只負責排序、資料可得性與最終性；真正的計算被推到 341 個 core 上平行執行，靠 guarantee（質押）＋ availability（分片）＋ auditing（重跑）三段接力換取安全，最後才把結果 accumulate 進鏈上狀態。
+
+**流程**
+
+1. 使用者／builder 組出 work-package（含 authorizer、context、若干 work-item）
+2. core 上的 3 個 guarantor 跑 is-authorized → refine，產出 work-report 並連署上鏈（§11）
+3. bundle 被 erasure code 成 shard 發給全體 validator，> 2/3 表態持有即 available（§11）
+4. ELVES：隨機抽出的 auditor 重建 bundle、重跑 refine，結果不符就升級為爭議（§18 auditing）
+5. available 的 report 進 accumulate，才真正改動鏈上狀態 δ（§12）
+6. 爭議走 disputes 上鏈定案，罰沒與剔除（§10）；BEEFY 提供對外的最終性證明（§18）
+7. 整條路徑是三段管線：本塊 guarantee、下塊 assure、再下塊 accumulate —— 所以延遲是可預期的常數
+
+**常數與門檻**
+
+- `6 秒 / slot、600 slot / epoch` — 一個 epoch 一小時；validator 輪替與 entropy 輪替都以 epoch 為界
+- `C = 341 core、每 core 3 guarantor` — 1023 個 validator 剛好三等分；也是 1/3 惡意假設的來源
+- `每 report 約 30 次 audit` — 平均每 validator 每 slot 10 次 audit 推出來的數字（§21 討論）
+- `1/3 門檻家族` — guarantor 3 選 2、assurance > 2/3、verdict ⌊2|k|/3⌋+1 或 ⌊|k|/3⌋ —— 同一套假設的不同投影
+
+**核心公式**
+
+- `§4.9.1` — 「a crypto-economic game of three stages called guaranteeing, assuring, auditing」——四階段合起來的原句
+- `§4.9.2` — in-core 執行要達到與 on-chain 相當的 crypto-economic security
+- `§1.2–1.3` — 設計目標：resilient、generic、performant，以及不做通用 on-chain 計算的取捨
+- `§21` — throughput 的推導：341 work-package / slot 的來源
+
+**最常被追問**
+
+- **JAM 跟 Polkadot、Ethereum 的關鍵差別是什麼？**  
+  Polkadot 的 parachain 是「有身分的插槽」，要拍賣、要治理；JAM 的 core 是無身分的計算資源，任何人付 gas 都能用。Ethereum 把所有計算放在單一 on-chain 環境；JAM 把計算推到 in-core，鏈上只留 accumulate。結果是 JAM 沒有 parachain 概念、也沒有全域 EVM，而是「service + core time」的模型。
+- **為什麼需要 availability 和 auditing 兩層，只有一層不行嗎？**  
+  只有 availability：資料在，但沒人檢查算得對不對，guarantor 可以直接報假結果。只有 auditing：想查也查不到資料——惡意 guarantor 只要不給 bundle，auditor 就無法重跑，也無法證明對方藏資料。先強制資料可得（分片＋2/3 表態），再讓隨機 auditor 重跑，兩者相乘才讓「說謊且不被抓」的機率降到可忽略。
+- **為什麼 header 帶的是 prior state root，不是 posterior？**  
+  posterior root 要等本塊執行完才算得出來，出塊者就必須在極短時間內跑完整個 STF 才能簽章。改成帶 prior root，出塊、驗證、狀態計算就能管線化 —— 代價是驗證某塊的狀態要等下一塊的 header。
+- **service 跟 parachain 在心智模型上怎麼對應？**  
+  一個 service 大致等於「一段 refine 程式碼 + 一段 accumulate 程式碼 + 一份狀態」。parachain 可以實作成一個 service，但 service 更小也更自由：它不綁定 core、不需要插槽，只要有人願意付 core time 並帶對 authorizer，就能被執行。
+
+**0.7.2 → 0.8.0**
+
+- 0.8.0 的特權服務由 bless 三元組擴成 χ_M / χ_A / χ_V / χ_R 四個角色
+- PVM gas model 改為 block-level 預扣（附錄 A）
+- ready queue ϑ → ω；ρ 改存完整 guarantee；refinement context 欄位擴充
+
+**對應程式碼**
+
+- 面試會問「你們實作到哪、哪裡跟 GP 不一致」——先準備好 0.7.2 → 0.8.0 的差異清單與你們的遷移計畫
+- 已知兩處值得主動提：merkle_tree.T 的 ⌊|v|/2⌋ 應為 ⌈|v|/2⌉；Δ* 的 transfer 需依 eq. 12.18 的 s ↕ s 穩定排序
+
+---
+
+
+# 題庫
 
 
 <a id="ch-3"></a>
