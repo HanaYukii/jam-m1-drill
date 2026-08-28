@@ -8,7 +8,9 @@ Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, bu
 - **92-entry glossary** of GP 0.8.0 symbols and terms (state components, data structures, PVM,
   cryptography, constants, ecosystem), searchable and cross-linked.
 - Explanations in Traditional Chinese with English protocol terms, each citing the section or
-  equation it comes from; 52 items are tagged **0.7.2 → 0.8.0** for the version delta.
+  equation it comes from; 52 items are tagged **0.7.2 → 0.8.0** for the version delta. Every answered question shows
+  the same breakdown whether you got it right or wrong: the general reasoning first, then a
+  per-option verdict saying why each of the four options is right or wrong.
 - Study modes: **practice** (instant feedback), **Q&A** (read straight through — question, then tap
   for the model answer and explanation, no options to pick), **cheat sheet** (21 condensed pages — one per
   chapter and appendix: flow, constants, key equations, the questions examiners keep asking, and the
