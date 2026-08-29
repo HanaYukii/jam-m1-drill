@@ -1,5 +1,5 @@
 // Headless smoke test of dist/jam-m1-drill.html: console errors, answer flow, mock flow, screenshots (light/dark).
-import { chromium } from '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
 
