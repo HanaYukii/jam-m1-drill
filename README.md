@@ -3,14 +3,16 @@
 Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, built for the
 [New-JAMneration](https://github.com/New-JAMneration/JAM-Protocol) team.
 
-- **267 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–13, appendices A–H,
+- **260 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–13, appendices A–H,
   plus architecture / design-rationale / off-chain-protocol items.
 - **92-entry glossary** of GP 0.8.0 symbols and terms (state components, data structures, PVM,
   cryptography, constants, ecosystem), searchable and cross-linked.
 - Explanations in Traditional Chinese with English protocol terms, each citing the section or
-  equation it comes from; 52 items are tagged **0.7.2 → 0.8.0** for the version delta. Every answered question shows
+  equation it comes from; 50 items are tagged **0.7.2 → 0.8.0** for the version delta. Every answered question shows
   the same breakdown whether you got it right or wrong: the general reasoning first, then a
   per-option verdict saying why each of the four options is right or wrong.
+- Questions are written for an **oral** examination: they ask for rules, reasons and consequences rather
+  than byte offsets, opcode tables or arithmetic to the octet.
 - Study modes: **practice** (instant feedback), **Q&A** (read straight through — question, then tap
   for the model answer and explanation, no options to pick), **cheat sheet** (21 condensed pages — one per
   chapter and appendix: flow, constants, key equations, the questions examiners keep asking, and the
