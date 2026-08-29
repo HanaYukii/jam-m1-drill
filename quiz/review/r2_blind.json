@@ -1,0 +1,189 @@
+[
+ {
+  "id": "c3-ch03-bounded-numeric-blob-types",
+  "ch": "3",
+  "section": "3.4 Numbers / 3.7.4 Octets and Blobs",
+  "gpRef": "§3.4; §3.7.4; §3.8.1",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "Almost every type in the Gray Paper is built from the vocabulary fixed in §3.4 and §3.7.4: N, N_n, Z, N_L, B, B_x and B_$. Which statement reads all of them the way the GP defines them?",
+  "options": [
+   "The subscripted natural set is the naturals strictly below the subscript and N_L equals N_{2^32}, but B_$ is the set of blobs whose first octet is a sentinel marker, and an unsubscripted B is the single-octet set with B_x being x-octet sequences.",
+   "The subscripted natural set includes the subscript itself, so it has n + 1 members; N_L equals N_{2^64} because lengths are carried as 64-bit values; B_$ denotes a length-prefixed blob; and an octet and a natural below 256 are fully interchangeable, serialization included.",
+   "The subscripted natural set is the naturals strictly below the subscript; N_L is the GP's shorthand for the set of octet-sequence lengths and is equivalent to N_{2^32}; B_$ is the subset of blobs which are ASCII-encoded strings; and although an octet has an obvious bijection with a natural under 256, the two are not treated as the same entity — an octet always serializes to itself, whereas a natural may serialize to several octets depending on magnitude and encoding variant.",
+   "The subscripted natural set is the naturals strictly below the subscript; N_L is the set of octet sequences shorter than 2^32 rather than the set of their lengths; B_x is the set of blobs of at most x octets; and an octet serializes exactly as the general natural-number encoding does."
+  ],
+  "code": "",
+  "n": 1
+ },
+ {
+  "id": "c3-ch03-optional-none-error",
+  "ch": "3",
+  "section": "3.3 Sets / 3.2 Functions and Operators",
+  "gpRef": "§3.3; eq. 3.2 (substitute-if-nothing); applied at eq. 13.13",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "§3.3 introduces ∅, ∇ and the optional constructor A?, and eq. 3.2 defines the substitute-if-nothing function 𝒰. §13.2 then writes a service's accumulation entry as 𝒰(S[s], (0, 0, 0)), where S is a dictionary from service index to a triple. Which reading is correct?",
+  "options": [
+   "∅ marks a term validly left without a specific value and is defined to have cardinality zero; the optional constructor gives A? ≡ A ∪ {∅}; ∇ marks an unexpected failure or an invalid value, and the GP prefers it to ⊥ so it is not confused with Boolean false; and 𝒰 yields its first argument that is not ∅ — so the entry is the service's own triple when the dictionary holds one and the all-zero triple otherwise.",
+   "∅ is simply the empty set and ∇ stands for Boolean false; A? means the component may be omitted from the encoding; and 𝒰 yields the last of its arguments that is not ∅, so the entry is always the all-zero triple.",
+   "∅ marks an absent value and A? ≡ A ∪ {∅}, but 𝒰 yields the first argument that is ∅, and ∇ is a synonym for ∅ used when the absence was anticipated; the entry is therefore ∅ for any service that was accumulated.",
+   "∅ has cardinality one, being a distinct inhabitant of A?; 𝒰 is defined for exactly two arguments; and a dictionary subscript on a missing key yields ∇, which is precisely why a fallback is needed here."
+  ],
+  "code": "",
+  "n": 2
+ },
+ {
+  "id": "c3-ch03-ellipsis-ranges",
+  "ch": "3",
+  "section": "3.4 Numbers / 3.7 Sequences",
+  "gpRef": "§3.4 (Z_{a…b}, Z_{a…+b}); §3.7 (slicing, s[i]^⟲, last)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "Let s = [10, 20, 30, 40, 50]. Applying the ellipsis conventions of GP §3.4 for integer sets and §3.7 for sequence slicing, which line is correct throughout?",
+  "options": [
+   "s_{…3} = [10, 20], s_{1…+3} = [20, 30, 40, 50], Z_{1…3} = {1, 2, 3}, Z_{1…+3} = {1, 2, 3, 4}, last(s) = 50, s[7]^⟲ = 20",
+   "s_{…3} = [10, 20, 30], s_{1…+3} = [20, 30, 40], Z_{1…3} = {1, 2}, Z_{1…+3} = {1, 2, 3}, last(s) = 50, s[7]^⟲ = 30",
+   "s_{…3} = [30, 40, 50], s_{1…+3} = [10, 20, 30], Z_{1…3} = {1, 2}, Z_{1…+3} = {1, 2, 3}, last(s) = 10, s[7]^⟲ = 40",
+   "s_{…3} = [10, 20, 30], s_{1…+3} = [20, 30], Z_{1…3} = {1, 2, 3}, Z_{1…+3} = {2, 3, 4}, last(s) = 50, s[7]^⟲ = 30"
+  ],
+  "code": "",
+  "n": 3
+ },
+ {
+  "id": "c3-ch03-prime-dagger-record",
+  "ch": "3",
+  "section": "3.6 Tuples / 3.7 Sequences",
+  "gpRef": "§3.6 (named tuple components); eq. 4.1 (σ′ ≡ Υ(σ, B)); §4 state-transition dependency graph; eq. 13.1–13.3",
+  "difficulty": 3,
+  "kind": "concept",
+  "stem": "Eq. 13.1–13.2 declare π ≡ (π_V, π_L, π_C, π_S) with (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧², and §13.1 then works through π_V†, π_V‡ and π′_V. An interviewer asks you to read that notation aloud. Which reading is right?",
+  "options": [
+   "The record notation makes the six counters positional only, so they must be addressed by index rather than by name; the prime denotes the Grandpa-finalized value of a state component; and the daggered forms are the same component as it stood on a fork that was later discarded.",
+   "Squaring the sequence-set means the pair holds exactly two records, one per epoch, so each record carries a single validator's six counters; the prime marks the value that will be current at the start of the next epoch; and the daggered forms are two further components of σ, each with its own state-trie key.",
+   "∈ and the tricolon are interchangeable spellings of the same binding; §3 defines the prime as 'the value after the extrinsic has been applied'; and the dagger marks a value that has already been through the epoch rollover while the double-dagger marks one that has not.",
+   "A type declaration introduces each component with ∈, naming the field and the set it is drawn from, while a concrete value binds fields with the tricolon and a field is read back by subscripting its name; squaring the sequence-set says each of the two records is itself a sequence of such records, one entry per validator; the undecorated symbol is the prior state and the primed one the posterior — a convention the GP fixes not in §3 but alongside σ′ ≡ Υ(σ, B) — and dagger and double-dagger mark intermediate values inside a single transition that appear in neither σ nor σ′."
+  ],
+  "code": "",
+  "n": 4
+ },
+ {
+  "id": "c3-ch13-epoch-boundary-split",
+  "ch": "13",
+  "section": "13.1 Validator Activity",
+  "gpRef": "eq. 13.4–13.6",
+  "difficulty": 3,
+  "kind": "concept",
+  "stem": "GP 0.8.0 §13.1 derives the validator activity records in three ordered steps — π_V†, then (π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch (so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by validators 4 and 9, and its guarantee extrinsic E_G credits validator 22. Where do this block's own increments end up?",
+  "options": [
+   "Everything this block contributes is credited to the freshly zeroed accumulator, so the archive holds exactly the previous epoch's totals with nothing from this block added to it.",
+   "The two assurance increments land in the last-epoch archive, because they are added to the prior record first and it is that already-incremented record which is moved across at the rollover; validator 7's block/ticket/preimage counters and validator 22's guarantee credit start from the freshly zeroed accumulator and so land in the current-epoch record. One block is deliberately split across the two records.",
+   "Everything this block contributes is credited to the archive, and the current-epoch record stays an all-zero sequence until the second block of the new epoch.",
+   "The rollover is triggered by the header's epoch marker H_E rather than by comparing ⌊τ/E⌋ with ⌊τ′/E⌋; when H_E ≠ ∅ both records are zeroed and all of this block's increments are the first entries of the current-epoch record."
+  ],
+  "code": "",
+  "n": 5
+ },
+ {
+  "id": "c3-ch13-guarantee-credit-set",
+  "ch": "13",
+  "section": "13.1 Validator Activity",
+  "gpRef": "eq. 13.6 (g counter); eq. 11.28 (reporters set G)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "GP 0.8.0 updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a credential in both of them (one report under this rotation's assignment, one under the previous rotation's), validator 30 signed a credential in only one, and the block's author is validator 5. How does the g counter move?",
+  "options": [
+   "Validator 12 moves by 1, validator 30 by 1, the author not at all — the added term is a Boolean membership test of the validator's Ed25519 key against a set of keys, so two credentials in the same block still yield a single step, and the index v is resolved through the posterior active set.",
+   "Validator 12 moves by 2 and validator 30 by 1, the author not at all — the counter accumulates one step per credential signature, which is what makes it a count of reports guaranteed.",
+   "Validator 12 moves by 1 and validator 30 by 1, resolved through the prior active set κ, and the author additionally moves by 2 for having included the two reports.",
+   "Only the author moves, by 2: g records the reports the author brought on-chain, while the guarantors are compensated through the assurance counter a instead."
+  ],
+  "code": "",
+  "n": 6
+ },
+ {
+  "id": "c3-ch13-core-record-fields",
+  "ch": "13",
+  "section": "13.2 Cores and Services",
+  "gpRef": "eq. 13.7–13.9; §13.2",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "GP 0.8.0 types the core statistics as π_C ∈ ⟦(d, p, i, x, z, e, l, u)⟧_C while the service statistics are π_S ∈ ⟨N_S → (…)⟩. A teammate is laying out the Go struct for one core record and asks which of the eight components are gas, which are counts and which are octet quantities — and whether the container needs zeroing at the epoch boundary. What do you tell them?",
+  "options": [
+   "All eight are plain naturals — the gas type N_G appears only in the service record's refinement pair; the popularity figure counts the guarantors assigned to that core in this rotation, and the bundle component counts the segments in the bundle.",
+   "The DA load and the refine gas are both gas-typed, because DA occupancy is charged against the refine budget; the bundle component counts work-items rather than octets; and the container is a dictionary that lists only the cores which saw activity in the block.",
+   "Only the last component is gas-typed (N_G, the refine gas summed over the digests); the DA load, the total extrinsic size and the total bundle length are octet quantities; the popularity figure and the import, extrinsic and export components are plain counts. The container is a fixed-length sequence with one entry per core, rebuilt from scratch on every block, so no epoch-boundary zeroing exists for it.",
+   "The typing is one gas component with three octet components and four counts, but the sequence accumulates over the epoch just like the validator records and is zeroed at the same rollover — which is why the first component is called a load rather than a size."
+  ],
+  "code": "",
+  "n": 7
+ },
+ {
+  "id": "c3-ch13-da-load-calc",
+  "ch": "13",
+  "section": "13.2 Cores and Services",
+  "gpRef": "eq. 13.9, 13.12; eq. 11.17 (R); eq. 11.30 (I)",
+  "difficulty": 3,
+  "kind": "calc",
+  "stem": "In one block, core 5 sees two things. (a) The guarantee extrinsic brings in a fresh work-report for core 5 whose availability spec has bundle length 100,000 octets and export-segment count 200. (b) An older report already assigned to core 5 crosses its two-thirds assurance threshold in this same block; its availability spec has bundle length 262,144 octets and export-segment count 130. With W_G = 4,104, what value does π′_C[5]_d take?",
+  "options": [
+   "803,872",
+   "937,216",
+   "807,976",
+   "795,664"
+  ],
+  "code": "",
+  "n": 8
+ },
+ {
+  "id": "c3-ch13-rollover-code",
+  "ch": "13",
+  "section": "13.1 Validator Activity",
+  "gpRef": "eq. 13.4–13.6",
+  "difficulty": 2,
+  "kind": "code",
+  "stem": "This is the team's GP 0.7.2 statistics code, condensed. Measured against GP 0.8.0 eq. 13.4–13.6, on which blocks does it place a validator's assurance increment in the wrong record, and what is the minimal fix?",
+  "options": [
+   "Only on blocks where ⌊τ/E⌋ ≠ ⌊τ′/E⌋. eq. 13.4 applies the assurance pass to the prior record, and eq. 13.5 then moves that already-incremented record into the archive, so on an epoch-boundary block each assurer's step belongs in the archive rather than in the newly allocated slice this code writes it into. The fix is to run the assurance pass on the prior record before the branch and to hand the incremented record to the else-branch's archive assignment.",
+   "On every block, because 0.8.0 attributes assurances to the block author rather than to each assurer; the fix is to index the increment by authorIndex like the ticket and preimage passes do.",
+   "Only on epoch-boundary blocks, but in the opposite direction: 0.8.0 requires all six counters to be credited before the rollover, so the newly allocated slice must stay untouched until the second block of the new epoch.",
+   "On every block, because 0.8.0 sizes the two records from the prior state's |κ| and |λ| instead of the constant ValidatorsCount; the placement of the assurance increment itself is already identical to 0.8.0."
+  ],
+  "code": "// (13.3)  π ≡ (πV , πL, πC , πS);  (πV, πL) => (current, last)\nfunc UpdateValidatorActivityStatistics() {\n\tcs := blockchain.GetInstance()\n\tpreEpochIndex := GetEpochIndex(cs.GetPriorStates().GetTau())\n\tpostEpochIndex := GetEpochIndex(cs.GetPosteriorStates().GetTau())\n\tpreStatistics := cs.GetPriorStates().GetPi()\n\tif preEpochIndex == postEpochIndex {\n\t\tcs.GetPosteriorStates().SetPiCurrent(preStatistics.ValsCurr)\n\t\tcs.GetPosteriorStates().SetPiLast(preStatistics.ValsLast)\n\t} else { // reset\n\t\tvalsCurrent := make(types.ValidatorsStatistics, types.ValidatorsCount)\n\t\tcs.GetPosteriorStates().SetPiCurrent(valsCurrent)\n\t\tcs.GetPosteriorStates().SetPiLast(preStatistics.ValsCurr)\n\t}\n\tUpdateCurrentStatistics(cs.GetLatestBlock().Extrinsic) // ... plus core & service stats\n}\n\nfunc UpdateCurrentStatistics(extrinsic types.Extrinsic) {\n\tstatistics := cs.GetPosteriorStates().GetPi()\n\tUpdateBlockStatistics(&statistics, authorIndex)\n\tUpdateTicketStatistics(&statistics, authorIndex, extrinsic.Tickets)\n\tUpdatePreimageStatistics(&statistics, authorIndex, extrinsic.Preimages)\n\tUpdateReportStatistics(&statistics, extrinsic.Guarantees, tau, kappa)\n\tUpdateAvailabilityStatistics(&statistics, authorIndex, extrinsic.Assurances)\n\tcs.GetPosteriorStates().SetPiCurrent(statistics.ValsCurr)\n}",
+  "n": 9
+ },
+ {
+  "id": "c3-ch13-accum-triple-code",
+  "ch": "13",
+  "section": "13.2 Cores and Services",
+  "gpRef": "eq. 13.8, 13.13–13.14; eq. 12.27–12.28",
+  "difficulty": 2,
+  "kind": "code",
+  "stem": "The team's GP 0.7.2 code builds each service record's accumulation entry as the pair shown. GP 0.8.0 reshapes that entry. What exactly changes, and what observable consequence does it have for which services appear in π′_S?",
+  "options": [
+   "The entry becomes a three-element value — work-digests accumulated for the service, deferred transfers delivered to it, and accumulation gas — obtained as the substitute-if-nothing of the service's entry in S against an all-zero triple. Since S now keeps every service whose triple is not all-zero, a service touched only by incoming transfers has a non-zero middle element, becomes a key of S, and therefore joins the union that forms π′_S's domain.",
+   "The entry keeps two elements but its gas element is re-typed from N_G to a plain natural; the domain of π′_S is unchanged, still the union of reported services, preimage-provided services and the keys of the accumulation statistics.",
+   "0.8.0 restores the separate on-transfer PVM invocation Ψ_T, so the record regains a transfer count and a transfer gas figure as two further top-level fields next to the accumulate pair, and every service that received a transfer appears with its own on-transfer gas figure.",
+   "The entry becomes a three-element value whose middle element is the number of preimages provided to the service, making the provision pair redundant; correspondingly the domain of π′_S narrows to exactly the services that were accumulated."
+  ],
+  "code": "// v0.7.1\n// (13.12) a\n// AccumulateCount, AccumulateGasUsed\nfunc CalculateAccumulationStatistics(serviceID types.ServiceID,\n\taccumulationStatistics types.AccumulationStatistics,\n) (accumulateCount types.U32, accumulateGasUsed types.Gas) {\n\tvalue, ok := accumulationStatistics[serviceID]\n\tif ok {\n\t\taccumulateCount = types.U32(value.NumAccumulatedReports)\n\t\taccumulateGasUsed = value.Gas\n\t}\n\t// else, the service id is not found, count and gas are 0\n\treturn accumulateCount, accumulateGasUsed\n}\n\n// ... inside UpdateServiceActivityStatistics, for each serviceID in s:\nservicesStatistics[serviceID] = types.ServiceActivityRecord{\n\tProvidedCount:     ps.count,\n\tProvidedSize:      ps.size,\n\tRefinementCount:   R.n,\n\tRefinementGasUsed: R.GasUsed,\n\tAccumulateCount:   accumulateCount,\n\tAccumulateGasUsed: accumulateGasUsed,\n}",
+  "n": 10
+ },
+ {
+  "id": "c3-ch13-consensus-state-rationale",
+  "ch": "13",
+  "section": "13.1 Validator Activity",
+  "gpRef": "§13.1; eq. 4.4 (state composition); eq. 13.1–13.3; App. D key C(13)",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "An interviewer pushes back: 'Validator counters look like telemetry to me. Why are they a component of σ and Merklized into the state trie at all, and why keep two validator records rather than one running counter?' What is the GP-grounded answer?",
+  "options": [
+   "It is essentially a serialization convenience: the JIP-2 RPC's statistics endpoint and the conformance vectors want a fixed-shape record, and the second record only exists so a vector can compare a whole epoch's totals; a node that skipped the update entirely would still agree on the state root.",
+   "Because Grandpa weights finality votes by validator performance, so a stale accumulator would let a validator vote with the previous epoch's weight; the second record exists so that a validator removed mid-epoch can still be slashed against its own history.",
+   "Because the author's reward is paid out of the block's accumulation gas budget in the same block, so the counters have to be readable from inside the state transition; the second record is a rollback buffer consulted when a fork is reverted.",
+   "Because the figures must be bit-identical on every node and provable to a consumer outside the chain: JAM pays no rewards itself but has to deliver activity data to a staking subsystem, so the record is a state component with its own trie key and a node computing it differently produces a different state root. The pairing exists because settlement is per-epoch — the archive holds the just-completed epoch's totals unchanged for the whole of the next epoch, giving a stable snapshot to read while the accumulator fills. Core and service records need no pairing because they are rebuilt every block."
+  ],
+  "code": "",
+  "n": 11
+ }
+]

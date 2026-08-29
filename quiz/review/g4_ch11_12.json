@@ -1,0 +1,497 @@
+[
+{
+"n": 116,
+"id": "ch11-rho-pipeline-worked",
+"ch": "11",
+"gpRef": "eq. 11.16–11.18, 11.32, 11.46",
+"stem": "Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?",
+"options": [
+"ρ‡[0] = ∅ because 45 ≥ 40 + U; g₁'s report never enters W and is dropped without accumulation; g₂ is accepted, so ρ′[0] = (g₂, 45)",
+"ρ‡[0] = (g₁, 40): the 4 + 3 = 7 assurances gathered so far exceed the threshold of 5, so the report is in W and accumulates, while g₂ is rejected as core_engaged",
+"ρ‡[0] = ∅ because the cumulative 7 assurances made the report available; it accumulates in this block and ρ′[0] = (g₂, 45)",
+"ρ‡[0] = (g₁, 40): the timeout only fires once H_t > t + U, i.e. from slot 46, so g₂ is rejected as core_engaged"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 117,
+"id": "ch11-guarantee-slot-window-calc",
+"ch": "11",
+"gpRef": "eq. 11.28",
+"stem": "Full config (R = 10). The block being imported has τ′ = 57. For a guarantee g = (w, t, a) in E_G, which values of t are acceptable under eq. 11.28, and which assignment (M or M*) verifies the credential for each?",
+"options": [
+"t ∈ [47, 57] — a sliding window of R slots ending at τ′; t ∈ [47, 49] is verified against M* and t ∈ [50, 57] against M; t = 46 is rejected as too old",
+"t ∈ [40, 57]: t ∈ [40, 49] is verified against M* (rotation index 4) and t ∈ [50, 57] against M (rotation index 5); t = 39 and t = 58 are both rejected",
+"t ∈ [50, 57] only — the current rotation, all verified against M — because M* is consulted solely when the previous rotation lies in the previous epoch",
+"t ∈ [40, 59] — the whole previous and current rotation — with t > τ′ allowed since guarantees may be produced before the block that includes them"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 118,
+"id": "ch11-rotation-epoch-boundary-mstar",
+"ch": "11",
+"gpRef": "eq. 11.23, 11.28",
+"stem": "Full config (E = 600, R = 10). A block at τ′ = 603 includes a guarantee with t = 595. Which assignment must its credential be checked against?",
+"options": [
+"M* = (P(|κ′|, η′_2, 593), Φ(κ′)): the previous rotation always uses the current epoch's entropy and set, only the rotation index differs",
+"M = (P(|κ′|, η′_2, 603), Φ(κ′)) at rotation index 0, because t is within R slots of τ′",
+"The guarantee is invalid: a guarantee may not straddle an epoch boundary because the validator set may have changed",
+"M* = (P(|λ′|, η′_3, 593), Φ(λ′)): the previous rotation (index 59) belonged to the previous epoch, so it is recomputed from λ′ and η′_3"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 119,
+"id": "ch11-code-permute-080",
+"ch": "11",
+"gpRef": "eq. 11.20–11.22 — internal/extrinsic/guarantor_assignments.go permute",
+"stem": "This is the team's P (GP 0.7.2). Under GP 0.8.0 (eq. 11.20–11.21), what changes when the validator sequence has |κ′| = 9 in a chain with C = 341 cores?",
+"options": [
+"0.8.0 builds the base [⌊i/3⌋ | i ∈ N_9] = [0,0,0,1,1,1,2,2,2] and rotates modulo |κ′|/3 = 3; this code builds ⌊341·i/9⌋ = [0, 37, 75, …, 303] and rotates modulo 341, scattering guarantors over inactive cores",
+"Nothing observable: ⌊C·i/V⌋ and ⌊i/3⌋ coincide for every validator count permitted by eq. 6.8, and mod C equals mod V/3 for the same reason, so only the constant names differ between the versions",
+"0.8.0 keeps ⌊C·i/V⌋ = [0, 37, 75, …, 303] as the base but changes the rotation modulus from C to E/R = 60, the number of rotations per epoch, so the shuffle output cycles once per epoch",
+"0.8.0 replaces the Fisher–Yates shuffle by a plain rotation of the identity assignment [0, 1, 2, …, 8] modulo |κ′|/3, removing the dependence on η′_2 so that assignments are known a whole epoch ahead"
+],
+"answer": 0,
+"code": "// (11.19) R(c, n) = [(x + n) mod C | x ∈ c]\nfunc rotateCores(in []types.U32, n types.U32) []types.U32 {\n    out := make([]types.U32, len(in))\n    for i, x := range in {\n        out[i] = (x + n) % types.U32(types.CoresCount)\n    }\n    return out\n}\n\n// (11.20)\nfunc permute(e types.Entropy, currentSlot types.TimeSlot) []types.CoreIndex {\n    base := make([]types.U32, types.ValidatorsCount)\n    for i"
+},
+{
+"n": 120,
+"id": "ch11-code-anchor-checks-080",
+"ch": "11",
+"gpRef": "eq. 11.36, 11.38 — internal/extrinsic/guarantee_controller.go ValidateContexts",
+"stem": "This is the team's refinement-context validation (GP 0.7.2). Which conditions required by GP 0.8.0 eq. 11.36 (anchor) and eq. 11.38 (lookup anchor) are missing from it?",
+"options": [
+"Anchor: compare against β instead of β†, since 0.8.0 no longer patches the parent's state root into recent history; lookup anchor: unchanged, since the ancestor set already stores (slot, hash) pairs",
+"Anchor: the context's anchor timeslot must also equal the β† entry's timeslot (x_t = y_t); lookup anchor: the child header h′ (h′_p = H(h)) must carry h′_r = l_s, verifying the lookup anchor's posterior state root",
+"Anchor: drop the state-root comparison because 0.8.0 anchors carry a timeslot instead of a state root; lookup anchor: check only l_t ≥ H_t − L, since the ancestor-set requirement was removed in 0.8.0",
+"Nothing beyond renaming BeefyRoot to the accumulation-output super-peak b, with the new BlockInfo timeslot being informational only; both anchor tuples are otherwise identical to 0.7.2"
+],
+"answer": 1,
+"code": "for _, context := range contexts {\n    recentAnchorMatch := false\n    stateRootMatch := false\n    beefyRootMatch := false\n    for _, blockInfo := range betaDagger {\n        // xa = yh\n        if context.Anchor == blockInfo.HeaderHash {\n            recentAnchorMatch = true\n            // xs = ys\n            stateRootMatch = (context.StateRoot == blockInfo.StateRoot)\n            // xb = yb\n         "
+},
+{
+"n": 121,
+"id": "ch11-lookup-anchor-ancestry",
+"ch": "11",
+"gpRef": "eq. 11.37–11.38",
+"stem": "Why can the lookup-anchor requirement (eq. 11.38) not be checked from the on-chain state σ alone, and how does the conformance fuzzer make it checkable for an M1 target?",
+"options": [
+"It only needs β (the last H = 8 blocks, whose entries carry header hash and timeslot), so it is purely on-chain; the fuzzer merely replays enough blocks to fill β before testing guarantees",
+"It needs the full posterior state of the lookup-anchor block (to recompute l_s), which the fuzzer supplies on demand through GetState messages during ImportBlock",
+"It needs the headers of the last L slots (the ancestor set, not part of σ), deterministic from the header chain; the fuzzer's Initialize message therefore carries an ancestry list of (slot, header hash), a mandatory M1 feature",
+"The fuzzer skips it: lookup anchors became optional in 0.8.0 (the refinement context may omit them), so only the age bound l_t ≥ H_t − L is exercised by the vectors"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 122,
+"id": "ch11-prerequisite-window",
+"ch": "11",
+"gpRef": "eq. 11.42",
+"stem": "A work-report in E_G lists prerequisite p. Package p was guaranteed 10 blocks ago and accumulated 8 blocks ago, so p ∈ ξ but p no longer appears in any entry of β (H = 8). Is the guarantee valid?",
+"options": [
+"Valid: p ∈ ξ proves it was accumulated, so the dependency is satisfied and the report accumulates as soon as it becomes available",
+"Invalid (dependency_missing): eq. 11.42 admits a prerequisite only if it is in this block's E_G or among the reported-package sets of β; ξ is not consulted at guarantee time",
+"Valid, but the report is parked in the ready queue ϑ until p is reported again within the recent history",
+"Invalid because a prerequisite must be guaranteed in the same block as the dependent report (only mutual and self dependencies are allowed)"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 123,
+"id": "ch11-code-hash-prediction",
+"ch": "11",
+"gpRef": "eq. 11.45",
+"stem": "Service s upgraded its code after a work-package was built: the work-item's code hash c was correct at build time and refine ran the code available at the lookup anchor, but the including block's prior state has δ[s]_c ≠ c. What happens to the guarantee at inclusion?",
+"options": [
+"Accepted: c only records which code refine executed (resolved at the lookup anchor), and accumulation uses δ′[s]_c regardless",
+"Accepted, but the digest's result is replaced by the BAD error because the code preimage no longer matches the service",
+"Accepted provided the lookup anchor is at most L slots old, since code availability is judged at the lookup-anchor state",
+"Rejected (bad_code_hash): eq. 11.45 demands d_c = δ[d_s]_c in the prior state of the including block — c is a prediction of the code hash at reporting time, so a report refined against superseded code is discarded rather than accumulated"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 124,
+"id": "ch11-assurance-bitfield-packing",
+"ch": "11",
+"gpRef": "eq. 11.11, 11.14; App. C bit-sequence encoding",
+"stem": "Full config (C = 341). An assurer sets only the bit for core 340. What does E(f) look like, and what exactly does the assurer sign?",
+"options": [
+"E(f) is 43 octets with last octet 0x08 (bits packed MSB-first within each octet); the signature is over X_A ⌢ H(H_p ⌢ E(f))",
+"E(f) is 341 octets (one per core) ending in 0x01; the signature is over X_A ⌢ H_p ⌢ E(f) directly, without hashing",
+"E(f) is 43 octets with last octet 0x10 (bit 4 of octet 42, LSB-first, no length prefix); the signature is over X_A ⌢ H(H_p ⌢ E(f)), i.e. a hash of 75 octets",
+"E(f) is a length-prefixed sequence of 43 octets with last octet 0x10; the signature is over X_A ⌢ H(H_p ⌢ E(f))"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 125,
+"id": "ch11-inactive-core-set-shrink",
+"ch": "11",
+"gpRef": "eq. 11.18, 11.23, 11.28, 11.31",
+"stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?",
+"options": [
+"Valid: M* reproduces the previous rotation's assignment, under which core 3 was active, and the shard count |κ| = 12 was correct when the report was produced",
+"Valid, but ρ′[3] is stored with the guarantee's own slot t = 595 as its timestamp, so it times out at the very next block",
+"Invalid: eq. 11.28 requires w_c < |κ′|/3 = 3 with the posterior set even under M* — an inactive core may not be used even if it was active in the previous rotation; moreover (w_s)_n must equal |κ′| = 9 (eq. 11.31), and every pending entry of ρ‡ is cleared because |κ| ≠ |κ′| (eq. 11.18)",
+"Invalid only because the signers come from λ′; a guarantee in an epoch's first block must be signed by members of κ′"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 198,
+"id": "ch11-rho-state",
+"ch": "11",
+"gpRef": "eq. 11.1 (ρ)",
+"stem": "What does each entry of ρ (the availability assignments) hold in GP 0.8.0, and why did PR #494 change it?",
+"options": [
+"ρ ∈ [(g ∈ G guarantee, t ∈ N_T timeslot)?]_C — the FULL guarantee including guarantor signatures plus the slot it was reported; kept so that the guarantors can be identified for fetching the bundle and for constructing culprits in a dispute",
+"ρ ∈ [(w ∈ W work-report, t)?]_C — only the report and the slot, as in 0.7.x",
+"ρ ∈ [H?]_C — only the report hash per core",
+"ρ ∈ [(w, t, bitfield)?]_C — the report plus the running assurance bitfield"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 199,
+"id": "ch11-workreport-fields",
+"ch": "11",
+"gpRef": "eq. 11.2–11.3",
+"stem": "A work-report W is a tuple (s, x, c, a, o, l, d, g). Which field description is WRONG?",
+"options": [
+"s — the availability specification (package hash, bundle length, erasure root, shard count, segment root, segment count)",
+"l — the segment-root lookup dictionary (work-package hash → segment root), which together with the prerequisites is limited to J = 8 entries",
+"g — the total gas used by all refine invocations in the package",
+"d — the work-digests, between 1 and I = 16 of them"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 200,
+"id": "ch11-refinement-context",
+"ch": "11",
+"gpRef": "eq. 11.4",
+"stem": "Which fields does the refinement context X contain in GP 0.8.0 (PR #526)?",
+"options": [
+"Anchor: header hash a, timeslot t, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot l_t, posterior state root l_s; prerequisites p (a set of package hashes) — 8 fields",
+"Anchor: header hash and state root; lookup-anchor: header hash and timeslot; prerequisites — 5 fields, as in 0.7.x",
+"Anchor hash, anchor state root, BEEFY root, lookup-anchor hash, lookup-anchor slot, core index, prerequisites — 7 fields",
+"Only the anchor hash and the prerequisites"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 201,
+"id": "ch11-avspec",
+"ch": "11",
+"gpRef": "eq. 11.5, 11.31",
+"stem": "The availability specification s = (h, l, u, n, e, k). What are u, n, e and what constraint applies to n on-chain?",
+"options": [
+"u = erasure root (Merkle root over the n erasure-coded chunks of bundle + exported segments); n = number of erasure shards, which must equal |κ′| (one chunk per assurer); e = segment root (constant-depth Merkle tree over exported segment hashes); k = segment count",
+"u = segment root; n = number of work-items; e = erasure root; k = number of validators",
+"u = bundle hash; n = 1023 always; e = exports root; k = core index",
+"u = erasure root; n = number of guarantors (2 or 3); e = extrinsic root; k = chunk size"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 202,
+"id": "ch11-work-errors",
+"ch": "11",
+"gpRef": "eq. 11.6–11.7",
+"stem": "A work-digest's result r ∈ B ∪ J where J = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG}. Which meaning is correct?",
+"options": [
+"∞ out-of-gas; ☇ panic; BADEXPORTS the number of exports was misreported; OVERSIZE the refine output would exceed the size limit; BAD service code unavailable at the lookup-anchor; BIG code exceeds W_C = 4,000,000",
+"∞ infinite loop detected; ☇ host-call fault; BAD invalid signature; BIG bundle exceeds W_B",
+"∞ out-of-gas; ☇ page fault; BAD the authorizer rejected the package; BIG too many work-items",
+"All six are equivalent and simply mean the digest is empty"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 203,
+"id": "ch11-report-size-limit",
+"ch": "11",
+"gpRef": "eq. 11.8",
+"stem": "What is the on-chain limit on the variable-size content of a single work-report?",
+"options": [
+"|authorizer trace o| + Σ over digests of |result blob| (errors count as 0) ≤ W_R = 48·2^10 = 49,152 octets",
+"Each digest's output ≤ 4 KiB and at most 16 digests",
+"The encoded report ≤ W_B = 13,791,360 octets",
+"|o| ≤ 32 and each result ≤ W_G = 4,104 octets"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 204,
+"id": "ch11-assurance-rules",
+"ch": "11",
+"gpRef": "eq. 11.11–11.16",
+"stem": "Which set of rules applies to the assurances extrinsic E_A?",
+"options": [
+"Each assurance = (anchor a, bitfield f ∈ bits[C], validator index v, Ed25519 sig); a must equal H_p; assurances strictly ordered by v (so at most one per validator); the signature by κ[v]_e is over X_A ⌢ H(E(H_p, f)); a bit may be set only if ρ†[c] ≠ ∅",
+"Assurances are anchored on the block's own hash and signed with Bandersnatch keys",
+"Any number of assurances per validator; the bitfield has one bit per validator",
+"Assurances are signed over the erasure root of each report; ordering is by core index"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 205,
+"id": "ch11-availability-threshold",
+"ch": "11",
+"gpRef": "eq. 11.17–11.18",
+"stem": "When does a report become available (W), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?",
+"options": [
+"Available iff the number of assurances with bit c set is > 2/3·|κ| (tiny: ≥ 5 of 6; full: ≥ 683); ρ‡[c] = ∅ if the report became available, or H_t ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)",
+"Available iff ≥ 1/3·|κ| assurances; cleared after U = 10 slots",
+"Available iff exactly 2/3·|κ| assurances; never cleared until accumulated",
+"Available iff > 1/2·|κ| assurances; cleared on every epoch change"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 206,
+"id": "ch11-guarantor-assignment",
+"ch": "11",
+"gpRef": "eq. 11.19–11.23",
+"stem": "How are validators assigned to cores for guaranteeing in GP 0.8.0?",
+"options": [
+"P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the sequence [0,0,0,1,1,1,…] is Fisher-Yates shuffled with entropy e = η′_2, then rotated by the rotation index (R = 10 slots); M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — only cores < |κ′|/3 are active",
+"Validator i is assigned to core i mod C, rotating one core per block",
+"P uses η′_1 and rotates every epoch; all 341 cores are always active",
+"Assignment is by Bandersnatch VRF: each validator picks its own core"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 207,
+"id": "ch11-guarantee-validity",
+"ch": "11",
+"gpRef": "eq. 11.24–11.29",
+"stem": "Which statement about a guarantee g = (w, t, a) in E_G is correct?",
+"options": [
+"a has 2 or 3 (validator index, Ed25519 sig) pairs ordered by index; each signer must be assigned to core w_c under M (if t is in the current rotation) or M* (previous rotation); R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′; the signature is over X_G ⌢ H(E(w)); w_c < |κ′|/3; E_G is ordered & unique by core",
+"a has exactly 3 signatures; t must equal τ′; the signature is over the encoded report itself",
+"a has 1 signature from the block author; t may be any slot in the last 24 hours",
+"Signers may be any validators in κ′ ∪ λ′; E_G is ordered by report hash"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 208,
+"id": "ch11-report-checks-state",
+"ch": "11",
+"gpRef": "eq. 11.31–11.33",
+"stem": "Which on-chain checks apply to each incoming report w before it is placed in ρ′?",
+"options": [
+"ρ‡[w_c] = ∅ (core free after assurances/timeouts); w_a ∈ α[w_c] (authorizer in the PRIOR pool); Σ digest accumulate-gas ≤ G_A = 10,000,000 and each digest's gas ≥ δ[s]_g (the service's minaccgas); erasure shard count = |κ′|",
+"ρ[w_c] = ∅ (prior); w_a ∈ α′[w_c]; Σ gas ≤ G_T",
+"The core must have been free for at least U slots; total gas ≤ G_R = 5·10^9",
+"The report must be signed by the manager service"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 209,
+"id": "ch11-contextual-validity",
+"ch": "11",
+"gpRef": "eq. 11.35–11.45",
+"stem": "Which of the following is NOT one of the contextual validity requirements for reports in E_G?",
+"options": [
+"No two reports in the extrinsic share a work-package hash, and no package hash may appear in β's reported sets, in ξ (accumulated), in ϑ (ready queue) or in ρ (pending)",
+"The anchor (a, s, b, t) must match an entry of β†; the lookup-anchor time ≥ H_t − L and the lookup-anchor must be in the ancestor set A",
+"Every prerequisite and every segment-root-lookup key must be in this extrinsic or in β's reported sets, and lookup segment roots must match",
+"Each digest's service must have been accumulated within the last epoch, otherwise the report is rejected"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 210,
+"id": "ch11-rho-prime",
+"ch": "11",
+"gpRef": "eq. 11.46",
+"stem": "After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?",
+"options": [
+"(g, τ′) — the full guarantee with the current block's timeslot as the assignment time, so it can be timed out if not assured within U slots",
+"(g, g_t) — the guarantee with the guarantee's own slot t",
+"(w, 0) — the report with a zeroed timestamp",
+"The report hash only; the guarantee itself is discarded"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 211,
+"id": "ch11-code-availability",
+"ch": "11",
+"gpRef": "eq. 11.17 — internal/extrinsic/assurance_controller.go",
+"stem": "The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Which statement is accurate?",
+"options": [
+"It is equivalent to the GP's strict '> 2/3·|κ|' as long as ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 is derived from the actual size of κ (5 for 6 validators, 683 for 1023); for 0.8.0 it must follow |κ| rather than a compile-time constant",
+"It is wrong: the GP requires ≥ 2/3·|κ|, so 4 of 6 should suffice in tiny",
+"It is wrong: the GP counts assurances per validator, not per core",
+"It is wrong: reports on cores where rhoDagger[i] == nil should still be added"
+],
+"answer": 0,
+"code": "for i := 0; i < types.CoresCount; i++ {\n    // If the votes for this core are greater than the available number, add the work report\n    if totalAvailable[i] >= types.ValidatorsSuperMajority {\n        if rhoDagger[i] == nil {\n            continue\n        }\n        availableWorkReports = append(availableWorkReports, rhoDagger[i].Report)\n    }\n}"
+},
+{
+"n": 212,
+"id": "ch12-history-queue-state",
+"ch": "12",
+"gpRef": "eq. 12.1–12.3",
+"stem": "What are ξ (accumulated) and ϑ (ready) and how big are they?",
+"options": [
+"ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ϑ ∈ [[(W, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set",
+"ξ ∈ {H} — all package hashes ever accumulated; ϑ ∈ [W] — a FIFO of all pending reports",
+"ξ ∈ [{H}]_H — 8 slots of history; ϑ ∈ [(W, N)]_C — one queued report per core",
+"ξ and ϑ are both dictionaries from report hash to timeslot"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 213,
+"id": "ch12-W-partition",
+"ch": "12",
+"gpRef": "eq. 12.4–12.12 (W!, W^Q, E, Q, W*)",
+"stem": "How is the sequence of accumulatable reports W* built from the newly available reports W?",
+"options": [
+"W! = reports with no prerequisites and empty segment-root lookup, accumulated immediately; W^Q = the rest, each paired with its dependency set (prerequisites ∪ keys of srlookup) pruned by ξ_∪; W* = W! ⌢ Q(E(ϑ[m..] ⌢ ϑ[..m] ⌢ W^Q, P(W!))) where Q repeatedly extracts reports whose dependency set is empty and E removes satisfied dependencies",
+"W* = W sorted by core index; dependencies are checked by guarantors, not on-chain",
+"W* = all of ϑ followed by W; a report with a missing dependency causes the block to be invalid",
+"W* = W! only; queued reports are accumulated one epoch later regardless of dependencies"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 214,
+"id": "ch12-gas-budget",
+"ch": "12",
+"gpRef": "eq. 12.24 (g) & 12.17 (Δ+)",
+"stem": "What total gas budget g is handed to the outer accumulation Δ+ in a block, and how does Δ+ choose how many reports to accumulate in a round?",
+"options": [
+"g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports + Σ gas of pending deferred transfers + Σ free-accumulation gas ≤ g, runs Δ* on them, then recurses with g* = g + Σ(new transfers' gas) − Σ gas actually used and an empty free-accumulation map",
+"g = G_T = 3.5·10^9 always; Δ+ accumulates all reports regardless of gas",
+"g = G_A = 10^7 per report; Δ+ accumulates reports one at a time",
+"g = G_R = 5·10^9; Δ+ stops at the first report whose service panics"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 215,
+"id": "ch12-delta-star",
+"ch": "12",
+"gpRef": "eq. 12.18–12.19 (Δ*, R)",
+"stem": "In Δ* (parallel accumulation), which services are accumulated and how are the privileged indices (assigners, delegator, registrar) resolved when both the manager and the privileged service itself change them?",
+"options": [
+"s = {services with a digest} ∪ keys(f) ∪ {destinations of deferred transfers}; each is accumulated exactly once via Δ1; the manager's output decides χ′_M and χ′_Z; for assigners/delegator/registrar R(o, a, b) = b if a = o else a — i.e. the manager's change wins unless the manager left it unchanged, in which case the service's own change applies",
+"Only services with digests are accumulated; privileges can only be changed by the manager",
+"Every service in δ is accumulated each block; privilege conflicts make the block invalid",
+"Services are accumulated in order of service index; the last writer of a privilege wins"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 216,
+"id": "ch12-delta-one-gas",
+"ch": "12",
+"gpRef": "eq. 12.23 (Δ1)",
+"stem": "For a single service s, Δ1 invokes Ψ_A(e, τ′, s, g, i^T ⌢ i^U). How is the gas g computed and what are the inputs?",
+"options": [
+"g = f[s] (free allowance, or 0) + Σ gas of deferred transfers destined to s + Σ accumulate gas-limits of s's digests across the round's reports; i^T = the transfers to s (in order), i^U = one operand tuple per digest of s (report order)",
+"g = G_A = 10^7 fixed; inputs are the raw work-reports",
+"g = δ[s]_g (the service's minaccgas); inputs are only the digests, transfers are delivered separately via on_transfer",
+"g = the service's balance in gas units; inputs are the exported segments"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 217,
+"id": "ch12-deferred-transfer",
+"ch": "12",
+"gpRef": "eq. 12.14 & B.transfer",
+"stem": "A deferred transfer T = (s, d, a, m, g). What are the fields, and when is the balance moved?",
+"options": [
+"s source service, d destination, a amount, m memo of W_T = 128 octets, g gas limit for the recipient's handling; the sender's balance is deducted when `transfer` is called, and the amount is credited to the destination when it is accumulated in a later round",
+"s sender's Ed25519 key, d destination, a amount, m message hash, g gas price; settled immediately",
+"s source, d destination core, a amount, m memo of 32 octets, g gas refund",
+"Transfers are settled off-chain by guarantors"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 218,
+"id": "ch12-outputs",
+"ch": "12",
+"gpRef": "eq. 12.24–12.33",
+"stem": "After Δ+ returns (n, e′, b, u, t), which statements about the final integration are correct?",
+"options": [
+"θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ‡, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(W*[..n])",
+"θ′ = the hash of the whole δ‡; ι′ is unchanged until the next epoch; ξ′ is reset to empty",
+"θ′ = b; statistics record only gas; a_a is updated for all services in δ",
+"The outputs are discarded; only the new balances matter"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 219,
+"id": "ch12-preimage-integration",
+"ch": "12",
+"gpRef": "eq. 12.34–12.37",
+"stem": "Which rule governs the preimages extrinsic E_P and its integration into δ′?",
+"options": [
+"E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the PRIOR δ — the service exists and δ[s]_l[(H(d), |d|)] = [] (requested, not yet provided); integration happens after accumulation: δ′ = I(δ‡‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d, silently dropping any preimage that is no longer useful",
+"Any preimage may be included; unrequested ones are stored for 24 hours",
+"E_P is integrated before accumulation so that accumulate can read the new preimages",
+"Preimages must be signed by the service's manager"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 220,
+"id": "ch12-code-outer-accumulation",
+"ch": "12",
+"gpRef": "eq. 12.17 — internal/accumulation/accumulation.go OuterAccumulation",
+"stem": "This is the team's prefix selection in Δ+. Compared with GP 0.8.0 eq. 12.17, what is missing?",
+"options": [
+"0.8.0 requires the budget test to include Σ gas of the pending deferred transfers t and Σ free-accumulation allowances f (Σ d_g + Σ t_g + Σ f ≤ g), so gasSum must start from those two sums rather than 0",
+"Nothing — the loop exactly matches eq. 12.17",
+"The loop should break as soon as a single report exceeds G_A = 10^7",
+"n should not include |t| and |f|"
+],
+"answer": 0,
+"code": "gasSum := types.Gas(0)\ni := 0\n// Determine the maximal prefix of reports that fits within the gas limit\nfor idx, report := range r {\n    for _, result := range report.Results {\n        gasSum += result.AccumulateGas\n    }\n    if gasSum <= g {\n        i = idx + 1\n    } else {\n        break\n    }\n}\n// n = |t| + i + |f|\nn := len(t) + i + len(f)"
+}
+]

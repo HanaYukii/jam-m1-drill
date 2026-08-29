@@ -1,0 +1,189 @@
+[
+ {
+  "id": "c3-appE-wb-vs-constant-depth",
+  "ch": "E",
+  "section": "E.1 Binary Merkle Trees & E.2 MMR",
+  "gpRef": "eq. E.1 (N), E.3 (M_B), E.4 (M), E.7 (C); eq. 11.5 (segment-root a_s); §14 availability specifier (erasure-root a_u)",
+  "difficulty": 3,
+  "kind": "rationale",
+  "stem": "Appendix E gives two general Merkle root functions: the well-balanced M_B and the constant-depth M. In an availability specification the segment-root a_s is built with one of them and the erasure-root a_u with the other. Which way round is it, and what does the well-balanced shape buy over simply padding every tree up to a power of two?",
+  "options": [
+   "The segment-root uses M: the preprocessor C rewrites every item as H('$leaf' ⌢ s) and pads to 2^⌈log₂ n⌉ zero-hash leaves, so all leaves sit at one depth and 64-leaf pages stay size-aligned for J_6/L_6. The erasure-root uses M_B, whose leaves are already 64-octet hash pairs, so pre-hashing would be wasted and splitting at ⌈|v|/2⌉ keeps the deepest level — and the count of leaves on it — minimal.",
+   "The other way round: the segment-root uses M_B because a segment is 4,104 octets and M_B avoids hashing each item, while the erasure-root uses M because the chunk count is fixed at the validator-set size, so a constant-depth tree is cheaper to build. Well-balancedness only matters for very short sequences where log₂ rounding wastes one level.",
+   "Both roots use M_B; the constant-depth function exists only for the state trie of appendix D, whose 31-octet keys already fix the depth. The well-balanced shape is preferred because it gives every leaf the same proof length, which a power-of-two-padded tree cannot do once the item count is not itself a power of two.",
+   "Both roots use M; M_B is only a thin wrapper that hashes a lone item and otherwise defers to the node function N. Padding up to a power of two is exactly what makes a tree well-balanced, and the '$leaf' versus '$node' prefixes are the only substantive difference between the two root functions."
+  ],
+  "code": "",
+  "n": 1
+ },
+ {
+  "id": "c3-appE-code-trace-split",
+  "ch": "E",
+  "section": "E.1 Binary Merkle Trees & E.2 MMR",
+  "gpRef": "eq. E.1 (N), E.2 (trace T), E.5–E.6 (J_x, L_x), E.7 (C); eq. 14.12 (paged proofs)",
+  "difficulty": 3,
+  "kind": "code",
+  "stem": "Below is the team's trace function, the one that produces the sibling nodes of an inclusion justification. In the same file the node function N splits its input with `mid := (len(v) + 1) / 2`. Reading the two together, what is the defect and where does it actually bite?",
+  "options": [
+   "It is fine as written: for a well-balanced tree the two rounding conventions describe the same tree, because N recurses on the very halves this function walks. The only genuine divergence from the GP is ordering — the returned sequence runs from the leaf upwards, whereas the GP emits the opposite nodes from the root downwards.",
+   "The recursion descends into the sibling half rather than the half that contains the target index, so the returned co-path is the mirror image of the correct one. Lengths always match the GP's, which is why unit tests on proof length pass while verification against a root fails.",
+   "It rounds the split down while the GP — and this file's own node function — round it up, so at any recursion level of odd length the siblings and even the path length are wrong: for three items at index 0 the GP yields two nodes and this yields one. Page proofs escape it because C has already padded to a power of two, but the direct call that builds the CE 140 segment-shard co-path does not.",
+   "It omits the '$node' domain-separation prefix when folding a sibling into the path, so the hashes it returns cannot be recombined into the root; the fix is to prepend the prefix inside this function rather than relying on the node function to do it."
+  ],
+  "code": "func T(v []types.ByteSequence, i types.U32, hashFunc func(types.ByteSequence) types.OpaqueHash) (output []types.ByteSequence) {\n\tif len(v) <= 1 {\n\t\treturn output\n\t}\n\tmid := types.U32(len(v) / 2)\n\tvar siblingHalf []types.ByteSequence\n\tvar traverseHalf []types.ByteSequence\n\tvar newIndex types.U32\n\n\tif i < mid {\n\t\tsiblingHalf = v[mid:]  // right is sibling\n\t\ttraverseHalf = v[:mid] // go left\n\t\tnewIndex = i\n\t} else {\n\t\tsiblingHalf = v[:mid]  // left is sibling\n\t\ttraverseHalf = v[mid:] // go right\n\t\tnewIndex = i - mid\n\t}\n\tsibling := N(siblingHalf, hashFunc)\n\tsuffix := T(traverseHalf, newIndex, hashFunc)\n\tresult := make([]types.ByteSequence, 0, 1+len(suffix))\n\tresult = append(result, sibling)\n\tresult = append(result, suffix...)\n\treturn result\n}",
+  "n": 2
+ },
+ {
+  "id": "c3-appE-mmb-peaks-superpeak",
+  "ch": "E",
+  "section": "E.1 Binary Merkle Trees & E.2 MMR",
+  "gpRef": "eq. E.8 (A), E.9 (E_M), E.10 (M_R); eq. 7.3, 7.7–7.8; §18 Beefy Distribution",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "The Accumulation Output Log β_B is a sequence of optional hashes rather than a single root, yet every recent-history entry stores only one 32-octet value b derived from it. Why does state keep the whole peak sequence, and what is that single value used for?",
+  "options": [
+   "The peak sequence is a cache that a node may drop and rebuild from the last H recent-history entries; the single value is the Blake2b well-balanced root of the peaks, kept in β_H purely so that light clients can check the log without replaying accumulation.",
+   "The append function A carries like binary addition — an occupied slot n is folded with the incoming leaf and carried into slot n+1, an empty slot ∅ is simply filled — so the peaks are exactly the state needed to keep appending and to serve O(log N) inclusion proofs; hashing them away would end appendability, which is why the separate super-peak M_R (a left-associated Keccak fold over the non-∅ peaks under a '$peak' prefix) is the one 32-octet value that enters β_H and is BLS-signed for Beefy.",
+   "Each block pushes one new peak and the oldest peak is discarded once the sequence exceeds H entries, exactly like the recent-history ring buffer; the single stored value is the Keccak hash of the encoded peak sequence E_M(β_B), which third parties use as the bridging commitment.",
+   "The peaks are kept so that the log can be rewound on a fork, since removing the last leaf only requires dropping one peak; the single value is the Merkle root over the accumulation outputs of that block alone, which is what Beefy signs, so the log itself never leaves the node."
+  ],
+  "code": "",
+  "n": 3
+ },
+ {
+  "id": "c3-appF-shuffle-is-consensus",
+  "ch": "F",
+  "section": "F Shuffling (Fisher–Yates)",
+  "gpRef": "eq. F.1 (F); eq. 11.21 (guarantor permute P); §17 tranche-0 audit selection",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "A reviewer on the team wants to replace the `r_0 mod l` index selection in the shuffle F with rejection sampling, on the grounds that a modulo of a 32-bit draw is biased whenever l does not divide 2³². How should the team answer?",
+  "options": [
+   "Reject the change. F is a consensus rule, not a statistics utility: every node must derive the identical permutation from the same entropy, and its output drives the guarantor-to-core assignment P(|κ′|, η′_2, τ′) and the tranche-0 audit selection. A node that de-biases assigns validators to different cores, then rejects perfectly valid guarantor signatures and splits the chain; the residual bias across 32-bit draws is deliberately accepted.",
+   "Accept the change. The Gray Paper fixes only the distribution — any shuffle that yields a uniformly random permutation of the input is conformant — and the jamtestvectors shuffle suite checks only that the result is a permutation of the input sequence, not which permutation.",
+   "The change is unnecessary rather than wrong: the numeric-sequence-from-hash function already removes the bias by slicing 4-octet windows out of a Blake2b digest, so the value taken modulo the remaining length is exactly uniform and rejection sampling would loop zero times.",
+   "Accept it, but only for ticket handling. The shuffle is what orders the ticket accumulator γ_a, and since γ_a is re-sorted by identifier before use the permutation never reaches state; the guarantor path must keep the Gray Paper's biased form."
+  ],
+  "code": "",
+  "n": 4
+ },
+ {
+  "id": "c3-appF-seq-from-hash-vs-fallback",
+  "ch": "F",
+  "section": "F Shuffling (Fisher–Yates)",
+  "gpRef": "eq. F.2 (Q_l), F.3 (F from a hash); eq. 6.27 (fallback key sequence)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",
+  "options": [
+   "They are the same construction used twice: §6's fallback sequence is literally the appendix-F shuffle applied to the active key set with η′_2 as the seed and then truncated to E entries, which is why an implementation only needs one hash-expansion routine.",
+   "The shuffle's expansion makes one Blake2b call per eight outputs — hashing the seed concatenated with the 4-octet encoding of ⌊i/8⌋ — and decodes the little-endian 4-octet window at offset 4i mod 32, so one 32-octet digest supplies eight consecutive 32-bit numbers. §6's fallback hashes once per slot, over the seed concatenated with the encoding of the slot index, and decodes only the leading 4 octets, using the result to index the key sequence cyclically.",
+   "It is the other way round: the shuffle's expansion hashes once per output and takes the leading four octets of each digest, while §6's fallback packs eight slot indices into every digest to keep the fallback cheap to compute for a whole epoch at once.",
+   "Both hash once per output, but the shuffle decodes big-endian into the natural range while §6's fallback decodes little-endian and reduces modulo the key-sequence length; the only real difference is the endianness, which is the classic source of fallback-seal mismatches."
+  ],
+  "code": "",
+  "n": 5
+ },
+ {
+  "id": "c3-appG-why-ring-not-plain-vrf",
+  "ch": "G",
+  "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
+  "gpRef": "§G; §3 signing schemes; eq. 6.30 (tickets extrinsic), eq. 6.16 (ticket seal)",
+  "difficulty": 1,
+  "kind": "rationale",
+  "stem": "Safrole could have proved ticket validity with an ordinary IETF VRF signature plus the submitting validator's published Bandersnatch key. Why does the Gray Paper insist on a ring VRF proof instead?",
+  "options": [
+   "Because a ring VRF output is unbiasable whereas a plain VRF output can be ground by its signer through resubmission; anonymity is a welcome side effect but not the reason, and it is why the ticket's message is empty.",
+   "Because one ring proof can carry all of a validator's ticket entries at once, so the tickets extrinsic stays within its per-block cap no matter how many entries each validator is allowed.",
+   "Because the proof shows only that its author knows a secret whose public key lies in the ring committed by γ′_Z, never which one, so next epoch's slot-sealer sequence can sit in public state without revealing who will author which slot; the author is identified only when the seal appears, which is what blunts targeted denial-of-service and bribery.",
+   "Because it lets any key holder, validator or not, enter the ticket contest, which is what keeps the accumulator saturated when part of the validator set is offline and is why the contest closes early in the epoch."
+  ],
+  "code": "",
+  "n": 6
+ },
+ {
+  "id": "c3-appG-ring-root-commitment",
+  "ch": "G",
+  "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
+  "gpRef": "§G (ring root O, padding point); eq. 6.14–6.15 (key rotation and Φ); eq. 6.4 (γ_Z)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "What exactly does the epoch root γ′_Z commit to, and what becomes of a validator whose key tuple has been zeroed by Φ because its Ed25519 key is in the offenders set?",
+  "options": [
+   "It commits to the ordered Bandersnatch components of the pending key set — the validators of the coming epoch — as a fixed 144-octet commitment recomputed at the epoch boundary. An all-zero entry is not a valid curve point, so the Bandersnatch padding point is substituted for it: the ring keeps its size, every other member keeps its index, and no proof can ever be produced for that position.",
+   "It commits to the ordered Bandersnatch components of the active key set κ′, recomputed whenever the offenders set changes. Zeroed entries are dropped and the surviving keys re-indexed, so the ring shrinks by the number of offenders and both the root and the proofs get correspondingly cheaper.",
+   "It is the well-balanced Merkle root of the 32-octet Bandersnatch keys and is therefore itself 32 octets; a zeroed entry simply becomes a leaf whose opening nobody knows, which is what excludes the offender from the contest.",
+   "It commits to the full 336-octet validator key tuples of the pending set, Bandersnatch, Ed25519, BLS and metadata alike; since Φ zeroes only the Ed25519 component the Bandersnatch half survives, so an offender can still submit tickets until the next rotation removes it."
+  ],
+  "code": "",
+  "n": 7
+ },
+ {
+  "id": "c3-appG-output-vs-signature",
+  "ch": "G",
+  "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
+  "gpRef": "§G (Y as output(·)‥32); §3 signing schemes; eq. 6.6 (ticket), 6.16 (ticket seal), 6.30 (tickets extrinsic)",
+  "difficulty": 3,
+  "kind": "concept",
+  "stem": "The ticket accumulator keeps only tuples of a 32-octet identifier and an entry index; the 784-octet ring proof from the extrinsic is thrown away once verified. An epoch later the sealer of a slot must present a 96-octet signature whose output equals that stored identifier, even though it now signs the serialized unsigned header rather than an empty message. What makes that possible?",
+  "options": [
+   "Because the stored identifier is the Blake2b hash of the ring proof, and a Bandersnatch ring proof is deterministic, so the same key and context regenerate the identical proof bytes and hence the identical hash; the message plays no part in that hash.",
+   "Because the seal republishes the stored ring proof inside the seal field — the 96-octet form is the same proof with the zero-knowledge portion stripped — so its output is trivially unchanged.",
+   "Because a VRF output is a high-entropy hash influenced by the context but not by the message, fixed by the secret key and the input alone. The ticket's context is the ticket-seal string with η′_2 and the entry index; the seal's is the same string with η′_3 and the ticket's entry index, and the entropy rotation makes those two byte strings equal one epoch later, so the same key yields the same 32 octets under either signature type.",
+   "Because the identifier is derived from η′_2 together with the entry index alone, so every validator can recompute every ticket identifier; the signature contributes only the proof of the right to use it, which is why the proof itself need not be retained."
+  ],
+  "code": "",
+  "n": 8
+ },
+ {
+  "id": "c3-appH-code-shardcount-080",
+  "ch": "H",
+  "section": "H Erasure Coding",
+  "gpRef": "eq. H.1 (𝒟); eq. 6.8 (𝕍); eq. 11.5 (a_v), eq. 11.31 ((w_s)_v = |κ′|); §14 availability specifier",
+  "difficulty": 2,
+  "kind": "code",
+  "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
+  "options": [
+   "Only the total needs to follow the validator set: it becomes the assuring-set size, while the data-shard count stays 342 because 𝒟 is derived from the segment size, and the segment size has not changed. The tiny 4 / 1026 pair therefore stays exactly as it is.",
+   "Every one of these numbers becomes a function of the assuring-set size that the report itself carries: the total is that size (which the on-chain rule pins to |κ′|), the data-shard count is the largest d with 2d dividing W_G and d no greater than v/3 + 1, and the pad width is twice that. On tiny that gives 3 data shards out of 6, a pad width of 6 and 684 pieces per segment, so the old 4 / 1026 pair must go.",
+   "Set the data-shard count to v/3 + 1 unconditionally. Because the set of legal validator-set sizes contains only multiples of three, the side condition that twice the count divide the segment size is automatically satisfied and can be dropped; tiny becomes 3 out of 6 and full stays 342 out of 1023.",
+   "Nothing in this file changes. 𝒟(v) governs only the Import-DA segment path, so the audit-DA bundle keeps the 342:1023 rate while the segment path switches to the report's own shard count; that asymmetry is exactly why the availability spec gained a shard-count field."
+  ],
+  "code": "// SetTinyMode()                     // SetFullMode()\n\tECPiecesPerSegment = 1026         //   ECPiecesPerSegment = 6      // W_P\n\tECBasicSize        = 4            //   ECBasicSize        = 684    // W_E\n\n// erasure coding constants\n// 342:1023 (Appendix H)\nconst (\n\tDataShards  = 342\n\tTotalShards = 1023\n)\n\n// buildBCloud\n\tpadded := PadToMultiple(bundle, types.ECBasicSize)\n\n\tshards, err := erasurecoding.EncodeDataShards(padded, types.DataShards, types.TotalShards-types.DataShards)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\thashedShards := make([]types.OpaqueHash, len(shards))\n\tfor i, shard := range shards {\n\t\thashedShards[i] = hash.Blake2bHash(types.ByteSequence(shard))\n\t}",
+  "n": 9
+ },
+ {
+  "id": "c3-appH-what-gets-coded",
+  "ch": "H",
+  "section": "H Erasure Coding",
+  "gpRef": "§14 availability specifier (b♣, s♣, a_u); eq. 14.12 (paged proofs); eq. 11.5; eq. H.5–H.6",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "For one work-report, which data does a guarantor erasure-code and hand out, and what does an individual validator end up holding?",
+  "options": [
+   "The work-report itself is coded into one chunk per validator, and the erasure-root is the Merkle root over those chunks; the work-package bundle and the exported segments stay with the guarantors, who serve them on request during an audit.",
+   "Only the exported segments are coded, because only they must survive in the long-term data lake; the auditable bundle is replicated whole to every validator, which is precisely why it may be discarded soon after the block is finalized.",
+   "Two data sets: the auditable bundle, zero-padded up to a multiple of twice the data-shard count and then coded, with each resulting chunk hashed; and the exported segments together with their paged-proof segments, each coded and then transposed so that one chunk of every segment lands on the same validator. A validator holds one leaf of the erasure-root: its bundle-chunk hash concatenated with the root over its own segment column.",
+   "Only the work-package bundle is coded, into as many chunks as there are validators; the exported segments are committed to by the segment-root instead and are reconstructed on demand by re-running refine, which is why the segment-root and the erasure-root are separate fields."
+  ],
+  "code": "",
+  "n": 10
+ },
+ {
+  "id": "c3-appH-rate-and-field-rationale",
+  "ch": "H",
+  "section": "H Erasure Coding",
+  "gpRef": "eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority)",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?",
+  "options": [
+   "Reconstruction must survive almost two-thirds of the validators being malicious or incapacitated, which puts the data-shard count near v/3 + 1 and dovetails with the 2/3+1 assurance super-majority; the field is 16-bit, so one code word is an octet pair and the evaluation points can index up to v distinct validators — an octet-wide field offers only 256 points and could not address 1,023; and twice the shard count must divide the 4,104-octet segment size so that a segment codes with no padding at all, which is why the count is the largest such value rather than exactly v/3 + 1.",
+   "The rate is chosen so that a two-thirds super-majority of assurances is itself the reconstruction threshold, putting the data-shard count near 2v/3; the field is 16-bit purely because a segment is 4,104 = 2 × 2,052 octets and the code words must tile it evenly; and the divisibility side condition exists only to keep the last chunk from needing a length prefix.",
+   "The data-shard count is exactly ⌊v/3⌋ + 1 for every legal validator-set size, so no side condition is ever active; GF(2¹⁶) is chosen only because 16-bit multiply-accumulate is faster than byte-wise arithmetic on modern hardware, and the 4,104-octet segment size follows from the field rather than the other way round.",
+   "The rate is set so that exactly the 683 validators of a full super-majority are needed to rebuild, which is what ties availability to finality; GF(2¹⁶) is chosen because Blake2b emits 32 octets, i.e. exactly 16 code words, so a chunk hash and a chunk share a representation."
+  ],
+  "code": "",
+  "n": 11
+ }
+]

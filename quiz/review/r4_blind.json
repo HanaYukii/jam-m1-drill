@@ -1,0 +1,172 @@
+[
+ {
+  "id": "c3-ch09-expunge-delay",
+  "ch": "9",
+  "section": "9.2 Preimage Lookups",
+  "gpRef": "§9.2 (domain of Λ); App. B Refine Invocation (D ≡ L + 4,800 = 19,200)",
+  "difficulty": 1,
+  "kind": "rationale",
+  "stem": "§9.2 bounds the timeslot argument of the historical-lookup function Λ to the window (H_t − D … H_t), and the constants appendix fixes D = 19,200 timeslots. What is the GP's stated reason for that particular number?",
+  "options": [
+   "19,200 timeslots is exactly 32 epochs, which is precisely how long the accumulation history ξ keeps work-package hashes, so a preimage may not be dropped before its package can no longer be re-accumulated.",
+   "The period must exceed the two-epoch audit window (1,200 timeslots) by a factor of sixteen so that erasure-coded bundles can still be reconstructed from the 1,023 validators' shards during a dispute.",
+   "Ω_H must return the same answer at every moment when auditing may still occur; the lookup anchor may itself be up to L = 14,400 timeslots older than recent history, so the period is that anchor age plus a further 4,800 slots (eight hours) of safety margin.",
+   "The per-octet deposit B_L is refunded linearly over the period, and 19,200 slots is 32 hours at six seconds per slot — the standard deposit-refund schedule for elective state."
+  ],
+  "code": "",
+  "n": 1
+ },
+ {
+  "id": "c3-ch09-service-info-leaf",
+  "ch": "9",
+  "section": "9.3 Account Footprint and Threshold Balance",
+  "gpRef": "eq. 9.3, eq. 9.8; §D.1 T(σ) row C(255, s); App. B `info` (Ω_I)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "a_i (items), a_o (octets) and a_t (threshold balance) are dependent values — §9.3 defines them purely from a_s and a_l, and none of them is a member of the eq. 9.3 tuple. Which of them actually reach the Merklized state, and how does that compare with what the `info` host call hands back?",
+  "options": [
+   "All three reach both encodings, and the two encodings are byte-for-byte identical — which is exactly why an implementation is free to reuse a single codec for the trie leaf and for the host call, and why the leaf can be handed straight to the guest's buffer.",
+   "The service-info leaf carries a_i and a_o but not a_t, and it opens with a version octet 0; `info` has no version octet but does include a_t, laid out as E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p)).",
+   "None of the three is serialized anywhere: the trie stores only the eq. 9.3 tuple fields, and a_i, a_o and a_t are recomputed from a_s and a_l each time a host call needs them.",
+   "The trie leaf carries a_t but neither a_i nor a_o (those are recomputed on demand), while `info` returns a_i and a_o but not a_t; both encodings begin with the version octet 0."
+  ],
+  "code": "",
+  "n": 2
+ },
+ {
+  "id": "c3-ch09-write-threshold-go",
+  "ch": "9",
+  "section": "9.3 Account Footprint and Threshold Balance",
+  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
+  "difficulty": 2,
+  "kind": "code",
+  "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?",
+  "options": [
+   "One storage entry costs 1 against a_i and 32 + |v| against a_o — key length is never charged, because JAM stores only the hash of a storage key in the trie; on FULL the write still lands and the shortfall is taken out of the balance.",
+   "One storage entry costs 2 against a_i and 81 + |v| against a_o, exactly like a lookup-meta entry, on the grounds that both occupy precisely one leaf of the state trie; FULL is only ever produced once the balance itself has reached zero, so a solvent service can always complete a write.",
+   "The threshold is recomputed once at the end of accumulation rather than on every host call, so `write` can never yield FULL at all; services that over-commit their storage are pruned afterwards by whichever service holds their code-hash tombstone, and their deposit is returned to the parent.",
+   "One storage entry costs 1 against a_i and 34 + |k| + |v| against a_o — both the key and the value are charged; when the post-write threshold exceeds the balance the call yields FULL and the account must be returned completely untouched, which is why the map write is deferred until after the comparison."
+  ],
+  "code": "// remove the old item's footprint, then add the new one's\nnewItems := a.ServiceInfo.Items - footprintItems\nnewOctets := a.ServiceInfo.Bytes - footprintOctets\n\nstorageItems, storageOctets := service_account.CalcStorageItemfootprint(\n    string(storageRawKey), storageRawData)\nnewItems += storageItems\nnewOctets += storageOctets\n\nnewMinBalance := service_account.CalcThresholdBalance(\n    newItems, newOctets, a.ServiceInfo.DepositOffset) // a_t\nif newMinBalance > a.ServiceInfo.Balance {\n    input.VM.Registers[7] = FULL\n    return OmegaOutput{ExitReason: ExitContinue, Addition: input.Addition}\n}\n\n// balance check passed, now apply the storage mutation\na.StorageDict[string(storageRawKey)] = storageRawData\na.ServiceInfo.Items = newItems\na.ServiceInfo.Bytes = newOctets\n\n// ---- service_account.go ----\nfunc CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequence) (types.U32, types.U64) {\n\treturn 1, 34 + types.U64(len(storageRawKey)) + types.U64(len(storageData))\n}",
+  "n": 3
+ },
+ {
+  "id": "c3-ch09-forget-lifecycle",
+  "ch": "9",
+  "section": "9.2.2 Semantics",
+  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, which set of transitions matches GP 0.8.0?",
+  "options": [
+   "[] → the request entry is dropped; [x] → [x, t]; [x, y] → the request entry and a_p[h] are both expunged, but only once y < t − D; [x, y, w] → [w, t], again only once y < t − D; every other case returns HUH.",
+   "[] → HUH, there is nothing to forget; [x] → the request entry and a_p[h] are dropped at once; [x, y] → [x, y, t]; [x, y, w] → [w, t] with no age condition attached.",
+   "[x] → [x, t]; [x, y] → dropped the moment y < t, with no waiting period; [x, y, w] → dropped outright; [] → dropped.",
+   "Every shape collapses to [] and a_p[h] is deleted immediately; the D-slot delay governs only `eject`, where one service tears down another."
+  ],
+  "code": "",
+  "n": 4
+ },
+ {
+  "id": "c3-ch09-new-service-index",
+  "ch": "9",
+  "section": "9 Service Accounts",
+  "gpRef": "§9.1 (N_S ≡ N_{2^32}); eq. B.14 (check); S = 2^16",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "A service calls `new` during accumulation. How does GP 0.8.0 pick the index of the child account, and how is a clash with an existing service avoided?",
+  "options": [
+   "The index is Blake2b of the new account's code hash reduced mod 2^32, so that identical code always lands on the same slot and duplicate deployments are cheap; there is no probing at all, and should that index already be occupied the whole block is rejected as invalid.",
+   "The index is the largest key currently present in δ plus one, so indices are handed out strictly sequentially across the whole chain and a clash is impossible by construction; the registrar merely reserves the first 2^16 of them at genesis and hands them out off-chain.",
+   "The context's next free id starts as check((E⁻¹_4(H(E(s, η′_0, H_t))) mod (2^32 − S − 2^8)) + S) with S = 2^16, so it is folded into the public range only; check linearly probes forward, i ↦ (i − S + 1) mod (2^32 − 2^8 − S) + S, until it lands on an index outside K(δ); the registrar alone may instead name any index below S.",
+   "The index is derived from H(E(s, η_0, H_t)) using the prior entropy accumulator and then probed downwards until a free slot appears; the reserved block is the top 2^16 of the index space rather than the bottom, and any service — not merely the registrar — may claim one of those reserved slots."
+  ],
+  "code": "",
+  "n": 5
+ },
+ {
+  "id": "c3-ch09-privilege-mutation",
+  "ch": "9",
+  "section": "9.4 Service Privileges",
+  "gpRef": "eq. 9.9–9.10 (χ); App. B `bless` (Ω_B), `assign` (Ω_A), `new` (Ω_N)",
+  "difficulty": 3,
+  "kind": "delta",
+  "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
+  "options": [
+   "Ω_B may still be invoked by any of the five privileged services, each rewriting only the slot it owns; the manager is special solely in that it may grant storage deposit credits, and `new` accepts f ≠ 0 from either the manager or the registrar.",
+   "Ω_B is open to any service whose own index sits below S = 2^16, since occupying the protected range is what confers privilege in the first place; χ_A[c] may then only be moved by the manager, and a service raises its own a_f through `upgrade`.",
+   "χ is no longer mutable by host calls at all in 0.8.0; it may only be rewritten by the services listed in χ_Z as part of the automatic accumulation they receive in every block, and a_f is fixed for every account at genesis and can never be raised afterwards by anyone, manager included.",
+   "Ω_B is the one host call that rewrites (χ_M, χ_A, χ_V, χ_R, χ_Z) wholesale, and it now yields HUH unless the caller is χ_M itself, so no service can promote itself to manager; a core's assigner may still hand over its own χ_A[c] through `assign`, and `new` yields HUH whenever f ≠ 0 and the caller is not the manager."
+  ],
+  "code": "",
+  "n": 6
+ },
+ {
+  "id": "c3-appD-key-31-octets",
+  "ch": "D",
+  "section": "D.2.1 Node Encoding and Trie Identification",
+  "gpRef": "§D.1 (C → B_31); §D.2.1 (nodes fixed at 512 bit)",
+  "difficulty": 1,
+  "kind": "rationale",
+  "stem": "The state-key constructor C is specified as producing B_31, yet every other quantity in the state trie — child identities, the embedded value slot, H(v) — is 32 octets. What forces the key to be one octet short?",
+  "options": [
+   "The top octet is reserved so that the branch/leaf discriminator bit can be carried inside the key itself, which is what lets a verifier tell the two node types apart without fetching the node.",
+   "A node is fixed at 512 bit, and a leaf must fit a one-octet discriminator-plus-size header, the key, and a full 32-octet field for either the value or its hash: 1 + 31 + 32 = 64.",
+   "Keys are Blake2b outputs with the one-octet chapter index stripped off before storage; the value field is likewise 31 octets, padded to 32 only when hashed.",
+   "31 octets leaves one spare octet in a branch node so that a third child pointer can be appended when a sub-trie exceeds the 2^8 fan-out limit."
+  ],
+  "code": "",
+  "n": 7
+ },
+ {
+  "id": "c3-appD-service-subkeys",
+  "ch": "D",
+  "section": "D.1 Serialization",
+  "gpRef": "§D.1 (state-key constructor C; the final four rows of T(σ))",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "In T(σ) a service's storage entries, its preimages and its lookup-meta entries all go through the very same third form of C. What exactly is passed in, and what keeps the three kinds apart in the trie?",
+  "options": [
+   "The three kinds are told apart by octet 0 of the finished 31-octet key, which is 0xFD for storage, 0xFE for a preimage and 0xFF for lookup-meta, with the remaining 30 octets holding H(k) or the hash h directly and the service index folded into the value rather than the key.",
+   "Storage uses C(s, k) with the raw key, preimages use the chapter form C(254, s) and lookup-meta uses C(253, s); no marker is needed at all because the three already live under distinct chapter indices, and the (h, l) pair of a lookup entry is recovered from the leaf's value rather than its key.",
+   "A four-octet marker is prepended before hashing — E_4(2^32−1) ⌢ k for storage, E_4(2^32−2) ⌢ h for a preimage, and E_4(l) ⌢ h for the lookup-meta of declared length l — and C(s, ·) then interleaves the four octets of n = E_4(s) with the first four octets of a = H(·), appending a_4 … a_26.",
+   "All three use C(s, h) with h the raw storage key or preimage hash and no marker whatsoever; collisions cannot arise because a service storage key is required by §9 to be exactly 32 octets long, which keeps it inside a namespace disjoint from the 32-octet preimage hashes."
+  ],
+  "code": "",
+  "n": 8
+ },
+ {
+  "id": "c3-appD-rho-guarantee",
+  "ch": "D",
+  "section": "D.1 Serialization",
+  "gpRef": "§D.1 T(σ) row C(10); eq. 11.1 (ρ spec)",
+  "difficulty": 3,
+  "kind": "delta",
+  "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
+  "options": [
+   "Per core an optional pair of work-report and timeslot exactly as before; 0.8.0 only tightened the timeslot to a fixed-length E_4 encoding and left the payload alone.",
+   "Per core an optional pair ⟨a_g, E_4(a_t)⟩ written with the ? option discriminator, where a_g is the entire guarantee G ≡ (w work-report, t timeslot, a credential of 2–3 (validator index, Ed25519 signature) pairs) — so the guarantors' signatures are now part of committed state.",
+   "The availability assurances extrinsic of the current block, so that an assurer's bitfield can be proven against the state root without replaying the block.",
+   "Only the availability specification (package hash, erasure root, segment root, bundle length) of each core's pending report, the guarantee itself being retained off-chain by the guarantors until an audit demands it; that is precisely the size reduction 0.8.0 was aiming for."
+  ],
+  "code": "",
+  "n": 9
+ },
+ {
+  "id": "c3-appD-merklize-bitorder",
+  "ch": "D",
+  "section": "D.2 Merklization",
+  "gpRef": "§D.2 (M over D⟨b → (B_31, B)⟩); §3 notation (bits(·) is most-significant-first)",
+  "difficulty": 3,
+  "kind": "code",
+  "stem": "M is defined over a dictionary keyed by bits(k), while the team's Go partitions one slice in place at each depth. A teammate proposes replacing it with 'sort the key-vals ascending, then fold them pairwise like M_B — same leaves, same root, and it vectorizes better'. Which statement is correct?",
+  "options": [
+   "The proposal is sound: ascending key order is exactly a pre-order walk of the Patricia trie, so pairwise folding rebuilds the identical shape and the identical root; the in-place partition is nothing but an allocation optimization, and leaf caching keeps working either way because a leaf hash depends on nothing beyond its own key and value.",
+   "bits(·) runs least-significant-bit first so as to agree with the bit-sequence encoding E(b) of appendix C, so depth d has to branch on bit d mod 8 of octet ⌊d/8⌋; the partition shown is therefore reversed, and the only reason such an implementation ever matches a vector is that its state-key constructor is reversed too.",
+   "Insertion order genuinely matters here: the GP requires the leaves to be folded in ascending key order because the resulting root is what gets appended to the accumulation-output belt by M_R, an append-only structure; caching leaf hashes across blocks is consequently unsound and the trie must be rebuilt in full every block.",
+   "bits(·) runs most-significant-bit first, so depth d branches on bit 7 − (d mod 8) of octet ⌊d/8⌋; the shape follows from key bit-prefixes alone and never from slice order, which is what lets leaf hashes be cached and only the path from a changed leaf to the root recomputed — folding sorted leaves pairwise builds a balanced tree and a different root."
+  ],
+  "code": "func partitionByBit(entries []types.StateKeyVal, depth int) int {\n\tbyteIdx := depth / 8\n\tbitMask := byte(1 << (7 - depth%8))\n\tleft := 0\n\tfor right := range entries {\n\t\tif entries[right].Key[byteIdx]&bitMask == 0 {\n\t\t\tentries[left], entries[right] = entries[right], entries[left]\n\t\t\tleft++\n\t\t}\n\t}\n\treturn left\n}\n\nfunc merklizeWithCache(entries []types.StateKeyVal, depth int, cache LeafHashCache) types.OpaqueHash {\n\tif len(entries) == 0 {\n\t\treturn types.OpaqueHash{}\n\t}\n\tif len(entries) == 1 {\n\t\tif cache != nil {\n\t\t\treturn cache(entries[0].Key, entries[0].Value)\n\t\t}\n\t\tnode := encodeLeafNode(entries[0].Key, entries[0].Value)\n\t\treturn hash.Blake2bHash(node[:])\n\t}\n\tpivot := partitionByBit(entries, depth)\n\tleftHash := merklizeWithCache(entries[:pivot], depth+1, cache)\n\trightHash := merklizeWithCache(entries[pivot:], depth+1, cache)\n\tnode := encodeBranchNode(leftHash, rightHash)\n\treturn hash.Blake2bHash(node[:])\n}",
+  "n": 10
+ }
+]

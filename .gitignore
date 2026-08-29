@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+
+# Gray Paper LaTeX source — cloned locally, pinned to 07f041d (v0.8.0).
+# See CLAUDE.md for the two-line clone command.
+gp-src/
+
+# Build output. The deployed copies live in the repo root.
+quiz/dist/
+__pycache__/

@@ -1,0 +1,422 @@
+[
+{
+"n": 0,
+"id": "appA-exit-reasons",
+"ch": "A",
+"gpRef": "eq. A.1 (Ψ) & §4.5",
+"stem": "The PVM invocation Ψ returns an exit reason ε. Which is the complete set of possible exit reasons?",
+"options": [
+"∎ halt (regular termination), ☇ panic, ∞ out-of-gas, F̄ × address (page fault, with the lowest inaccessible page address), h̄ × id (host call, with the host-call identifier)",
+"halt, panic, out-of-gas, stack-overflow, division-by-zero",
+"halt, panic, out-of-gas, breakpoint, timeout",
+"success, failure, pending"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 1,
+"id": "appA-program-blob",
+"ch": "A",
+"gpRef": "eq. A.2 (deblob), A.3 (skip)",
+"stem": "What is the layout of a PVM program blob p, and what does the opcode bitmask k do?",
+"options": [
+"p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ c ⌢ k: jump-table length, jump-table entry width z, code length, the jump table (entries of z octets each), the instruction data c, then the bitmask k (one bit per code octet, 1 = this octet is an opcode); |k| must equal |c|",
+"p = magic ⌢ version ⌢ c: a RISC-V ELF file",
+"p = E(|c|) ⌢ c ⌢ E(|k|) ⌢ k ⌢ E(|j|) ⌢ j — bitmask before jump table",
+"p = c only; instruction boundaries are derived from opcode lengths"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 2,
+"id": "appA-basic-blocks-gas",
+"ch": "A",
+"gpRef": "eq. A.5–A.8, A.54",
+"stem": "GP 0.8.0 (PR #508) introduced a new gas model. How is gas charged?",
+"options": [
+"Per BASIC BLOCK, in advance: on the first step and whenever execution enters a basic block (or jumps back to its start), the whole block's cost ϱ^Δ is deducted; if the remaining gas is insufficient the machine exits with ∞ and the counter is unchanged; ϱ^Δ = max(cycles − 3, 1) from a simulated out-of-order CPU model (reorder buffer, execution units, decode slots)",
+"Per instruction, 1 gas each, as in 0.7.x",
+"Per instruction, with a fixed table of costs per opcode, charged after execution",
+"Per memory page touched"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 3,
+"id": "appA-memory-access",
+"ch": "A",
+"gpRef": "eq. A.9–A.10 (ε^μ)",
+"stem": "What happens when an instruction accesses RAM at an address that is (a) below 2^16, or (b) in an inaccessible page above 2^16?",
+"options": [
+"(a) the machine panics immediately regardless of page accessibility; (b) the machine state is unchanged and the exit is a page fault F̄ × (Z_P·⌊addr/Z_P⌋), reporting the lowest inaccessible page address",
+"(a) and (b) both produce a page fault with the exact byte address",
+"(a) reads return 0 and writes are ignored; (b) panics",
+"(a) and (b) both panic"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 4,
+"id": "appA-standard-init",
+"ch": "A",
+"gpRef": "eq. A.42–A.47",
+"stem": "Under standard program initialization Y(p, a), which register/memory layout is correct?",
+"options": [
+"ω_0 = 2^32 − 2^16 (return address; jumping there halts), ω_1 = 2^32 − 2·Z_Z − Z_I (stack pointer), ω_7 = 2^32 − Z_Z − Z_I (argument pointer), ω_8 = |a|; RO data at Z_Z = 2^16, RW data (heap) at 2·Z_Z + Q(|o|), stack ends at 2^32 − 2·Z_Z − Z_I, args at 2^32 − Z_Z − Z_I; Z_I = 2^24",
+"ω_0 = 0, ω_1 = 2^32 − 1 (stack grows down from the top), args at address 0",
+"ω_7 = |a|, ω_8 = argument pointer; RO data at address 0; heap at 2^31",
+"All registers start at 0; the program must set up its own stack"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 5,
+"id": "appA-djump-alignment",
+"ch": "A",
+"gpRef": "eq. A.22 (jumptablealignment)",
+"stem": "For a dynamic jump to address a, the GP requires a mod Z_A = 0 with Z_A = 2, a ≠ 0, a ≤ |j|·Z_A and j[a/Z_A − 1] ∈ ϖ (a basic-block start). Why the alignment requirement?",
+"options": [
+"Because LLVM 'requires and assumes in its code generation that dynamically computed jump destinations always have a certain memory alignment', and JAM's tooling depends on LLVM, so the GP acquiesces to that assumption",
+"Because the jump table entries are 2 octets wide",
+"Because RISC-V hardware requires 2-byte alignment for compressed instructions",
+"Because odd addresses are reserved for host-call identifiers"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 6,
+"id": "appA-host-call-continue",
+"ch": "A",
+"gpRef": "§A.6 (Ψ_H)",
+"stem": "In Ψ_H, when the inner Ψ exits with h̄ × h (a host call via `ecalli`), what happens next?",
+"options": [
+"The context mutator f(h, ϱ, ω, μ, x) runs; if it returns ▸ (continue), Ψ_H resumes with the instruction counter advanced to ı′ + 1 + skip(ı′), the new gas/registers/memory/context; if it returns ☇/∎/∞ that becomes the final exit; a page fault cannot come out of a host call itself",
+"The machine halts and the host call result is returned to the caller of Ψ_H",
+"The instruction counter stays on the ecalli instruction and the machine loops until gas runs out",
+"The host call is executed by a separate validator"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 7,
+"id": "appA-registers-immediates",
+"ch": "A",
+"gpRef": "§A.5.1 & eq. A.19 (sign extension)",
+"stem": "How are register operands and immediates decoded from an instruction's octets?",
+"options": [
+"Register indices come from the low and high nibbles of the octet after the opcode, each clamped to at most 12 (min(12, …)); immediates are little-endian, their length ℓ = min(4, skip − 1) (or up to 8 for load_imm_64), and are sign-extended to 64 bits",
+"Registers are encoded as full octets; immediates are big-endian and zero-extended",
+"Registers are 3-bit fields packed into the opcode; immediates are always 8 octets",
+"The instruction format is fixed at 4 octets like RV32I"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 35,
+"id": "ch14-work-package",
+"ch": "14",
+"gpRef": "eq. 14.2–14.3",
+"stem": "A work-package P = (j, h, u, p, x, w). Which description is correct?",
+"options": [
+"j authorization token; h auth-service index (the service hosting the authorizer code); u authorizer code hash; p configuration blob (parameterization); x refinement context; w work-items (1..I = 16) each with service, code hash, payload, refine & accumulate gas limits, imports (segment root/hash + index), extrinsic (hash, length) pairs, and export count",
+"j JSON manifest; h header hash; u URL of the code; p price; x extrinsics; w witnesses",
+"j judgment; h hash of the package; u user key; p parachain id; x XCM; w weight",
+"A work-package is just a list of transactions"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 38,
+"id": "b2-appA-branch-both-targets",
+"ch": "A",
+"gpRef": "eq. A.21 (branch), A.5 (ϖ), A.2 (v_blob)",
+"stem": "Every conditional branch in the team's 0.7.2 interpreter (instBranch for 170–175 and the branch_*_imm handlers) resolves through this helper. Under GP 0.8.0 eq. A.21, which statement about the branch rule is correct?",
+"options": [
+"0.8.0 panics whenever either target is not a basic-block start — the taken target b or the fall-through ı + 1 + skip(ı) — even when the condition is false; this helper validates only b, and only when C holds, so a not-taken branch with an invalid target continues here but must panic in 0.8.0",
+"The helper is already 0.8.0-compliant: a branch only needs a valid target when it is actually taken, because an untaken branch never alters the instruction counter and therefore cannot leave a basic block illegally",
+"0.8.0 still validates only the taken target, but additionally requires it to be 2-octet aligned like a dynamic jump (Z_A = 2), which this helper never checks",
+"0.8.0 removed the runtime panic entirely: the blob validator v_blob rejects any branch whose target is not in ϖ at deblob time, so both the check on b and the isOpcodeValid clause are dead code"
+],
+"answer": 0,
+"code": "func branch(pc ProgramCounter, b ProgramCounter, C bool, bitmask Bitmask, instruction ProgramCode) (ExitReason, ProgramCounter) {\n\tswitch {\n\tcase !C:\n\t\treturn ExitContinue, pc\n\tcase !bitmask.IsStartOfBasicBlock(b) && instruction.isOpcodeValid(b):\n\t\treturn ExitPanic, pc\n\tdefault:\n\t\treturn ExitContinue, b\n\t}\n}\n\n// instBranch (opcodes 170-175), after computing branchCondition:\n\treason, newPC := branc"
+},
+{
+"n": 39,
+"id": "b2-appA-jump-family",
+"ch": "A",
+"gpRef": "§A.5.1 opcodes 40/50/80/180 (eq. A.27, A.28, A.30, A.34 tables); eq. A.20 (sjump), A.22 (djump)",
+"stem": "The PVM has four unconditional control-transfer instructions: jump (40), jump_ind (50), load_imm_jump (80) and load_imm_jump_ind (180). Which description of their operands and target resolution is correct?",
+"options": [
+"All four carry an absolute code offset; the _ind forms differ only in reading that offset from a register instead of an immediate, and all four are validated by the same sjump rule (target ∈ ϖ)",
+"jump and jump_ind are the static pair whose targets are checked at deblob time, while load_imm_jump and load_imm_jump_ind are the dynamic pair that go through the jump table j and can hit the halt sentinel",
+"jump and load_imm_jump carry a signed PC-relative offset (target = ı + Z_l(…)) resolved statically by sjump; jump_ind and load_imm_jump_ind compute (ω_reg + ν) mod 2^32 and resolve it through the jump table via djump; the two load_imm_* forms additionally write ω′_A = ν_X, which is how a call saves its return address",
+"jump_ind and load_imm_jump_ind index the jump table directly with the register value (j[ω_A]); their immediate is only a gas hint, and the halt sentinel 2^32 − 2^16 is recognised by sjump rather than djump"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 40,
+"id": "b2-appA-div-rem-signed-calc",
+"ch": "A",
+"gpRef": "§A.5.1 opcodes 194, 196 (eq. A.35 table); eq. A.36 (smod), A.37 (rtz), A.13 (Z_n)",
+"stem": "ω_A = 0xFFFF_FFF9 (= 2^32 − 7) and ω_B = 2. What do div_s_32 (opcode 194) and rem_s_32 (opcode 196) write to ω′_D?",
+"options": [
+"div_s_32 → 0xFFFF_FFFF_FFFF_FFFC (2^64 − 4); rem_s_32 → 0x0000_0000_0000_0001",
+"div_s_32 → 0xFFFF_FFFF_FFFF_FFFD (2^64 − 3); rem_s_32 → 0xFFFF_FFFF_FFFF_FFFF (2^64 − 1)",
+"div_s_32 → 0x0000_0000_FFFF_FFFD; rem_s_32 → 0x0000_0000_FFFF_FFFF",
+"div_s_32 → 0x0000_0000_7FFF_FFFC; rem_s_32 → 0x0000_0000_0000_0001"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 41,
+"id": "b2-appA-shift32-code",
+"ch": "A",
+"gpRef": "§A.5.1 opcodes 139, 140 (eq. A.32 table); eq. A.19 (X_n sign extension), A.13 (Z_4)",
+"stem": "ω_B = 0xFFFF_FFFF_FFFF_FFF0 and the decoded immediate is ν_X = 36. Following this code (which mirrors the GP rows), what do shlo_r_imm_32 (139) and shar_r_imm_32 (140) leave in ω′_A?",
+"options": [
+"Both instructions write 0x0000_0000_0000_0000, because a shift amount of 36 is at least 32 and therefore shifts every bit of a 32-bit value out",
+"shlo_r_imm_32 → 0x0FFF_FFFF_FFFF_FFFF (the whole 64-bit register shifted right by 4); shar_r_imm_32 → 0xFFFF_FFFF_FFFF_FFFF",
+"shlo_r_imm_32 → 0xFFFF_FFFF_0FFF_FFFF (upper half untouched, only the low 32 bits shifted); shar_r_imm_32 → 0xFFFF_FFFF_FFFF_FFFF",
+"shlo_r_imm_32 → 0x0000_0000_0FFF_FFFF (low 32 bits 0xFFFF_FFF0 shifted logically by 36 mod 32 = 4, then sign-extended from a zero MSB); shar_r_imm_32 → 0xFFFF_FFFF_FFFF_FFFF (Z_4(0xFFFF_FFF0) = −16, arithmetic shift by 4 gives −1)"
+],
+"answer": 3,
+"code": "// opcode 139\nfunc instShloRImm32(interp *Interpreter, pc ProgramCounter, skipLength ProgramCounter) (ExitReason, ProgramCounter) {\n\trA, rB, vX, err := decodeTwoRegistersAndOneImmediate(interp.Program.InstructionData, pc, skipLength)\n\t...\n\tvX = vX & 31 // % 32\n\timm, err := SignExtend(4, uint64(uint32(interp.Registers[rB])>>vX))\n\t...\n\tinterp.Registers[rA] = imm\n\treturn ExitContinue, pc\n}\n\n// opcode"
+},
+{
+"n": 42,
+"id": "b2-appA-gas-block-calc",
+"ch": "A",
+"gpRef": "eq. A.54 (ϱ^Δ), A.55–A.61 (𝔛 simulation), A.62 (𝔓), A.64 (𝔪 = 25); A.10 table",
+"stem": "A basic block is: load_ind_u64 ω_3 ← μ[ω_1 + 0]; add_64 ω_4 = ω_3 + ω_2; fallthrough. From the A.10 table: the load costs 𝔪 = 25 cycles, 1 decode slot, one ALU and one LOAD unit; add_64 costs 1 cycle, 𝔓(1, 2) decode slots, one ALU; fallthrough costs 2 cycles, 1 slot, no unit. Running the A.9 pipeline simulation (4 decode slots and 5 starts per cycle, units (4, 4, 4, 1, 1), in-order retirement), what is ϱ^Δ for this block?",
+"options": [
+"26",
+"25",
+"28",
+"3"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 43,
+"id": "b2-appA-gas-charged-flag",
+"ch": "A",
+"gpRef": "eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine",
+"stem": "GP 0.8.0 threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Which statement about gas charging in this situation is correct?",
+"options": [
+"The remaining instructions after the ecalli are re-charged proportionally (only the suffix of the block), because every non-▸ exit — including a host call — clears the flag to ⊥",
+"Nothing is charged again on that resume: ecalli is not a terminator, so flag* stays ⊤ and Ψ_1 skips the ϱ^Δ deduction; the flag becomes ⊥ only after a terminator executes (or on an out-of-gas exit), while a brand-new Ψ_H — which always starts with ⊥ — resuming at a mid-block ı charges the whole block ϱ^Δ(𝔏(ı)), not just the remaining suffix",
+"The whole block is charged a second time on every host-call resume, because in 0.8.0 ecalli was added to the terminator set T so that host calls always start a new basic block",
+"The flag only matters for out-of-gas resumption; on every other exit it is discarded and Ψ_H unconditionally charges ϱ^Δ of the block containing ı″ before continuing"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 44,
+"id": "b2-appA-recompiler-block-gas-stub",
+"ch": "A",
+"gpRef": "eq. A.8 (ε^ϱ, ϱ* unchanged on ∞), A.10 (ı* = ı), A.54 (ϱ^Δ)",
+"stem": "The recompiler contains a prepared-but-disabled block-level gas path for GP 0.8.0 (shown together with the current 0.7.2 per-instruction landing pad). Measured against eq. A.8, what is still wrong with the prepared path?",
+"options": [
+"Nothing: in 0.8.0 each instruction still costs 1 gas and is merely aggregated per block, so subtracting the instruction count at block entry is exactly ϱ^Δ, and leaving the counter negative on OOG is the intended signal to the host",
+"Only the exit PC: on a block-entry OOG the GP requires ı* to point at the block's terminating instruction (the one that could not be paid for), not at the block start",
+"Two things: the amount deducted must be the block's ϱ^Δ from the A.9 pipeline simulation (max(cycles − 3, 1)), not its instruction count; and on the out-of-gas path the deduction must be undone, because A.8 leaves ϱ unchanged when ϱ < ϱ^Δ — the per-instruction pad restores its charge, the block pad does not",
+"The direction: 0.8.0 charges a block after its terminator has executed, so the SubMemImm32 must be emitted after the terminator and the sign check reversed"
+],
+"answer": 2,
+"code": "// emitOutOfGasExit emits the temporary GP v0.7.2 per-instruction OOG landing pad.\nfunc emitOutOfGasExit(a *asm.Assembler, oog asm.Label, instrPC PVM.ProgramCounter) {\n\t_ = a.BindLabel(oog)\n\t// Undo the fused charge: on OOG the interpreter leaves gas unchanged.\n\ta.SubMemImm32(RegGuestBase, -int32(OffsetGas), -1)\n\ta.MovMemImm32_32(RegGuestBase, -int32(OffsetExitPC), int32(instrPC))\n\ta.MovImm64ToReg"
+},
+{
+"n": 45,
+"id": "b2-appA-load-imm-jump-ind-reg-write",
+"ch": "A",
+"gpRef": "eq. A.34 table (opcode 180), A.22 (djump), A.1 (Ψ returns ω′ on ☇/∎), A.10; §B invoke",
+"stem": "In this implementation of load_imm_jump_ind the register write ω_A = ν_X happens even when the dynamic jump panics. Is that what GP 0.8.0 prescribes, and can the difference ever be observed?",
+"options": [
+"No: on a panic the GP says the machine state is the state prior to the faulting instruction, so ω_A must stay untouched; the write is a latent bug that only goes unnoticed because Ψ_M discards registers on ☇",
+"Yes, but only because the halt sentinel a = 2^32 − 2^16 needs ω_A = ν_X as part of the return value; for a genuine panic the write is irrelevant and can never be observed by anyone",
+"No: djump must be evaluated first and a panicking instruction must roll back all of its mutations including ν_X; the koute PVM test vectors expect ω_A unchanged in every *_nok case",
+"Yes: the table row defines djump((ω_B + ν_Y) mod 2^32) and ω′_A = ν_X as independent mutations, and on ☇ Ψ returns the posterior registers ω′ (only ı is reset to 0); it is observable because the invoke host call writes the inner machine's registers back to memory even when the inner exit is PANIC, and at top level via ω_7/ω_8 when the sentinel halts"
+],
+"answer": 3,
+"code": "// opcode 180\nfunc instLoadImmJumpInd(interp *Interpreter, pc ProgramCounter, skipLength ProgramCounter) (ExitReason, ProgramCounter) {\n\trA, rB, vX, vY, err := decodeTwoRegistersAndTwoImmediates(interp.Program.InstructionData, pc, skipLength)\n\tif err != nil {\n\t\tpvmLogger.Errorf(\"instLoadImmJumpInd decodeTwoRegistersAndTwoImmediates error: %v\", err)\n\t\treturn ExitPanic, pc\n\t}\n\t// per https://github."
+},
+{
+"n": 46,
+"id": "b2-appA-store-cross-page-fault-address",
+"ch": "A",
+"gpRef": "eq. A.9 (ε^μ), A.10 (state unchanged on F̄); §A.5.1 store_u64 row",
+"stem": "A store_u64 (8 bytes) targets address 0x2_0FFC: page 0x20 (0x20000–0x20FFF) is writable, page 0x21 is unallocated. What exit does GP 0.8.0 eq. A.9 require, and how does this implementation differ?",
+"options": [
+"GP: F̄ × 0x2_1000 — the lowest inaccessible page address among the written indices (x = {0x21000…0x21003}, min(x) rounded down to a multiple of Z_P); the code correctly leaves memory untouched but reports memIndex = 0x2_0FFC, an address that lies in an accessible page and is not page-aligned",
+"GP: F̄ × 0x2_0FFC — the address given to the store instruction; the implementation is exactly compliant, including for stores that fault in their very first byte",
+"GP: ☇ (panic), because a multi-byte access must never straddle two pages and misaligned accesses are treated like accesses below 2^16; the code wrongly reports a page fault",
+"GP: the first four bytes are committed to page 0x20 and only then F̄ × 0x2_1000 is raised for the remainder; the code is wrong to leave memory completely unchanged"
+],
+"answer": 0,
+"code": "func storeIntoMemory(interp *Interpreter, offset int, memIndex uint32, immediate uint64) ExitReason {\n\tmem := interp.Memory\n\tif memIndex < uint32(1<<16) { // 0.7.2  A.8 check memory > 2^16\n\t\treturn ExitPanic\n\t}\n\n\tpageNum := memIndex / ZP\n\tpageIndex := memIndex % ZP\n\n\tpage, ok := mem.Pages[pageNum]\n\tif !ok {\n\t\treturn ExitPageFault | ExitReason(memIndex)\n\t}\n\tif page.Access != MemoryReadWrite {\n\t\tret"
+},
+{
+"n": 47,
+"id": "b2-appA-sigsegv-handler",
+"ch": "A",
+"gpRef": "eq. A.9 (ε^μ: < 2^16 → ☇, else F̄), §A.5.1 div/rem rows (b = 0, MIN/−1)",
+"stem": "The x86-64 recompiler maps guest memory as one 4 GiB region based at R15 with real mprotect permissions and emits no software bounds check above 2^16; this signal handler turns hardware events inside JIT code into PVM exits. Which statement is correct?",
+"options": [
+"Every fault is retried: the handler maps the missing page read-write, restores the registers and returns, so the faulting instruction re-executes — the JIT analogue of eq. A.9's 'RAM must be changed' recovery",
+"A fault at guest offset < 2^16 becomes ☇ and any other fault inside the guest window becomes F̄ carrying the faulting guest address, after the 13 pinned x86 registers are spilled to the control region and RIP/RSP are rewritten to the Go return point; SIGFPE from JIT code becomes ☇ only as a safety net — the emitted div/rem code must branch around IDIV for b = 0 and MIN/−1, since the GP defines those results instead of a panic",
+"Faults below 2^16 are reported as F̄ × 0 so that the host can tell null-pointer bugs apart, and SIGFPE is mapped to ∞ because division is the most expensive row of the A.10 table",
+"The handler cannot know which PVM registers were live at the fault, so it always reports ☇ and discards register state; only the interpreter backend can ever produce F̄"
+],
+"answer": 1,
+"code": "    if (sig == SIGFPE) {\n        uintptr_t rip = (uintptr_t)gregs[REG_RIP];\n        if (!is_jit_code(rip) || base == NULL) {\n            chain_to_old(sig, info, uctx_void);\n            return;\n        }\n        jit_exit_panic(base, gregs);\n        return;\n    }\n\n    uintptr_t fault_addr = (uintptr_t)info->si_addr;\n    if (!is_jit_fault(base, fault_addr)) {\n        chain_to_old(sig, info, uctx_void"
+},
+{
+"n": 48,
+"id": "b2-appA-vblob-terminator",
+"ch": "A",
+"gpRef": "eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ)",
+"stem": "GP 0.8.0's deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. Which set of conditions do these two validators actually enforce?",
+"options": [
+"Only that |k| = |c| and that every jump-table entry points at a basic-block start; opcode validity is left to execution time, where an unknown opcode behaves like opcode 0 (trap)",
+"That every branch and jump target lies in ϖ and that no instruction is longer than 16 octets; the final instruction may be anything, because ζ pads the code with zeros so running off the end simply traps",
+"|k| = |c|; walking the code from index 0 by 1 + skip(·), every visited octet is flagged in k and is a valid opcode (∈ U); the walk ends exactly at |k| with the last instruction a terminator (∈ T); and the entry point ı is itself a flagged, valid opcode",
+"That the code contains at least one ecalli and ends with a jump to the halt sentinel 2^32 − 2^16, so that every program has a well-defined return path to the host"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 49,
+"id": "b2-appA-opcode-renumbering-unlikely",
+"ch": "A",
+"gpRef": "§A.5.1 tables (opcodes 0–2, 100–110), eq. A.65 (𝔟 branch cost), A.10 table (unlikely = 40 cycles)",
+"stem": "This is the team's GP 0.7.2 opcode table for the no-argument and two-register groups. What must change to match GP 0.8.0?",
+"options": [
+"Nothing in these groups: 0.8.0 only renumbered the host calls (grow_heap inserted at id 1); PVM opcodes are frozen across GP versions so that compiled service blobs stay valid",
+"sbrk stays at 101 but becomes a terminator, because growing the heap can now page-fault; and unlikely = 2 is added as a new terminator that ends a basic block wherever a compiler marks cold code",
+"The two-register group is renumbered to start at 101 and trap moves from 0 to 2, so that a zero byte is no longer a valid opcode and running off the end of the code is caught by v_blob instead",
+"sbrk (101) disappears — heap growth becomes the grow_heap host call — so count_set_bits_64 … reverse_bytes shift down to 101–110; and a new no-argument opcode unlikely = 2 appears: a no-op that is not a terminator but is priced at 40 cycles and makes any branch targeting it (or trap) cost 𝔟 = 1 instead of 20"
+],
+"answer": 3,
+"code": "\t// A.5.1 No-argument (terminators)\n\t0: {Name: \"trap\", Category: InstrCatNoArg, IsTerminator: true},\n\t1: {Name: \"fallthrough\", Category: InstrCatNoArg, IsTerminator: true},\n\n\t// A.5.2 One immediate\n\t10: {Name: \"ecalli\", Category: InstrCatOneImm, IsTerminator: false},\n\t...\n\t// A.5.9 Two registers\n\t100: {Name: \"move_reg\", Category: InstrCatTwoReg, IsTerminator: false},\n\t101: {Name: \"sbrk\", Category:"
+},
+{
+"n": 129,
+"id": "ch14-code-digest-mapping",
+"ch": "14",
+"gpRef": "eq. 14.10 (item-to-digest C); eq. 11.6 (D); eq. 13.10/13.17 — internal/work_package/work_package.go C",
+"stem": "This is the team's item-to-digest function (GP 0.8.0 eq. 14.10, C). Which statement about it is correct?",
+"options": [
+"The only defect is the payload hash: eq. 14.10 requires y = H(E(w)), the hash of the whole encoded work-item, not of the payload alone",
+"AccumulateGas is wrong: a digest's g must be the refine gas limit w_g, because the accumulation gas is decided on-chain by Δ+ rather than by the package",
+"The code is correct: eq. 14.10 leaves the three manifest counters to whatever Ψ_R actually did, so any consistent assignment is acceptable as long as the on-chain report hash matches",
+"Three load counters are rotated: eq. 14.10 sets x = |w_x| (number of extrinsics), z = Σ of the extrinsic lengths and e = w_e (declared export count), but the code puts w_e into ExtrinsicCount, |w_x| into ExtrinsicSize and the length sum into Exports — payload hash, accumulate gas limit, import count and gas used are right"
+],
+"answer": 3,
+"code": "// C (14.8)\nfunc C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.WorkResult {\n    payloadHash := hash.Blake2bHash(item.Payload)\n    importCount := types.U16(len(item.ImportSegments))\n    extrinsicSize := types.U32(len(item.Extrinsic))\n    var zSum types.U16\n    for _, v := range item.Extrinsic {\n        zSum += types.U16(v.Len)\n    }\n    return types.WorkResult{\n        Se"
+},
+{
+"n": 130,
+"id": "ch14-code-refine-args",
+"ch": "14",
+"gpRef": "eq. B.5 (Ψ_R argument a and gas w_g); eq. B.1 (Ψ_I uses E_2(c)); eq. 14.9 (G_R) — PVM/refine_invocation.go RefineInvoke",
+"stem": "Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Which statement is correct under GP 0.8.0 (eq. B.5)?",
+"options": [
+"The core index must be encoded as E_2(c) (fixed two octets) exactly as in Ψ_I, so EncodeUint (compact) is wrong; the rest is correct",
+"The third component of a must be the service index w_s as a compact natural, but the code appends the 32-octet code hash w_c; the compact c and i, the length-prefixed payload, H(p) over the encoded package and the gas limit w_g all match the GP",
+"The final hash must be H(E(w)) — the hash of the work-item being refined — rather than H(p); and the gas limit passed to Ψ_M must be G_R = 5·10⁹, the per-package refine allowance",
+"The payload must not carry a length prefix because refine obtains it through the fetch host call; everything else matches eq. B.5"
+],
+"answer": 1,
+"code": "    // otherwise\n    var a []byte\n    encoder := types.NewEncoder()\n    // c\n    encoded, _ := encoder.EncodeUint(uint64(input.CoreIndex))\n    a = append(a, encoded...)\n    // i\n    encoded, _ = encoder.EncodeUint(uint64(input.WorkItemIndex))\n    a = append(a, encoded...)\n    // w_s\n    encoded, _ = encoder.Encode(&workItem.CodeHash)\n    a = append(a, encoded...)\n    // |w_y| . w_y\n    encoded, _ "
+},
+{
+"n": 131,
+"id": "ch14-compute-report-signature",
+"ch": "14",
+"gpRef": "eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31",
+"stem": "GP 0.8.0 redefines the work-report computation function Ξ. Which statement about its arguments and its failure condition E is correct?",
+"options": [
+"Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if keys(l) differ from the set of h⊞ hashes — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail",
+"Ξ(p, c) as in 0.7.2: the segment-root dictionary is looked up from the on-chain state ρ during computation and the shard count is always V = 1023",
+"Ξ returns ∇ whenever any work-item's Refine execution yields an error, so that a guarantor never signs a report containing a failed item",
+"v is the number of guarantor signatures (2 or 3) and l maps each work-item index to its segment root; Ξ fails when the encoded report exceeds W_B"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 132,
+"id": "ch14-oversize-cumulative-calc",
+"ch": "14",
+"gpRef": "eq. 14.13 (I(p, j), z); eq. 11.8 (W_R)",
+"stem": "A guarantor computes a report for a package whose authorization trace t is 1,000 octets and whose four work-items all refine successfully (export counts correct) with output blobs of 20,000, 25,000, 5,000 and 3,000 octets, in that order. With W_R = 49,152, what results do the four digests carry?",
+"options": [
+"ok, ok, ok, ok — each output is individually far below W_R; the 48 KiB limit is enforced only on-chain against the assembled report (eq. 11.8)",
+"Ξ returns ∇ — the package as a whole is invalid because 1,000 + 20,000 + 25,000 + 5,000 + 3,000 = 54,000 exceeds W_R",
+"ok (20,000), ok (25,000), ⊖ OVERSIZE, ok (3,000) — the size check is cumulative (|r| + |t| + Σ of earlier successful outputs > W_R) and an item replaced by ⊖ contributes 0 to the sums of later items",
+"ok, ok, ⊖, ⊖ — once the limit is crossed every later item is oversize because the oversize item's 5,000 octets still count towards z"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 133,
+"id": "ch14-bundle-size-calc",
+"ch": "14",
+"gpRef": "eq. 14.6–14.8 (W_B check, W_F, W_B); C.6 constants W_G, W_X, W_M",
+"stem": "Under eq. 14.6, a work-package has an authorization token j of 64 octets, a configuration blob f of 32 octets and two items: item A with a 10,000-octet payload, 100 imports and three extrinsics of 1,000 octets each; item B with a 2,000-octet payload, 50 imports and no extrinsics. What total is compared against W_B, and what is W_B?",
+"options": [
+"630,696 — imports count at the raw segment size W_G = 4,104 each; W_B = 3,072·4,104 + 4,224 = 12,611,712",
+"685,296 — extrinsic lengths are not part of the total because only their hashes sit in the package; W_B = 13,791,360",
+"1,361,496 — each import is counted twice (segment plus its paged proof, 2·4,488), matching the 'two segments per import' worst case; W_B = 13,791,360",
+"688,296 = 64 + 32 + (10,000 + 100·4,488 + 3,000) + (2,000 + 50·4,488), where W_F = W_G + 32·⌈log₂ W_X⌉ = 4,104 + 384 = 4,488; W_B = W_M·W_F + 4,096 + 64 + 64 = 13,791,360"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 134,
+"id": "ch14-paged-proofs",
+"ch": "14",
+"gpRef": "eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12",
+"stem": "Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. Which statement is correct?",
+"options": [
+"e = M(s) is the root of a constant-depth binary Merkle tree over the exported segments ('$leaf'-prefixed leaves, padded to a power of two); P(s) yields ⌈|s|/64⌉ extra segments, each the zero-padded encoding of the Merkle path J_6(s, i) down to a 64-leaf subtree plus that subtree's page of 64 leaf hashes L_6(s, i); they are erasure-coded into the D³L together with the segments, so an importer needs at most one extra segment per import to justify it",
+"e = M_B(s), a well-balanced binary tree over the raw segments; the justification of an import is the full Merkle path, which is stored inside the auditable bundle rather than in the D³L",
+"Paged proofs are one 4,104-octet segment per 32 exported segments and live only in the short-term Audit DA, since auditors are the only ones who verify imports",
+"Every validator stores the ≈350-byte justification of every segment so that any node can verify any import locally without fetching chunks"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 135,
+"id": "ch14-makebundle",
+"ch": "14",
+"gpRef": "eq. 14.15–14.17 (X, L_l, S_l, J_l, B, s = A(H(p), B(p, l), e, v)); §14.3.1 (Audit DA vs D³L lifetimes)",
+"stem": "What exactly goes into the auditable work-bundle B(p, l) that guarantors erasure-code into the Audit DA, and how does that differ from what goes into the D³L?",
+"options": [
+"B(p, l) = E(p) followed by the exported segments and the finished work-report, so that auditors can compare their own result with the guarantors' report without touching on-chain data; both stores keep their items for 28 days",
+"B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)): the encoded package, then every extrinsic blob, then every imported segment (h⊞ references resolved through l) and finally the Merkle justifications of those imports — only the justification paths carry length prefixes; the bundle is short-lived Audit-DA data (kept until the block assuring its availability is finalized), whereas exported segments plus their paged proofs go to the long-lived D³L (≥ 28 days = 672 epochs)",
+"B(p, l) contains only the work-package and the extrinsic hashes; auditors re-fetch imported segments from the D³L and verify their paged proofs themselves, exactly as the guarantors did",
+"B(p, l) is the concatenation of the package and every extrinsic, each with a length prefix; imported segments are excluded because they already sit in the D³L, and the bundle is retained for 28 days"
+],
+"answer": 1,
+"code": ""
+}
+]

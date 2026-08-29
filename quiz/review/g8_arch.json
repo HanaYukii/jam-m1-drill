@@ -1,0 +1,347 @@
+[
+{
+"n": 27,
+"id": "arch-corejam-name",
+"ch": "ARCH",
+"gpRef": "§1.1 & RFC-31 CoreJam",
+"stem": "Where does the name 'JAM' come from, and which stages of the original CoreJam model actually execute on-chain?",
+"options": [
+"From CoreJam (Polkadot Fellowship RFC-31), named after its Collect / Refine / Join / Accumulate model; only Join and Accumulate happen on-chain — Collect and Refine are off-chain/in-core — hence 'Join-Accumulate Machine'",
+"From 'Just Another Machine'; all four stages run on-chain",
+"From the JAM token; Refine and Accumulate run on-chain",
+"From 'Joint Availability Mechanism'; only Collect runs on-chain"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 28,
+"id": "arch-driving-factors",
+"ch": "ARCH",
+"gpRef": "§1.2–1.3",
+"stem": "The GP names five driving factors and a principle called 'size-coherency antagonism'. Which statement is correct?",
+"options": [
+"Factors: Resilience, Generality, Performance, Coherency, Accessibility; performance and coherency are antagonistic because causality is bounded by signal speed, so larger state-spaces become less coherent — JAM answers by pipelining a highly scalable, mostly-coherent element (in-core) into a synchronous, fully-coherent element (on-chain), replacing crude partitioning with 'cache affinity'",
+"Factors: Speed, Cost, Security, Privacy, Simplicity; JAM sacrifices coherency entirely for throughput",
+"Factors: Resilience and Generality only; JAM is a fully synchronous single-threaded machine like Solana",
+"Factors: Decentralization and Scalability; the antagonism is between validator count and block size"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 29,
+"id": "arch-why-safrole",
+"ch": "ARCH",
+"gpRef": "§6 intro & §19",
+"stem": "Why does JAM use Safrole (ticket-based, anonymous, ring-VRF) rather than a BABE-like VRF lottery?",
+"options": [
+"Safrole limits each 6-second slot to exactly one predetermined key-holder (near fork-free), keeps the identity of future slot authors anonymous until they seal (DoS resistance), and produces a high-quality unbiasable entropy pool; the best-chain rule additionally prefers chains with more ticket-sealed (vs fallback) ancestors",
+"Safrole is faster to verify than BABE because it uses no signatures",
+"Safrole lets any validator produce a block in any slot, maximizing liveness",
+"Safrole is required for Grandpa finality to work"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 30,
+"id": "arch-availability-auditing",
+"ch": "ARCH",
+"gpRef": "§4.8.1, §16–17, ELVES paper",
+"stem": "Why does JAM need BOTH availability (assurances + erasure coding) AND auditing/disputes to secure in-core computation?",
+"options": [
+"Guaranteeing attaches economic cost to invalid results; but auditors can only re-execute if the inputs are retrievable, so 2/3+1 of validators must first assure they hold erasure-coded shards (any 1/3 reconstruct); then randomly-selected auditors (ELVES) re-run reports and escalate on negative judgments or no-shows; disputes finalize the verdict on-chain and ban the report/offenders — together this gives in-core work security comparable to on-chain execution",
+"Availability alone is sufficient; auditing is optional and only used by light clients",
+"Auditing alone is sufficient; availability exists only to speed up syncing",
+"Both exist only to compute validator rewards"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 31,
+"id": "arch-why-prior-root-and-pipelining",
+"ch": "ARCH",
+"gpRef": "§5, §20 Discussion",
+"stem": "JAM claims roughly 3–3.5 seconds of effective block computation per 6-second slot despite network latency. Which design features make this possible?",
+"options": [
+"Temporal parallelism (pipelining): the header carries the prior state root so Merklization of the new state can overlap the next slot; the small pre-accumulation part of the STF (~5%) runs immediately while the heavy accumulation (~95%) runs while the block propagates; plus spatial parallelism across ~16 independent state components and in-core cores",
+"Validators run 6-second blocks on 3-second clocks",
+"Blocks are pre-computed one epoch in advance by the ticket holders",
+"Accumulation is executed off-chain by guarantors"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 32,
+"id": "arch-services-vs-accounts",
+"ch": "ARCH",
+"gpRef": "§4.8.2, §9",
+"stem": "How do JAM services differ from Ethereum's account model, and how does external data enter the state?",
+"options": [
+"JAM has only service accounts (code + balance + state, no secret key, no nonce); each has two entry points — refine (in-core, stateless, arbitrary input → small digest) and accumulate (on-chain, stateful); all extrinsic data enters through refine inside work-packages, authorized via coretime/authorizers rather than signed transactions",
+"JAM has contract accounts and externally-owned accounts like Ethereum; data enters via signed transactions",
+"JAM services are parachains; data enters via collators' PoV blocks only",
+"JAM has a single global account; services are just namespaces"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 33,
+"id": "arch-constants",
+"ch": "ARCH",
+"gpRef": "Appendix I & §20",
+"stem": "Which set of full-configuration constants is correct?",
+"options": [
+"C = 341 cores, V = 1023 validators, E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7",
+"C = 1023, V = 341, E = 3600, P = 6, Y = 600, R = 60",
+"C = 341, V = 1023, E = 600, P = 12, Y = 300, R = 10, H = 24, L = 600",
+"C = 256, V = 1024, E = 512, P = 6, Y = 400"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 34,
+"id": "arch-jam-vs-polkadot-eth",
+"ch": "ARCH",
+"gpRef": "§2",
+"stem": "According to the GP's 'Previous Work' analysis, what are the main limitations of Polkadot 1.0 and of Ethereum-style rollups that JAM tries to overcome?",
+"options": [
+"Polkadot: parachains are isolated ecosystems with asynchronous, coarse-grained XCMP and access limited to ~50 auction slots; rollups: heterogeneous security/economics, SNARK proving is orders of magnitude too costly (RISC-Zero ~61,000× slower than native) and sequencers centralize — JAM keeps Polkadot's ELVES machinery but makes cores un-opinionated, permissionless and semi-coherent",
+"Polkadot: too fast to be secure; rollups: too decentralized",
+"Polkadot: no shared security; rollups: no smart contracts",
+"Polkadot and rollups are both fine; JAM only changes the token"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 36,
+"id": "delta-summary-080",
+"ch": "ARCH",
+"gpRef": "graypaper releases v0.8.0 (June 3 2026)",
+"stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. Which list contains ONLY genuine 0.8.0 changes?",
+"options": [
+"Variable validator-set sizes (multiples of 3 from 6 to 1023, thresholds derived from |κ|); full guarantees kept in ρ; hard caps of 16 verdicts/culprits/faults and no mandatory culprits for bad verdicts; bless restricted to the manager; authorizer = H(code hash ⌢ config); refinement context gains anchor slot and lookup-anchor posterior root; per-basic-block gas model and grow_heap host call (host calls renumbered); new host-call gas costs; tickets per validator = ⌈2E/|γ′_P|⌉; extrinsic hash commits to (service, H(preimage)) pairs; processed-transfer count back in service stats; recent-history entries carry the timeslot",
+"on_transfer merged into accumulate; registrar and small service IDs; version byte in account serialization",
+"fetch replaces import; memory-access exceptions formalized; feature freeze",
+"64-bit registers; Ed25519 keys in the epoch marker; assurances checked with the prior validator set"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 37,
+"id": "arch-tiny-config",
+"ch": "ARCH",
+"gpRef": "w3f/jamtestvectors README & JIP-4",
+"stem": "Which values describe the 'tiny' test-vector configuration used by the W3F vectors and the conformance fuzzer?",
+"options": [
+"6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 10, rotation period 4, preimage expunge period 32, super-majority 5 of 6, verdict thresholds 5/0/2, ring size 6",
+"12 validators, 4 cores, epoch 60 slots, rotation 10",
+"3 validators, 1 core, epoch 6 slots, rotation 2",
+"1023 validators, 341 cores, epoch 600 — tiny only changes the gas limits"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 72,
+"id": "arch-beefy-commitment",
+"ch": "ARCH",
+"gpRef": "eq. 18.1–18.2; eq. 7.7–7.8; §19–20",
+"stem": "Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?",
+"options": [
+"After importing each finalized block: a BLS12-381 signature under κ′[v]'s BLS key over $jam_beefy ⌢ b, where b is the Keccak MMR super-peak of the accumulation-output belt held in the newest β_H entry; the signatures are published freely so they can be aggregated into concise finality proofs for third-party systems such as bridges",
+"After importing every block, finalized or not: a BLS12-381 signature under the validator's BLS key over the posterior state root M_σ(σ′), so that light clients can verify the newest state; Grandpa then aggregates these signatures into its finality justification instead of running its own vote round",
+"Once per epoch: an Ed25519 signature over the Keccak hash of the epoch's last header, published alongside the epoch marker H_E so that parachains bridged through the CoreChains service can prove that the whole epoch was finalized without tracking individual blocks",
+"For each block it authors: a Bandersnatch VRF signature (context $jam_beefy) over the accumulation-output root M_B(s, H_K) of that block, which is placed in the header's H_o marker and is the datum that Grandpa voters sign when they finalize the block"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 73,
+"id": "arch-best-chain-selection",
+"ch": "ARCH",
+"gpRef": "eq. 19.1–19.4; §17 (ban-listing)",
+"stem": "How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?",
+"options": [
+"Longest-chain rule among descendants of the finalized block; two valid blocks at the same timeslot are both kept because Safrole tolerates equivocation; audited status only gates accumulation, not voting; the vote carries the header hash together with the prior state root H_r taken from the header",
+"Candidates must descend from the latest finalized block, be considered audited, and contain no unfinalized ancestor at a timeslot where the node has seen an equivocation; among them the chain with the most ticket-sealed (non-fallback) ancestors wins; the vote carries the best header together with its posterior state root",
+"Candidates must descend from the finalized block and carry the most guarantees; the chain with the greatest cumulative timeslot wins so that stalled cores are penalised; the vote carries the header only, since Grandpa is independent of state and the state root is supplied by Beefy",
+"Candidates are all blocks whose parent is known; the chain with the most fallback-sealed ancestors wins because fallback keys belong to the honest majority; the vote carries the header plus the accumulation-output super-peak so that bridges can reuse Grandpa justifications"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 74,
+"id": "arch-audit-tranches",
+"ch": "ARCH",
+"gpRef": "eq. 17.1–17.19 (PDF numbering); §20 (10 audits/validator/slot)",
+"stem": "In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?",
+"options": [
+"Tranche 0: the three guarantors of each core re-execute their own report so that the accused party bears the cost; every 6 s (one slot) the remaining validators are added round-robin until more than 2/3 have judged, at which point the report counts as audited and any validator that judged negatively is slashed",
+"Tranche 0: a Fisher–Yates shuffle of κ seeded with η′_2 assigns exactly 30 auditors to every report, matching the 30 audits per report of §20; later tranches occur only if a negative judgment appears, in which case every validator must audit that report before the block can be finalized",
+"Tranche 0: shuffle the per-core list of just-available reports with a Bandersnatch VRF output (context $jam_audit ⌢ Y(H_v)) and take the first 10 non-empty entries; a new tranche starts every A = 8 s, adding a report either unconditionally (a negative judgment was seen) or by a per-report VRF whose acceptance chance grows with the previous tranche's no-shows, tuned so that F = 2 validators are expected per no-show",
+"Tranche 0: each validator audits the reports of the cores it guarantees in the current rotation, since it already holds the bundle; every 8 s it adds F = 3 further reports chosen by shuffling with η′_3, and once all initially selected auditors have published their announcements no further tranches are ever needed"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 75,
+"id": "arch-guaranteeing-procedure",
+"ch": "ARCH",
+"gpRef": "§15; eq. 14.13 (Ξ); eq. 11.24, 11.28",
+"stem": "Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?",
+"options": [
+"Check the package's authorization against the authorizer pool of the most recent chain state (plus the other on-chain inclusion conditions) before running any refine logic; after r = Ξ(p, c, l, v), Ed25519-sign $jam_guarantee ⌢ H(E(r)); two signatures suffice to send the report to the next block author; an unincludable report only forfeits reward, a misrepresented Ξ result is punished severely; sign on average at most two reports per timeslot",
+"Run every work-item's refine first and check authorization only afterwards, since the pool is re-verified on-chain anyway and refine dominates the cost; all three guarantors' signatures must be collected before the report may be sent to the block author; any report the block author declines to include counts as an offence and is slashed exactly like an invalid report",
+"Use the chain state at the report's lookup-anchor rather than the current head for the pool check so that all guarantors of the core agree on the same view; a single signature suffices for distribution because the block author collects the remaining credentials itself; the GP gives no guidance on how many reports a guarantor may sign per slot",
+"Sign the report with the Bandersnatch key under the $jam_guarantee context so that the ring proof hides which of the core's guarantors signed; two signatures suffice for distribution; guarantors should never sign more than one report per epoch, otherwise the block author's anti-spam filter disregards them for the rest of the epoch"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 76,
+"id": "arch-two-da-classes",
+"ch": "ARCH",
+"gpRef": "§16; §14 (Exporting, eq. 14.18); eq. 11.5, 11.11–11.18",
+"stem": "Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?",
+"options": [
+"Only its shard of the work-package bundle; segment shards are fetched lazily by later importers directly from the guarantors of the exporting package; the bundle shard is retained for L = 14,400 slots (24 h) so that lookup-anchors stay auditable, and no proof is needed because the assurance signature is checked on-chain against the report's erasure-root",
+"The full work-package bundle plus every exported segment in clear (not shards), verified by recomputing the work-report locally before assuring, and kept for D = 19,200 slots so that any preimage referenced by the package can be re-verified during the dispute window",
+"Both its shard of the auditable bundle (kept only until the report is considered audited / its block finalized, served on request until then) and its shards of every exported segment under the report's segments-root plus paged-proof data (the long-term D³L, kept ≥ 28 days = 672 epochs), each verified by a Merkle proof against the report's erasure-root before possession is claimed",
+"Its bundle shard and segment shards, verified against the segments-root rather than the erasure-root since the erasure-root only commits to the bundle; the bundle shard is kept for 28 days while segment shards may be dropped once the report is accumulated, because accumulation copies the exported segments into on-chain service storage"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 77,
+"id": "arch-core-virtual-hardware",
+"ch": "ARCH",
+"gpRef": "§20 Discussion",
+"stem": "How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?",
+"options": [
+"A full validator machine (16 cores, 64 GB RAM, 8 TB) for one 6-second slot with unlimited chain-state I/O; the result may be up to 12 MB and is then accumulated for up to one second with the same I/O budget, which is why block execution is allotted 2/16 of validator CPU time in the performance model",
+"Roughly one regular CPU core at 25–50% of native speed for the whole 6-second slot, about 2 MB/s of general-purpose I/O (which includes trustless reads of recent JAM state) and up to 2 GB of RAM, plus unlimited reads from a semi-static preimage store; the result is at most 48 KB and then gets ~10 ms on the same machine with no external I/O but full, immediate access to chain state",
+"One CPU core at native speed for one second plus 5 MB of I/O per 6-second slot — the Polkadot parachain budget carried over unchanged so that CoreChains needs no re-tuning — with results up to 90 KB that are accumulated during the following slot with full state access and a further 6 s of execution",
+"A CPU core at 25–50% speed with 2 GB RAM but no access to chain state whatsoever, since refine is stateless by construction; the 48 KB result is then accumulated inside the audit budget (10/16 of CPU time), which is why accumulation is capped at 10^7 gas per report and 3.5·10^9 per block"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 78,
+"id": "arch-sweet-spot-further-work",
+"ch": "ARCH",
+"gpRef": "§21",
+"stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?",
+"options": [
+"Sweet spot = as coherent as a fully synchronous chain while accepting Solana-class hardware requirements; open items: replacing ELVES auditing with SNARK proofs once proving cost falls below 50,000×, shortening D³L retention from 28 days to 24 hours, and specifying coretime sales and staking in a later chapter of the paper rather than leaving them to system services",
+"Sweet spot = the point where 341 cores exactly saturate a 0.5 GbE link; under consideration: synchronous calls between services during refine, removing the `transfer` host call, lifting the per-block accumulate gas limit, and Merklizing the state trie — with the networking protocol fully specified in an appendix and validator rewards defined on-chain",
+"Sweet spot = a fully fragmented design like Cosmos but with one validator set; under consideration: dropping Beefy in favour of Grandpa-only proofs, letting on-chain governance upgrade services in place, and adding native signed transactions because the 171k TPS model showed refine-only transfers are I/O-bound and cannot use the cores",
+"Sweet spot = massive computation under secure, resilient consensus (unlike fully-synchronous models) with strict timing and integration guarantees into a singleton state machine (unlike persistently fragmented models); under consideration: synchronous service calls in accumulate, restricting `transfer` for parallel accumulation, reserving extra accumulate compute under certain conditions, and Merklizing the work-package format so authorization needs no full download; networking and token/coretime/staking layers are left out"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 79,
+"id": "arch-jip4-protocol-parameters-080",
+"ch": "ARCH",
+"gpRef": "App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5",
+"stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?",
+"options": [
+"The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports",
+"0.8.0 drops four fields — N (tickets per validator, now ⌈2E/|γ′_P|⌉), V (validator count, now implied by the validator sets in the genesis state), W_E and W_P (erasure-coding sizes, now derived from the validator count) — shrinking the blob from 33 fields / 134 bytes to 29 fields / 122 bytes; parsers and any 'apply parameters' code that still overwrites tickets-per-validator, validator count or EC sizes from it must change",
+"0.8.0 adds fields for the new gas-model constants (C_gasunknown and the host-call base costs) and for the audit constants F and A so that services can read them via fetch(0); V stays in the blob because validator sets may now vary and a service must know the set size to compute erasure-coding parameters for its exports",
+"0.8.0 keeps all 33 fields but switches them from fixed-width little-endian integers to the general compact encoding E(x), so the blob length now depends on the values (e.g. 1,023 versus 6 validators); JIP-4 widened the `genesis_state` keys from 31 to 32 bytes at the same time so that the state trie can be loaded without re-hashing"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 80,
+"id": "arch-fuzz-protocol-m1",
+"ch": "ARCH",
+"gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
+"stem": "Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?",
+"options": [
+"A JSON-RPC 2.0 session over WebSockets (port 19800) in which the fuzzer calls importBlock and compares the header hash the target returns; forks are never generated because Safrole makes equivocation impossible, and ancestry is reconstructed by the fuzzer itself from the target's finalizedBlock subscription rather than being supplied",
+"A TCP stream in which the target initiates the handshake; blocks are SCALE-encoded with a u16 big-endian length prefix, the fuzzer compares full state dumps after every block, and the ancestry feature is optional for M1 because lookup-anchor checks are only needed by block authors, not by importers",
+"A file-based protocol: the fuzzer writes numbered block .bin files into a shared directory and reads back the post-state JSON the target writes next to them; on the first state-root mismatch the run stops immediately, no report is produced, and the submission is marked as failed for that GP version",
+"A synchronous request/response protocol over a Unix domain socket the target binds; messages are JAM-codec encoded with a u32 little-endian length prefix; after a PeerInfo handshake (features = bitwise AND of both sides) the fuzzer sends Initialize (header, state key-vals, ancestor list) then ImportBlock requests, each answered by the posterior state root or an Error (state unchanged); on a root mismatch it pulls the whole state via GetState; ancestry and forks are mandatory for M1"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 81,
+"id": "arch-prize-interview-rule12",
+"ch": "ARCH",
+"gpRef": "jam.web3.foundation/rules #12; T&C 3.5 / 6.1 / 8.4; delivery template",
+"stem": "According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?",
+"options": [
+"It is a mandatory oral defence of the performance benchmarks (gas, trie/DB, signature verification, erasure coding) that the Foundation runs on standard hardware; it is conducted by W3F staff rather than the Fellowship, is not recorded, and by design cannot change the prize amount awarded for the milestone",
+"It is an optional Q&A with Parity's auditors about findings from the conformance fuzzer; passing it replaces the need to pass the public and private conformance tests, and the outcome is recorded off-chain by the Foundation instead of being ratified by the Fellowship on-chain",
+"It may be requested after submission to verify that team members are the legitimate authors (precluding generative AI) with definitive expertise on both the Gray Paper and their own codebase; the delivery template commits the team to a recorded interview by the Polkadot Technical Fellowship, ratified by an on-chain Fellowship remark, and failing to prove expertise may reduce the prize or disqualify the team",
+"It is a code-review session limited to the PVM and host-call implementation; teams that used generative AI may still pass provided they declared it up-front in the delivery document, and the only possible consequence of a poor interview is a delay of payment until version 1.0 of the protocol is ratified"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 136,
+"id": "arch-audit-initial-tranche",
+"ch": "ARCH",
+"gpRef": "eq. 17.2–17.4",
+"stem": "How does a validator pick the work-reports it must audit in the INITIAL tranche (a_0)?",
+"options": [
+"It makes a Bandersnatch VRF signature s_0 over context X_U ⌢ Y(H_V) with an empty message, then Fisher-Yates shuffles the per-core sequence q of newly available reports using Y(s_0) and takes the first ten non-empty entries",
+"It audits every report that became available in the block",
+"It audits the reports on the cores it guaranteed in the previous rotation",
+"It signs the block hash with Ed25519 and audits the cores whose index matches the low bits of the signature"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 137,
+"id": "arch-audit-outcomes",
+"ch": "ARCH",
+"gpRef": "§17.1",
+"stem": "GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?",
+"options": [
+"If more than 2/3 of validators still issue POSITIVE judgments, the validators issuing negative judgments may be punished for time-wasting; if more than 1/3 issue NEGATIVE judgments, the block containing the report is ban-listed and it and all its descendants are disregarded",
+"If more than 1/2 issue negative judgments the report is dropped; there is no punishment for false negatives",
+"Any single negative judgment immediately invalidates the block and slashes the guarantors",
+"Negative judgments have no on-chain effect; only the disputes extrinsic matters and it requires unanimity"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 138,
+"id": "arch-audit-reconstruction",
+"ch": "ARCH",
+"gpRef": "§17.2–17.3 & appendix H",
+"stem": "How does an auditor obtain the data it needs to re-run a work-report?",
+"options": [
+"It requests erasure-coded chunks from about one-third of the validators and reconstructs the bundle via the recovery function, verifying against the erasure-root; the bundle yields the package, its extrinsics, imported segments and their justifications, while EXPORTED segments are recomputed by re-running refine — it may shortcut by asking a guarantor for the whole bundle, but must fall back to reconstruction if that data fails verification",
+"It downloads the full work-package from the block author, who is required to store it for 28 days",
+"It reads the imported and exported segments from the on-chain state, which stores them under the service's preimages",
+"It asks the other two guarantors of the core to re-sign the report; no data fetching is needed"
+],
+"answer": 0,
+"code": ""
+}
+]

@@ -1,0 +1,392 @@
+[
+{
+"n": 112,
+"id": "ch10-verdict-keyset-epoch-boundary",
+"ch": "10",
+"gpRef": "eq. 10.2–10.4",
+"stem": "Tiny config (E = 12). A block with H_t = 24 — the first block of epoch 2 — is imported on top of a parent whose τ = 23, and its E_D contains verdicts. Per eq. 10.2–10.4, which epoch indices a may those verdicts carry, and which validator set K(a) verifies each of them?",
+"options": [
+"a ∈ {1, 0}: a = 1 selects the prior κ (the set active during epoch 1) and a = 0 the prior λ; a = 2 is rejected even though the block itself belongs to epoch 2",
+"a ∈ {2, 1}: a = 2 selects κ′ (the set this block rotates in) and a = 1 selects κ, because the index is derived from the block's own timeslot H_t; a = 0 is rejected since λ is two epochs stale by now",
+"a ∈ {2, 1}: a = 2 selects the prior κ and a = 1 the prior λ, since ⌊H_t/E⌋ = 2 is the epoch index a verdict must name; a = 0 is rejected as too old",
+"a ∈ {2, 1, 0}: in an epoch-boundary block judgments from κ′, κ and λ are all admissible, each verdict still needing ⌊2|k|/3⌋+1 = 5 signatures"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 113,
+"id": "ch10-code-genesis-age-underflow",
+"ch": "10",
+"gpRef": "eq. 10.2–10.3 — internal/extrinsic/verdict_controller.go VerifySignature",
+"stem": "The chain is still in its genesis epoch (prior τ < E, so ⌊τ/E⌋ = 0). Which verdict `Age` does this code accept although GP 0.8.0 (eq. 10.2–10.3) makes the block invalid — and against which key set would it then verify the judgments?",
+"options": [
+"Age = 1: because the check compares Age against both a and a−1 symmetrically, the next epoch's index also passes and the judgments are verified against κ as if the epoch had already rolled over",
+"Age = 0 with judgments signed by λ keys: since a−1 cannot be matched at genesis, the code falls through to the λ branch and accepts λ signatures for the current epoch",
+"Age = 2^32 − 1: `a-1` wraps around in U32, so the age check passes and the judgments are verified against λ, whereas ⌊τ/E⌋ − N_2 has no previous epoch at epoch 0",
+"None: the wrapped value of `a-1` can never equal a decoded 32-bit Age, so at genesis only Age = 0 passes and the code is exactly the GP rule"
+],
+"answer": 2,
+"code": "func (v *VerdictWrapper) VerifySignature() error {\n\n    state := blockchain.GetInstance().GetPriorStates()\n\n    a := types.U32(state.GetTau()) / types.U32(types.EpochLength)\n    if v.Verdict.Age != a && v.Verdict.Age != a-1 {\n        return errors.New(\"bad_judgement_age\")\n    }\n\n    k := make(types.ValidatorsData, types.ValidatorsCount)\n    if v.Verdict.Age == a {\n        k = state.GetKappa()\n    "
+},
+{
+"n": 114,
+"id": "ch10-code-fault-equivalence-wonky",
+"ch": "10",
+"gpRef": "eq. 10.7 — internal/extrinsic/fault_controller.go VerifyReportHashValidty",
+"stem": "In this block a verdict classifies report r as wonky (exactly ⌊|k|/3⌋ positive judgments), so r ∈ ψ′_W and r ∉ ψ′_G ∪ ψ′_B. E_F also carries a fault (r, ⊥, k, s) with a correct signature from a κ ∪ λ key that is not in ψ_O. Per GP 0.8.0 eq. 10.7, is the block valid — and what does this code do with it?",
+"options": [
+"Valid: v = ⊥ does not contradict a non-good verdict, so the fault stands, k enters ψ′_O and H_O; the code agrees, since neither inGood nor inBad is set for a wonky target",
+"Invalid: the equivalence forces r into exactly one of ψ′_B, ψ′_G, so a wonky report admits no fault for either v; the code nevertheless accepts it, since it only rejects (v ∧ good) or (¬v ∧ bad)",
+"Invalid, and the code rejects it too: with inGood = inBad = false both clauses collapse to the vote itself, so fault_verdict_wrong is returned for v = ⊥",
+"Valid only if v = ⊤ — a 'valid' vote on a report that is not in ψ′_G is the offense a fault documents — and the code rejects exactly that combination via inGood"
+],
+"answer": 1,
+"code": "func (f *FaultController) VerifyReportHashValidty() error {\n    posteriorStates := blockchain.GetInstance().GetPosteriorStates()\n    psiBad := posteriorStates.GetPsiB()\n    psiGood := posteriorStates.GetPsiG()\n    // ... badMap / goodMap are filled from psiBad / psiGood ...\n    length := len(f.Faults)\n    for i := 0; i < length; i++ {\n        vote := f.Faults[i].Vote\n        // if vote not contrad"
+},
+{
+"n": 115,
+"id": "ch10-report-hash-identity",
+"ch": "10",
+"gpRef": "eq. 10.1, 10.6, 10.14; cf. eq. 11.28",
+"stem": "ψ_G, ψ_B, ψ_W, every judgment message, every culprit proof and the ρ† clearing rule (eq. 10.14) all identify the disputed item by one 32-byte hash. Which hash is it, and why is that the right identity for a dispute?",
+"options": [
+"The work-package hash (w_s)_h: the package is the unit of work, so judging it bans every report ever made of that package, and eq. 10.14 compares the package hash held in ρ[c] against the verdict",
+"H(E(g)) — the hash of the whole guarantee including its credential and slot, so that the guarantors who signed are bound into the judged object and culprits can be derived from the verdict alone",
+"H(E(w)) — the hash of the encoded work-report: it is exactly what guarantors signed (X_G ⌢ H(w)), so a culprit proof is the original guarantee signature, and eq. 10.14 matches cores via H((ρ[c]_g)_w)",
+"The erasure root (w_s)_u, because a dispute is ultimately about whether the erasure-coded bundle behind the report reconstructs to valid data, which is what auditors re-execute"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 126,
+"id": "ch13-counter-deltas-calc",
+"ch": "13",
+"gpRef": "eq. 13.4–13.6 (π_V†, π_V‡, π′_V); eq. 11.28 (reporters set G)",
+"stem": "A block in the middle of an epoch (e′ = e) has author index H_i = 3. Its extrinsic contains E_T with 2 tickets, E_P with one preimage of 500 octets, E_A with assurances signed by validators 1 and 2, and E_G with one guarantee whose credential carries the signatures of validators 0 and 4. Which per-validator changes does π′_V show relative to π_V (counters b, t, p, d, g, a)?",
+"options": [
+"Validator 3: b+1, t+2, p+1, d+500, g+1, a+2 — every extrinsic the author includes is credited to the author; no other validator changes",
+"Validator 3: b+1, t+2, p+1, d+1; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each",
+"Validator 3: b+1, t+2, p+1, d+500; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each; all other records unchanged",
+"Validator 3: b+1, p+1, d+500; the two validators who generated the tickets: t+1 each; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 127,
+"id": "ch13-daload-calc",
+"ch": "13",
+"gpRef": "eq. 13.9–13.12 (π′_C, R(c), L(c), D(c)); eq. 11.17 (R), 11.30 (I)",
+"stem": "Full configuration (W_G = 4,104). In one block, the report that was pending on core 7 becomes available (bundle length 100,000 octets, 130 exported segments), and E_G brings a new report for core 7 (bundle length 50,000 octets, 10 exported segments). What are π′_C[7]_d (DA load) and π′_C[7]_l (bundle length)?",
+"options": [
+"d = 645,832 and l = 50,000",
+"d = 95,144 and l = 50,000",
+"d = 633,520 and l = 100,000",
+"d = 740,976 and l = 150,000"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 128,
+"id": "ch13-why-statistics",
+"ch": "13",
+"gpRef": "§13.1 (intro paragraphs); §14.1 honest behavior; C(13) in App. D",
+"stem": "Why does the JAM chain keep validator activity statistics at all, and what does the GP say about the activities that cannot be measured directly on-chain?",
+"options": [
+"The statistics feed the STF's per-block reward payout from the treasury service; every validator activity is measurable on-chain because all consensus messages are included in blocks",
+"JAM issues no rewards itself but oracles activity data to a staking subsystem (in Polkadot's case a fee-less system parachain), as it does with punishment data; block production, guaranteeing and assurances are trackable on-chain, whereas GRANDPA, BEEFY and auditing are not and are instead covered by validators voting on each other's efforts, a median being accepted under a 50%-honest assumption",
+"The statistics drive Safrole: validators whose counters fall below a threshold are dropped from the next epoch's validator set ι′; GRANDPA activity is read from the header's finality field",
+"The statistics exist only for telemetry (JIP-3) and RPC and are not part of the consensus state, so untrackable activities are simply omitted"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 182,
+"id": "ch09-account-fields",
+"ch": "9",
+"gpRef": "eq. 9.3",
+"stem": "Which of the following is NOT a field of a service account A in GP 0.8.0 (eq. 9.3)?",
+"options": [
+"a_f — the gratis storage offset (a balance-denominated deposit credit)",
+"a_p — the parent service index that created this account",
+"a_n — a nonce incremented on every accumulation",
+"a_m — the minimum gas required per deferred transfer (minmemogas)"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 183,
+"id": "ch09-code-metadata",
+"ch": "9",
+"gpRef": "eq. 9.4",
+"stem": "How are a service's code a_c and metadata a_m derived from its code hash?",
+"options": [
+"The preimage of a_c in the account's own preimage lookup must decode as E(var(m), c): a length-prefixed metadata blob followed by the code; if absent, both are ∅",
+"The code is stored directly in the storage dictionary under key a_c",
+"The code is fetched from the manager service's preimages",
+"The code hash is the Blake2b of the raw code; metadata is stored in a_s"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 184,
+"id": "ch09-lookup-status",
+"ch": "9",
+"gpRef": "§9.2.2 Semantics, eq. 9.7",
+"stem": "A request entry a_l[(h, len)] holds a sequence of up to 3 timeslots. What does [x, y] mean, and what does [x, y, z] mean?",
+"options": [
+"[x, y]: the preimage was available from x and became unavailable at y; [x, y, z]: it was available from x until y and is available again since z",
+"[x, y]: requested at x, provided at y; [x, y, z]: expunged at z",
+"[x, y]: available from x, expunged at y; [x, y, z]: invalid state",
+"[x, y]: two different requesters; [x, y, z]: three requesters"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 185,
+"id": "ch09-historical-lookup-calc",
+"ch": "9",
+"gpRef": "eq. 9.7 (Λ)",
+"stem": "A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. Which statement about the historical lookup Λ(a, t, h) is correct?",
+"options": [
+"Λ returns p for t = 120 and t = 450, but ∅ for t = 300",
+"Λ returns p for t = 300 only",
+"Λ returns p for any t ≥ 100",
+"Λ returns p for t = 120 but ∅ for t = 450, since the last entry marks a second withdrawal"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 186,
+"id": "ch09-footprint-formula",
+"ch": "9",
+"gpRef": "eq. 9.8",
+"stem": "How are the footprint a_i (items) and a_o (octets) and the threshold balance a_t defined?",
+"options": [
+"a_i = 2·|a_l| + |a_s|; a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|); a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)",
+"a_i = |a_l| + |a_s|; a_o = Σ z + Σ |y|; a_t = B_S + B_I·a_i + B_L·a_o",
+"a_i = |a_p|; a_o = Σ |p|; a_t = B_S·a_i",
+"a_i = |a_s|; a_o = Σ (32 + |y|); a_t = max(0, B_I·a_i + B_L·a_o)"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 187,
+"id": "ch09-threshold-calc",
+"ch": "9",
+"gpRef": "eq. 9.8 with B_S=100, B_I=10, B_L=1",
+"stem": "A service has one preimage request of declared length 100, two storage entries each with a 4-octet key and a 10-octet value, and gratis a_f = 0. What is its threshold balance a_t?",
+"options": [
+"417",
+"407",
+"336",
+"349"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 188,
+"id": "ch09-privileges",
+"ch": "9",
+"gpRef": "eq. 9.9–9.10",
+"stem": "The privileges state χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z). Which mapping of privilege → power is correct?",
+"options": [
+"χ_M manager: may alter χ (bless) and grant gratis storage; χ_V delegator: may set ι (designate); χ_R registrar: may create services with indices below S = 2^16; χ_A assigners (one per core): may set φ[c] (assign); χ_Z: services that accumulate every block with a fixed gas allowance",
+"χ_M: may set ι; χ_V: may alter χ; χ_R: may set φ; χ_A: may create low-index services; χ_Z: services exempt from gas",
+"χ_M: the service that pays for all accumulation; χ_V: the validator set; χ_R: the registrar of preimages; χ_A: auditors; χ_Z: zero-balance services",
+"All five are service indices with identical powers; they differ only in ordering"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 189,
+"id": "ch09-preimage-vs-storage",
+"ch": "9",
+"gpRef": "§9.2 intro",
+"stem": "The GP lists three differences between preimage lookups and general storage. Which is NOT one of them?",
+"options": [
+"Preimage data is supplied extrinsically (via E_P), whereas storage data originates from the service's own accumulation",
+"Preimages map a hash to its preimage, whereas storage maps arbitrary keys to values",
+"Preimages may be removed instantly by the service, whereas storage entries are retained for 28 days",
+"Preimage data, once supplied, goes through an 'unavailable' period before it may be removed, so that its historical availability is retained"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 190,
+"id": "ch10-state",
+"ch": "10",
+"gpRef": "eq. 10.1",
+"stem": "The disputes state is ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O). What do the four components hold?",
+"options": [
+"ψ_G good-set, ψ_B bad-set and ψ_W wonky-set of work-report hashes judged correct / incorrect / impossible to judge; ψ_O the punish-set of Ed25519 keys of validators found to have misbehaved",
+"ψ_G guarantors, ψ_B block authors, ψ_W witnesses, ψ_O offenders — all as validator indices",
+"ψ_G/ψ_B/ψ_W hold work-package hashes; ψ_O holds Bandersnatch keys",
+"ψ_G/ψ_B hold report hashes; ψ_W holds pending verdicts; ψ_O holds slashed balances"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 191,
+"id": "ch10-verdict-structure",
+"ch": "10",
+"gpRef": "eq. 10.2–10.4",
+"stem": "Per GP 0.8.0, which statement about the verdicts component E_V of the disputes extrinsic is correct?",
+"options": [
+"Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic",
+"Each verdict contains all |κ| judgments; there is no per-extrinsic cap",
+"Judgments may come from any validator set in the last 24 hours; the verdict needs > 1/2 of them",
+"A verdict is a single aggregated BLS signature over the report hash"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 192,
+"id": "ch10-verdict-thresholds",
+"ch": "10",
+"gpRef": "eq. 10.12 (V)",
+"stem": "A verdict's outcome depends on t, the number of positive judgments among the ⌊2|k|/3⌋+1 signatures. In the tiny config (|k| = 6), which (t → outcome) table is correct, and what happens for any other t?",
+"options": [
+"t = 5 → good (⊤); t = 0 → bad (⊥); t = 2 → wonky (∅); any other t makes the block invalid",
+"t ≥ 4 → good; t ≤ 1 → bad; t ∈ {2, 3} → wonky",
+"t = 5 → good; t = 0 → bad; t = 3 → wonky; other t → wonky",
+"t = 6 → good; t = 0 → bad; t = 2 → wonky; other t are ignored"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 193,
+"id": "ch10-culprits-faults",
+"ch": "10",
+"gpRef": "eq. 10.6–10.7, 10.13",
+"stem": "Which statement about culprits (E_C) and faults (E_F) is correct in GP 0.8.0?",
+"options": [
+"A culprit references a report in ψ′_B with a guarantor signature over X_G ⌢ hash; a fault references a report whose claimed validity contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); keys must be in (κ ∪ λ)'s Ed25519 keys minus ψ_O; every good verdict needs ≥ 1 fault; the old rule that a bad verdict needs ≥ 2 culprits was removed",
+"A bad verdict must be accompanied by at least two culprits, and a good verdict by at least one fault",
+"Culprits and faults are optional hints with no validity constraints",
+"Culprits reference reports in ψ′_G; faults reference reports in ψ′_W"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 194,
+"id": "ch10-ordering",
+"ch": "10",
+"gpRef": "eq. 10.8–10.11",
+"stem": "Which ordering/uniqueness constraints does the disputes extrinsic impose?",
+"options": [
+"Verdicts ordered & unique by report hash; culprits and faults each ordered & unique by Ed25519 key; judgments within a verdict ordered & unique by validator index; no verdict report hash may already be in ψ_G ∪ ψ_B ∪ ψ_W",
+"Everything ordered by timeslot of submission",
+"Verdicts ordered by validator index; culprits/faults ordered by report hash",
+"No ordering constraints; duplicates are silently ignored"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 195,
+"id": "ch10-effects",
+"ch": "10",
+"gpRef": "eq. 10.14–10.19",
+"stem": "What are the state effects of processing E_D, and what must the header's offenders marker H_O contain?",
+"options": [
+"ρ†[c] = ∅ for any core whose pending report was judged bad or wonky; ψ′_G/ψ′_B/ψ′_W absorb the verdict hashes; ψ′_O absorbs all culprit and fault keys; H_O = [culprit keys in order] ⌢ [fault keys in order]",
+"ρ†[c] = ∅ only for bad reports; wonky reports stay pending; H_O lists validator indices",
+"The good-set is cleared every epoch; H_O is the hash of E_D",
+"Only ψ′_O changes; ρ is untouched until accumulation"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 196,
+"id": "ch10-code-thresholds",
+"ch": "10",
+"gpRef": "eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi",
+"stem": "This is the team's verdict classification. What must change for GP 0.8.0 conformance?",
+"options": [
+"The thresholds must be computed from |k| — the length of the validator set the verdict's epoch index selects (κ or λ) — rather than the global ValidatorsCount, because 0.8.0 allows validator-set sizes to differ between epochs",
+"Nothing — ValidatorsCount is always 1023 so the thresholds are constant",
+"The wonky case should be removed, since 0.8.0 only has good and bad verdicts",
+"The default case should classify as wonky instead of returning an error"
+],
+"answer": 0,
+"code": "for _, verdict := range verdictSumSequence {\n    switch verdict.PositiveJudgmentsSum {\n    case types.ValidatorsCount*2/3 + 1:\n        updates.Good = append(updates.Good, types.WorkReportHash(verdict.ReportHash))\n    case 0:\n        updates.Bad = append(updates.Bad, types.WorkReportHash(verdict.ReportHash))\n    case types.ValidatorsCount * 1 / 3:\n        updates.Wonky = append(updates.Wonky, types"
+},
+{
+"n": 197,
+"id": "ch10-rationale",
+"ch": "10",
+"gpRef": "§10 intro paragraphs",
+"stem": "Which of the following is NOT a purpose of the disputes system as stated in the GP?",
+"options": [
+"Removing and banning invalid work-reports from the processing pipeline",
+"Removing troublesome keys from the validator set where there is consensus over their malfunction",
+"Coordinating nodes to revert chain-extensions containing invalid work-reports and aggregating offenders for punishment in a higher-level system (e.g. slashing on a staking parachain)",
+"Directly slashing the offending validator's balance inside the JAM state"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 221,
+"id": "ch13-validator-stats",
+"ch": "13",
+"gpRef": "eq. 13.1–13.6",
+"stem": "π ≡ (π_V, π_L, π_C, π_S). Which statement about the validator statistics is correct in GP 0.8.0?",
+"options": [
+"Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to the author H_i and g to every validator in the reporters set R",
+"Each record has five counters; on epoch change both π_V and π_L are zeroed",
+"Assurances are credited after the rollover, so the first block of an epoch never counts them",
+"Guarantees are credited to the block author, not to the guarantors"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 222,
+"id": "ch13-core-service-stats",
+"ch": "13",
+"gpRef": "eq. 13.7, 13.9–13.12",
+"stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?",
+"options": [
+"Per core: d DA load = Σ over reports that became AVAILABLE this block (W) on that core of (bundle length + W_G·⌈65·segment_count/64⌉); p popularity = number of assurances with that core's bit set; i/x/z/e/u (imports, extrinsic count, extrinsic size, exports, refine gas) and b bundle length are summed over reports GUARANTEED this block (I) on that core",
+"Per core: all eight fields are summed over reports guaranteed this block",
+"Per core: all eight fields are summed over reports that became available this block",
+"Per core: d = number of validators, p = number of guarantors, the rest are zero"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 223,
+"id": "ch13-service-stats",
+"ch": "13",
+"gpRef": "eq. 13.8, 13.13–13.17",
+"stem": "Which services appear in π′_S for a block, and what does the accumulation entry hold?",
+"options": [
+"s = services with a digest in this block's reports ∪ services that received a preimage in E_P ∪ keys of the accumulation statistics; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = I[s] = (items N, transfers T, gas G) or (0,0,0)",
+"All services in δ, every block",
+"Only services that were accumulated this block",
+"Only services whose balance changed"
+],
+"answer": 0,
+"code": ""
+}
+]

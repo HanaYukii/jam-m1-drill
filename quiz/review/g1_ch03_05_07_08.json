@@ -1,0 +1,662 @@
+[
+{
+"n": 82,
+"id": "ch03-sequence-set-subscripts",
+"ch": "3",
+"gpRef": "§3.7 (⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, ⟦T⟧_{n:}, ⟦T⟧_N); applied in eq. 8.1 and eq. 6.22",
+"stem": "Eq. 8.1 types the authorizer pool and queue as α ∈ ⟦⟦H⟧_{:O}⟧_C and φ ∈ ⟦⟦H⟧_Q⟧_C, and eq. 6.22 types the entropy as η ∈ ⟦H⟧_4. Using the sequence-set notation of GP §3.7, what do these subscripts say?",
+"options": [
+"⟦H⟧_{:O} is the set of hash sequences of length at most O, ⟦H⟧_Q of length exactly Q and ⟦H⟧_4 of length exactly 4; the outer ⟦·⟧_C means exactly one inner sequence per core",
+"⟦H⟧_{:O} is the set of hash sequences of length at least O (a pool must be kept full), while ⟦H⟧_Q and ⟦H⟧_4 are sequences of length at most Q and at most 4 respectively",
+"⟦H⟧_{:O} denotes the first O elements of a hash sequence (a slice), so α is an O-element prefix of each core's queue, and ⟦H⟧_Q denotes the single element at index Q",
+"All three denote sequences of exactly that many hashes; the colon in ⟦H⟧_{:O} only marks that the pool is indexed cyclically (H_T mod O) rather than from zero"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 83,
+"id": "ch03-first-last-n-arrows",
+"ch": "3",
+"gpRef": "§3.7.2 (⌢, ⧺, →s^n, ←s^n) and §3.7 (⟲); applied in eq. 7.8, eq. 8.2 and eq. 6.35",
+"stem": "Three state-transition rules use the arrow operators of GP §3.7.2: β_H′ ≡ ←(β_H† ⧺ e)^H (eq. 7.8), α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O (eq. 8.2) and γ′_A ≡ →(n ∪ γ_A sorted ascending by ticket id)^E (eq. 6.35). Which reading is correct?",
+"options": [
+"←^n keeps the first n elements and →^n the last n: β_H′ and α′[c] therefore drop the newest entry once they are full, while γ′_A keeps the E largest ticket ids",
+"→^n keeps the first n elements and ←^n the last n: β_H′ and α′[c] retain the H = 8 and O = 8 most recently appended entries, while γ′_A retains the E = 600 smallest ticket ids",
+"Both arrows keep n elements counted from the front; the direction only records whether the sequence was extended with ⧺ (append at the right) or with ⌢ (prepend at the left)",
+"The arrows are cyclic rotations by n positions, the same operation as the ⟲ superscript, so β_H′ and α′[c] behave as ring buffers whose oldest slot is overwritten in place"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 84,
+"id": "ch03-bits-msb-first-trie",
+"ch": "3",
+"gpRef": "§3.7.3 bits(); eq. D.5–D.6 (M_σ, M); App. C.1.4 (bit-sequence encoding); eq. A.15 (PVM ℬ_n)",
+"stem": "GP §3.7.3 defines bits(B) for an octet sequence B by the example bits([160, 0]) = [1, 0, 1, 0, 0, …], and M_σ (eq. D.5) keys the state trie by bits(k) of the 31-octet state key. The team's trie splits entries at each depth with the code below. Is it consistent with the GP?",
+"options": [
+"No: bits() is least-significant-bit first, matching the codec's bit-sequence encoding E(b ∈ 𝕓) which packs b_i into 2^i, so the mask must be 1 << (depth mod 8)",
+"No: bits() is MSB-first, but M_σ keys the trie by bits(H(k)) — the Blake2b hash of the state key — so the partition must be taken over H(k) rather than the raw key",
+"No: bits() is MSB-first, but the first bit of every node is the branch/leaf discriminator, so the key path must skip bit 0 of key[0] and the mask should start at 1 << (6 − depth mod 8)",
+"Yes: 160 = 0b10100000, so bits() emits each octet's most significant bit first; masking key[depth/8] with 1 << (7 − depth mod 8) walks the path in exactly that order"
+],
+"answer": 3,
+"code": "func partitionByBit(entries []types.StateKeyVal, depth int) int {\n\tbyteIdx := depth / 8\n\tbitMask := byte(1 << (7 - depth%8))\n\tleft := 0\n\tfor right := range entries {\n\t\tif entries[right].Key[byteIdx]&bitMask == 0 {\n\t\t\tentries[left], entries[right] = entries[right], entries[left]\n\t\t\tleft++\n\t\t}\n\t}\n\treturn left\n}"
+},
+{
+"n": 85,
+"id": "ch03-vrf-signature-notation",
+"ch": "3",
+"gpRef": "§3.8.2; applied in eq. 6.16 (seal), eq. 6.18 (H_V), eq. 6.30 (ticket proof) and eq. 6.32 (ticket id = Y)",
+"stem": "GP §3.8.2 writes a Bandersnatch VRF signature as Ṽ_k^m⟨x⟩ ⊂ B_96 with VRF output Y(·) ∈ H, and eq. 6.16 requires H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_r⟩. Which statement is correct?",
+"options": [
+"The angle brackets carry the message and the superscript the context, so Y(H_S) depends on the header serialization E_U(H); this is what lets the seal's VRF output commit to the block content",
+"k = H_A is the signer's public key, the superscript E_U(H) is the signed message and the angle-bracketed term is the context; Y(H_S) is determined by the key and the context but not by the message",
+"Ṽ is the anonymous Ring-VRF form: H_A is a ring root over the validator keys and the signer cannot be identified, whereas the identifying form V̊ ⊂ B_784 is the one tickets use",
+"Y(H_S) is a 96-octet value; the 32-octet ticket identifier i_y is obtained as H(Y(H_S)), and Ed25519 signatures V̄_k⟨m⟩ likewise define a VRF output"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 86,
+"id": "ch03-hash-functions-and-codec-subscripts",
+"ch": "3",
+"gpRef": "§3.8.1 (H, H_K, H_0, E_l and E^{-1}_l assertions); Keccak applied in eq. 7.7",
+"stem": "Per GP §3.8.1, which statement about the hash functions and the subscripted codec functions is correct?",
+"options": [
+"H is Keccak-256 as in the Yellow Paper and H_K is Blake2b-256; the subscript on E counts the octets of the input, so E_4 accepts only arguments already in B_4 and E^{-1}_8 only naturals below 2^64",
+"H is Blake2b-256 and H_K is Keccak-256; hashing a tuple is undefined unless it is written explicitly as H(E(…)), and E_4 is the general variable-length natural encoding capped at four octets",
+"H is Blake2b-256 and H_K is Keccak-256, both into H ≡ B_32; a non-blob argument is implicitly passed through E; E_4(x) asserts x ∈ N_2^32 and yields B_4, and E^{-1}_8(y) asserts y ∈ B_8 and yields N_2^64",
+"H is Blake2b-512 truncated to 32 octets and H_K is Keccak-256; H_0 denotes H([]), the hash of the empty blob, which is also how M_σ identifies an empty sub-trie"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 87,
+"id": "ch03-dictionary-semantics",
+"ch": "3",
+"gpRef": "eq. 3.7–3.11; 𝒰 in eq. 3.2; ∅ / A? / ∇ in §3.3",
+"stem": "Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), which statement is correct?",
+"options": [
+"d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a} because the left operand wins on a collision; V(d ∪ e) = [a, b, a] keeps duplicates in insertion order; and d[3] = ∅ is an ordinary, valid lookup result in every context",
+"d ∪ e is undefined because key 2 collides — dictionary union is only defined when K(d) ⫰ K(e), which is why the GP always writes (d ∖ K(e)) ∪ e out explicitly instead of d ∪ e",
+"d ∖ {2} removes the pairs whose value is 2, so d ∖ {2} = d; K(e) = {c, a}; and d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a} because the right operand wins on a collision",
+"d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a} because the right operand wins on a collision; V(d ∪ e) = {a, c}; and writing d[3] in a rule asserts that key 3 exists — a block relying on it without handling ∅ is invalid"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 88,
+"id": "ch04-dagger-intermediate-states",
+"ch": "4",
+"gpRef": "eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18",
+"stem": "GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. Which description of what each one has just absorbed is correct?",
+"options": [
+"β_H† = β_H after this block's guarantees E_G are appended to the newest entry; ρ† = ρ after the assurances E_A; ρ‡ = ρ† after the guarantees E_G; δ‡ = δ after the preimages E_P are integrated, before accumulation runs",
+"β_H† = β_H with the parent's posterior state root H_R written into its newest entry; ρ† = ρ after the disputes E_D; ρ‡ = ρ† after the assurances E_A; δ‡ = δ after accumulating R*, before E_P is folded in",
+"β_H† = β_H after the accumulation-output log θ′ has been committed to the belt; ρ† = ρ after the guarantees E_G; ρ‡ = ρ† after the disputes E_D; δ‡ = δ after E_P is integrated and before deferred transfers are applied",
+"β_H† = β_H with H_R written in; ρ† = ρ after E_A; ρ‡ = ρ† after E_D; δ‡ = δ after E_P — the order of disputes and assurances is immaterial because both only remove entries from ρ"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 89,
+"id": "ch04-extrinsic-dependency-inputs",
+"ch": "4",
+"gpRef": "eq. 4.11–4.20",
+"stem": "Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, which statement about where the five extrinsic components enter the transition is TRUE?",
+"options": [
+"The preimages extrinsic E_P is an input to the accumulation step (eq. 4.16), so a service's accumulate code can read a preimage that was provided in the same block",
+"The assurances extrinsic E_A is a direct input to ρ′, i.e. ρ′ ≺ (E_G, E_A, ρ†, κ, τ′), because guarantees and assurances are processed together in one pass over the cores",
+"The guarantees extrinsic E_G is an input to ρ′, β_H′, α′ and π′, but not to the accumulation step, whose only extrinsic-derived input is R* (derived from E_A and ρ†)",
+"The disputes extrinsic E_D is a direct input to π′, because the validator statistics record which validators were reported as offenders in the block"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 90,
+"id": "ch04-in-core-300x-rationale",
+"ch": "4",
+"gpRef": "§4.8.1",
+"stem": "The Overview states that JAM should be able to do 'upwards of 300 times' the computation in-core as a single machine running the VM at full speed. What justifies this figure, and what keeps such unreplicated computation safe?",
+"options": [
+"A given computation is executed by only a subset of validators, so throughput scales with network size rather than one machine; the guarantee/assure/audit (and if needed judge) game secures it, and stateless in-core execution can be reproduced by any node synced to the finalized chain",
+"Every validator still executes every in-core computation, but the PVM's recompiler makes RISC-V code roughly 300 times faster than EVM bytecode; safety therefore follows from full replication, exactly as in the on-chain model, and no auditing stage is required",
+"In-core results are accepted on the guarantors' signatures alone and are never re-executed by anyone else; the economic stake bonded by the guarantors (slashed on a later dispute) is what makes the 300x figure safe without any further verification",
+"The 300x comes from each of the 341 cores using the whole 6-second slot in parallel; in-core code may read arbitrary on-chain state as of the lookup-anchor block, and that anchoring is what makes its results reproducible by other nodes"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 91,
+"id": "ch04-best-block-vs-finalized",
+"ch": "4",
+"gpRef": "§4.6; §4.3 (head, finalized); §19 (best chain)",
+"stem": "GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. Which statement matches the GP?",
+"options": [
+"The best block is the latest Grandpa-finalized block; JAM nodes never author on top of an unfinalized block, which is precisely why Grandpa lags only 1–2 blocks behind the most recent head and why no speculative state is ever exposed to applications",
+"The best block is simply the head — the valid block with the most ancestors — with ties between competing heads broken by the smaller header hash; Grandpa merely confirms that head some blocks later and plays no part in choosing a parent for authoring",
+"The best block is the head of the best chain (§19), used when latency matters more than certainty — choosing the parent for a block one is about to author, or reporting the latest state to a downstream application — at the risk that it never becomes canonical",
+"The best block is the most recent block whose timeslot is not in the future; Grandpa is consulted only afterwards, to prune whichever fork lost, so no separate best-chain rule is needed either for authoring or for serving state to applications"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 92,
+"id": "ch05-unsigned-header-serialization",
+"ch": "5",
+"gpRef": "eq. 5.1 & §C.2 (E(H), E_U(H))",
+"stem": "The team derives the unsigned header serialization by encoding the full header and truncating it. Which statement about GP 0.8.0's E(H) and E_U(H) explains why this is sound and describes E_U's layout correctly?",
+"options": [
+"E_U(H) omits both Bandersnatch signatures — the entropy source H_v as well as the seal H_s — so a conformant implementation must cut 192 bytes from E(H), and the seal's message contains no VRF material at all",
+"E(H) = E(E_U(H), H_s): the 96-octet seal is the last, fixed-size field, so cutting 96 bytes off E(H) yields exactly the seal's message; inside E_U the order is H_p, H_r, H_x, E_4(H_t), H_e (0/1 discriminator), H_w (0/1 discriminator), E_2(H_i), H_v, var(H_o)",
+"E_U(H) is E(H) with the seal replaced by 96 zero octets (keeping the header length constant so H_p can be computed before sealing), so simple truncation yields a message that is 96 bytes too short",
+"The serialized field order follows eq. 5.1 literally (…, H_w, var(H_o), E_2(H_i), H_v, H_s), so truncating the last 96 bytes is only correct when H_o is empty, because a non-empty offenders list shifts the seal's position"
+],
+"answer": 1,
+"code": "// (C.23)\n// This function encodes the header's properties without the seal\n// I still use header encoding function, but remove the length of the encoded seal\nfunc HeaderUSerialization(header types.Header) (output types.ByteSequence, err error) {\n\tencoder := types.GetEncoder()\n\tdefer types.PutEncoder(encoder)\n\n\tserializedHeader, err := encoder.Encode(&header)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n"
+},
+{
+"n": 93,
+"id": "ch05-extrinsic-hash-inclusion-proof",
+"ch": "5",
+"gpRef": "eq. 5.4–5.7",
+"stem": "A light client holds only a verified header H and wants to check that preimage blob d for service s was included in that block's E_P. Given H_x = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)] (eq. 5.4–5.7), what is the minimal witness it needs and what is the shape of the check?",
+"options": [
+"A log₂|E_P|-length Merkle path from the leaf H(d) up to H_x, because H_x is a binary Merkle root over all extrinsic items of the block, so the witness is O(log n) hashes",
+"The complete E_P (every preimage blob of the block) together with the other four extrinsics in full, because H_x hashes the block's whole extrinsic serialization as one blob and cannot be recomputed from hashes alone",
+"The other four component hashes (h_T, h_g, h_A, h_D) plus the entire p sequence of (E_4(s_i), H(d_i)) pairs: it checks (E_4(s), H(d)) ∈ p and H(h_T ⌢ H(p) ⌢ h_g ⌢ h_A ⌢ h_D) = H_x — no other blob is needed, but p is a flat blob, not a log-size path",
+"Only H(d), the service index s and the block's H_x, because eq. 5.6 commits each (service, preimage-hash) pair directly into H_x, so a single pair can be checked without the rest of E_P"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 94,
+"id": "ch05-future-slot-temporarily-invalid",
+"ch": "5",
+"gpRef": "eq. 5.8 & §5 text",
+"stem": "A node receives a block at wall-clock time T whose header has H_t · P > T, while P(H)_t < H_t holds (its parent is known and older). How does GP §5 classify this block?",
+"options": [
+"It is permanently invalid, and because authoring ahead of the clock is an offence its author's Ed25519 key must be added to ψ_O by the next disputes extrinsic",
+"It is valid as long as the drift is below one slot period P = 6 s, which the GP grants as clock-skew tolerance so that honest authors at the very start of a slot are not rejected",
+"It is valid: only the ordering rule P(H)_t < H_t is part of consensus; the wall-clock comparison is guidance for block authors and not a validity condition",
+"It fails eq. 5.8 for now, but the GP notes such a block 'may become valid as T advances' — unlike a block with H_t ≤ P(H)_t, which can never become valid, it is only temporarily invalid and may be re-evaluated later"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 95,
+"id": "ch05-author-index-bound-set",
+"ch": "5",
+"gpRef": "eq. 5.10 & eq. 6.8 (valcount)",
+"stem": "After fuzzer bug #825 (a header with H_i = 65535 panicked UpdateEtaPrime0 with 'index out of range [65535] with length 6' because the index was used before being validated), the team added this check. Is the bound it uses the one GP 0.8.0 specifies?",
+"options": [
+"Yes: eq. 5.10 defines H_i ∈ N_{|κ|} — the author must belong to the prior active set, because the block is built on the prior state and its seal is verified before the epoch's key rotation is applied",
+"Not exactly: eq. 5.10 bounds H_i by |κ′| (the posterior active set, whose key also verifies H_s and H_v); the prior κ is equivalent only while |κ| = |κ′|, which holds today because the team never resizes the set, but 0.8.0 lets validator-set sizes differ across an epoch boundary (eq. 6.8)",
+"Yes: the bound is the constant V (1023 full / 6 tiny); κ and κ′ always hold exactly V entries, so either length works in every configuration and the choice of set is purely cosmetic",
+"No: H_i indexes the pending set γ_P, since the first block of an epoch is sealed by the incoming validators, so the check should compare against |γ_P| taken from the prior Safrole state"
+],
+"answer": 1,
+"code": "\t// Validate author_index out of range.\n\t// NOTE: There is currently no official error code defined for this case.\n\t// We may need to update this once the spec updates.\n\tif header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {\n\t\terrCode := SafroleErrorCode.AuthorIndexOutOfRange\n\t\treturn &errCode\n\t}\n\treturn nil\n}"
+},
+{
+"n": 96,
+"id": "ch07-beta-entry-timeslot-080",
+"ch": "7",
+"gpRef": "eq. 7.2, 7.8 & eq. 11.36; §D.1 C(3)",
+"stem": "This 0.7.2 code builds the entry appended to β_H at the end of a block. What must change for GP 0.8.0, and which on-chain check motivates the change?",
+"options": [
+"Add the block's timeslot t = H_t as a fifth field (E_4(t) between s and p under state key C(3)): refinement contexts now carry the anchor's timeslot and eq. 11.36 requires it to equal the t of the matching β† entry (GP PR #526, team PR #1031)",
+"Replace the zero state root with the posterior root M_σ(σ′), because 0.8.0 headers now commit to the posterior state, so the β† correction of eq. 7.5 is no longer needed",
+"Store the whole accumulation-output sequence θ′ instead of the super-peak b, because eq. 11.36 now compares the anchor's accumulation log entry by entry rather than by commitment",
+"Add the lookup-anchor posterior state root of every guaranteed report, because eq. 11.38 now checks that value and β is the only on-chain place where it can be recorded"
+],
+"answer": 0,
+"code": "// pack item $n$ (7.8) GP 0.6.7\n/*\n\titem $n$ = (header hash $h$, accumulation-result mmr $b$, state root $s$, WorkReportHash $\\mathbf{p}$)\n*/\nfunc NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPackage, accumulationResultMmr types.OpaqueHash) (item types.BlockInfo) {\n\tzeroHash := types.StateRoot{}\n\titem = types.BlockInfo{\n\t\tHeaderHash: headerHash,\n\t\tBeefyRoot:  accumulatio"
+},
+{
+"n": 97,
+"id": "ch07-belt-empty-output",
+"ch": "7",
+"gpRef": "eq. 7.6–7.7 & eq. E.1, E.3",
+"stem": "Block N accumulates nothing that yields an output, so θ′ = []. What happens to the accumulation-output belt β_B and to the super-peak b written into block N's β_H entry?",
+"options": [
+"Nothing is appended and b repeats the parent's super-peak, so the belt holds one leaf per block that produced at least one accumulation output and BEEFY verifiers simply skip empty blocks",
+"An empty peak ∅ is appended to the peak sequence without any hashing, so the peak count grows by one while b stays unchanged until the next block with a non-empty θ′",
+"One leaf is still appended: M_B([], H_K) = N([], H_K) = H_0, so β′_B = A(β_B, H_0, H_K) and b = M_R(β′_B) changes — the belt always carries exactly one leaf per block since genesis",
+"The block's header hash H(H) is appended in place of the missing output root, so that the belt stays aligned one-to-one with the β_H entries and their header hashes"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 98,
+"id": "ch07-belt-five-appends-calc",
+"ch": "7",
+"gpRef": "eq. 7.7 & eq. E.8–E.10",
+"stem": "Starting from an empty belt β_B = [] at genesis, five consecutive blocks append their per-block roots r_1, …, r_5 (each r_i = M_B(s_i, H_K)). Applying the MMR append function of eq. E.8 with H = H_K, what is β_B after block 5, and what super-peak b = M_R(β_B) enters block 5's β_H entry?",
+"options": [
+"β_B = [H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4)), ∅, r_5]; b = H_K('peak' ⌢ H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4)) ⌢ r_5)",
+"β_B = [r_5, ∅, H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4))]; b = H_K('peak' ⌢ r_5 ⌢ H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4)))",
+"β_B = [M_B([r_1, r_2, r_3, r_4, r_5], H_K)]; b = that single root — the range is re-balanced on every append so there is always exactly one peak",
+"β_B = [r_5, ∅, H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4))]; b = H_K(r_5 ⌢ H_K(H_K(r_1 ⌢ r_2) ⌢ H_K(r_3 ⌢ r_4))) — the super-peak is just one more un-prefixed carry"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 99,
+"id": "ch08-leftmost-removal-code",
+"ch": "8",
+"gpRef": "eq. 8.3 (F) & eq. 11.25, 11.32",
+"stem": "Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. Which statement correctly describes the GP rule the fixed code implements and why the old behaviour was wrong?",
+"options": [
+"eq. 8.2: the removal only makes room for the appended queue entry, so deleting all duplicates is harmless because α[c] is a set in which the same authorizer hash can never occur twice",
+"eq. 11.32: the removal re-validates that the authorizer was in the pool and a missing match must reject the block — so the old code was wrong only in not returning an error when nothing matched",
+"eq. 8.3, but the pool to edit must be selected by the guarantors' validator indices (the core they are assigned to under G), not by the core index stored inside the work-report",
+"eq. 8.3: F(c) = α[c] ⊖ {w_a} removes one left-most instance from the pool of the report's own core; a pool is a sequence that may hold the same hash several times (e.g. a queue repeating one authorizer), so deleting every copy shrank pools and broke the test vectors"
+],
+"answer": 3,
+"code": "func updatePoolFromQueue(coreIndex types.CoreIndex, eg types.ReportGuarantee, alpha types.AuthPools) (types.AuthPools, error) {\n\tpool := alpha[coreIndex]\n\tif pool == nil {\n\t\treturn nil, fmt.Errorf(\"alpha[%d] is nil\", coreIndex)\n\t}\n\n\t// (8.3)   remove (g_r)a from α[c]（leftmost match）\n\tauthHashToRemoved := eg.Report.AuthorizerHash\n\tpool.RemoveLeftMostPairedValue(authHashToRemoved)\n\n\talpha[coreIndex]"
+},
+{
+"n": 100,
+"id": "ch08-pool-two-block-calc",
+"ch": "8",
+"gpRef": "eq. 8.2–8.3 & eq. 4.19",
+"stem": "Core c, with O = 8 and Q = 80. Before block N: α[c] = [x, y, x, z, w, u, v, t] (oldest on the left) and φ[c] = [q_0, …, q_79]. Block N has H_t = 171 and its E_G holds one guarantee for core c whose report has authorizer x; φ[c] is untouched in block N. Block N+1 has H_t = 173 and no guarantee for core c, but its accumulation calls `assign` on core c, replacing the queue with [r_0, …, r_79]. What is α[c] after block N+1?",
+"options": [
+"[x, z, w, u, v, t, q_11, q_13]",
+"[y, z, w, u, v, t, q_11, r_13]",
+"[x, z, w, u, v, t, q_3, r_5]",
+"[x, z, w, u, v, t, q_11, r_13]"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 101,
+"id": "ch08-new-authorizer-availability-timing",
+"ch": "8",
+"gpRef": "eq. 8.2, eq. 4.19 & eq. 11.32",
+"stem": "At the start of block N the pool α[c] does not contain authorizer x. During block N's accumulation the assigner service of core c calls `assign` with a queue whose entry at index H_t mod Q is x, so x will be appended to core c's pool by this block. Block N's E_G also carries a guarantee for core c whose work-report has authorizer x. Is that guarantee valid, and when is x first usable?",
+"options": [
+"Valid: α′ is deliberately computed after accumulation so that guarantees in the same block can already rely on freshly assigned authorizers, which is why §8.2 orders the pool update last",
+"Invalid: eq. 11.32 requires w_a ∈ α[w_c] on the prior pool, and x only enters α′[c] through eq. 8.2 at the end of block N — so the first block whose E_G may carry a report authorized by x is N+1",
+"Valid: the authorizer check accepts any hash present in α[c] or in φ′[c], since the queue is the source of the pool and the assigner has already approved that authorizer for the core",
+"Invalid, but for a different reason: a single block may not both alter a core's queue via `assign` and accept a guarantee on that core, so the guarantee is rejected regardless of x"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 139,
+"id": "ch04-stf-extrinsic",
+"ch": "4",
+"gpRef": "eq. 4.2–4.3 (block / extrinsic)",
+"stem": "Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Which of the following is NOT one of them?",
+"options": [
+"E_T — tickets for the Safrole slot-sealer contest",
+"E_X — user transactions signed by external accounts",
+"E_A — availability assurances by validators",
+"E_D — disputes (verdicts, culprits, faults)"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 140,
+"id": "ch04-state-components",
+"ch": "4",
+"gpRef": "eq. 4.4 (state composition)",
+"stem": "GP eq. 4.4 partitions the state σ into 17 components. Which pairing of symbol → meaning is WRONG?",
+"options": [
+"ρ → each core's current availability assignment (a guaranteed but not-yet-available work-report)",
+"ξ → work-packages recently accumulated (one epoch of history)",
+"ϑ → the authorizer queue from which each core's pool is refilled",
+"θ → the accumulation output log of the most recent block"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 141,
+"id": "ch04-dependency-graph-alpha",
+"ch": "4",
+"gpRef": "eq. 4.5–4.20",
+"stem": "In the state-transition dependency graph, the posterior authorizer pool α′ is defined as α′ ≺ (H, E_G, φ′, α). What does this imply for the order of computation inside a block import?",
+"options": [
+"α′ can be computed first, before any extrinsic is validated, since it depends only on the header",
+"α′ must be computed after accumulation, because φ′ (the posterior authorizer queue) is only known once accumulate has run (the `assign` host call may change it)",
+"α′ must be computed before the guarantees extrinsic is validated, otherwise the authorizer check would use a stale pool",
+"α′ is independent of the extrinsic and can be computed in parallel with Safrole"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 142,
+"id": "ch04-common-era",
+"ch": "4",
+"gpRef": "§4.4 (JAM Common Era)",
+"stem": "When does the JAM Common Era begin, and why was that particular time of day chosen?",
+"options": [
+"00:00 UTC on 1 January 2025 — so that timeslot 0 coincides with the start of a calendar day",
+"12:00 UTC on 1 January 2025 — midday ensures every major timezone is on the same calendar date at any exact 24-hour multiple from the epoch start",
+"12:00 UTC on 1 January 2024 — the date the Gray Paper was first published",
+"00:00 UTC on 1 January 2025 — to align with the Unix epoch day boundary"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 143,
+"id": "ch04-in-core-vs-on-chain",
+"ch": "4",
+"gpRef": "§4.8.1–4.8.2",
+"stem": "Which statement correctly contrasts JAM's in-core and on-chain consensus models?",
+"options": [
+"In-core computation is executed by every validator, while on-chain computation is executed only by the block author",
+"In-core computation (refine) is executed by a subset of validators and secured by the guarantee/assure/audit/judge game; on-chain computation (accumulate) is executed by all validators",
+"In-core computation is stateful and may transfer balances; on-chain computation is stateless and has arbitrary inputs",
+"Both models are executed by all validators; the difference is only in gas pricing"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 144,
+"id": "ch04-balance-timeslot-ranges",
+"ch": "4",
+"gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
+"stem": "Which of the following is TRUE about the numeric domains used by JAM?",
+"options": [
+"Balances are N_2^64 (u64) with a standard denomination of 10^9 tokens; timeslots are N_2^32, giving the protocol a lifespan into the year 2840",
+"Balances are N_2^128 to match Polkadot's 10^10 denomination; timeslots are N_2^64",
+"Balances are N_2^64 with a 10^18 denomination like Ethereum; timeslots are N_2^32",
+"Balances and timeslots are both N_2^64"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 145,
+"id": "ch04-coretime-vs-gas",
+"ch": "4",
+"gpRef": "§4.8.2 last paragraphs",
+"stem": "How does JAM replace Ethereum's gas-purchase model for buying blockspace?",
+"options": [
+"Each service pays gas from its balance at the moment its work-report is accumulated",
+"Coretime is pre-purchased (Agile-Coretime style) and assigned to an authorization agent; procurement is out of scope of the GP and expected to be handled by a system parachain",
+"Validators auction each 6-second slot to the highest bidding work-package builder",
+"Work-package builders sign transactions that deduct DOT from their account on inclusion"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 146,
+"id": "ch04-pvm-summary",
+"ch": "4",
+"gpRef": "§4.5, eq. 4.22–4.27",
+"stem": "Which description of the PVM as summarized in the Overview is correct?",
+"options": [
+"A stack machine derived from WebAssembly with 32-bit words and 16 registers",
+"A RISC-V (RV64EM) based register machine with 13 64-bit registers, little-endian, and a pageable 32-bit address space in 4096-octet pages",
+"A RISC-V (RV32IM) based machine with 16 registers and a 64-bit address space",
+"An EVM-compatible machine with cryptographic precompiles built into the instruction set"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 147,
+"id": "ch04-forks-safrole-grandpa",
+"ch": "4",
+"gpRef": "§4.3",
+"stem": "JAM states three goals about forks: (1) two heads should rarely form, (2) when they do they should be resolved quickly, (3) it should be possible to identify a recent block that will remain in history in perpetuity. Which mechanism delivers which goal?",
+"options": [
+"Safrole delivers (1), Grandpa delivers (3), and both contribute to (2)",
+"Grandpa delivers (1) and (2); Safrole delivers (3)",
+"Safrole delivers all three; Grandpa is only used for BEEFY bridging",
+"ELVES auditing delivers (1); Safrole delivers (2); Grandpa delivers (3)"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 148,
+"id": "ch05-header-fields",
+"ch": "5",
+"gpRef": "eq. 5.1",
+"stem": "GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?",
+"options": [
+"H_r — the prior state root",
+"H_w — the winning-tickets marker",
+"H_b — the BEEFY/accumulation-output root of this block",
+"H_v — the entropy-yielding VRF signature"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 149,
+"id": "ch05-prior-state-root",
+"ch": "5",
+"gpRef": "eq. 5.9 (H_r)",
+"stem": "Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_r = M_σ(σ)) rather than the posterior one. What is the stated reason?",
+"options": [
+"To reduce header size, since the posterior root is already implied by the extrinsic hash",
+"To facilitate pipelining of block computation, in particular of Merklization: the author need not finish Merklizing the new state before publishing the block",
+"Because Grandpa votes require the prior root to verify ancestry",
+"Because the posterior state root cannot be computed until the block is finalized"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 150,
+"id": "ch05-extrinsic-hash-080",
+"ch": "5",
+"gpRef": "eq. 5.4–5.7 (H_x)",
+"stem": "GP 0.8.0 (PR #524) redefined the extrinsic hash H_x = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?",
+"options": [
+"p and g are simply the full codec encodings of E_P and E_G, identical to the block encoding",
+"p is the encoding of the sequence of (E_4(service), H(data)) pairs; g is the encoding of the sequence of (H(work-report), E_4(slot), var(credential)) tuples — so each preimage's and report's inclusion can be proven individually",
+"p is the Blake2b hash of the concatenated preimage blobs; g is the Keccak hash of the concatenated reports",
+"p and g are omitted from H_x; only tickets, assurances and disputes are committed"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 151,
+"id": "ch05-timeslot-validity",
+"ch": "5",
+"gpRef": "eq. 5.8",
+"stem": "Which condition must a block's timeslot H_t satisfy for the block to be considered valid right now?",
+"options": [
+"P(H)_t < H_t and H_t · P ≤ T (i.e. strictly after the parent and not in the future relative to the wall clock)",
+"P(H)_t ≤ H_t and H_t · P ≤ T",
+"P(H)_t < H_t and H_t · P ≥ T",
+"H_t = P(H)_t + 1 exactly"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 152,
+"id": "ch05-author-index",
+"ch": "5",
+"gpRef": "eq. 5.10 (H_i, H_a)",
+"stem": "The block author index H_i is an index into which validator set, and how is the author's Bandersnatch key H_a obtained?",
+"options": [
+"Into the prior active set κ; H_a = κ[H_i]_b and it is serialized in the header",
+"Into the posterior active set κ′; H_a ≡ κ′[H_i]_b and H_a is NOT serialized (it is merely an equivalence)",
+"Into the pending set γ_k; H_a = γ_k[H_i]_b",
+"Into the staging set ι; H_a = ι[H_i]_b"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 153,
+"id": "ch05-ancestors-lookup-anchor",
+"ch": "5",
+"gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
+"stem": "The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?",
+"options": [
+"Verifying that a guarantee's lookup-anchor block (hash, timeslot and posterior state root) actually exists in the chain's ancestry — a check that cannot be done from state σ alone",
+"Verifying the parent hash H_p of each new block",
+"Verifying that assurances are anchored on the parent block",
+"Recomputing the fallback slot-sealer sequence after a skipped epoch"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 154,
+"id": "ch05-markers-types",
+"ch": "5",
+"gpRef": "eq. 5.11 (markers)",
+"stem": "Which statement about the three header markers (H_e, H_w, H_o) is correct per eq. 5.11?",
+"options": [
+"H_e ∈ (H, H, [(bandersnatch, ed25519)]_V)? , H_w ∈ ([ticket]_E)? , H_o ∈ [ed25519 key] — the first two are optional, the offenders marker is a (possibly empty) sequence",
+"All three markers are optional and are None in every block except the first block of an epoch",
+"H_e contains the full 336-octet validator keys of the next epoch; H_w contains the fallback keys",
+"H_o is optional and contains the indices (not keys) of offending validators"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 174,
+"id": "ch07-beta-structure",
+"ch": "7",
+"gpRef": "eq. 7.1–7.4",
+"stem": "In GP 0.8.0 the recent-history state is β ≡ (β_H, β_B). What does each recent block entry in β_H hold, and what is β_B?",
+"options": [
+"Each β_H entry: (header hash h, state root s, accumulation-output-log super-peak b, timeslot t, dictionary p of reported work-package hash → segment root); β_B is the accumulation-output belt, an MMR of per-block accumulation-output roots",
+"Each β_H entry: (header hash, posterior state root, extrinsic hash); β_B is the BEEFY signature set",
+"Each β_H entry: (header hash, state root, list of all work-report hashes); β_B is the list of the last 8 block headers",
+"β_H is a single hash of the last 8 headers; β_B is the entropy accumulator"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 175,
+"id": "ch07-beta-dagger",
+"ch": "7",
+"gpRef": "eq. 7.5 & 7.8",
+"stem": "Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?",
+"options": [
+"Because the posterior state root of block N is not yet known when β′ is computed (the header carries the prior root); block N+1 computes β† by overwriting the last entry's s with its own H_r (eq. 7.5) before anything reads β",
+"Because the state root is only needed for finalized blocks; Grandpa fills it in",
+"Because β_H entries never store state roots — the zero hash is permanent",
+"Because the state root is stored in β_B instead"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 176,
+"id": "ch07-belt-keccak",
+"ch": "7",
+"gpRef": "eq. 7.6–7.7",
+"stem": "The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?",
+"options": [
+"s = [E_4(service) ⌢ E(hash) for each (service, hash) in θ′]; Keccak is used 'to maximize compatibility with legacy systems' (i.e. EVM/BEEFY bridges can verify the belt cheaply)",
+"s = the list of all work-report hashes; Keccak is faster than Blake2b on modern CPUs",
+"s = the encoded header; Keccak is required by the Bandersnatch VRF",
+"s = [H(report) for each guarantee]; Keccak is mandated by Grandpa"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 177,
+"id": "ch07-purpose",
+"ch": "7",
+"gpRef": "§7 & eq. 11.36, 11.41–11.44",
+"stem": "What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?",
+"options": [
+"To preclude duplicate or out-of-date work-reports: a guarantee's anchor must appear in β† and its package hash must not already be in any recent block's reported set",
+"To allow light clients to sync headers without state",
+"To compute the fallback slot-sealer sequence",
+"To store the last 8 state roots for Grandpa voting"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 178,
+"id": "ch08-pool-queue-sizes",
+"ch": "8",
+"gpRef": "eq. 8.1",
+"stem": "What are the shapes of the authorizer pool α and authorizer queue φ?",
+"options": [
+"α ∈ [[H]_{:O}]_C with O = 8 (up to 8 authorizer hashes per core); φ ∈ [[H]_Q]_C with Q = 80 (exactly 80 per core)",
+"α ∈ [[H]_{:80}]_C; φ ∈ [[H]_8]_C",
+"α ∈ [H]_C (one authorizer per core); φ ∈ [[H]_600]_C",
+"α and φ are both dictionaries from authorizer hash to core index"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 179,
+"id": "ch08-pool-update",
+"ch": "8",
+"gpRef": "eq. 8.2–8.3",
+"stem": "Core c has pool α[c] = [a, b, a, d] (left = oldest) and a guarantee in E_G for core c whose report has authorizer a. With φ′[c][H_t mod Q] = x and O = 8, what is α′[c]?",
+"options": [
+"[b, a, d, x] — the leftmost occurrence of a is removed, then x is appended, and the last O entries are kept",
+"[b, d, x] — every occurrence of a is removed",
+"[a, b, a, d, x] — nothing is removed since the pool is not full",
+"[x, a, b, a, d] — x is prepended and the oldest is dropped only when the pool exceeds O"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 180,
+"id": "ch08-authorizer-identity",
+"ch": "8",
+"gpRef": "§8.1 & eq. 14.2 (delta #522)",
+"stem": "How is an authorizer identified in GP 0.8.0, and where is the authorization decision actually made?",
+"options": [
+"Authorizer = H(PVM code hash ⌢ configuration blob); the is-authorized decision is made entirely in-core by the guarantors (Ψ_I), while on-chain logic only checks that the authorizer is in the core's pool",
+"Authorizer = the code hash alone; the block author runs the authorizer on-chain",
+"Authorizer = H(token ⌢ trace); every validator re-runs the authorizer during block import",
+"Authorizer = the Ed25519 key of the coretime purchaser"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 181,
+"id": "ch08-why-authorization",
+"ch": "8",
+"gpRef": "§8 intro",
+"stem": "What motivation does the GP give for the authorization system?",
+"options": [
+"To disentangle the intention of using some coretime from the specification/submission of a particular workload, so JAM can support both Ethereum-style (purchaser = author) and Polkadot-style (purchaser ≠ author) interaction patterns",
+"To let validators charge different gas prices per core",
+"To replace Grandpa finality with authorizer votes",
+"To prevent services from creating more than one work-package per slot"
+],
+"answer": 0,
+"code": ""
+}
+]

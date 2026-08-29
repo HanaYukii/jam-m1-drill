@@ -1,0 +1,302 @@
+[
+{
+"n": 19,
+"id": "appC-compact-int",
+"ch": "C",
+"gpRef": "§C.1 general natural number serialization",
+"stem": "Using the GP's general natural-number encoding E(x), what is E(128) and what is E(2^56)?",
+"options": [
+"E(128) = [0x80, 0x80]; E(2^56) = [0xFF] ⌢ E_8(2^56) (9 octets)",
+"E(128) = [0x80]; E(2^56) = 8 octets little-endian",
+"E(128) = [0x81, 0x00]; E(2^56) = [0xFE] ⌢ 7 octets",
+"E(128) = [0x00, 0x80]; E(2^56) = [0xFF, 0x01, 0, 0, 0, 0, 0, 0, 0]"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 20,
+"id": "appC-discriminators",
+"ch": "C",
+"gpRef": "§C.1.3–C.1.5",
+"stem": "Which statement about JAM's codec conventions is correct?",
+"options": [
+"Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; bit sequences pack bits LSB-first into octets; since 0.7.0 all variable-length fields of a structure are moved to its end",
+"Everything is prefixed with its byte length, including hashes",
+"Optionals are encoded as 0xFF for ∅; dictionaries are unordered",
+"Bit sequences are MSB-first; structures keep fields in declaration order regardless of size"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 21,
+"id": "appC-fixed-vs-compact",
+"ch": "C",
+"gpRef": "§C.2 & appendix D note",
+"stem": "Where does the GP use fixed-width integer encodings E_l versus the general compact encoding E?",
+"options": [
+"State serialization (appendix D) uses fixed-length for all non-discriminator numerics (e.g. E_4(τ), E_8(balance)); block/extrinsic encodings use E_4 for timeslots and validator indices and E_2 for core indices in some places, while lengths/discriminators always use the compact E; the GP defines each structure's encoding explicitly in appendix C",
+"Everything in JAM uses the compact encoding",
+"Everything in JAM uses fixed 8-octet little-endian integers",
+"The block uses compact integers; the state uses big-endian fixed integers"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 22,
+"id": "appD-state-key",
+"ch": "D",
+"gpRef": "§D.1 eq. C",
+"stem": "The state-key constructor C maps to 31-octet keys. Which forms are correct?",
+"options": [
+"C(i) = [i, 0, 0, …]; C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …] with n = E_4(s); C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26] with n = E_4(s) and a = H(h) — service-id bytes interleaved with the first 4 hash bytes, then hash bytes 4..26",
+"C(i) = [0, …, i]; C(i, s) = [i] ⌢ E_4(s); C(s, h) = E_4(s) ⌢ h[0..27]",
+"C(i) = H(i)[0..31]; C(i, s) = H(i ⌢ s)[0..31]; C(s, h) = H(s ⌢ h)[0..31]",
+"All keys are 32 octets: C(x) = Blake2b(x)"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 23,
+"id": "appD-trie-nodes",
+"ch": "D",
+"gpRef": "§D.2.1 B and L functions, M",
+"stem": "How are nodes of the state Patricia Merkle trie encoded?",
+"options": [
+"Every node is 512 bits. Branch: bit 0 = 0, then the last 255 bits of the left child's hash, then the full 256 bits of the right child's hash. Leaf with value ≤ 32 octets: bits 10 + 6-bit value length, the 31-octet key, then the value zero-padded to 32 octets. Leaf with larger value: bits 11000000, the 31-octet key, then H(value). Empty (sub)trie = zero hash; node identity = Blake2b of the 64 octets",
+"Nodes are variable-length RLP like Ethereum; branches have 16 children",
+"Branch: 256-bit left + 256-bit right; leaves store key and value hash only; empty = H([])",
+"Nodes are 256 bits: 128-bit left + 128-bit right"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 24,
+"id": "appE-merkle-functions",
+"ch": "E",
+"gpRef": "eq. E.1–E.8",
+"stem": "Which description of the general Merklization functions is correct?",
+"options": [
+"N (node): splits the sequence at ⌈n/2⌉ and hashes '$node' ⌢ left ⌢ right (well-balanced); M_B is the root over hashed leaves; M (constant-depth) first hashes each leaf as '$leaf' ⌢ v and pads to a power of two with zero hashes — used for segment roots and paged proofs; the MMR append A adds a peak with binary-addition-style carrying and the super-peak folds the peaks with a '$peak' prefix",
+"All trees are 16-ary like Ethereum's Patricia trie",
+"M_B is a sparse Merkle tree of depth 256; MMRs are not used",
+"N hashes left ⌢ right without any prefix"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 25,
+"id": "appH-erasure-rate",
+"ch": "H",
+"gpRef": "eq. H.1",
+"stem": "The systematic Reed-Solomon code over GF(2^16) has rate d(v):v with d(v) = max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0}). What is d for v = 1023 and for v = 6, and what does this achieve?",
+"options": [
+"d(1023) = 342 and d(6) = 3: any d of the v chunks reconstruct the data, so the system survives almost two-thirds of validators being malicious or offline; a 4,104-octet segment splits into 4104/(2·342) = 6 pieces per validator at full scale",
+"d(1023) = 341 and d(6) = 2: exactly one-third of the chunks reconstruct",
+"d(1023) = 512 and d(6) = 3: half of the chunks reconstruct",
+"d(1023) = 682 and d(6) = 4: two-thirds of the chunks reconstruct"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 26,
+"id": "appH-chunking",
+"ch": "H",
+"gpRef": "eq. H.5–H.6",
+"stem": "How does the chunking function C_v^k turn a data blob into v chunks, and what makes the code 'systematic'?",
+"options": [
+"The blob (padded to a multiple of 2·d(v) octets) is split into k pieces of d(v) octet-pairs; each piece is erasure-coded into v octet-pairs; the results are transposed so that chunk i holds the i-th pair of every piece (k pairs per chunk); systematic means the first d(v) chunks are the original data, so if they are all present reconstruction is mere concatenation",
+"The blob is hashed d(v) times and each hash is a chunk",
+"Each chunk is a full copy of the blob (replication)",
+"The blob is XOR-split into v parts of equal size"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 60,
+"id": "appC-decode-compact-bytes",
+"ch": "C",
+"gpRef": "§C.1 general natural-number encoding E (unlabelled, 5th equation of appendix C)",
+"stem": "A decoder reads the two octets [0xA7, 0x10] as one general natural number E(x) of §C.1. What is x?",
+"options": [
+"10000",
+"2087",
+"42768",
+"4263"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 61,
+"id": "appC-code-avspec-080",
+"ch": "C",
+"gpRef": "§C.2 E(s ∈ availability spec); eq. 11.5; eq. 11.31",
+"stem": "The team's encoder for the availability specification (work-package spec) is still on GP 0.7.2. What must change so that it produces the GP 0.8.0 wire form E(s) of §C.2, and which on-chain rule accompanies the new field?",
+"options": [
+"Insert a U16 erasure-shard count v, encoded E_2(v), between ErasureRoot and ExportsRoot; the other widths stay as they are (E_4 length, E_2 exports count); on-chain every incoming report must carry v = |κ′|",
+"Append E_2(v) after ExportsCount, because since GP 0.7.0 any newly added field of a structure must go to its end to keep decoders streaming-friendly; on-chain v must equal the number of cores C",
+"Replace the fixed E_4 Length with a compact E(l) and add v as a compact natural right after it; v is whatever number of chunks the guarantor actually distributed, so it is not checked on-chain",
+"Nothing on the wire: v is derivable from the validator count V and is therefore never serialized; only the JSON test-vector schema gains an erasure_shards field for readability"
+],
+"answer": 0,
+"code": "func (w *WorkPackageSpec) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding WorkPackageSpec\")\n\n\t// Hash\n\tif err := w.Hash.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// Length\n\tif err := w.Length.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ErasureRoot\n\tif err := w.ErasureRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsRoot\n\tif err := w.ExportsRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t/"
+},
+{
+"n": 62,
+"id": "appC-work-digest-encoding",
+"ch": "C",
+"gpRef": "§C.2 E(d ∈ work digest) and O(o); eq. 11.6–11.7",
+"stem": "A work digest d = (s, c, y, g, l, u, i, x, z, e) is serialized inside a work report. Which statement about its encoding in GP 0.8.0 is correct?",
+"options": [
+"E_4(s), c, y, E_8(g), then O(l) — [0] ⌢ ↕blob on success, else one octet 1…6 for ∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG — then u, i, x, z, e as compact naturals (digests are never read individually by the PVM, so space wins)",
+"O(l) uses 0 for ∞ and [1] ⌢ ↕blob for success, mirroring the ¿x optional encoding; the five load fields u, i, x, z, e are E_4 so that every digest has a predictable size for the report-size limit W_R",
+"Every numeric field is fixed-width — E_8 for both gas values, E_4 for the four counters and E_4 for the extrinsic size — because work reports are hashed into the state trie and fixed widths keep the trie leaves aligned",
+"The gas limit g is a compact natural exactly like the core index of the enclosing work report, the result carries a leading length prefix in all seven cases, and u, i, x, z, e are E_2 counters"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 63,
+"id": "appC-code-operand-transfer-prefix",
+"ch": "C",
+"gpRef": "§C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14",
+"stem": "The team prefixes each accumulate input item with a byte before its body. Which explanation of the two prefixes and of what actually consumes this encoding is correct per GP 0.8.0?",
+"options": [
+"The prefixes are the discriminators GP puts in front of E(operand tuple) (0) and E(deferred transfer) (1); Ψ_A takes one mixed sequence i ∈ ⟦operand ∪ transfer⟧ and the service reads it back through fetch (cases 14/15), so each item must be self-describing",
+"The prefixes distinguish the two halves of the accumulate memory image: Ψ_M's initial argument E(t, s, |i|) is followed by all operands (prefix 0) and then all transfers (prefix 1) written into RAM at start-up",
+"The prefix is the version byte introduced in GP 0.7.1 (0 = legacy operand layout, 1 = transfer layout with the 128-octet memo); 0.8.0 removes it because transfers are no longer accumulate inputs",
+"The prefixes are a team convention for the JSON test vectors only; on the wire GP orders all transfers before all operands and relies on their different fixed lengths (a transfer is 152 octets) to tell them apart"
+],
+"answer": 0,
+"code": "func (o *OperandOrDeferredTransfer) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding OperandOrDeferredTransfer\")\n\n\t// if operand is nil, append 0 to the buffer, else append 1\n\tif o.Operand == nil && o.DeferredTransfer == nil {\n\t\treturn errors.New(\"Operand and DeferredTransfer are both nil\")\n\t}\n\t// ...\n\t// Operand\n\tif o.Operand != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{0})\n\n\t\tif err := o.Operand.En"
+},
+{
+"n": 64,
+"id": "appD-leaf-first-octet",
+"ch": "D",
+"gpRef": "§D.2.1 functions B and L (unlabelled)",
+"stem": "In the state trie, what is the first octet of the 64-octet leaf node for a value of exactly 32 octets, and what is it for a value of 33 octets?",
+"options": [
+"0xA0 for the 32-octet value and 0xC0 for the 33-octet value",
+"0xC0 for both — 32 octets already needs the full value slot, so both are regular leaves storing H(v)",
+"0xA0 and 0xA1 — the 6-bit length field holds any length up to 63, so 33 still fits as an embedded value",
+"0x80 and 0xC0 — the length is not part of the first octet; it is recovered from the zero padding"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 65,
+"id": "appD-code-service-info-key",
+"ch": "D",
+"gpRef": "§D.1 state-key constructor C (unlabelled first equation of appendix D)",
+"stem": "Before PR #780 the team recognised a service-info key C(255, s) by testing only stateKey[0] == 0xFF, and fuzzer traces failed with 'failed to decode expected service info from state key 0xffff0017…: EOF'. Why was byte 0 alone ambiguous, and why is the current check sound?",
+"options": [
+"C(s, h) keys start with n_0, the low octet of E_4(s), so every service with s mod 256 = 255 yields storage/preimage/request keys beginning 0xFF; the new check also requires zeros in all non-service-id positions, which a Blake2b-derived key matches only with negligible probability",
+"C(255, s) keys for service ids above 2^24 spill their fourth id octet into position 9, so byte 0 alone cannot separate them from the chapter keys C(9)…C(16); the fix therefore skips positions 1, 3, 5, 7 and tolerates position 9 as well",
+"Because C(s, h) hashes the service id together with the key, every octet of such a key — the first one included — is uniformly random, so about 1/256 of them start with 0xFF; the fix re-hashes the whole key so the 0xFF prefix becomes unreachable",
+"The chapter key C(255) of the accumulation-output component θ shares its first octet with C(255, s); the fix tells them apart by demanding a non-zero service id in positions 1, 3, 5, 7 and zeros everywhere else"
+],
+"answer": 0,
+"code": "func IsServiceInfoKey(stateKey types.StateKey) bool {\n\tif stateKey[0] != 0xFF {\n\t\treturn false\n\t}\n\tfor i := 1; i < len(stateKey); i++ {\n\t\tif i == 1 || i == 3 || i == 5 || i == 7 {\n\t\t\tcontinue\n\t\t}\n\t\tif stateKey[i] != 0 {\n\t\t\treturn false\n\t\t}\n\t}\n\treturn true\n}\n\n// [n_0, h_0, n_1, h_1, n_2, h_2, n_3, h_3, h_4, h_5,...,h_26] where n = encode_4(service_id)\nfunc (w ServiceWrapper) StateKeyConstruct() (ou"
+},
+{
+"n": 66,
+"id": "appE-mmr-append-worked",
+"ch": "E",
+"gpRef": "eq. E.8 (append A/P/R), E.9 (encoding), E.10 (super-peak)",
+"stem": "Starting from an empty MMR, five leaves l_0 … l_4 are appended with A (eq. E.8) using hash function H. What is the resulting peak sequence, and how does the super-peak function M_R (eq. E.10) commit to it?",
+"options": [
+"Peaks [l_4, ∅, H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3))]; super-peak = H_K($peak ⌢ l_4 ⌢ H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3)))",
+"Peaks [l_4, ∅, H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3))]; super-peak = H_K($peak ⌢ H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3)) ⌢ l_4)",
+"Peaks [H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3)), ∅, l_4]; super-peak = H_K($peak ⌢ H(H(l_0 ⌢ l_1) ⌢ H(l_2 ⌢ l_3)) ⌢ l_4)",
+"Peaks [l_4, ∅, H($node ⌢ H($node ⌢ l_0 ⌢ l_1) ⌢ H($node ⌢ l_2 ⌢ l_3))]; super-peak = H_K($peak ⌢ l_4 ⌢ H($node ⌢ …))"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 67,
+"id": "appE-paged-proof-sizes",
+"ch": "E",
+"gpRef": "eq. E.4–E.7; eq. 14.12 (paged-proofs P)",
+"stem": "A work-package exports 200 segments s. With pages of 2^6 = 64 leaves, how many paged-proof segments does P(s) (eq. 14.12) add to the D³L, and how many hashes does the page path J_6(s, i) (eq. E.5) contain for each page?",
+"options": [
+"4 paged-proof segments, each carrying a 2-hash page path",
+"3 paged-proof segments, each carrying a 2-hash page path",
+"4 paged-proof segments, each carrying an 8-hash page path",
+"4 paged-proof segments, each carrying a 6-hash page path"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 68,
+"id": "appF-code-shuffle",
+"ch": "F",
+"gpRef": "eq. F.1 (shuffle), F.2 (Q_l), F.3 (hash form); eq. 11.20–11.22 (guarantor assignment R, P, G); eq. 17.3 and the tranche-0 selection that follows it",
+"stem": "This is the team's implementation of the shuffle F of eq. F.1. For s = [10, 20, 30, 40] and r = [3, 6, 4, 5], what does it return, and is the in-place swap faithful to the GP definition?",
+"options": [
+"[40, 10, 30, 20]; faithful — GP writes s_{l−1} into the picked slot and drops the last position, and swapping then slicing off the tail is the same thing (the caller's slice is mutated as a side effect)",
+"[40, 10, 20, 30]; not faithful — GP removes the picked element and shifts the remainder left, preserving relative order, so the swap with s[l-1] silently permutes the survivors",
+"[20, 30, 10, 40]; not faithful — GP's result is the array left in place after all swaps have been applied, not the sequence of picked elements, so this function returns the reverse of what eq. F.1 defines",
+"[40, 30, 10, 20]; not faithful — GP takes every r_i modulo the original length l and indexes the original sequence without shrinking it, discarding duplicates only at the end"
+],
+"answer": 0,
+"code": "func FisherYatesShuffle(s []types.U32, r []types.U32) []types.U32 {\n\tl := len(s)\n\n\t// If the sequence is empty, return an empty slice\n\tif l == 0 {\n\t\treturn make([]types.U32, 0)\n\t}\n\n\t// Calculate the index\n\tindex := r[0] % types.U32(l)\n\n\t// The selected element\n\tselected := s[index]\n\n\t// Swap elements\n\ts[index], s[l-1] = s[l-1], s[index]\n\n\t// Recursively shuffle the remaining elements\n\tshuffledRest"
+},
+{
+"n": 69,
+"id": "appG-ietf-vs-ring",
+"ch": "G",
+"gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
+"stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?",
+"options": [
+"Only ticket proofs in E_T are 784-octet ring-VRF proofs (anonymous, checked against a 144-octet ring root); the seal H_S, entropy H_V and audit seeds are 96-octet IETF VRF signatures under a named key; in both, Y(·) is the first 32 octets of the VRF output and depends on the context, not the message",
+"Both the seal H_S and the ticket proof are 784-octet ring-VRF proofs against γ′_Z — that is what keeps the block author anonymous until the epoch ends — while H_V and the audit seeds are 96-octet IETF signatures whose Y(·) is the full 64-octet VRF output",
+"Y(x) is the Blake2b hash of the entire 96- or 784-octet signature, so changing the signed message changes the ticket identifier; this is why tickets sign the empty message while seals sign E_U(H)",
+"The ring root γ_Z is committed over the Bandersnatch keys of the active set κ′ rather than the pending set; offenders' zeroed keys are simply skipped, so the ring shrinks by the number of offenders and the proof shrinks with it"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 70,
+"id": "appG-signing-contexts",
+"ch": "G",
+"gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
+"stem": "Each JAM signature is domain-separated by a context string X. Which of the following (context → primitive → use) statements is correct?",
+"options": [
+"X_T = $jam_ticket_seal is used twice: for the ring-VRF ticket proof (context X_T ⌢ η′_2 ⌢ [e], empty message, root γ′_Z) and for the regular IETF-VRF seal (context X_T ⌢ η′_3 ⌢ [i_e], message E_U(H))",
+"X_E = $jam_entropy is an Ed25519 signature by the author over the unsigned header E_U(H); the Blake2b hash of that signature is what feeds the entropy accumulator η′_0 each block",
+"X_G = $jam_guarantee is a Bandersnatch VRF context over H(w), and its output Y(·) doubles as the guarantee identifier stored with the availability assignment in ρ",
+"X_U = $jam_audit is the Ed25519 context under which validators sign the judgments that appear in the verdicts of the disputes extrinsic E_D, one signature per report hash"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 71,
+"id": "appH-segment-chunk-size",
+"ch": "H",
+"gpRef": "eq. H.1, H.5–H.6; §14.4.1 availability specifier",
+"stem": "With v = 1023 assurers, one exported segment of W_G = 4,104 octets is erasure-coded with C_v^k (eq. H.5). How large is the chunk each validator receives, and what does validator j < d(v) actually hold?",
+"options": [
+"12 octets (k = 4104/684 = 6 octet-pairs); a validator with index j < 342 holds the plain segment octets [12j, 12j + 12) because the code is systematic",
+"4 octets, i.e. 4104/1023 rounded down, with the remainder spread over the first few validators so that every octet of the segment is stored exactly once",
+"684 octets — one full piece of 2·d(v) octets per validator — so any 6 validators together hold a complete segment and can reconstruct it by concatenation",
+"6 octets, since a segment yields 6 pieces and each validator stores one two-byte word of every piece; validator j < 342 therefore holds three words of data and three of parity"
+],
+"answer": 0,
+"code": ""
+}
+]

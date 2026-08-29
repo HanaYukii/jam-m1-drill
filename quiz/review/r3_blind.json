@@ -1,0 +1,172 @@
+[
+ {
+  "id": "c3-ch07-reported-map-shape",
+  "ch": "7",
+  "section": "7 Recent History",
+  "gpRef": "eq. 7.2 & 7.8; §7",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "Every item of β_H carries a field p. In GP 0.8.0, what does p hold, and what bounds the number of entries it can have?",
+  "options": [
+   "A dictionary keyed by each work-package hash guaranteed in that block, whose value is that package's segment-root; at most C = 341 entries, because a block can report at most one work-report per core",
+   "A set holding the header hashes of the block's ancestors; at most H = 8 entries, one for each block kept in the recent-history window",
+   "A dictionary keyed by each guaranteed work-package hash, whose value is the index of the core the work ran on; at most O = 8 entries, matching the size of a core's authorizer pool",
+   "A sequence of the payload hashes of every work-item in every report of the block; at most I = 16 entries, the maximum number of work-items in one work-package"
+  ],
+  "code": "",
+  "n": 1
+ },
+ {
+  "id": "c3-ch07-reported-map-downstream",
+  "ch": "7",
+  "section": "7 Recent History",
+  "gpRef": "eq. 7.8 & eq. 11.41–11.44",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "When a block's guarantees extrinsic E_G is validated in §11, which of the on-chain checks actually read the reported-package maps stored inside β_H?",
+  "options": [
+   "Three of them: an incoming package hash must not already be a key of any recent block's map (anti-duplicate); every prerequisite and every key of a report's segment-root lookup l must be such a key or come from this block's own guarantees; and l must be a sub-dictionary of those maps, so each segment-root matches its package hash",
+   "Only the anti-duplicate one; prerequisites and the segment-root lookup are instead resolved against ξ (accumulation history) and the ready queue ω, which is why β needs no package data",
+   "Only the refinement-context anchor check: the anchor's header hash, state root, super-peak and timeslot are all looked up among the maps of β†, and duplicates are caught later during accumulation",
+   "None of them: the maps exist to build BEEFY inclusion proofs for third parties, and §11 re-derives recent package hashes by decoding the E_G of the last eight blocks from the block store"
+  ],
+  "code": "",
+  "n": 2
+ },
+ {
+  "id": "c3-ch07-superpeak-to-beefy",
+  "ch": "7",
+  "section": "7 Recent History",
+  "gpRef": "eq. 7.7, 7.8; eq. E.8, E.10; §18 Beefy",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "Trace how a block's accumulation outputs end up inside a BEEFY signature. Which description matches GP 0.8.0?",
+  "options": [
+   "Each block Keccak-Merklizes the encoded θ′ into one root and appends that root to the belt β_B; the new β_H item stores only the belt's Keccak super-peak; validators then BLS-sign the domain-separated hash of the newest item's super-peak for each block they finalize",
+   "Each block Keccak-Merklizes θ′ into one root, appends it to β_B, and validators BLS-sign the whole encoded peak sequence of β_B; the super-peak exists only so that state key C(3) has a fixed-length field",
+   "The block header carries the super-peak in a dedicated marker and validators sign the header hash; β_B is guarantor-side bookkeeping that never enters the serialized state",
+   "The belt is rebuilt from θ with Blake2b every block and validators sign the root of the current block's outputs alone, so one BEEFY signature attests exactly one block's accumulation results"
+  ],
+  "code": "",
+  "n": 3
+ },
+ {
+  "id": "c3-ch07-dagger-before-append",
+  "ch": "7",
+  "section": "7 Recent History",
+  "gpRef": "eq. 7.5, 7.8 & eq. 11.36",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "An implementer builds β′_H by first appending this block's new item (state root = H_0) and only then applying the parent-state-root back-fill of eq. 7.5 to 'the last element of the sequence'. What actually goes wrong?",
+  "options": [
+   "The back-fill lands on the block's own fresh item, so every entry ends up carrying its parent's posterior root instead of its own, and the block before it keeps the zero hash forever; from then on eq. 11.36's state-root comparison rejects honest refinement contexts and the C(3) preimage diverges from every other node's",
+   "Nothing observable: the last element is the same item either way once the block is finished, and the correction of eq. 7.5 is idempotent, so both orders serialize identically",
+   "Only β_B is corrupted: the new item's super-peak would be taken from the uncorrected belt, so BEEFY roots drift apart while the recent-history entries and the state root stay correct",
+   "The history window slides one block too early, leaving β_H permanently at H − 1 = 7 entries, so eq. 11.36 rejects any anchor that is exactly eight blocks old but everything else still matches"
+  ],
+  "code": "",
+  "n": 4
+ },
+ {
+  "id": "c3-ch07-c3-field-order",
+  "ch": "7",
+  "section": "7 Recent History",
+  "gpRef": "eq. 7.2 & §D.1 state key C(3)",
+  "difficulty": 3,
+  "kind": "code",
+  "stem": "This is the team's GP 0.7.2 encoder for one β_H item under state key C(3). A reviewer objects that GP 0.8.0 declares the item as ⟨h, s, b, t, p⟩ — state root ahead of the accumulation-output-log super-peak — so the encoder must have two fields swapped. Who is right?",
+  "options": [
+   "The encoder's order is right: state serialization is fixed by C(3) in appendix D, which emits header hash, then super-peak, then state root, then the timeslot, then the reported map; the tuple in chapter 7 merely names the components. The real 0.8.0 gap is the missing 4-byte timeslot between the state root and the reported map",
+   "The reviewer is right: a state component is always serialized in the order its defining equation lists the fields, so C(3) needs header hash, state root, super-peak, timeslot, reported map; as written the encoder produces the wrong C(3) preimage and therefore the wrong state root",
+   "Both are wrong: C(3) holds only the encoded peak sequence of β_B, while the per-block items are committed through a marker in the header, so this encoder should not be feeding state serialization at all",
+   "The reviewer is right about the order and about the shape: 0.8.0 replaced the per-item super-peak with the full peak sequence, so each item must encode the whole belt where this code writes a single 32-byte hash"
+  ],
+  "code": "func (bi *BlockInfo) Encode(e *Encoder) error {\n\t// HeaderHash\n\tif err := bi.HeaderHash.Encode(e); err != nil {\n\t\treturn err\n\t}\n\t// BeefyRoot\n\tif err := bi.BeefyRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\t// StateRoot\n\tif err := bi.StateRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\t// Reported\n\tif err := e.EncodeLength(uint64(len(bi.Reported))); err != nil {\n\t\treturn err\n\t}\n\tfor _, reportedWorkPackage := range bi.Reported {\n\t\tif err := reportedWorkPackage.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\treturn nil\n}",
+  "n": 5
+ },
+ {
+  "id": "c3-ch08-queue-writer",
+  "ch": "8",
+  "section": "8.2 Pool and Queue",
+  "gpRef": "§8.2 (note under eq. 8.1); assign host call (index 16)",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "Who is permitted to change a core's authorizer queue φ[c] in GP 0.8.0, and through what mechanism?",
+  "options": [
+   "Only the service currently registered as that core's assigner, and only from inside its accumulate execution, by calling `assign`, which replaces all Q = 80 entries of that one core's queue in a single call and may also hand the assigner role to another service",
+   "Any service may call `assign`, but it only takes effect on cores whose pool has fallen empty; the manager service can override any core at any time with `bless`",
+   "The block author, by including an authorization extrinsic next to E_G; other validators re-check it against the coretime-sales record before accepting the block",
+   "Nobody on-chain: φ is each node's local view of purchased coretime, gossiped off-chain by the coretime chain, and only its commitment reaches state via the header"
+  ],
+  "code": "",
+  "n": 6
+ },
+ {
+  "id": "c3-ch08-rotation-index-cyclic",
+  "ch": "8",
+  "section": "8.2 Pool and Queue",
+  "gpRef": "eq. 8.1–8.2",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "Each block moves exactly one queue entry into every core's pool. How is that entry picked, and what becomes of the entries belonging to slots in which no block was produced?",
+  "options": [
+   "By cyclic subscription on the block's own timeslot, i.e. index H_T mod Q, with no stored cursor anywhere; a slot that produces no block simply never has its entry drawn, and that index only comes round again 80 slots later",
+   "By a per-core cursor kept alongside the pool that advances by one on every imported block, so no queue entry is ever skipped — an empty slot only postpones the rotation by one position",
+   "By index H_T mod O, so only the first eight queue positions ever rotate into the pool and the remaining 72 stay unreachable until an `assign` call shifts them forward",
+   "By taking the oldest not-yet-used entry (FIFO) and deleting it from the queue as it enters the pool, which is why the assigner must refill a core's queue at least every 80 blocks"
+  ],
+  "code": "",
+  "n": 7
+ },
+ {
+  "id": "c3-ch08-psi-i-visibility",
+  "ch": "8",
+  "section": "8.1 Authorizers and Authorizations",
+  "gpRef": "eq. B.1–B.2; §8.1",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "A guarantor runs the Is-Authorized logic Ψ_I before refining anything. What is that program actually able to observe?",
+  "options": [
+   "Its two arguments only — the work-package and the core index, the latter handed to the PVM as a 2-byte encoded argument — plus what `fetch` can pull out of that package (its encoding, configuration blob, token, context, work-item metadata and payloads) and the protocol constants; no chain state at all, and besides `fetch` the only host calls are the gas counter and heap growth",
+   "The work-package plus a read-only snapshot of the service accounts δ, so an authorizer can verify a balance or confirm that the coretime buyer still owns the core it is running on",
+   "The work-package, the core index and a historical lookup pinned to the lookup-anchor timeslot, exactly as Refine gets, since the authorization code itself is resolved by that same historical lookup",
+   "The work-package and the core's own authorizer pool, so that the code can confirm its own authorizer hash is still pooled and abort early instead of wasting the guarantor's gas"
+  ],
+  "code": "",
+  "n": 8
+ },
+ {
+  "id": "c3-ch08-authcode-lookup-anchor",
+  "ch": "8",
+  "section": "8.1 Authorizers and Authorizations",
+  "gpRef": "eq. 14.11; §8.1",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "The pool α[c] stores nothing but 32-byte authorizer hashes. So where does a guarantor obtain the executable is-authorized code, and as of which point in history is it resolved — and why there?",
+  "options": [
+   "From the preimage store of the separate auth-code host service named by the work-package, resolved by a historical lookup at the package's lookup-anchor timeslot, so that an auditor re-running the check much later resolves byte-identical code even if that service has since replaced or forgotten the preimage",
+   "From the account of the first work-item's service, read at the anchor block's posterior state, since the anchor is what already pins the refinement context to a recent state root that every validator has agreed on",
+   "From the work-package itself: the code blob travels in the bundle beside the token and the configuration blob, which is exactly what the 64,000-octet limit bounds",
+   "From the pool entry: the hash in α[c] is the preimage hash of the code plus its configuration, so the guarantor fetches the blob by that hash from any peer and runs it against the current best head"
+  ],
+  "code": "",
+  "n": 9
+ },
+ {
+  "id": "c3-ch08-unauthorized-report-outcome",
+  "ch": "8",
+  "section": "8.2 Pool and Queue",
+  "gpRef": "eq. 11.32 & eq. 8.2",
+  "difficulty": 3,
+  "kind": "code",
+  "stem": "This 0.7.2 code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?",
+  "options": [
+   "The prior pool, since the posterior one is only formed after accumulation out of the posterior queue; and the failure is an ordinary block-validity failure — the guarantee cannot be part of a valid block, so there is no report to punish anyone over and nothing is written to the disputes state",
+   "The posterior pool, because the report is being included in this very block and the rotation of eq. 8.2 is applied before guarantees are processed; failure then invalidates the block",
+   "Either pool will do, because the rotation only removes the authorizer the report itself consumed; failure records the report's guarantors as culprits in the disputes state so the next epoch's punishment set slashes them",
+   "The prior pool, but the report is still admitted into the availability assignments with an empty authorizer trace and is silently discarded at accumulation time, which is why an absent authorizer costs a guarantor nothing"
+  ],
+  "code": "func (g *GuaranteeController) ValidateWorkReports() error {\n\tworkReports := g.WorkReportSet()\n\talpha := blockchain.GetInstance().GetPriorStates().GetAlpha()\n\tdelta := blockchain.GetInstance().GetPriorStates().GetDelta()\n\trhoDoubleDagger := blockchain.GetInstance().GetIntermediateStates().GetRhoDoubleDagger()\n\tfor _, workReport := range workReports {\n\t\tif rhoDoubleDagger[workReport.CoreIndex] != nil {\n\t\t\terr := ReportsErrorCode.CoreEngaged\n\t\t\treturn &err\n\t\t}\n\t\tauthPool := alpha[workReport.CoreIndex]\n\t\tif !isAuthPoolContains(authPool, workReport.AuthorizerHash) {\n\t\t\terr := ReportsErrorCode.CoreUnauthorized\n\t\t\treturn &err\n\t\t}\n\t\t// … per-service accumulate-gas checks elided …\n\t}\n\treturn nil\n}",
+  "n": 10
+ }
+]

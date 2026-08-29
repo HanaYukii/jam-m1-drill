@@ -1,0 +1,317 @@
+[
+{
+"n": 8,
+"id": "appB-result-constants",
+"ch": "B",
+"gpRef": "§B.1",
+"stem": "Which mapping of host-call result constants is correct?",
+"options": [
+"OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3; WHO = 2^64−4 (index unknown); FULL = 2^64−5; CORE = 2^64−6; CASH = 2^64−7 (insufficient funds); LOW = 2^64−8 (gas limit too low); HUH = 2^64−9 (invalid operation / insufficient privilege)",
+"OK = 0; NONE = 1; WHAT = 2; OOB = 3; WHO = 4; FULL = 5; CORE = 6; CASH = 7; LOW = 8; HUH = 9",
+"OK = 1; errors are negative two's-complement values from −1 to −9 in the same order but starting with HUH = −1",
+"OK = 0; NONE = 2^32−1; the rest are undefined and implementation-specific"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 9,
+"id": "appB-three-invocations",
+"ch": "B",
+"gpRef": "eq. B.1–B.2, B.5–B.6, B.9–B.11",
+"stem": "The PVM has three invocation types. Which statement about their host-call sets is correct in GP 0.8.0?",
+"options": [
+"Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, lookup, read, write, info, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT",
+"All three invocations expose every host call; privileges are checked inside each call",
+"Ψ_R may read and write service storage; Ψ_A may export segments",
+"Ψ_I has no host calls at all"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 10,
+"id": "appB-host-call-indices",
+"ch": "B",
+"gpRef": "§B.5–B.7 (0.8.0 numbering)",
+"stem": "Which host-call index assignment is correct for GP 0.8.0?",
+"options": [
+"gas 0, grow_heap 1, fetch 2, lookup 3, read 4, write 5, info 6, historical_lookup 7, export 8, machine 9, peek 10, poke 11, pages 12, invoke 13, expunge 14, bless 15, assign 16, designate 17, checkpoint 18, new 19, upgrade 20, transfer 21, eject 22, query 23, solicit 24, forget 25, yield 26, provide 27, log 100 (JIP-1)",
+"gas 0, fetch 1, lookup 2, read 3, write 4, info 5, historical_lookup 6, export 7, machine 8, … (0.7.2 numbering, no grow_heap)",
+"gas 0, grow_heap 1, fetch 2, lookup 3, read 4, write 5, info 6, historical_lookup 7, export 8, compile 9, machine 10, peek 11, … provide 28",
+"The indices are alphabetical: assign 0, bless 1, checkpoint 2, …"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 11,
+"id": "appB-accumulate-invocation",
+"ch": "B",
+"gpRef": "eq. B.7–B.14",
+"stem": "Which statement about the accumulate invocation Ψ_A(e, t, s, g, i) is correct?",
+"options": [
+"If the service's code is unavailable or > W_C it returns the state with incoming transfer amounts already credited and no other effect; otherwise it runs Ψ_M(code, entry 5, g, E(t, s, |i|), F, I(s, s)^2) with a regular context X and an exceptional context Y (only `checkpoint` copies X into Y); on ☇ or ∞ the result collapses to Y; a 32-octet return blob becomes the yield hash; inputs are read via `fetch`",
+"It runs entry point 1 with the raw operand tuples as the argument blob; on panic all state changes are kept",
+"It runs entry point 0; transfers are delivered by a separate Ψ_T on_transfer invocation",
+"It is executed in-core by the guarantors; the block author only records the output hash"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 12,
+"id": "appB-new-service-index",
+"ch": "B",
+"gpRef": "eq. B.10, B.14 & `new` (§B.7)",
+"stem": "How are new service indices chosen by the `new` host call in GP 0.8.0?",
+"options": [
+"The context's next-free id starts at check(decode_4(H(E(s, η′_0, H_t))) mod (2^32 − S − 2^8) + S) with S = 2^16; check() linearly probes (+1 wrapping) until an unused index; after each `new` the next candidate is check(S + (i − S + 42) mod (2^32 − S − 2^8)); a registrar may instead request a specific index < S (FULL if taken); creating with gratis f ≠ 0 requires being the manager (else HUH); CASH if the creator's balance after paying the new account's threshold would drop below its own threshold",
+"Indices are assigned sequentially from 0 by the block author",
+"The caller chooses any free index; conflicts make the block invalid",
+"Indices are the low 32 bits of the code hash"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 13,
+"id": "appB-transfer-rules",
+"ch": "B",
+"gpRef": "`transfer` = 21",
+"stem": "The `transfer` host call (ω_7 = d, ω_8 = a, ω_9 = l gas, ω_10 = o memo ptr) can fail in several ways. Which order/meaning is correct?",
+"options": [
+"Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → LOW; balance − a < own threshold a_t → CASH; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged",
+"d unknown → HUH; insufficient gas → OOB; insufficient funds → FULL",
+"Transfers never fail; invalid ones are dropped silently at accumulation",
+"d unknown → WHO; l too low → CASH; balance too low → LOW"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 14,
+"id": "appB-solicit-forget",
+"ch": "B",
+"gpRef": "`solicit` = 24, `forget` = 25, `eject` = 22",
+"stem": "Given request status l = a_l[(h, z)] and current slot t, which transitions do `solicit` and `forget` perform?",
+"options": [
+"solicit: no entry → [] (FULL if the new footprint is unaffordable); [x, y] → [x, y, t]; anything else → HUH. forget: [] or [x, y] with y < t − D → delete request and preimage; [x] → [x, t]; [x, y, w] with y < t − D → [w, t]; anything else → HUH",
+"solicit: any status → []; forget: any status → delete immediately",
+"solicit: [] → [t]; forget: [t] → []",
+"solicit and forget are refine-only host calls operating on D3L segments"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 15,
+"id": "appB-bless-assign-designate",
+"ch": "B",
+"gpRef": "`bless` = 15, `assign` = 16, `designate` = 17",
+"stem": "Which privilege checks do bless, assign and designate perform in GP 0.8.0?",
+"options": [
+"bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 336-octet keys",
+"bless may be called by any service; assign requires the manager; designate requires the registrar",
+"All three may only be called by the manager",
+"bless requires 2/3 of validators to sign; assign and designate are refine host calls"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 16,
+"id": "appB-fetch",
+"ch": "B",
+"gpRef": "`fetch` = 2",
+"stem": "The `fetch` host call (index 2) is available in all three invocations. Which statement is correct?",
+"options": [
+"ω_10 selects the datum: 0 = the encoded protocol constants (the same encoding JIP-4 uses for protocol_parameters), 1 = η′_0 (in accumulate), 2 = authorizer trace, 3–6 = extrinsics/imports, 7–13 = package, config, token, context, work-item summaries and payload, 14–15 = accumulate inputs — availability depends on the invocation; the datum is copied into memory at ω_7 with offset ω_8 and length ω_9, and ω′_7 = the datum's full length (or NONE if the selector is unavailable)",
+"fetch always returns the whole work-package; it is refine-only",
+"fetch reads a storage key of the service; it is accumulate-only",
+"fetch returns the next pending deferred transfer and removes it from the queue"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 17,
+"id": "appB-checkpoint-yield",
+"ch": "B",
+"gpRef": "`checkpoint` = 18, `yield` = 26, `provide` = 27",
+"stem": "What do `checkpoint`, `yield` and `provide` do inside accumulate?",
+"options": [
+"checkpoint: copies the regular context X into the exceptional context Y (so a later panic/OOG commits the checkpointed state) and returns remaining gas in ω_7; yield(o): records the 32-octet hash at o as the service's accumulation output (θ entry / BEEFY-visible commitment); provide(s, o, z): supplies preimage bytes for a request [] of service s (or the caller if ω_7 = 2^64−1), returning WHO/HUH on errors, integrated after the round",
+"checkpoint: writes the state root to the header; yield: ends accumulation; provide: transfers balance",
+"checkpoint: pauses the PVM for CorePlay; yield: schedules the next work-item; provide: exports a segment",
+"All three are refine-only"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 18,
+"id": "appB-host-gas-costs",
+"ch": "B",
+"gpRef": "eq. B.17 (memgas) & Appendix I host-function gas costs",
+"stem": "How is host-call gas charged in GP 0.8.0 (PR #517), compared with 0.7.2?",
+"options": [
+"Each host call has a base cost M_□ (e.g. gas 48, checkpoint 103, transfer 575 + l, new 3855, export 3521) plus, where applicable, a per-KiB term ⌈L·ℓ/1024⌉ (e.g. lookup 600 + 248/KiB, write 2442 + key 3358/KiB + value 216/KiB) or a per-page term; if ϱ < g the call exits ∞ before doing anything; unknown calls cost M_∅ = 1000",
+"Every host call costs a flat 10 gas as in 0.7.2",
+"Host calls are free; only PVM instructions are metered",
+"Host calls cost 1 gas per register touched"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 50,
+"id": "b2-appB-write-prev-length-full",
+"ch": "B",
+"gpRef": "§B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)",
+"stem": "The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (ω_7…ω_10 = k_O, k_Z, v_O, v_Z). Which statement matches GP 0.8.0?",
+"options": [
+"On success ω′_7 = 5000, the length of the value just written; if a_t > a_b the value is still stored, ω′_7 = FULL, and the missing deposit is debited from the balance at the service's next accumulation",
+"If the post-write a_t ≤ a_b the value is stored and ω′_7 = 100, the length of the value being replaced; if a_t > a_b, ω′_7 = FULL and the account is handed back unchanged (s′ = s) — the pre-fix code had already mutated the shared Go map, so the FULL write leaked (#979)",
+"On success ω′_7 = OK (0); a_t > a_b cannot occur for an overwrite because the storage deposit (B_I per item, B_L per octet) is only charged when a key is first created, never when its value changes size",
+"If a_t > a_b the host call exits ☇ (panic) so that the whole accumulation collapses to the checkpointed context Y; otherwise ω′_7 = 100 and the value is stored"
+],
+"answer": 1,
+"code": "\tvalue, storageRawKeyExists := a.StorageDict[string(storageRawKey)]\n\t// ...\n\tif storageRawKeyExists {\n\t\tfootprintItems, footprintOctets = service_account.CalcStorageItemfootprint(string(storageRawKey), value)\n\t\tl = uint64(len(value))\n\t} else { // ... (elided: key only present in the not-yet-decoded state key-vals)\n\t\tl = NONE\n\t}\n\t// ...\n\tif vz == 0 { // remove storage\n\t\tdelete(a.StorageDict, string"
+},
+{
+"n": 51,
+"id": "b2-appB-read-cross-service-pure",
+"ch": "B",
+"gpRef": "§B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)",
+"stem": "Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = ω_7, or the caller when ω_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. Which statement is correct?",
+"options": [
+"Ω_R(ϱ, ω, μ, s, s, d) may look up any account in d but hands back only the caller's account s (mirrored into x by G); a read of B is a pure lookup that must leave B untouched — before the guard, B's key-val was evicted from the unmatched pool, B's entry vanished from the merged δ′ and the state root diverged",
+"Reading another service's storage is not permitted by Ω_R: for s* ≠ s the call must return WHO without touching memory, so in a compliant implementation the branch that reads B's account is unreachable and the guard is merely defensive",
+"The read must observe the posterior state being built in this block — including writes by other services accumulated in the same round — so the cached value has to be refreshed from the context on every read rather than removed from the pool",
+"The read must be served from the lookup-anchor snapshot exactly as `historical_lookup` does, so mutating the current-state cache is only a performance concern; the guard merely avoids repeatedly decoding B's key-vals"
+],
+"answer": 0,
+"code": "\tvar a types.ServiceAccount\n\tcallerServiceID := serviceID\n\tif sStar == uint64(serviceID) {\n\t\ta = delta[serviceID]\n\t} else if value, exists := delta[types.ServiceID(sStar)]; exists {\n\t\ta = value\n\t\tserviceID = types.ServiceID(sStar)\n\t} else {\n\t\tinput.VM.Registers[7] = NONE\n\t\treturn OmegaOutput{ExitReason: ExitContinue, Addition: input.Addition}\n\t}\n\tstorageRawKey := input.VM.Mem.Read(ko, kz)\n\tv, exis"
+},
+{
+"n": 52,
+"id": "b2-appB-unknown-hostcall-oog",
+"ch": "B",
+"gpRef": "eq. B.2, B.6, B.11 (default case); eq. B.13 (C); M_∅ in App. I",
+"stem": "During accumulation a service executes `ecalli 9` (`machine`, a refine-only call) with ϱ = 300 gas remaining. The team's dispatcher routes ids that are not in the invocation's table to hostCallException (below, after PR #992). What does GP 0.8.0 prescribe for this situation?",
+"options": [
+"ω′_7 = WHAT and execution continues at the next instruction regardless of the remaining gas — nothing was executed, so an unknown or unavailable host call can never by itself trigger out-of-gas (the pre-#992 behaviour)",
+"The machine panics (☇) with no gas charged: a host-call id outside the invocation's table is treated like an invalid instruction, and the accumulation collapses to the checkpointed context Y",
+"The default branch of F charges M_∅ = 1000 first: ϱ′ = 300 − 1000 < 0, so the invocation exits ∞ and Ψ_A collapses to the checkpointed context Y; under the 0.7.2 flat charge of 10 the same call would have continued with ω′_7 = WHAT",
+"The `ecalli` surfaces to the caller of Ψ_A as the exit h̄ × 9: the accumulation is aborted, treated as a host-call fault, and the service's result for this block is recorded as BAD"
+],
+"answer": 2,
+"code": "func hostCallException(input OmegaInput) (output OmegaOutput) {\n\tif result := chargeGasAndCheck(&input); result != nil {\n\t\treturn *result\n\t}\n\tinput.VM.Registers[7] = WHAT\n\treturn OmegaOutput{\n\t\tExitReason: ExitContinue,\n\t\tAddition:   input.Addition,\n\t}\n}\n\nfunc chargeGasAndCheck(input *OmegaInput) *OmegaOutput {\n\t*input.VM.Gas -= 10\n\tif *input.VM.Gas < 0 {\n\t\treturn &OmegaOutput{\n\t\t\tExitReason: Exit"
+},
+{
+"n": 53,
+"id": "b2-appB-invoke-gas-refund",
+"ch": "B",
+"gpRef": "§B.6 `invoke` = 13 (Ω_K); eq. B.4 (inner PVM tuple); §B.1 inner result codes",
+"stem": "The excerpt is the team's 0.7.2 `invoke` (Ω_K): it reads a 112-octet block at ω_8, runs inner machine n = ω_7 and writes the block back. Apart from the id shift (12 → 13), which GP 0.8.0 rule is missing from it?",
+"options": [
+"Nested host calls: an `ecalli` executed by the inner machine must be dispatched through the refine mutator F (historical_lookup, export, …) instead of stopping the inner run and reporting HOST × h to the outer service",
+"Resumption: on a HOST exit the saved instruction counter must stay on the `ecalli` itself, so that the outer service can re-execute that instruction after servicing the call, exactly as Ψ does for a top-level page fault",
+"Memory: the 112-octet block need only be readable, because in 0.8.0 the inner gas and the 13 registers are handed back through ω′_7…ω′_12 rather than being written back into the block",
+"Gas: the outer machine pays g = M_K + g_R up front (∞ if ϱ < g; g_R is the inner gas read from the block) and afterwards gets the inner's unspent g_R′ back, ϱ′ = ϱ − g + g_R′; the inner machine also carries a gas-charged flag for its current basic block"
+],
+"answer": 3,
+"code": "\tn, o := input.VM.Registers[7], input.VM.Registers[8]\n\n\toffset := uint64(112)\n\t// g = panic\n\tif !input.VM.Mem.IsWriteable(o, offset) {\n\t\tinput.VM.Registers[7] = OOB\n\t\treturn OmegaOutput{ExitReason: ExitPanic, Addition: input.Addition}\n\t}\n\t// ... (WHO if n is not a known machine; decode g and w[0..13] from the 112 octets)\n\t// wrap m[n]_p (program), w (registers), m[n]_u (memory), g (gas)\n\ttempInter"
+},
+{
+"n": 54,
+"id": "b2-appB-pages-access-modes",
+"ch": "B",
+"gpRef": "§B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants",
+"stem": "The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (ω_7…ω_10 = n, p, c, r). Compared with GP 0.8.0, which statement is correct?",
+"options": [
+"The code is correct: Ω_Z zero-fills the range for every r ∈ 0…4 and only the resulting access differs (0 → none, 1/3 → R, 2/4 → W); the GP never distinguishes an allocation from a mode change",
+"Two semantic gaps: for r = 0 the GP zero-fills the range and makes it inaccessible (the code leaves it untouched), and for r ∈ {3, 4} the GP keeps the contents and only changes the access to R/W (the code re-allocates zeroed pages); the WHO-before-HUH ordering matches the GP",
+"The only gap is the error code: when r > 2 and a page of the range is inaccessible the GP returns OOB (inner memory index not accessible), as `peek`/`poke` do, rather than HUH; the page mutations themselves are right",
+"The GP validates r ∈ 0…4 and p ≥ 16 before looking up n, so an invalid request on a non-existent machine must yield HUH, whereas the code yields WHO; the page mutations themselves are right"
+],
+"answer": 1,
+"code": "\tif r > 4 || p < 16 || p+c >= (1<<32)/ZP {\n\t\tinput.VM.Registers[7] = HUH\n\t\treturn OmegaOutput{ExitReason: ExitContinue, Addition: input.Addition}\n\t}\n\tif r > 2 && !isReadable(p, c, input.Addition.IntegratedPVMMap[n].Memory) {\n\t\tinput.VM.Registers[7] = HUH\n\t\treturn OmegaOutput{ExitReason: ExitContinue, Addition: input.Addition}\n\t}\n\t// otherwise : ok\n\t// u_v\n\tif r >= 3 {\n\t\tfor i := uint32(p); i < uin"
+},
+{
+"n": 55,
+"id": "b2-appB-info-layout-calc",
+"ch": "B",
+"gpRef": "§B.5 `info` = 6 (Ω_I); eq. 9.8 (a_t)",
+"stem": "A service wants its own minimum memo gas a_m via `info` (index 6). It sets ω_7 = 2^64−1, ω_8 = o, ω_9 = 56 and ω_10 = 8. Under GP 0.8.0, what is written at μ[o…] and what is ω′_7?",
+"options": [
+"E_8(a_g) (minimum accumulate gas, octets [56, 64) of the record) is written at o, and ω′_7 = 96",
+"E_8(a_m) is written at o, and ω′_7 = 8, the number of octets actually copied into the window",
+"E_8(a_m) — octets [56, 64) of the record — is written at o, and ω′_7 = 96, the record's full length",
+"E_8(a_m) is written at o, and ω′_7 = OK (0) because the requested window fitted entirely inside the record"
+],
+"answer": 2,
+"code": ""
+},
+{
+"n": 56,
+"id": "b2-appB-query-encoding-calc",
+"ch": "B",
+"gpRef": "§B.7 `query` = 23 (Ω_Q); eq. 9.3 (a_l request statuses)",
+"stem": "During accumulation a service calls `query` (index 23) for the request (h, z) whose status is a_l[(h, z)] = [100, 250] (provided at slot 100, made unavailable at slot 250). What are ω′_7 and ω′_8 in GP 0.8.0?",
+"options": [
+"ω′_7 = 102 and ω′_8 = 250 — the status code and x are simply added",
+"ω′_7 = 1 + 2^32·100 = 429,496,729,601 and ω′_8 = 250",
+"ω′_7 = 100 + 2^32·2 = 8,589,934,692 and ω′_8 = 250",
+"ω′_7 = 2 + 2^32·100 = 429,496,729,602 and ω′_8 = 250"
+],
+"answer": 3,
+"code": ""
+},
+{
+"n": 57,
+"id": "b2-appB-grow-heap",
+"ch": "B",
+"gpRef": "§B.5 `grow_heap` = 1 (Ω_Γ); eq. A.42 (Y conditions); M_Γ,c / M_Γ,p in App. I",
+"stem": "GP 0.8.0 replaces the `sbrk` instruction with the `grow_heap` host call (index 1, present in all three invocations). A program with no RO data (so a = 32, the first RW-data page) currently has c = 8 writable RW pages (h = 40) and b = 1000; it calls grow_heap with ω_7 = 50 while ϱ = 2,000. What happens?",
+"options": [
+"ω_7 is the desired end page (index + 1 of the last writable page): g = 275 + (50 − 40)·121 = 1,485 is charged, pages [40, 50) become writable and ω′_7 = 50; with ω_7 ≤ 40 or ω_7 > 1000 only 275 would be charged, ω′_7 = 40 and nothing would change",
+"ω_7 is a page count to add: pages [40, 90) become writable, g = 275 + 50·121 = 6,325 is charged and ω′_7 = 90; a request that would pass b is clamped to b rather than refused",
+"ω_7 is an octet count as with sbrk: the heap grows by 50 octets rounded up to one whole page, ω′_7 = the previous break address 40·Z_P, and only the base cost 275 is charged since a single page is added",
+"Memory growth is already priced by the per-basic-block gas model, so grow_heap only charges its base cost 275 regardless of the number of pages; pages [40, 50) become writable and ω′_7 = 50"
+],
+"answer": 0,
+"code": ""
+},
+{
+"n": 58,
+"id": "b2-appB-eject-conditions",
+"ch": "B",
+"gpRef": "§B.7 `eject` = 22 (Ω_J); eq. 9.8 (a_i, a_o); eq. B.3 (D)",
+"stem": "Service 7 (accumulating) calls `eject` (index 22) with ω_7 = 9 and ω_8 = o, where μ[o..+32] = h. Under GP 0.8.0, when does the call return OK, and what happens then?",
+"options": [
+"Service 9's code hash equals the code hash of service 7 (same code) and its parent field a_p = 7; a_i must be 0 and its balance already below a_t; then 9 is deleted and its balance is burned",
+"Service 9 exists, is not the caller, and its code hash equals E_32(7); its footprint is exactly a_i = 2 with l = max(81, a_o) − 81 (one request (h, l), no storage); a_l[(h, l)] = [x, y] with y < t − D; then 9 is deleted and its entire balance is added to service 7",
+"Service 9's code hash equals E_32(7) and its only request (h, l) is still unprovided ([]), proving nobody depends on it; then 9 is deleted and its balance is credited to the registrar",
+"Service 9's code hash equals E_32(7), a_i = 2 and a_l[(h, l)] = [x, y, w] with w < t − D (re-requested but expired again); then 9 is deleted and its balance is credited to 7"
+],
+"answer": 1,
+"code": ""
+},
+{
+"n": 59,
+"id": "b2-appB-log-jip1",
+"ch": "B",
+"gpRef": "eq. B.2, B.6, B.11 (default branch); JIP-1 (host call 100)",
+"stem": "A service executes `ecalli 100` (`log`). Which statement is correct?",
+"options": [
+"`log` is host call 100 of GP App. B, available in all three invocations: it returns OK, costs M_∅ and, like every other host call that reads memory, panics (☇) when the message range is not readable",
+"`log` is consensus-critical: the formatted message is hashed into the service's accumulation output (θ) and hence into the BEEFY root, so all nodes must implement byte-identical formatting",
+"`log` is specified by JIP-1, not by the Gray Paper: its observable effects match an unimplemented index — ω′_7 = WHAT and the gas of a bad-index call — and an unreadable message/target range must have no side-effects (no panic); the node merely prints the message",
+"`log` exists only in Ψ_R as a guarantor diagnostic and is unavailable during accumulate and is-authorized, where `ecalli 100` falls through to the WHAT default of the mutator"
+],
+"answer": 2,
+"code": ""
+}
+]

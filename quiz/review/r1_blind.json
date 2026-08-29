@@ -1,0 +1,206 @@
+[
+ {
+  "id": "c3-ch12-omega-xi-theta-naming",
+  "ch": "12",
+  "section": "12.1 History and Queuing",
+  "gpRef": "eq. 12.1 & 12.3; eq. 7.4 (θ); §4.1 state σ",
+  "difficulty": 1,
+  "kind": "delta",
+  "stem": "Three state items in σ are written to by accumulation: ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. Which mapping of symbol → meaning is right for GP 0.8.0?",
+  "options": [
+   "ω ∈ ⟦⟦(W, {H})⟧⟧_E is the ready (accumulation) queue of deferred reports each paired with its outstanding dependency set — GP 0.7.2 wrote this as ϑ; ξ ∈ ⟦{H}⟧_E is the epoch-long history of already-accumulated work-package hashes; θ ∈ ⟦(N_S, H)⟧ is the Accumulation Output Log, this block's (service, commitment) pairs",
+   "ω is the Accumulation Output Log, renamed from θ in 0.8.0; ξ is the ready queue of deferred reports; θ now holds the per-service gas usage u produced by the last block's Δ+",
+   "ω took over from ξ as the history of accumulated work-package hashes; the ready queue is still spelled ϑ in 0.8.0 and θ is unchanged, so a 0.7.2 client only needs to rename ξ",
+   "ω is a new 0.8.0 state item holding the deferred transfers carried between accumulation rounds so that they survive a block boundary; ϑ remains the ready queue and ξ the accumulated set"
+  ],
+  "code": "",
+  "n": 1
+ },
+ {
+  "id": "c3-ch12-operand-tuple-fields",
+  "ch": "12",
+  "section": "12.2 Execution",
+  "gpRef": "eq. 12.13 (U), 12.14 (X), 12.23 (Δ1)",
+  "difficulty": 1,
+  "kind": "concept",
+  "stem": "Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. Which description of what an operand tuple carries is right for GP 0.8.0?",
+  "options": [
+   "The set is U (and deferred transfers are X, Ψ_A taking ⟦U ∪ X⟧). Each tuple mixes digest-level fields — y payload hash, g accumulate gas-limit, l the result, which is a blob or a member of the work-error set E — with fields lifted from its own report: p = (r_s)_p package hash, e = (r_s)_e segment root, a = r_a authorizer hash and t = r_t authorizer trace; so the two tuples differ in their report-level fields",
+   "An operand tuple is the work-digest verbatim, so it also carries c the code hash, the gas actually used during refine, and the import / extrinsic / export counts that feed the core statistics",
+   "One operand tuple is built per report rather than per digest; its result field holds the concatenation of that report's digest results, and the service demultiplexes them by payload hash",
+   "Operands carry the core index and the refinement-context anchor so that accumulate can re-verify availability; digests whose result is a work-error are dropped before i^U is assembled"
+  ],
+  "code": "",
+  "n": 2
+ },
+ {
+  "id": "c3-ch12-E-removes-entries-too",
+  "ch": "12",
+  "section": "12.1 History and Queuing",
+  "gpRef": "eq. 12.7 (E), 12.8 (Q), 12.12, 12.33 (ω′)",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "The queue-editing function E(r, x) does two jobs: it strips dependencies that appear in x, and it also discards whole entries. A teammate implements only the first job. What actually goes wrong?",
+  "options": [
+   "Q stops terminating — E(r, P(g)) hands back the same entries with still-empty dependency sets, so the next recursion picks the identical g forever — and at the block boundary ω′ (both the i = 0 case E(R^Q, ξ′[E−1]) and the i ≥ τ′ − τ case E(ω↺[m−i], ξ′[E−1])) keeps reports that were just accumulated, so they would be accumulated again in a later block",
+   "Only ω′ is affected. Q is safe because each recursion is fed a strictly shorter sequence anyway; the ready queue would merely grow without bound until the epoch-long shift drops the stale entries",
+   "Nothing breaks inside this block. The §11.4 contextual check rejects any incoming report whose package hash is already in ξ, so a duplicate can never be accumulated twice; dropping entries is a pure optimisation",
+   "The dependency-stripping job becomes redundant instead: once entries are never removed, a report can only ever be blocked by another report sitting in the same queue, so the dependency sets never shrink"
+  ],
+  "code": "",
+  "n": 3
+ },
+ {
+  "id": "c3-ch12-starved-dependency-fate",
+  "ch": "12",
+  "section": "12.1 History and Queuing",
+  "gpRef": "eq. 12.8 (Q), 12.31–12.33; §12.1",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "A report w is sitting in ω with one outstanding dependency p, and package p is never accumulated — it was never even guaranteed. Trace w's fate under GP 0.8.0.",
+  "options": [
+   "It is dropped at the very next block: E(·, ξ′[E−1]) removes any entry that still carries a dependency which is not present in ξ, which is exactly how the GP cancels unsatisfiable reports",
+   "The block that made w available is invalid: §12.1 says accumulation is cancelled entirely in the case of an invalid dependency, and cancellation is signalled by rejecting the block",
+   "After E = 600 slots the dependency is deemed expired, Q treats w's dependency set as empty and accumulates it with whatever operands it has, so the work is never silently lost",
+   "Q never emits it, because its dependency set is never emptied; each block it is simply carried forward by the i ≥ τ′ − τ case ω′↺[m−i] = E(ω↺[m−i], ξ′[E−1]), and it vanishes at most one epoch later when the slot index wraps round and the i = 0 case overwrites that very slot with the new block's R^Q"
+  ],
+  "code": "",
+  "n": 4
+ },
+ {
+  "id": "c3-ch12-gas-floor-vs-ceiling",
+  "ch": "12",
+  "section": "12.2 Execution",
+  "gpRef": "§11.4 (report gas checks); eq. 12.23 (Δ1 g), 12.24 (block g); §9.1",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Which statement correctly places each accumulate-gas limit — the ceilings and the per-service floors?",
+  "options": [
+   "Per report, §11.4 requires Σ over its digests of d_g ≤ G_A and every digest's d_g ≥ δ[d_s]_g (the destination service's a_g), both checked at guarantee time against the prior δ; per block, eq. 12.24 sets Δ+'s budget to g = max(G_T, G_A·C + Σ values(χ_Z)); and the `transfer` host call refuses with LOW unless the transfer's gas l ≥ δ[d]_m, so a deferred transfer also arrives with enough gas for the recipient's Accumulate",
+   "G_A is a per-service per-block cap enforced inside Δ1, and a_g is a refund floor: whatever a service leaves unspent below a_g is credited back to its balance at the end of Δ+",
+   "Both ceilings are enforced inside Δ+ at accumulation time; a service whose a_g exceeds G_A can therefore never be accumulated, which is why a_g ≤ G_A is maintained as a state invariant by the `new` host call",
+   "a_g is the minimum gas per deferred transfer and a_m the minimum per work-item; G_A is the whole-block ceiling and G_T bounds any single report, which is why G_T is the larger of the two"
+  ],
+  "code": "",
+  "n": 5
+ },
+ {
+  "id": "c3-ch12-theta-from-yield",
+  "ch": "12",
+  "section": "12.3 Final State Integration",
+  "gpRef": "eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B)",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, and it calls `yield`. What ends up in θ′, and what consumes it?",
+  "options": [
+   "θ′ holds one entry for every service in Δ*'s service set s, with the zero hash standing in for services that did not yield, so |θ′| = |s| and downstream verifiers can index it by position",
+   "θ′ is the append-only log of every accumulation output since genesis; the pairs produced by this block are only its tail, and the belt β_B is merely a cache of its Merkle root",
+   "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, so θ′ carries exactly the pairs for services 5 and 9 — service 6 shows up in u and in the accumulation statistics S but not here. θ′ is a state item of its own, replaced wholesale each block, and it is the input to β′_B = A(β_B, M_B(s, H_K), H_K) whose super-peak is stored in the new β_H entry",
+   "Only services that had at least one work-digest in R*[..n] may contribute, so service 9 is excluded from b even though it yielded; a service reached solely by a transfer can never commit an accumulation output"
+  ],
+  "code": "",
+  "n": 6
+ },
+ {
+  "id": "c3-ch12-provide-two-places",
+  "ch": "12",
+  "section": "12.2 Execution / 12.4 Preimage Integration",
+  "gpRef": "eq. 12.18 (d′), 12.20 (I), 12.21 (Y), 12.37",
+  "difficulty": 2,
+  "kind": "concept",
+  "stem": "The preimage-integration function I is applied twice during a block's transition. Where are the two applications, and what does its Y predicate silently discard?",
+  "options": [
+   "Once inside Δ* as e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p) — folding in the blobs offered by the `provide` host call only after newly created and removed services have been merged — and once at the very end as δ′ = I(δ‡, E_P). Y(d, s, i) is ⊥ unless s ∈ K(d) and d[s]_l[(H(i), |i|)] = [], so a blob aimed at a service ejected in the same round, or at a request that is not merely solicited, is dropped without prejudice",
+   "Only once, at the very end: δ′ = I(δ‡, E_P). The `provide` host call writes straight into the service's a_p and a_l during accumulation, so no second integration step is needed for it",
+   "Twice, but both applications take E_P as their second argument. Y additionally requires the blob to be under W_C = 4,000,000 octets and the service to hold the storage deposit, and a failure of either makes the block invalid",
+   "Once inside Δ1 for each accumulating service and once for E_P; Y accepts a request slot of the form [] or [x, y] (solicited, or previously available and then forgotten), which is what lets a preimage be provided twice"
+  ],
+  "code": "",
+  "n": 7
+ },
+ {
+  "id": "c3-ch12-code-accumulation-statistics",
+  "ch": "12",
+  "section": "12.3 Final State Integration",
+  "gpRef": "eq. 12.27–12.28; eq. 12.17 (Δ+ output)",
+  "difficulty": 2,
+  "kind": "code",
+  "stem": "This is the team's GP 0.7.2 accumulation-statistics builder S. Which gap against GP 0.8.0 must be closed?",
+  "options": [
+   "N(s) must count whole work-*reports*, not digests: eq. 12.28 iterates r ↕ R*[..n] and counts each report once for the service that owns it, whereas this code counts one entry per matching digest",
+   "0.8.0 makes S ∈ ⟨N_S → (N, N, N_G)⟩ a three-tuple S(s) = (N(s), T(s), G(s)); the missing middle element T(s) counts the processed deferred transfers whose destination is s, which forces Δ+ to return a fifth component — the processed-transfer sequence t ⌢ t† — and the inclusion filter becomes S(s) ≠ (0, 0, 0) rather than a sum test",
+   "G(s) must be the gas *allotted* (Σ d_g over the service's digests) rather than the gas actually used, otherwise a service that runs out of gas is under-charged in the statistics that feed π_S",
+   "S must carry an entry for every service in δ, with (0, 0, 0) for untouched services, so that the dictionary's key set is stable from block to block and the state-key encoding has a fixed length"
+  ],
+  "code": "// (12.28–12.29) S ≡ {(s ↦ (G(s), N(s))) | G(s)+N(s) ≠ 0}\nfunc calculateAccumulationStatistics(serviceGasUsedList types.ServiceGasUsedList,\n\tn types.U64) types.AccumulationStatistics {\n\tG := map[types.ServiceID]types.Gas{} // G(s)\n\tfor _, serviceGasUsed := range serviceGasUsedList {\n\t\tG[serviceGasUsed.ServiceID] += serviceGasUsed.Gas\n\t}\n\n\tS := types.AccumulationStatistics{}\n\tfor s, Gs := range G {\n\t\tNs := types.U64(len(getWorkResultByService(s, n)))\n\n\t\tif types.U64(Gs)+Ns == 0 {\n\t\t\tcontinue // skip, N(S) = []\n\t\t}\n\n\t\tS[s] = types.GasAndNumAccumulatedReports{\n\t\t\tGas:                   Gs,\n\t\t\tNumAccumulatedReports: Ns,\n\t\t}\n\t}\n\treturn S\n}",
+  "n": 8
+ },
+ {
+  "id": "c3-ch12-why-R-star-is-a-sequence",
+  "ch": "12",
+  "section": "12.1 History and Queuing",
+  "gpRef": "eq. 11.17 (R), 12.4, 12.11 (R*), 12.17, 12.31",
+  "difficulty": 2,
+  "kind": "rationale",
+  "stem": "R, R!, R^Q and R* are all sequences rather than sets, even though only membership decides which reports are eligible. Why does the ordering matter for consensus, and where is it fixed?",
+  "options": [
+   "Because Δ+ accumulates only the gas-fitting prefix R*[..i] and then records ξ′[E−1] = P(R*[..n]): a different ordering yields a different prefix and hence a different posterior state. The order is pinned right back at eq. 11.17, where R is built by walking cores in ascending core index over ρ† and keeping those with more than 2/3·|κ| assurances; R! preserves that order and Q appends the queued reports in dependency-resolution rounds",
+   "It does not matter. Δ* accumulates services in parallel and the GP states that any permutation of R* gives the same posterior state, which is exactly why b is a set while u is merely a convenient sequence",
+   "Ordering only affects the accumulation statistics S and therefore π_S; the service state δ† is order-independent because each service's Δ1 is a pure function of its own operands and its own prior account",
+   "R is ordered by how many assurances each core collected, most-assured first, so that when gas runs short the best-attested reports are the ones that get accumulated"
+  ],
+  "code": "",
+  "n": 9
+ },
+ {
+  "id": "c3-ch12-accseq-n-with-transfers",
+  "ch": "12",
+  "section": "12.2 Execution",
+  "gpRef": "eq. 12.17 (Δ+), 12.24, 12.28",
+  "difficulty": 3,
+  "kind": "delta",
+  "stem": "Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and what does it hand back in GP 0.8.0?",
+  "options": [
+   "No. With r = ⟦⟧ the maximal gas-fitting prefix is i = 0, so the base case ⟨0, e, ∅, ⟦⟧, ⟦⟧⟩ fires; the pending transfers are carried into the next block through ω and delivered there",
+   "Yes, but the round is a no-op: Δ* is only ever invoked on r[..i], so with i = 0 its service set is empty, the three transfers are discarded and only the balances already credited by the earlier `transfer` calls survive",
+   "Yes. The GP's termination test is n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0, so Δ* is still invoked; its service set s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} reduces to the three destinations, which are accumulated on the transfers alone. The result is ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩, whose fifth component — the processed transfers — is what T(s) in eq. 12.28 counts",
+   "Yes, and Δ+ returns the four-tuple ⟨n, e′, b, u⟩ exactly as in 0.7.2; the processed transfers are recovered afterwards by diffing δ† against δ for balance movements"
+  ],
+  "code": "",
+  "n": 10
+ },
+ {
+  "id": "c3-ch12-prior-privileged-index-reads",
+  "ch": "12",
+  "section": "12.2 Execution",
+  "gpRef": "eq. 12.18 (Δ*), 12.19 (R)",
+  "difficulty": 3,
+  "kind": "concept",
+  "stem": "Inside Δ*, core c's posterior authorizer queue φ′[c] and the posterior staging keys ι′ are each lifted out of exactly one service's Δ1 output. Whose output, and selected by which version of χ?",
+  "options": [
+   "φ′[c] = ((Δ(χ_A[c])_e)_q)[c] and ι′ = (Δ(χ_V)_e)_i — the *prior* per-core assigner and the *prior* delegator. Even when this same round rewrites χ′_A[c] or χ′_V, the queue and the keys still come from whoever held the privilege when the round began, and only that service's own copy of the component is read, core index by core index",
+   "Both are taken from the manager's output e* = Δ(χ_M)_e, because only the manager may alter χ; the assigner and the delegator merely stage requests that the manager's Accumulate ratifies",
+   "They are read from the *posterior* privileged indices χ′_A[c] and χ′_V, so a service that is granted the assign privilege during this very block can immediately install the queue that the block will use",
+   "φ′[c] is merged across every service in s using R(o, a, b) exactly as χ′_A[c] is, and ι′ is taken from whichever service in s wrote it last when s is walked in ascending service index"
+  ],
+  "code": "",
+  "n": 11
+ },
+ {
+  "id": "c3-ch12-code-delta-star-map-order",
+  "ch": "12",
+  "section": "12.2 Execution",
+  "gpRef": "eq. 12.18 (u, t′)",
+  "difficulty": 3,
+  "kind": "code",
+  "stem": "In the team's Δ*, the service set s is a Go map and this loop collects u and t′ from the per-service results. Which GP 0.8.0 requirement does it violate, and what is the observable symptom?",
+  "options": [
+   "Nothing consensus-relevant: the GP treats t′ as a set and u is only ever summed per service by G(s), so both are order-independent; iterating the map is merely slower than sorting first",
+   "Eq. 12.18 writes u = ⟦(s, Δ(s)_u) | s ↕ s⟧ and t′ = ⟦Δ(s)_t | s ↕ s⟧ with the ordered-iteration marker, i.e. ascending service index, whereas Go randomises map iteration. The flattened ⌢⌢t′ therefore reaches the next Δ+ round permuted, so each destination's i^T — and hence Ψ_A's operand sequence, the balances it credits and the resulting state root — can differ between two nodes importing the very same block",
+   "The violation is that s must be walked in *report* order — the order in which each service's first digest appears in r[..i] — so sorting by ascending service index would be just as wrong as the map order",
+   "The violation is that only services carrying a work-digest may contribute to u and t′; transfer destinations and always-accumulate services must be filtered back out of s before this loop runs"
+  ],
+  "code": "func set_s(r []types.WorkReport, f types.AlwaysAccumulateMap,\n\tt []types.DeferredTransfer) map[types.ServiceID]bool {\n\ts := make(map[types.ServiceID]bool, len(r)*2+len(f)+len(t))\n\tfor _, w := range r {\n\t\tfor _, r := range w.Results {\n\t\t\ts[r.ServiceID] = true // rd\n\t\t}\n\t}\n\tfor serviceID := range f { // K(f)\n\t\ts[serviceID] = true\n\t}\n\tfor _, deferredTransfer := range t {\n\t\ts[deferredTransfer.ReceiverID] = true // td\n\t}\n\treturn s\n}\n\n// ... later, in ParallelizedAccumulation:\n// Process results from each service accumulation\nfor service_id := range s {\n\tsingleOutput := cache[service_id]\n\t// u = [(s, ∆(s)u) S s <− s]\n\tu = append(u, types.ServiceGasUsed{ServiceID: service_id,\n\t\tGas: singleOutput.GasUsed})\n\t// t = [∆(s)t S s <− s]\n\ttPrime = append(tPrime, singleOutput.DeferredTransfers...)\n}",
+  "n": 12
+ }
+]
