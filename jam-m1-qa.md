@@ -1,6 +1,6 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 260 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+Gray Paper **0.8.0** · 21 章速記 · 270 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
 線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-08-29
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
@@ -10,7 +10,7 @@ Gray Paper **0.8.0** · 21 章速記 · 260 題 · 92 條名詞解釋 · New-JAM
 - [速記（考前濃縮）](#cheat)
 - [§3 Notation](#ch-3) — 10 題
 - [§4 Overview](#ch-4) — 13 題
-- [§5 The Header](#ch-5) — 11 題
+- [§5 The Header](#ch-5) — 21 題
 - [§6 Safrole](#ch-6) — 29 題
 - [§7 Recent History](#ch-7) — 12 題
 - [§8 Authorization](#ch-8) — 11 題
@@ -1663,7 +1663,7 @@ GP §4.3：「Safrole, which governs the (not-necessarily forkless) extension of
 
 <a id="ch-5"></a>
 
-## §5 The Header　<sub>11 題</sub>
+## §5 The Header　<sub>21 題</sub>
 
 ### 5-1　The team derives the unsigned header serialization by encoding the full header and truncating it. Which statement about GP 0.8.0's E(H) and E_U(H) explains why this is sound and describes E_U's layout correctly?
 
@@ -1806,7 +1806,241 @@ eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b——用的是 posterior a
 
 ---
 
-### 5-5　GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?
+### 5-5　H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?
+
+<sub>5.1 The Header — ●●○ · 概念 · eq. 5.2</sub>
+
+**標準答案**　The full encoding including the parent's seal, so a child commits to the exact sealed bytes its parent was published as; nobody can re-seal a header — even with the same author and contents — without orphaning every block already built on it
+
+eq. 5.2：H_P ≡ H(E(P(H)))，用的是**完整**編碼 E，也就是含 seal H_S 的那個版本（未含 seal 的 E_U 只用來當簽章訊息）。結論是每個子區塊都把父區塊「發布出去的那串位元組」原封釘死：改動父 header 的任何一個位元組——包括重簽一次 seal——都會換出不同的 H_P，讓所有已經建在上面的區塊瞬間脫鏈。這正是「鏈」這個字的意思，也是為什麼 seal 必須是 header 的一部分而不是附加在旁邊的資料。
+
+**逐項辨析**
+
+1. ✅ The full encoding including the parent's seal, so a child commits to the exact sealed bytes its parent was published as; nobody can re-seal a header — even with the same author and contents — without orphaning every block already built on it  
+   完整編碼（含 seal）與「重簽即脫鏈」的推論，正是 eq. 5.2 的直接後果。
+2. ❌ The unsigned encoding, so that the parent's seal stays outside the chain of commitments; this lets a validator replace a lost seal without disturbing its descendants, which is what makes seal-less archival storage possible  
+   E_U 是簽章訊息，不是父雜湊的輸入；若不涵蓋 seal，同一份內容可以被重複簽出多個合法父節點。
+3. ❌ The full encoding, but with the markers cleared to their empty forms, so that the same parent yields one hash whether or not it opened an epoch; this keeps hashes stable across the epoch boundary where markers are added late  
+   GP 沒有「清空 marker 再雜湊」的變體；marker 是在出塊當下就決定的欄位，不會事後補。
+4. ❌ A hash of the parent's state root and timeslot only, since those two fields already determine the parent uniquely; hashing the whole header would make the commitment depend on data the child cannot independently reconstruct  
+   只雜湊兩個欄位會讓不同 header 碰撞成同一個 H_P，等於允許替換父區塊的其餘內容。
+
+<sub>`ch05-parent-hash-covers-seal`</sub>
+
+---
+
+### 5-6　A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?
+
+<sub>5.1–5.3 — ●●● · 概念 · §5; eq. 5.8; eq. 5.9</sub>
+
+**標準答案**　It can check structural well-formedness, that the timeslot exceeds its parent's, and that the slot is not in the future; it cannot verify the seal, because knowing who was entitled to author that slot requires the sealer sequence, which lives in state
+
+從 header 本身可以做的是結構檢查、以及 eq. 5.8 的時間條件：P(H)_T < H_T，且 H_T·P ≤ 目前的牆鐘時間（前者需要父 header，後者只需要時鐘）。**卡住的是 seal**：驗 H_S 要先知道「這個 slot 該由誰出塊」，那來自 γ′_S 與 κ′——都是狀態。這正好解釋 header 為什麼要帶 marker：H_E 給出下一個 epoch 的 key 與 entropy、H_W 給出該 epoch 的 600 張 ticket，讓只同步 header 的輕客戶端能自己推出 sealer 序列、往後一路驗下去，而不必重放狀態。
+
+**逐項辨析**
+
+1. ✅ It can check structural well-formedness, that the timeslot exceeds its parent's, and that the slot is not in the future; it cannot verify the seal, because knowing who was entitled to author that slot requires the sealer sequence, which lives in state  
+   結構與時間可查、seal 需要 sealer 序列（狀態）——這正是 marker 存在的理由。
+2. ❌ It can check everything except the extrinsic hash, since only that field depends on data outside the header; the seal is self-contained because the author's public key is one of the header's own fields and needs no external lookup  
+   作者的公鑰不是 header 欄位：H_I 是索引，H_A ≡ κ′[H_I]_b 只是等價式，不被序列化。
+3. ❌ It can check the seal and the entropy signature, since both are verifiable against the author index alone; what it cannot check is the timeslot, because comparing against the parent requires having stored the parent header  
+   驗簽反而是最需要外部資訊的一步；而時間檢查只需要父 header 與時鐘。
+4. ❌ It can check nothing without state, because even the timeslot bound is expressed against the posterior validator set; this is why the GP requires implementations to keep 24 hours of ancestors before validating any header  
+   24 小時祖先的要求是為了 anchor 檢查，不是時間條件的前提；時間條件不涉及 κ′。
+
+> **陷阱**　「拿到 header 你能驗什麼」是很常見的開場題，答案的分水嶺在「簽章需要狀態」。
+
+<sub>`ch05-what-header-alone-proves`</sub>
+
+---
+
+### 5-7　The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?
+
+<sub>5.1 The Header — ●●○ · 設計理由 · §5（genesis header 與 σ_g）</sub>
+
+**標準答案**　Because every header's validity is defined relative to its parent, so the recursion needs a base case that is agreed out-of-band; without one, any self-consistent chain would be as valid as any other and 'the' chain would not be well defined
+
+§5 直接寫明：對 genesis header H_g 與它所代表的狀態 σ_g 的共識是**預設**的。理由是形式上的——header 的合法性是相對於父 header 定義的（H_P 指向父、H_T 必須大於父），這是一條遞迴；遞迴需要一個基底，而基底無法由同一套規則產生，否則任何一條自洽的鏈都同樣「合法」，「這條鏈」這個詞就沒有指涉。實務上這個基底就是 chain spec：所有節點在鏈外同意同一份 genesis，之後所有東西才能靠密碼學推導。
+
+**逐項辨析**
+
+1. ✅ Because every header's validity is defined relative to its parent, so the recursion needs a base case that is agreed out-of-band; without one, any self-consistent chain would be as valid as any other and 'the' chain would not be well defined  
+   遞迴需要鏈外約定的基底，這是 genesis 被「預設」而非「推導」的形式理由。
+2. ❌ Because the genesis state is too large to Merklize with the same function used for later blocks, so its root has to be published separately and taken on trust until the first real block establishes the normal invariants  
+   genesis 狀態用的是同一個 Merklization 函數，大小不是問題。
+3. ❌ Because the genesis block has no author and therefore no seal, and the GP's validity rules are stated only for sealed headers; presuming genesis is a notational shortcut that a production chain replaces with a genesis seal  
+   把它說成暫時的notation 捷徑並不正確——任何鏈都需要這個公理，不會被 genesis seal 取代。
+4. ❌ Because the validator set at genesis cannot be committed to inside the state it is meant to authorize, so the bootstrap keys are distributed by the chain spec and the state root is recomputed by each node from that file  
+   驗證者集合本來就存在 genesis 狀態裡；問題不在能不能放，而在誰來認定那份狀態。
+
+<sub>`ch05-genesis-presumed`</sub>
+
+---
+
+### 5-8　H_X hashes a sequence of five per-component hashes, and inside two of those components each item is itself reduced to a hash. What is that shape buying, and why are only those two treated that way?
+
+<sub>5.2 The Extrinsic Hash — ●●● · 設計理由 · eq. 5.4–5.7</sub>
+
+**標準答案**　It lets a third party prove one preimage or one guarantee was included without shipping the rest of the extrinsic, so the components whose individual items outsiders care about are itemized while the others are committed to wholesale
+
+GP 的原話是這個設計「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」。五個分量各自先 hash，再對這五個 hash 的序列取 hash，等於一棵極扁的證明樹：想證明某個 preimage 被納入，只要出示另外四個分量的 hash 加上 p 這個分量的內容即可，其他四份資料完全不必給。而 p 與 g 內部再把每一項換成 (E_4(service), H(data)) 與 (H(report), E_4(slot), var(credential))，是因為**外界真正會單獨追問的就是這兩種東西**：某份 preimage 有沒有上鏈、某份 report 有沒有被擔保。ticket、assurance、dispute 沒有這種外部需求，整包編碼即可。
+
+**逐項辨析**
+
+1. ✅ It lets a third party prove one preimage or one guarantee was included without shipping the rest of the extrinsic, so the components whose individual items outsiders care about are itemized while the others are committed to wholesale  
+   為個別 preimage 與 report 提供包含證明，正是 GP 對這個結構寫下的理由。
+2. ❌ It lets the five components be gossiped and verified independently of one another, which is what allows a validator to accept the assurances of a block while still waiting for its guarantees to arrive over the network  
+   H_X 是事後的承諾，與分量能不能各自傳播無關；區塊本來就是整體被驗證的。
+3. ❌ It keeps the hash cheap to recompute when one component changes, so an author assembling a block can swap in a better set of guarantees without rehashing the tickets, assurances and disputes it has already fixed  
+   重算成本不是動機：出塊者本來就要把整份 extrinsic 定下來才能封塊。
+4. ❌ It bounds the size of the extrinsic, because a component that hashes its items individually can be checked against a per-item limit that a single flat encoding would hide from the on-chain validity rules  
+   大小限制寫在 §11 的 W_R 等規則裡，不靠雜湊結構表達。
+
+<sub>`ch05-why-five-component-hash`</sub>
+
+---
+
+### 5-9　When a block is the first of a new epoch, its epoch marker is populated. What does that marker carry, and who is it for?
+
+<sub>5.3 The Markers — ●●○ · 概念 · eq. 5.11；§6.6</sub>
+
+**標準答案**　The next and current epoch randomness plus, for every validator of the coming epoch, its Bandersnatch and Ed25519 keys — enough for a header-only follower to reconstruct who may author and to verify their signatures
+
+§6.6：epoch marker 在新 epoch 的第一塊出現，內容是**下一個與當前 epoch 的隨機數**，加上一個序列，逐一列出下個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰（型別即 eq. 5.11 的 ?(H, H, ⟦(bskey, edkey)⟧_V)）。它的受眾是只同步 header 的人：validator set 換人之後，後續所有 seal 都要用新的金鑰驗，而金鑰住在狀態裡；把它放進 header，輕客戶端才能在不重放狀態的前提下繼續驗下去。600 張 ticket 則是另一個 marker H_W 的內容，兩者常被搞混。
+
+**逐項辨析**
+
+1. ✅ The next and current epoch randomness plus, for every validator of the coming epoch, its Bandersnatch and Ed25519 keys — enough for a header-only follower to reconstruct who may author and to verify their signatures  
+   兩個隨機數加上全套下屆金鑰、服務對象是只看 header 的追隨者，正是 §6.6 的定義與用途。
+2. ❌ The hash of the previous epoch's final state and the ticket accumulator as it stood at the boundary, so that a follower can replay the ticket contest itself and confirm the sealer sequence was derived honestly  
+   GP 沒有把 ticket accumulator 放進 marker；讓追隨者自行重跑抽籤等於要它持有狀態。
+3. ❌ The next epoch's slot-sealer sequence in full, which is why the marker is optional — carrying it in every header would cost 600 entries per block rather than one per epoch  
+   600 張 ticket 是 winning-tickets marker H_W 的內容，不是 epoch marker。
+4. ❌ The identities of validators leaving and joining, expressed as a delta against the previous set, together with the entropy that will seed the coming epoch's shuffle  
+   marker 給的是完整金鑰列表而非差異；差異式表示法要求接收者已經握有前一屆的完整集合。
+
+<sub>`ch05-epoch-marker-content`</sub>
+
+---
+
+### 5-10　The header identifies its author by an index rather than by a public key. Beyond saving bytes, what does that choice force, and what does it cost?
+
+<sub>5.1 The Header — ●●○ · 設計理由 · eq. 5.10</sub>
+
+**標準答案**　It forces every verifier to already agree on the posterior active set, since the index means nothing without it; the cost is that a header cannot be interpreted in isolation, which is precisely why the epoch marker exists
+
+eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b 只是等價式，**不被序列化**。用索引的代價不只是省下 32 個位元組——它把「這個 header 說的是誰」變成一個相對於 κ′ 的問題，於是任何驗證者都必須先同意同一份 posterior active set 才能解讀 header。這正是 epoch marker 存在的理由：set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。實作上還有一個直接後果：H_I 的上界是 |κ′| 而不是 |κ|，兩者只有在集合大小不變時才等價（fuzzer bug #825 就踩在這裡）。
+
+**逐項辨析**
+
+1. ✅ It forces every verifier to already agree on the posterior active set, since the index means nothing without it; the cost is that a header cannot be interpreted in isolation, which is precisely why the epoch marker exists  
+   索引把解讀權綁在 κ′ 上、因而需要 epoch marker，這是這個設計最實質的連動。
+2. ❌ It forces the author to prove set membership separately, since an index alone cannot be checked against a signature; the cost is an extra ring proof per block, which is why the seal and the entropy signature are distinct  
+   seal 本身就是用 κ′[H_I] 的金鑰驗的，不需要額外的成員資格證明；ring proof 用在 ticket，不在 seal。
+3. ❌ It forces the validator set to be ordered by public key so that indices are canonical; the cost is that a set change reorders every index, which is why offenders are zeroed in place rather than removed  
+   GP 沒有要求驗證者集合依公鑰排序；offender 被 Φ 歸零是 §6 的機制，與索引正規化無關。
+4. ❌ It forces the index to be re-derived after disputes, since a punished validator's slot is reused; the cost is that two blocks in the same epoch may legitimately carry the same index for different authors  
+   同一個 epoch 內索引與人的對應是固定的；被懲罰者不會讓索引被別人接手。
+
+<sub>`ch05-index-not-key`</sub>
+
+---
+
+### 5-11　The offenders marker is a plain sequence of Ed25519 keys, empty in almost every block, and it duplicates information that disputes processing already puts into state. Why carry it in the header?
+
+<sub>5.3 The Markers — ●●○ · 設計理由 · eq. 5.11；§10</sub>
+
+**標準答案**　Because punishment changes which keys may sign later, and a follower that only reads headers would otherwise keep accepting signatures from validators the chain has already excluded
+
+H_O ∈ ⟦ed25519 key⟧ 是一個可以為空、但永遠不是 ∅ 的普通序列（H_E 與 H_W 才是 optional，這個型別差異本身就是常考點）。它放進 header 的理由跟 epoch marker 同一條線：被剔除的 validator 之後不能再被當成合法簽章者，而只讀 header 的人不會處理 disputes extrinsic、也不持有 ψ_O；沒有這個 marker，它就會繼續接受早該被排除的簽章。至於狀態那份紀錄，是給完整節點做狀態轉移用的，兩者受眾不同、不是重複。
+
+**逐項辨析**
+
+1. ✅ Because punishment changes which keys may sign later, and a follower that only reads headers would otherwise keep accepting signatures from validators the chain has already excluded  
+   讓只讀 header 的人知道「誰的簽章不再算數」，正是把 offender 放上 header 的理由。
+2. ❌ Because the disputes extrinsic is optional and may be pruned from archived blocks, so the marker is the only durable on-chain record of who was punished and when  
+   extrinsic 不會被協定層剪枝，marker 也不是為了保存歷史而存在。
+3. ❌ Because offenders must be announced one block before their verdicts take effect, giving the accused a window to publish a counter-proof before the exclusion becomes final  
+   GP 沒有給被指認者緩衝期；verdict 一旦上鏈就生效。
+4. ❌ Because the marker is what the accumulation stage reads when it rewrites the validator queue, so leaving it out would make the punishment invisible to the next epoch's key rotation  
+   accumulation 讀的是狀態裡的 ψ，不是 header 的 marker。
+
+<sub>`ch05-offenders-marker-why`</sub>
+
+---
+
+### 5-12　Two of the three markers are optional and one is not. What does that asymmetry buy, given how often each is populated and how large each can get?
+
+<sub>5.3 The Markers — ●●○ · 概念 · eq. 5.11</sub>
+
+**標準答案**　The two that can be large — a full key set and a whole epoch of tickets — appear at most once per epoch, so making them optional keeps the ordinary header to a fixed small size; the third is normally empty and an empty sequence already costs almost nothing
+
+eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)、H_W ∈ ?(⟦ticket⟧_E)、H_O ∈ ⟦ed25519 key⟧。前兩個一旦出現就很大——一整套 validator 金鑰、或整個 epoch 的 600 張 ticket——但每個 epoch 至多出現一次，所以用 optional 讓平時只花一個 0 位元組的判別位元；第三個平常是空序列，長度前綴 0 已經幾乎不佔空間，做成 optional 沒有收益，反而多一層包裝。這是「編碼形狀跟隨出現頻率與大小」的典型取捨，也是最容易被追問「為什麼 H_O 不是 optional」的地方。
+
+**逐項辨析**
+
+1. ✅ The two that can be large — a full key set and a whole epoch of tickets — appear at most once per epoch, so making them optional keeps the ordinary header to a fixed small size; the third is normally empty and an empty sequence already costs almost nothing  
+   大而罕見的用 optional、小而常在的用空序列，正是這組型別差異的成本考量。
+2. ❌ The two that are optional are the ones a verifier may legitimately ignore, so a node that trusts its peers can skip decoding them; the third must always be present because the seal is computed over it and a missing field would change the signed message  
+   seal 涵蓋的是 E_U 的全部欄位，三個 marker 都在裡面，沒有哪個因為 optional 而被排除。
+3. ❌ The asymmetry mirrors which fields are produced by Safrole and which by disputes: everything Safrole emits is optional because the ticket contest may fail, while disputes output is mandatory because a verdict cannot fail to conclude  
+   H_W 確實與 Safrole 有關，但 H_E 也在 epoch 邊界必然出現，不是「可能失敗」才有。
+4. ❌ It lets the encoder distinguish 'no epoch change happened' from 'an epoch change happened with an empty key set', a distinction that matters at genesis and after a set-size change to zero validators  
+   空序列與 ∅ 的區分在這裡沒有語意需求——沒有 offender 與有零個 offender 是同一件事。
+
+<sub>`ch05-markers-optionality-cost`</sub>
+
+---
+
+### 5-13　A block arrives mid-epoch carrying a populated epoch marker. How should a validator treat it, and what is the general principle behind that treatment?
+
+<sub>5.3 The Markers — ●●● · 概念 · §5.3；§6.6</sub>
+
+**標準答案**　Reject the block: the markers are not free-form annotations but values the state transition itself determines, so a header whose marker disagrees with what the transition produces is simply not a valid header
+
+marker 不是出塊者可以自由填寫的欄位：H_E 與 H_W 的內容與**出現時機**都是由狀態轉移決定的（§6.6 把 H_E 定義成一個依 e′ ≠ e 分支的式子，非邊界時就是 ∅）。因此「epoch 中間出現 epoch marker」不是一個可以容忍的瑕疵，而是 header 與狀態轉移不一致——區塊無效。背後的通則值得記牢：**header 裡每一個欄位都是狀態轉移的承諾，不是附註**；驗證一個區塊，本質上就是重跑轉移並確認每個承諾都對得上。這也是為什麼 marker 雖然是為輕客戶端而設，全節點仍然必須檢查它。
+
+**逐項辨析**
+
+1. ✅ Reject the block: the markers are not free-form annotations but values the state transition itself determines, so a header whose marker disagrees with what the transition produces is simply not a valid header  
+   marker 由狀態轉移決定，不一致即無效，這是 header 欄位的一般原則。
+2. ❌ Accept the block but ignore the marker, since markers are advisory aids for light clients and a full node derives the same information from state; only a marker that contradicts state in a way affecting the seal can invalidate a block  
+   把 marker 當成可忽略的註記，等於允許出塊者對輕客戶端說謊而不受懲罰。
+3. ❌ Accept the block and adopt the marker, treating it as an early announcement of the coming epoch; this is the mechanism by which an author can pre-publish a set change that the state has not yet applied  
+   GP 沒有「預先公告」的機制；epoch 邊界由 τ 與 E 決定，不由出塊者宣告。
+4. ❌ Reject the block only if the marker's key set differs from the one already in state; a marker that merely appears at an unexpected time is harmless because its content is still correct  
+   出現時機本身就是規格的一部分，內容正確不能補救時機錯誤。
+
+> **陷阱**　面試常追問「如果出塊者亂填 marker 會怎樣」——答「無效」還不夠，要說出「marker 是轉移的承諾」這條通則。
+
+<sub>`ch05-marker-misplacement`</sub>
+
+---
+
+### 5-14　An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?
+
+<sub>5.1 The Header — ●●● · 設計理由 · eq. 5.1；§4</sub>
+
+**標準答案**　The post-state appears as the next block's prior state root; per-item outcomes live in work-digests inside reports rather than in the header; and resource use is bounded in advance by core time and gas ceilings instead of being reported after the fact
+
+三件事各有去處。post-state：JAM 的 header 帶的是 **prior** state root，某一塊的執行結果要到**下一塊**的 H_R 才被承諾——這是為了讓出塊與 Merklization 管線化。receipts：JAM 沒有 receipt 這一層，每個 work-item 的結果（成功的 blob 或 𝔼 裡的錯誤）留在 work-report 的 digest 裡，隨報告上鏈，accumulate 讀得到。gas：JAM 不事後回報用量，而是事前設限——core time 本身是稀缺資源、report 有 G_A 之類的上限、PVM 以 basic block 預扣，超過就是 OOG。少了這三個承諾，header 只剩十個欄位，這也是它能保持小而固定的原因。
+
+**逐項辨析**
+
+1. ✅ The post-state appears as the next block's prior state root; per-item outcomes live in work-digests inside reports rather than in the header; and resource use is bounded in advance by core time and gas ceilings instead of being reported after the fact  
+   prior state root、digest 裡的結果、事前設限取代事後回報，三者各自對應原本的角色。
+2. ❌ All three are folded into the extrinsic hash, whose five components include a results component; JAM simply reorganizes the same commitments under one field so that light clients need to follow only one root rather than three  
+   extrinsic hash 承諾的是輸入（extrinsic），不是執行結果；它沒有 results 分量。
+3. ❌ The post-state is committed to by the seal, which signs the state root the author computed; receipts are replaced by the accumulation output log in the header; and gas is omitted because JAM meters core time in slots rather than in gas  
+   seal 簽的是 header 自身（不含 seal 的編碼），不是狀態根；header 也沒有 accumulation output log 欄位。
+4. ❌ They are all deferred to the BEEFY commitment, which is why a JAM header is smaller: anything an external verifier needs is proven against the accumulation-output MMR rather than against the header itself  
+   BEEFY 的 MMR 承諾 accumulation output，取代不了 state root 與逐項結果。
+
+<sub>`ch05-absent-commitments`</sub>
+
+---
+
+### 5-15　GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?
 
 <sub>5 The Header — ●○○ · 概念 · eq. 5.1</sub>
 
@@ -1831,7 +2065,7 @@ eq. 5.1：H ≡ (H_P parent hash, H_R prior state root, H_X extrinsic hash, H_T 
 
 ---
 
-### 5-6　Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?
+### 5-16　Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?
 
 <sub>5 The Header — ●○○ · 設計理由 · eq. 5.9 (H_r)</sub>
 
@@ -1856,7 +2090,7 @@ GP §5：「This is a departure from both Polkadot and the Yellow Paper's Ethere
 
 ---
 
-### 5-7　GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?
+### 5-17　GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?
 
 <sub>5 The Header — ●●● · 版本差異 · eq. 5.4–5.7 (H_x) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -1881,7 +2115,7 @@ GP eq. 5.6–5.7：p = E(var[(E_4(s), H(d)) for (s,d) in E_P])，g = E(var[(H(w)
 
 ---
 
-### 5-8　Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?
+### 5-18　Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?
 
 <sub>5 The Header — ●○○ · 概念 · eq. 5.8</sub>
 
@@ -1906,7 +2140,7 @@ GP eq. 5.8：P(H)_t < H_T ∧ H_T·P ≤ T，其中 P = 6 秒、T 為 wall-clock
 
 ---
 
-### 5-9　The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?
+### 5-19　The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?
 
 <sub>5 The Header — ●●○ · 概念 · eq. 5.10 (H_i, H_a)</sub>
 
@@ -1931,7 +2165,7 @@ GP eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b，「this is merely an 
 
 ---
 
-### 5-10　The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?
+### 5-20　The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?
 
 <sub>5 The Header — ●●○ · 概念 · eq. 5.3 (ancestors A) & §11.4 lookup anchor</sub>
 
@@ -1956,7 +2190,7 @@ GP eq. 11.38：∀x ∈ contexts: ∃h, h′ ∈ A: h_t = x_l（lookup-anchor ti
 
 ---
 
-### 5-11　Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?
+### 5-21　Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?
 
 <sub>5.1 The Markers — ●●○ · 概念 · eq. 5.11 (markers)</sub>
 
