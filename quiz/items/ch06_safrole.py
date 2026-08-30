@@ -40,7 +40,7 @@ ITEMS = [
   "錯兩處：ring root 必須對 γ′_P（下個 epoch 的提票 ring）取，且 disputes 先跑，用 posterior ψ′_O。",
   "輪換只在 e′ > e 發生，且新 pending set 的來源是 ι 而非 γ_P 自身，否則 ι 永遠進不了 κ。",
  ],
- "explanation": "eq. 6.14：e′ > e 時 (γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)，其中 z = O([k_b | k ∈ γ′_P])（ring root），否則四者不變。eq. 6.15：Φ(k) 把 k_e ∈ ψ′_O（posterior offenders，因為 disputes 已先處理）的 validator 整組換成全零 key。所以 staging set ι 要等**兩個** epoch 邊界才會成為 active（ι → γ_P → κ）。你們的 KeyRotate() 對應此式；ReplaceOffenderKeys 用的是 posterior ψ_O。",
+ "explanation": "eq. 6.14：e′ > e 時 (γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)，其 where 子句定義 z = ringroot([k_b | k ∈ γ′_P])；非 epoch 邊界則四者原封不動。**四組金鑰是一條輸送帶**：ι staging（服務透過 `designate` 寫入）→ γ_P pending（下個 epoch 生效，決定 ring root）→ κ active（現在出塊、擔保、背書的就是這組）→ λ previous（上一個 epoch，仍需保留以驗證跨界的舊簽章）。**所以 ι 要等兩個 epoch 邊界才會真正上場**（ι → γ_P → κ），這個延遲是刻意的：ring root 必須在整個 epoch 之前就固定下來，ticket 才有東西可以證明自己屬於某個 ring。**Φ 的角色**（eq. 6.15）：把 k_e ∈ ψ′_O 的 validator **整筆 336 位元組換成全零**，而不是從序列中移除。用 posterior 的 ψ′_O 是因為 disputes 在同一塊裡已經先處理完。**歸零而非移除很重要**：|κ| ≡ |λ| ≡ V 因此恆成立，索引不會位移——H_I 才能一直當索引用，π_V 的統計陣列也不必重排。你們的 KeyRotate() 對應此式，ReplaceOffenderKeys 取的是 posterior ψ_O。",
  "trap": "常考：ι 什麼時候變成 κ？答：下下個 epoch（先進 γ_P，再進 κ）。"
 },
 {
@@ -61,7 +61,7 @@ ITEMS = [
   "eq. 6.8 的 N_V ≡ {3c | c ∈ N_{2…C+1}}，即 6, 9, 12, …, 1023。",
   "兩端各差一格：c 從 2 起算所以下界是 6，c 上限到 C+1 才使 3c 達到 3·C = 1023。",
  ],
- "explanation": "eq. 6.8：N_V ≡ {3c | c ∈ N_{2…C+1}}，即 6, 9, 12, …, 1023；§6.3：「The length of each sequence is always a multiple of 3 between 6 and 3C.」每個 active core 需要 3 個 guarantor，所以只有前 |κ′|/3 個 core 是 active（§11.3）。這是 0.7.2→0.8.0 的重大變化：很多常數改成依 |κ| 計算（例如 super-majority ⌊2|κ|/3⌋+1、tickets per validator n = ⌈2E/|γ′_P|⌉、erasure shards = |κ′|），designate host call 也只要求 z ∈ N_V。你們 repo 的 issue #1037 就是在追這個變動。",
+ "explanation": "eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 1023**（C = 341 是 core 數）。§6.3 原文：「The length of each sequence is always a multiple of 3 between 6 and 3C.」**為什麼一定是 3 的倍數**：每個 active core 需要 3 名 guarantor，所以 validator 數與 core 數是 3:1 的關係，只有前 |κ′| / 3 個 core 會被指派工作（§11.3）。tiny 設定 |κ| = 6 就只有 2 個 core 在動。**這是 0.7.2 → 0.8.0 的重大變化（PR #514）**：原本 V 是一個常數，現在集合大小可變，於是一整批原本寫死的數字都得改成依 |κ| 計算——super-majority 門檻 ⌊2|κ|/3⌋+1、每位 validator 的 ticket 配額 n = ⌈2E/|γ′_P|⌉、erasure coding 的 shard 數 = |κ′|、verdict 的三個門檻（⌊2|k|/3⌋+1、0、⌊|k|/3⌋）。`designate` host call 也只檢查 z ∈ 𝕍，不再比對某個常數。**遷移時最容易漏的**就是散在各處的 `ValidatorsCount` 編譯期常數（你們的 issue #1037 在追這件事）——它們在 0.7.2 都成立，因為那時 |κ| 恆等於 V；0.8.0 之後必須換成 len(κ′)。注意 Φ 把 offender 歸零而非移除，所以 |κ| 在 epoch 內不會變動，只在換屆時才可能改變。",
  "trap": "tiny 模式 V=6、C=2；full V=1023、C=341（1023 = 3·341）。"
 },
 {
@@ -103,7 +103,7 @@ ITEMS = [
   "累積進 η_0 的是 H_V 的輸出；rotate 推入 posterior η′_0 更會把本塊 entropy 混進 η′_1。",
   "違反 6.24 的 case 條件：每塊都推的話，η_2 就不再是上上個 epoch 結束時的累積值。",
  ],
- "explanation": "eq. 6.23：η′_0 ≡ H(η_0 ⌢ Y(H_V))——用 **prior** η_0 與 H_V 的 VRF **輸出** Y(·)（App. G 定義為 output 的前 32 bytes）做 Blake2b。eq. 6.24：e′ > e 時 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，注意推入的是 prior η_0，否則三者不變。H_V 的簽章 context 是 X_E ⌢ Y(H_S)（eq. 6.18），也就是 seal 的 VRF 輸出，因此 entropy 是「先固定訊息、再產生」的 bias-resistant 來源；Y(H_S) 本身只拿來當 H_V 的 context 並與 ticket id 比對，不會直接進 η。你們 UpdateEtaPrime0() / UpdateEntropy() 分別對應 6.23 / 6.24。",
+ "explanation": "兩條式子分工明確。**eq. 6.23（每塊都做）**：η′_0 ≡ H(η_0 ⌢ Y(H_V))——把 **prior** 的 η_0 接上本塊 entropy VRF 簽章的輸出 Y(H_V) 再 Blake2b。Y(·) 是附錄 G 定義的 VRF output（簽章的前 32 個位元組），不是簽章本身。**eq. 6.24（只在 e′ > e 做）**：(η′_1, η′_2, η′_3) = (η_0, η_1, η_2)——整體右移一格，**推進去的是 prior 的 η_0**，不是剛算好的 η′_0。這個 prior/posterior 的區分是實作最常翻車的地方。**為什麼這樣就不可偏置（bias-resistant）**：H_V 的簽章 context 是 X_E ⌢ Y(H_S)（eq. 6.18），也就是綁在 seal 的 VRF 輸出上——而 seal 又必須簽 E_U(H)，訊息在產生熵之前就已經固定。出塊者無法試很多份 header 挑一個對自己有利的熵，因為換內容就換 seal、換 seal 就整組重來，且輸出是確定性的。**Y(H_S) 本身不直接進 η**，它只當 H_V 的 context、並在票券模式下與 ticket id 比對。四個 η 的用途分工：η_0 每塊更新的活水；η′_2 供本 epoch 抽籤（ticket context、fallback、guarantor 洗牌）；η′_3 供驗證 seal。你們的 UpdateEtaPrime0() 與 UpdateEntropy() 分別對應 6.23 與 6.24。",
  "trap": "H_V 的輸出餵 η′_0；H_S 的輸出（Y(H_S)）只作為 H_V 的訊息與 ticket id 比對。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "三個用途整組往前挪一格；eq. 11.22 明寫 G ≡ (P(|κ′|, η′_2, τ′), Φ(κ′))，用的是 η′_2。",
   "η′_0 每塊都被 6.23 改寫，拿它當 ring proof context 會使同 epoch 內每塊 context 都不同。",
  ],
- "explanation": "tickets 在 epoch N 提交時用 η′_2（eq. 6.30 的 ring proof context X_T ⌢ η′_2 ++ r）；到 epoch N+1 驗 seal 時，那個值已經被 rotate 成 η′_3（eq. 6.16：X_T ⌢ η′_3 ++ i_e；6.17：X_F ⌢ η′_3），這就是 §6.4 說的「The oldest is used to regenerate this randomness when verifying the seal」。fallback F(η′_2, κ′)（6.25）與 guarantor 分配 P(|κ′|, η′_2, τ′)（11.22）也都用 η′_2；§11.3 解釋不用 η_1 是為了避免 epoch 末尾狀態不確定造成 fork magnification。epoch marker H_E 帶的則是 prior (η_0, η_1)，rotate 後即 η′_1、η′_2。",
+ "explanation": "記法是**「同一份隨機性在不同時間點有不同名字」**：η 每個 epoch 邊界右移一格，所以今天的 η′_2 就是明天的 η′_3。**η′_2 用於「本 epoch 要抽的籤」**：ticket 的 ring-proof context X_T ⌢ η′_2 ++ r（eq. 6.30）、fallback 金鑰序列 F(η′_2, κ′)（eq. 6.25／6.27）、以及 guarantor 對 core 的分配洗牌 P(|κ′|, η′_2, τ′)（eq. 11.22）。**η′_3 用於「驗證上一輪抽籤的結果」**：seal 的 context——票券模式 X_T ⌢ η′_3 ++ i_e（eq. 6.16）、fallback 模式 X_F ⌢ η′_3（eq. 6.17）。**兩者為什麼必須是同一個值的不同時期**：ticket 在 epoch N 提交時用 η′_2 當 context，到 epoch N+1 出塊驗 seal 時，那個值已經 rotate 成 η′_3——§6.4 說得很直接：「The oldest is used to regenerate this randomness when verifying the seal」。用錯就會驗不過，而且只在 epoch 交界才爆，單機測試常常看不出來。**為什麼不用更新的 η_1**：§11.3 解釋是為了避免 fork magnification——η_1 在 epoch 末尾仍可能因為分叉而不確定，拿它當分配依據會讓分叉自我放大。**epoch marker 帶的是 prior 的 (η_0, η_1)**，rotate 之後正好成為 η′_1 與 η′_2，供輕客戶端接續使用。",
  "trap": "口訣：提 ticket 用 η2，驗 seal 用 η3（同一個值晚一個 epoch）。"
 },
 {
@@ -145,7 +145,7 @@ ITEMS = [
   "η′_2 是提交 ticket 時的 context；驗 seal 一律用已 rotate 的 η′_3。",
   "那是 eq. 6.17 的 fallback 情況：i = H_A、X_F context、T = 0。",
  ],
- "explanation": "eq. 6.16：γ′_S ∈ [C] ⇒ { i_y = Y(H_S)（seal 的 VRF 輸出必須等於該 slot ticket 的 id，證明出塊者就是持票人）, H_S ∈ F^{X_T ⌢ η′_3 ++ i_e}_{H_A}(E_U(H)), T = 1 }。seal 是一般（IETF）Bandersnatch VRF 簽章，不是 ring VRF——ring 只在提交 ticket 時用；訊息則是省略 seal 欄位的 E_U(H)，否則簽章會簽進自己。你們的 sealing.go ValidateByBandersnatchs 就是檢查 Y(H_S) == ticket id。",
+ "explanation": "eq. 6.16（票券模式，i = γ′_S[H_T mod E]）三個條件：**i_y = Y(H_S)**——seal 的 VRF 輸出必須等於該 slot 那張 ticket 的 id；**H_S ∈ F^{X_T ⌢ η′_3 ++ i_e}_{H_A}(E_U(H))**——用 H_A 簽的 Bandersnatch 簽章；**T = 1**（標記為 ticketed）。**第一個條件是整個 Safrole 的樞紐**：ticket id 當初是持票人用 ring-VRF 產生的 VRF 輸出，只有握有那把私鑰的人能在出塊時再產生同樣的輸出。所以 i_y = Y(H_S) 這一行同時證明了「你就是當初買下這個 slot 的人」，而**不必揭露你是誰**——匿名性正是在這裡兌現的。**兩個常見誤解**：其一，**seal 是一般的 IETF Bandersnatch VRF 簽章，不是 ring VRF**——ring 只在提交 ticket（eq. 6.30）時用；出塊當下驗證者已經能從 κ′[H_I] 拿到公鑰，不需要匿名集合。其二，簽的訊息是 **E_U(H)**（省略 H_S 欄位的 header 編碼），否則簽章會簽進自己、無解。context 裡的 η′_3 是專供 seal 驗證的那份 entropy，i_e 是 ticket 的 entry index。",
  "trap": "E_U(H) = 不含 H_S 的 header 序列化；H_V 則是 context X_E ⌢ Y(H_S)、訊息為空 []。"
 },
 {
@@ -208,7 +208,7 @@ ITEMS = [
   "(η_2, η_3) 又更舊兩格；未經 Φ 過濾的 ι 會讓 light client 收到尚未歸零的 offender key。",
   "Z(γ_A) 是 winning-tickets marker H_W（6.29）的內容，與 H_E 是 header 裡互斥的兩個欄位。",
  ],
- "explanation": "eq. 6.28：H_E ≡ (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P]) 當 e′ > e，否則 ∅。η_0 與 η_1 是 **prior** 值（rotate 後就是 η′_1、η′_2，也就是下個 epoch 提 ticket 與 fallback 會用到的 entropy），加上 γ′_P（下一個 epoch 的 pending set，已經 Φ 過濾）的 Bandersnatch + Ed25519 key。目的（§6.6）：讓不同步完整 state 的節點（light client）只靠 header 鏈就能追蹤 validator 變化。你們 ValidateHeaderEpochMark（InvalidEpochMark = code 9）檢查此式。",
+ "explanation": "eq. 6.28：H_E ≡ (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P]) 當 e′ > e，否則 ∅。**兩個 entropy 是 prior 值**——注意是 η_0 與 η_1 不是 η′。rotate 之後它們就變成 η′_1 與 η′_2，而 η′_2 正是下個 epoch 提交 ticket 的 context 種子（eq. 6.30）與 fallback F 的種子（eq. 6.27）。換句話說，marker 提前把「下個 epoch 抽籤要用的隨機性」公告出來。**金鑰是 γ′_P（pending set）的**，也就是**再下一個** epoch 才會 active 的那組（ι → γ_P → κ 的中段），而且已經被 Φ 過濾（offender 的位置是全零）。每筆帶 Bandersnatch 與 Ed25519 兩把（Ed25519 是 0.6.4 起加入的）。**用途**（§6.6）：讓不同步完整狀態的節點只靠 header 鏈就能追蹤 validator 集合的變化——它需要 Bandersnatch 來驗未來的 seal、需要 Ed25519 來驗 guarantee 與 judgment 簽章，所以兩把都給。**為什麼不給 BLS**：BLS 只用於 Beefy 的鏈下分發，跟「跟著 header 走」無關，給了是浪費頻寬。你們的 ValidateHeaderEpochMark（InvalidEpochMark = code 9）檢查此式。",
  "trap": "H_E 放 γ′_P 不是 κ′；entropy 是 prior η_0/η_1。"
 },
 {
@@ -250,7 +250,7 @@ ITEMS = [
   "K 限制的是**單一區塊**的 extrinsic 大小；GP 對整個 epoch 的提交總量沒有直接上限。",
   "m′ = Y 那一塊已在 tail 內；比例倒過來更會變成 validator 越多、每人配額越少。",
  ],
- "explanation": "eq. 6.30：E_T ∈ [(r ∈ N_n, p ∈ ring proof over γ′_Z with context X_T ⌢ η′_2 ++ r)]，n = ⌈2E/|γ′_P|⌉——0.8.0 (#527) 把原本的常數 N 改成公式，「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」。full：⌈2·600/1023⌉ = 2；test-vector 的 tiny 配置（E = 12、|γ′_P| = 6）：⌈24/6⌉ = 4（0.7.x 的 tiny 常數是 3，這是遷移時要改的點）。eq. 6.31：|E_T| ≤ K = 16 當 m′ < Y，否則必須為 0（tail 期間不能再提 ticket）。",
+ "explanation": "三個限制，來源不同。**每位 validator 的配額**（eq. 6.30）：entry index r ∈ N_n，n = ⌈2E / |γ′_P|⌉。0.8.0（PR #527）把原本的常數 N 換成這條公式，理由 GP 明寫：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」——accumulator 要收滿 E = 600 張才能啟用票券模式，validator 少的時候若每人配額不變就永遠收不滿。full 設定：⌈2·600/1023⌉ = **2**；test-vector 的 tiny 設定（E = 12、|γ′_P| = 6）：⌈24/6⌉ = **4**（0.7.x 的 tiny 常數是 3，這是遷移時必須改的點）。**每塊的數量上限與時間窗**（eq. 6.31）：|E_T| ≤ K = 16 當 m′ < Y = 500；**m′ ≥ Y 時 |E_T| 必須為 0**——tail 期間完全不能再提票，不是「提了也不算」而是「提了區塊就無效」。**為什麼要有 tail**：投票必須在 epoch 結束前收攤，Z(γ_A) 才能在 eq. 6.29 的那一塊被公告成 H_W、並在下個 epoch 第一塊定案為 γ′_S。沒有這段緩衝，換屆時序列還在變動。注意 K = 16 是**每塊**上限而非每人，用意是限制單塊的驗簽成本（ring proof 驗證不便宜）。",
  "trap": "條件是 m′ < Y（本塊的 phase），K = 16 是每個區塊的上限，不是每個 epoch。"
 },
 {
@@ -292,7 +292,7 @@ ITEMS = [
   "ring 由 γ′_P 的 Bandersnatch key 組成，曲線與集合都不對；proof 可重新隨機化，不能當 id。",
   "X_E ⌢ Y(H_S) 是 H_V 的 context（6.18）；提票的當下根本還沒有 H_S 存在。",
  ],
- "explanation": "eq. 6.30：p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([])，ring proof 的驗證 root 是 γ′_Z（若本塊是 epoch 第一塊，γ′_Z 已換成新 pending set 的 root，因此 ticket 會針對**新** ring 驗證）；訊息為空序列；eq. 6.32：ticket id y = Y(p)（VRF 輸出），r 是 entry index。ring proof 讓驗證者知道「某個 γ′_P 成員」擁有此 ticket，但不知道是誰——這正是匿名性的來源。你們 createSignatureContext 就是 \"jam_ticket_seal\" + η′_2(32B) + attempt(1B)。",
+ "explanation": "eq. 6.30：p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([])——四個要素缺一不可。**驗證 root 是 γ′_Z**（posterior 的 epoch ring root）：若本塊是 epoch 第一塊，γ′_Z 已經換成新 pending set 的 root，所以 ticket 是針對**新的** ring 驗證的。**context 是 X_T ⌢ η′_2 ++ r**：X_T = `$jam_ticket_seal` 是 domain separator、η′_2 是本 epoch 的抽籤隨機性、r 是 entry index（同一位 validator 可以用不同的 r 提交多張）。**訊息是空序列 []**——ticket 不需要對任何內容表態，它只是「我有資格」這件事本身。**ticket id 是 VRF 輸出 y = Y(p)**（eq. 6.32），這個值後來會在出塊時被 eq. 6.16 拿來比對。**匿名性是怎麼來的**：ring proof 讓驗證者確信「**某個** γ′_P 的成員」擁有這張票，卻不知道是哪一位——這是 ring VRF 相對於一般 VRF 的全部價值。而因為 VRF 輸出是確定性且不可偏置的，持票人也無法挑選自己想要的 slot，只能接受抽到什麼算什麼。你們的 createSignatureContext 組出來的正是 `jam_ticket_seal` + η′_2（32 B）+ attempt（1 B）。",
  "trap": "ring VRF 用在 ticket；一般 VRF 用在 seal 與 H_V。"
 },
 {
@@ -313,7 +313,7 @@ ITEMS = [
   "三處都錯：γ′_S ∈ [H_B]_E 是 Bandersnatch key 序列，ring proof 只用於提票，fallback 的 T 必為 0。",
   "6.17 仍要求 H_S，否則無從證明作者持有該 slot 指定的 key；H_V 的 context 也是 X_E ⌢ Y(H_S)。",
  ],
- "explanation": "eq. 6.17：γ′_S ∈ [H_B] ⇒ { i = H_A, H_S ∈ F^{X_F ⌢ η′_3}_{H_A}(E_U(H)), T = 0 }。eq. 6.18 對 ticket 與 fallback 兩種模式都適用：H_V ∈ F^{X_E ⌢ Y(H_S)}_{H_A}([])，也就是 entropy 在 fallback 下仍然每塊更新。三個 context 字串：X_F = $jam_fallback_seal、X_T = $jam_ticket_seal、X_E = $jam_entropy。T = 0 表示此塊「安全性較低」，§19 best-chain 規則會偏好 ticket-sealed 祖先較多的鏈。",
+ "explanation": "eq. 6.17（fallback 模式，γ′_S 每格直接是一把 Bandersnatch 公鑰）：**i = H_A**——該 slot 指定的那把公鑰必須就是本塊作者的；**H_S ∈ F^{X_F ⌢ η′_3}_{H_A}(E_U(H))**；**T = 0**。和票券模式對照著記：票券模式比對的是 **VRF 輸出等於 ticket id**（i_y = Y(H_S)），fallback 比對的是**公鑰本身相等**（i = H_A）——後者根本沒有匿名性可言，因為出塊表是公開可算的。context 也換了：X_F = `$jam_fallback_seal` 取代 X_T，而且**沒有 ++ i_e**（fallback 沒有 entry index 這回事）。**eq. 6.18 兩種模式都適用**：H_V ∈ F^{X_E ⌢ Y(H_S)}_{H_A}([])，X_E = `$jam_entropy`。也就是說**熵在 fallback 之下仍然每塊更新**——Safrole 可以退化，但鏈的隨機性來源不能斷，否則下個 epoch 連 fallback 都沒有種子可用。注意它的 context 吃的是 Y(H_S)，所以 seal 必須先算出來。**T 這個旗標有下游用途**：§19 的 best-chain 規則偏好「ticket-sealed 祖先較多」的分支，因為 fallback 區塊的出塊者是公開可預測的，安全性較低——T = 0 就是這個偏好的依據。",
  "trap": "fallback 的 entropy 仍然每塊更新（H_V 必填）。"
 },
 {
@@ -373,7 +373,7 @@ posteriorState.SetGammaS(newGammaS)"""},
   "兩處都錯：s_{…4} 取的是**前** 4 個元素，且 decode 與 E_n 一律小端。",
   "忽略了 6.27 外層的 ⟲：decode_4 的值域是 0…2³²−1，不取模必然越界。",
  ],
- "explanation": "eq. 6.27：k[decode_4(H(r ⌢ E_4(i))_{…4})]_b，外面套 ⟲（cyclic 索引）——也就是對**傳入的 key 序列長度** |k| = |κ′| 取模。H 是 Blake2b（§3.8：H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY）。這段 code 有兩個要點：(1) 註解寫 Keccak256 是 stale，實際呼叫的是 Blake2bHashPartial，行為正確；(2) `%= types.ValidatorsCount` 用的是編譯期常數，在 0.7.2（|κ| 恆等於 V）沒問題，但 0.8.0 允許 |κ| 變動後就必須改成 len(κ′)——這正是 issue #1037 要處理的一類問題。順帶一提，取模讓不同 slot 撞到同一個 validator 是 fallback 的正常行為而非缺陷——F 本來就是可重複抽樣。",
+ "explanation": "eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]。逐項對照程式碼：**H 是 Blake2b**——§3.8 定義 H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY。**取前 4 個位元組、little-endian 解碼**（decode_4）。這兩點程式都對，雖然註解寫 Keccak256 已經 stale，實際呼叫的是 Blake2bHashPartial。**真正的落差在 ⟲ 這個記號**：它是 §3.7 的模數下標 s[i]^⟲ ≡ s[i mod |s|]，對的是**傳入的金鑰序列長度** |k| = |κ′|；程式卻寫 `%= types.ValidatorsCount`，用的是編譯期常數。在 0.7.2 這沒問題（|κ| 恆等於 V），但 0.8.0 讓 |κ| 可變（eq. 6.8 的 𝕍）之後就必須換成 len(κ′)，否則在非滿編的設定下會索引越界或選錯人。這正是 issue #1037 那一類問題。**一個容易誤判為 bug 的行為**：取模會讓不同 slot 抽到同一位 validator——這是 F 的正常語意（可重複抽樣），不是缺陷；fallback 本來就沒有「每人一個 slot」的保證。",
  "trap": "面試官可能直接問：你們 fallback 用哪個 hash？答 Blake2b，並指出註解錯誤。"
 },
 {

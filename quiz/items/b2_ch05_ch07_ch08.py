@@ -172,7 +172,7 @@ func NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPac
   "M_B([], H_K) = N([], H_K) = H_0：空塊照樣 append 一片 H_0 的 leaf，super-peak 每塊都變。",
   "header hash 進的是 β_H 的 h 欄位，從來不會被 append 進 belt。",
  ],
- "explanation": "eq. 7.6–7.7：s = [E_4(s) ⌢ E(h) | (s, h) ∈ θ′]，β′_B ≡ A(β_B, M_B(s, H_K), H_K)。θ′ 來自 eq. 12.22/12.24 的 b = {(s, b) | b = yield 結果 ≠ ∅}——只有在 accumulate 裡呼叫 yield 的 service 才會出現，所以大多數區塊的 θ′ 都是空的。此時 s = []，依 eq. E.3：M_B(v, H) 在 |v| = 1 時為 H(v_0)，否則為 N(v, H)；再依 eq. E.1：N([], H) = H_0（零 hash）。你們的 lastAccOutRoot → merkle.Mb：len(v) == 0 時走 N 回傳 zeroHash，再交給 AppendOne（OpaqueHash 長度固定 32，不會被當成空值略過），行為一致。",
+ "explanation": "關鍵是 **belt 每塊必定長一片葉子，即使本塊什麼都沒產出**。θ′ 來自 eq. 12.22／12.24：只有在 accumulate 裡呼叫 `yield` 且回傳非 ∅ 的 service 才會出現在裡面，所以**多數區塊的 θ′ 都是空的**——這不是特例而是常態。此時 s = []（eq. 7.6 的映射對空序列就是空序列），接著看附錄 E：eq. E.3 定義 M_B(v, H) 在 |v| = 1 時為 H(v_0)、否則走 N(v, H)；eq. E.1 定義 N([], H) = H_0（零雜湊）。所以 M_B([], H_K) = H_0，β′_B = A(β_B, H_0, H_K) 照樣 append 一片，b = M_R(β′_B) 也照樣改變。**為什麼要這樣設計**：belt 是 MMR，第 i 個 peak 代表 2^i 個項——若空區塊不 append，「第 n 片葉子」就不再對應「第 n 個區塊」，外部拿著區塊高度來索引證明的系統（BEEFY 橋接）就得額外維護一張對照表。每塊一片、從 genesis 起算，索引才能直接等於高度。**實作陷阱**：H_0 是 32 個零位元組，是一個**合法的雜湊值**而不是「空值」。你們的 lastAccOutRoot → merkle.Mb 在 len(v) == 0 時回傳 zeroHash 再交給 AppendOne，因為 OpaqueHash 長度固定 32，不會被誤判成 nil 而略過——這正是要小心的地方。",
  "trap": "belt 是「每塊一片 leaf」的 MMR；空區塊的 leaf 是 H_0 不是 ∅。因此兩個相鄰的空區塊，其 β_H 的 b 也不相同。"
 },
 {
@@ -219,7 +219,7 @@ func (a *AuthPool) RemoveLeftMostPairedValue(h OpaqueHash) {
   "要編輯哪個 pool 由 (g_w)_c 決定；eq. 11.28 允許 g_t 落在前一個 rotation，反推會挑到別的 pool。",
   "§3 的 s ⊖ {v} 是 excepting the left-most element equal to v，只移除最舊的那一個。",
  ],
- "explanation": "eq. 8.3：F(c) ≡ α[c] ⊖ {(g_w)_a} 當 ∃g ∈ E_G：(g_w)_c = c，否則 F(c) = α[c]。α[c] 是序列而非集合，重複完全合法：queue φ[c] 常常整排都是同一個 authorizer（例如某條 parachain 專用的 core），pool 裡自然會累積多個相同 hash；全部刪掉會讓 pool 憑空縮水，後續的 guarantee 就會因 eq. 11.32 找不到 authorizer 而被拒。而且這裡一定只需要移除一個：eq. 11.25 保證 E_G 每個 core 最多一個 guarantee、依 core 排序且不重複。#692 的修法正是「match the core index from report in guarantees」+「remove only the leftmost instance」。",
+ "explanation": "eq. 8.3：F(c) ≡ α[c] ⊖ {(g_w)_a} 當 ∃g ∈ E_G 且該 guarantee 的 report 指向 core c，否則 F(c) = α[c]。⊖ 是 sequence-minus-leftmost：**只移除最左邊那一個符合的元素**。**為什麼「刪掉全部」是錯的**：α[c] 是**序列不是集合**，同一個 authorizer hash 重複出現完全合法——queue φ[c] 很可能整排都排同一個 authorizer（例如某條專用 core），每個時槽補一筆進 pool，pool 裡自然會累積多個相同的 hash。這些重複代表的是**可用額度**：有幾個就能用幾次。一次全刪等於把剩餘額度一併沒收，pool 憑空縮水，後續 guarantee 就會在 eq. 11.32（w_a ∈ α[w_c]）找不到 authorizer 而被拒——測試向量因此對不上。**為什麼只需要移除一個就夠**：eq. 11.25 保證 E_G 裡每個 core 至多一個 guarantee、且依 core index 排序不重複，所以一塊之內同一個 core 不會消耗兩次。**還有第二個錯**：舊實作忽略了 report 的 core index，等於在錯的 core 的 pool 上做移除。#692 的修法正是兩件事一起補——比對 report 的 core、且只移除最左邊一個。",
  "trap": "⊖（seqminusl）只砍最左邊一個；pool 與 queue 都是「序列」，允許重複。"
 },
 {
@@ -240,7 +240,7 @@ func (a *AuthPool) RemoveLeftMostPairedValue(h OpaqueHash) {
   "guarantee 驗證不看 φ：queue 只是 pool 的補給來源，本身不是授權依據。",
   "GP 沒有「同一塊不能同時 assign 與 guarantee 同一個 core」這條規則。",
  ],
- "explanation": "eq. 11.32：∀w ∈ w：ρ‡[w_c] = ∅ ∧ w_a ∈ α[w_c]。依賴圖 eq. 4.19：α′ ≺ (H, E_G, φ′, α)，表示 E_G 是 α′ 的輸入而不是反過來——所以 x 要到 block N 結束時才進入 α′[c]，block N+1 的 prior α 才含 x。實務含意：assigner 想讓新 authorizer 可用，最快也是下一個 slot；而且 pool 每塊都會 append 一個 queue 項目，x 進 pool 後若一直沒被使用、pool 又沒被其他 guarantee 消耗，最多再 8 個區塊就會被 ←^O 擠掉，所以 queue 的安排要與預期的 package 提交時間對齊。你們 STF 的順序（ValidateExtrinsic → UpdateReports → UpdateAccumlate → UpdateAuthorizations）也正是先用 prior α 驗 guarantee、最後才產生 α′。",
+ "explanation": "答案落在**依賴圖的方向**上。eq. 4.19：α′ ≺ (H, E_G, φ′, α)——讀作「α′ 由 header、本塊的 E_G、posterior 的 φ′ 與 prior 的 α 共同決定」，也就是 **E_G 是 α′ 的輸入，不是反過來**。而 eq. 11.32 檢查 guarantee 時要求 w_a ∈ α[w_c]——用的是 **prior 的 α**。所以 assigner 在本塊 accumulate 期間呼叫 `assign` 寫進 φ′，x 要等到本塊結束、經由 eq. 8.2 才進入 α′[c]；**最快能使用 x 的是下一個區塊 N+1**（那時它才是 prior α 的一部分）。本題的 guarantee 因此無效。**實務上要注意的第二件事**：pool 每塊都會 append 一筆（即使沒有 guarantee 消耗），而 ←(…)^O 只保留最後 O = 8 個。所以 x 進了 pool 之後若一直沒被用到，**最多再過 8 個區塊就會被擠掉**——assigner 安排 queue 的時機必須與預期的 work-package 提交時間對齊，太早排入等於白排。你們 STF 的順序（ValidateExtrinsic → UpdateReports → UpdateAccumlate → UpdateAuthorizations）正好體現這個方向：先用 prior α 驗 guarantee，最後才產生 α′。",
  "trap": "guarantee 看 prior α；α′ 用 posterior φ′。新 authorizer 最早在「下一個區塊」才可用。"
 },
 ]

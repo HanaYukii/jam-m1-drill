@@ -19,7 +19,7 @@ ITEMS = [
   "eq. 7.8 建的 p 是 package hash ↦ segment root 的 dictionary，不是 report hash 清單；狀態裡從無 header 序列。",
   "eq. 7.1–7.2 的 β_H 是最多 8 筆 tuple 的序列；四項的 entropy accumulator 是另一個狀態項 η。",
  ],
- "explanation": "eq. 7.2：β_H ∈ [(h ∈ H, s ∈ H, b ∈ H, t ∈ N_T, p ∈ D⟨H→H⟩)]_{:H}，H = 8。t（timeslot）是 0.8.0 新增欄位（配合 refinement context 的 anchor slot，#526）。p 是本塊 E_G 中每個 work-package hash → 其 segment root（exports root），供之後 report 的 prerequisite / segment-root lookup 驗證用。eq. 7.3：β_B ∈ [H?]（MMR 的 peaks，∅ 表示空 peak），用 Keccak。eq. 7.4：θ ∈ [(N_S, H)] 是本塊的 accumulation output（service, hash）序列。",
+ "explanation": "β ≡ (β_H, β_B) 是兩個目的不同的東西被放在同一個狀態分量裡。**β_H（recent history）**（eq. 7.2）：β_H ∈ ⟦(h, s, b, t, p)⟧_{:H}，最多 H = 8 筆，每筆是h = header hash、s = state root、b = accumulation-output log 的 super-peak、t = timeslot（**0.8.0 新增**，配合 refinement context 的 anchor slot，PR #526）、p = 一個字典，把本塊 E_G 裡每個 work-package hash 映到它的 segment root（exports root）。**p 是最容易被忽略但用途最多的欄位**：後續 report 的重複檢查、prerequisite 檢查、segment-root lookup 全都要查它（§11）。**β_B（accumulation-output belt）**（eq. 7.3）：β_B ∈ ⟦?H⟧，是一個 MMR 的 peak 序列（∅ 代表該高度沒有 peak），用 Keccak 而不是 Blake2b。**兩者的時間尺度完全不同**：β_H 是滑動窗口，只留 8 筆、舊的直接丟；β_B 是 append-only、永不遺忘，因為它要支撐鏈外幾個月後回來驗的 BEEFY 證明。**θ 不在 β 裡**（eq. 7.4）：θ ∈ ⟦(N_S, H)⟧ 是**本塊**各 service 透過 `yield` 產出的 (service, hash) 序列，它是 β_B 這一輪的輸入，本身是獨立的狀態分量。",
  "trap": "0.8.0 β_H 有 5 個欄位（多了 timeslot）；p 的 value 是 segment root 不是 report hash。"
 },
 {
@@ -40,7 +40,7 @@ ITEMS = [
   "eq. 7.2 明列 s ∈ H 為第二個具名欄位，C(3) 讓它佔滿 32 bytes，eq. 11.36 也確實比對 x_s = y_s。",
   "eq. 7.6–7.7 append 進 belt 的 leaf 由 θ′ 編碼而來，與 state root 無關；x_s 與 x_b 是兩個獨立比較。",
  ],
- "explanation": "eq. 7.8：新 entry 為 (H(H), H_0, super-peak(β′_B), H_T, p)，§7 說明「The new state-trie root is the zero hash, which is inaccurate but safe since β′ is not utilized except to define the next block's β†」。eq. 7.5：β† ≡ β_H except β†[|β_H|−1]_s = H_R。所以每個 block 一開始（在驗 guarantee 的 anchor 之前）先用自己的 H_R 補正父塊的 state root。這是 header 帶 prior state root（pipelining）的直接後果。你們的 STF 在 τ′ 與 header check 之後、disputes 之前就算 β†。",
+ "explanation": "**根因是 header 帶的是 prior state root**（H_R = 父塊的 posterior root），為的是 pipelining——出塊者不必先算完 Merklization 才能發布。代價就是：算 β′ 的當下，本塊自己的 posterior root 還不存在。**GP 的處理是先填零再補正**。eq. 7.8 定義新 entry 為 (H(H), H_0, super-peak(β′_B), H_T, p)，其中 state root 那格是 H_0（零雜湊）；§7 說明「The new state-trie root is the zero hash, which is inaccurate but safe since β′ is not utilized except to define the next block's β†」——**安全的原因是它在被補正之前不會被任何人讀到**。eq. 7.5：β† ≡ β_H 但 β†[|β_H| − 1]_s = H_R——下一個區塊一開始就用自己的 H_R 把父塊那格補上。**時序很重要**：β† 必須在**驗證 guarantee 的 anchor 之前**算好，因為 eq. 11.36 要拿 anchor 的 state root 去比對 β† 的內容——比對的對象若還是零，所有 anchor 都會失敗。你們的 STF 在 τ′ 與 header 檢查之後、disputes 之前就算 β†，順序是對的。**口試常見追問**：「為什麼不乾脆讓 header 帶 posterior root？」——那就等於要求出塊者序列化地跑完 Merklization，pipelining 的好處整個消失，這個零雜湊是換來並行的代價。",
  "trap": "guarantee 的 anchor 檢查（eq. 11.36）比對的是 β†（補正後），不是 β。"
 },
 {
@@ -61,7 +61,7 @@ ITEMS = [
   "belt 的 leaf 來源是 θ′ 而非 header；附錄 G 的 ring VRF 有自己的建構，與 belt 雜湊選擇無關。",
   "簽 belt super-peak 的是 BEEFY 的 BLS 簽章（eq. 18.1），Grandpa 完全不碰 belt。",
  ],
- "explanation": "eq. 7.6：s = [E_4(s) ⌢ E(h) | (s,h) ∈ θ′]；eq. 7.7：β′_B ≡ A(β_B, M_B(s, H_K), H_K)——先用 well-balanced binary Merkle（M_B）以 Keccak 算出本塊 accumulation output 的 root，再用 MMR append（附錄 E.2）接到 belt 上。§7：「Throughout, the Keccak hash function is used to maximize compatibility with legacy systems」——EVM 有便宜的 keccak256 precompile，BEEFY（§18）就是對這個 belt 的 super-peak 做 BLS 簽章給外部系統（bridge）用，bridge 合約驗 belt 幾乎不花錢。你們的 recent_history_controller / mmr 都用 Keccak。",
+ "explanation": "eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本塊的 accumulation output 逐筆編碼成 blob。eq. 7.7：β′_B ≡ A(β_B, M_B(s, H_K), H_K)——**兩層結構**：先用 well-balanced binary Merkle（M_B，附錄 E）把本塊的 s 壓成一個 root，再用 MMR 的 append 函數 A（附錄 E.2）接到 belt 上。所以 belt 每塊只長一個 peak，而塊內有幾個 service 產出則由 M_B 那層吸收。**為什麼是 Keccak 不是 Blake2b**：§7 直接寫明「Throughout, the Keccak hash function is used to maximize compatibility with legacy systems」。具體是誰在用：BEEFY（§18）對這條 belt 的 super-peak 做 BLS 簽章，交給**外部系統**（主要是 EVM 橋接合約）驗證；而 EVM 有便宜的 keccak256 precompile，Blake2b 則沒有——換句話說這個選擇不是為了 JAM 自己，是為了讓別人驗得起。**注意 H_K 只在這一條路徑上出現**：狀態 trie、header、extrinsic 雜湊全都用 Blake2b（§3.8 的 H）。把兩者搞混會讓 belt 的 root 對不上，而且只有在跟外部橋接對接時才會爆——很難查。",
  "trap": "belt 是 MMR（append-only，peaks 序列），super-peak（E.2）才是單一 32-byte commitment。"
 },
 {
@@ -82,7 +82,7 @@ ITEMS = [
   "fallback key sequence F 的種子是 η′_2、抽的是 κ′ 的 Bandersnatch key（§6），與 β 無關。",
   "最新一筆的 s 在本塊仍是 H_0、要等下一塊 β† 補正；β_B 是 output belt，不存任何簽章。",
  ],
- "explanation": "§7 第一句：「This is used to preclude the possibility of duplicate or out of date work-reports from being submitted.」具體用途：(1) eq. 11.36：refinement context 的 anchor (hash, state root, belt super-peak, timeslot) 必須匹配 β† 的某一筆——所以 anchor 最多只能是 8 個區塊之前；(2) eq. 11.41：新 report 的 package hash 不得出現在任何 β 條目的 p 裡（防重複）；(3) eq. 11.42 / 11.44：prerequisites 與 segment-root lookup 必須在 extrinsic 或 β 的 p 裡找得到。",
+ "explanation": "§7 第一句就給了答案：「This is used to preclude the possibility of duplicate or out of date work-reports from being submitted.」**防重複、防過期，兩件事。****防過期**（eq. 11.36）：refinement context 的 anchor——(header hash, state root, belt super-peak, timeslot)——必須能在 β† 裡找到完全相符的一筆。因為 β_H 只留 H = 8 筆，這等於規定 **anchor 最多只能是 8 個區塊之前**，report 不能拿很舊的鏈狀態當前提。**防重複**（eq. 11.41）：新 report 的 work-package hash 不得出現在任何 β 條目的 p 字典裡——同一份工作不能被重複計酬或重複 accumulate。**還有兩個附帶用途**（eq. 11.42、11.44）：prerequisite 與 segment-root lookup 所指的 package，必須在本塊的 extrinsic 裡、或在 β 的 p 裡找得到，否則依賴關係就懸空了。**為什麼是 8 而不是更多**：窗口越長，節點要保存與掃描的資料越多；8 塊約 48 秒，足夠涵蓋 guarantee 從產生到進鏈的正常延遲（一個 rotation R = 10 個時槽），又不會讓檢查成本失控。**注意這與 L = 14,400 的 ancestor 窗口是兩回事**：後者存的是 header 序列、供 lookup anchor 用。",
  "trap": "anchor 深度 ≤ 8 blocks；lookup anchor 深度 ≤ 14,400 slots（用 ancestors A）。"
 },
 {
@@ -103,7 +103,7 @@ ITEMS = [
   "α[c] 是可容多個 hash 的序列（eq. 8.3 才需要移除最左邊一個）；queue 長度是獨立常數 Q，不隨 E 走。",
   "與 eq. 8.1 的型別直接衝突：兩者都是 per-core 序列，同一 hash 在同一 pool 重複完全合法。",
  ],
- "explanation": "eq. 8.1：α ∈ [[H]_{:O}]_C，O = C_authpoolsize = 8（最多 8 個）；φ ∈ [[H]_Q]_C，Q = C_authqueuesize = 80（固定 80 個）。pool 是「現在可以用的 authorizer」，queue 是「未來每個 slot 依序補進 pool 的 authorizer」，rotation 取的是 H_T mod Q。φ 只能由 accumulate 中具 assigner 權限（χ_A[c]）的 service 透過 `assign` host call 修改。編碼上 C(1) 為 [var(x) | x ∈ α]、C(2) 為 E(φ)。",
+ "explanation": "eq. 8.1：**α ∈ ⟦⟦H⟧_{:O}⟧_C**，O = C_authpoolsize = 8——每個 core **最多** 8 個（注意是 `:O`，上界不是定值）；**φ ∈ ⟦⟦H⟧_Q⟧_C**，Q = C_authqueuesize = 80——每個 core **恰好** 80 個（定長）。兩者都是每個 core 一份，所以外層是 ⟦…⟧_C。**分工**：α 是「現在這個 core 可以用哪些 authorizer」，是 guarantor 檢查 report 時實際比對的清單；φ 是「未來要依序補進 α 的排程」，每個時槽從 φ[c][H_T mod Q] 取一筆補進去。取模讓 φ 變成一個循環排程——**80 個時槽（8 分鐘）繞一圈**，所以一份 φ 可以持續供給而不必頻繁改寫。**誰能改**：φ 只能由 accumulate 期間具 assigner 權限的 service 透過 `assign` host call 修改，而 assigner 是**每個 core 各自指定**的（χ_A[c]），不是全域單一權限——這讓不同 core 可以由不同的 service 掌管授權策略。α 則沒有人能直接寫，它完全由 eq. 8.2 的規則推導。**編碼**：狀態 trie 裡 C(1) 存 [var(x) | x ∈ α]、C(2) 存 E(φ)。",
  "trap": "O = 8、Q = 80；pool 是 :O（可少於 8），queue 是固定長度 Q。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "eq. 8.3 的條件是「E_G 裡存在 core c 的 guarantee」，與長度無關；長度只決定截斷。",
   "方向相反：eq. 8.2 把新項接在右邊，←(…)^O 丟掉的是最左邊（最舊）那個。",
  ],
- "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c][H_T mod Q])^O；eq. 8.3：F(c) = α[c] ⊖ {w_a}（⊖ 是「移除最左邊一個」的 seqminusl 運算）當 E_G 裡有 core c 的 guarantee，否則 α[c]。所以先移除最左邊那個 a → [b, a, d]，再 append x → [b, a, d, x]，長度 4 ≤ 8 不需截斷。每個區塊每個 core 都會 append 一個（即使沒有 guarantee），滿 8 時以 ←^O 保留**最後** 8 個（丟最舊）。你們的 authorization 模組註解：remove leftmost occurrence, append φ′[c][H_T mod Q], keep last 8。",
+ "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c][H_T mod Q])^O；eq. 8.3：F(c) = α[c] ⊖ {w_a} 當 E_G 裡有 core c 的 guarantee，否則就是 α[c] 原封不動。三步驟依序做：**① 移除**——⊖ 是「只移除**最左邊那一個**符合的元素」（sequence-minus-leftmost），不是移除全部。[a, b, a, d] 移掉最左的 a 得 [b, a, d]，**第二個 a 留著**。**② 補一個**——把 φ′[c][H_T mod Q] 接到尾端，得 [b, a, d, x]。注意這一步**每塊每個 core 都做，即使該 core 這塊沒有 guarantee**——所以 pool 會自然汰換。**③ 截斷**——←(…)^O 保留**最後** O = 8 個（丟最舊的）。本題長度只有 4，不需截斷。**為什麼是「移除最左邊一個」而不是全部**：同一個 authorizer 可以合法地在 pool 裡出現多次（φ 排程裡重複排入即可），代表它有多個可用額度；一次用掉一個才符合語意。你們的 issue #692/#694 就是這個 bug——原本刪掉了所有出現，等於一次消耗掉全部額度。**另一個 0.8.0 的變動**：pool 更新在 accumulation **之後**才做，用的是 posterior 的 φ′（issue #1020），因為 accumulate 期間的 `assign` 可能剛改過佇列。",
  "trap": "H_T mod Q 用的是本塊 timeslot 對 80 取餘；用 posterior φ′。"
 },
 {

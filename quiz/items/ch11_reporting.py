@@ -19,7 +19,7 @@ ITEMS = [
   "eq. 11.17 要把 (ρ†[c]_g)_w 這份完整 report 交給 accumulation，光有 hash 拼不回 digest。",
   "可用性是單一區塊內的統計：eq. 11.17 只對本塊 E_A 求和，state 裡沒有跨塊累加的 bitfield。",
  ],
- "explanation": "eq. 11.1：ρ ∈ [(g ∈ G, t ∈ N_T)?]_C。0.7.2 存的是 (w report, t)；0.8.0 (#494) 改存整個 guarantee（含 2–3 個 guarantor 簽章），理由：「To determine the guarantors to try directly fetching the bundle from」以及「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic（culprits）」。t 是 report 被 guarantee 進鏈的 slot（τ′），用來算 timeout U = 5。這也改變了 C(10) 的 state serialization：↕(g, E_4(t))。",
+ "explanation": "eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可以是 ∅（沒有待處理的工作）或一組 (guarantee, 時槽)。**0.8.0（PR #494）的改動是把存的東西從 report 換成整份 guarantee**，也就是連 2–3 個 guarantor 簽章一起留著。GP 給了兩個理由：**其一，「To determine the guarantors to try directly fetching the bundle from」**——auditor 要重跑 refine 就得先拿到 work-package bundle，而最可能還持有完整 bundle 的就是當初擔保它的那幾位；有簽章才知道去找誰，否則只能靠 erasure coding 從 1/3 的 shard 慢慢重建，代價高得多。**其二，「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic」**——若這份 report 後來被判為 bad，那些簽章就是把擔保者列為 culprit 的證據。簽章丟了，就罰不到人。**t 是進鏈的時槽 τ′**（不是 guarantee 自己帶的 slot），用來起算 U = 5 的 timeout。**連帶影響狀態序列化**：C(10) 從只存 report 變成 ↕(g, E_4(t))，這是遷移時必須同步改的地方。",
  "trap": "遷移點：ρ 的型別與序列化都變了（issue #1012 樹）。"
 },
 {
@@ -82,7 +82,7 @@ ITEMS = [
   "eq. 11.31 比的是 |κ′|，而 validator 數是 6 到 1023 之間 3 的倍數，寫死 1023 正是移植 bug。",
   "p 才是 package hash、l 是 bundle 長度；2–3 是 credential 長度（eq. 11.24），core index 是 w_c。",
  ],
- "explanation": "eq. 11.5：s ≡ (p package hash, l bundle length, u erasure root, v ∈ 𝕍 erasure shards, e segment root, n segment count)。eq. 11.31：∀w ∈ I：(w_s)_v = |κ′|——GP 的理由是「As one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」（0.8.0 因 validator 數可變而必須明確檢查）。兩個 root 分工不同：erasure root 承諾了審計所需的全部資料（bundle shard + segment shards），segment root 則讓後續 package 的 import 可驗證重建出來的 segment。",
+ "explanation": "eq. 11.5：s ≡ (p, l, u, v, e, n)——p = work-package hash、l = bundle 長度、**u = erasure root**、**v = erasure chunk 數**、**e = segment root**、n = segment 數。**兩個 root 的分工是這題的核心**：u 承諾的是「審計所需的全部資料」——bundle 的 shard 加上匯出 segment 的 shard，auditor 靠它確認自己拿到的碎片沒被竄改；e 承諾的是「這份 package 匯出了哪些 segment」，用的是定深樹，讓**後續**的 package 在 import 這些 segment 時能驗證重建出來的內容正確。一個對內（稽核），一個對外（給下游引用）。**eq. 11.31 強制 v = |κ′|**，GP 的理由寫得很白：「As one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」。**0.8.0 之所以要明確檢查這件事**，是因為 validator 數變成可變（eq. 6.8 的 𝕍）——在 0.7.2 那是個常數，對不上根本不會發生；現在若 v 與 |κ′| 不符，就會有 assurer 分不到 chunk 或 chunk 沒人收，可得性門檻的計算跟著失真。注意用的是 **posterior 的 κ′**，因為 chunk 是發給接下來要背書的那一組。",
  "trap": "erasure shard 數 v = |κ′|（posterior）：tiny 6、full 1023。別把 v（shards）跟 n（segment count）記反。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "|w_t| 是加總的第一項，否則 is-authorized 的 trace 可以無限撐大區塊。",
   "eq. 11.8 是單一總量上限、沒有逐項上限；W_G = 4,104 是 segment 大小，與 report 無關。",
  ],
- "explanation": "eq. 11.8：∀w ∈ R：|w_o| + Σ_{i} L(w_d[i]_r) ≤ W_R，L(r) = |r| 若 r ∈ B（成功輸出），否則 0；W_R = 48·2^10 = 49,152。GP 給的理由：「In order to ensure fair use of a block's extrinsic space」。對照 W_B（13,791,360）是 work-package **bundle**（extrinsics + imports 等）的上限（§14）——兩者管的是不同層級的東西。你們 guarantor 端的 BIG/OVERSIZE 判斷是累積前面 item 的輸出一起算。",
+ "explanation": "eq. 11.8：∀w ∈ ℝ：|w_t| + Σ_i L(w_d[i]_r) ≤ W_R，其中 L(r) = |r| 若 r 是 blob（成功輸出），**若是錯誤值則計 0**。W_R = 48 · 2^10 = **49,152 位元組**。所以受限的是「authorizer trace 加上所有成功輸出」的總和——失敗的 item 不佔額度，這與 §14 的 OVERSIZE 累計規則是一致的（那裡也只累加結果為 blob 的前序項）。**GP 給的理由**：「In order to ensure fair use of a block's extrinsic space」——report 是要寫進區塊的，一份報告吃掉太多空間就排擠了其他 core 的工作。**最容易混淆的是 W_R 與 W_B**：W_R = 49,152 管的是**寫上鏈的 work-report**；W_B = 13,791,360（約 13 MB）管的是 **work-package bundle**（extrinsic 資料、import 的 segment 等，§14），那份東西根本不上鏈，是走 erasure coding 分發的。兩者差了近 300 倍，正好反映 JAM「in-core 處理大量資料、on-chain 只收小結果」的核心架構。你們 guarantor 端判 BIG／OVERSIZE 時是累加前面 item 的輸出一起算，符合這條式子的形狀。",
  "trap": "48 KiB 是 report 級總量，且 auth trace 也算在內。"
 },
 {
@@ -166,7 +166,7 @@ ITEMS = [
   "U = 5 不是 10；清除條件是 |κ| ≠ |κ′| 而非 epoch 邊界，人數沒變的換屆不清任何 pending。",
   "門檻是 2/3 super-majority；等 accumulate 才清會讓湊不到票的 report 把 core 永久卡死。",
  ],
- "explanation": "eq. 11.17：R ≡ [ρ†[c]_g_w | Σ_a f[c] > 2/3·|κ|]——嚴格大於 2/3（tiny 6 → >4 → ≥5；full 1023 → >682 → ≥683，即 ⌊2V/3⌋+1；ELVES 的安全假設要求 2/3+1 誠實且 live）。eq. 11.18：ρ‡[c] = ∅ 當 p = ∅ ∨ report ∈ R ∨ H_T ≥ p_t + U ∨ |κ| ≠ |κ′|，否則 p。U = C_assurancetimeoutperiod = 5。「|κ| ≠ |κ′|」是 0.8.0 新增：validator 數改變時所有 pending 都視為提早 timeout（因為 erasure shard 數與 assurer 集合都對不上了）。你們 0.7.2 的 FilterAvailableReports 只有 timeout，沒有 size-change 條件。",
+ "explanation": "**成為 available（eq. 11.17）**：R ≡ [ρ†[c] 的 report | Σ_a a_f[c] > (2/3)·|κ|]——注意是**嚴格大於** 2/3，對整數而言等價於 ≥ ⌊2|κ|/3⌋ + 1。tiny（|κ| = 6）：> 4，也就是至少 **5**；full（|κ| = 1023）：> 682，也就是至少 **683**。門檻訂在這裡是因為 ELVES 的安全假設要求超過 2/3 的 validator 誠實且在線；而 erasure coding 只需 1/3 的 shard 就能重建，所以 2/3 的背書意味著「資料確實救得回來」。**清除 pending（eq. 11.18）**：ρ‡[c] = ∅ 當 **① 本來就空** ∨ **② 已經 available** ∨ **③ H_T ≥ t + U（逾時，U = C_assurancetimeoutperiod = 5 個時槽）** ∨ **④ |κ| ≠ |κ′|**。**第四個條件是 0.8.0 新增的**，而且理由很硬：validator 集合大小一變，erasure chunk 數（必須等於 |κ′|）與 assurer 集合就全部對不上了，那些 pending 的 report 再等下去也不可能湊到有效的背書——所以一律視同提早逾時。你們 0.7.2 的 FilterAvailableReports 只實作了逾時那條，缺的正是這個 size-change 條件。",
  "trap": "timeout 比較的是 H_T（本塊 slot）與 assignment 的 t（guarantee 進鏈的 slot）。"
 },
 {
@@ -229,7 +229,7 @@ ITEMS = [
   "eq. 11.32 只要求 ρ‡[r_c] = ∅、沒有「空滿 U 個 slot」；eq. 11.33 也明確有 d_g ≥ δ[d_s]_g。",
   "eq. 11.33 管的是 accumulate gas 而不是 refine 的 G_R；eq. 11.31 比的也是 posterior 的 |κ′|。",
  ],
- "explanation": "eq. 11.31：∀r ∈ I：(r_s)_v = |κ′|（erasure chunk 數 = posterior 的 validator 數，因為 chunk 是發給下一組 assurer 的）；11.32：∀r ∈ I：ρ‡[r_c] = ∅ ∧ r_a ∈ α[r_c]——core 空不空要等 disputes 清完（ρ†）、assurances 與 timeout 收完（ρ‡）才知道，而 authorizer 只能比 **prior** 的 α；11.33：Σ_{d ∈ r_d} d_g ≤ G_A（10M，每個 report 的 accumulate gas 上限）∧ ∀d：d_g ≥ δ[d_s]_g。對照另外兩個容易混的預算：G_T = 3.5·10^9 是**整塊** accumulation 的總預算，G_R = 5·10^9 是單一 work-package refine 的預算（§14，鏈下判定）。",
+ "explanation": "三條式子，每條防的東西不同，而且**時序**是重點。**eq. 11.31**：(r_s)_v = |κ′|——erasure chunk 數必須等於 **posterior** 的 validator 數，因為 chunk 是發給接下來要背書的那一組人。**eq. 11.32**：ρ‡[r_c] = ∅ ∧ r_a ∈ α[r_c]。前半用的是 **ρ‡**，也就是 disputes 清完（ρ†）、assurances 與逾時也處理完之後的中間態——「這個 core 現在有沒有空」要等這兩步做完才算數。後半用的是 **prior 的 α**：authorizer 必須在**本塊開始時**就已經在 pool 裡（新 assign 進去的要等下一塊，因為 α′ ≺ E_G 的方向）。**eq. 11.33**：Σ_{d ∈ r_d} d_g ≤ G_A ∧ ∀d：d_g ≥ δ[d_s]_g——單份 report 的 accumulate gas 總和有上限，且每個 digest 宣告的 gas 不得低於該 service 自己設定的下限。**三個 gas 預算最好一起記，很容易互相搞混**：G_A = 10^7 是**單份 report** 的 accumulate 上限；G_T = 3.5 × 10^9 是**整塊** accumulation 的總預算；G_R = 5 × 10^9 是**單一 work-package refine** 的預算（§14，鏈下判定，不上鏈檢查）。",
  "trap": "α（prior）用於檢查，α′ 在 accumulate 之後才算。"
 },
 {
@@ -250,7 +250,7 @@ ITEMS = [
   "eq. 11.42 與 11.43–11.44 正是這一項：prereq/srlookup 的 key 與 segment root 都要對得上。",
   "GP 沒有「service 閒置過久失效」這條規則，唯一相關的是 eq. 11.45 的 d_c = δ[d_s]_c。",
  ],
- "explanation": "這題考的是 §11.4.1 的完整清單：eq. 11.35（同一塊不得有兩份同 package 的 report）、11.36–11.38（anchor 四元組對 β†、lookup anchor 的時間下限與祖先集合 A）、11.39–11.41（package hash 不得出現在 β 的 reported 集合、ξ、ready queue ω 或任何 pending 的 ρ）、11.42–11.44（prerequisites 與 srlookup 的 key 與 segment root）、11.45（d_c = δ[d_s]_c）。service 只會因 eject 而消失（§9），report 是否合法完全不看該 service 上次 accumulate 的時間。§11.4.1 附註：這些檢查刻意允許表面上的 dependency loop，因為 accumulation 端的 Q 函數永遠不會 accumulate 它們。",
+ "explanation": "§11.4.1 的清單相當長，值得整組記起來，**因為它們共同回答「這份 report 放在這條鏈的這個位置合不合理」**：**eq. 11.35**：同一塊裡不得有兩份指向同一個 package 的 report。**eq. 11.36–11.38**：anchor 四元組必須對得上 β† 的某一筆（所以最多 8 塊之前）；lookup anchor 的時槽不得早於 H_T − L（L = 14,400）；且必須真的出現在祖先集合 A 裡。**eq. 11.39–11.41**：package hash 不得已經出現在 β 的 reported 集合、ξ（accumulation history）、ready queue ω，或任何還 pending 的 ρ 裡——四個地方都要查，才算真正防住重複。**eq. 11.42–11.44**：prerequisites 與 segment-root lookup 的鍵必須有著落，且 lookup 的值也要吻合。**eq. 11.45**：d_c = δ[d_s]_c——digest 宣告的 code hash 必須等於該 service 當前的 code hash。**清單裡沒有的是「service 必須近期 accumulate 過」這種活躍度要求**——service 只會因為 `eject` 而消失（§9），閒置多久都不影響它能不能被 report。**一個容易誤答的方向**：§11.4.1 附註說這些檢查**刻意允許表面上的依賴環**，因為 accumulation 端的 Q 函數永遠不會去 accumulate 環裡的東西，在報告階段就拒絕反而會擋掉合法的交錯依賴。",
  "trap": "面試官可能要求你列舉「所有」contextual checks——建議背下 anchor / lookup-anchor / no-dup / prereq / srlookup / code-hash 六類。"
 },
 {
@@ -301,7 +301,7 @@ ITEMS = [
   "eq. 11.17 的 Σ 是逐 core 對 a_f[c] 求和；混著數會把只 assure 了別的 core 的人算進來。",
   "那個 core 根本沒有 report 可送；ρ‡ 是 eq. 11.18 的輸出，不是計票當下的狀態。",
  ],
- "explanation": "eq. 11.17：Σ_a a_f[c] > (2/3)|κ|。對整數而言 > 2V/3 ⇔ ≥ ⌊2V/3⌋ + 1：V = 6 → > 4 → ≥ 5；V = 1023 → > 682 → ≥ 683。所以 `>= ValidatorsSuperMajority` 這個寫法本身是對的，真正的風險在該常數必須等於 ⌊2|κ|/3⌋+1 且隨 |κ| 變動（0.8.0 起 validator 數可變），不能是編譯期寫死的數字。另外 `rhoDagger[i] == nil` 的情況其實已被 eq. 11.16（bit 只能在有 pending report 的 core 上設）擋掉，這裡是防禦性檢查。",
+ "explanation": "eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的是 `>= ValidatorsSuperMajority`。**兩者等價的條件是 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1**：對整數而言 x > 2V/3 ⇔ x ≥ ⌊2V/3⌋ + 1。驗算：V = 6 → > 4 → ≥ **5**；V = 1023 → > 682 → ≥ **683**。所以這個寫法本身沒問題。**真正的風險在那個常數怎麼來的**：0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），所以它必須從 **live 的 len(κ)** 算出來，不能是編譯期寫死的數字——這與 fallback 那題的 `%= types.ValidatorsCount` 是同一類問題（issue #1037）。**另外那個 `rhoDagger[i] == nil` 的檢查其實是多餘的但無害**：eq. 11.16 已經規定 assurance 的某一位只能在該 core 確實有 pending report 時才被設起來，所以走到這裡不會有「有人為空 core 背書」的情況。留著當防禦性檢查沒關係，但別誤以為 GP 要求在這裡做這個判斷——它其實屬於 extrinsic 驗證那一層。",
  "trap": "tiny 5/6、full 683/1023；同一個 super-majority 常數也用在 verdict 的 good 門檻。"
 },
 ]

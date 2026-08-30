@@ -19,7 +19,7 @@ ITEMS = [
   "accumulation output 走 β 的 accumulation-output belt，簽的是 last(β)_b 的 super-peak，header 無此欄。",
   "H_V 的輸出 Y(H_V) 正是 entropy accumulator 的輸入：η′_0 ≡ H(η_0 ⌢ Y(H_V))。",
  ],
- "explanation": "eq. 5.1：H ≡ (H_P parent hash, H_R prior state root, H_X extrinsic hash, H_T timeslot, H_E epoch marker, H_W winning-tickets marker, H_O offenders marker, H_I author index, H_V VRF signature, H_S seal)，共十個欄位——一個 parent hash、兩個 root/hash、時間、三個 marker、作者索引，以及兩個 Bandersnatch 簽章。BEEFY / accumulation-output root 屬於 β 的 accumulation-output belt（β_B，見 §7）與 §18 Beefy Distribution 的鏈下流程，從來不是 header 的一部分。",
+ "explanation": "eq. 5.1：H ≡ (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S)，十個欄位，可以分成四組來記：**指向過去**——H_P parent hash（父 header 完整編碼的 Blake2b）、H_R prior state root（**父區塊的** posterior root）；**指向本塊內容**——H_X extrinsic hash、H_T timeslot；**給輕客戶端的三個 marker**——H_E epoch、H_W winning-tickets、H_O offenders；**出塊者身分與證明**——H_I author index、H_V entropy VRF 簽章、H_S seal。**為什麼 BEEFY root 不在裡面**：accumulation output 的承諾走的是狀態那條路——θ（本塊的 output log）被吸進 β_B（accumulation-output belt，一個 MMR，§7），BEEFY（§18）再對它取 super-peak 簽名，那是**鏈下的分發流程**，不是 header 欄位。把它放進 header 反而會破壞 pipelining：H_R 之所以是 prior root，就是為了讓出塊者不必先算完本塊的 Merklization；若 header 還要承諾本塊自己的 accumulation output，那個好處就沒了。順帶記：H_A（作者的 Bandersnatch 公鑰）也**不是**欄位，它只是 κ′[H_I]_b 的等價式，不被序列化。",
  "trap": "記憶法：p r x t | e w o | i v s。"
 },
 {
@@ -40,7 +40,7 @@ ITEMS = [
   "§19 明寫 Grandpa 投的是 best block header「together with its posterior state root」。",
   "σ′ 由 (σ, B) 完全決定、區塊內就算得出；auditing 是鏈下流程，只影響 finalization 與選鏈。",
  ],
- "explanation": "GP §5：「This is a departure from both Polkadot and the Yellow Paper's Ethereum… We do this to facilitate the pipelining of block computation and in particular of Merklization.」實務上 block author 可以先發布區塊，把耗時的 state Merklization 延後到下一個 slot 才需要（下一個區塊的 H_R 才會用到）。後果：β 裡最新一筆的 state root 先填零，由下一個區塊的 β† 用 H_R 補正（eq. 7.5）。",
+ "explanation": "GP §5 原文：「This is a departure from both Polkadot and the Yellow Paper's Ethereum… We do this to facilitate the pipelining of block computation and in particular of Merklization.」**H_R = M_σ(σ) 是 prior state 的 root，也就是父區塊的 posterior root**，不是本塊執行完的結果。**實務上買到什麼**：Merklization 是整個轉移裡最慢的一段（要走完整棵 Patricia trie）。把它移出關鍵路徑之後，出塊者可以先把區塊發出去，本塊的 posterior root 到**下一個 slot** 才真正需要——因為那是下一個區塊的 H_R。傳播與 Merklization 因此可以重疊，而不是排隊。**代價與補償**：β_H 裡最新那一筆的 state root 在當下還算不出來，只能先填 H_0（零雜湊）；下一個區塊再用 eq. 7.5 的 β†（beta dagger）把它用自己的 H_R 補正。所以「β_H 最後一筆的 root 是零」不是 bug 而是設計，這也是為什麼 §7 要多一個 dagger 中間態。**口試會追問的對照**：Ethereum 的 header 帶 post-state root，代表出塊者必須算完才能發布——JAM 用一個 slot 的延遲換取整段 Merklization 的並行空間。",
  "trap": "設計理念題。延伸：Grandpa vote 會帶 posterior state root（§19）以彌補 header 只有 prior root。"
 },
 {
@@ -61,7 +61,7 @@ ITEMS = [
   "H# 是 blake-many（對序列每個元素各取一次 hash），且 Keccak 在 JAM 只用於 §18 的 BEEFY MMR。",
   "eq. 5.5 的 a 是五個元素；preimages 與 guarantees 正是靠 H_X 而非 state root 進入 header。",
  ],
- "explanation": "GP eq. 5.6–5.7：p = E(var[(E_4(s), H(d)) for (s,d) in E_P])，g = E(var[(H(w), E_4(t), var(a)) for (w,t,a) in E_G])。GP 為此給的理由（§5）：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——只放 hash，就能用 Merkle proof 證明某個 preimage/report 在區塊裡，而不必附上整個 blob。你們的 code（block_serialization / header hash）在 0.7.2 對 guarantees 已是用 report hash，0.8.0 再把 preimages 改為 (service, blake(data))。",
+ "explanation": "eq. 5.4–5.7：H_X = H(E(H#(a)))，其中 a 是五個成分各自的承諾，**每個成分先被壓成自己的雜湊、再一起雜湊**。0.8.0（PR #524）重新定義了其中兩個：p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])——preimage 存的是 (service index, blob 的雜湊)；g = E(var[(H(w), E_4(t), var(a)) | (w, t, a) ∈ E_G])——guarantee 存的是 (work-report 的雜湊, slot, 擔保簽章)。**GP 給的理由寫在 §5**：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——因為只放雜湊，第三方就能用一份 Merkle proof 證明「某個 preimage 或某份 report 確實在這個區塊裡」，而**不必附上整個 blob 或整份報告**。work-report 可以接近 48 KiB（W_R），preimage 更可能是任意大小，差別是實質的。**為什麼是兩層雜湊**：先各自 hash 再合併，讓每個成分成為獨立的承諾——證明某個 preimage 存在時，不需要揭露 tickets、assurances 或 disputes 的內容。這是「承諾結構跟隨證明需求」的典型設計，與 §7 的 β_B 用 MMR 是同一種思路。",
  "trap": "0.7.2→0.8.0 差異；H# 是 blake-many（對序列每個元素各取 hash 再 encode）。"
 },
 {
@@ -82,7 +82,7 @@ ITEMS = [
   "wall-clock 條件方向反了：H_T·P ≥ T 等於只接受當下或未來的區塊。",
   "要求恰好 parent + 1 就禁止跳 slot，但沒人出塊時 slot 本來就會被跳過。",
  ],
- "explanation": "GP eq. 5.8：P(H)_t < H_T ∧ H_T·P ≤ T，其中 P = 6 秒、T 為 wall-clock 秒數（自 Common Era 起算）。§5 原文：「A block may only be regarded as valid once the time-slot index H_T is in the past. It is always strictly greater than that of its parent.」且「Blocks considered invalid by this rule may become valid as T advances」——太新的區塊只是暫時無效，不是永久拒絕。你們 STF 裡 `BadSlot` 對應的是 τ ≥ τ′ 的情況。",
+ "explanation": "eq. 5.8：**P(H)_T < H_T ∧ H_T · P ≤ 𝕋**。兩個條件的性質完全不同，這是這題的重點。**前半是永久性的**：本塊的時槽必須嚴格大於父的（GP：「It is always strictly greater than that of its parent」）。違反就是永遠無效——你們 STF 裡的 `BadSlot` 對應的正是這種 τ ≥ τ′ 的情況。**後半是暫時性的**：H_T 乘上 P = 6 秒（每個時槽的長度）不得超過目前的牆鐘秒數 𝕋（自 JAM Common Era 起算）。GP 特別補一句「Blocks considered invalid by this rule may become valid as 𝕋 advances」——**一個「來自未來」的區塊只是還沒到時候，不該被永久丟棄或當成攻擊**，實作上通常先留著、等時間到再處理。把這兩者混為一談是常見的實作 bug：對未來區塊直接 ban 掉來源節點，會在時鐘些微不同步時互相斷線。**注意這條規則不需要任何狀態**：前半只要父 header、後半只要一個時鐘，所以它是「只拿到 header 能驗什麼」那題裡的第二層——真正卡住的是需要 κ′ 與 γ′_S 的 seal。",
  "trap": "跳 slot 是合法的（例如沒人出塊），這也是為什麼 Safrole 要處理 e′ > e+1（整個 epoch 被跳過）的情況。"
 },
 {
@@ -103,7 +103,7 @@ ITEMS = [
   "違反 eq. 5.10 的型別 H_I ∈ N_{|κ′|}——索引域永遠是 κ′，不可能超出。",
   "ι 慢一輪：eq. 6.14 要先 ι → γ_k，再過一個 epoch 才成為 κ，對應的是下下個 epoch。",
  ],
- "explanation": "GP eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b，「this is merely an equivalence, and is not serialized as part of the header」——驗證者是自己用 κ′ 算出作者的 Bandersnatch key。用 posterior κ′ 是因為 epoch 交界的第一個區塊已由新的 active set 出塊（key rotation 在該區塊內完成）。你們的 sealing.go 驗 seal/VRF 時傳入的也是 posterior state（code-map 3.2.6 註：參數名叫 priorState 但 STF 傳的是 posterior）。",
+ "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b。兩個要點。**其一，header 裡放的是索引不是公鑰。** GP 明說 H_A「is merely an equivalence, and is not serialized as part of the header」——驗證者拿到 H_I 之後，自己去 κ′ 裡查出作者的 Bandersnatch 公鑰。省下的是每塊 32 個位元組，但真正的代價是**驗簽從此需要狀態**（這正是輕客戶端只拿 header 驗不了 seal 的原因）。**其二，用的是 posterior 的 κ′ 不是 prior 的 κ。** epoch 交界的第一個區塊已經由**新的** active set 出塊，而金鑰輪換（eq. 6.14：γ_P → κ、κ → λ）是在該區塊的轉移中完成的——所以要驗那一塊的作者，必須先跑完輪換、拿到 κ′ 才行。你們的 sealing.go 驗 seal 與 VRF 時傳的也是 posterior state（code-map 3.2.6 註明參數雖叫 priorState、但 STF 實際傳入 posterior），這個命名落差值得記一下，容易看走眼。相關名詞：κ active（現行）、λ previous、ι staging、γ_P pending。",
  "trap": "epoch 第一個區塊：作者屬於 κ′ = 舊的 γ_k。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "eq. 11.12 的 a_a = H_P 是一次等值比對，不需要在保留的 header 序列裡搜尋。",
   "F(η′_2, κ′)（eq. 6.27）的輸入只有 posterior entropy 與 κ′ 兩個 state 分量，不讀歷史 header。",
  ],
- "explanation": "GP eq. 11.38：∀x ∈ contexts: ∃h, h′ ∈ A: h_t = x_l（lookup-anchor time）∧ H(h) = x_l（lookup-anchor hash）∧ h′_p = H(h) ∧ h′_r = x_{l,s}（posterior state root of lookup anchor，0.8.0 新增）。§11.4：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」。這也是 fuzzer 的「Ancestry」feature：M1 必須支援。",
+ "explanation": "eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個時槽（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的時槽等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root（最後這項是 0.8.0 新增的）。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。",
  "trap": "L = 14,400 slots = 24h；recent history H = 8 blocks 是給 anchor 用的，lookup anchor 用 A。"
 },
 {
@@ -145,7 +145,7 @@ ITEMS = [
   "H_E 只放 (bandersnatch, ed25519) 這對子集合；fallback key 由鏈上重算，從不進 H_W。",
   "H_O 裝的是 Ed25519 公鑰而不是 validator index，而且它並非 optional。",
  ],
- "explanation": "GP eq. 5.11：H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?（兩個 entropy hash + 下一 epoch 每個 validator 的 Bandersnatch 與 Ed25519 key，0.6.4 起加入 Ed25519），H_W ∈ ([ticket]_E)?（E = 600 張 tickets），H_O ∈ [ed25519 key]。時機也不同：H_E 只在 e′ > e 時非空，H_W 只在同一 epoch 內首次跨越 Y 且 accumulator 飽和時非空，而 H_O 與 epoch 邊界無關，由 §10 disputes 帶進來的 culprits/faults 決定。fallback slot-sealer 序列 F(η′_2, κ′) 則是鏈上重算（eq. 6.27），不佔任何 header 欄位。",
+ "explanation": "eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**——兩個 entropy 雜湊加上下個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰（Ed25519 是 0.6.4 起加入的）；**H_W ∈ ?(⟦ticket⟧_E)**——整個 epoch 的 E = 600 張 ticket；**H_O ∈ ⟦ed25519 key⟧**——注意這個**沒有問號**，是普通序列，可以為空但永遠不是 ∅。前兩個是 optional、第三個不是，這個型別差異本身就是常考點。**出現時機也各不相同**：H_E 只在 e′ > e（新 epoch 第一塊）非空；H_W 只在同一 epoch 內首次跨越 Y = 500 且 accumulator 飽和的那一塊非空（eq. 6.29）；H_O 與 epoch 邊界完全無關，由本塊 disputes extrinsic 帶進來的 culprits 與 faults 決定，多數區塊為空。**一個容易誤答的方向**：fallback 的 slot-sealer 序列 F(η′_2, κ′) 並不佔任何 header 欄位——它是鏈上用 eq. 6.27 重算出來的，因為輸入（η′_2 與 κ′）本來就在狀態裡，不需要出塊者告知。換句話說，marker 只承載「算不出來、必須被告知」的東西。",
  "trap": "H_E 放的是 key 的子集合（bs + ed），不是完整 336-octet key；H_O 放 key 不是 index。"
 },
 ]

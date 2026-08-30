@@ -58,7 +58,7 @@ ITEMS = [
             "anchor 檢查是 eq. 11.36、比對 h/s/b/t 與 p 無關；eq. 11.41 撞到就整塊不合法，不會留到 accumulation。",
             "p 上鏈正是為了不必翻舊 extrinsic；ancestor set A 只留 header，BEEFY 承諾的是 β_B 的 super-peak。",
         ],
-        "explanation": "三處都在 §11：(1) eq. 11.41 要求 ∀p ∈ 本區塊 package hashes，p ∉ ⋃_{x ∈ β_H} K(x_p) ∪ ⋃ξ ∪ q ∪ a —— 這是反重複／反過期的主線，也是 §7 開頭說保留最近 H 個區塊的理由（\"to preclude the possibility of duplicate or out of date work-reports\"）；(2) eq. 11.42 要求 prerequisites 與 l 的每個 key 落在本區塊 E_G 或某個 β_H item 的 p 的 keys 裡；(3) eq. 11.44 要求 w_l ⊆ 本區塊 package-hash↦segment-root ∪ ⋃_{b ∈ β_H} b_p，是 dictionary 的包含關係，所以 value（segment-root）也必須吻合。",
+        "explanation": "β_H 每筆裡的 p 是一個字典：**work-package hash ↦ segment root（exports root）**。§11 有三處檢查會讀它，各自防的是不同的事。**① 防重複／防過期**（eq. 11.41）：本塊要進來的每個 package hash 都不得出現在任何 β_H 條目的 p 的鍵集合裡（也不得在 ξ、ready queue 或 accumulated 集合裡）。這就是 §7 開宗明義那句「to preclude the possibility of duplicate or out of date work-reports」的落實處。**② 依賴必須有著落**（eq. 11.42）：report 的 prerequisites 與 segment-root lookup l 的每個鍵，必須落在**本塊自己的 E_G**、或某個 β_H 條目的 p 的鍵裡——所以依賴可以指向同一塊裡的兄弟 report，也可以指向最近 8 塊內的舊 report，但不能懸空。**③ 值也要對**（eq. 11.44）：w_l ⊆ 本塊的 package↦segment-root 映射 ∪ ⋃_{b ∈ β_H} b_p——注意這是**字典的包含關係**而不只是鍵的包含，所以 segment root 這個**值**也必須與 p 記錄的一致，不能宣稱某個 package 有別的 exports root。**一句話記憶**：p 同時扮演「這份工作做過了嗎」與「它的 exports root 是什麼」兩個角色，前者防重複、後者讓後續 report 能安全地引用先前的匯出段。",
         "trap": "同一份 map 同時被用來「拒絕重複」與「接受依賴」——方向相反，別記反了。",
     },
     {
@@ -212,7 +212,7 @@ ITEMS = [
             "O = 8 只出現在最後的 ←(…)^O 截斷；80 格每一格都會在 80 個 slot 內輪到，沒有碰不到的格子。",
             "刪掉用過的項會讓 φ[c] 短於 Q，直接違反 eq. 8.1 的固定長度型別；queue 也不需要定期補。",
         ],
-        "explanation": "eq. 8.2：∀c ∈ N_C : α′[c] ≡ ←(F(c) ⌢ φ′[c]↺[H_T])^O。notation.tex 定義 modulo subscription s↺[i] ≡ s[i mod |s|]，而 eq. 8.1 規定 φ ∈ ⟦⟦H⟧_Q⟧_C —— 每個 core 的 queue 是「剛好 Q = 80 個」的序列（相對地 α ∈ ⟦⟦H⟧_:O⟧_C 是「至多 O = 8 個」）。索引直接來自 header 的 timeslot，不是狀態裡的游標，所以分叉、空 slot、Safrole 沒出票的 slot 對應的那格這一輪就是被跳過；實作若自己維護 cursor，只要鏈上出現空 slot 就會與參考實作分歧。queue 不會因為被抽取而縮短或清空（它不是 FIFO），唯一能改它的是 assign 的整批覆寫。",
+        "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c]^⟲[H_T])^O。索引的來源是 **header 自己的 timeslot**，經由 §3.7 的模數下標 s^⟲[i] ≡ s[i mod |s|] 化成 H_T mod Q。**沒有任何游標被存在狀態裡**——這是這題的重點。eq. 8.1 規定 φ ∈ ⟦⟦H⟧_Q⟧_C：每個 core 的 queue 是**恰好** Q = 80 個的定長序列（對照 α ∈ ⟦⟦H⟧_{:O}⟧_C 是**至多** O = 8 個），所以取模永遠落在合法範圍內。**空 slot 的後果**：沒有出塊的時槽，其對應的那一格這一輪就是被跳過，要再等 80 個時槽（8 分鐘）繞回來才有機會。這不是遺漏，而是設計——索引綁在時間上，鏈上任何節點都能獨立算出來，不需要協調。**實作陷阱**：若自己維護一個「下一個要取哪格」的游標，在鏈上出現空 slot（Safrole 沒出票、或單純沒人出塊）時就會與參考實作分歧，而且分歧會一直累積下去，state root 從此對不上。**另一個常見誤解**：queue 不會因為被抽取而縮短或清空——它不是 FIFO，同一格會被反覆讀取。唯一能改動 φ 的是 `assign` host call 的整批覆寫。",
         "trap": "抽 queue 用 mod Q（80），截 pool 用 O（8）——兩個常數各司其職，別互換。",
     },
     {
