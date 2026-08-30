@@ -1,6 +1,6 @@
 {
  "meta": {
-  "bankVersion": "bank v1.0 (2026-08-30)",
+  "bankVersion": "bank v1.0 (2026-08-31)",
   "gpVersion": "Gray Paper 0.8.0",
   "team": "New-JAMneration M1 interview prep",
   "chapters": [
@@ -5539,7 +5539,7 @@
     "It can check everything except the extrinsic hash, since only that field depends on data outside the header; the seal is self-contained because the author's public key is one of the header's own fields and needs no external lookup"
    ],
    "answer": 0,
-   "explanation": "從 header 本身可以做的是結構檢查、以及 eq. 5.8 的時間條件：P(H)_T < H_T，且 H_T·P ≤ 目前的牆鐘時間（前者需要父 header，後者只需要時鐘）。**卡住的是 seal**：驗 H_S 要先知道「這個 slot 該由誰出塊」，那來自 γ′_S 與 κ′——都是狀態。這正好解釋 header 為什麼要帶 marker：H_E 給出下一個 epoch 的 key 與 entropy、H_W 給出該 epoch 的 600 張 ticket，讓只同步 header 的輕客戶端能自己推出 sealer 序列、往後一路驗下去，而不必重放狀態。",
+   "explanation": "把檢查按「需要什麼才做得到」分三層就很清楚。**只要 header 自己**：結構檢查——eq. 5.1 的 header 是 10 元組 (H_P 父雜湊, H_R 先前狀態根, H_X extrinsic 雜湊, H_T 時槽, H_E, H_W, H_O 三個 marker, H_I 作者索引, H_V 熵 VRF 簽章, H_S seal)，欄位數、型別與長度都能就地驗。**要父 header 或時鐘**：eq. 5.8 的時間條件 P(H)_T < H_T ∧ H_T · P ≤ 𝕋。這裡 P(H) 是父 header（存過那張 header 即可，不必有狀態）、P = 6 是每個時槽的秒數、𝕋 是牆鐘時間；前半只要父 header，後半只要一個時鐘。GP 還補一句「blocks considered invalid by this rule may become valid as 𝕋 advances」——「太未來」是暫時無效，不是永久無效。**要狀態**：seal。而且 H_S 是雙重狀態相依。其一，header 只放 H_I（索引），不放公鑰；§5 原文特別註明 H_A ≡ κ′[H_I]_b 「is merely an equivalence, and is not serialized as part of the header」，要拿驗簽用的 Bandersnatch 公鑰就得查 κ′。其二，就算有了公鑰還要確認「這個 slot 本來就該由他出塊」：§6 定義 H_S 是「a Bandersnatch signature produced with the private key corresponding to the entry at index m′ of the current epoch’s slot-sealer sequence γ′_S」，m′ 是本塊在 epoch 內的 slot phase。κ′ 與 γ′_S 都是狀態。相關名詞（站上「名詞」模式都查得到）：validator 金鑰有四組——κ active（現任）、λ previous（上一輪）、ι staging（待命）、γ_P pending（下個 epoch 生效）；γ_S 是 slot-sealer sequence，票券模式下每格是一張 ticket、fallback 模式下每格直接是 Bandersnatch 公鑰；E_U(H) 是「不含 H_S 的 header 編碼」，也就是 seal 實際簽的那段訊息。**這題真正的落點**：正因為 seal 需要狀態，header 才要帶 marker。H_E 在每個 epoch 第一塊給出下個 epoch 的 entropy 與整組 validator 金鑰、H_W 在票券截止那一塊給出整個 epoch 的 600 張 ticket。只同步 header 鏈的輕客戶端因此能自行推出 κ′ 與 γ′_S 的變化、往後一路驗 seal，不必重放狀態——§6 說得很直接，marker 存在是為了「minimize data transfer necessary to determine the validator keys associated with any given epoch」。",
    "optNotes": [
     "結構與時間可查、seal 需要 sealer 序列（狀態）——這正是 marker 存在的理由。",
     "驗簽反而是最需要外部資訊的一步；而時間檢查只需要父 header 與時鐘。",
@@ -5708,7 +5708,7 @@
     "The two that are optional are the ones a verifier may legitimately ignore, so a node that trusts its peers can skip decoding them; the third must always be present because the seal is computed over it and a missing field would change the signed message"
    ],
    "answer": 1,
-   "explanation": "eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)、H_W ∈ ?(⟦ticket⟧_E)、H_O ∈ ⟦ed25519 key⟧。前兩個一旦出現就很大——一整套 validator 金鑰、或整個 epoch 的 600 張 ticket——但每個 epoch 至多出現一次，所以做成 optional：不存在時只寫一個值為 0 的判別位元組（App. C：E_epochmark(∅) = E(0)），1 byte 就打發。第三個平常是空序列，而 var() 編碼的空序列同樣只是一個長度前綴 0，也是 1 byte——已經跟 optional 一樣便宜，再包一層沒有收益。這是「編碼形狀跟隨出現頻率與大小」的取捨，也是最容易被追問「為什麼 H_O 不是 optional」的地方。順帶澄清一個常見誤解：**H_O 是可以為空的，絕大多數區塊都是空的**。§10 定義 H_O ≡ [k | (k,…) ∈ E_C] ⌢ [k | (k,…) ∈ E_F]，「must contain exactly the keys of all new offenders」——沒有新的 offender 就是空序列。它的強制性不在「非空」，而在「必須與本塊 E_D 帶進來的 culprits 與 faults 逐項相符」：有新 offender 卻留空、或列出沒有依據的鍵，都會讓區塊無效。另外 H_E 的金鑰序列恆為 V 筆（整個 γ′_P），同樣不會是空的。",
+   "explanation": "**先把型別記號對齊**：`?S`（GP 的 optional）是「S ∪ {∅}」，序列化時前面掛一個判別位元組；`⟦T⟧` 是元素型別 T 的序列，`⟦T⟧_n` 是長度固定 n 的序列。eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)、H_W ∈ ?(⟦ticket⟧_E)、H_O ∈ ⟦ed25519 key⟧——**前兩個是 optional，第三個只是一般序列**。再看 App. C 的三個編碼器：E(0) = [0]（一般自然數編碼，0 就是單一位元組）；maybe(x) 在 x = ∅ 時是 0、否則是 (1, x)；var(x) ≡ (|x|, x)，E(var(x)) = E(|x|) ⌢ E(x)。代進去：H_E 不存在是 E_epochmark(∅) = E(0) = 1 byte、H_W 不存在是 maybe(∅) = 1 byte、H_O 為空是長度前綴 E(0) 後面接空 = 1 byte——**三者在空的時候都恰好一個位元組**，沒有誰更省。所以 optional 買到的不是「空的時候更便宜」，而是應付有內容時的極端落差。前兩個一旦出現就很大——一整套 validator 金鑰、或整個 epoch 的 600 張 ticket——但每個 epoch 至多出現一次，所以做成 optional——用那 1 byte 的判別位元組把「有」與「無」兩種形狀切開，平時的 header 就維持固定的小尺寸。第三個沒有這種兩極分布，而且它是序列——**長度前綴本身已經兼任判別子**，再包一層 optional 只會多一個判別位元組，還會生出 ∅ 與 [] 兩種都表示「沒有 offender」的寫法，語意重複。這是「編碼形狀跟隨出現頻率與大小」的取捨，也是最容易被追問「為什麼 H_O 不是 optional」的地方。順帶澄清一個常見誤解：**H_O 是可以為空的，絕大多數區塊都是空的**。§10 定義 H_O ≡ [k | (k,…) ∈ E_C] ⌢ [k | (k,…) ∈ E_F]（E_C 是 culprits、E_F 是 faults，都是 disputes extrinsic E_D 的成分），「must contain exactly the keys of all new offenders」——沒有新的 offender 就是空序列。它的強制性不在「非空」，而在「必須與本塊 E_D 帶進來的 culprits 與 faults 逐項相符」：有新 offender 卻留空、或列出沒有依據的鍵，都會讓區塊無效。另外 H_E 的金鑰序列恆為 V 筆（整個 γ′_P），同樣不會是空的。",
    "optNotes": [
     "epoch marker 的金鑰序列恆為 V 筆（整個 γ′_P），根本不存在「空金鑰集」這個狀態可供區分。",
     "大而罕見的用 optional、小而常在的用空序列，正是這組型別差異的成本考量。",
