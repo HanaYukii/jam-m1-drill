@@ -1,7 +1,7 @@
 # JAM M1 Drill — 問答講義
 
 Gray Paper **0.8.0** · 21 章速記 · 270 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-08-29
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-08-30
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
