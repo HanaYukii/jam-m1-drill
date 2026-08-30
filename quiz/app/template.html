@@ -450,7 +450,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
            + '<div class="on-b"><div class="on-t">'+(isKey?'<b class="on-tag ok">正解</b>':'<b class="on-tag ng">錯</b>')
            + (picked !== null && oi === picked ? '<b class="on-tag you">你選的</b>' : '')
            + inlineCode(it.options[oi])+'</div>'
-           + '<div class="on-x">'+inlineCode(it.optNotes[pos])+'</div></div></li>';
+           + '<div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
       });
       h += '</ol></div>';
     }
