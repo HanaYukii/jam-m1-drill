@@ -2796,26 +2796,26 @@ eq. 6.25：γ′_S ≡ Z(γ_A) 當 e′ = e+1 ∧ m ≥ Y ∧ |γ_A| = E；γ_S 
 
 ---
 
-### 6-20　With a tiny epoch of E = 6 and a sorted accumulator γ_A = [a, b, c, d, e, f] (ascending ticket ids), what is Z(γ_A)?
+### 6-20　The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?
 
-<sub>6.5 The Slot-Sealer Sequence — ●○○ · 概念 · eq. 6.26 (Z)</sub>
+<sub>6.5 The Slot-Sealer Sequence — ●●○ · 概念 · eq. 6.26 (Z)</sub>
 
-**標準答案**　[a, f, b, e, c, d]
+**標準答案**　The lowest identifier seals the first slot, the highest the second, the second-lowest the third, and so on: Z consumes the sorted sequence from both ends inward at once, so the two extremes of the ranking sit side by side at the head of the epoch.
 
-eq. 6.26：Z(s) = [s_0, s_{n−1}, s_1, s_{n−2}, …]，「outside-in」交錯取頭尾。所以 [a,b,c,d,e,f] → [a,f,b,e,c,d]。目的：最佳（最小 id）的 ticket 與最差的 ticket 交錯散佈到整個 epoch，避免某段時間集中由同一批 validator 出塊。你們的 OutsideInSequencer() 用 left/right 兩個指標實作。
+eq. 6.26：Z(s) = [s_0, s_{|s|−1}, s_1, s_{|s|−2}, …]——從排序好的序列頭尾交替往內取。「rank」的來源是 §6：accumulator「becomes the lowest items of the sorted union of tickets from prior accumulator and the submitted tickets」，即依 ticket id 升冪、只留最小的 E 張。所以 rank 0 → slot 0、rank E−1 → slot 1、rank 1 → slot 2……分數順序決定的是**誰入選**，slot 位置則是那個順序的頭尾交錯，兩者不是同一回事。同一個 Z 在本章出現兩次：eq. 6.25 用它產生 γ′_S（e′ = e+1 ∧ m ≥ Y ∧ |γ_A| = E）；winning-tickets marker H_W 則在 e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E 時帶同一個 Z(γ_A)——marker 先把下個 epoch 要用的序列公告出來，兩處必須逐項一致，方向算反就會踩到 InvalidTicketsMark（團隊 issue #770）。需要說明的是：**GP 只定義 Z，並沒有交代為什麼要 outside-in**，safrole.tex 只寫「we use Z as the outside-in sequencer function」，所以口試時講定義與用途即可，不必編一個抗攻擊的理由。
 
 **逐項辨析**
 
-1. ✅ [a, f, b, e, c, d]  
-   eq. 6.26 的 [s_0, s_{n−1}, s_1, s_{n−2}, …] 逐項對上。
-2. ❌ [a, b, c, d, e, f]  
-   那是原始的升冪序列，完全沒有做 outside-in 交錯。
-3. ❌ [f, a, e, b, d, c]  
-   頭尾起點反了：Z 從最小 id 起頭，不是從最大的那一張開始。
-4. ❌ [a, c, e, f, d, b]  
-   那是「隔一個取一個」再折返，不是 6.26 的頭尾交錯。
+1. ✅ The lowest identifier seals the first slot, the highest the second, the second-lowest the third, and so on: Z consumes the sorted sequence from both ends inward at once, so the two extremes of the ranking sit side by side at the head of the epoch.  
+   eq. 6.26 從頭尾交替往內取，所以最小與最大的 id 相鄰坐在 epoch 開頭的兩個 slot。
+2. ❌ Rank order and slot order coincide, because the accumulator is already sorted on insertion; Z matters only for the fallback sequence, which is derived from entropy and therefore arrives in no particular order at all.  
+   γ_A 已排序不代表 Z 是恆等函數；eq. 6.25 對滿的 accumulator 一樣要套 Z，fallback 走的是 F 不是 Z。
+3. ❌ The highest identifier seals the first slot and the lowest the second, so Z still consumes the sorted sequence from both ends inward but begins at the far end of the ranking rather than at its start.  
+   方向反了：eq. 6.26 的第一項是 s_0（最小 id），最大的那張排第二。
+4. ❌ Ranks are dealt alternately into the epoch's two halves, so the lowest identifier seals the first slot, the next lowest the middle slot, the third lowest the second slot, and so on across both halves.  
+   那是把序列切兩半交錯，不是頭尾往內收；Z 的第二項取的是整個序列的最後一個。
 
-> **陷阱**　第一個 slot 是最小 id（s_0），第二個是最大 id。
+> **陷阱**　Z 決定的是 slot 位置，不是誰入選；入選由 id 最小的 E 張決定。GP 未解釋為何要 outside-in。
 
 <sub>`ch06-outside-in-Z`</sub>
 
@@ -6801,26 +6801,26 @@ eq. A.9 把 fault 的參數定義成「被觸及的位址中最低的那個不�
 
 ## 附錄 B · Host Calls　<sub>18 題</sub>
 
-### B-1　Which mapping of host-call result constants is correct?
+### B-1　A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?
 
-<sub>B.1 Host-Call Result Constants — ●○○ · 概念 · §B.1</sub>
+<sub>B.1 Result Constants; Omega_A (assign) — ●●○ · 概念 · §B.1; Ω_A</sub>
 
-**標準答案**　OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3; WHO = 2^64−4 (index unknown); FULL = 2^64−5; CORE = 2^64−6; CASH = 2^64−7 (insufficient funds); LOW = 2^64−8 (gas limit too low); HUH = 2^64−9 (invalid operation / insufficient privilege)
+**標準答案**　A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. Each constant names what kind of thing is wrong: the out-of-range index, the absent privilege, the unresolvable identity.
 
-§B.1 逐字：NONE = 2^64−1、WHAT = 2^64−2、OOB = 2^64−3（inner PVM 記憶體索引不可存取）、WHO = 2^64−4（index unknown）、FULL = 2^64−5（storage full / resource already allocated）、CORE = 2^64−6（core index unknown）、CASH = 2^64−7（insufficient funds）、LOW = 2^64−8（gas limit too low）、HUH = 2^64−9、OK = 0。錯誤碼刻意擺在 2^64 頂端，因為 host call 的正常回傳值本身就是小整數（read/lookup/fetch 回傳長度、new 回傳新 service index、machine 回傳機器編號、query 回傳 1 + 2^32·x），必須能與之區分。inner PVM 的結果碼則是獨立的一組 HALT = 0、PANIC = 1、FAULT = 2、HOST = 3、OOG = 4。另註：「Note return codes for a host-call-request exit are any non-zero value less than 2^64 − 13」。
+Ω_A（`assign` = 16）把四種失敗排成一道有序的階梯：q = error（要寫進佇列的那段記憶體不可讀）→ panic；c ≥ C → CORE；呼叫者 ≠ χ_A[c]（該 core 目前的 assigner）→ HUH；新的 assigner a ∉ 𝕊（不是合法 service id）→ WHO；其餘 OK。分工的原則是「常數描述的是哪一種東西壞了」：越界的索引用它專屬的常數（§B.1 逐字：CORE = core index unknown），權限不足一律是 HUH（§B.1：the operation is invalid… or the service is insufficiently privileged），解析不出來的身分是 WHO（index unknown）。順序本身也有意義：先確定 core 存不存在，再確定你有沒有權動它，最後才看你要塞進去的值合不合法。兩個常被混用的：WHAT 不是給參數用的，它是 Ω 派送表的 otherwise 分支——host call 編號本身不認得（Name unknown），且只扣 C_gasunknown；OOB 則專指 inner PVM 的記憶體索引不可存取，跟 accumulate 自己的記憶體無關——後者讀不到就直接 panic。
 
 **逐項辨析**
 
-1. ✅ OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3; WHO = 2^64−4 (index unknown); FULL = 2^64−5; CORE = 2^64−6; CASH = 2^64−7 (insufficient funds); LOW = 2^64−8 (gas limit too low); HUH = 2^64−9 (invalid operation / insufficient privilege)  
-   十個常數與 §B.1 逐字對上：2^64−k 的數值與 CASH/LOW/FULL/CORE 的語意都正確。
-2. ❌ OK = 0; NONE = 1 (item does not exist); WHAT = 2 (name unknown); OOB = 3; WHO = 4 (index unknown); FULL = 5; CORE = 6; CASH = 7 (insufficient funds); LOW = 8 (gas limit too low); HUH = 9 (invalid operation / insufficient privilege); the inner-PVM results HALT…OOG continue the same run at 10…14  
-   錯誤碼落在 0…9 就無法與 read/new/machine 那些正常的小整數回傳值區分。
-3. ❌ OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3 (index unknown); WHO = 2^64−4 (inner-PVM memory index not accessible); FULL = 2^64−5 (core index unknown); CORE = 2^64−6 (storage full or resource already allocated); CASH = 2^64−7; LOW = 2^64−8; HUH = 2^64−9  
-   數值對但語意平移：OOB 是 inner PVM 記憶體不可存取，WHO 才是 index unknown。
-4. ❌ OK = 0; NONE = 2^32−1 (item does not exist); WHAT = 2^32−2 (name unknown); OOB = 2^32−3; WHO = 2^32−4 (index unknown); FULL = 2^32−5; CORE = 2^32−6; LOW = 2^32−7 (gas limit too low); CASH = 2^32−8 (insufficient funds); HUH = 2^32−9 (invalid operation / insufficient privilege)  
-   錯誤常數定義在 2^64 附近（2^32−1 是合法長度/索引），且 CASH 排在 LOW 之前。
+1. ✅ A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. Each constant names what kind of thing is wrong: the out-of-range index, the absent privilege, the unresolvable identity.  
+   四段依序 panic → CORE → HUH → WHO，與 Ω_A 的 cases 逐項對上；範圍、權限、身分各有專屬常數。
+2. ❌ A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHO; a caller that is not that core's current assigner gives HUH. Privilege comes last so that a structurally broken call is never turned away merely for who happened to submit it.  
+   順序反了：GP 先檢查呼叫者是不是該 core 的 assigner，才輪到新 assigner 的 service id 合不合法。
+3. ❌ A queue that cannot be read out of memory panics; a caller that is not that core's current assigner gives WHO; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHAT. WHO names the party that made the call, and WHAT names an argument the host could not resolve to anything.  
+   WHO 指的是解析不出來的索引或身分，不是呼叫者；WHAT 是用在整個 host call 編號不認得的時候。
+4. ❌ A queue that cannot be read out of memory gives OOB; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. A memory fault is reported rather than fatal here, so accumulation carries on and the caller may retry.  
+   記憶體讀不到在 Ω_A 是直接 panic，不是回 OOB；OOB 專指 inner PVM 的記憶體索引不可存取。
 
-> **陷阱**　常考 WHO vs HUH：WHO = 找不到 service/index；HUH = 操作本身不合法（已 solicit、無法 forget、權限不足）。
+> **陷阱**　權限不足 → HUH；索引解析不出來 → WHO；host call 編號不認得 → WHAT。三者最常被混用。
 
 <sub>`appB-result-constants`</sub>
 

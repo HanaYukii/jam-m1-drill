@@ -3,24 +3,24 @@
 ITEMS = [
 {
  "id": "appB-result-constants",
- "ch": "B", "section": "B.1 Host-Call Result Constants", "gpRef": "§B.1",
- "difficulty": 1, "kind": "concept", "tags": ["host-calls"],
- "stem": "Which mapping of host-call result constants is correct?",
+ "ch": "B", "section": "B.1 Result Constants; Omega_A (assign)", "gpRef": "§B.1; Ω_A",
+ "difficulty": 2, "kind": "concept", "tags": ["host-calls", "privileges"],
+ "stem": "A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?",
  "options": [
-  "OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3; WHO = 2^64−4 (index unknown); FULL = 2^64−5; CORE = 2^64−6; CASH = 2^64−7 (insufficient funds); LOW = 2^64−8 (gas limit too low); HUH = 2^64−9 (invalid operation / insufficient privilege)",
-  "OK = 0; NONE = 1 (item does not exist); WHAT = 2 (name unknown); OOB = 3; WHO = 4 (index unknown); FULL = 5; CORE = 6; CASH = 7 (insufficient funds); LOW = 8 (gas limit too low); HUH = 9 (invalid operation / insufficient privilege); the inner-PVM results HALT…OOG continue the same run at 10…14",
-  "OK = 0; NONE = 2^64−1 (item does not exist); WHAT = 2^64−2 (name unknown); OOB = 2^64−3 (index unknown); WHO = 2^64−4 (inner-PVM memory index not accessible); FULL = 2^64−5 (core index unknown); CORE = 2^64−6 (storage full or resource already allocated); CASH = 2^64−7; LOW = 2^64−8; HUH = 2^64−9",
-  "OK = 0; NONE = 2^32−1 (item does not exist); WHAT = 2^32−2 (name unknown); OOB = 2^32−3; WHO = 2^32−4 (index unknown); FULL = 2^32−5; CORE = 2^32−6; LOW = 2^32−7 (gas limit too low); CASH = 2^32−8 (insufficient funds); HUH = 2^32−9 (invalid operation / insufficient privilege)"
+  "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. Each constant names what kind of thing is wrong: the out-of-range index, the absent privilege, the unresolvable identity.",
+  "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHO; a caller that is not that core's current assigner gives HUH. Privilege comes last so that a structurally broken call is never turned away merely for who happened to submit it.",
+  "A queue that cannot be read out of memory panics; a caller that is not that core's current assigner gives WHO; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHAT. WHO names the party that made the call, and WHAT names an argument the host could not resolve to anything.",
+  "A queue that cannot be read out of memory gives OOB; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. A memory fault is reported rather than fatal here, so accumulation carries on and the caller may retry."
  ],
  "answer": 0,
+ "explanation": "Ω_A（`assign` = 16）把四種失敗排成一道有序的階梯：q = error（要寫進佇列的那段記憶體不可讀）→ panic；c ≥ C → CORE；呼叫者 ≠ χ_A[c]（該 core 目前的 assigner）→ HUH；新的 assigner a ∉ 𝕊（不是合法 service id）→ WHO；其餘 OK。分工的原則是「常數描述的是哪一種東西壞了」：越界的索引用它專屬的常數（§B.1 逐字：CORE = core index unknown），權限不足一律是 HUH（§B.1：the operation is invalid… or the service is insufficiently privileged），解析不出來的身分是 WHO（index unknown）。順序本身也有意義：先確定 core 存不存在，再確定你有沒有權動它，最後才看你要塞進去的值合不合法。兩個常被混用的：WHAT 不是給參數用的，它是 Ω 派送表的 otherwise 分支——host call 編號本身不認得（Name unknown），且只扣 C_gasunknown；OOB 則專指 inner PVM 的記憶體索引不可存取，跟 accumulate 自己的記憶體無關——後者讀不到就直接 panic。",
  "optNotes": [
-   "十個常數與 §B.1 逐字對上：2^64−k 的數值與 CASH/LOW/FULL/CORE 的語意都正確。",
-   "錯誤碼落在 0…9 就無法與 read/new/machine 那些正常的小整數回傳值區分。",
-   "數值對但語意平移：OOB 是 inner PVM 記憶體不可存取，WHO 才是 index unknown。",
-   "錯誤常數定義在 2^64 附近（2^32−1 是合法長度/索引），且 CASH 排在 LOW 之前。",
+  "四段依序 panic → CORE → HUH → WHO，與 Ω_A 的 cases 逐項對上；範圍、權限、身分各有專屬常數。",
+  "順序反了：GP 先檢查呼叫者是不是該 core 的 assigner，才輪到新 assigner 的 service id 合不合法。",
+  "WHO 指的是解析不出來的索引或身分，不是呼叫者；WHAT 是用在整個 host call 編號不認得的時候。",
+  "記憶體讀不到在 Ω_A 是直接 panic，不是回 OOB；OOB 專指 inner PVM 的記憶體索引不可存取。"
  ],
- "explanation": "§B.1 逐字：NONE = 2^64−1、WHAT = 2^64−2、OOB = 2^64−3（inner PVM 記憶體索引不可存取）、WHO = 2^64−4（index unknown）、FULL = 2^64−5（storage full / resource already allocated）、CORE = 2^64−6（core index unknown）、CASH = 2^64−7（insufficient funds）、LOW = 2^64−8（gas limit too low）、HUH = 2^64−9、OK = 0。錯誤碼刻意擺在 2^64 頂端，因為 host call 的正常回傳值本身就是小整數（read/lookup/fetch 回傳長度、new 回傳新 service index、machine 回傳機器編號、query 回傳 1 + 2^32·x），必須能與之區分。inner PVM 的結果碼則是獨立的一組 HALT = 0、PANIC = 1、FAULT = 2、HOST = 3、OOG = 4。另註：「Note return codes for a host-call-request exit are any non-zero value less than 2^64 − 13」。",
- "trap": "常考 WHO vs HUH：WHO = 找不到 service/index；HUH = 操作本身不合法（已 solicit、無法 forget、權限不足）。"
+ "trap": "權限不足 → HUH；索引解析不出來 → WHO；host call 編號不認得 → WHAT。三者最常被混用。"
 },
 {
  "id": "appB-three-invocations",

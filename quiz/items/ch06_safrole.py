@@ -172,23 +172,23 @@ ITEMS = [
 {
  "id": "ch06-outside-in-Z",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.26 (Z)",
- "difficulty": 1, "kind": "concept", "tags": ["safrole", "tickets"],
- "stem": "With a tiny epoch of E = 6 and a sorted accumulator γ_A = [a, b, c, d, e, f] (ascending ticket ids), what is Z(γ_A)?",
+ "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
+ "stem": "The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?",
  "options": [
-  "[a, f, b, e, c, d]",
-  "[a, b, c, d, e, f]",
-  "[f, a, e, b, d, c]",
-  "[a, c, e, f, d, b]"
+  "The lowest identifier seals the first slot, the highest the second, the second-lowest the third, and so on: Z consumes the sorted sequence from both ends inward at once, so the two extremes of the ranking sit side by side at the head of the epoch.",
+  "Rank order and slot order coincide, because the accumulator is already sorted on insertion; Z matters only for the fallback sequence, which is derived from entropy and therefore arrives in no particular order at all.",
+  "The highest identifier seals the first slot and the lowest the second, so Z still consumes the sorted sequence from both ends inward but begins at the far end of the ranking rather than at its start.",
+  "Ranks are dealt alternately into the epoch's two halves, so the lowest identifier seals the first slot, the next lowest the middle slot, the third lowest the second slot, and so on across both halves."
  ],
  "answer": 0,
+ "explanation": "eq. 6.26：Z(s) = [s_0, s_{|s|−1}, s_1, s_{|s|−2}, …]——從排序好的序列頭尾交替往內取。「rank」的來源是 §6：accumulator「becomes the lowest items of the sorted union of tickets from prior accumulator and the submitted tickets」，即依 ticket id 升冪、只留最小的 E 張。所以 rank 0 → slot 0、rank E−1 → slot 1、rank 1 → slot 2……分數順序決定的是**誰入選**，slot 位置則是那個順序的頭尾交錯，兩者不是同一回事。同一個 Z 在本章出現兩次：eq. 6.25 用它產生 γ′_S（e′ = e+1 ∧ m ≥ Y ∧ |γ_A| = E）；winning-tickets marker H_W 則在 e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E 時帶同一個 Z(γ_A)——marker 先把下個 epoch 要用的序列公告出來，兩處必須逐項一致，方向算反就會踩到 InvalidTicketsMark（團隊 issue #770）。需要說明的是：**GP 只定義 Z，並沒有交代為什麼要 outside-in**，safrole.tex 只寫「we use Z as the outside-in sequencer function」，所以口試時講定義與用途即可，不必編一個抗攻擊的理由。",
  "optNotes": [
-  "eq. 6.26 的 [s_0, s_{n−1}, s_1, s_{n−2}, …] 逐項對上。",
-  "那是原始的升冪序列，完全沒有做 outside-in 交錯。",
-  "頭尾起點反了：Z 從最小 id 起頭，不是從最大的那一張開始。",
-  "那是「隔一個取一個」再折返，不是 6.26 的頭尾交錯。",
+  "eq. 6.26 從頭尾交替往內取，所以最小與最大的 id 相鄰坐在 epoch 開頭的兩個 slot。",
+  "γ_A 已排序不代表 Z 是恆等函數；eq. 6.25 對滿的 accumulator 一樣要套 Z，fallback 走的是 F 不是 Z。",
+  "方向反了：eq. 6.26 的第一項是 s_0（最小 id），最大的那張排第二。",
+  "那是把序列切兩半交錯，不是頭尾往內收；Z 的第二項取的是整個序列的最後一個。"
  ],
- "explanation": "eq. 6.26：Z(s) = [s_0, s_{n−1}, s_1, s_{n−2}, …]，「outside-in」交錯取頭尾。所以 [a,b,c,d,e,f] → [a,f,b,e,c,d]。目的：最佳（最小 id）的 ticket 與最差的 ticket 交錯散佈到整個 epoch，避免某段時間集中由同一批 validator 出塊。你們的 OutsideInSequencer() 用 left/right 兩個指標實作。",
- "trap": "第一個 slot 是最小 id（s_0），第二個是最大 id。"
+ "trap": "Z 決定的是 slot 位置，不是誰入選；入選由 id 最小的 E 張決定。GP 未解釋為何要 outside-in。"
 },
 {
  "id": "ch06-epoch-marker",
