@@ -584,7 +584,7 @@
    "tags": [
     "codec"
    ],
-   "stem": "Which statement about JAM's codec conventions is correct?",
+   "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?",
    "options": [
     "Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E_4(|x|) so every length prefix is the same width; an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets most-significant-first",
     "Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
@@ -7890,7 +7890,7 @@
     "accumulation",
     "privileges"
    ],
-   "stem": "In Δ* (parallel accumulation), which services are accumulated and how are the privileged indices (assigners, delegator, registrar) resolved when both the manager and the privileged service itself change them?",
+   "stem": "In Δ* (parallel accumulation), which services get accumulated? And when the manager and a privileged service both write to the same privileged index — assigners, delegator or registrar — which write survives?",
    "options": [
     "s = {services with a digest} ∪ keys(f) ∪ {destinations of deferred transfers}; each is accumulated exactly once via Δ1; χ′_M and χ′_Z are taken from the registrar's output; the conflict resolver is R(o, a, b) = a when a = o, else b",
     "s = {services with a digest} ∪ keys(f) ∪ {destinations of deferred transfers}; each is accumulated exactly once via Δ1; the manager's output alone decides χ′_M and χ′_Z; for assigners, delegator and registrar the conflict resolver is R(o, a, b) = b when a = o, else a",
@@ -11047,6 +11047,13 @@
   "X_T": "ticket 的簽章 context 字串，與 seal / entropy 的 context 分開。",
   "Z_A": "dynamic jump alignment：Z_A = 2，動態跳躍目標必須對齊且落在 basic block 起點。",
   "ℙ": "work-package 集合 ℙ：⟨j, h, u, f, c, w⟩。",
+  "N_L": "octet 序列長度的集合（§3.4），等同 N_{2^32}——是長度的集合，不是 blob 的集合。",
+  "N_S": "service index 集合：u32，與時槽同寬但意義無關。",
+  "N_n": "小於 n 的自然數（§3.4，嚴格小於，所以有 n 個元素）。",
+  "B_x": "長度恰為 x 的 octet 序列（§3.7.4）；B 本身是任意長度。",
+  "B_31": "31 octet 的 blob——state key 構造函數 C 的值域。",
+  "B_96": "96 octet 的 blob——Bandersnatch 簽章的長度。",
+  "ν_X": "指令解碼出的 immediate 值（附錄 A，寬度由 skip 決定並做 sign extension）。",
   "E_V": "verdicts：disputes extrinsic 中的判決，每筆帶 ⌊2|k|/3⌋+1 個簽章。",
   "Ξ": "work-report 計算函數 Ξ：把 work-package 算成 work-report。"
  }

@@ -68,7 +68,7 @@ ITEMS = [
  "id": "ch12-delta-star",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.18–12.19 (Δ*, R)",
  "difficulty": 3, "kind": "concept", "tags": ["accumulation", "privileges"],
- "stem": "In Δ* (parallel accumulation), which services are accumulated and how are the privileged indices (assigners, delegator, registrar) resolved when both the manager and the privileged service itself change them?",
+ "stem": "In Δ* (parallel accumulation), which services get accumulated? And when the manager and a privileged service both write to the same privileged index — assigners, delegator or registrar — which write survives?",
  "options": [
   "s = {services with a digest} ∪ keys(f) ∪ {destinations of deferred transfers}; each is accumulated exactly once via Δ1; the manager's output alone decides χ′_M and χ′_Z; for assigners, delegator and registrar the conflict resolver is R(o, a, b) = b when a = o, else a",
   "s = {services with a digest} only, so a service that merely receives a deferred transfer or enjoys free accumulation is skipped; each is accumulated exactly once via Δ1; the manager's output alone decides χ′_M and χ′_Z, and assigners, delegator and registrar are changeable only by the manager",

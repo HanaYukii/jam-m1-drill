@@ -5,7 +5,7 @@ ITEMS = [
  "id": "appC-discriminators",
  "ch": "C", "section": "C.1 Discriminator / Sequence / Dictionary encoding", "gpRef": "§C.1.3–C.1.5",
  "difficulty": 2, "kind": "concept", "tags": ["codec"],
- "stem": "Which statement about JAM's codec conventions is correct?",
+ "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?",
  "options": [
   "Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
   "Fixed-length items (hashes, fixed sequences) are prefixed by E(|x|) too, so a decoder never needs type information; variable-length items ↕x are prefixed the same way; an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",

@@ -5602,7 +5602,7 @@ eq. 12.24：g = max(G_T, G_A·C + Σ χ_Z gas)，G_T = 3.5·10^9、G_A = 10^7、
 
 ---
 
-### 12-16　In Δ* (parallel accumulation), which services are accumulated and how are the privileged indices (assigners, delegator, registrar) resolved when both the manager and the privileged service itself change them?
+### 12-16　In Δ* (parallel accumulation), which services get accumulated? And when the manager and a privileged service both write to the same privileged index — assigners, delegator or registrar — which write survives?
 
 <sub>12.2 Execution — ●●● · 概念 · eq. 12.18–12.19 (Δ*, R)</sub>
 
@@ -7401,7 +7401,7 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 ## 附錄 C · Codec　<sub>6 題</sub>
 
-### C-1　Which statement about JAM's codec conventions is correct?
+### C-1　Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?
 
 <sub>C.1 Discriminator / Sequence / Dictionary encoding — ●●○ · 概念 · §C.1.3–C.1.5</sub>
 

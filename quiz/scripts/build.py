@@ -50,6 +50,13 @@ SYM_ALIASES = {
     "X_T": "ticket 的簽章 context 字串，與 seal / entropy 的 context 分開。",
     "Z_A": "dynamic jump alignment：Z_A = 2，動態跳躍目標必須對齊且落在 basic block 起點。",
     "\u2119": "work-package 集合 ℙ：⟨j, h, u, f, c, w⟩。",
+    "N_L": "octet 序列長度的集合（§3.4），等同 N_{2^32}——是長度的集合，不是 blob 的集合。",
+    "N_S": "service index 集合：u32，與時槽同寬但意義無關。",
+    "N_n": "小於 n 的自然數（§3.4，嚴格小於，所以有 n 個元素）。",
+    "B_x": "長度恰為 x 的 octet 序列（§3.7.4）；B 本身是任意長度。",
+    "B_31": "31 octet 的 blob——state key 構造函數 C 的值域。",
+    "B_96": "96 octet 的 blob——Bandersnatch 簽章的長度。",
+    "\u03bd_X": "指令解碼出的 immediate 值（附錄 A，寬度由 skip 決定並做 sign extension）。",
     "E_V": "verdicts：disputes extrinsic 中的判決，每筆帶 ⌊2|k|/3⌋+1 個簽章。",
     "\u039e": "work-report 計算函數 Ξ：把 work-package 算成 work-report。",
 }
