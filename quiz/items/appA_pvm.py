@@ -40,7 +40,7 @@ ITEMS = [
    "§A.2 的指令長度隱含且最多 16 octets，動態跳躍是 runtime 查 j（eq. A.22）而非載入期重定位。",
    "v_inst 要求 |k| = |c| 且標記的就是 opcode 那個 octet，eq. A.3 的 skip 也是往前找下一個 set bit。",
  ],
- "explanation": "eq. A.2：deblob 要求 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ E(c) ⌢ E(k) 且 v_blob(c, k, 0) 與 v_inst(c, k, ı) 都成立（沿 skip 走訪的每個落點都是 bitmask 標記的合法 opcode、最後一條是 terminator）。§A.2：PVM 以 octet 計算指令位置，k 標記哪些 octet 是 opcode；skip(i) = min(24, 到下一個 set bit 的距離 − 1)（eq. A.3），k 後面補無限個 1 讓最後一條指令有定義；指令長度隱含、最多 16 octets。指令資料 ζ = c ⌢ [0, 0, …]（eq. A.4）確保 PC 跑出程式碼時執行 opcode 0 = trap。",
+ "explanation": "eq. A.2 的 deblob 要求 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ E(c) ⌢ E(k)——jump table 長度、**每個 table 項目的寬度 z**（單一位元組）、code 長度、jump table 本身、指令資料 c，最後是 bitmask k。**k 是這題的核心**：PVM 以 **octet 為單位**計算指令位置，而指令長度是隱含的（最多 16 octet），所以需要一張表告訴解碼器「哪些 octet 是 opcode 的起點」——k 就是每個 code octet 一位，1 表示這裡是 opcode。|k| 必須等於 |c|。**指令長度怎麼算出來**：eq. A.3 的 skip(i) = min(24, 到下一個 set bit 的距離 − 1)，也就是「離下一條指令還有幾個位元組」。k 的後面補無限多個 1，讓**最後一條指令也有定義**，不必特別處理邊界。**兩個驗證條件**：v_blob(c, k, 0) 與 v_inst(c, k, ı) 都必須成立——沿著 skip 走訪的每個落點都得是 bitmask 標記的合法 opcode，且最後一條是 terminator。不成立就直接 panic，**一條指令都不執行**（0.8.0 的行為）。**還有一個安全網**：eq. A.4 定義指令資料 ζ = c ⌢ [0, 0, …]，所以 PC 若跑出程式碼範圍，讀到的是 opcode 0 = trap，而不是未定義行為。",
  "trap": "deblob 失敗（格式錯）→ 整個 Ψ 直接 panic。"
 },
 {

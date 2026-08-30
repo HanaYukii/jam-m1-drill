@@ -61,7 +61,7 @@ ITEMS = [
    "[x, y] 只是標成 unavailable，preimage 仍留在 a_p；[x, y, z] 是 §9.2.2 明列的合法形狀。",
    "a_l 掛在單一服務帳戶底下，鍵是 (h, len)、值是這個服務自己的可用性歷史，不記請求者身分。",
  ],
- "explanation": "§9.2.2：h = []：requested 未提供；[x]：自 x 起 available；[x, y]：曾於 x 可用、自 y 起 unavailable；[x, y, z]：x～y 可用、z 起再次可用。eq. 9.7 的 I(l, t)：[x] → x ≤ t；[x,y] → x ≤ t < y；[x,y,z] → x ≤ t < y ∨ z ≤ t；[] → ⊥。真正要移除還得靠 `forget`，而且要等 y < t − D。這個「歷史可用性」是為了 in-core refine 的 historical_lookup 能在任何 lookup-anchor 時點被確定性地重算（審計需要），所以狀態只往序列尾端追加。你們 `query` host call 把這四種狀態編成 φ_7/φ_8。",
+ "explanation": "§9.2.2 用**序列長度**編碼四種狀態，這是刻意的設計：**[]** = 已請求、還沒有人提供；**[x]** = 自 x 起可用；**[x, y]** = 曾於 x 起可用、自 y 起不可用；**[x, y, z]** = x 到 y 可用、自 z 起再次可用。eq. 9.7 的可用性判定 I(l, t) 直接對應：[x] → x ≤ t；[x, y] → x ≤ t < y；[x, y, z] → x ≤ t < y ∨ z ≤ t；[] → 恆為否。**為什麼只往尾端追加、不覆寫**：refine 在 in-core 會用 historical_lookup 查 preimage，而審計時 auditor 必須能對**任意一個 lookup-anchor 時點**重算出「當時到底可不可用」——若狀態被覆寫成單一布林值，這個重算就做不到，稽核也就失效了。所以這不是為了省空間，是為了**可追溯性**。**真正的刪除還要再等**：`forget` 只有在 y < t − D（D = 19,200 時槽 = 32 小時）之後才會真的移除，確保任何還在有效窗口內的稽核都查得到。你們的 `query` host call 把這四種狀態編進 φ_7／φ_8 回傳，讓 service 自己也能讀到。",
  "trap": "再次 solicit 一個 [x,y] 會變 [x,y,t]；forget 一個 [x] 變 [x,t]；forget [x,y]（y 夠舊）才真正刪除。"
 },
 {
@@ -103,7 +103,7 @@ ITEMS = [
    "求和應跑 requests dictionary a_l 的鍵 (h, z)、用宣告長度 z，不是跑 a_p 用實際 blob 長度。",
    "固定開銷是 81 與 34 不是 32/32，storage 的 key 長度要計入，base deposit B_S 也不能漏。",
  ],
- "explanation": "eq. 9.8：每個 lookup request 算 2 個 item 與 81+z octets（z 是宣告的 preimage 長度；81 是 GP 給定的固定開銷常數），每個 storage entry 算 1 個 item 與 34+|k|+|v| octets（34 同為固定開銷）。這些數字直接寫在 eq. 9.8 裡，面試時不需要推導、但要記得。a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)，B_S = 100、B_I = 10、B_L = 1（appendix I），a_f 是 gratis 抵扣，扣到負數再由 max(0, ·) 夾回零。計價對象是 requests dictionary 而非已供應的 preimages，等於 solicit 一發出就開始收押金，防止免費占位。fuzzer 曾抓到你們少減 a_f（issue digest：因為 traces 的 DepositOffset 都是 0 所以一直沒發現）。",
+ "explanation": "eq. 9.8 三條式子，數字都是 GP 直接給定的常數，不需要推導但要記得。**a_i（項數）= 2·|a_l| + |a_s|**——每個 lookup request 算 **2 項**、每個 storage entry 算 1 項。request 算兩項是因為它同時佔用了 requests 字典與（供應後的）preimages 字典兩個位置。**a_o（位元組）= Σ_{(h,z) ∈ keys(a_l)} (81 + z) + Σ_{(x,y) ∈ a_s} (34 + |x| + |y|)**——81 與 34 是固定開銷（涵蓋 key、長度前綴、trie 節點等），z 是**宣告的** preimage 長度。**a_t（門檻餘額）= max(0, B_S + B_I·a_i + B_L·a_o − a_f)**，B_S = 100（基本）、B_I = 10（每項）、B_L = 1（每位元組），a_f 是 gratis 抵扣，扣成負數再由 max(0, ·) 夾回零。**最關鍵的設計點**：計價對象是 **requests 字典**而不是已經供應的 preimages——也就是說 `solicit` 一發出去就開始收押金，還沒有人提供資料也一樣算錢。這是為了防止免費占位：否則任何 service 都能無成本地宣告要一百萬個 preimage。**fuzzer 抓過的坑**：你們曾漏減 a_f，但因為測試 trace 的 DepositOffset 都是 0，錯了很久沒被發現——這類「參數恆為零所以錯得看不出來」的 bug 值得特別留意。",
  "trap": "request 算 2 items；storage 算 1 item。"
 },
 {
@@ -145,7 +145,7 @@ ITEMS = [
    "方向剛好說反：GP 說的是 preimage「may not be removed freely」，被綁住的是 preimage 不是 storage。",
    "這正是 §9.2 的第三個差異：供應後要先標成 unavailable，過一段時間才能移除。",
  ],
- "explanation": "§9.2：三個差異——(1) hash→preimage vs 任意 key→value；(2) preimage 由 extrinsic 外部提供，storage 由 accumulate 產生；(3) preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。理由：refine 在 in-core 用 historical_lookup 查 preimage，審計時必須能確定「當時是否可用」，所以移除只能走這種可追溯的兩段式流程。",
+ "explanation": "§9.2 列出的三個差異：**① 索引方式**——preimage 是 hash → preimage（key 由內容決定），storage 是任意 key → value。**② 資料來源**——preimage 由**外部**透過 E_P extrinsic 提供，storage 則由 accumulate 自己寫入。**③ 移除方式**——GP 原文：preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。**第三點是這題的重點，理由也在同一段**：refine 在 in-core 會用 historical_lookup 查 preimage，而 auditor 事後重跑時必須能確定「在那個 lookup-anchor 時點，這份資料到底算不算可用」。若 service 能隨時把 preimage 抹掉，這個判定就沒有依據，一個惡意 service 甚至可以在被稽核前刪掉資料、讓所有 auditor 都無法驗證。所以移除必須走「先標記不可用、等過 D = 19,200 時槽（32 小時）、再由 `forget` 真正刪除」的兩段式流程。**storage 沒有這個限制**：它是 accumulate 的私有狀態，不參與 in-core 的稽核路徑，服務想刪就刪。「28 天」這個數字則是 §14 匯出 segment 的保存期限，跟這裡無關，是常見的混淆來源。",
  "trap": "forget 後要等 D = 19,200 slots 才能真正刪除。"
 },
 ]

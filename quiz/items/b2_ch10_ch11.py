@@ -56,7 +56,7 @@ ITEMS = [
   "a 宣告成 U32，a = 0 時 a-1 wrap 成 4294967295，而 Age 以 E_4 編碼，fuzzer 做得出這個值。",
   "U32 之間的比較就是會相等，wrap 後的值完全可能命中解碼出來的 Age。",
  ],
- "explanation": "eq. 10.2：a ∈ ⌊τ/E⌋ − N_2 = {⌊τ/E⌋, ⌊τ/E⌋ − 1}；eq. 10.3：K(a) = κ 當 a = ⌊τ/E⌋，否則 λ。在 genesis epoch，⌊τ/E⌋ = 0，「前一個 epoch」的 index 是 −1，不是自然數，所以唯一合法的 a 是 0；序列化上 a 是 E_4（附錄 C 的 E_D 編碼：(r, E_4(a), var[j])）。後果：這樣的區塊會通過 age 檢查並改用 λ 驗簽，若簽章確實由 λ 的 key 產生（genesis 時 λ 通常等於 κ），你們會接受一個 reference implementation 會拒絕的區塊 → state root 分歧。這正是 #1042 整合 PR 補的「genesis-epoch guard」。",
+ "explanation": "eq. 10.2 規定 verdict 的 epoch index a ∈ ⌊τ/E⌋ − N_2，也就是 {⌊τ/E⌋, ⌊τ/E⌋ − 1}；eq. 10.3 據此選集合：K(a) = κ 當 a 是當前 epoch，否則 λ。**在 genesis epoch，⌊τ/E⌋ = 0**，而「前一個 epoch」的 index 會是 −1——**那不是自然數，所以不在集合裡**。此時唯一合法的 a 就是 0。**bug 怎麼發生的**：a 在序列化上是 E_4（附錄 C 的 disputes 編碼是 (report hash, E_4(a), var[judgments])），程式用 U32 算 `a - 1` 時，0 − 1 會**回繞成 2^32 − 1**。於是一個帶 a = 4294967295 的 verdict 通過了 age 檢查，並被判定為「前一個 epoch」而改用 λ 驗簽。**後果是共識分歧而不是崩潰**：genesis 時 λ 通常等於 κ，所以簽章很可能真的驗得過——你們會**接受一個參考實作會拒絕的區塊**，state root 從此分家。**這類 bug 特別難抓**，因為它只在 genesis epoch 出現、而且不會 panic 只會靜靜地放行。這正是 #1042 整合 PR 補上 genesis-epoch guard 的原因。**通則**：凡是規格寫成「集合減去某個自然數」的地方，實作都要先確認下界，不能直接做無號減法。",
  "trap": "用 unsigned 減 1 之前先想 a = 0；GP 的 ⌊τ/E⌋ − N_2 沒有負數，也沒有 2^32 − 1。"
 },
 {

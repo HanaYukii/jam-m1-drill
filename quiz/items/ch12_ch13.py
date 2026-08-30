@@ -19,7 +19,7 @@ ITEMS = [
   "ξ 是長度 E 的序列、歷史只留一個 epoch；ω 裝的是 work-report ℝ，𝕎 是 §14.3 的 work-item。",
   "ξ 與 ω 都以 slot 索引、長度都是 E = 600；App. D 的 C(14) 也是照 slot 逐格序列化。",
  ],
- "explanation": "eq. 12.1：ξ ∈ [{H}]_E（每個 slot 一個集合，共 E 個），ξ_∪ 是聯集；12.3：ω ∈ [[(R, {H})]]_E——ready（已 available 但尚未 accumulate）的 report 與其**未滿足的** dependency（package hash 集合）。兩者都是長度 E 的環狀緩衝：ξ′[E−1] 放本塊剛 accumulate 的 hash 並左移；ω′[m]（m = H_T mod E）放本塊新的 R^Q，跳過的 slot 清空。這就是 test vectors 中 accumulate/ 的 enqueue/unlock/ring-wrap 案例。",
+ "explanation": "兩個都是**長度 E = 600 的環狀緩衝**，也就是「一個 epoch 份的歷史」。**ξ（accumulation history，eq. 12.1）**：ξ ∈ ⟦{H}⟧_E——每個 slot 一個集合，裝該 slot 已 accumulate 的 work-package hash；ξ_∪ 是全部的聯集。用途是**防重複**與**判斷依賴是否已滿足**。**ω（ready queue，eq. 12.3）**：ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E——每個 slot 一串「已經 available、但依賴還沒滿足」的 report，每筆配上它**尚未滿足的**依賴集合（會隨時間被扣減，不是原始清單）。**環狀怎麼轉**：ξ′[E−1] 放本塊剛 accumulate 的 hash、其餘左移；ω′[m]（m = H_T mod E）放本塊新產生的 R^Q，而**被跳過的 slot（沒出塊的那些）會被清空**。**為什麼是一個 epoch 的長度**：依賴等太久就沒有意義了——被依賴的 package 若一個 epoch 都沒出現，等下去也不會出現。所以懸而未決的 report 最終會被環狀覆蓋而自然消失，**不需要額外的清理機制**。這也表示「依賴解不開」不會讓區塊無效，只是那份工作靜靜地過期。這正是 test vectors 裡 accumulate 目錄的 enqueue／unlock／ring-wrap 三類案例在測的東西。",
  "trap": "ξ 存的是 package hash 不是 report hash；ready 的依賴在每次 accumulate 後用 E() 修剪。"
 },
 {
@@ -40,7 +40,7 @@ ITEMS = [
   "eq. 12.4 要求 |x_p| = 0 且 r_l = ∅ 同時成立；D(r) 含 keys(r_l)，修剪用 ξ_∪ 而非只有最後一格。",
   "Q 是遞迴定義（解開一批就再用 E 扣一次依賴）；解不開的 report 只是續留 ω 等過期，區塊仍有效。",
  ],
- "explanation": "eq. 12.4：R! = [r | r ∈ R, |x_p| = 0 ∧ r_l = ∅]；12.5：R^Q = E([D(r) | r ∈ R, 有依賴], ξ_∪)，D(r) = (r, x_p ∪ keys(r_l))；12.7：E(r, x) 移除 package hash ∈ x 的項目並從各項依賴集合扣掉 x；12.8：Q(r) = g ⌢ Q(E(r, P(g)))，g = 依賴集合為空者，直到沒有為止；12.11–12.12：R* = R! ⌢ Q(q)，q = E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!))，m = H_T mod E——ready queue 從**最舊**（slot m 起繞一圈）讀起。有無法解的依賴不會讓區塊無效，只是那個 report 留在 ω 直到過期（一個 epoch 後被覆蓋）。",
+ "explanation": "整段是一條流水線，分三步。**① 分流**（eq. 12.4–12.5）：R! = 沒有 prerequisites 且 segment-root lookup 為空的 report——**可以立刻做**；其餘進 R^Q，每筆配上依賴集合 D(r) = prerequisites ∪ keys(r_l)，並先用 ξ_∪ 把「已經做過的」扣掉。**② 兩個工具函數**（eq. 12.7–12.8）：E(r, x) 把 package hash 落在 x 裡的項目移除、並從其餘各項的依賴集合中扣掉 x；Q(r) = g ⌢ Q(E(r, P(g)))，g 是當前依賴集合為空的那些——**反覆「取出可做的、扣掉、再取」直到沒有東西可取**，是一個標準的拓撲排序。**③ 組裝**（eq. 12.11–12.12）：R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!)))。**注意 ready queue 的讀取順序**：ω[m..] 接 ω[..m]，m = H_T mod E——從**最舊**的 slot 開始繞一圈，等最久的先處理，避免飢餓。**兩個容易誤答的方向**：其一，**依賴解不開不會讓區塊無效**——那份 report 就留在 ω 裡，一個 epoch 後被環狀覆蓋而過期。其二，R! 一定排在最前面，因為它們無依賴、且它們的完成可能正好解開後面那些的依賴（P(R!) 就是傳這個）。",
  "trap": "E 的參數 x 在第一次是 P(R!)（本塊立即 accumulate 者的 hash），不是整個 ξ（R^Q 已先用 ξ_∪ 修剪過）。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "d ∈ N_S 是 service 不是 core；Ω_T 成功時已把 balance 設為 b − a，收方消失錢也回不來。",
   "0.7.1 就把 Ψ_T 併進 accumulate，0.8.0 只有 Ψ_A，而且交付是在下一輪而非同一輪。",
  ],
- "explanation": "eq. 12.14：T ≡ (s ∈ N_S, d ∈ N_S, a ∈ N_B, m ∈ B_{W_T}, g ∈ N_G)，W_T = C_memosize = 128。B 附錄 `transfer`（index 21）：呼叫時檢查 d 存在（否則 WHO）、l ≥ δ[d]_m（否則 LOW）、扣款後餘額 ≥ 自己的 threshold（否則 CASH），成功則立刻從 sender 扣除 a 並把 T 追加到 context 的 transfers 序列。接收方在**下一輪** Δ+ 才以 input 形式收到（Δ+ 的 t* 餵給遞迴呼叫），此時餘額才加上去；轉給不存在（或本輪被刪除）的 service 會被丟棄——但 sender 早就被扣了。",
+ "explanation": "eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、**memo m ∈ B_{W_T}（W_T = C_memosize = 128 位元組，定長）**、以及給接收方處理用的 gas 上限。**扣款與入帳不同步，這是這題的核心。** 呼叫 `transfer`（host call 21）的當下就會：檢查 d 存在（否則 WHO）、g 不低於 δ[d] 的最低 memo gas（否則 LOW）、扣款後自己的餘額仍不低於門檻 a_t（否則 CASH）；三關都過就**立刻從 sender 扣除 a**，並把 T 追加到本次 accumulate 的 transfers 序列。**接收方要到下一輪 Δ+ 才收到**：那些 T 會被當成 input 餵給遞迴呼叫（Δ+ 的 t*），此時金額才加到收款方帳上，收款方也才有機會用 g 的預算執行自己的處理邏輯。**所以有一個很現實的後果**：轉給「不存在、或在本輪被刪除」的 service，那筆 transfer 會被丟棄，**但 sender 早就被扣了錢**——這不是 bug，是「先扣後送」的必然結果，服務端要自己確認目標存在。**為什麼要延後**：若轉帳在呼叫當下就同步執行接收方的程式碼，accumulate 之間就會產生任意深度的重入（reentrancy），gas 計價與確定性都會失控。",
  "trap": "memo 固定 128 bytes；g 是給接收方處理這筆 transfer 的 gas，會計入下一輪預算。"
 },
 {
@@ -145,7 +145,7 @@ ITEMS = [
   "0.8.0 的 S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。",
   "ω′ 是環狀更新：只有被跳過的 slot 會清空，其餘 slot 保留並同樣經過 E 修剪。",
  ],
- "explanation": "eq. 12.24：(n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ ≡ [(s, h) ∈ b]（餵 §7 的 belt）；eq. 12.26：(δ†, ι′, φ′, χ′_M, χ′_A, χ′_V, χ′_R, χ′_Z) ≡ e′。eq. 12.27–12.28：accumulation statistics 記作 **S** ∈ D⟨N_S → (N, N, N_G)⟩，S(s) = (N(s) 前 n 個 report 中屬於 s 的 digest 數, T(s) 處理的 transfers 數（0.8.0 #502 加回）, G(s) gas used)，只記非 (0,0,0) 者。eq. 12.29–12.30：δ‡ = δ† 但 keys(S) 中的 service a_a = τ′。eq. 12.31–12.33：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 的 ring 更新。",
+ "explanation": "Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.24）：θ′ ≡ [(s, h) ∈ b]，也就是有呼叫 `yield` 且回傳非 ∅ 的 service 及其 hash——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。**為什麼要記這個時間**：`eject` 需要它來判斷一個 service 是否已經長期閒置。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。",
  "trap": "a_a（last accumulation slot）只對「這塊真的 accumulate 過」的 service 更新。"
 },
 {
@@ -166,7 +166,7 @@ ITEMS = [
   "Y 要求 δ[s]_l[(H(d), |d|)] = []；§12.4 開頭就是 After accumulation, we must integrate…。",
   "eq. 12.35 要求 ordered 且 unique，而 GP 從頭到尾沒有任何簽章條件，只看 request 是否存在。",
  ],
- "explanation": "eq. 12.34–12.36：E_P ∈ [(N_S, B)]，依 (s, d) 排序且唯一，∀(s, d)：Y(δ, s, d)（providable：s ∈ keys(δ) 且 δ[s]_l[(H(d), |d|)] = []）——用 **prior** δ 檢查。eq. 12.37：δ′ = I(δ‡, E_P)——在 accumulation 之後才整合（依 §4 dependency graph 的 merge/join），因此若 accumulate 過程中 service 被刪或 request 被 forget，該 preimage「disregarded, without prejudice」。I 會把 request 設為 [τ′] 並寫入 preimage。你們的錯誤碼：preimages not sorted and unique / preimage not required。",
+ "explanation": "兩個階段，**檢查用 prior、整合在 accumulation 之後**。**檢查**（eq. 12.34–12.36）：E_P ∈ ⟦(N_S, B)⟧，依 (service, data) 排序且唯一；每筆必須在 **prior 的 δ** 上「providable」——即 s ∈ keys(δ) 且 δ[s]_l[(H(d), |d|)] = **[]**，也就是**已經被 solicit 但還沒有人提供**。注意空序列 [] 是關鍵：已經提供過的（[x]）或曾被移除的（[x, y]）都不算 providable，這防止同一份 preimage 被重複塞進來。**整合**（eq. 12.37）：δ′ = I(δ‡, E_P)——**在 accumulation 跑完之後**才做，把 request 設為 [τ′]、並把 blob 寫入 a_p。**為什麼順序是這樣，以及它的副作用**：因為檢查用 prior、整合用 posterior，中間隔了一整段 accumulation；若在這段期間該 service 被 `eject` 刪掉、或該 request 被 `forget` 撤銷，這筆 preimage 就會被**「disregarded, without prejudice」——靜靜丟棄，但區塊仍然有效**。這是刻意的：出塊者在打包時無法預知 accumulation 會怎麼改動狀態，若因此讓整塊無效，出塊會變得極難。你們的兩個錯誤碼 preimages not sorted and unique 與 preimage not required 分別對應這兩條檢查。",
  "trap": "驗證看 prior δ、整合作用於 δ‡；順序題在 fuzzer 很常出現。"
 },
 {
@@ -202,7 +202,7 @@ n := len(t) + i + len(f)"""},
   "eq. 12.17 的測試是對整個前綴累加；單一 package 的 Σ w_a < G_A 是 §14.3 的封包合法性條件。",
   "idx 最大取到 |r| − 1，i = idx + 1 因此可以等於 |r|，與 i ∈ N_{|r|+1} 完全一致。",
  ],
- "explanation": "eq. 12.17（0.8.0）：i = max(N_{|r|+1})：Σ_{r ∈ r[..i], d ∈ r_d} d_g + Σ_{t ∈ t} t_g + Σ_{x ∈ values(f)} x ≤ g。PR #500「Account for gas reserved by transfer and always acc items」把 transfer gas 與 always-accumulate 的 gas 納入預算判斷（否則實際可能超出 g）。0.7.2 的 code 只加 AccumulateGas。n = |t| + i + |f| 在兩版都一樣。§12.2 也講明「Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit」——實際用量只能透過 g* = g + Σ t* gas − Σ u 回饋到下一輪。",
+ "explanation": "eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d_g + **Σ_{t ∈ t} t_g** + **Σ_{x ∈ values(f)} x** ≤ g }。**加粗的兩項就是 0.7.2 缺的**：待處理 deferred transfer 的 gas，與 always-accumulate 服務的免費額度。PR #500「Account for gas reserved by transfer and always acc items」把它們納入預算判斷——所以 gasSum 必須從這兩個總和起算，而不是從 0。**不加會怎樣**：這一輪選進來的 report 看起來還在預算內，但實際執行時還要付 transfer 的處理費與 always-acc 的額度，**總量就超過 g 了**。換句話說舊版是「事後才發現超支」，新版是「事前就把已承諾的支出算進去」。n = |t| + i + |f| 這條在兩版都一樣，沒有改。**背後的道理 §12.2 講得很清楚**：「Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit」——宣告的 gas 只是上限，實際用量要等做完才知道，所以下一輪的預算得靠 g* = g + Σ t* 的 gas − Σ 實際用量 回饋修正。**這是一個「保守預估 + 事後結算」的模型**，預估這一步漏算任何一項都會讓保守性失效。",
  "trap": "你們 issue digest 提到：eq:accseq budget now includes transfer gas + free allowances。"
 },
 {
@@ -244,7 +244,7 @@ n := len(t) + i + len(f)"""},
   "65/64 正是把每 64 個 export segment 多出的那一頁 paged proof 算進去；R(c)、L(c) 的範圍是 I。",
   "p 仍然是 assurance 打勾數；L(c) 是該 core 上所有 report 的 bundle length 總和而不是最大值。",
  ],
- "explanation": "eq. 13.9–13.12：π′_C[c] = (d = D(c), p = Σ_a a_f[c], i, x, z, e from R(c), l = L(c), u refine gas)。R(c) 與 L(c) 對 **I**（本塊 E_G 進來的 report，w_c = c）求和；D(c) 對 **R**（本塊剛 available 的 report）求和：bundle length + W_G·⌈k·65/64⌉——65/64 是因為每 64 個 export segment 會多一頁 paged-proof segment（§14）。popularity = 本塊 assurance 中對該 core 打勾的數量。你們 code-map 3.9：「DA load is computed from W while imports/exports/gas/bundle-size come from w」。",
+ "explanation": "π_C 每個 core 一組，**但不同欄位的求和對象不同，這正是最容易記錯的地方**。**d（DA load，資料可得性負載）對的是 R**——**本塊剛變成 available 的** report，D(c) = Σ (bundle 長度 + W_G · ⌈65 · segment 數 / 64⌉)。那個 65/64 的係數是因為**每 64 個匯出 segment 會多一頁 paged-proof segment**（§14），所以實際要分發的資料比 segment 本身多約 1.6%。**p（popularity）** = 本塊 assurance 中對該 core 打勾的數量，Σ_a a_f[c]。**i、x、z、e、u、l 對的是 I**——**本塊 E_G 帶進來（被 guarantee）的** report。**為什麼要分兩個來源**：guarantee 與 available 是**不同時間點的事件**，同一份 report 通常在某一塊被 guarantee、在之後某一塊才湊滿背書變成 available。「這塊 core 產生了多少工作」要看 I，「這塊 core 造成多少資料分發負擔」要看 R——混用會讓兩種統計都失真。你們 code-map 3.9 的註記正是這件事：「DA load is computed from W while imports/exports/gas/bundle-size come from w」。**另外記住 π_C 與 π_S 都是 per-block**（每塊重算，不累積），跨 epoch 累積的是 π_V／π_L。",
  "trap": "兩個不同來源（guaranteed vs available）——面試容易考。"
 },
 {
@@ -265,7 +265,7 @@ n := len(t) + i + len(f)"""},
   "本塊被 report 或收到 preimage 但沒 accumulate 者仍要列；(N, G) 是 0.7.2 的形狀。",
   "§13.2 明說 core 與 service 統計 tracked only on a per-block basis；provision 的 (1, |d|) 對 E_P 求和。",
  ],
- "explanation": "eq. 13.13–13.17：s = s^R（reported）∪ s^P（provided）∪ keys(S)；π′_S[s] = (p provision = Σ (1, |d|) over E_P for s, r refinement = (count, gas used) over digests, i, x, z, e, a accumulation = S(s) 或 (0,0,0))。π_S 是 per-block 的，所以沒活動的 service 不會出現；跨 epoch 累積並在 e′ ≠ e 換手的是 π_V／π_L。0.7.1 拿掉 on_transfer 的統計、0.8.0 (#502) 把 processed-transfer count 加回 accumulation 三元組。",
+ "explanation": "**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**版本沿革值得記，因為是 delta 考點**：0.7.1 拿掉了 `on_transfer` 的統計；0.8.0（PR #502）又把「處理掉的 transfer 數」加回 accumulation 那個三元組裡。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。",
  "trap": "π_S 的 accumulation 是 (N, T, G) 三元組。"
 },
 ]

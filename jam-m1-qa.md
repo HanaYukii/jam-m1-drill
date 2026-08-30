@@ -1493,7 +1493,7 @@ eq. 4.4：σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω
 
 **標準答案**　α′ must be computed after accumulation, because φ′ (the posterior authorizer queue) is only known once accumulate has run (the `assign` host call may change it)
 
-GP §8.2 明講：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」α′[c] = ←(F(c) ⌢ φ′[c][H_T mod Q])^O 的兩個動態輸入分工明確：E_G 決定哪些 authorizer hash 要從 pool 移除，φ′ 決定補進來的是什麼，而 φ 只能被持有 assigner 權限的 service 在 accumulate 裡修改。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′。
+GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。**0.8.0 的變動**：這個「pool 更新在 accumulation 之後」是 issue #1020 處理的重點，0.7.2 的順序不同。
 
 **逐項辨析**
 
@@ -1518,7 +1518,7 @@ GP §8.2 明講：「Since α′ is dependent on φ′, practically speaking, th
 
 **標準答案**　12:00 UTC on 1 January 2025 — midday ensures every major timezone is on the same calendar date at any exact 24-hour multiple from the epoch start
 
-GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」（Unix 時間 1,735,732,800 秒後），並直接給出理由：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」timeslot index 即自 Common Era 起算的 6 秒週期數，H_T·P ≤ T（wall clock）才是有效的 slot。
+GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」，註腳補上這是 Unix 紀元後的 1,735,732,800 秒。**選正午的理由 GP 直接寫出來了**：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」也就是說，從 Common Era 起算每滿 24 小時的那一刻，從東亞到美洲的所有主要時區都還落在**同一個日曆日**——若選午夜 UTC，那一刻在美洲還是前一天、在東亞已是後一天，任何以「第幾天」做分期的人工對照都會出現跨日歧義。**與時槽的關係**：timeslot index 就是自 Common Era 起算的 6 秒週期數，所以 eq. 5.8 的有效性條件寫成 H_T · P ≤ 𝕋（P = 6 秒、𝕋 是牆鐘秒數）。**順帶算一下壽命**：時槽是 u32（eq. 4.28 的 N_T ≡ N_{2^32}），2^32 × 6 秒 ≈ 816.6 年，所以編號會在 2841 年 8 月中用完。
 
 **逐項辨析**
 
@@ -1618,7 +1618,7 @@ GP §4.9.2：「In place of Ethereum's gas model for purchasing and measuring bl
 
 **標準答案**　A RISC-V (RV64EM) based register machine with 13 64-bit registers, little-endian, and a pageable 32-bit address space in 4096-octet pages
 
-GP §4.5：PVM 以 RISC-V 的 RV64EM 為基礎，13 個 64-bit 暫存器（RISC-V 有 16 個，扣掉 2 個 OS 保留 + 1 個固定為 0）、little-endian、記憶體為 2^32 個 octet 的 pageable RAM，page 大小 Z_P = 2^12 = 4096，每頁可為 mutable(W)、readable(R) 或 inaccessible(∅)。同節並交代刪減指令集的理由：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」。
+GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 0.8.0 把 sbrk 改成 grow_heap host call：成本取決於運算元的指令會破壞 basic block 的靜態計價。
 
 **逐項辨析**
 
@@ -1643,7 +1643,7 @@ GP §4.5：PVM 以 RISC-V 的 RV64EM 為基礎，13 個 64-bit 暫存器（RISC-
 
 **標準答案**　Safrole delivers (1), Grandpa delivers (3), and both contribute to (2)
 
-GP §4.3：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」分工很清楚：出塊機制負責「很少長出兩個 head」，finality gadget 負責「某個近期區塊永久留在歷史裡」，而「分叉快速收斂」則是兩者共同的貢獻。
+GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」**Safrole → 目標 1（很少長出兩個 head）**：它把每個 6 秒時槽的出塊權限定給**唯一一位**持票人，所以正常情況下同一個 slot 不會有兩個合法區塊。注意 GP 自己用了「not-necessarily forkless」——Safrole 減少分叉但不保證消除，網路延遲或 fallback 模式下仍可能分叉。**Grandpa → 目標 3（某個近期區塊永久留在歷史裡）**：出塊機制本身無法給出「永不回滾」的保證，那是 finality gadget 的工作。**兩者共同 → 目標 2（分叉快速收斂）**：Safrole 讓分叉少發生，Grandpa 讓已發生的分叉有一個明確的收斂點；再加上 §19 的 best-chain 規則偏好 ticket-sealed 祖先較多的分支（T = 1 的那些），三者一起讓分叉不會拖長。**口試常見的追問**：「為什麼不用單一機制解決三件事？」——因為「快速出塊」與「不可回滾」在非同步網路下是互相拉扯的目標，分開處理才能各自最佳化。
 
 **逐項辨析**
 
@@ -1883,7 +1883,7 @@ eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**
 
 **標準答案**　It lets a third party prove one preimage or one guarantee was included without shipping the rest of the extrinsic, so the components whose individual items outsiders care about are itemized while the others are committed to wholesale
 
-GP 的原話是這個設計「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」。五個分量各自先 hash，再對這五個 hash 的序列取 hash，等於一棵極扁的證明樹：想證明某個 preimage 被納入，只要出示另外四個分量的 hash 加上 p 這個分量的內容即可，其他四份資料完全不必給。而 p 與 g 內部再把每一項換成 (E_4(service), H(data)) 與 (H(report), E_4(slot), var(credential))，是因為**外界真正會單獨追問的就是這兩種東西**：某份 preimage 有沒有上鏈、某份 report 有沒有被擔保。ticket、assurance、dispute 沒有這種外部需求，整包編碼即可。
+H_X = H(E(H#(a)))，a 是五個 extrinsic 分量各自的雜湊。**這是一棵極扁的證明樹**：想證明某個 preimage 被納入，只要出示另外四個分量的雜湊，加上 p 這個分量的內容即可——其他四份資料（可能包含整包 guarantee 與 ticket）完全不必給。**為什麼只有 p 與 g 內部再逐項雜湊**：GP 的原話是這個設計「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」。關鍵在「individually」——外界真正會**單獨追問**的就是這兩種東西：某份 preimage 有沒有上鏈（service 要據此確認自己請求的資料已就位）、某份 report 有沒有被擔保（下游 package 要引用它的 exports root）。所以 p 存 (E_4(service), H(data))、g 存 (H(report), E_4(slot), var(credential))，**只放雜湊就足以證明存在，而不必搬運可能達數十 KB 的內容**。**其他三個為什麼整包編碼就好**：ticket、assurance、dispute 沒有「第三方要單獨證明某一筆存在」的需求——它們是鏈內部的表態，驗證者本來就會拿到整包。**通則**：承諾結構的細緻程度跟隨證明需求走，而不是一律做到最細——每多一層都是額外的雜湊成本，沒人要用的證明能力就是浪費。
 
 **逐項辨析**
 
@@ -1906,7 +1906,7 @@ GP 的原話是這個設計「taking care to allow for the possibility of report
 
 **標準答案**　The next and current epoch randomness plus, for every validator of the coming epoch, its Bandersnatch and Ed25519 keys — enough for a header-only follower to reconstruct who may author and to verify their signatures
 
-§6.6：epoch marker 在新 epoch 的第一塊出現，內容是**下一個與當前 epoch 的隨機數**，加上一個序列，逐一列出下個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰（型別即 eq. 5.11 的 ?(H, H, ⟦(bskey, edkey)⟧_V)）。它的受眾是只同步 header 的人：validator set 換人之後，後續所有 seal 都要用新的金鑰驗，而金鑰住在狀態裡；把它放進 header，輕客戶端才能在不重放狀態的前提下繼續驗下去。600 張 ticket 則是另一個 marker H_W 的內容，兩者常被搞混。
+型別在 eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)，內容由 eq. 6.28 定義為 (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])。**兩個隨機數是 prior 的 η_0 與 η_1**（rotate 之後成為 η′_1、η′_2），而 η′_2 正是下個 epoch 抽 ticket 與 fallback 要用的種子——marker 等於提前公告抽籤用的隨機性。**金鑰是 γ′_P（pending set）的**，每位 validator 給兩把：Bandersnatch 用來驗未來的 seal，Ed25519 用來驗 guarantee、assurance 與 judgment 的簽章。**受眾是只同步 header 的人**：validator set 換人之後，後續所有簽章都要用新金鑰驗，而金鑰住在狀態裡；把它放進 header，輕客戶端才能在不重放狀態的前提下一路驗下去。**兩個常見混淆**：其一，600 張 ticket 是**另一個** marker（H_W）的內容，不在 H_E 裡；H_E 給的是「誰有資格」，H_W 給的是「哪個 slot 輪到誰」。其二，**BLS 金鑰不在裡面**——它只用於 Beefy 的鏈下分發，對「跟著 header 走」沒有用處，給了是浪費頻寬。
 
 **逐項辨析**
 
@@ -1929,7 +1929,7 @@ GP 的原話是這個設計「taking care to allow for the possibility of report
 
 **標準答案**　It forces every verifier to already agree on the posterior active set, since the index means nothing without it; the cost is that a header cannot be interpreted in isolation, which is precisely why the epoch marker exists
 
-eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b 只是等價式，**不被序列化**。用索引的代價不只是省下 32 個位元組——它把「這個 header 說的是誰」變成一個相對於 κ′ 的問題，於是任何驗證者都必須先同意同一份 posterior active set 才能解讀 header。這正是 epoch marker 存在的理由：set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。實作上還有一個直接後果：H_I 的上界是 |κ′| 而不是 |κ|，兩者只有在集合大小不變時才等價（fuzzer bug #825 就踩在這裡）。
+eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——0.8.0 讓 |κ| 可變之後這個區別變得實質。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。
 
 **逐項辨析**
 
@@ -2023,7 +2023,7 @@ marker 不是出塊者可以自由填寫的註記欄位：H_E 與 H_W 的**內�
 
 **標準答案**　The post-state appears as the next block's prior state root; per-item outcomes live in work-digests inside reports rather than in the header; and resource use is bounded in advance by core time and gas ceilings instead of being reported after the fact
 
-三件事各有去處。post-state：JAM 的 header 帶的是 **prior** state root，某一塊的執行結果要到**下一塊**的 H_R 才被承諾——這是為了讓出塊與 Merklization 管線化。receipts：JAM 沒有 receipt 這一層，每個 work-item 的結果（成功的 blob 或 𝔼 裡的錯誤）留在 work-report 的 digest 裡，隨報告上鏈，accumulate 讀得到。gas：JAM 不事後回報用量，而是事前設限——core time 本身是稀缺資源、report 有 G_A 之類的上限、PVM 以 basic block 預扣，超過就是 OOG。少了這三個承諾，header 只剩十個欄位，這也是它能保持小而固定的原因。
+三件 Ethereum header 有、JAM 沒有的東西，各自的去處不同。**post-state root → 下一塊的 H_R**：JAM 的 header 帶的是 **prior** state root，某一塊的執行結果要到**下一塊**才被承諾。為的是讓出塊與 Merklization 管線化——出塊者不必算完整棵 trie 才能發布。代價是 β_H 最新一筆的 state root 先填零，由下一塊的 β† 補正（eq. 7.5）。**receipts root → work-report 裡的 digest**：JAM 根本沒有 receipt 這一層。每個 work-item 的結果（成功的 blob，或 𝔼 = {∞, ☇, BADEXPORTS, ⊖, BAD, BIG} 裡的錯誤值）留在 work-report 的 digest 中隨報告上鏈，accumulate 直接讀得到。**gas used → 事前設限而非事後回報**：JAM 不回報用量，而是預先卡住上限——core time 本身就是稀缺資源、單份 report 有 G_A = 10^7 的上限、整塊有 G_T、PVM 則以 basic block 為單位預先扣款，超過就是 OOG。**通則**：Ethereum 的三個欄位都是「執行完之後才知道的事實」，而 JAM 刻意讓 header 只承諾「發布當下就已確定的東西」——這正是它能維持十個欄位、大小固定的原因，也是 pipelining 得以成立的前提。
 
 **逐項辨析**
 
@@ -4007,7 +4007,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 
 **標準答案**　[x, y]: the preimage was available from x and is unavailable since y; [x, y, z]: it was available from x until y and is available again since z
 
-§9.2.2：h = []：requested 未提供；[x]：自 x 起 available；[x, y]：曾於 x 可用、自 y 起 unavailable；[x, y, z]：x～y 可用、z 起再次可用。eq. 9.7 的 I(l, t)：[x] → x ≤ t；[x,y] → x ≤ t < y；[x,y,z] → x ≤ t < y ∨ z ≤ t；[] → ⊥。真正要移除還得靠 `forget`，而且要等 y < t − D。這個「歷史可用性」是為了 in-core refine 的 historical_lookup 能在任何 lookup-anchor 時點被確定性地重算（審計需要），所以狀態只往序列尾端追加。你們 `query` host call 把這四種狀態編成 φ_7/φ_8。
+§9.2.2 用**序列長度**編碼四種狀態，這是刻意的設計：**[]** = 已請求、還沒有人提供；**[x]** = 自 x 起可用；**[x, y]** = 曾於 x 起可用、自 y 起不可用；**[x, y, z]** = x 到 y 可用、自 z 起再次可用。eq. 9.7 的可用性判定 I(l, t) 直接對應：[x] → x ≤ t；[x, y] → x ≤ t < y；[x, y, z] → x ≤ t < y ∨ z ≤ t；[] → 恆為否。**為什麼只往尾端追加、不覆寫**：refine 在 in-core 會用 historical_lookup 查 preimage，而審計時 auditor 必須能對**任意一個 lookup-anchor 時點**重算出「當時到底可不可用」——若狀態被覆寫成單一布林值，這個重算就做不到，稽核也就失效了。所以這不是為了省空間，是為了**可追溯性**。**真正的刪除還要再等**：`forget` 只有在 y < t − D（D = 19,200 時槽 = 32 小時）之後才會真的移除，確保任何還在有效窗口內的稽核都查得到。你們的 `query` host call 把這四種狀態編進 φ_7／φ_8 回傳，讓 service 自己也能讀到。
 
 **逐項辨析**
 
@@ -4057,7 +4057,7 @@ eq. 9.7 的 Λ(a, t, h) 是「在時間點 t 回頭看，這個 preimage 當時�
 
 **標準答案**　a_i = 2·|a_l| + |a_s|; a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|); a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)
 
-eq. 9.8：每個 lookup request 算 2 個 item 與 81+z octets（z 是宣告的 preimage 長度；81 是 GP 給定的固定開銷常數），每個 storage entry 算 1 個 item 與 34+|k|+|v| octets（34 同為固定開銷）。這些數字直接寫在 eq. 9.8 裡，面試時不需要推導、但要記得。a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)，B_S = 100、B_I = 10、B_L = 1（appendix I），a_f 是 gratis 抵扣，扣到負數再由 max(0, ·) 夾回零。計價對象是 requests dictionary 而非已供應的 preimages，等於 solicit 一發出就開始收押金，防止免費占位。fuzzer 曾抓到你們少減 a_f（issue digest：因為 traces 的 DepositOffset 都是 0 所以一直沒發現）。
+eq. 9.8 三條式子，數字都是 GP 直接給定的常數，不需要推導但要記得。**a_i（項數）= 2·|a_l| + |a_s|**——每個 lookup request 算 **2 項**、每個 storage entry 算 1 項。request 算兩項是因為它同時佔用了 requests 字典與（供應後的）preimages 字典兩個位置。**a_o（位元組）= Σ_{(h,z) ∈ keys(a_l)} (81 + z) + Σ_{(x,y) ∈ a_s} (34 + |x| + |y|)**——81 與 34 是固定開銷（涵蓋 key、長度前綴、trie 節點等），z 是**宣告的** preimage 長度。**a_t（門檻餘額）= max(0, B_S + B_I·a_i + B_L·a_o − a_f)**，B_S = 100（基本）、B_I = 10（每項）、B_L = 1（每位元組），a_f 是 gratis 抵扣，扣成負數再由 max(0, ·) 夾回零。**最關鍵的設計點**：計價對象是 **requests 字典**而不是已經供應的 preimages——也就是說 `solicit` 一發出去就開始收押金，還沒有人提供資料也一樣算錢。這是為了防止免費占位：否則任何 service 都能無成本地宣告要一百萬個 preimage。**fuzzer 抓過的坑**：你們曾漏減 a_f，但因為測試 trace 的 DepositOffset 都是 0，錯了很久沒被發現——這類「參數恆為零所以錯得看不出來」的 bug 值得特別留意。
 
 **逐項辨析**
 
@@ -4107,7 +4107,7 @@ eq. 9.8：每個 lookup request 算 2 個 item 與 81+z octets（z 是宣告的 
 
 **標準答案**　Preimages may be removed instantly by the service, whereas storage entries are retained for 28 days
 
-§9.2：三個差異——(1) hash→preimage vs 任意 key→value；(2) preimage 由 extrinsic 外部提供，storage 由 accumulate 產生；(3) preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。理由：refine 在 in-core 用 historical_lookup 查 preimage，審計時必須能確定「當時是否可用」，所以移除只能走這種可追溯的兩段式流程。
+§9.2 列出的三個差異：**① 索引方式**——preimage 是 hash → preimage（key 由內容決定），storage 是任意 key → value。**② 資料來源**——preimage 由**外部**透過 E_P extrinsic 提供，storage 則由 accumulate 自己寫入。**③ 移除方式**——GP 原文：preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。**第三點是這題的重點，理由也在同一段**：refine 在 in-core 會用 historical_lookup 查 preimage，而 auditor 事後重跑時必須能確定「在那個 lookup-anchor 時點，這份資料到底算不算可用」。若 service 能隨時把 preimage 抹掉，這個判定就沒有依據，一個惡意 service 甚至可以在被稽核前刪掉資料、讓所有 auditor 都無法驗證。所以移除必須走「先標記不可用、等過 D = 19,200 時槽（32 小時）、再由 `forget` 真正刪除」的兩段式流程。**storage 沒有這個限制**：它是 accumulate 的私有狀態，不參與 in-core 的稽核路徑，服務想刪就刪。「28 天」這個數字則是 §14 匯出 segment 的保存期限，跟這裡無關，是常見的混淆來源。
 
 **逐項辨析**
 
@@ -4181,7 +4181,7 @@ func (v *VerdictWrapper) VerifySignature() error {
 
 **標準答案**　Age = 2^32 − 1: `a-1` wraps around in U32, so the age check passes and the judgments are verified against λ, whereas ⌊τ/E⌋ − N_2 has no previous epoch at epoch 0
 
-eq. 10.2：a ∈ ⌊τ/E⌋ − N_2 = {⌊τ/E⌋, ⌊τ/E⌋ − 1}；eq. 10.3：K(a) = κ 當 a = ⌊τ/E⌋，否則 λ。在 genesis epoch，⌊τ/E⌋ = 0，「前一個 epoch」的 index 是 −1，不是自然數，所以唯一合法的 a 是 0；序列化上 a 是 E_4（附錄 C 的 E_D 編碼：(r, E_4(a), var[j])）。後果：這樣的區塊會通過 age 檢查並改用 λ 驗簽，若簽章確實由 λ 的 key 產生（genesis 時 λ 通常等於 κ），你們會接受一個 reference implementation 會拒絕的區塊 → state root 分歧。這正是 #1042 整合 PR 補的「genesis-epoch guard」。
+eq. 10.2 規定 verdict 的 epoch index a ∈ ⌊τ/E⌋ − N_2，也就是 {⌊τ/E⌋, ⌊τ/E⌋ − 1}；eq. 10.3 據此選集合：K(a) = κ 當 a 是當前 epoch，否則 λ。**在 genesis epoch，⌊τ/E⌋ = 0**，而「前一個 epoch」的 index 會是 −1——**那不是自然數，所以不在集合裡**。此時唯一合法的 a 就是 0。**bug 怎麼發生的**：a 在序列化上是 E_4（附錄 C 的 disputes 編碼是 (report hash, E_4(a), var[judgments])），程式用 U32 算 `a - 1` 時，0 − 1 會**回繞成 2^32 − 1**。於是一個帶 a = 4294967295 的 verdict 通過了 age 檢查，並被判定為「前一個 epoch」而改用 λ 驗簽。**後果是共識分歧而不是崩潰**：genesis 時 λ 通常等於 κ，所以簽章很可能真的驗得過——你們會**接受一個參考實作會拒絕的區塊**，state root 從此分家。**這類 bug 特別難抓**，因為它只在 genesis epoch 出現、而且不會 panic 只會靜靜地放行。這正是 #1042 整合 PR 補上 genesis-epoch guard 的原因。**通則**：凡是規格寫成「集合減去某個自然數」的地方，實作都要先確認下界，不能直接做無號減法。
 
 **逐項辨析**
 
@@ -4277,7 +4277,7 @@ eq. 10.7 是三向等價：r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v。真值表：r
 
 **標準答案**　ψ_G, ψ_B and ψ_W are sets of work-report hashes judged respectively correct, incorrect and impossible to judge; ψ_O is a set of the Ed25519 keys of validators found to have misjudged a report
 
-eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。前三者都是 **work-report hash** 的集合：good（判定正確）、bad（判定錯誤）、wonky（無法判定）；ψ_O 是 punish-set，裝的是 **Ed25519 key**（不是 index，因為 validator 集合每個 epoch 會變），供 Φ 在換屆時把 offender 的 key 清零，也供上層 staking 系統 slash——§10 明說 JAM 自己不動餘額。§10 說明 verdict 很少發生，但是「an important security backstop for removing and banning invalid work-reports from the processing pipeline」。
+eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。**前三個都是 work-report hash 的集合**：good（判定正確）、bad（判定錯誤）、wonky（無法判定，票數卡在 ⌊|k|/3⌋）。**ψ_O 裝的是 Ed25519 金鑰，不是索引**——這一點值得記，理由是 validator 集合每個 epoch 都可能換人，索引在跨 epoch 之後會指向不同的人，只有金鑰是穩定的身分。**ψ_O 有兩個下游**：其一，Φ（eq. 6.15）在 epoch 換屆時把這些金鑰對應的整筆 validator key 歸零；其二，交給上層的 staking 系統處理罰則——**§10 明說 JAM 自己不動餘額**，它只負責「認定誰做錯了」，實際的 slash 由外部機制執行。**為什麼要記錄判定為 good 的那些**：§10 說這樣「ensures that additional disputes cannot be raised in the future of the chain」——判決一次定讞，同一份 report 不能被反覆拿出來爭議，否則攻擊者可以靠不斷提起爭議來拖垮處理管線。§10 也交代 verdict 本身很少發生，但它是「an important security backstop for removing and banning invalid work-reports from the processing pipeline」。
 
 **逐項辨析**
 
@@ -4302,7 +4302,7 @@ eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。前三者都是 **work-report hash*
 
 **標準答案**　Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic
 
-eq. 10.2：E_V ∈ [(H, ⌊τ/E⌋ − N_2, [(⊤/⊥, N, Ed25519 sig)])]_{:N_V}，N_V = 16（0.8.0 #525 新增硬上限）；E_C、E_F 各最多 N_O = 16。eq. 10.3：K(a) = κ 當 a = ⌊τ/E⌋（prior τ 的 epoch），否則 λ；每個 verdict 必須恰好包含 ⌊2|k|/3⌋+1 個 judgment（tiny：5；full：683），每個 judgment 由 k[i]_e 對 X_valid/X_invalid ⌢ report hash 簽名（X = $jam_valid / $jam_invalid）。每票依 index 排序、可個別驗證，事後才能被引用來構造 fault。你們 Verdict.Validate 檢查 ValidatorsSuperMajority 個票。
+eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（0.8.0 PR #525 新增的硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。
 
 **逐項辨析**
 
@@ -4377,7 +4377,7 @@ eq. 10.6：∀(r, k, s) ∈ E_C：r ∈ ψ′_B ∧ k ∈ k ∧ s 是 k 對 X_G 
 
 **標準答案**　Verdicts ordered & unique by report hash; culprits and faults each ordered & unique by Ed25519 key; judgments within a verdict ordered & unique by validator index; no verdict report hash may already be in ψ_G ∪ ψ_B ∪ ψ_W
 
-eq. 10.8：E_V 依 report hash 排序且唯一；10.9：E_C、E_F 依 offender 的 Ed25519 key 排序且唯一（同一個 report 可能有多個 offender，用 hash 排不出唯一序）；10.10：verdict 的 report hash 與 ψ_G ∪ ψ_B ∪ ψ_W 不相交，判決一次定讞——GP 說 recording reports found to be valid「ensures that additional disputes cannot be raised in the future of the chain」；10.11：每個 verdict 的 judgments 依 validator index 排序且唯一。這些是 test vectors（disputes/）大量 invalid case 的來源：not sorted、duplicate、already judged，任何一項不合都直接使區塊無效。
+四條排序／唯一性規則，**每一條的排序鍵都不同，而且都有理由**：**eq. 10.8**：E_V 依 **report hash** 排序且唯一——一份 report 一塊之內只能被判一次。**eq. 10.9**：E_C 與 E_F 依 **offender 的 Ed25519 金鑰**排序且唯一。**為什麼不用 report hash 排**：同一份 report 可能牽出多個 offender，用 hash 根本排不出唯一序；而用金鑰排就自然保證「同一個人在同一塊裡不會被列兩次」。**eq. 10.10**：verdict 的 report hash 不得已經在 ψ_G ∪ ψ_B ∪ ψ_W 裡——**判決一次定讞**，GP 說這確保「additional disputes cannot be raised in the future of the chain」。**eq. 10.11**：verdict 內部的 judgments 依 **validator index** 排序且唯一——防止同一個人投兩票。**為什麼全部都要求排序而不只是唯一**：排序讓「檢查唯一性」變成 O(n) 的相鄰比較，而且讓編碼**正規化**——同一組內容只有一種合法寫法，state root 才不會因為排列順序不同而分歧。這是 JAM 全篇一致的做法（字典也必須依 key 排序後才編碼）。**實務意義**：test vectors 的 disputes 目錄裡大量 invalid case 就是在測這四條——not sorted、duplicate、already judged，任何一項不合都直接讓區塊無效，不是忽略該筆。
 
 **逐項辨析**
 
@@ -4443,7 +4443,7 @@ for _, verdict := range verdictSumSequence {
 
 **標準答案**　The thresholds must be computed from |k|, the length of the validator set that the verdict's epoch index selects (κ or λ), rather than from the global ValidatorsCount constant
 
-eq. 10.12 的門檻是 ⌊2|k|/3⌋+1、0、⌊|k|/3⌋，其中 k = K(a) ∈ {κ, λ}，所以拿全域常數 ValidatorsCount 去取三分之二／三分之一不再正確——必須依 verdict 的 epoch index 取對應集合的長度（你們 issue #1037「support variable validator-set size (|κ| ≠ V)」就是在處理這件事；§6.4 的 𝕍 見 eq. 6.8：「The length of each sequence is always a multiple of 3 between 6 and 3C」）。程式其餘部分是對的：default → error，讓不合法的票數組合直接使區塊無效。0.8.0 在 §10 只動了 culprits 要求與 N_V/N_O 上限，三個門檻本身沒變。
+eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3⌋（wonky），**其中 k = K(a)，由 verdict 自己的 epoch index 決定是 κ 還是 λ**（eq. 10.3）。所以問題有兩層：**第一層**，0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），拿全域常數 ValidatorsCount 去算三分之二／三分之一已經不對。**第二層更細**：即使改成動態長度，也不能一律用 |κ|——若 verdict 指的是前一個 epoch，門檻要用 **|λ|** 算。兩個集合的大小在換屆時可能不同，這正是需要依 epoch index 取對應集合的原因。這屬於你們 issue #1037「support variable validator-set size」的範疇。**程式其餘部分是對的**：default 分支回傳 error，讓不合法的票數組合直接使區塊無效，而不是忽略該筆 verdict——這符合「三個門檻都是等式」的語意。**順帶釐清 0.8.0 在 §10 到底改了什麼**：只動了 culprits 的要求與 N_V／N_O 的數量上限，**三個門檻本身沒變**，變的是 |k| 從常數變成變數。
 
 **逐項辨析**
 
@@ -5200,7 +5200,7 @@ GP 0.8.0 的 preamble 明訂 ready = ω、accumulated = ξ、lastaccout = θ。e
 
 **標準答案**　The set is U (and deferred transfers are X, Ψ_A taking ⟦U ∪ X⟧). Each tuple mixes digest-level fields — y payload hash, g accumulate gas-limit, l the result, which is a blob or a member of the work-error set E — with fields lifted from its own report: p = (r_s)_p package hash, e = (r_s)_e segment root, a = r_a authorizer hash and t = r_t authorizer trace; so the two tuples differ in their report-level fields
 
-eq. 12.13：U ≡ (p ∈ H, e ∈ H, a ∈ H, y ∈ H, g ∈ N_G, t ∈ B, l ∈ B ∪ E)，eq. 12.14：X ≡ (s, d, a, m, g)，兩者的聯集就是 Ψ_A 的第五個參數（eq. B.9）。eq. 12.23 明白寫出每個 tuple 的來源：l ← d_l、g ← d_g、y ← d_y 來自 work-digest；t ← r_t、e ← (r_s)_e、p ← (r_s)_p、a ← r_a 來自那個 digest 所屬的 report，所以同一個 service 在不同 report 裡的兩個 digest，report-level 欄位不同。l 的型別特地寫成 B ∪ E，就是為了讓 service 自己處理 ∞、☇、BAD、BIG 等錯誤，GP 沒有任何「把 work-error digest 濾掉」的步驟。
+**兩個集合要先分清楚**：eq. 12.13 的 𝕌（operand tuple）≡ (p, e, a, y, g, t, l)，eq. 12.14 的 𝕏（deferred transfer）≡ (s, d, a, m, g)；Ψ_A 的第五個參數吃的是 ⟦𝕌 ∪ 𝕏⟧，也就是兩種東西混在同一個序列裡餵給 accumulate。**每個 tuple 的欄位來自兩個層級**（eq. 12.23 逐項寫明）：**digest 層級**——y（payload hash）、g（accumulate gas 上限）、l（結果）來自 work-digest 自己；**report 層級**——p = (r_s)_p（package hash）、e = (r_s)_e（segment root）、a = r_a（authorizer hash）、t = r_t（authorizer trace）來自**那個 digest 所屬的 report**。**所以同一個 service 的兩個 digest 若落在不同 report 裡，它們的 report-level 欄位就不同**——這正是本題要問的。service 靠 p 與 e 才知道「這筆結果是哪個 package 產生的、它匯出的 segment root 是什麼」，沒有這些就無法把結果接回自己的邏輯。**l 的型別特地寫成 B ∪ 𝔼**，也就是「blob 或錯誤值」：GP **沒有任何把失敗 digest 濾掉的步驟**，∞、☇、BAD、BIG、⊖ 全都原樣送進 accumulate，由 service 自己決定要重試、退款還是記帳。這與 §14 把失敗當值而非當作廢是同一個設計立場。
 
 **逐項辨析**
 
@@ -5225,7 +5225,7 @@ eq. 12.13：U ≡ (p ∈ H, e ∈ H, a ∈ H, y ∈ H, g ∈ N_G, t ∈ B, l ∈
 
 **標準答案**　Q stops terminating — E(r, P(g)) hands back the same entries with still-empty dependency sets, so the next recursion picks the identical g forever — and at the block boundary ω′ (both the i = 0 case E(R^Q, ξ′[E−1]) and the i ≥ τ′ − τ case E(ω↺[m−i], ξ′[E−1])) keeps reports that were just accumulated, so they would be accumulated again in a later block
 
-eq. 12.7 的 E 同時做兩件事：「(r, x) ↦ [(r, d ∖ x) | (r, d) ↕ r, (r_s)_p ∉ x]」——後半的過濾條件 (r_s)_p ∉ x 才是把「自己已經被 accumulate」的項目整筆刪掉的那一半。少了它，eq. 12.8 的 Q(r) = g ⌢ Q(E(r, P(g))) 會無限遞迴，因為 g 裡的項目依然留在 E(r, P(g)) 中且 dependency 集合仍為空。同樣地 eq. 12.12 的 q = E(… ⌢ R^Q, P(R!)) 會讓同時出現在 R! 與 ready queue 的 report 在同一個區塊被 accumulate 兩次，而 eq. 12.33 三個 case 中的兩個（i = 0 與 i ≥ τ′ − τ）靠 E(·, ξ′[E−1]) 清掉本區塊已完成的項目（中間的 1 ≤ i < τ′ − τ 是直接清成 ⟦⟧，不套用 E）。eq. 12.8 唯一的 base case 是 g = ⟦⟧。
+eq. 12.7 的 E 定義是 (r, x) ↦ [(r, d ∖ x) | (r, d) ↕ r, **(r_s)_p ∉ x**]——前半 d ∖ x 是「從依賴集合裡扣掉已完成的」，**後半那個過濾條件 (r_s)_p ∉ x 才是「把自己已經被 accumulate 的項目整筆刪掉」**。兩件事缺一不可。**少了後半會壞在三個地方**：**① Q 不再終止**（eq. 12.8）：Q(r) = g ⌢ Q(E(r, P(g)))，g 是依賴集合為空的那些；若 E 沒把 g 自己移除，下一輪遞迴會**挑到一模一樣的 g**，無限迴圈。eq. 12.8 唯一的終止條件是 g = ⟦⟧，而這永遠不會發生。**② 同一塊內重複 accumulate**（eq. 12.12）：q = E(… ⌢ R^Q, P(R!))——同時出現在 R! 與 ready queue 裡的 report 會被做兩次。**③ 跨塊重複**（eq. 12.33）：ω′ 的三個 case 裡有兩個（i = 0 與 i ≥ τ′ − τ）靠 E(·, ξ′[E−1]) 把本塊剛完成的清掉；漏了就會留在佇列裡、下一塊再做一次。（中間那個 1 ≤ i < τ′ − τ 的 case 是直接清成 ⟦⟧，不套用 E——那是被跳過的 slot。）**一句話記憶**：E 同時是「扣依賴」和「除役」，只做前者會讓拓撲排序永遠排不完。
 
 **逐項辨析**
 
@@ -5300,7 +5300,7 @@ eq. 12.8 的 Q 只挑 dependency 集合為空的項目（g = [r | (r, ∅) ↕ r
 
 **標準答案**　b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, so θ′ carries exactly the pairs for services 5 and 9 — service 6 shows up in u and in the accumulation statistics S but not here. θ′ is a state item of its own, replaced wholesale each block, and it is the input to β′_B = A(β_B, M_B(s, H_K), H_K) whose super-peak is stored in the new β_H entry
 
-eq. 12.18 定義 b = {(s, b) | s ∈ s, b = Δ(s)_y, b ≠ ∅}，條件 b ≠ ∅ 表示「沒呼叫 yield 就不入列」，所以只燒 gas 的服務只會出現在 u（gas 使用量）與 eq. 12.28 的 S，不會出現在 θ′。Δ* 的 service 集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t}，transfer 的收款方本來就在裡面。eq. 12.25：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡獨立的一項（state key C(16)），每個區塊整批換掉，不是自創世以來的累積；真正累積的是 §7 的 β_B（eq. 7.7 用 Keccak 做 M_B 與 MMB append），其 super-peak 才寫進 β_H。
+eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 的條件就是「**沒呼叫 `yield` 就不入列**」。所以本題三個服務：5 有 yield → 入列；6 只燒 gas → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。
 
 **逐項辨析**
 
@@ -5402,7 +5402,7 @@ GP 0.8.0 eq. 12.27 寫的是 S ∈ ⟨N_S → (N, N, N_G)⟩，eq. 12.28 是 S �
 
 **標準答案**　Because Δ+ accumulates only the gas-fitting prefix R*[..i] and then records ξ′[E−1] = P(R*[..n]): a different ordering yields a different prefix and hence a different posterior state. The order is pinned right back at eq. 11.17, where R is built by walking cores in ascending core index over ρ† and keeping those with more than 2/3·|κ| assurances; R! preserves that order and Q appends the queued reports in dependency-resolution rounds
 
-eq. 12.17 選的是「最大的前綴 i」使得 Σ_{r ∈ r[..i], d ∈ r_d}(d_g) + Σ_{t ∈ t}(t_g) + Σ_{x ∈ values(f)}(x) ≤ g，而 eq. 12.31 又用 ξ′[E−1] = P(R*[..n]) 把「本區塊做完了哪些 package」寫進 state。這兩處都只看前綴，所以順序一旦不同，被 accumulate 的集合、ξ′、δ† 乃至 state root 全都不同。順序的源頭在 eq. 11.17：R ≡ [(ρ†[c]_g)_w | c ↕ N_C, Σ_{a ∈ E_A} a_f[c] > 2/3·|κ|]，是以 core index 遞增走訪，接著 eq. 12.4 的 R! 沿用該順序、eq. 12.11 的 R* = R! ⌢ Q(q) 再把佇列項目依相依解開的輪次接上。
+**因為 Δ+ 只做「前綴」，而不是「全部」。** eq. 12.17 選的是最大的 i 使得Σ_{r ∈ r[..i]} 的 digest gas + Σ transfer gas + Σ free-acc 額度 ≤ g；eq. 12.31 又把 ξ′[E−1] = P(R*[..n]) 寫進狀態。**兩處都只看前綴**，所以順序一變，被 accumulate 的集合就變，ξ′、δ† 乃至 state root 全都跟著變——這不是效能問題，是**共識問題**：兩個誠實節點若用不同順序，會算出不同的 posterior state。**順序在哪裡被釘死**：源頭是 eq. 11.17——R ≡ [(ρ†[c]_g)_w | c ↕ N_C, Σ_a a_f[c] > (2/3)|κ|]，**以 core index 遞增走訪**，這是一個所有節點都能獨立重現的確定性順序。接著 eq. 12.4 的 R! 沿用該順序、eq. 12.11 的 R* = R! ⌢ Q(q) 再把佇列項目依「相依解開的輪次」接在後面（Q 每一輪取出當時依賴為空的那批）。**所以整條鏈上沒有任何一步依賴實作自己的選擇**——這是 JAM 全篇的通則：凡是會影響 state root 的東西，順序都必須由規格決定。**口試常見追問**：「為什麼不乾脆按 gas 由小到大排以塞進更多？」——因為那需要一個全域最佳化，而且會讓「哪些 report 被做」變得難以預測；固定順序 + 取前綴雖然不是最優，但簡單、確定、人人算得出來。
 
 **逐項辨析**
 
@@ -5427,7 +5427,7 @@ eq. 12.17 選的是「最大的前綴 i」使得 Σ_{r ∈ r[..i], d ∈ r_d}(d_
 
 **標準答案**　Yes. The GP's termination test is n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0, so Δ* is still invoked; its service set s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} reduces to the three destinations, which are accumulated on the transfers alone. The result is ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩, whose fifth component — the processed transfers — is what T(s) in eq. 12.28 counts
 
-eq. 12.17 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|：只要還有待處理的 deferred transfer 或還有 free-accumulation 服務，Δ+ 就會再跑一輪 Δ*。eq. 12.18 的服務集合 s 明確包含 {t_d | t ∈ t}，所以純粹被轉帳打到的服務也會被 accumulate（Δ1 的 g = U(f[s], 0) + Σ_{t_d = s}(t_g) + Σ digests，此時只剩轉帳那一項），這正是 0.7.1 之後把 on-transfer 併進 accumulate 的結果。GP 0.8.0 的 Δ+ 回傳五元組，最後一項 t ⌢ t† 是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就靠它計數（對照 0.7.2 只回傳四元組，這是團隊必須補的差異）。
+**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是 0.7.1 之後「把 on_transfer 併進 accumulate」的結果**：收款方不再有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**0.8.0 的 Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。**0.7.2 只回傳四元組**，缺的正是這一項——這是遷移時必須補的差異，否則 accumulation statistics 的第二個欄位永遠是零。
 
 **逐項辨析**
 
@@ -5533,7 +5533,7 @@ eq. 12.18 對這兩個輸出都用了有序迭代記號：u = ⟦(s, Δ(s)_u) | 
 
 **標準答案**　ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set
 
-eq. 12.1：ξ ∈ [{H}]_E（每個 slot 一個集合，共 E 個），ξ_∪ 是聯集；12.3：ω ∈ [[(R, {H})]]_E——ready（已 available 但尚未 accumulate）的 report 與其**未滿足的** dependency（package hash 集合）。兩者都是長度 E 的環狀緩衝：ξ′[E−1] 放本塊剛 accumulate 的 hash 並左移；ω′[m]（m = H_T mod E）放本塊新的 R^Q，跳過的 slot 清空。這就是 test vectors 中 accumulate/ 的 enqueue/unlock/ring-wrap 案例。
+兩個都是**長度 E = 600 的環狀緩衝**，也就是「一個 epoch 份的歷史」。**ξ（accumulation history，eq. 12.1）**：ξ ∈ ⟦{H}⟧_E——每個 slot 一個集合，裝該 slot 已 accumulate 的 work-package hash；ξ_∪ 是全部的聯集。用途是**防重複**與**判斷依賴是否已滿足**。**ω（ready queue，eq. 12.3）**：ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E——每個 slot 一串「已經 available、但依賴還沒滿足」的 report，每筆配上它**尚未滿足的**依賴集合（會隨時間被扣減，不是原始清單）。**環狀怎麼轉**：ξ′[E−1] 放本塊剛 accumulate 的 hash、其餘左移；ω′[m]（m = H_T mod E）放本塊新產生的 R^Q，而**被跳過的 slot（沒出塊的那些）會被清空**。**為什麼是一個 epoch 的長度**：依賴等太久就沒有意義了——被依賴的 package 若一個 epoch 都沒出現，等下去也不會出現。所以懸而未決的 report 最終會被環狀覆蓋而自然消失，**不需要額外的清理機制**。這也表示「依賴解不開」不會讓區塊無效，只是那份工作靜靜地過期。這正是 test vectors 裡 accumulate 目錄的 enqueue／unlock／ring-wrap 三類案例在測的東西。
 
 **逐項辨析**
 
@@ -5558,7 +5558,7 @@ eq. 12.1：ξ ∈ [{H}]_E（每個 slot 一個集合，共 E 個），ξ_∪ 是
 
 **標準答案**　R! = reports with no prerequisites and empty segment-root lookup, accumulated immediately; R^Q = the rest, each paired with its dependency set (prerequisites ∪ keys of srlookup) pruned by ξ_∪; R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!))) where Q repeatedly extracts reports whose dependency set is empty and E removes satisfied dependencies
 
-eq. 12.4：R! = [r | r ∈ R, |x_p| = 0 ∧ r_l = ∅]；12.5：R^Q = E([D(r) | r ∈ R, 有依賴], ξ_∪)，D(r) = (r, x_p ∪ keys(r_l))；12.7：E(r, x) 移除 package hash ∈ x 的項目並從各項依賴集合扣掉 x；12.8：Q(r) = g ⌢ Q(E(r, P(g)))，g = 依賴集合為空者，直到沒有為止；12.11–12.12：R* = R! ⌢ Q(q)，q = E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!))，m = H_T mod E——ready queue 從**最舊**（slot m 起繞一圈）讀起。有無法解的依賴不會讓區塊無效，只是那個 report 留在 ω 直到過期（一個 epoch 後被覆蓋）。
+整段是一條流水線，分三步。**① 分流**（eq. 12.4–12.5）：R! = 沒有 prerequisites 且 segment-root lookup 為空的 report——**可以立刻做**；其餘進 R^Q，每筆配上依賴集合 D(r) = prerequisites ∪ keys(r_l)，並先用 ξ_∪ 把「已經做過的」扣掉。**② 兩個工具函數**（eq. 12.7–12.8）：E(r, x) 把 package hash 落在 x 裡的項目移除、並從其餘各項的依賴集合中扣掉 x；Q(r) = g ⌢ Q(E(r, P(g)))，g 是當前依賴集合為空的那些——**反覆「取出可做的、扣掉、再取」直到沒有東西可取**，是一個標準的拓撲排序。**③ 組裝**（eq. 12.11–12.12）：R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!)))。**注意 ready queue 的讀取順序**：ω[m..] 接 ω[..m]，m = H_T mod E——從**最舊**的 slot 開始繞一圈，等最久的先處理，避免飢餓。**兩個容易誤答的方向**：其一，**依賴解不開不會讓區塊無效**——那份 report 就留在 ω 裡，一個 epoch 後被環狀覆蓋而過期。其二，R! 一定排在最前面，因為它們無依賴、且它們的完成可能正好解開後面那些的依賴（P(R!) 就是傳這個）。
 
 **逐項辨析**
 
@@ -5658,7 +5658,7 @@ eq. 12.23：g = f[s]（若無則 0）+ Σ_{t: t_d = s} t_g + Σ_{d: d_s = s} d_g
 
 **標準答案**　s source service, d destination, a amount, m memo of W_T = 128 octets, g gas limit for the recipient's handling; the sender's balance is deducted when `transfer` is called, and the amount is credited to the destination when it is accumulated in a later round
 
-eq. 12.14：T ≡ (s ∈ N_S, d ∈ N_S, a ∈ N_B, m ∈ B_{W_T}, g ∈ N_G)，W_T = C_memosize = 128。B 附錄 `transfer`（index 21）：呼叫時檢查 d 存在（否則 WHO）、l ≥ δ[d]_m（否則 LOW）、扣款後餘額 ≥ 自己的 threshold（否則 CASH），成功則立刻從 sender 扣除 a 並把 T 追加到 context 的 transfers 序列。接收方在**下一輪** Δ+ 才以 input 形式收到（Δ+ 的 t* 餵給遞迴呼叫），此時餘額才加上去；轉給不存在（或本輪被刪除）的 service 會被丟棄——但 sender 早就被扣了。
+eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、**memo m ∈ B_{W_T}（W_T = C_memosize = 128 位元組，定長）**、以及給接收方處理用的 gas 上限。**扣款與入帳不同步，這是這題的核心。** 呼叫 `transfer`（host call 21）的當下就會：檢查 d 存在（否則 WHO）、g 不低於 δ[d] 的最低 memo gas（否則 LOW）、扣款後自己的餘額仍不低於門檻 a_t（否則 CASH）；三關都過就**立刻從 sender 扣除 a**，並把 T 追加到本次 accumulate 的 transfers 序列。**接收方要到下一輪 Δ+ 才收到**：那些 T 會被當成 input 餵給遞迴呼叫（Δ+ 的 t*），此時金額才加到收款方帳上，收款方也才有機會用 g 的預算執行自己的處理邏輯。**所以有一個很現實的後果**：轉給「不存在、或在本輪被刪除」的 service，那筆 transfer 會被丟棄，**但 sender 早就被扣了錢**——這不是 bug，是「先扣後送」的必然結果，服務端要自己確認目標存在。**為什麼要延後**：若轉帳在呼叫當下就同步執行接收方的程式碼，accumulate 之間就會產生任意深度的重入（reentrancy），gas 計價與確定性都會失控。
 
 **逐項辨析**
 
@@ -5683,7 +5683,7 @@ eq. 12.14：T ≡ (s ∈ N_S, d ∈ N_S, a ∈ N_B, m ∈ B_{W_T}, g ∈ N_G)，
 
 **標準答案**　θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])
 
-eq. 12.24：(n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ ≡ [(s, h) ∈ b]（餵 §7 的 belt）；eq. 12.26：(δ†, ι′, φ′, χ′_M, χ′_A, χ′_V, χ′_R, χ′_Z) ≡ e′。eq. 12.27–12.28：accumulation statistics 記作 **S** ∈ D⟨N_S → (N, N, N_G)⟩，S(s) = (N(s) 前 n 個 report 中屬於 s 的 digest 數, T(s) 處理的 transfers 數（0.8.0 #502 加回）, G(s) gas used)，只記非 (0,0,0) 者。eq. 12.29–12.30：δ‡ = δ† 但 keys(S) 中的 service a_a = τ′。eq. 12.31–12.33：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 的 ring 更新。
+Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.24）：θ′ ≡ [(s, h) ∈ b]，也就是有呼叫 `yield` 且回傳非 ∅ 的 service 及其 hash——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。**為什麼要記這個時間**：`eject` 需要它來判斷一個 service 是否已經長期閒置。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。
 
 **逐項辨析**
 
@@ -5708,7 +5708,7 @@ eq. 12.24：(n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ ≡ [(s, h) �
 
 **標準答案**　E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the PRIOR δ — the service exists and δ[s]_l[(H(d), |d|)] = [] (requested, not yet provided); integration happens after accumulation: δ′ = I(δ‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d, silently dropping any preimage that is no longer useful
 
-eq. 12.34–12.36：E_P ∈ [(N_S, B)]，依 (s, d) 排序且唯一，∀(s, d)：Y(δ, s, d)（providable：s ∈ keys(δ) 且 δ[s]_l[(H(d), |d|)] = []）——用 **prior** δ 檢查。eq. 12.37：δ′ = I(δ‡, E_P)——在 accumulation 之後才整合（依 §4 dependency graph 的 merge/join），因此若 accumulate 過程中 service 被刪或 request 被 forget，該 preimage「disregarded, without prejudice」。I 會把 request 設為 [τ′] 並寫入 preimage。你們的錯誤碼：preimages not sorted and unique / preimage not required。
+兩個階段，**檢查用 prior、整合在 accumulation 之後**。**檢查**（eq. 12.34–12.36）：E_P ∈ ⟦(N_S, B)⟧，依 (service, data) 排序且唯一；每筆必須在 **prior 的 δ** 上「providable」——即 s ∈ keys(δ) 且 δ[s]_l[(H(d), |d|)] = **[]**，也就是**已經被 solicit 但還沒有人提供**。注意空序列 [] 是關鍵：已經提供過的（[x]）或曾被移除的（[x, y]）都不算 providable，這防止同一份 preimage 被重複塞進來。**整合**（eq. 12.37）：δ′ = I(δ‡, E_P)——**在 accumulation 跑完之後**才做，把 request 設為 [τ′]、並把 blob 寫入 a_p。**為什麼順序是這樣，以及它的副作用**：因為檢查用 prior、整合用 posterior，中間隔了一整段 accumulation；若在這段期間該 service 被 `eject` 刪掉、或該 request 被 `forget` 撤銷，這筆 preimage 就會被**「disregarded, without prejudice」——靜靜丟棄，但區塊仍然有效**。這是刻意的：出塊者在打包時無法預知 accumulation 會怎麼改動狀態，若因此讓整塊無效，出塊會變得極難。你們的兩個錯誤碼 preimages not sorted and unique 與 preimage not required 分別對應這兩條檢查。
 
 **逐項辨析**
 
@@ -5752,7 +5752,7 @@ n := len(t) + i + len(f)
 
 **標準答案**　0.8.0 requires the budget test to include Σ gas of the pending deferred transfers t and Σ free-accumulation allowances f (Σ d_g + Σ t_g + Σ f ≤ g), so gasSum must start from those two sums rather than 0
 
-eq. 12.17（0.8.0）：i = max(N_{|r|+1})：Σ_{r ∈ r[..i], d ∈ r_d} d_g + Σ_{t ∈ t} t_g + Σ_{x ∈ values(f)} x ≤ g。PR #500「Account for gas reserved by transfer and always acc items」把 transfer gas 與 always-accumulate 的 gas 納入預算判斷（否則實際可能超出 g）。0.7.2 的 code 只加 AccumulateGas。n = |t| + i + |f| 在兩版都一樣。§12.2 也講明「Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit」——實際用量只能透過 g* = g + Σ t* gas − Σ u 回饋到下一輪。
+eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d_g + **Σ_{t ∈ t} t_g** + **Σ_{x ∈ values(f)} x** ≤ g }。**加粗的兩項就是 0.7.2 缺的**：待處理 deferred transfer 的 gas，與 always-accumulate 服務的免費額度。PR #500「Account for gas reserved by transfer and always acc items」把它們納入預算判斷——所以 gasSum 必須從這兩個總和起算，而不是從 0。**不加會怎樣**：這一輪選進來的 report 看起來還在預算內，但實際執行時還要付 transfer 的處理費與 always-acc 的額度，**總量就超過 g 了**。換句話說舊版是「事後才發現超支」，新版是「事前就把已承諾的支出算進去」。n = |t| + i + |f| 這條在兩版都一樣，沒有改。**背後的道理 §12.2 講得很清楚**：「Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit」——宣告的 gas 只是上限，實際用量要等做完才知道，所以下一輪的預算得靠 g* = g + Σ t* 的 gas − Σ 實際用量 回饋修正。**這是一個「保守預估 + 事後結算」的模型**，預估這一步漏算任何一項都會讓保守性失效。
 
 **逐項辨析**
 
@@ -6065,7 +6065,7 @@ eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|�
 
 **標準答案**　Per core: d (DA load) = Σ over the reports that became AVAILABLE this block (the set R) on that core of bundle length + W_G·⌈65·segment_count/64⌉; p (popularity) = the number of assurances whose bitfield has that core set; i, x, z, e, u and l are summed over the reports GUARANTEED this block (the set I) on that core
 
-eq. 13.9–13.12：π′_C[c] = (d = D(c), p = Σ_a a_f[c], i, x, z, e from R(c), l = L(c), u refine gas)。R(c) 與 L(c) 對 **I**（本塊 E_G 進來的 report，w_c = c）求和；D(c) 對 **R**（本塊剛 available 的 report）求和：bundle length + W_G·⌈k·65/64⌉——65/64 是因為每 64 個 export segment 會多一頁 paged-proof segment（§14）。popularity = 本塊 assurance 中對該 core 打勾的數量。你們 code-map 3.9：「DA load is computed from W while imports/exports/gas/bundle-size come from w」。
+π_C 每個 core 一組，**但不同欄位的求和對象不同，這正是最容易記錯的地方**。**d（DA load，資料可得性負載）對的是 R**——**本塊剛變成 available 的** report，D(c) = Σ (bundle 長度 + W_G · ⌈65 · segment 數 / 64⌉)。那個 65/64 的係數是因為**每 64 個匯出 segment 會多一頁 paged-proof segment**（§14），所以實際要分發的資料比 segment 本身多約 1.6%。**p（popularity）** = 本塊 assurance 中對該 core 打勾的數量，Σ_a a_f[c]。**i、x、z、e、u、l 對的是 I**——**本塊 E_G 帶進來（被 guarantee）的** report。**為什麼要分兩個來源**：guarantee 與 available 是**不同時間點的事件**，同一份 report 通常在某一塊被 guarantee、在之後某一塊才湊滿背書變成 available。「這塊 core 產生了多少工作」要看 I，「這塊 core 造成多少資料分發負擔」要看 R——混用會讓兩種統計都失真。你們 code-map 3.9 的註記正是這件事：「DA load is computed from W while imports/exports/gas/bundle-size come from w」。**另外記住 π_C 與 π_S 都是 per-block**（每塊重算，不累積），跨 epoch 累積的是 π_V／π_L。
 
 **逐項辨析**
 
@@ -6090,7 +6090,7 @@ eq. 13.9–13.12：π′_C[c] = (d = D(c), p = Σ_a a_f[c], i, x, z, e from R(c)
 
 **標準答案**　s = services with a digest in this block's reports ∪ services that received a preimage in E_P ∪ keys of the accumulation statistics; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)
 
-eq. 13.13–13.17：s = s^R（reported）∪ s^P（provided）∪ keys(S)；π′_S[s] = (p provision = Σ (1, |d|) over E_P for s, r refinement = (count, gas used) over digests, i, x, z, e, a accumulation = S(s) 或 (0,0,0))。π_S 是 per-block 的，所以沒活動的 service 不會出現；跨 epoch 累積並在 e′ ≠ e 換手的是 π_V／π_L。0.7.1 拿掉 on_transfer 的統計、0.8.0 (#502) 把 processed-transfer count 加回 accumulation 三元組。
+**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**版本沿革值得記，因為是 delta 考點**：0.7.1 拿掉了 `on_transfer` 的統計；0.8.0（PR #502）又把「處理掉的 transfer 數」加回 accumulation 那個三元組裡。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。
 
 **逐項辨析**
 
@@ -6376,7 +6376,7 @@ eq. A.1：ε ∈ {∎, ☇, ∞} ∪ ({F̄, h̄} × N_R)，剛好五種。§A.1�
 
 **標準答案**　p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ c ⌢ k: jump-table length, jump-table entry width z, code length, the jump table (entries of z octets each), the instruction data c, then the bitmask k (one bit per code octet, 1 = this octet is an opcode); |k| must equal |c|
 
-eq. A.2：deblob 要求 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ E(c) ⌢ E(k) 且 v_blob(c, k, 0) 與 v_inst(c, k, ı) 都成立（沿 skip 走訪的每個落點都是 bitmask 標記的合法 opcode、最後一條是 terminator）。§A.2：PVM 以 octet 計算指令位置，k 標記哪些 octet 是 opcode；skip(i) = min(24, 到下一個 set bit 的距離 − 1)（eq. A.3），k 後面補無限個 1 讓最後一條指令有定義；指令長度隱含、最多 16 octets。指令資料 ζ = c ⌢ [0, 0, …]（eq. A.4）確保 PC 跑出程式碼時執行 opcode 0 = trap。
+eq. A.2 的 deblob 要求 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ E(c) ⌢ E(k)——jump table 長度、**每個 table 項目的寬度 z**（單一位元組）、code 長度、jump table 本身、指令資料 c，最後是 bitmask k。**k 是這題的核心**：PVM 以 **octet 為單位**計算指令位置，而指令長度是隱含的（最多 16 octet），所以需要一張表告訴解碼器「哪些 octet 是 opcode 的起點」——k 就是每個 code octet 一位，1 表示這裡是 opcode。|k| 必須等於 |c|。**指令長度怎麼算出來**：eq. A.3 的 skip(i) = min(24, 到下一個 set bit 的距離 − 1)，也就是「離下一條指令還有幾個位元組」。k 的後面補無限多個 1，讓**最後一條指令也有定義**，不必特別處理邊界。**兩個驗證條件**：v_blob(c, k, 0) 與 v_inst(c, k, ı) 都必須成立——沿著 skip 走訪的每個落點都得是 bitmask 標記的合法 opcode，且最後一條是 terminator。不成立就直接 panic，**一條指令都不執行**（0.8.0 的行為）。**還有一個安全網**：eq. A.4 定義指令資料 ζ = c ⌢ [0, 0, …]，所以 PC 若跑出程式碼範圍，讀到的是 opcode 0 = trap，而不是未定義行為。
 
 **逐項辨析**
 
@@ -6754,7 +6754,7 @@ eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1
 
 **標準答案**　A page fault carrying the page-aligned address of the lowest inaccessible octet touched by the access; aligning to the page is what makes the value something the host can act on — it is exactly the page the host must map before the program is resumed
 
-eq. A.9 把 fault 的參數定義成「被觸及的位址中最低的那個不可存取位址，向下對齊到 Z_P = 2^12 的頁邊界」。兩個設計點值得講：第一，**回報的是頁而不是精確位址**，因為 host 唯一能做的補救就是把那一頁映射進來再續跑，給它一個頁位址剛好可以直接用；第二，page fault 是**可回復的退出理由**而不是 panic，因為 refine 要按需載入 import segment、accumulate 要按需取 storage，如果一開始就得把所有可能用到的資料塞進記憶體，work-package 會大到不可行。另外，跨頁存取不會先寫入可存取的那一半——整個存取要嘛完成、要嘛不發生，否則重跑不出同樣的記憶體狀態。
+eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那個不可存取位址，向下對齊到 Z_P = 2^12 的頁邊界**」。**為什麼回報頁而不是精確位址**：host 唯一能做的補救就是把那一頁映射進來再續跑，給它一個頁對齊的位址剛好可以直接拿去用，不必自己再算一次對齊。**為什麼取「最低的那個」**：跨頁存取可能碰到不只一個不可存取的頁，從最低的開始補才能保證進度單調前進，不會來回震盪。**page fault 是可回復的退出理由，不是 panic**——這一點常被誤解。理由很實際：refine 要按需載入 import segment、accumulate 要按需取 storage；如果一開始就得把所有**可能**用到的資料全塞進記憶體，work-package 會大到不可行。按需分頁讓「宣告可能用到很多、實際只碰一小部分」變成可行的模式。**還有一個確定性要求**：跨頁存取**不會先寫入可存取的那一半**——整個存取要嘛完整發生、要嘛完全不發生。若允許部分寫入，auditor 重跑時記憶體狀態就可能與原執行不同，稽核的可比對性就沒了。
 
 **逐項辨析**
 
@@ -6777,7 +6777,7 @@ eq. A.9 把 fault 的參數定義成「被觸及的位址中最低的那個不�
 
 **標準答案**　An indirect target must be aligned, non-zero, inside the jump table and land on a basic-block start; without the block-start requirement a program could enter a block below its first instruction and execute it without the block's gas ever being charged
 
-靜態跳躍（jump / load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析；間接跳躍（jump_ind / load_imm_jump_ind）的目標由暫存器算出，因此 GP 對它加了四個條件：對齊 Z_A、非零、落在 jump table 範圍內，而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。最後一條跟 0.8.0 的 gas 模型直接相扣——gas 是在「進入 block」時整塊預扣的，如果可以從 block 中間切進去，那段指令就會在沒被計價的情況下執行，等於無限免費計算。對齊那條則是 GP 自己說的 LLVM 相容性：LLVM 產碼時假設動態跳躍目標有一定的對齊。
+**靜態跳躍**（jump、load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析，沒有額外條件。**間接跳躍**（jump_ind、load_imm_jump_ind）的目標由暫存器算出來，執行前無法預知，所以 GP 加了四個條件：對齊 Z_A（= 2）、**非零**、落在 jump table 範圍內（a ≤ |j| · Z_A）、而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。**最後一條與 0.8.0 的 gas 模型直接相扣**：gas 是在「進入 basic block」時**整塊預先扣掉**的，金額由該 block 的指令靜態加總而來。如果可以從 block 的中間切進去，那段指令就會在**沒有被計價的情況下執行**——而且可以反覆這樣做，等於無限的免費計算，整個計價模型直接崩潰。**非零那條**是為了讓 0 保留給「無效目標」的語意（配合 ζ 補零後 opcode 0 = trap）。**對齊那條的理由 GP 自己說了**：是 LLVM 相容性——LLVM 產碼時假設動態跳躍目標有一定的對齊，順著它可以少一層轉換。**口試角度**：這題真正在問的是「為什麼間接跳躍需要比靜態跳躍更多的檢查」，答案是**靜態的可以在編譯期驗證，動態的只能在執行期驗證，而計價的完整性依賴這個驗證**。
 
 **逐項辨析**
 
@@ -6907,7 +6907,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 **標準答案**　Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → LOW; balance − a < own threshold a_t → CASH; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged
 
-Ω_T（index 21，g = M_T + t，成功時 t = l、失敗時 t = 0，M_T = 575）：t = error（memo 範圍 μ[o..+W_T]、W_T = 128 不可讀）→ panic；d ∉ keys(d) → WHO；l < d[d]_m → LOW；b = balance − a < 自身 a_t → CASH；否則 OK，x′_t = x_t ⌢ t，balance = b。門檻用的是自身 a_t（eq. 9.8）而不是 0——否則帳戶可以把餘額花到低於 deposit 而讓 storage 失去擔保。transfer 屬於 deferred transfer：只是把 ⟨source, dest, amount, memo, gas⟩ 附加到 x_t，由 Δ+ 在**下一輪**把它當成接收方的 accumulate input 送達（接收方屆時不存在就丟棄），這也是 transfer 得先付 l gas 的原因。
+Ω_T（index 21）的失敗階梯是**有序**的，而且順序有意義：memo 範圍 μ[o..+W_T]（W_T = 128）不可讀 → **panic**（記憶體錯誤一律是致命的，不是回錯誤碼）；d ∉ keys(δ) → **WHO**（身分解析不出來）；l < δ[d]_m（低於收款方自訂的最低處理 gas）→ **LOW**；扣款後餘額低於**自身**的門檻 a_t → **CASH**；否則 OK。gas 計價是 g = M_T + l（M_T = 575），**失敗時只收 M_T**。**門檻用 a_t 而不是 0 是關鍵**：a_t（eq. 9.8）是該帳戶依 footprint 算出的最低擔保餘額，若允許花到低於它，storage 就失去押金支撐——等於免費占用狀態空間。**這是 deferred transfer**：成功只是把 (source, dest, amount, memo, gas) 附加到 context 的 transfer 序列、並**立刻從 sender 扣款**；收款方要到 Δ+ 的**下一輪**才以 accumulate input 的形式收到。**所以會有一個現實後果**：收款方若在那之前被刪除，這筆轉帳直接丟棄，**但錢已經扣了**。這也解釋了為什麼要先付 l 的 gas——那是預留給收款方處理這筆轉帳的預算，必須在當下就從發送方的預算裡切出來，否則下一輪沒有經費來源。
 
 **逐項辨析**
 
@@ -6982,7 +6982,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 **標準答案**　checkpoint: copies the regular context x into the exceptional context y (so a later panic/OOG commits the checkpointed state) and returns remaining gas in φ_7; yield(o): records the 32-octet hash at o as the service's accumulation output (θ entry / BEEFY-visible commitment); provide(s, o, z): supplies preimage bytes for a request [] of service s (or the caller if φ_7 = 2^64−1), returning WHO/HUH on errors, integrated after the round
 
-Ω_C（checkpoint, 18）：y′ ≡ x，φ′_7 = ϱ′（扣完 M_C = 103 後的**剩餘** gas）——這是唯一改變 y 的 host call；因為 collapse C 在 ☇/∞ 時使用 y，service 可以「存檔」部分進度。Ω_Taurus（yield, 26）：x_y = 記憶體 o 處的 32 bytes，回 OK 後**繼續執行**；若程式正常 halt 且回傳 32 bytes 也會成為 yield（B.13）。Ω_Aries（provide, 27）：s = φ_7（2^64−1 表示自己），i = μ[φ_8..+φ_9]，s 不存在 → WHO，request 狀態不是 [] 或已提供過 → HUH，否則加入 x_provisions，由 Δ* 的 I() 在該輪後整合（0.6.5 引入 provide）——host call 期間不可能直接改別的 service 的 preimage 表。
+三個都是 accumulate 專屬，但作用的層面完全不同。**`checkpoint`（18，Ω_C）**：y′ ≡ x——把當前的 regular context 整份複製到 exceptional context，並在 φ_7 回傳**扣掉 M_C = 103 之後的剩餘 gas**。**它是唯一會改動 y 的 host call**。意義在於：collapse 函數 C 在 ☇（panic）或 ∞（OOG）時採用的是 y，所以 service 可以「存檔」——即使後面爆掉，存檔當下的進度仍會被提交。沒有 checkpoint 的話，一次 panic 就會讓整個 accumulate 的改動全部作廢。**`yield`（26，Ω_♉）**：把記憶體 o 處的 32 個位元組記成本次 accumulate 的產出，**回 OK 後繼續執行**（不是結束）。這個值最終進 θ′、再進 β_B、最後被 BEEFY 簽名給外部看。順帶一提，若程式正常 halt 且回傳恰好 32 位元組，那也會被當成 yield（B.13）。**`provide`（27，Ω_♈）**：替某個 service（φ_7 = 2^64−1 表示自己）補上一份 preimage，s 不存在 → WHO，request 狀態不是 [] 或已提供過 → HUH。**注意它不會當場改動別人的狀態**——只是加進 x_provisions，由 Δ* 在該輪結束後用 I() 統一整合。host call 期間不能直接寫別的 service 的表，這是 accumulate 隔離性的一部分。
 
 **逐項辨析**
 
@@ -7333,7 +7333,7 @@ GP 附錄 B 沒有 index 100；純 GP 節點對 ecalli 100 走 F 的 default（e
 
 **標準答案**　Each call has a base cost plus, where it moves data, a term proportional to the number of KiB touched; an index that is unknown or unavailable is charged a default cost first, so a call with too little gas left exits out-of-gas rather than returning an error code
 
-0.8.0（PR #517）把 host call 的計價改成「基本成本 + 資料量項」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的部分。這件事的面試價值在它跟兩件事的互動——第一，**先扣後做**：不明或當前 invocation 不可用的 index 會先被收一筆預設成本，所以餘額不足時的結果是 ∞（out-of-gas，整個 invocation 收掉並回到 checkpoint），而不是乖乖回 WHAT，這是實作很容易寫反的地方；第二，它跟附錄 A 的 block-level 預扣是兩層獨立的計價，host call 的成本不會被算進 block 的 ϱ^Δ 裡。
+0.8.0（PR #517）把 host call 的計價改成「**基本成本 + 資料量項**」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的線性部分（`grow_heap` 就是典型：常數項加上與新增頁數成正比的項）。**面試價值在它與兩件事的互動。****其一，先扣後做。** 不認得的、或在當前 invocation 不可用的 host call index，**會先被收一筆預設成本**，然後才判定它不可用。所以餘額不足時的結果是 **∞（out-of-gas，整個 invocation 收掉並回到最近的 checkpoint）**，而不是乖乖回一個 WHAT 錯誤碼。這是實作很容易寫反的地方——直覺會先檢查合法性再扣款，但規格是反過來的。**為什麼要這樣**：否則呼叫不存在的 index 就變成一個零成本的探測操作，可以用來免費地試探環境。**其二，兩層計價互相獨立。** 附錄 A 的 basic-block 預扣管的是指令，host call 的成本**不會**被算進 block 的預扣裡——這正是為什麼動態成本的操作必須做成 host call 而不是指令（0.8.0 移除 sbrk 就是這個原因）。
 
 **逐項辨析**
 
@@ -7379,7 +7379,7 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 **標準答案**　Because the host-call numbering is part of the ABI every deployed service compiles against: a selector argument lets new data sources be added without renumbering anything, while a new index per source would eventually force existing services to be rebuilt
 
-fetch 用 φ_10 當 selector 選資料來源（協定常數、entropy、authorizer trace、extrinsic 與 import、work-package 各部分…），三種 invocation 都能用，只是可取的來源不同。把它們收成一個呼叫的理由是 **ABI 穩定性**：host call 的編號是所有已部署 service 編譯時就寫死的介面，每加一種資料就配一個新編號，遲早會撞上重新編號的需求，而重新編號會讓既有 service 全部失效（0.8.0 移除 sbrk 導致 opcode 位移就是同一類痛）。selector 是資料層的參數，加東西只要多一個值。
+`fetch` 用 φ_10 當 **selector** 選擇要讀哪一種資料——協定常數、entropy、authorizer trace、extrinsic 與 import 的內容、work-package 的各個部分等等。三種 invocation（refine、accumulate、on-transfer）都能呼叫它，只是各自可取的來源不同。**收成一個呼叫的理由是 ABI 穩定性。** host call 的**編號是介面的一部分**——所有已部署的 service 在編譯時就把 `ecalli 3` 這種數字寫死在程式碼裡了。每多一種資料就配一個新編號，編號空間遲早要重新整理，而**重新編號會讓既有的 service 全部失效**，因為它們呼叫的還是舊數字。**這不是假想的風險**：0.8.0 移除 sbrk 導致後面的 opcode 位移，就是同一類痛的實例（雖然那是指令不是 host call）。**selector 則是資料層的參數**：新增一種來源只要多定義一個 selector 值，既有 service 完全不受影響，因為它們傳的還是自己那個值。**通則**：把「會持續增加的維度」放進參數而不是放進介面編號，這是任何長期演化的 ABI 都會做的取捨——代價是呼叫端要多傳一個參數、而且單一呼叫的語意變得比較複雜。
 
 **逐項辨析**
 
@@ -7407,7 +7407,7 @@ fetch 用 φ_10 當 selector 選資料來源（協定常數、entropy、authoriz
 
 **標準答案**　Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first
 
-§C.1：E(∅) = []、blob 編碼為自身、tuple 為各元素串接；↕x ≡ (|x|, x) 即長度前綴；x? = 0 當 ∅ 否則 (1, x)；dictionary 依 key 排序後編碼 pairs；§C.1.4 的 bit sequence 每 8 個 bit 打包成 octet、「in order of least significant to most」（assurance 的 bitfield 就是這樣）。附錄 C 對每個結構逐一給出編碼，沒有「變長欄位一律排到最後」這種通則——例如 E_U(H) 就把變長的 epoch marker 與 winning-tickets marker 排在固定長度的 H_I、H_V 之前。0.7.1 為 account serialization 加了 version byte（C(255, s) 開頭的 0）。
+附錄 C 的幾條通則：**E(∅) = []**（空的什麼都不寫）；blob 編碼為自身；tuple 是各元素直接串接（沒有分隔符）；**↕x ≡ (|x|, x)**——變長的東西前面掛長度前綴；**x? = 0 當 x = ∅，否則 (1, x)**——optional 用一個判別位元組；dictionary **依 key 排序後**編碼成 (key, value) 對；§C.1.4 的 bit sequence 每 8 位打包成一個位元組，而且是「**in order of least significant to most**」（assurance 的 bitfield 就是這樣）。**最後這一條特別容易踩**：它與 §3.7.3 的 bits()（**MSB first**，用於 state trie 的 key path）方向相反。同一份實作裡兩種方向並存，混用只會在特定資料上出錯，很難查。**一個常見的錯誤通則**：以為「變長欄位一律排到最後」。附錄 C **沒有**這條規則——它是對每個結構逐一給出編碼的。反例就在眼前：E_U(H) 把變長的 epoch marker 與 winning-tickets marker 排在**固定長度**的 H_I、H_V 之前。**為什麼可以這樣**：因為每個變長欄位自己帶長度前綴，解碼器讀完就知道下一個欄位從哪開始，不需要靠位置推算。順帶記：0.7.1 為 account serialization 加了 version byte（C(255, s) 開頭的 0）。
 
 **逐項辨析**
 
@@ -7869,7 +7869,7 @@ func merklizeWithCache(entries []types.StateKeyVal, depth int, cache LeafHashCac
 
 **標準答案**　The first bit separates branch from leaf and the second separates an embedded-value leaf from a regular one; a value of at most 32 octets is embedded (its length lives in the remaining bits of that octet), anything longer is replaced by its hash
 
-§D.2.1：節點固定 512 bit（64 octet），第一個 bit 分 branch / leaf，第二個 bit 分 embedded-value leaf / regular leaf。embedded 的情況下，首位元組剩下的 6 個 bit 存值的長度，接著 31 octet 的 state key，最後 32 octet 放值本身（不足補零）；regular 的情況下那 6 個 bit 歸零，最後 32 octet 改放值的 hash。門檻是 32 octet，因為那正是尾段的容量。固定大小讓節點可以直接以陣列存取、證明大小完全可預測，而內嵌小值省掉一次 hash 與一次額外查詢——狀態裡的餘額、索引、小 metadata 幾乎都落在這一類。
+§D.2.1：狀態 trie 的節點**全部固定 512 bit（64 位元組）**，靠開頭兩個 bit 分辨種類——**第一個 bit** 分 branch / leaf，**第二個 bit** 分 embedded-value leaf / regular leaf。**embedded leaf**：首位元組剩下的 6 個 bit 存**值的長度**，接著 31 位元組的 state key，最後 32 位元組直接放值本身（不足補零）。**regular leaf**：那 6 個 bit 歸零，最後 32 位元組改放**值的 hash**。**門檻是 32 位元組，因為那正是尾段的容量**——放得下就直接放，放不下就只留指紋。（也順帶解釋了為什麼長度只需要 6 個 bit：0 到 32 用 6 位表示綽綽有餘。）**固定大小買到什麼**：節點可以像陣列一樣直接定址、**證明大小完全可預測**（深度乘以 64 位元組），不必逐節點量測。**內嵌小值買到什麼**：省掉一次 hash 與一次額外的查詢——狀態裡的餘額、索引、小 metadata 幾乎都在 32 位元組以內，所以這個最佳化命中率很高。**注意 key 是 31 位元組不是 32**：state key 構造函數 C 產生的就是 B_31，剩下的 1 個位元組正好留給判別位與長度——這個「31 + 1 + 32 = 64」的配置不是巧合。
 
 **逐項辨析**
 
@@ -8268,7 +8268,7 @@ eq. 6.14 的 key rotation 在 e′ > e 時把 (γ′_P, κ′, λ′, γ′_Z) �
 
 **標準答案**　The blob (padded to a multiple of 2·d(v) octets) is split into k pieces of d(v) octet-pairs; each piece is erasure-coded into v octet-pairs; the results are transposed so that chunk i holds the i-th pair of every piece (k pairs per chunk); systematic means the first d(v) chunks are the original data, so if they are all present reconstruction is mere concatenation
 
-eq. H.5：𝒞^v_k(d) = join(T[C_v(p) | p ∈ T(split_2(split_2k(d)))])——先切成 k 段、每段 𝒟(v) 個 octet-pair、各自 RS 編碼成 v 個 pair、再轉置成 v 個 chunk（每個 k pairs）。eq. H.6：任意 𝒟(v) 個 chunk（附索引）可還原；「If the original d items are known then reconstruction is just their concatenation」——這正是 systematic code 的優點：guarantor/assurer 手上的前 342 個 chunk 就是原始資料。兩個使用情境：Audit DA（work-package bundle，變長）與 Import DA（固定 4104-octet segments）。實作用 Cantor basis 的 GF(2^16)（lin2014novel）。
+eq. H.5：𝒞^v_k(d) = join(T[C_v(p) | p ∈ T(split_2(split_2k(d)))])——拆開來看是四步：**① 分段**——資料補齊到 2·𝒟(v) 的倍數後切成 k 段，每段 𝒟(v) 個 octet-pair；**② 編碼**——每一段各自做 Reed–Solomon，從 𝒟(v) 個 pair 擴成 v 個 pair；**③ 轉置**——把結果轉置，讓第 i 個 chunk 收集**每一段的第 i 個 pair**；**④ 串接**——於是共 v 個 chunk，每個含 k 個 pair。**轉置是關鍵**：它讓每個 chunk 都均勻地含有全部 k 段的一小片，所以任何 𝒟(v) 個 chunk（附索引）就能還原全部（eq. H.6）——而不是「某幾段的 chunk 湊齊才救得回那幾段」。**systematic 的意思**：前 𝒟(v) 個 chunk **就是原始資料本身**，沒有經過變換。GP 明說「If the original d items are known then reconstruction is just their concatenation」——也就是說在正常情況（持有前 342 個 chunk）下，重建的成本是**零**，只要接起來；只有在缺片時才需要跑代價高的 RS 解碼。**兩個使用情境**：Audit DA 處理 work-package bundle（變長），Import DA 處理固定 4,104 位元組的 segment。實作用 Cantor basis 的 GF(2^16)。
 
 **逐項辨析**
 

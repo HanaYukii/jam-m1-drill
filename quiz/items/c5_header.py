@@ -78,7 +78,7 @@ ITEMS = [
   "It bounds the size of the extrinsic, because a component that hashes its items individually can be checked against a per-item limit that a single flat encoding would hide from the on-chain validity rules",
  ],
  "answer": 0,
- "explanation": "GP 的原話是這個設計「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」。五個分量各自先 hash，再對這五個 hash 的序列取 hash，等於一棵極扁的證明樹：想證明某個 preimage 被納入，只要出示另外四個分量的 hash 加上 p 這個分量的內容即可，其他四份資料完全不必給。而 p 與 g 內部再把每一項換成 (E_4(service), H(data)) 與 (H(report), E_4(slot), var(credential))，是因為**外界真正會單獨追問的就是這兩種東西**：某份 preimage 有沒有上鏈、某份 report 有沒有被擔保。ticket、assurance、dispute 沒有這種外部需求，整包編碼即可。",
+ "explanation": "H_X = H(E(H#(a)))，a 是五個 extrinsic 分量各自的雜湊。**這是一棵極扁的證明樹**：想證明某個 preimage 被納入，只要出示另外四個分量的雜湊，加上 p 這個分量的內容即可——其他四份資料（可能包含整包 guarantee 與 ticket）完全不必給。**為什麼只有 p 與 g 內部再逐項雜湊**：GP 的原話是這個設計「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」。關鍵在「individually」——外界真正會**單獨追問**的就是這兩種東西：某份 preimage 有沒有上鏈（service 要據此確認自己請求的資料已就位）、某份 report 有沒有被擔保（下游 package 要引用它的 exports root）。所以 p 存 (E_4(service), H(data))、g 存 (H(report), E_4(slot), var(credential))，**只放雜湊就足以證明存在，而不必搬運可能達數十 KB 的內容**。**其他三個為什麼整包編碼就好**：ticket、assurance、dispute 沒有「第三方要單獨證明某一筆存在」的需求——它們是鏈內部的表態，驗證者本來就會拿到整包。**通則**：承諾結構的細緻程度跟隨證明需求走，而不是一律做到最細——每多一層都是額外的雜湊成本，沒人要用的證明能力就是浪費。",
  "optNotes": [
   "為個別 preimage 與 report 提供包含證明，正是 GP 對這個結構寫下的理由。",
   "H_X 是事後的承諾，與分量能不能各自傳播無關；區塊本來就是整體被驗證的。",
@@ -99,7 +99,7 @@ ITEMS = [
   "The identities of validators leaving and joining, expressed as a delta against the previous set, together with the entropy that will seed the coming epoch's shuffle",
  ],
  "answer": 0,
- "explanation": "§6.6：epoch marker 在新 epoch 的第一塊出現，內容是**下一個與當前 epoch 的隨機數**，加上一個序列，逐一列出下個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰（型別即 eq. 5.11 的 ?(H, H, ⟦(bskey, edkey)⟧_V)）。它的受眾是只同步 header 的人：validator set 換人之後，後續所有 seal 都要用新的金鑰驗，而金鑰住在狀態裡；把它放進 header，輕客戶端才能在不重放狀態的前提下繼續驗下去。600 張 ticket 則是另一個 marker H_W 的內容，兩者常被搞混。",
+ "explanation": "型別在 eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)，內容由 eq. 6.28 定義為 (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])。**兩個隨機數是 prior 的 η_0 與 η_1**（rotate 之後成為 η′_1、η′_2），而 η′_2 正是下個 epoch 抽 ticket 與 fallback 要用的種子——marker 等於提前公告抽籤用的隨機性。**金鑰是 γ′_P（pending set）的**，每位 validator 給兩把：Bandersnatch 用來驗未來的 seal，Ed25519 用來驗 guarantee、assurance 與 judgment 的簽章。**受眾是只同步 header 的人**：validator set 換人之後，後續所有簽章都要用新金鑰驗，而金鑰住在狀態裡；把它放進 header，輕客戶端才能在不重放狀態的前提下一路驗下去。**兩個常見混淆**：其一，600 張 ticket 是**另一個** marker（H_W）的內容，不在 H_E 裡；H_E 給的是「誰有資格」，H_W 給的是「哪個 slot 輪到誰」。其二，**BLS 金鑰不在裡面**——它只用於 Beefy 的鏈下分發，對「跟著 header 走」沒有用處，給了是浪費頻寬。",
  "optNotes": [
   "兩個隨機數加上全套下屆金鑰、服務對象是只看 header 的追隨者，正是 §6.6 的定義與用途。",
   "GP 沒有把 ticket accumulator 放進 marker；讓追隨者自行重跑抽籤等於要它持有狀態。",
@@ -120,7 +120,7 @@ ITEMS = [
   "It forces the index to be re-derived after disputes, since a punished validator's slot is reused; the cost is that two blocks in the same epoch may legitimately carry the same index for different authors",
  ],
  "answer": 0,
- "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b 只是等價式，**不被序列化**。用索引的代價不只是省下 32 個位元組——它把「這個 header 說的是誰」變成一個相對於 κ′ 的問題，於是任何驗證者都必須先同意同一份 posterior active set 才能解讀 header。這正是 epoch marker 存在的理由：set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。實作上還有一個直接後果：H_I 的上界是 |κ′| 而不是 |κ|，兩者只有在集合大小不變時才等價（fuzzer bug #825 就踩在這裡）。",
+ "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——0.8.0 讓 |κ| 可變之後這個區別變得實質。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。",
  "optNotes": [
   "索引把解讀權綁在 κ′ 上、因而需要 epoch marker，這是這個設計最實質的連動。",
   "seal 本身就是用 κ′[H_I] 的金鑰驗的，不需要額外的成員資格證明；ring proof 用在 ticket，不在 seal。",
@@ -205,7 +205,7 @@ ITEMS = [
   "They are all deferred to the BEEFY commitment, which is why a JAM header is smaller: anything an external verifier needs is proven against the accumulation-output MMR rather than against the header itself",
  ],
  "answer": 0,
- "explanation": "三件事各有去處。post-state：JAM 的 header 帶的是 **prior** state root，某一塊的執行結果要到**下一塊**的 H_R 才被承諾——這是為了讓出塊與 Merklization 管線化。receipts：JAM 沒有 receipt 這一層，每個 work-item 的結果（成功的 blob 或 𝔼 裡的錯誤）留在 work-report 的 digest 裡，隨報告上鏈，accumulate 讀得到。gas：JAM 不事後回報用量，而是事前設限——core time 本身是稀缺資源、report 有 G_A 之類的上限、PVM 以 basic block 預扣，超過就是 OOG。少了這三個承諾，header 只剩十個欄位，這也是它能保持小而固定的原因。",
+ "explanation": "三件 Ethereum header 有、JAM 沒有的東西，各自的去處不同。**post-state root → 下一塊的 H_R**：JAM 的 header 帶的是 **prior** state root，某一塊的執行結果要到**下一塊**才被承諾。為的是讓出塊與 Merklization 管線化——出塊者不必算完整棵 trie 才能發布。代價是 β_H 最新一筆的 state root 先填零，由下一塊的 β† 補正（eq. 7.5）。**receipts root → work-report 裡的 digest**：JAM 根本沒有 receipt 這一層。每個 work-item 的結果（成功的 blob，或 𝔼 = {∞, ☇, BADEXPORTS, ⊖, BAD, BIG} 裡的錯誤值）留在 work-report 的 digest 中隨報告上鏈，accumulate 直接讀得到。**gas used → 事前設限而非事後回報**：JAM 不回報用量，而是預先卡住上限——core time 本身就是稀缺資源、單份 report 有 G_A = 10^7 的上限、整塊有 G_T、PVM 則以 basic block 為單位預先扣款，超過就是 OOG。**通則**：Ethereum 的三個欄位都是「執行完之後才知道的事實」，而 JAM 刻意讓 header 只承諾「發布當下就已確定的東西」——這正是它能維持十個欄位、大小固定的原因，也是 pipelining 得以成立的前提。",
  "optNotes": [
   "prior state root、digest 裡的結果、事前設限取代事後回報，三者各自對應原本的角色。",
   "extrinsic hash 承諾的是輸入（extrinsic），不是執行結果；它沒有 results 分量。",

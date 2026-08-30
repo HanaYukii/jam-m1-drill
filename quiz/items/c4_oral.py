@@ -38,7 +38,7 @@ ITEMS = [
   "Branches and leaves are distinguished by whether the second half of the node is a valid hash preimage; values are always stored by hash so that node size stays fixed, and the embedded form exists only in the service-info leaf",
  ],
  "answer": 0,
- "explanation": "§D.2.1：節點固定 512 bit（64 octet），第一個 bit 分 branch / leaf，第二個 bit 分 embedded-value leaf / regular leaf。embedded 的情況下，首位元組剩下的 6 個 bit 存值的長度，接著 31 octet 的 state key，最後 32 octet 放值本身（不足補零）；regular 的情況下那 6 個 bit 歸零，最後 32 octet 改放值的 hash。門檻是 32 octet，因為那正是尾段的容量。固定大小讓節點可以直接以陣列存取、證明大小完全可預測，而內嵌小值省掉一次 hash 與一次額外查詢——狀態裡的餘額、索引、小 metadata 幾乎都落在這一類。",
+ "explanation": "§D.2.1：狀態 trie 的節點**全部固定 512 bit（64 位元組）**，靠開頭兩個 bit 分辨種類——**第一個 bit** 分 branch / leaf，**第二個 bit** 分 embedded-value leaf / regular leaf。**embedded leaf**：首位元組剩下的 6 個 bit 存**值的長度**，接著 31 位元組的 state key，最後 32 位元組直接放值本身（不足補零）。**regular leaf**：那 6 個 bit 歸零，最後 32 位元組改放**值的 hash**。**門檻是 32 位元組，因為那正是尾段的容量**——放得下就直接放，放不下就只留指紋。（也順帶解釋了為什麼長度只需要 6 個 bit：0 到 32 用 6 位表示綽綽有餘。）**固定大小買到什麼**：節點可以像陣列一樣直接定址、**證明大小完全可預測**（深度乘以 64 位元組），不必逐節點量測。**內嵌小值買到什麼**：省掉一次 hash 與一次額外的查詢——狀態裡的餘額、索引、小 metadata 幾乎都在 32 位元組以內，所以這個最佳化命中率很高。**注意 key 是 31 位元組不是 32**：state key 構造函數 C 產生的就是 B_31，剩下的 1 個位元組正好留給判別位與長度——這個「31 + 1 + 32 = 64」的配置不是巧合。",
  "optNotes": [
   "兩個 bit 分三種節點，門檻 32 octet 正好是尾段容量，這是 §D.2.1 的原文結構。",
   "節點種類是自描述的，不靠深度推斷；31 octet 是 state key 的長度，不是值的容量。",
@@ -122,7 +122,7 @@ ITEMS = [
   "A page fault carrying the base address of the page containing the start of the access, so that the whole access can be retried from a known-mapped position; the machine writes the accessible prefix first and resumes from the fault address",
  ],
  "answer": 0,
- "explanation": "eq. A.9 把 fault 的參數定義成「被觸及的位址中最低的那個不可存取位址，向下對齊到 Z_P = 2^12 的頁邊界」。兩個設計點值得講：第一，**回報的是頁而不是精確位址**，因為 host 唯一能做的補救就是把那一頁映射進來再續跑，給它一個頁位址剛好可以直接用；第二，page fault 是**可回復的退出理由**而不是 panic，因為 refine 要按需載入 import segment、accumulate 要按需取 storage，如果一開始就得把所有可能用到的資料塞進記憶體，work-package 會大到不可行。另外，跨頁存取不會先寫入可存取的那一半——整個存取要嘛完成、要嘛不發生，否則重跑不出同樣的記憶體狀態。",
+ "explanation": "eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那個不可存取位址，向下對齊到 Z_P = 2^12 的頁邊界**」。**為什麼回報頁而不是精確位址**：host 唯一能做的補救就是把那一頁映射進來再續跑，給它一個頁對齊的位址剛好可以直接拿去用，不必自己再算一次對齊。**為什麼取「最低的那個」**：跨頁存取可能碰到不只一個不可存取的頁，從最低的開始補才能保證進度單調前進，不會來回震盪。**page fault 是可回復的退出理由，不是 panic**——這一點常被誤解。理由很實際：refine 要按需載入 import segment、accumulate 要按需取 storage；如果一開始就得把所有**可能**用到的資料全塞進記憶體，work-package 會大到不可行。按需分頁讓「宣告可能用到很多、實際只碰一小部分」變成可行的模式。**還有一個確定性要求**：跨頁存取**不會先寫入可存取的那一半**——整個存取要嘛完整發生、要嘛完全不發生。若允許部分寫入，auditor 重跑時記憶體狀態就可能與原執行不同，稽核的可比對性就沒了。",
  "optNotes": [
   "最低不可存取位址、向下對齊到頁邊界，正是 eq. A.9 的定義，理由也在「host 要映射的是一整頁」。",
   "精確位址對 host 沒有多餘用處，而 GP 明確把對齊寫進了公式，不是留給 host 做。",
@@ -143,7 +143,7 @@ ITEMS = [
   "An indirect target only has to be a multiple of the page size, so that a jump can never straddle a page; gas is charged per instruction retired rather than per block, so where control lands has no bearing on the accounting",
  ],
  "answer": 0,
- "explanation": "靜態跳躍（jump / load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析；間接跳躍（jump_ind / load_imm_jump_ind）的目標由暫存器算出，因此 GP 對它加了四個條件：對齊 Z_A、非零、落在 jump table 範圍內，而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。最後一條跟 0.8.0 的 gas 模型直接相扣——gas 是在「進入 block」時整塊預扣的，如果可以從 block 中間切進去，那段指令就會在沒被計價的情況下執行，等於無限免費計算。對齊那條則是 GP 自己說的 LLVM 相容性：LLVM 產碼時假設動態跳躍目標有一定的對齊。",
+ "explanation": "**靜態跳躍**（jump、load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析，沒有額外條件。**間接跳躍**（jump_ind、load_imm_jump_ind）的目標由暫存器算出來，執行前無法預知，所以 GP 加了四個條件：對齊 Z_A（= 2）、**非零**、落在 jump table 範圍內（a ≤ |j| · Z_A）、而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。**最後一條與 0.8.0 的 gas 模型直接相扣**：gas 是在「進入 basic block」時**整塊預先扣掉**的，金額由該 block 的指令靜態加總而來。如果可以從 block 的中間切進去，那段指令就會在**沒有被計價的情況下執行**——而且可以反覆這樣做，等於無限的免費計算，整個計價模型直接崩潰。**非零那條**是為了讓 0 保留給「無效目標」的語意（配合 ζ 補零後 opcode 0 = trap）。**對齊那條的理由 GP 自己說了**：是 LLVM 相容性——LLVM 產碼時假設動態跳躍目標有一定的對齊，順著它可以少一層轉換。**口試角度**：這題真正在問的是「為什麼間接跳躍需要比靜態跳躍更多的檢查」，答案是**靜態的可以在編譯期驗證，動態的只能在執行期驗證，而計價的完整性依賴這個驗證**。",
  "optNotes": [
   "四個條件與「block 起點保證 gas 一定被收過」的關聯，正是這題要考的設計連動。",
   "PVM 不會在跳躍後回頭補收 block 的 gas；預扣發生在進入 block 的那一刻，所以落點必須受限。",
@@ -165,7 +165,7 @@ ITEMS = [
   "Costs are declared by the service in its metadata and validated at registration, which lets a service bound its own worst case; an unknown index aborts the whole accumulation with a panic so that mistakes surface loudly during development",
  ],
  "answer": 0,
- "explanation": "0.8.0（PR #517）把 host call 的計價改成「基本成本 + 資料量項」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的部分。這件事的面試價值在它跟兩件事的互動——第一，**先扣後做**：不明或當前 invocation 不可用的 index 會先被收一筆預設成本，所以餘額不足時的結果是 ∞（out-of-gas，整個 invocation 收掉並回到 checkpoint），而不是乖乖回 WHAT，這是實作很容易寫反的地方；第二，它跟附錄 A 的 block-level 預扣是兩層獨立的計價，host call 的成本不會被算進 block 的 ϱ^Δ 裡。",
+ "explanation": "0.8.0（PR #517）把 host call 的計價改成「**基本成本 + 資料量項**」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的線性部分（`grow_heap` 就是典型：常數項加上與新增頁數成正比的項）。**面試價值在它與兩件事的互動。****其一，先扣後做。** 不認得的、或在當前 invocation 不可用的 host call index，**會先被收一筆預設成本**，然後才判定它不可用。所以餘額不足時的結果是 **∞（out-of-gas，整個 invocation 收掉並回到最近的 checkpoint）**，而不是乖乖回一個 WHAT 錯誤碼。這是實作很容易寫反的地方——直覺會先檢查合法性再扣款，但規格是反過來的。**為什麼要這樣**：否則呼叫不存在的 index 就變成一個零成本的探測操作，可以用來免費地試探環境。**其二，兩層計價互相獨立。** 附錄 A 的 basic-block 預扣管的是指令，host call 的成本**不會**被算進 block 的預扣裡——這正是為什麼動態成本的操作必須做成 host call 而不是指令（0.8.0 移除 sbrk 就是這個原因）。",
  "optNotes": [
   "base + 每 KiB、以及不明 index 先扣預設成本導致可能 OOG，兩點都是 0.8.0 的規定。",
   "0.8.0 已經不是齊頭式定價；而且 block 的靜態成本與 host call 的成本本來就分屬兩層。",
@@ -207,7 +207,7 @@ ITEMS = [
   "Because a selector keeps the call's register signature within the four argument registers available to host calls, which separate indices could not do since each source needs its own offset and length pair",
  ],
  "answer": 0,
- "explanation": "fetch 用 φ_10 當 selector 選資料來源（協定常數、entropy、authorizer trace、extrinsic 與 import、work-package 各部分…），三種 invocation 都能用，只是可取的來源不同。把它們收成一個呼叫的理由是 **ABI 穩定性**：host call 的編號是所有已部署 service 編譯時就寫死的介面，每加一種資料就配一個新編號，遲早會撞上重新編號的需求，而重新編號會讓既有 service 全部失效（0.8.0 移除 sbrk 導致 opcode 位移就是同一類痛）。selector 是資料層的參數，加東西只要多一個值。",
+ "explanation": "`fetch` 用 φ_10 當 **selector** 選擇要讀哪一種資料——協定常數、entropy、authorizer trace、extrinsic 與 import 的內容、work-package 的各個部分等等。三種 invocation（refine、accumulate、on-transfer）都能呼叫它，只是各自可取的來源不同。**收成一個呼叫的理由是 ABI 穩定性。** host call 的**編號是介面的一部分**——所有已部署的 service 在編譯時就把 `ecalli 3` 這種數字寫死在程式碼裡了。每多一種資料就配一個新編號，編號空間遲早要重新整理，而**重新編號會讓既有的 service 全部失效**，因為它們呼叫的還是舊數字。**這不是假想的風險**：0.8.0 移除 sbrk 導致後面的 opcode 位移，就是同一類痛的實例（雖然那是指令不是 host call）。**selector 則是資料層的參數**：新增一種來源只要多定義一個 selector 值，既有 service 完全不受影響，因為它們傳的還是自己那個值。**通則**：把「會持續增加的維度」放進參數而不是放進介面編號，這是任何長期演化的 ABI 都會做的取捨——代價是呼叫端要多傳一個參數、而且單一呼叫的語意變得比較複雜。",
  "optNotes": [
   "ABI 穩定、加來源不必動編號，正是把多來源收進單一 fetch 的理由。",
   "「哪些來源在哪個 invocation 可用」用個別編號一樣表達得出來——那只是 dispatch 表的事。",

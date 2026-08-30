@@ -89,7 +89,7 @@ ITEMS = [
         "與 eq. 12.23 的 d ↕ r_d 迭代直接矛盾：該 service 這一輪有幾個 digest 就有幾個 operand。",
         "eq. 12.13 的七個欄位裡沒有 core index 與 refinement context；l 的型別是 B ∪ E，錯誤結果不會被濾掉。",
     ],
-    "explanation": "eq. 12.13：U ≡ (p ∈ H, e ∈ H, a ∈ H, y ∈ H, g ∈ N_G, t ∈ B, l ∈ B ∪ E)，eq. 12.14：X ≡ (s, d, a, m, g)，兩者的聯集就是 Ψ_A 的第五個參數（eq. B.9）。eq. 12.23 明白寫出每個 tuple 的來源：l ← d_l、g ← d_g、y ← d_y 來自 work-digest；t ← r_t、e ← (r_s)_e、p ← (r_s)_p、a ← r_a 來自那個 digest 所屬的 report，所以同一個 service 在不同 report 裡的兩個 digest，report-level 欄位不同。l 的型別特地寫成 B ∪ E，就是為了讓 service 自己處理 ∞、☇、BAD、BIG 等錯誤，GP 沒有任何「把 work-error digest 濾掉」的步驟。",
+    "explanation": "**兩個集合要先分清楚**：eq. 12.13 的 𝕌（operand tuple）≡ (p, e, a, y, g, t, l)，eq. 12.14 的 𝕏（deferred transfer）≡ (s, d, a, m, g)；Ψ_A 的第五個參數吃的是 ⟦𝕌 ∪ 𝕏⟧，也就是兩種東西混在同一個序列裡餵給 accumulate。**每個 tuple 的欄位來自兩個層級**（eq. 12.23 逐項寫明）：**digest 層級**——y（payload hash）、g（accumulate gas 上限）、l（結果）來自 work-digest 自己；**report 層級**——p = (r_s)_p（package hash）、e = (r_s)_e（segment root）、a = r_a（authorizer hash）、t = r_t（authorizer trace）來自**那個 digest 所屬的 report**。**所以同一個 service 的兩個 digest 若落在不同 report 裡，它們的 report-level 欄位就不同**——這正是本題要問的。service 靠 p 與 e 才知道「這筆結果是哪個 package 產生的、它匯出的 segment root 是什麼」，沒有這些就無法把結果接回自己的邏輯。**l 的型別特地寫成 B ∪ 𝔼**，也就是「blob 或錯誤值」：GP **沒有任何把失敗 digest 濾掉的步驟**，∞、☇、BAD、BIG、⊖ 全都原樣送進 accumulate，由 service 自己決定要重試、退款還是記帳。這與 §14 把失敗當值而非當作廢是同一個設計立場。",
     "trap": "口訣：operand = 「digest 三件（y, g, l）+ report 四件（p, e, a, t）」；refine 用掉多少 gas 不在裡面。",
 },
 
@@ -132,7 +132,7 @@ ITEMS = [
         "§11.4 管的是 E_G 新進來的 guarantee，管不到早就躺在 ω 裡的項目；Q 也沒有 epoch 長度的界。",
         "被依賴的那份可能走 R! 或早已只留在 ξ，剪依賴與刪項目作用在不同項目上，兩者不互相涵蓋。",
     ],
-    "explanation": "eq. 12.7 的 E 同時做兩件事：「(r, x) ↦ [(r, d ∖ x) | (r, d) ↕ r, (r_s)_p ∉ x]」——後半的過濾條件 (r_s)_p ∉ x 才是把「自己已經被 accumulate」的項目整筆刪掉的那一半。少了它，eq. 12.8 的 Q(r) = g ⌢ Q(E(r, P(g))) 會無限遞迴，因為 g 裡的項目依然留在 E(r, P(g)) 中且 dependency 集合仍為空。同樣地 eq. 12.12 的 q = E(… ⌢ R^Q, P(R!)) 會讓同時出現在 R! 與 ready queue 的 report 在同一個區塊被 accumulate 兩次，而 eq. 12.33 三個 case 中的兩個（i = 0 與 i ≥ τ′ − τ）靠 E(·, ξ′[E−1]) 清掉本區塊已完成的項目（中間的 1 ≤ i < τ′ − τ 是直接清成 ⟦⟧，不套用 E）。eq. 12.8 唯一的 base case 是 g = ⟦⟧。",
+    "explanation": "eq. 12.7 的 E 定義是 (r, x) ↦ [(r, d ∖ x) | (r, d) ↕ r, **(r_s)_p ∉ x**]——前半 d ∖ x 是「從依賴集合裡扣掉已完成的」，**後半那個過濾條件 (r_s)_p ∉ x 才是「把自己已經被 accumulate 的項目整筆刪掉」**。兩件事缺一不可。**少了後半會壞在三個地方**：**① Q 不再終止**（eq. 12.8）：Q(r) = g ⌢ Q(E(r, P(g)))，g 是依賴集合為空的那些；若 E 沒把 g 自己移除，下一輪遞迴會**挑到一模一樣的 g**，無限迴圈。eq. 12.8 唯一的終止條件是 g = ⟦⟧，而這永遠不會發生。**② 同一塊內重複 accumulate**（eq. 12.12）：q = E(… ⌢ R^Q, P(R!))——同時出現在 R! 與 ready queue 裡的 report 會被做兩次。**③ 跨塊重複**（eq. 12.33）：ω′ 的三個 case 裡有兩個（i = 0 與 i ≥ τ′ − τ）靠 E(·, ξ′[E−1]) 把本塊剛完成的清掉；漏了就會留在佇列裡、下一塊再做一次。（中間那個 1 ≤ i < τ′ − τ 的 case 是直接清成 ⟦⟧，不套用 E——那是被跳過的 slot。）**一句話記憶**：E 同時是「扣依賴」和「除役」，只做前者會讓拓撲排序永遠排不完。",
     "trap": "E 是「刪項目 + 剪依賴」兩件事；只做剪依賴，Q 就不會收斂。",
 },
 
@@ -258,7 +258,7 @@ ITEMS = [
         "b ≠ ∅ 濾掉沒呼叫 yield 的 service 6，而 transfer 收款方本來就在 s 裡，所以 5 與 9 都入列。",
         "eq. 12.18 的 s 是三段聯集，純收款與 always-accumulate 服務同樣會被 Δ1 呼叫、同樣能 yield。",
     ],
-    "explanation": "eq. 12.18 定義 b = {(s, b) | s ∈ s, b = Δ(s)_y, b ≠ ∅}，條件 b ≠ ∅ 表示「沒呼叫 yield 就不入列」，所以只燒 gas 的服務只會出現在 u（gas 使用量）與 eq. 12.28 的 S，不會出現在 θ′。Δ* 的 service 集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t}，transfer 的收款方本來就在裡面。eq. 12.25：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡獨立的一項（state key C(16)），每個區塊整批換掉，不是自創世以來的累積；真正累積的是 §7 的 β_B（eq. 7.7 用 Keccak 做 M_B 與 MMB append），其 super-peak 才寫進 β_H。",
+    "explanation": "eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 的條件就是「**沒呼叫 `yield` 就不入列**」。所以本題三個服務：5 有 yield → 入列；6 只燒 gas → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。",
     "trap": "沒 yield 就沒 commitment：θ′ 的長度由 yield 次數決定，不由 |s| 決定。",
 },
 
@@ -411,7 +411,7 @@ func calculateAccumulationStatistics(serviceGasUsedList types.ServiceGasUsedList
         "ξ′[E−1] 雖是集合，決定它內容的仍是前綴長度 n，所以 δ† 與 state root 同樣隨順序而變。",
         "eq. 11.17 走的是 c ↕ N_C；2/3·|κ| 只是布林門檻，跨過就入列，沒有任何名次可言。",
     ],
-    "explanation": "eq. 12.17 選的是「最大的前綴 i」使得 Σ_{r ∈ r[..i], d ∈ r_d}(d_g) + Σ_{t ∈ t}(t_g) + Σ_{x ∈ values(f)}(x) ≤ g，而 eq. 12.31 又用 ξ′[E−1] = P(R*[..n]) 把「本區塊做完了哪些 package」寫進 state。這兩處都只看前綴，所以順序一旦不同，被 accumulate 的集合、ξ′、δ† 乃至 state root 全都不同。順序的源頭在 eq. 11.17：R ≡ [(ρ†[c]_g)_w | c ↕ N_C, Σ_{a ∈ E_A} a_f[c] > 2/3·|κ|]，是以 core index 遞增走訪，接著 eq. 12.4 的 R! 沿用該順序、eq. 12.11 的 R* = R! ⌢ Q(q) 再把佇列項目依相依解開的輪次接上。",
+    "explanation": "**因為 Δ+ 只做「前綴」，而不是「全部」。** eq. 12.17 選的是最大的 i 使得Σ_{r ∈ r[..i]} 的 digest gas + Σ transfer gas + Σ free-acc 額度 ≤ g；eq. 12.31 又把 ξ′[E−1] = P(R*[..n]) 寫進狀態。**兩處都只看前綴**，所以順序一變，被 accumulate 的集合就變，ξ′、δ† 乃至 state root 全都跟著變——這不是效能問題，是**共識問題**：兩個誠實節點若用不同順序，會算出不同的 posterior state。**順序在哪裡被釘死**：源頭是 eq. 11.17——R ≡ [(ρ†[c]_g)_w | c ↕ N_C, Σ_a a_f[c] > (2/3)|κ|]，**以 core index 遞增走訪**，這是一個所有節點都能獨立重現的確定性順序。接著 eq. 12.4 的 R! 沿用該順序、eq. 12.11 的 R* = R! ⌢ Q(q) 再把佇列項目依「相依解開的輪次」接在後面（Q 每一輪取出當時依賴為空的那批）。**所以整條鏈上沒有任何一步依賴實作自己的選擇**——這是 JAM 全篇的通則：凡是會影響 state root 的東西，順序都必須由規格決定。**口試常見追問**：「為什麼不乾脆按 gas 由小到大排以塞進更多？」——因為那需要一個全域最佳化，而且會讓「哪些 report 被做」變得難以預測；固定順序 + 取前綴雖然不是最優，但簡單、確定、人人算得出來。",
     "trap": "「哪些會被 accumulate」由 gas 前綴決定，所以序列順序就是共識的一部分；core index 遞增是唯一的來源。",
 },
 
@@ -456,7 +456,7 @@ func calculateAccumulationStatistics(serviceGasUsedList types.ServiceGasUsedList
         "終止條件是 n = i + |t| + |f|；s 縮成三個收款方，回傳五元組的 t ⌢ t† 正是 T(s) 的來源。",
         "餘額變化是淨額：同時有 digest、有轉入又有轉出的 service 根本數不出 transfer 筆數。",
     ],
-    "explanation": "eq. 12.17 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|：只要還有待處理的 deferred transfer 或還有 free-accumulation 服務，Δ+ 就會再跑一輪 Δ*。eq. 12.18 的服務集合 s 明確包含 {t_d | t ∈ t}，所以純粹被轉帳打到的服務也會被 accumulate（Δ1 的 g = U(f[s], 0) + Σ_{t_d = s}(t_g) + Σ digests，此時只剩轉帳那一項），這正是 0.7.1 之後把 on-transfer 併進 accumulate 的結果。GP 0.8.0 的 Δ+ 回傳五元組，最後一項 t ⌢ t† 是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就靠它計數（對照 0.7.2 只回傳四元組，這是團隊必須補的差異）。",
+    "explanation": "**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是 0.7.1 之後「把 on_transfer 併進 accumulate」的結果**：收款方不再有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**0.8.0 的 Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。**0.7.2 只回傳四元組**，缺的正是這一項——這是遷移時必須補的差異，否則 accumulation statistics 的第二個欄位永遠是零。",
     "trap": "Δ+ 的停機條件是 n = i + |t| + |f|；report 用完不代表結束，轉帳與 always-accumulate 也能把遞迴撐著。",
 },
 

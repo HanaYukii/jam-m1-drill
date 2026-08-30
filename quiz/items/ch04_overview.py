@@ -61,7 +61,7 @@ ITEMS = [
   "prior 與 posterior 反了：eq. 11.32 檢查的是 w_a ∈ α[w_c]，用的是 prior pool。",
   "認錯了 host call 與權限：改 φ[c] 的是 core 的 assigner χ_A 用 assign，designate 是 χ_V 設 ι。",
  ],
- "explanation": "GP §8.2 明講：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」α′[c] = ←(F(c) ⌢ φ′[c][H_T mod Q])^O 的兩個動態輸入分工明確：E_G 決定哪些 authorizer hash 要從 pool 移除，φ′ 決定補進來的是什麼，而 φ 只能被持有 assigner 權限的 service 在 accumulate 裡修改。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′。",
+ "explanation": "GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。**0.8.0 的變動**：這個「pool 更新在 accumulation 之後」是 issue #1020 處理的重點，0.7.2 的順序不同。",
  "trap": "guarantee 驗證看 prior α；pool 更新用 posterior φ′。"
 },
 {
@@ -82,7 +82,7 @@ ITEMS = [
   "年份錯了（是 2025），而且 GP 從未把 common era 綁在自身的出版日上。",
   "若 era 就是 Unix epoch，腳註那個 1,735,732,800 秒的偏移就會是 0。",
  ],
- "explanation": "GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」（Unix 時間 1,735,732,800 秒後），並直接給出理由：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」timeslot index 即自 Common Era 起算的 6 秒週期數，H_T·P ≤ T（wall clock）才是有效的 slot。",
+ "explanation": "GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」，註腳補上這是 Unix 紀元後的 1,735,732,800 秒。**選正午的理由 GP 直接寫出來了**：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」也就是說，從 Common Era 起算每滿 24 小時的那一刻，從東亞到美洲的所有主要時區都還落在**同一個日曆日**——若選午夜 UTC，那一刻在美洲還是前一天、在東亞已是後一天，任何以「第幾天」做分期的人工對照都會出現跨日歧義。**與時槽的關係**：timeslot index 就是自 Common Era 起算的 6 秒週期數，所以 eq. 5.8 的有效性條件寫成 H_T · P ≤ 𝕋（P = 6 秒、𝕋 是牆鐘秒數）。**順帶算一下壽命**：時槽是 u32（eq. 4.28 的 N_T ≡ N_{2^32}），2^32 × 6 秒 ≈ 816.6 年，所以編號會在 2841 年 8 月中用完。",
  "trap": "數字題：1,735,732,800；slot = 6 秒；epoch = 600 slots = 1 小時。"
 },
 {
@@ -166,7 +166,7 @@ ITEMS = [
   "四項全反：暫存器是 64-bit、13 個、little-endian，位址空間是 32-bit 且分頁。",
   "與 GP 的簡化理由正好相反：密碼學與環境互動指令一律拿掉，能力改走 host call。",
  ],
- "explanation": "GP §4.5：PVM 以 RISC-V 的 RV64EM 為基礎，13 個 64-bit 暫存器（RISC-V 有 16 個，扣掉 2 個 OS 保留 + 1 個固定為 0）、little-endian、記憶體為 2^32 個 octet 的 pageable RAM，page 大小 Z_P = 2^12 = 4096，每頁可為 mutable(W)、readable(R) 或 inaccessible(∅)。同節並交代刪減指令集的理由：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」。",
+ "explanation": "GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 0.8.0 把 sbrk 改成 grow_heap host call：成本取決於運算元的指令會破壞 basic block 的靜態計價。",
  "trap": "13 registers / 64-bit / 4 KiB pages / 32-bit addressing。"
 },
 {
@@ -187,7 +187,7 @@ ITEMS = [
   "Grandpa 在 GP 裡就是 finality gadget 本身，不是只為 BEEFY bridging 服務的附件。",
   "ELVES 是 in-core 計算正確性的 auditing 機制，與這三個 fork 目標無直接關係。",
  ],
- "explanation": "GP §4.3：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」分工很清楚：出塊機制負責「很少長出兩個 head」，finality gadget 負責「某個近期區塊永久留在歷史裡」，而「分叉快速收斂」則是兩者共同的貢獻。",
+ "explanation": "GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」**Safrole → 目標 1（很少長出兩個 head）**：它把每個 6 秒時槽的出塊權限定給**唯一一位**持票人，所以正常情況下同一個 slot 不會有兩個合法區塊。注意 GP 自己用了「not-necessarily forkless」——Safrole 減少分叉但不保證消除，網路延遲或 fallback 模式下仍可能分叉。**Grandpa → 目標 3（某個近期區塊永久留在歷史裡）**：出塊機制本身無法給出「永不回滾」的保證，那是 finality gadget 的工作。**兩者共同 → 目標 2（分叉快速收斂）**：Safrole 讓分叉少發生，Grandpa 讓已發生的分叉有一個明確的收斂點；再加上 §19 的 best-chain 規則偏好 ticket-sealed 祖先較多的分支（T = 1 的那些），三者一起讓分叉不會拖長。**口試常見的追問**：「為什麼不用單一機制解決三件事？」——因為「快速出塊」與「不可回滾」在非同步網路下是互相拉扯的目標，分開處理才能各自最佳化。",
  "trap": ""
 },
 ]

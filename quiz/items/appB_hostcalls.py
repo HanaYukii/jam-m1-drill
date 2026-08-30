@@ -103,7 +103,7 @@ ITEMS = [
    "記憶體不可讀在 Ω_T 一律是 ☇；比的是接收方的 d[d]_m，門檻是自身 a_t 而不是 0。",
    "transfer 是 deferred 的：只附加到 x_t，接收方下一輪才被當成 accumulate input 叫起來。",
  ],
- "explanation": "Ω_T（index 21，g = M_T + t，成功時 t = l、失敗時 t = 0，M_T = 575）：t = error（memo 範圍 μ[o..+W_T]、W_T = 128 不可讀）→ panic；d ∉ keys(d) → WHO；l < d[d]_m → LOW；b = balance − a < 自身 a_t → CASH；否則 OK，x′_t = x_t ⌢ t，balance = b。門檻用的是自身 a_t（eq. 9.8）而不是 0——否則帳戶可以把餘額花到低於 deposit 而讓 storage 失去擔保。transfer 屬於 deferred transfer：只是把 ⟨source, dest, amount, memo, gas⟩ 附加到 x_t，由 Δ+ 在**下一輪**把它當成接收方的 accumulate input 送達（接收方屆時不存在就丟棄），這也是 transfer 得先付 l gas 的原因。",
+ "explanation": "Ω_T（index 21）的失敗階梯是**有序**的，而且順序有意義：memo 範圍 μ[o..+W_T]（W_T = 128）不可讀 → **panic**（記憶體錯誤一律是致命的，不是回錯誤碼）；d ∉ keys(δ) → **WHO**（身分解析不出來）；l < δ[d]_m（低於收款方自訂的最低處理 gas）→ **LOW**；扣款後餘額低於**自身**的門檻 a_t → **CASH**；否則 OK。gas 計價是 g = M_T + l（M_T = 575），**失敗時只收 M_T**。**門檻用 a_t 而不是 0 是關鍵**：a_t（eq. 9.8）是該帳戶依 footprint 算出的最低擔保餘額，若允許花到低於它，storage 就失去押金支撐——等於免費占用狀態空間。**這是 deferred transfer**：成功只是把 (source, dest, amount, memo, gas) 附加到 context 的 transfer 序列、並**立刻從 sender 扣款**；收款方要到 Δ+ 的**下一輪**才以 accumulate input 的形式收到。**所以會有一個現實後果**：收款方若在那之前被刪除，這筆轉帳直接丟棄，**但錢已經扣了**。這也解釋了為什麼要先付 l 的 gas——那是預留給收款方處理這筆轉帳的預算，必須在當下就從發送方的預算裡切出來，否則下一輪沒有經費來源。",
  "trap": "LOW 對照的是**接收方**的 a_m，不是發送方。"
 },
 {
@@ -166,7 +166,7 @@ ITEMS = [
    "Ω_Taurus 只設 x_y 一個欄位（停機得靠 halt 指令），provide 也只加進 x_provisions 等 Δ* 整合。",
    "eq. B.11 才有這三個；refine 的 export 附加的是 4,104 octet segment，不是 32-octet hash。",
  ],
- "explanation": "Ω_C（checkpoint, 18）：y′ ≡ x，φ′_7 = ϱ′（扣完 M_C = 103 後的**剩餘** gas）——這是唯一改變 y 的 host call；因為 collapse C 在 ☇/∞ 時使用 y，service 可以「存檔」部分進度。Ω_Taurus（yield, 26）：x_y = 記憶體 o 處的 32 bytes，回 OK 後**繼續執行**；若程式正常 halt 且回傳 32 bytes 也會成為 yield（B.13）。Ω_Aries（provide, 27）：s = φ_7（2^64−1 表示自己），i = μ[φ_8..+φ_9]，s 不存在 → WHO，request 狀態不是 [] 或已提供過 → HUH，否則加入 x_provisions，由 Δ* 的 I() 在該輪後整合（0.6.5 引入 provide）——host call 期間不可能直接改別的 service 的 preimage 表。",
+ "explanation": "三個都是 accumulate 專屬，但作用的層面完全不同。**`checkpoint`（18，Ω_C）**：y′ ≡ x——把當前的 regular context 整份複製到 exceptional context，並在 φ_7 回傳**扣掉 M_C = 103 之後的剩餘 gas**。**它是唯一會改動 y 的 host call**。意義在於：collapse 函數 C 在 ☇（panic）或 ∞（OOG）時採用的是 y，所以 service 可以「存檔」——即使後面爆掉，存檔當下的進度仍會被提交。沒有 checkpoint 的話，一次 panic 就會讓整個 accumulate 的改動全部作廢。**`yield`（26，Ω_♉）**：把記憶體 o 處的 32 個位元組記成本次 accumulate 的產出，**回 OK 後繼續執行**（不是結束）。這個值最終進 θ′、再進 β_B、最後被 BEEFY 簽名給外部看。順帶一提，若程式正常 halt 且回傳恰好 32 位元組，那也會被當成 yield（B.13）。**`provide`（27，Ω_♈）**：替某個 service（φ_7 = 2^64−1 表示自己）補上一份 preimage，s 不存在 → WHO，request 狀態不是 [] 或已提供過 → HUH。**注意它不會當場改動別人的狀態**——只是加進 x_provisions，由 Δ* 在該輪結束後用 I() 統一整合。host call 期間不能直接寫別的 service 的表，這是 accumulate 隔離性的一部分。",
  "trap": "yield 的 hash 進 θ′ → β′_B belt → BEEFY；這是 service 對外（bridge）承諾狀態的管道。"
 },
 ]

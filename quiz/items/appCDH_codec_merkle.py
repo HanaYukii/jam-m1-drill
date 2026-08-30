@@ -19,7 +19,7 @@ ITEMS = [
    "x? 的定義是 0 或 (1, x)；dictionary 明訂依 key 排序，否則同一 state 會有多種合法編碼。",
    "長度 discriminator 用的是可變長的 compact E，且 §C.1.4 明寫 bit 打包由最低位到最高位。",
  ],
- "explanation": "§C.1：E(∅) = []、blob 編碼為自身、tuple 為各元素串接；↕x ≡ (|x|, x) 即長度前綴；x? = 0 當 ∅ 否則 (1, x)；dictionary 依 key 排序後編碼 pairs；§C.1.4 的 bit sequence 每 8 個 bit 打包成 octet、「in order of least significant to most」（assurance 的 bitfield 就是這樣）。附錄 C 對每個結構逐一給出編碼，沒有「變長欄位一律排到最後」這種通則——例如 E_U(H) 就把變長的 epoch marker 與 winning-tickets marker 排在固定長度的 H_I、H_V 之前。0.7.1 為 account serialization 加了 version byte（C(255, s) 開頭的 0）。",
+ "explanation": "附錄 C 的幾條通則：**E(∅) = []**（空的什麼都不寫）；blob 編碼為自身；tuple 是各元素直接串接（沒有分隔符）；**↕x ≡ (|x|, x)**——變長的東西前面掛長度前綴；**x? = 0 當 x = ∅，否則 (1, x)**——optional 用一個判別位元組；dictionary **依 key 排序後**編碼成 (key, value) 對；§C.1.4 的 bit sequence 每 8 位打包成一個位元組，而且是「**in order of least significant to most**」（assurance 的 bitfield 就是這樣）。**最後這一條特別容易踩**：它與 §3.7.3 的 bits()（**MSB first**，用於 state trie 的 key path）方向相反。同一份實作裡兩種方向並存，混用只會在特定資料上出錯，很難查。**一個常見的錯誤通則**：以為「變長欄位一律排到最後」。附錄 C **沒有**這條規則——它是對每個結構逐一給出編碼的。反例就在眼前：E_U(H) 把變長的 epoch marker 與 winning-tickets marker 排在**固定長度**的 H_I、H_V 之前。**為什麼可以這樣**：因為每個變長欄位自己帶長度前綴，解碼器讀完就知道下一個欄位從哪開始，不需要靠位置推算。順帶記：0.7.1 為 account serialization 加了 version byte（C(255, s) 開頭的 0）。",
  "trap": "bits(x) 函數（§3）是 MSB-first 用於 trie key；codec 的 bit sequence 是 LSB-first——兩者方向不同。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
    "chunk 就是轉置後的 coded octet-pair 本身，雜湊只發生在組 erasure-root 的 b^♣ 那一步。",
    "§H 明訂 GF(2^16)（x^16 + x^5 + x^3 + x^2 + 1）並改用 Cantor basis，systematic 也與自反性無關。",
  ],
- "explanation": "eq. H.5：𝒞^v_k(d) = join(T[C_v(p) | p ∈ T(split_2(split_2k(d)))])——先切成 k 段、每段 𝒟(v) 個 octet-pair、各自 RS 編碼成 v 個 pair、再轉置成 v 個 chunk（每個 k pairs）。eq. H.6：任意 𝒟(v) 個 chunk（附索引）可還原；「If the original d items are known then reconstruction is just their concatenation」——這正是 systematic code 的優點：guarantor/assurer 手上的前 342 個 chunk 就是原始資料。兩個使用情境：Audit DA（work-package bundle，變長）與 Import DA（固定 4104-octet segments）。實作用 Cantor basis 的 GF(2^16)（lin2014novel）。",
+ "explanation": "eq. H.5：𝒞^v_k(d) = join(T[C_v(p) | p ∈ T(split_2(split_2k(d)))])——拆開來看是四步：**① 分段**——資料補齊到 2·𝒟(v) 的倍數後切成 k 段，每段 𝒟(v) 個 octet-pair；**② 編碼**——每一段各自做 Reed–Solomon，從 𝒟(v) 個 pair 擴成 v 個 pair；**③ 轉置**——把結果轉置，讓第 i 個 chunk 收集**每一段的第 i 個 pair**；**④ 串接**——於是共 v 個 chunk，每個含 k 個 pair。**轉置是關鍵**：它讓每個 chunk 都均勻地含有全部 k 段的一小片，所以任何 𝒟(v) 個 chunk（附索引）就能還原全部（eq. H.6）——而不是「某幾段的 chunk 湊齊才救得回那幾段」。**systematic 的意思**：前 𝒟(v) 個 chunk **就是原始資料本身**，沒有經過變換。GP 明說「If the original d items are known then reconstruction is just their concatenation」——也就是說在正常情況（持有前 342 個 chunk）下，重建的成本是**零**，只要接起來；只有在缺片時才需要跑代價高的 RS 解碼。**兩個使用情境**：Audit DA 處理 work-package bundle（變長），Import DA 處理固定 4,104 位元組的 segment。實作用 Cantor basis 的 GF(2^16)。",
  "trap": "shard/chunk 數 = |κ′|（每個 validator 一個）；erasure root 是對這些 chunk 的 Merkle root。"
 },
 ]

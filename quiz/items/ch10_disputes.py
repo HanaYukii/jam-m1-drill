@@ -19,7 +19,7 @@ ITEMS = [
   "judgment 針對的是 work-report（hash 為 H(E(w))），而 punish-set 用的是 Ed25519 key。",
   "eq. 10.4 要求 verdict 進鏈時票數恰好，鏈上沒有待補佇列；JAM 也不在 ψ_O 記罰沒餘額。",
  ],
- "explanation": "eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。前三者都是 **work-report hash** 的集合：good（判定正確）、bad（判定錯誤）、wonky（無法判定）；ψ_O 是 punish-set，裝的是 **Ed25519 key**（不是 index，因為 validator 集合每個 epoch 會變），供 Φ 在換屆時把 offender 的 key 清零，也供上層 staking 系統 slash——§10 明說 JAM 自己不動餘額。§10 說明 verdict 很少發生，但是「an important security backstop for removing and banning invalid work-reports from the processing pipeline」。",
+ "explanation": "eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。**前三個都是 work-report hash 的集合**：good（判定正確）、bad（判定錯誤）、wonky（無法判定，票數卡在 ⌊|k|/3⌋）。**ψ_O 裝的是 Ed25519 金鑰，不是索引**——這一點值得記，理由是 validator 集合每個 epoch 都可能換人，索引在跨 epoch 之後會指向不同的人，只有金鑰是穩定的身分。**ψ_O 有兩個下游**：其一，Φ（eq. 6.15）在 epoch 換屆時把這些金鑰對應的整筆 validator key 歸零；其二，交給上層的 staking 系統處理罰則——**§10 明說 JAM 自己不動餘額**，它只負責「認定誰做錯了」，實際的 slash 由外部機制執行。**為什麼要記錄判定為 good 的那些**：§10 說這樣「ensures that additional disputes cannot be raised in the future of the chain」——判決一次定讞，同一份 report 不能被反覆拿出來爭議，否則攻擊者可以靠不斷提起爭議來拖垮處理管線。§10 也交代 verdict 本身很少發生，但它是「an important security backstop for removing and banning invalid work-reports from the processing pipeline」。",
  "trap": "報告是 report hash H(E(w))；offender 用 Ed25519 key（不是 index，因為 validator 集合每個 epoch 會變）。"
 },
 {
@@ -40,7 +40,7 @@ ITEMS = [
   "第二欄是 epoch index 而非 timeslot；⌊|k|/3⌋ 是 wonky 門檻；K(a) 取 prior 的 κ/λ 不是 κ′。",
   "judgment 是 [(⊤/⊥, N, Ed25519 sig)] 序列、每票須可個別驗證；BLS 只用於 Beefy commitment。",
  ],
- "explanation": "eq. 10.2：E_V ∈ [(H, ⌊τ/E⌋ − N_2, [(⊤/⊥, N, Ed25519 sig)])]_{:N_V}，N_V = 16（0.8.0 #525 新增硬上限）；E_C、E_F 各最多 N_O = 16。eq. 10.3：K(a) = κ 當 a = ⌊τ/E⌋（prior τ 的 epoch），否則 λ；每個 verdict 必須恰好包含 ⌊2|k|/3⌋+1 個 judgment（tiny：5；full：683），每個 judgment 由 k[i]_e 對 X_valid/X_invalid ⌢ report hash 簽名（X = $jam_valid / $jam_invalid）。每票依 index 排序、可個別驗證，事後才能被引用來構造 fault。你們 Verdict.Validate 檢查 ValidatorsSuperMajority 個票。",
+ "explanation": "eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（0.8.0 PR #525 新增的硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。",
  "trap": "epoch index 用 prior τ；票數是「恰好」不是「至少」。"
 },
 {
@@ -103,7 +103,7 @@ ITEMS = [
   "epoch index 只有兩個可能值排不出唯一序；要比對的也是 ψ_G ∪ ψ_B ∪ ψ_W 而非裝 key 的 ψ_O。",
   "verdict 結構裡根本沒有 timeslot 欄位，offender 用 key 不用 index，違規也不會被靜默忽略。",
  ],
- "explanation": "eq. 10.8：E_V 依 report hash 排序且唯一；10.9：E_C、E_F 依 offender 的 Ed25519 key 排序且唯一（同一個 report 可能有多個 offender，用 hash 排不出唯一序）；10.10：verdict 的 report hash 與 ψ_G ∪ ψ_B ∪ ψ_W 不相交，判決一次定讞——GP 說 recording reports found to be valid「ensures that additional disputes cannot be raised in the future of the chain」；10.11：每個 verdict 的 judgments 依 validator index 排序且唯一。這些是 test vectors（disputes/）大量 invalid case 的來源：not sorted、duplicate、already judged，任何一項不合都直接使區塊無效。",
+ "explanation": "四條排序／唯一性規則，**每一條的排序鍵都不同，而且都有理由**：**eq. 10.8**：E_V 依 **report hash** 排序且唯一——一份 report 一塊之內只能被判一次。**eq. 10.9**：E_C 與 E_F 依 **offender 的 Ed25519 金鑰**排序且唯一。**為什麼不用 report hash 排**：同一份 report 可能牽出多個 offender，用 hash 根本排不出唯一序；而用金鑰排就自然保證「同一個人在同一塊裡不會被列兩次」。**eq. 10.10**：verdict 的 report hash 不得已經在 ψ_G ∪ ψ_B ∪ ψ_W 裡——**判決一次定讞**，GP 說這確保「additional disputes cannot be raised in the future of the chain」。**eq. 10.11**：verdict 內部的 judgments 依 **validator index** 排序且唯一——防止同一個人投兩票。**為什麼全部都要求排序而不只是唯一**：排序讓「檢查唯一性」變成 O(n) 的相鄰比較，而且讓編碼**正規化**——同一組內容只有一種合法寫法，state root 才不會因為排列順序不同而分歧。這是 JAM 全篇一致的做法（字典也必須依 key 排序後才編碼）。**實務意義**：test vectors 的 disputes 目錄裡大量 invalid case 就是在測這四條——not sorted、duplicate、already judged，任何一項不合都直接讓區塊無效，不是忽略該筆。",
  "trap": "culprits/faults 排序鍵是 key，不是 report hash。"
 },
 {
@@ -157,7 +157,7 @@ ITEMS = [
   "ψ_W 仍是 eq. 10.1 的第三個成員，⌊|k|/3⌋ 的 wonky case 也還在，0.8.0 沒有拿掉。",
   "V 是部分函數；把 4 票、3 票也判成 wonky 會讓惡意 verdict 清掉別人的 pending report。",
  ],
- "explanation": "eq. 10.12 的門檻是 ⌊2|k|/3⌋+1、0、⌊|k|/3⌋，其中 k = K(a) ∈ {κ, λ}，所以拿全域常數 ValidatorsCount 去取三分之二／三分之一不再正確——必須依 verdict 的 epoch index 取對應集合的長度（你們 issue #1037「support variable validator-set size (|κ| ≠ V)」就是在處理這件事；§6.4 的 𝕍 見 eq. 6.8：「The length of each sequence is always a multiple of 3 between 6 and 3C」）。程式其餘部分是對的：default → error，讓不合法的票數組合直接使區塊無效。0.8.0 在 §10 只動了 culprits 要求與 N_V/N_O 上限，三個門檻本身沒變。",
+ "explanation": "eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3⌋（wonky），**其中 k = K(a)，由 verdict 自己的 epoch index 決定是 κ 還是 λ**（eq. 10.3）。所以問題有兩層：**第一層**，0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），拿全域常數 ValidatorsCount 去算三分之二／三分之一已經不對。**第二層更細**：即使改成動態長度，也不能一律用 |κ|——若 verdict 指的是前一個 epoch，門檻要用 **|λ|** 算。兩個集合的大小在換屆時可能不同，這正是需要依 epoch index 取對應集合的原因。這屬於你們 issue #1037「support variable validator-set size」的範疇。**程式其餘部分是對的**：default 分支回傳 error，讓不合法的票數組合直接使區塊無效，而不是忽略該筆 verdict——這符合「三個門檻都是等式」的語意。**順帶釐清 0.8.0 在 §10 到底改了什麼**：只動了 culprits 的要求與 N_V／N_O 的數量上限，**三個門檻本身沒變**，變的是 |k| 從常數變成變數。",
  "trap": "同樣的 |κ| 依賴也出現在 assurances 的 2/3 門檻與 erasure shards 數。"
 },
 {
