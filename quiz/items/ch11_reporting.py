@@ -40,7 +40,7 @@ ITEMS = [
   "g 記的是 Is-Authorized 消耗的 gas；refine 的用量在每個 digest 自己的 u 欄位。",
   "eq. 11.2 的 d ∈ [𝔻]_{1:I}，I = 16，digest 數的上下界都對。",
  ],
- "explanation": "eq. 11.2：ℝ ≡ (s avspec, **c** refinement context, c core index, a authorizer hash, **t** authorizer trace, **l** segment-root lookup, **d** ∈ [𝔻]_{1:I} digests, g authgasused)——report 層級與 digest 層級各有自己的 gas 欄位，命名相近但語意不同，是這章最容易記混的地方。eq. 11.3：|l| + |c_p（prerequisites）| ≤ J = 8，兩者共用同一個 J 預算。",
+ "explanation": "eq. 11.2：ℝ ≡ (s, **c**, c, a, **t**, **l**, **d**, g)，八個欄位——**s** avspec（availability specification 𝕐，描述 bundle 怎麼被 erasure-code 出去）、**c**（粗體）refinement context ℂ（anchor 四件組 + lookup anchor + prerequisites）、c（細體）core index、**a** authorizer hash、**t** authorizer trace（Ψ_I 的輸出）、**l** segment-root lookup（把 package hash 對應到 segment root）、**d** ∈ ⟦𝔻⟧_{1:I} 各個 work-item 的 digest、**g** authgasused。**g 是這題的陷阱**：report 層級的 g 記的是**授權階段**（Ψ_I）用掉的 gas，而每個 item 各自 refine 用掉多少，記在它自己的 digest 裡（𝔻 的 gas 欄位）。兩層各有一個 gas 欄位、命名相近但語意完全不同，是這章最容易記混的地方——問「這份 report 總共花了多少 gas」時，正確答案是 g 加上所有 digest 的 gas，不是 g 本身。**另外記住 eq. 11.3 的預算**：|l| + |(c_p) prerequisites| ≤ J = 8——segment-root lookup 的筆數與 refinement context 裡的前置依賴**共用同一個 8 的額度**，不是各自 8。這個上限存在是為了讓依賴圖的深度與寬度都有界，accumulate 的排程才不會爆掉。",
  "trap": "report 層級的 g = auth gas；digest 層級的 u = refine gas；digest 的 g = accumulate gas limit。"
 },
 {
@@ -271,7 +271,7 @@ ITEMS = [
   "0.8.0 (#494) 的 ρ 型別就是 (g, t)：簽章要留著抓 bundle、以及在 dispute 時構造 culprits。",
   "β 每筆從不存 guarantee（eq. 7.2）；而 eq. 11.17 之後要交出整份 report，只有 hash 不夠。",
  ],
- "explanation": "eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G：(g_w)_c = c，否則 ρ‡[c]。§11.5 附註：對 c ≥ |κ′|/3 的 core，ρ′[c] 永遠是 ∅，保證待審計的 report 數不會超過 active validator 能負擔的量。你們 code-map 3.7.6 特別標了這個坑：「the assignment timestamp is τ′, not the guarantee's slot t」——它直接決定 eq. 11.18 的 timeout（H_T ≥ t + U）從哪一刻開始算。",
+ "explanation": "eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G 使得該 guarantee 的 report 指向 core c，否則沿用 ρ‡[c]。也就是**整份 guarantee**（work-report 加上 2–3 個 guarantor 簽章）配上一個時間戳一起掛在該 core 上。**時間戳是這題的坑**：存的是 **τ′（本塊的時槽）**，不是 guarantee 自己帶的 slot g_t。兩者可以差到一整個 rotation（R = 10 個時槽）——report 可以在被擔保之後隔幾塊才進鏈。這個差別直接決定 eq. 11.18 的逾時從哪一刻起算：報告若在 U = 5 個時槽內沒有湊到 availability 的超級多數，就會被清掉；用 g_t 當起點會讓可用時間平白縮水。你們 code-map 3.7.6 特別標了這一點。**另一個常被忽略的細節**：對 c ≥ |κ′| / 3 的 core，ρ′[c] 恆為 ∅。因為每個 core 需要 3 名 guarantor，active validator 只有 |κ′| 個，能同時運作的 core 數自然被 |κ′| / 3 卡住；這保證待審計的 report 數不會超過現有驗證者能負擔的量（tiny 設定下 |κ| = 6 就只有 2 個 core 在動）。相關名詞：ρ 是 availability assignments、ρ† 是清掉 disputes 判定為壞的那些之後的中間值、ρ‡ 是再處理完 assurances 之後的中間值。",
  "trap": ""
 },
 {

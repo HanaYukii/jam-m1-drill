@@ -82,7 +82,7 @@ ITEMS = [
   "Ed25519 必須緊接 Bandersnatch 落在 offset 32，BLS 要到 offset 64 才開始。",
   "Bandersnatch 公鑰是 32 octets、BLS 是 144；總長雖仍為 336，每個切點卻都偏了一格。",
  ],
- "explanation": "eq. 6.9–6.13：k_b = k[0..32)（Bandersnatch）、k_e = k[32..64)（Ed25519）、k_l = k[64..208)（BLS，144 octets）、k_m = k[208..336)（metadata，128 octets，opaque，用來放例如網路位址等實務識別資訊）。32+32+144+128 = 336。",
+ "explanation": "§6.3：驗證者金鑰集合 𝕂 ≡ B_336，也就是一段 336 位元組的 blob；GP 為了好指涉才把它切成四塊（eq. 6.9–6.13）：k_b = k[0…32) Bandersnatch、k_e = k[32…+32) Ed25519、k_l = k[64…+144) BLS、k_m = k[208…+128) metadata。32 + 32 + 144 + 128 = 336。**四把鑰匙各司其職**：Bandersnatch 用在出塊——seal H_S 與 ticket 的 ring-VRF proof 都是它；Ed25519 用在「表態」類簽章——guarantee、assurance、judgment 都是；BLS 用在 Beefy，是對外橋接時要驗的那把；metadata 則完全不參與密碼學，GP 說它是「an opaque octet sequence, but utilized to specify practical identifiers for the validator, not least a hardware address」，也就是放網路位址這類實務資訊。**為什麼要記得切點**：其一，epoch 的 ring root 只取每筆的前 32 位元組——eq. 6.14 的 where 子句定義 z = ringroot([k_b | k ∈ γ′_P])（z 本身沒有獨立編號），拿錯 offset 整個 root 就對不上。其二，offender 的處置是「就地歸零」而不是移除：eq. 6.15 的 Φ 把整筆 336 位元組換成全 0，所以 |κ| ≡ |λ| ≡ V 永遠成立，索引不會位移（H_I 才能一直當索引用）。相關名詞：ι staging（待命）、γ_P pending（下個 epoch 生效、決定 ring root）、κ active（現行）、λ previous（上一個 epoch）。",
  "trap": "BLS 144 octets（BLS12-381 上的 key 組合）。metadata 不參與任何密碼學運算。"
 },
 {
@@ -166,7 +166,7 @@ ITEMS = [
   "三條件缺一不可：m = 480 < Y = 500，比賽尚未封閉，即使 accumulator 已滿也得走 fallback。",
   "F 的參數必須是 posterior：κ′（= 舊 γ_P）才是本 epoch 的 active set，η′_2 也已 rotate 過。",
  ],
- "explanation": "eq. 6.25：γ′_S ≡ Z(γ_A) 當 e′ = e+1 ∧ m ≥ Y ∧ |γ_A| = E；γ_S 當 e′ = e；否則 F(η′_2, κ′)。三個條件缺一不可，而 m 是 **prior** block 的 slot phase（來自 τ），這個門檻是要確認「比賽在上一塊時就已結束」。同理若跳過整個 epoch（e′ ≥ e+2）也走 fallback。fallback 一律以 posterior 的 η′_2 與 κ′ 為種子。你們 UpdateSlotKeySequence() 的三段 if 完全對應。",
+ "explanation": "eq. 6.25 三個分支：γ′_S ≡ Z(γ_A) 當 **e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E**；γ_S（原封不動）當 e′ = e；其餘走 F(η′_2, κ′)。本題給的是 e′ = e + 1 ✓、|γ_A| = 600 = E ✓，但 m = 480 < Y = 500 ✗——**三個條件缺一不可**，所以落到 fallback。**m 是誰的 phase 是這題的核心**：m 來自 τ（**prior** block 的時槽），m′ 才是本塊的。用 prior 的 phase 當門檻，是要確認「投票在上一塊的時候就已經結束」；本題的情境正是 epoch 在票還沒截止時就結束了——比賽從未收尾，自然不能拿 accumulator 當結果。**同理 e′ ≥ e + 2（整個 epoch 被跳過）也走 fallback**：那批 ticket 是為 e + 1 準備的，其 ring proof 對應的是當時的 γ_Z，中間隔一個 epoch 之後 ring root 與 entropy 都已再度輪替。**fallback 的種子一律是 posterior**：F(η′_2, κ′)——因為 epoch 第一塊會先完成 eq. 6.14 的金鑰輪換與 entropy rotate。相關名詞：Y = 500 是投票截止的 phase（epoch tail start）、E = 600 是 epoch 長度、Z 是 outside-in sequencer（eq. 6.26）、F 是 fallback key sequence（eq. 6.27）。",
  "trap": "面試愛問邊界：(1) 跳過整個 epoch；(2) accumulator 未滿；(3) 前一塊 m < Y。全部都是 fallback。"
 },
 {
@@ -229,7 +229,7 @@ ITEMS = [
   "少了 m < Y 這個下界，整段 tail 每一塊都會重複公告同一份序列。",
   "Z 的定義域是長度 E 的序列；accumulator 未滿時下個 epoch 直接走 fallback。",
  ],
- "explanation": "eq. 6.29：H_W ≡ Z(γ_A) 當 e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E，否則 ∅。即「同一 epoch 內，前一塊 phase 在 Y 之前、本塊 phase 在 Y 之後（含）」的那唯一一個區塊，且 accumulator 已飽和，就把下個 epoch 的最終 ticket 序列公告在 header；6.25 則在下個 epoch 的第一塊把同一份序列定案為 γ′_S。注意若 epoch 尾端沒有任何區塊跨越 Y（例如 m = 480 直接跳到下個 epoch），H_W 永遠不會出現。",
+ "explanation": "eq. 6.29：H_W ≡ Z(γ_A) 當 **e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E**，否則 ∅。逐條拆開：e′ = e 表示**還在同一個 epoch 內**（不是換屆那一塊）；m < Y ≤ m′ 表示前一塊的 phase 還在投票期內、本塊的 phase 已經到達或越過截止點 Y = 500——這個「跨越」的性質保證了**整個 epoch 至多只有一塊**滿足它；|γ_A| = E 則要求 accumulator 已收滿 600 張。**它和 γ′_S 是同一份資料在兩個時間點**：H_W 在票剛截止那一塊就把結果公告在 header 裡，eq. 6.25 則要等到下個 epoch 的第一塊才把同一份 Z(γ_A) 定案為 γ′_S。兩處必須逐項一致，算錯方向就會踩到 InvalidTicketsMark。這樣安排的用意是讓只讀 header 的人**提早一整段 tail** 就知道下個 epoch 誰在哪個 slot 出塊，不必等到換屆。**注意反面情形**：若 epoch 尾端根本沒有區塊跨越 Y（例如 m = 480 之後就直接進入下個 epoch），H_W 永遠不會出現，而那個 epoch 也就只能走 fallback——這與 eq. 6.25 的 m ≥ Y 條件是同一件事的兩面。",
  "trap": "H_W 與 H_E 互斥：H_W 要 e′ = e，H_E 要 e′ > e。"
 },
 {
@@ -343,7 +343,7 @@ posteriorState.SetGammaS(newGammaS)"""},
   "epoch 第一塊完成 6.14 輪換之後，κ′（= 舊 γ_P）才是本 epoch 真正的 active set。",
   "跳過整個 epoch 後 ring root 與 η 都已再度 rotate，那些 ticket 是為 e+1 準備的。",
  ],
- "explanation": "eq. 6.25 的條件是 m ≥ Y，m 是 **prior** block 的 phase（τ 除以 E 的餘數），不是 m′——因為要確認「比賽已在前一塊之前結束」，這正是 fuzzer 愛打的邊界。F 的參數則是 η′_2 與 κ′（posterior）。e′ ≥ e+2（跳過整個 epoch）必須走 fallback，因為 accumulator 裡的 ticket 是為「e+1」那個 epoch 準備的，其 ring proof 針對的是當時的 γ′_Z。",
+ "explanation": "eq. 6.25 給 γ′_S 三種情形，這段程式要同時對上三處才算正確。**第一處是 m 還是 m′。** m 是 **prior** block 的 phase（τ mod E），m′ 是本塊的（τ′ mod E）。6.25 用票券的條件是 e′ = e + 1 ∧ **m ≥ Y** ∧ |γ_A| = E——用 prior 的 phase，是為了確認「投票在前一塊之前就已經結束」。寫成 m′ 會讓「剛好跨過 Y 的那一塊」立刻開票，等於少等一整段 tail，這正是 fuzzer 最愛打的邊界。**第二處是 prior 還是 posterior。** fallback 函數 F 的兩個參數必須是 η′_2 與 κ′，都是 posterior。原因是 epoch 第一塊會先完成 eq. 6.14 的輪換（γ_P → κ、κ → λ）與 entropy rotate，之後 κ′ 才是本 epoch 真正的 active set。你們的 OuterUsedSafrole 先做 UpdateEntropy、KeyRotate，最後才 UpdateSlotKeySequence，順序正是為了讓這兩個值就位。**第三處是跳過整個 epoch。** e′ ≥ e + 2 必須走 fallback，不能沿用 accumulator：那批 ticket 是為「e + 1」那個 epoch 準備的，它們的 ring proof 針對的是當時的 γ_Z（epoch ring root），中間隔了一個 epoch 之後 ring root 與 η 都已再度輪替，證明不再對應。相關名詞：Y = 500 是 ticket 投票截止的 phase（epoch tail start）、E = 600 是 epoch 長度、γ_A 是 ticket accumulator、γ_Z 是 epoch 的 Bandersnatch ring root。",
  "trap": "你們的 OuterUsedSafrole 先做 UpdateEntropy、KeyRotate，再做 UpdateSlotKeySequence——順序正是為了讓 η′_2、κ′ 就位。"
 },
 {
@@ -403,7 +403,7 @@ cs.GetPosteriorStates().SetEta(eta)"""},
   "正好說反：倒序確實避免了覆蓋，但**寫入時機**才是這段程式的核心。",
   "6.24 右邊是 (η_0, η_1, η_2) 三個 prior 值；照 posterior 遞推會讓三格歷史被同一值填滿。",
  ],
- "explanation": "eq. 6.24：(η′_1, η′_2, η′_3) ≡ (η_0, η_1, η_2)——右側全是 **prior** 值。η′_0 = H(η_0 ⌢ Y(H_V))（6.23）則已經包含本塊的 VRF 輸出。若先把 η′_0 寫進 eta[0] 再 rotate，η′_1 會變成 H(η_0 ⌢ Y(H_V))，導致下個 epoch 的 ticket context（用 η′_2）與 fallback 都算錯，state root 立刻 mismatch。這種「prior vs posterior」的細節正是 fuzzer 最常抓到的 bug 類型。",
+ "explanation": "兩條式子必須分清楚。eq. 6.23：η′_0 = H(η_0 ⌢ Y(H_V))——把 **prior** 的 η_0 接上本塊 entropy VRF 簽章的輸出再 hash，所以 η′_0 **已經含有本塊的隨機性**。eq. 6.24：(η′_1, η′_2, η′_3) ≡ (η_0, η_1, η_2)——右側**全部是 prior 值**，是一次單純的整體右移。**所以順序不能顛倒**：正確做法是先用 prior 的 η_0 完成 rotation（η_0 → η′_1），最後才把 η′_0 寫回 eta[0]。若先寫 η′_0 再 rotate，η′_1 會變成 H(η_0 ⌢ Y(H_V))，也就是**把本塊的熵提前混進了「上一個 epoch 的結尾值」**。**後果會擴散**：η′_2 是 ticket 的 ring-VRF context 種子、也是 fallback F 的種子，η′_3 則用於驗證 seal；三者一路錯下去，state root 立刻與其他節點 mismatch。**這是 fuzzer 最常抓到的 bug 類型**——「prior 還是 posterior」的錯誤在單機測試中完全看不出來，因為兩種寫法都能自洽地跑完，只有跟別人比對 state root 時才會爆。相關名詞：η 是 entropy pool，四個 32 位元組的值；η_0 每塊更新，η_1、η_2、η_3 分別是前三個 epoch 結束時的快照。",
  "trap": "所有 Safrole 式子都要先問：右邊是 prior 還是 posterior？"
 },
 ]

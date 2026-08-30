@@ -14,7 +14,7 @@ ITEMS = [
   "A hash of the parent's state root and timeslot only, since those two fields already determine the parent uniquely; hashing the whole header would make the commitment depend on data the child cannot independently reconstruct",
  ],
  "answer": 0,
- "explanation": "eq. 5.2：H_P ≡ H(E(P(H)))，用的是**完整**編碼 E，也就是含 seal H_S 的那個版本（未含 seal 的 E_U 只用來當簽章訊息）。結論是每個子區塊都把父區塊「發布出去的那串位元組」原封釘死：改動父 header 的任何一個位元組——包括重簽一次 seal——都會換出不同的 H_P，讓所有已經建在上面的區塊瞬間脫鏈。這正是「鏈」這個字的意思，也是為什麼 seal 必須是 header 的一部分而不是附加在旁邊的資料。",
+ "explanation": "eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**編碼——含 seal H_S 的那一版。GP 為 header 定義了兩個序列化函數：E(H) 含 seal、E_U(H) 不含（「with and without the latter seal component」），而 **E_U 的用途只有一個：當 seal 自己要簽的訊息**。父雜湊用的是 E，不是 E_U。**推論**：每個子區塊都把父區塊「實際發布出去的那串位元組」原封釘死。改動父 header 的任何一個位元組——包括用同一把金鑰對同樣的內容重簽一次 seal——都會算出不同的 H_P，讓所有已經建在上面的區塊瞬間脫鏈。這正是「鏈」這個字的意思，也是為什麼 seal 必須是 header 的欄位，而不是掛在旁邊的附屬資料：若父雜湊只涵蓋 E_U，同一份內容就能被簽出多個都合法的父節點，等於憑空製造分叉。**順帶記兩件相關的事**：§5 用 P 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），但實作只被要求保存「過去 24 小時（L = 14,400 個時槽）內出塊的祖先 header」——所以「能不能往回追」是有窗口的，這個窗口後來在 §11 的 lookup-anchor 檢查會再出現一次。",
  "optNotes": [
   "完整編碼（含 seal）與「重簽即脫鏈」的推論，正是 eq. 5.2 的直接後果。",
   "E_U 是簽章訊息，不是父雜湊的輸入；若不涵蓋 seal，同一份內容可以被重複簽出多個合法父節點。",
@@ -57,7 +57,7 @@ ITEMS = [
   "Because the validator set at genesis cannot be committed to inside the state it is meant to authorize, so the bootstrap keys are distributed by the chain spec and the state root is recomputed by each node from that file",
  ],
  "answer": 0,
- "explanation": "§5 直接寫明：對 genesis header H_g 與它所代表的狀態 σ_g 的共識是**預設**的。理由是形式上的——header 的合法性是相對於父 header 定義的（H_P 指向父、H_T 必須大於父），這是一條遞迴；遞迴需要一個基底，而基底無法由同一套規則產生，否則任何一條自洽的鏈都同樣「合法」，「這條鏈」這個詞就沒有指涉。實務上這個基底就是 chain spec：所有節點在鏈外同意同一份 genesis，之後所有東西才能靠密碼學推導。",
+ "explanation": "§5 直接寫明：對 genesis header H_g 與它所代表的狀態 σ_g 的共識是**預設（presumed）**的，不是推導出來的。**形式上的理由是遞迴需要基底。** header 的合法性全部是相對於父 header 定義的——H_P ≡ Blake2b(E(P(H))) 指向父、eq. 5.8 要求 H_T 嚴格大於父的 H_T、seal 要用父之後的狀態才驗得了。這是一條往回追的遞迴，而遞迴不能無限往回，必須有一個不靠同一套規則產生的起點。若沒有這個起點，任何一條內部自洽的鏈都同樣「合法」，「**這條**鏈」這四個字就失去指涉——你無法只用協定規則區分主網與某人昨天在筆電上生出來的鏈。**實務上這個基底就是 chain spec**：所有節點在鏈外（透過發行、社群、程式碼中寫死的檔案）同意同一份 genesis header 與 genesis state，之後每一件事才能靠密碼學推導。JIP-4 定義的 `protocol_parameters` 就是這份 chainspec 的一部分。**注意這不是 JAM 特有的妥協**，任何區塊鏈都有同一個公理；GP 只是把它明講出來，而不是假裝 genesis 也是被驗證的。也要分清楚：被預設的是「哪一份 genesis 算數」這個社會共識，不是它的內容不能被檢查——σ_g 用的是跟其他所有狀態一樣的 Merklization 函數 M_σ，算得出 root，只是沒有更早的區塊能為它背書。",
  "optNotes": [
   "遞迴需要鏈外約定的基底，這是 genesis 被「預設」而非「推導」的形式理由。",
   "genesis 狀態用的是同一個 Merklization 函數，大小不是問題。",
@@ -141,7 +141,7 @@ ITEMS = [
   "Because the marker is what the accumulation stage reads when it rewrites the validator queue, so leaving it out would make the punishment invisible to the next epoch's key rotation",
  ],
  "answer": 0,
- "explanation": "H_O ∈ ⟦ed25519 key⟧ 是一個可以為空、但永遠不是 ∅ 的普通序列（H_E 與 H_W 才是 optional，這個型別差異本身就是常考點）。它放進 header 的理由跟 epoch marker 同一條線：被剔除的 validator 之後不能再被當成合法簽章者，而只讀 header 的人不會處理 disputes extrinsic、也不持有 ψ_O；沒有這個 marker，它就會繼續接受早該被排除的簽章。至於狀態那份紀錄，是給完整節點做狀態轉移用的，兩者受眾不同、不是重複。",
+ "explanation": "H_O ∈ ⟦ed25519 key⟧ 是一個**可以為空、但永遠不是 ∅** 的普通序列——H_E 與 H_W 才是 optional，這個型別差異本身就是常考點（空序列與「沒有這個欄位」在 JAM 的編碼裡是兩件事）。§10 把它釘死為 H_O ≡ [k | (k,…) ∈ E_C] ⌢ [k | (k,…) ∈ E_F]，也就是本塊 disputes extrinsic 裡culprits 與 faults 兩段的金鑰接起來，「must contain exactly the keys of all new offenders」。**放進 header 的理由跟 epoch marker 同一條線：受眾不同。** 懲罰會改變「之後誰的簽章算數」——被列為 offender 的 validator，其金鑰在下次 epoch 換屆時會被 Φ 整筆歸零（eq. 6.15），從此不能出塊、不能擔保、不能背書。而只讀 header 的輕客戶端不會處理 disputes extrinsic、也不持有狀態裡的 ψ_O（offenders 集合）；沒有這個 marker，它就會繼續接受早該被排除的簽章，等於安全性破口。**所以它不是重複**：狀態裡那份 ψ_O 是給完整節點做狀態轉移用的，header 這份是給只跟著 header 鏈走的人用的，兩者受眾與用途都不同。這也解釋了為什麼它「幾乎每塊都是空的」還是要留著——成本是 1 個位元組的長度前綴，而少了它，輕客戶端就沒有任何管道得知驗證者被剔除。",
  "optNotes": [
   "讓只讀 header 的人知道「誰的簽章不再算數」，正是把 offender 放上 header 的理由。",
   "extrinsic 不會被協定層剪枝，marker 也不是為了保存歷史而存在。",
@@ -183,7 +183,7 @@ ITEMS = [
   "Reject the block only if the marker's key set differs from the one already in state; a marker that merely appears at an unexpected time is harmless because its content is still correct",
  ],
  "answer": 0,
- "explanation": "marker 不是出塊者可以自由填寫的欄位：H_E 與 H_W 的內容與**出現時機**都是由狀態轉移決定的（§6.6 把 H_E 定義成一個依 e′ ≠ e 分支的式子，非邊界時就是 ∅）。因此「epoch 中間出現 epoch marker」不是一個可以容忍的瑕疵，而是 header 與狀態轉移不一致——區塊無效。背後的通則值得記牢：**header 裡每一個欄位都是狀態轉移的承諾，不是附註**；驗證一個區塊，本質上就是重跑轉移並確認每個承諾都對得上。這也是為什麼 marker 雖然是為輕客戶端而設，全節點仍然必須檢查它。",
+ "explanation": "marker 不是出塊者可以自由填寫的註記欄位：H_E 與 H_W 的**內容**與**出現時機**都由狀態轉移決定。eq. 6.28 把 H_E 定義成一個依 e′ > e 分支的式子——是新 epoch 的第一塊就必須帶（且內容必須等於 η′_0、η′_1 與 γ′_P 的金鑰），不是就必須是 ∅；eq. 6.29 對 H_W 同理（條件是 e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E）。所以「epoch 中間出現 epoch marker」不是一個可以容忍的瑕疵，而是 **header 與狀態轉移不一致**——區塊無效，團隊的 fuzzer 把這類錯誤報成 InvalidEpochMark / InvalidTicketsMark（issue #770）。**背後的通則值得記牢，口試常從這裡追問**：header 裡每一個欄位都是對狀態轉移結果的**承諾**，不是附註。驗證一個區塊，本質上就是重跑轉移、再確認每個承諾都對得上——H_R 對得上父的 posterior root、H_X 對得上實際的 extrinsic、marker 對得上 Safrole 與 disputes 算出來的值。這也回答了一個常見的追問：marker 明明是為輕客戶端設計的，為什麼全節點還要檢查它？因為全節點若不檢查，就等於讓出塊者能對輕客戶端說謊而不受懲罰——marker 的可信度完全建立在全節點會驗證它。",
  "optNotes": [
   "marker 由狀態轉移決定，不一致即無效，這是 header 欄位的一般原則。",
   "把 marker 當成可忽略的註記，等於允許出塊者對輕客戶端說謊而不受懲罰。",

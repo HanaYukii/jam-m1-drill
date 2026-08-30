@@ -19,7 +19,7 @@ ITEMS = [
   "E_A 是 validator 對 availability 的 assurance，確實列在 eq. 4.3 之中。",
   "E_D 是 disputes（verdicts、culprits、faults），eq. 4.3 的第二項。",
  ],
- "explanation": "GP eq. 4.3：E ≡ (E_T, E_D, E_P, E_A, E_G)，即 tickets、disputes、preimages、assurances、guarantees（reports）。JAM 是 transactionless 的：沒有任何「使用者簽名的交易」進入區塊，所有 extrinsic 都是由 validator 產生的；外部資料只能透過 work-package（in-core 的 refine）以及 preimage 進入系統（§4.7：「there is no such concept of a transactor」）。",
+ "explanation": "eq. 4.3：E ≡ (E_T, E_D, E_P, E_A, E_G)——五個成分，各有各的來源與用途：**E_T** tickets，validator 提交的 Safrole 抽籤券；**E_D** disputes，verdicts + culprits + faults；**E_P** preimages，要併進 δ 的原像 blob；**E_A** assurances，validator 宣告自己持有哪些 core 的 shard；**E_G** guarantees，本塊帶進來的 work-report 與其擔保簽章。**沒有第六個，特別是沒有「使用者交易」。** JAM 是 transactionless 的：§4 明說「there is no such concept of a transactor」。五個成分全部由 validator 產生並簽署——ticket 是 validator 抽的、assurance 是 validator 宣告的、guarantee 是 guarantor 簽的、judgment 是 auditor 簽的。**那外部資料怎麼進來？** 兩條路：其一是 work-package——使用者把工作交給 core，經 in-core 的 refine 產出 work-report，再由 guarantor 以 E_G 帶進鏈；其二是 preimage，透過 E_P 把 blob 本身放進狀態。兩條路都要先經過某個 validator 才進得了區塊，這正是 JAM 「in-core 做重活、on-chain 只收結果」架構的直接體現。把 E_X 這種「外部帳戶簽名的交易」列進來，就是把 Ethereum 的模型套到 JAM 上——這是最常見的誤解。",
  "trap": "面試常問：JAM 為什麼沒有 transaction？答：授權（authorization）與 blockspace 購買（coretime）被拆開，外部輸入經 refine 進入。"
 },
 {
@@ -40,7 +40,7 @@ ITEMS = [
   "ω 是 ready queue（已 available 但 dependency 未滿足的 report）；authorizer queue 是 φ。",
   "θ 確實是本區塊的 accumulation output log，配對無誤。",
  ],
- "explanation": "σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω, ξ)，共 17 個分量。最容易混的是 authorization 與 accumulation 兩組佇列：α 是 authorizer pool、φ 是 authorizer queue（pool 的補給來源）、ω 是 ready queue、ξ 是防重複與 dependency 判斷用的已 accumulate 集合、θ 是本區塊的 accumulation output log（(service, hash) pairs），會被 β 的 belt 吸收。",
+ "explanation": "eq. 4.4：σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω, ξ)，共 17 個分量。**最容易混的是兩組佇列，記法是「誰餵誰」**：α 是 **authorizer pool**——每個 core 目前可用的 authorizer hash（最多 O = 8 個）；φ 是 **authorizer queue**——每個 core 固定 Q = 80 筆的補給來源，每個時槽從 φ 挪一筆進 α。所以「pool 的補給來源」是 φ，不是 ω。ω 是 **ready queue**——已經 available、但依賴還沒滿足、等著被 accumulate 的 report；ξ 是 **accumulation history**——最近一個 epoch 內已被 accumulate 的 work-package hash 集合，用來防重複與判斷依賴是否已滿足；θ 是 **accumulation output log**——本塊各 service 透過 `yield` 產出的 (service, hash) 序列，會被 β 的 belt 吸收。**其餘的分組記憶**：狀態核心 δ（service accounts）、χ（privileges）；Safrole 一組 γ（四元組）、η（entropy）、ι/κ/λ（staging/active/previous 三組金鑰）、τ（時槽）；流程一組 ρ（availability assignments）、β（recent history）、ψ（disputes）、π（statistics）。口試常見的追問是「哪些是每塊都動、哪些只在 epoch 邊界動」——η_0、τ、β、ρ、π 每塊都動，ι/κ/λ 的輪替與 γ_Z 的更新只在 e′ > e 時發生。",
  "trap": "ω (vartheta) vs φ (phi) 容易混：ω = ready/queued reports，φ = auth queue。"
 },
 {
@@ -124,7 +124,7 @@ ITEMS = [
   "10^18 是 Ethereum 的值；套上去 18×10^9 tokens 只剩 18 顆，正說明 GP 為何選 10^9。",
   "三處都錯：timeslot 是 u32、面額是 10^9，而 10^12 是 Kusama 的。",
  ],
- "explanation": "GP eq. 4.21：N_B ≡ N_2^64，並假設 10^9 為標準面額，因此最多約 18×10^9 tokens；用 u64 正是為了讓餘額能塞進固定寬度的序列化。eq. 4.28：N_T ≡ N_2^32，6 秒一 slot，壽命到 2840 年 8 月中。GP 在同處把 Polkadot 的 10^10、Kusama 的 10^12 與 Ethereum 的 10^18 明文列為「different to」JAM 的對照組，這三個數字正是干擾項的來源。",
+ "explanation": "兩個數域，兩個都在 §4 明文定義。**餘額** eq. 4.21：N_B ≡ N_{2^64}，也就是 u64。GP 同時說明面額是 10^-9（十億分之一顆為最小單位），因此「there may never be more than around 18×10^9 tokens」——2^64 個最小單位除以 10^9 約等於 184 億顆。選 u64 而不是更寬的型別，是因為餘額要塞進定寬的序列化欄位，也讓 service account 的門檻餘額計算不必動用大數。**時槽** eq. 4.28：N_T ≡ N_{2^32}，即 u32，計數的是自 JAM Common Era 起算的 6 秒時槽。算一下就知道壽命：2^32 × 6 秒 ≈ 257 億秒 ≈ **817 年**；Common Era 起點是 2025-01-01 1200 UTC，所以時槽編號會在 **2841 年 8 月中**用完。（GP 特別註明選正午 UTC，是為了讓所有主要時區在 24 小時的整數倍處都落在同一天。）**干擾項的來源**：GP 在同一段把 Polkadot 的 10^10、Kusama 的 10^12 與 Ethereum 的 10^18 明文列為對照，說 JAM 的 10^9「different to」它們——那三個數字就是被拿來當錯誤面額用的。順帶一提，service index 也是 u32（N_S），與時槽同寬但意義無關，是另一個常被混淆的點。",
  "trap": "u64 balance、u32 timeslot、u32 service index。"
 },
 {

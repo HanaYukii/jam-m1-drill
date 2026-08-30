@@ -16,7 +16,7 @@ ITEMS = [
   "The length is carried out-of-band by the enclosing structure's own length prefix, so E(x) itself is just the little-endian digits; the GP relies on the enclosing tuple to make the whole encoding unambiguous rather than on E(x) alone",
  ],
  "answer": 0,
- "explanation": "§C.1 的通用自然數編碼是「前綴決定長度」的變長編碼：第一個位元組的高位樣式宣告後面還有幾個位元組，小數值因此只佔一兩個位元組。真正的重點是**雙射**——附錄 D 的 state root 是對編碼後的位元組做 hash，所以「同一個值有兩種寫法」會讓兩個誠實節點算出不同的 root，「同一串位元組能解成兩個值」則讓證明可以被挪用。這也是為什麼字典必須先依 key 排序再編碼：正規化是編碼規格的一部分，不是實作細節。",
+ "explanation": "§C.1 的通用自然數編碼是「前綴決定長度」的變長編碼，值域到 2^64、輸出 1 到 9 個位元組：E(0) = [0]；當 2^(7l) ≤ x < 2^(7(l+1))（l ∈ N_8）時，第一個位元組是 2^8 − 2^(8−l) + ⌊x / 2^(8l)⌋，後面接 E_l(x mod 2^(8l))；x 再大就用 [255] ⌢ E_8(x)。直觀說法：**第一個位元組的高位有幾個連續的 1，後面就跟幾個位元組**，所以小數值只佔一兩個位元組，而讀取端看第一個位元組就知道要再吃幾個，不需要往前掃描或依賴外層資訊。**真正的重點是雙射（bijective）**——附錄 D 的 state root 是對**編碼後的位元組**做 hash，不是對解碼後的值。於是「同一個值有兩種寫法」會讓兩個誠實節點算出不同的 root（共識直接分裂），「同一串位元組能解成兩個值」則讓一份 Merkle 證明可以被挪用到另一個值上。這也是為什麼字典必須先依 key 排序再編碼：正規化（canonicalisation）是編碼規格的一部分，不是實作可自由發揮的細節。**別和 E_l 搞混**：E 是這個變長編碼；E_l（如 E_2、E_4、E_8）是定寬的 little-endian 整數，用在長度、時槽、索引這類「寬度本來就固定」的欄位上，兩者在 GP 裡並存、各有各的場合。",
  "optNotes": [
   "前綴宣告長度 + 唯一編碼，理由正是 state root 對編碼結果取 hash。",
   "掃描終止位元組不是 GP 的做法，且雙射是規格要求而非慣例——state root 取的是編碼後的位元組，不是解碼後的值。",
@@ -59,7 +59,7 @@ ITEMS = [
   "Appending inserts the new root at the position given by the block's timeslot modulo the belt length, overwriting whatever was there; the belt is therefore a ring buffer and old outputs age out automatically, which bounds the on-chain state",
  ],
  "answer": 0,
- "explanation": "MMR 的 append 只往後加、從不改寫既有節點：新項以高度 0 進來，遇到同高度的既有 peak 就合併升高，於是 peak 集合對應項數的二進位表示。這帶來兩個對 JAM 關鍵的性質——單次 append 只碰 O(log n) 個節點，而且**舊的證明不會失效**，因為它依賴的節點沒有被改寫。accumulation output 正是「持續產出、由鏈外長期驗證」的資料，BEEFY（§18）對 β_H 最後一筆的 super-peak 簽名，讓第三方能拿一份幾個月前的證明回來驗。普通平衡樹每加一片葉子就要重算整棵樹，所有舊證明全部作廢。",
+ "explanation": "§E.3 對 MMR 的定義：它是「an append-only cryptographic data structure」，append 與 inclusion proof 都是 O(log N)。型別是 ⟦?H⟧——**一個 peak 序列，索引 i 的 peak 是一棵含 2^i 個項的 Merkle 樹的根**；因為項數不一定是 2^k − 1，某些 peak 會是 ∅ 而不是一個 root。**append 的動作**：新項以高度 0 進來，若該位置已有 peak 就把兩者合併、升到高度 1，再遇到同高度的 peak 就再合併，一路進位上去——完全等同二進位加一。所以 peak 集合永遠對應「目前項數的二進位表示」，非空的 peak 個數就是那個數字的 popcount。**為什麼 JAM 選它而不是每塊重建一棵平衡樹**，兩個性質都關鍵：其一，append 只碰 O(log n) 個節點，而且**從不改寫既有節點**；其二，正因為不改寫，**先前發出去的證明不會失效**。accumulation output 恰好是「持續產出、由鏈外長期驗證」的資料——BEEFY 對它取 super-peak 後簽名，第三方橋接方可能拿著幾個月前的證明回來驗，平衡樹每加一片葉子就要重算整棵樹、舊證明全部作廢，根本不能用。**一個容易忽略的細節**：GP 說 MMR 通常會先被 hash 過再發布，而「hashing them removes the possibility of further appending」——所以要繼續產生證明的那一方必須保留 peak 序列本身，不能只留那個雜湊值。",
  "optNotes": [
   "peak 合併規則與 append-only 帶來的舊證明有效性，正是選 MMR 的兩個理由。",
   "MMR 不重新平衡；而且 BEEFY 的消費者要驗的常常是舊區塊的輸出，不是只驗最新一筆。",
@@ -80,7 +80,7 @@ ITEMS = [
   "The signature covers the assurer's own validator index and the bitfield, which is what lets the chain attribute the assurance; the parent hash is checked separately by comparing it against the header rather than by being signed",
  ],
  "answer": 0,
- "explanation": "§11.2 的 assurance 簽的是 domain separator 接上「parent header hash 與編碼後 bitfield 的 hash」。綁 parent hash 的用意是把這份表態鎖在**某一個特定的鏈上位置**：少了它，同一份簽名可以被別人撿去塞進之後任何一塊，讓一個早就把 shard 丟掉、甚至已經離線的 validator 持續被計入可得性門檻——而可得性門檻正是「資料還救得回來」的唯一保證。用 bitfield 而不是逐份報告簽名，則是頻寬考量：一個 validator 每塊可能同時持有數百個 core 的 shard，逐一簽名的驗簽成本是 C 倍。",
+ "explanation": "eq. 11.14 把簽章訊息寫得很死：∀a ∈ E_A，a 的簽章必須是 **X_A ⌢ Blake2b(E(H_P, a_availabilities))**，其中 X_A ≡ `$jam_available` 是 domain separator，H_P 是**父 header 的雜湊**，a_availabilities 是那串每個 core 一位元的 bitfield。驗簽用的公鑰是 κ[a_v]_ed——**prior** active set 裡該 assurer 的 Ed25519 金鑰。**綁 parent hash 的用意是把這份表態鎖在某一個特定的鏈上位置。** 少了它，同一份簽名就是一張可以無限重放的票：別人撿去塞進之後任何一塊，讓一個早就把 shard 丟掉、甚至已經離線的 validator 持續被計入可得性門檻。而那個門檻（2/3 + 1 的超級多數）正是「這份資料還救得回來」的**唯一**保證——它一旦失真，auditor 就可能拿不到重跑 refine 所需的資料，整條稽核鏈跟著失效。**為什麼用 bitfield 而不是逐份報告簽名**：一個 validator 每塊可能同時持有數百個 core 的 shard，逐一簽名會讓簽章數與驗簽成本變成 C 倍（full 設定下 C = 341）。**還有一條配套規則**：某一位只有在對應 core 確實有 availability assignment 時才能被設起來（ρ†[c] ≠ ∅），否則就是在為不存在的工作背書。",
  "optNotes": [
   "綁 parent header hash 是為了防重放，這正是它被納入簽章輸入的理由。",
   "「每塊最多出現一次」擋得住同一塊內的重複，擋不住把舊簽名搬到後面的區塊。",
@@ -101,7 +101,7 @@ ITEMS = [
   "It is cumulative and the outputs are truncated rather than replaced, with the truncation length recorded in the digest so that an auditor re-running refine can reproduce exactly the same bytes",
  ],
  "answer": 0,
- "explanation": "大小檢查是**累計**的：判斷的量是 authorizer trace |t| 加上先前已被接受的輸出總和，再加上這一項的輸出，超過 W_R 的第一項就把它的 result 換成 ⊖ OVERSIZE。關鍵有兩點——被換掉的是**該項的結果**，不是整份報告作廢（後面的 item 照跑，可能還是成功的）；而且順序有意義，同樣一組 item 換個順序，出事的可能是不同的那一個。這也是為什麼 OVERSIZE 屬於 𝔼 錯誤集合而不是「報告無效」：它是一個可被記錄、可被 accumulate 看到的結果，服務端能自己處理。",
+ "explanation": "大小檢查是**累計**的，而且累計的定義很精確。§14 的 countupexports 裡：z = |authtrace| + Σ_{k < j, 且第 k 項的結果 r ∈ B} |r|，也就是 authorizer trace 的長度，加上**排在前面、而且結果確實是 blob** 的那些項的輸出長度；已經出錯的項不計入。判斷式是 |r| + z > W_R，成立就把**這一項**的 result 換成 ⊖ OVERSIZE。W_R = C_maxreportvarsize = 48 · 2^10 = 49,152 位元組，管的是一份 work-report 裡所有不定長 blob 的總量。**兩個關鍵**：其一，被換掉的是該項的 result，**不是整份報告作廢**——後面的 item 照樣 refine，可能還是成功的，而且被換掉那項的 gas 用量 u 與匯出 segment 數仍然保留。其二，**順序有意義**：同一組 item 換個順序，爆掉的可能是不同的那一個，因為 z 是照 j 的順序累加的。**為什麼 OVERSIZE 是錯誤值而不是「無效」**：它屬於 work error set 𝔼 = {∞ OOG, ☇ panic, BADEXPORTS, ⊖ OVERSIZE, BAD, BIG}，是一個會被寫進 work-digest、accumulate 讀得到的**結果**，服務端可以自己處理（例如下次拆小一點再送）。要區分的是另一條規則：若 authorizer trace 自己就超過 W_R（authtrace ∉ B_{:W_R}），那是整份報告的錯誤 E，不是某一項的 OVERSIZE。",
  "optNotes": [
   "累計判斷、第一個越界的項被換成 OVERSIZE、後續照跑，三點都對上 §14 的規則。",
   "若只逐項比對，四個各佔 W_R 八成的 item 就能組出遠超上限的報告，鏈上限制形同虛設。",
@@ -186,7 +186,7 @@ ITEMS = [
   "The caller passes the desired end page and the cost is settled afterwards from the host's actual allocation cost, which is why it cannot be an instruction — instructions must have their cost known before they execute, but host calls are charged on return",
  ],
  "answer": 0,
- "explanation": "grow_heap 吃的是「想要的堆結尾頁」，費用按**新變成可寫的頁數**計。它從指令變成 host call 的理由跟 0.8.0 的 gas 模型直接相關：附錄 A 改成整個 basic block 在進入時預先扣款，而預扣的前提是 block 的價格能在執行前**靜態算出**。一條成本取決於運算元的指令會讓這個前提破掉——你無法在不執行的情況下知道這次 sbrk 要長多少頁。搬成 host call 之後，指令層維持靜態可計價，動態成本統一走 host call 那條先扣後做的路徑。",
+ "explanation": "grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——refine、accumulate、on-transfer——都可以呼叫。呼叫者在 φ_7 放「想要的堆結尾」，計價是常數項加線性項：g = C_gas♊const + (φ_7 − h) · C_gas♊linear，h 是目前的堆結尾；若 φ_7 ≤ h（沒有實際成長）或 φ_7 > b（超過上界），就只扣常數項、什麼也不做。**為什麼要從指令搬成 host call**，理由跟 0.8.0 的 gas 模型直接相扣：附錄 A 改成**以 basic block 為單位、進入時預先扣款**，而「預扣」的前提是這個 block 的價格能在**執行之前靜態算出**——把 block 裡每條指令的固定成本加總即可。一條成本取決於運算元的指令會直接打破這個前提：你不執行就不知道這次 sbrk 要長幾頁，也就算不出預扣金額。搬成 host call 之後，分工變得乾淨：**指令層一律靜態可計價，動態成本統一走 host call 那條「先算價、再扣、再做」的路徑**。這也是 0.8.0 移除 sbrk 的原因（PR #508 引入 block-level gas、#517 收尾），不是因為 sbrk 本身有錯，而是它與新的計價模型不相容。相關名詞：ϱ 是 gas 計數器、ϖ 是 basic block（以 terminator 指令切分，正是計價與跳躍目標的單位）。",
  "optNotes": [
   "指定結尾頁、按新增頁數計費，理由落在「block 價格必須靜態可算」，這正是 0.8.0 的連動。",
   "動機不是編碼空間；把它留在指令集裡會直接破壞 block-level 預扣的前提。",
@@ -228,7 +228,7 @@ ITEMS = [
   "A failing item makes the whole work-report invalid, so the encoding has no error case at all; the 𝔼 set exists only to name the conditions guarantors check off-chain before deciding whether to sign the report",
  ],
  "answer": 0,
- "explanation": "digest 的 result 用一個判別位元組區分：成功是判別值再接長度前綴的 blob，失敗則是單一個位元組，各自對應 𝔼 裡的 ∞（out-of-gas）、☇（panic）、BADEXPORTS、OVERSIZE、BAD、BIG。把失敗當**值**而不是當「報告無效」是刻意的：第一，accumulate 讀得到失敗原因，服務可以自己決定要重試、退款還是記帳；第二，同一個 work-package 裡其他 item 不受牽連，否則一個服務的失控就能吃掉同包所有人的工作；第三，失敗也要被稽核——auditor 重跑時比對的是「同一個輸入是否同樣失敗」，若失敗不上鏈就沒有可比對的對象。",
+ "explanation": "附錄 C 的 E_result 用一個判別位元組區分成功與失敗，六種錯誤各佔一個值：**成功 = (0, var(blob))**，判別值 0 之後接長度前綴的輸出；失敗則是**單一個位元組**——1 = ∞ out-of-gas、2 = ☇ panic、3 = BADEXPORTS、4 = ⊖ OVERSIZE、5 = BAD、6 = BIG，正好對應 eq. 11.7 的 work error set 𝔼 = {∞, ☇, BADEXPORTS, ⊖, BAD, BIG}。（成功要帶長度、失敗不必，所以失敗的編碼比成功還短。）**把失敗當「值」而不是當「報告無效」是刻意的設計，三個理由**：其一，**accumulate 讀得到失敗原因**——服務可以自己決定要重試、退款還是只記一筆帳，這是把控制權交還給服務端。其二，**同一個 work-package 裡其他 item 不受牽連**；否則一個服務的失控（無窮迴圈、輸出爆量）就能吃掉同一包裡所有人的工作，那會變成一個廉價的攻擊面。其三，**失敗也必須可稽核**——auditor 重跑 refine 時比對的是「同一份輸入是否得到同樣的結果」，而「同樣的結果」包含「同樣地失敗」；若失敗不上鏈，就沒有可比對的對象，一個惡意 guarantor 就能把成功的執行謊報成失敗而不被抓到。",
  "optNotes": [
   "判別位元組 + 單位元組錯誤碼，以及「失敗是值」帶來的三個好處，正是 GP 的設計。",
   "空 blob 無法區分「成功但輸出為空」與「失敗」，而 digest 本來就不是固定寬度。",
@@ -239,7 +239,7 @@ ITEMS = [
 {
  "id": "ch06-fallback-purpose",
  "ch": "6", "section": "6.5 The Slot Key Sequence",
- "gpRef": "eq. 6.25–6.26", "difficulty": 2, "kind": "concept",
+ "gpRef": "eq. 6.25, 6.27 (F)", "difficulty": 2, "kind": "concept",
  "tags": ["safrole", "fallback", "anonymity"],
  "stem": "When too few tickets arrive, γ′_S falls back to a key sequence derived from entropy and the active validator set. How is each slot's author chosen, and what property does the chain give up while the fallback is in force?",
  "options": [
@@ -249,7 +249,7 @@ ITEMS = [
   "The fallback assigns every slot to the validator set collectively and accepts the first valid seal to arrive; anonymity is unaffected because no schedule exists, at the cost of occasional competing blocks at the same height",
  ],
  "answer": 0,
- "explanation": "fallback 對每個 slot i 取 entropy 與 slot 索引一起 hash、截取四個位元組解成整數後對 validator 數取模，選出該 slot 的出塊者。它的代價很具體：所需的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來——這正是 ring VRF ticket 花力氣買來的匿名性，在 fallback 生效期間完全消失，針對性 DoS 與賄賂重新變得可行。GP 仍然這樣設計，是因為可用性優先於匿名性：寧可退化也不要停鏈。Y = 500 的投票截止線就是為了讓票源有時間累積、盡量不走到這條路。",
+ "explanation": "eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))[…4])]^⟲ _bs | i ∈ N_E ]。逐步拆：對 epoch 內的每個 slot 索引 i，把 entropy r 接上 i 的 4 位元組編碼一起 Blake2b、取雜湊的**前 4 個位元組**解成整數，用它**對 validator 數取模**（`^⟲` 就是 §3.7 的模數下標記號）選出一位驗證者，再取他的 Bandersnatch 公鑰。r 用的是 η′_2、k 用的是 κ′，兩者都是 posterior。**代價很具體**：這條式子的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來。這正是 ring VRF ticket 花大力氣買來的匿名性——§6 開宗明義說「the identity of the key-holder of any future timeslot will have a very high degree of anonymity」——在 fallback 生效期間完全消失。後果不是理論性的：知道誰在哪個 slot 出塊，針對性 DoS 與事前賄賂都重新變得可行。**GP 仍然這樣設計，是因為活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。Y = 500 的投票截止線正是為了讓票源有整整 500 個時槽可以累積，盡量不走到這條路上。",
  "optNotes": [
   "hash(entropy ⌢ slot index) 取模選人、以及匿名性全失，兩者是 eq. 6.26 與其代價。",
   "純輪流會讓出塊順序與 validator 索引綁死，任何人都能長期預測，且無法隨 entropy 變動。",
