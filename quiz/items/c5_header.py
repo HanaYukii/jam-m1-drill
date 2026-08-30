@@ -162,12 +162,12 @@ ITEMS = [
   "It lets the encoder distinguish 'no epoch change happened' from 'an epoch change happened with an empty key set', a distinction that matters at genesis and after a set-size change to zero validators",
  ],
  "answer": 0,
- "explanation": "eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)、H_W ∈ ?(⟦ticket⟧_E)、H_O ∈ ⟦ed25519 key⟧。前兩個一旦出現就很大——一整套 validator 金鑰、或整個 epoch 的 600 張 ticket——但每個 epoch 至多出現一次，所以用 optional 讓平時只花一個 0 位元組的判別位元；第三個平常是空序列，長度前綴 0 已經幾乎不佔空間，做成 optional 沒有收益，反而多一層包裝。這是「編碼形狀跟隨出現頻率與大小」的典型取捨，也是最容易被追問「為什麼 H_O 不是 optional」的地方。",
+ "explanation": "eq. 5.11：H_E ∈ ?(H, H, ⟦(bskey, edkey)⟧_V)、H_W ∈ ?(⟦ticket⟧_E)、H_O ∈ ⟦ed25519 key⟧。前兩個一旦出現就很大——一整套 validator 金鑰、或整個 epoch 的 600 張 ticket——但每個 epoch 至多出現一次，所以做成 optional：不存在時只寫一個值為 0 的判別位元組（App. C：E_epochmark(∅) = E(0)），1 byte 就打發。第三個平常是空序列，而 var() 編碼的空序列同樣只是一個長度前綴 0，也是 1 byte——已經跟 optional 一樣便宜，再包一層沒有收益。這是「編碼形狀跟隨出現頻率與大小」的取捨，也是最容易被追問「為什麼 H_O 不是 optional」的地方。順帶澄清一個常見誤解：**H_O 是可以為空的，絕大多數區塊都是空的**。§10 定義 H_O ≡ [k | (k,…) ∈ E_C] ⌢ [k | (k,…) ∈ E_F]，「must contain exactly the keys of all new offenders」——沒有新的 offender 就是空序列。它的強制性不在「非空」，而在「必須與本塊 E_D 帶進來的 culprits 與 faults 逐項相符」：有新 offender 卻留空、或列出沒有依據的鍵，都會讓區塊無效。另外 H_E 的金鑰序列恆為 V 筆（整個 γ′_P），同樣不會是空的。",
  "optNotes": [
   "大而罕見的用 optional、小而常在的用空序列，正是這組型別差異的成本考量。",
   "seal 涵蓋的是 E_U 的全部欄位，三個 marker 都在裡面，沒有哪個因為 optional 而被排除。",
   "H_W 確實與 Safrole 有關，但 H_E 也在 epoch 邊界必然出現，不是「可能失敗」才有。",
-  "空序列與 ∅ 的區分在這裡沒有語意需求——沒有 offender 與有零個 offender 是同一件事。",
+  "epoch marker 的金鑰序列恆為 V 筆（整個 γ′_P），根本不存在「空金鑰集」這個狀態可供區分。",
  ],
 },
 {
