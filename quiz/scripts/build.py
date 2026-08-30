@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build the JAM M1 Drill: items/*.py -> dist/questions.json, dist/artifact.html (fragment), dist/jam-m1-drill.html (standalone)."""
-import json, os, sys, random, datetime
+import json, os, sys, random, datetime, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from validate import load_items, validate, CHAPTERS, load_terms, validate_terms, GLOSS_CATS, load_sheets, validate_sheets
 
@@ -15,6 +15,66 @@ GROUPS = {
     **{k: "Appendices" for k in ["A","B","C","D","E","F","G","H"]},
     "ARCH": "Interview extras",
 }
+
+GREEK_SYM = "αβγδεζηθικλμνξοπρστυφχψωϱϖΓΔΘΛΞΠΣΦΨΩ"
+BB_SYM    = "𝔹𝕊𝕍𝕐𝔻𝔼ℙℝℂℍℕℤ𝕁𝔾𝕏𝕌"
+_SYM_TOKEN = re.compile(
+    "^(?:[" + GREEK_SYM + "][\u2032\u2021\u2020]?(?:_[A-Za-z0-9]+)?"
+    "|[" + BB_SYM + "]"
+    "|[A-Z]_[A-Za-z0-9]+)$")
+
+# Symbols the stems use that have no standalone glossary entry. Kept out of
+# glossary/*.py on purpose: the 92-term list is a reader-facing feature with
+# its own shape, and these are one-line hover glosses, not entries.
+SYM_ALIASES = {
+    "E_T": "tickets extrinsic：本塊提交的 Safrole ticket（每塊至多 K = 16 張）。",
+    "E_D": "disputes extrinsic：verdicts、culprits、faults 三部分。",
+    "E_P": "preimages extrinsic：本塊要併入 δ 的 preimage blob。",
+    "E_A": "assurances extrinsic：validator 宣告持有哪些 core 的 shard。",
+    "E_G": "guarantees extrinsic：本塊帶進來的 work-report 與其擔保簽章。",
+    "E_C": "culprits：disputes 中被證明擔保了 bad report 的 validator。",
+    "E_F": "faults：disputes 中被證明投了與最終判決相反票的 validator。",
+    "E_U": "E_U(H)：不含 H_S 的 header 編碼，也就是 seal 實際簽的訊息。",
+    "H_T": "timeslot index：本塊的時槽編號；τ′ = H_T。",
+    "H_t": "timeslot index：本塊的時槽編號；τ′ = H_T。",
+    "H_I": "author index：出塊者在 posterior active set κ′ 裡的索引。",
+    "H_A": "author 的 Bandersnatch key：H_A ≡ κ′[H_I]_b，只是等價式，不被序列化。",
+    "H_P": "parent hash：父 header 編碼的 Blake2b。",
+    "H_0": "zero hash：32 個 0 位元組，β_H 新項的 state root 佔位用。",
+    "Delta_PLACEHOLDER": "",
+    "\u0394": "accumulation 函數族：Δ+ 外層、Δ* 平行、Δ1 單一 service。",
+    "\u03a9": "host call 函數族：Ω_R read、Ω_W write、Ω_A assign、Ω_K invoke…",
+    "\u03a6": "blacklist filter：epoch 換屆時把 offender 的金鑰整筆歸零（不是移除）。",
+    "\u039b": "historical lookup：在 (H_t − D … H_t) 視窗內查某 service 的 preimage。",
+    "M_B": "well-balanced Merkle root：Appendix E 的 M_B，與定深的 M 不同。",
+    "X_T": "ticket 的簽章 context 字串，與 seal / entropy 的 context 分開。",
+    "Z_A": "dynamic jump alignment：Z_A = 2，動態跳躍目標必須對齊且落在 basic block 起點。",
+    "\u2119": "work-package 集合 ℙ：⟨j, h, u, f, c, w⟩。",
+    "E_V": "verdicts：disputes extrinsic 中的判決，每筆帶 ⌊2|k|/3⌋+1 個簽章。",
+    "\u039e": "work-report 計算函數 Ξ：把 work-package 算成 work-report。",
+}
+SYM_ALIASES.pop("Delta_PLACEHOLDER", None)
+
+def symbol_map(terms):
+    """symbol -> one-line gloss, for the reader-facing tooltips.
+
+    Only unambiguous symbols: Greek (with optional prime/dagger/subscript),
+    blackboard bold, and subscripted Latin. A bare 'B' or 'E' is ordinary
+    English and would match everywhere, so those glossary entries are skipped.
+    """
+    out = {}
+    for t in terms:
+        raw = (t.get("sym") or "").strip()
+        if not raw:
+            continue
+        gloss = t["term"] + "（" + t["zh"] + "）：" + t["one"]
+        for tok in re.split(r"\s*/\s*|\s+", raw):
+            tok = tok.strip()
+            if _SYM_TOKEN.match(tok):
+                out.setdefault(tok, gloss)
+    for k, v in SYM_ALIASES.items():
+        out.setdefault(k, v)
+    return out
 
 def shuffle_options(item):
     """Deterministic per-item shuffle so the exported bank isn't 'answer = A' everywhere."""
@@ -60,6 +120,7 @@ def main():
         "items": items,
         "terms": terms,
         "sheets": sheets,
+        "symbols": symbol_map(terms),
     }
     json_txt = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     with open(os.path.join(DIST, "questions.json"), "w", encoding="utf-8") as f:

@@ -172,6 +172,7 @@ pre.code{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--
 .on-tag.ok{background:var(--ok);color:var(--surface)}
 .on-tag.ng{background:var(--line-2);color:var(--muted)}
 .on-tag.you{background:var(--bad);color:var(--surface)}
+.sym{border-bottom:1px dotted var(--muted);cursor:help}
 .on-x{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line-2);font-size:13.5px;line-height:1.7;color:var(--ink-2)}
 .results-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 10px}
 .results-head h3{font-size:15px;margin:0}
@@ -311,6 +312,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   const ITEMS = DATA.items;
   const META = DATA.meta;
   const TERMS = DATA.terms || [];
+  const SYMS  = DATA.symbols || {};
   const SHEETS = DATA.sheets || [];
   const GCATS = META.glossaryCats || {};
   const CHAPTERS = META.chapters; // [{key,name,group}]
@@ -382,6 +384,24 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function inlineCode(s){ // `code` → <code>
     return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
   }
+  // Gray Paper symbols -> their glossary one-liner, shown on hover.
+  // u flag: the blackboard-bold letters live outside the BMP.
+  const SYM_RE = /[\u03b1-\u03c9\u03f1\u03d6\u0393\u0394\u0398\u039b\u039e\u03a0\u03a3\u03a6\u03a8\u03a9][\u2032\u2021\u2020]?(?:_[A-Za-z0-9]+)?|[\u{1D539}\u{1D54A}\u{1D54D}\u{1D550}\u{1D53B}\u{1D53C}\u{1D541}\u{1D53E}\u{1D54F}\u{1D54C}\u2119\u211d\u2102\u210d\u2115\u2124]|[A-Z]_[A-Za-z0-9]+/gu;
+  function symGloss(tok){
+    if (SYMS[tok]) return SYMS[tok];
+    const bare = tok.replace(/[\u2032\u2021\u2020]/g, '');
+    if (SYMS[bare]) return SYMS[bare];
+    return SYMS[bare.split('_')[0]] || null;
+  }
+  // only rewrites text between tags, so the HTML inlineCode() just produced stays intact
+  function glossSyms(html){
+    return String(html).split(/(<[^>]*>)/).map((part, i) => i % 2 ? part
+      : part.replace(SYM_RE, m => {
+          const g = symGloss(m);
+          return g ? '<span class="sym" title="'+esc(g)+'">'+m+'</span>' : m;
+        })
+    ).join('');
+  }
   const GO_KW = /\b(func|return|if|else|for|range|var|const|type|struct|interface|map|chan|go|defer|switch|case|default|break|continue|package|import|nil|true|false|len|make|append|int|uint|uint64|uint32|byte|string|bool|error)\b/g;
   function highlight(src, lang){
     let s = esc(src);
@@ -408,7 +428,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function questionBody(it, order, opts){
     // opts: {revealed, picked, disabled, showKeys}
     let h = metaRow(it);
-    h += '<p class="stem">'+inlineCode(it.stem)+'</p>';
+    h += '<p class="stem">'+glossSyms(inlineCode(it.stem))+'</p>';
     if (it.code){
       h += '<pre class="code"><code>'+highlight(it.code.src, it.code.lang)+'</code></pre>';
       if (it.code.caption) h += '<div class="code-cap">'+esc(it.code.caption)+'</div>';
@@ -422,7 +442,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         else cls.push('dim');
       } else if (opts.picked === oi) cls.push('picked');
       h += '<li><button class="'+cls.join(' ')+'" data-oi="'+oi+'" '+(opts.disabled?'disabled':'')+'>'
-        + '<span class="key">'+(pos+1)+'</span><span>'+inlineCode(it.options[oi])+'</span></button></li>';
+        + '<span class="key">'+(pos+1)+'</span><span>'+glossSyms(inlineCode(it.options[oi]))+'</span></button></li>';
     });
     h += '</ul>';
     return h;
@@ -449,7 +469,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         h += '<li class="'+cls.join(' ')+'"><span class="on-n">'+(pos+1)+'</span>'
            + '<div class="on-b"><div class="on-t">'+(isKey?'<b class="on-tag ok">正解</b>':'<b class="on-tag ng">錯</b>')
            + (picked !== null && oi === picked ? '<b class="on-tag you">你選的</b>' : '')
-           + inlineCode(it.options[oi])+'</div>'
+           + glossSyms(inlineCode(it.options[oi]))+'</div>'
            + '<div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
       });
       h += '</ol></div>';
@@ -677,7 +697,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       h += '<div class="review-item '+(ok?'is-ok':'is-ng')+'">'
         + '<div class="ri-head"><span class="ri-n">'+(i+1)+'</span>'+metaRow(it)
         + '<span class="ri-mark '+(ok?'ok':'ng')+'">'+(ok?'✓ 答對':(a===null?'— 未作答':'✗ 答錯'))+'</span></div>'
-        + '<div class="q">'+inlineCode(it.stem)+'</div>'
+        + '<div class="q">'+glossSyms(inlineCode(it.stem))+'</div>'
         + explanationBlock(it, ok, {order: ord, picked: a, noVerdict: true})
         + '</div>';
     });
@@ -790,20 +810,20 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       h += '<div class="card qa'+(open?' open':'')+'" data-qid="'+esc(it.id)+'">';
       h += metaRow(it);
       h += '<button class="qa-q" type="button"><span class="qa-n">'+(i+1)+'</span>'
-         + '<span class="qa-qt">'+inlineCode(it.stem)+'</span><span class="qa-caret">▾</span></button>';
+         + '<span class="qa-qt">'+glossSyms(inlineCode(it.stem))+'</span><span class="qa-caret">▾</span></button>';
       if (it.code){
         h += '<pre class="code"><code>'+highlight(it.code.src, it.code.lang)+'</code></pre>';
         if (it.code.caption) h += '<div class="code-cap">'+esc(it.code.caption)+'</div>';
       }
       h += '<div class="qa-a"'+(open?'':' hidden')+'>';
-      h += '<div class="qa-ans"><b>標準答案</b>'+inlineCode(it.options[it.answer])+'</div>';
+      h += '<div class="qa-ans"><b>標準答案</b>'+glossSyms(inlineCode(it.options[it.answer]))+'</div>';
       h += '<div class="expl ok">'+inlineCode(it.explanation)+'</div>';
       if (it.optNotes){
         h += '<div class="expl-block"><div class="expl-head">其他選項為什麼錯</div><ol class="optnotes">';
         it.options.forEach((o2, oi) => {
           if (oi === it.answer) return;
           h += '<li class="on ng"><span class="on-n">·</span><div class="on-b">'
-             + '<div class="on-t">'+inlineCode(o2)+'</div><div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
+             + '<div class="on-t">'+glossSyms(inlineCode(o2))+'</div><div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
         });
         h += '</ol></div>';
       }
