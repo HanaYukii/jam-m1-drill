@@ -18,7 +18,14 @@ ITEMS = [
         "difficulty": 1,
         "kind": "concept",
         "tags": ["notation", "types", "blobs", "numbers"],
-        "stem": (
+  "stemZh": "Gray Paper 裡幾乎每個型別都建立在 §3.4 與 §3.7.4 固定下來的詞彙上：N、N_n、Z、N_L、B、B_x 與 B_$。哪一個敘述把它們全部照 GP 的定義讀對了？",
+  "optionsZh": [
+   "帶下標的自然數集是嚴格小於下標的自然數，所以 N_n 有 n 個元素；N_L 是 octet 序列長度的集合、等同 N_{2^32}；B_x 是長度恰為 x 的 blob 集合，但 B_$ 是其中首個位元組為哨兵標記的子集；而 octet 就是小於 256 的自然數，兩者序列化方式相同",
+   "帶下標的自然數集包含下標本身，所以 N_n 有 n + 1 個元素；N_L 等同 N_{2^64}，因為 octet 序列的長度是以 64 位元值攜帶的；B_x 是長度恰為 x 的 blob 集合、B_$ 是其中屬於 ASCII 編碼字串的子集；而 octet 雖與小於 256 的自然數一一對應，在序列化上並非同一種實體",
+   "帶下標的自然數集是嚴格小於下標的自然數，所以 N_n 有 n 個元素；N_L 是 GP 用來指稱 octet 序列**長度**集合的簡寫、等同 N_{2^32}；B_x 是長度恰為 x 的 blob 集合、B_$ 是其中屬於 ASCII 編碼字串的子集；而 octet 雖與小於 256 的自然數一一對應，就序列化而言並非同一種實體",
+   "帶下標的自然數集是嚴格小於下標的自然數，所以 N_n 有 n 個元素；N_L 是長度小於 2^32 的 octet 序列集合，而不是它們長度的集合；B_x 是至多 x 個 octet 的 blob 集合、B_$ 是其中屬於 ASCII 編碼字串的子集；而 octet 的序列化方式與一般自然數編碼完全相同"
+  ],
+  "stem": (
             "Almost every type in the Gray Paper is built from the vocabulary fixed in §3.4 and §3.7.4: N, "
             "N_n, Z, N_L, B, B_x and B_$. Which statement reads all of them the way the GP defines them?"
         ),
@@ -59,7 +66,14 @@ ITEMS = [
         "difficulty": 1,
         "kind": "concept",
         "tags": ["notation", "optional", "none", "error"],
-        "stem": (
+  "stemZh": "§3.3 引入 ∅、∇ 與 optional 建構子 A?，eq. 3.2 定義了「若為空則替代」的函數 𝒰。§13.2 接著把一個 service 的 accumulation 條目寫成 𝒰(S[s], (0, 0, 0))，其中 S 是從 service index 到三元組的字典。哪一種讀法是對的？",
+  "optionsZh": [
+   "∅ 標記一個「合法地沒有具體值」的項，並被定義為基數為零；optional 建構子給出 A? ≡ A ∪ {∅}；∇ 標記非預期的失敗或無效值，GP 偏好用它而不用 ⊥ 以免與布林假值混淆；而 𝒰 取出它第一個不是 ∅ 的參數——所以字典裡有該 service 時取它自己的三元組，否則取全零三元組",
+   "∅ 就是空集合本身，它的基數為零只是因為裡面剛好沒有成員；optional 建構子 A? 是一個編碼指示，意思是該成分可以從編碼中省略，而不是集合運算；∇ 是 GP 對布林假值選用的寫法，這也是為什麼避開較常見的 ⊥；而 𝒰 取出它**最後**一個不是 ∅ 的參數——所以只要字典裡有任何東西，該條目就是全零三元組",
+   "∅ 標記一個「合法地沒有具體值」的項，optional 建構子給出 A? ≡ A ∪ {∅}；∇ 是 ∅ 的同義詞，保留給「這個缺席是預期中的」情況，所以兩者是 A? 裡可互換的成員；而 𝒰 取出它第一個**確實是** ∅ 的參數，若都不是則退回最後一個參數——所以每個被 accumulate 過的 service 條目都是 ∅，只有沒被碰過的才是全零三元組",
+   "∅ 的基數為一，它是 A? 加進 A 的一個獨立成員；∇ 標記非預期的失敗或無效值，GP 偏好用它而不用 ⊥ 以免與布林假值混淆；𝒰 恰好定義在兩個參數上，一個候選值與一個預設值；而對缺少的 key 做字典下標會得到 ∇ 而不是 ∅——這正是 eq. 13.13 需要那個 fallback 的原因"
+  ],
+  "stem": (
             "§3.3 introduces ∅, ∇ and the optional constructor A?, and eq. 3.2 defines the substitute-if-nothing "
             "function 𝒰. §13.2 then writes a service's accumulation entry as 𝒰(S[s], (0, 0, 0)), where S is a "
             "dictionary from service index to a triple. Which reading is correct?"
@@ -103,7 +117,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["notation", "sequences", "slicing", "ranges"],
-        "stem": (
+  "stemZh": "令 s = [10, 20, 30, 40, 50]。套用 GP §3.4 對整數集合、以及 §3.7 對序列切片的省略號慣例，哪一行從頭到尾都正確？",
+  "optionsZh": [
+   "s_{…3} = [10, 20]、s_{1…+3} = [20, 30, 40, 50]、Z_{1…3} = {1, 2, 3}、Z_{1…+3} = {1, 2, 3, 4}、last(s) = 50、s[7]^⟲ = 20",
+   "s_{…3} = [10, 20, 30]、s_{1…+3} = [20, 30, 40]、Z_{1…3} = {1, 2}、Z_{1…+3} = {1, 2, 3}、last(s) = 50、s[7]^⟲ = 30",
+   "s_{…3} = [30, 40, 50]、s_{1…+3} = [10, 20, 30]、Z_{1…3} = {1, 2}、Z_{1…+3} = {1, 2, 3}、last(s) = 10、s[7]^⟲ = 40",
+   "s_{…3} = [10, 20, 30]、s_{1…+3} = [20, 30]、Z_{1…3} = {1, 2, 3}、Z_{1…+3} = {2, 3, 4}、last(s) = 50、s[7]^⟲ = 30"
+  ],
+  "stem": (
             "Let s = [10, 20, 30, 40, 50]. Applying the ellipsis conventions of GP §3.4 for integer sets and "
             "§3.7 for sequence slicing, which line is correct throughout?"
         ),
@@ -135,7 +156,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "concept",
         "tags": ["notation", "tuples", "prior-vs-posterior", "state"],
-        "stem": (
+  "stemZh": "eq. 13.1–13.2 宣告 π ≡ (π_V, π_L, π_C, π_S)，其中 (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧²，而 §13.1 接著處理 π_V†、π_V‡ 與 π′_V。面試官請你把這段記號唸出來。哪一種讀法是對的？",
+  "optionsZh": [
+   "型別宣告與具體值都用 ∈ 書寫，三重冒號保留給字典的 key/value 配對，所以那六個計數器只有位置意義、必須以索引而非名稱存取；把序列集合平方表示那兩筆紀錄各自都是序列，每位 validator 一筆六欄位項目；prime 代表某個狀態分量經 Grandpa 定案後的值，所以 π′ 要等 finality 追上鏈之後才有定義；而 dagger 與 double-dagger 標記的是同一個分量在某條後來被丟棄的分叉上的樣子",
+   "型別宣告用 ∈ 引入每個成分，具體值則用三重冒號綁定欄位，兩種寫法都可以用名稱下標把欄位讀回來；把序列集合平方表示這一對總共剛好兩筆紀錄、每個 epoch 一筆，所以每筆帶的是單一位 validator 的六個計數器；prime 標記下一個 epoch 開始時將會生效的值；而 dagger 與 double-dagger 是 σ 的另外兩個分量，各自有自己的 state-trie key",
+   "∈ 與三重冒號是同一種綁定的兩種可互換寫法，所以欄位既可用名稱也可用位置讀回；把序列集合平方表示那兩筆紀錄各自都是序列，每位 validator 一筆六欄位項目；§3 把 prime 定義為「extrinsic 套用之後的值」；而 dagger 標記已經歷過 epoch 換屆的值、double-dagger 標記尚未歷經的",
+   "型別宣告用 ∈ 引入每個成分，具體值則用三重冒號綁定欄位，兩種寫法都可以用名稱下標把欄位讀回來；把序列集合平方表示那兩筆紀錄各自都是序列，每位 validator 一筆六欄位項目；未加裝飾的符號是 prior 狀態、加了 prime 的是 posterior——這個慣例 GP 不是在 §3 訂下的，而是在 σ′ ≡ Υ(σ, B) 旁邊訂的——而 dagger 與 double-dagger 標記的是單一次轉移內部的中間值，它們既不在 σ 也不在 σ′ 裡"
+  ],
+  "stem": (
             "Eq. 13.1–13.2 declare π ≡ (π_V, π_L, π_C, π_S) with (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, "
             "g ∈ N, a ∈ N)⟧², and §13.1 then works through π_V†, π_V‡ and π′_V. An interviewer asks you to read "
             "that notation aloud. Which reading is right?"

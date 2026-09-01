@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch04-stf-extrinsic",
  "ch": "4", "section": "4.1 The Block", "gpRef": "eq. 4.2–4.3 (block / extrinsic)",
  "difficulty": 1, "kind": "concept", "tags": ["block", "extrinsic"],
- "stem": "Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Which of the following is NOT one of them?",
+  "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。下列哪一個**不是**其中之一？",
+  "optionsZh": [
+   "E_T——供 Safrole slot-sealer 競賽用的 ticket",
+   "E_X——由外部帳戶簽署的使用者交易",
+   "E_A——validator 提交的 availability assurance",
+   "E_D——disputes（verdicts、culprits、faults）"
+  ],
+  "stem": "Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Which of the following is NOT one of them?",
  "options": [
   "E_T — tickets for the Safrole slot-sealer contest",
   "E_X — user transactions signed by external accounts",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "ch04-state-components",
  "ch": "4", "section": "4.2 The State", "gpRef": "eq. 4.4 (state composition)",
  "difficulty": 2, "kind": "concept", "tags": ["state"],
- "stem": "GP eq. 4.4 partitions the state σ into 17 components. Which pairing of symbol → meaning is WRONG?",
+  "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。哪一組「符號 → 意義」的對應是**錯的**？",
+  "optionsZh": [
+   "ρ → 每個 core 目前的 availability assignment（已被擔保但尚未 available 的 work-report）",
+   "ξ → 最近被 accumulate 的 work-package（一個 epoch 份的歷史）",
+   "ω → 用來補充每個 core 的 pool 的 authorizer queue",
+   "θ → 最近一個區塊的 accumulation output log"
+  ],
+  "stem": "GP eq. 4.4 partitions the state σ into 17 components. Which pairing of symbol → meaning is WRONG?",
  "options": [
   "ρ → each core's current availability assignment (a guaranteed but not-yet-available work-report)",
   "ξ → work-packages recently accumulated (one epoch of history)",
@@ -48,7 +62,14 @@ ITEMS = [
   "alsoCh": ["8", "12"],
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.5–4.20",
  "difficulty": 2, "kind": "concept", "tags": ["stf", "ordering"],
- "stem": "In the state-transition dependency graph, the posterior authorizer pool α′ is defined as α′ ≺ (H, E_G, φ′, α). What does this imply for the order of computation inside a block import?",
+  "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
+  "optionsZh": [
+   "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的時槽 H_T 與先前的 pool α",
+   "α′ 必須在 accumulation **之後**才能算，因為 φ′（posterior 的 authorizer queue）要等 accumulate 跑完才知道（`assign` host call 可能改動它）",
+   "α′ 必須在 guarantees extrinsic 被驗證之前算出來，因為 eq. 11.32 是拿每份 report 的 authorizer 去比對 posterior 的 pool α′[w_c]",
+   "α′ 與 extrinsic 無關、可以和 Safrole 平行執行，因為 φ 只會透過 delegator χ_V 持有的 `designate` 特權改變"
+  ],
+  "stem": "In the state-transition dependency graph, the posterior authorizer pool α′ is defined as α′ ≺ (H, E_G, φ′, α). What does this imply for the order of computation inside a block import?",
  "options": [
   "α′ can be computed before any extrinsic is validated, since eq. 4.5–4.20 makes it depend only on the header's timeslot H_T and the prior pool α",
   "α′ must be computed after accumulation, because φ′ (the posterior authorizer queue) is only known once accumulate has run (the `assign` host call may change it)",
@@ -69,7 +90,14 @@ ITEMS = [
  "id": "ch04-common-era",
  "ch": "4", "section": "4.4 Time", "gpRef": "§4.4 (JAM Common Era)",
  "difficulty": 1, "kind": "concept", "tags": ["time"],
- "stem": "When does the JAM Common Era begin, and why was that particular time of day chosen?",
+  "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
+  "optionsZh": [
+   "2025 年 1 月 1 日 00:00 UTC——從午夜起算讓時槽 0 成為某個日曆日的第一槽，因此每個 14,400 槽的邊界在全世界都是一次日期變換",
+   "2025 年 1 月 1 日 12:00 UTC——選正午確保所有主要時區在距起點恰好 24 小時的整數倍處都落在同一個日曆日",
+   "2024 年 1 月 1 日 12:00 UTC——第一版 Gray Paper 發表的那天，所以時槽索引是從規格自己的生日開始數",
+   "1970 年 1 月 1 日 00:00 UTC——也就是 Unix 紀元本身，所以 JAM 的時槽索引就是當前 Unix 時間除以 P = 6 秒"
+  ],
+  "stem": "When does the JAM Common Era begin, and why was that particular time of day chosen?",
  "options": [
   "00:00 UTC on 1 January 2025 — a midnight start makes timeslot 0 the first slot of a calendar day, so every 14,400-slot boundary is a date change worldwide",
   "12:00 UTC on 1 January 2025 — midday ensures every major timezone is on the same calendar date at any exact 24-hour multiple from the epoch start",
@@ -90,7 +118,14 @@ ITEMS = [
  "id": "ch04-in-core-vs-on-chain",
  "ch": "4", "section": "4.8 The Core Model and Services", "gpRef": "§4.9.1–4.9.2",
  "difficulty": 1, "kind": "concept", "tags": ["architecture", "refine", "accumulate"],
- "stem": "Which statement correctly contrasts JAM's in-core and on-chain consensus models?",
+  "stemZh": "哪一個敘述正確地對比了 JAM 的 in-core 與 on-chain 兩種共識模型？",
+  "optionsZh": [
+   "in-core 的運算（refine）由每一位 validator 執行，而 on-chain 的運算（accumulate）只由出塊者執行、其他人在出現爭議時才重放",
+   "in-core 的運算（refine）由 validator 的一個子集執行，並由「擔保／背書／稽核／判定」這套機制保障；on-chain 的運算（accumulate）由全體 validator 執行",
+   "in-core 的運算（refine）是有狀態的、可以在 service 之間轉移餘額；on-chain 的運算（accumulate）是無狀態的、可以接受任意大的輸入",
+   "兩者都由全體 validator 執行，差別只在計價：in-core 的 gas 按 work-package 的每個位元組計費，on-chain 的 gas 按 PVM 指令計費"
+  ],
+  "stem": "Which statement correctly contrasts JAM's in-core and on-chain consensus models?",
  "options": [
   "In-core computation (refine) is executed by every validator, while on-chain computation (accumulate) is executed only by the block author and replayed by others on a dispute",
   "In-core computation (refine) is executed by a subset of validators and secured by the guarantee/assure/audit/judge game; on-chain computation (accumulate) is executed by all validators",
@@ -111,7 +146,14 @@ ITEMS = [
  "id": "ch04-balance-timeslot-ranges",
  "ch": "4", "section": "4.6–4.7", "gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
  "difficulty": 1, "kind": "concept", "tags": ["types"],
- "stem": "Which of the following is TRUE about the numeric domains used by JAM?",
+  "stemZh": "關於 JAM 所使用的數值域，下列哪一項為**真**？",
+  "optionsZh": [
+   "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；時槽是 N_2^32，使協定的壽命延伸到 2840 年",
+   "餘額是 N_2^128 以配合 Polkadot 的 10^10 面額；時槽是 N_2^64，所以槽索引永遠不會回繞、協定也沒有明訂的終止日",
+   "餘額是 N_2^64、採用 Ethereum 的 10^18 面額；時槽是 N_2^32，套用該面額後總發行量上限約為 18 顆完整代幣",
+   "餘額與時槽都是 N_2^64、採用 Kusama 的 10^12 面額，使協定的終止日遠在 2840 年之後"
+  ],
+  "stem": "Which of the following is TRUE about the numeric domains used by JAM?",
  "options": [
   "Balances are N_2^64 (u64) with a standard denomination of 10^9 tokens; timeslots are N_2^32, giving the protocol a lifespan into the year 2840",
   "Balances are N_2^128 to match Polkadot's 10^10 denomination; timeslots are N_2^64, so the slot index can never wrap and the protocol has no dated end of life",
@@ -132,7 +174,14 @@ ITEMS = [
  "id": "ch04-coretime-vs-gas",
  "ch": "4", "section": "4.8.2 On Services and Accounts", "gpRef": "§4.9.2 last paragraphs",
  "difficulty": 2, "kind": "rationale", "tags": ["coretime", "authorization"],
- "stem": "How does JAM replace Ethereum's gas-purchase model for buying blockspace?",
+  "stemZh": "JAM 用什麼取代了 Ethereum 那套「用 gas 購買區塊空間」的模型？",
+  "optionsZh": [
+   "區塊空間以 gas 計量，並在 work-report 被 accumulate 時從該 service 的餘額 a_b 扣款；餘額見底的 service 其 report 會被丟棄",
+   "coretime 是事先購買的（Agile-Coretime 式）並指派給一個授權代理；採購流程不在 GP 的範圍內，預期由某個 system parachain 處理",
+   "validator 把每個 6 秒的時槽拍賣給出價最高的 work-package 建構者，而 §8 的授權系統的存在就是為了結算該拍賣並支付得標金",
+   "work-package 的建構者簽署一筆交易，在被納入時從自己的帳戶扣款，與 Ethereum 完全相同——這是 JAM 唯一保留可由簽章識別之交易者的地方"
+  ],
+  "stem": "How does JAM replace Ethereum's gas-purchase model for buying blockspace?",
  "options": [
   "Blockspace is metered in gas and debited from the accumulating service's balance a_b as its work-report accumulates; a service whose balance runs dry has its reports dropped",
   "Coretime is pre-purchased (Agile-Coretime style) and assigned to an authorization agent; procurement is out of scope of the GP and expected to be handled by a system parachain",
@@ -153,7 +202,14 @@ ITEMS = [
  "id": "ch04-pvm-summary",
  "ch": "4", "section": "4.5 The Virtual Machine and Gas", "gpRef": "§4.7 The Virtual Machine and Gas, eq. 4.22–4.27",
  "difficulty": 1, "kind": "concept", "tags": ["pvm"],
- "stem": "Which description of the PVM as summarized in the Overview is correct?",
+  "stemZh": "關於 Overview 中所摘述的 PVM，哪一個描述是正確的？",
+  "optionsZh": [
+   "一台源自 WebAssembly 的堆疊機，32 位元字組、16 個暫存器，線性記憶體以 64 KiB 為單位成長且沒有不可存取的頁",
+   "一台以 RISC-V（RV64EM）為基礎的暫存器機，13 個 64 位元暫存器、little-endian，位址空間為可分頁的 32 位元、每頁 4096 個 octet",
+   "一台以 RISC-V（RV32IM）為基礎的暫存器機，16 個 32 位元暫存器、big-endian，位址空間是完全不分頁的平坦 64 位元空間",
+   "一台相容 EVM 的機器，指令集裡保留了 Yellow Paper 的密碼學 precompile 與環境操作碼，字組為 256 位元"
+  ],
+  "stem": "Which description of the PVM as summarized in the Overview is correct?",
  "options": [
   "A stack machine derived from WebAssembly with 32-bit words, 16 registers and a linear memory that grows in 64 KiB pages with no inaccessible pages",
   "A RISC-V (RV64EM) based register machine with 13 64-bit registers, little-endian, and a pageable 32-bit address space in 4096-octet pages",
@@ -174,7 +230,14 @@ ITEMS = [
  "id": "ch04-forks-safrole-grandpa",
  "ch": "4", "section": "4.3 Which History?", "gpRef": "§4.3",
  "difficulty": 1, "kind": "rationale", "tags": ["consensus"],
- "stem": "JAM states three goals about forks: (1) two heads should rarely form, (2) when they do they should be resolved quickly, (3) it should be possible to identify a recent block that will remain in history in perpetuity. Which mechanism delivers which goal?",
+  "stemZh": "JAM 對分叉提出三個目標：(1) 很少長出兩個 head、(2) 一旦長出應迅速收斂、(3) 應能指出某個近期區塊將永久留在歷史裡。哪個機制達成哪個目標？",
+  "optionsZh": [
+   "Safrole 達成 (1)、Grandpa 達成 (3)，而兩者共同促成 (2)",
+   "Grandpa 達成 (1) 與 (2)；Safrole 達成 (3)",
+   "Safrole 達成全部三項；Grandpa 只用於 BEEFY 的橋接",
+   "ELVES 稽核達成 (1)；Safrole 達成 (2)；Grandpa 達成 (3)"
+  ],
+  "stem": "JAM states three goals about forks: (1) two heads should rarely form, (2) when they do they should be resolved quickly, (3) it should be possible to identify a recent block that will remain in history in perpetuity. Which mechanism delivers which goal?",
  "options": [
   "Safrole delivers (1), Grandpa delivers (3), and both contribute to (2)",
   "Grandpa delivers (1) and (2); Safrole delivers (3)",

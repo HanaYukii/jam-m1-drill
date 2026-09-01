@@ -5,7 +5,14 @@ ITEMS = [
  "id": "appB-result-constants",
  "ch": "B", "section": "B.1 Result Constants; Omega_A (assign)", "gpRef": "§B.1; Ω_A",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "privileges"],
- "stem": "A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?",
+  "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。哪一道階梯是對的？又是什麼區分了這些常數？",
+  "optionsZh": [
+   "要寫進佇列的那段記憶體讀不到就 panic；core 索引大於等於 C 得到 CORE；呼叫者不是該 core 目前的 assigner 得到 HUH；被指名的新 assigner 不在 service-id 集合內得到 WHO。每個常數指名的是「哪一種東西壞了」：越界的索引、缺少的權限、解析不出的身分。",
+   "要寫進佇列的那段記憶體讀不到就 panic；core 索引大於等於 C 得到 CORE；被指名的新 assigner 不在 service-id 集合內得到 WHO；呼叫者不是該 core 目前的 assigner 得到 HUH。權限擺在最後，好讓結構本身就壞掉的呼叫不會僅僅因為「是誰送來的」而被打回。",
+   "要寫進佇列的那段記憶體讀不到就 panic；呼叫者不是該 core 目前的 assigner 得到 WHO；core 索引大於等於 C 得到 CORE；被指名的新 assigner 不在 service-id 集合內得到 WHAT。WHO 指的是發出呼叫的那一方，WHAT 指的是宿主無法解析成任何東西的引數。",
+   "要寫進佇列的那段記憶體讀不到得到 OOB；core 索引大於等於 C 得到 CORE；呼叫者不是該 core 目前的 assigner 得到 HUH；被指名的新 assigner 不在 service-id 集合內得到 WHO。記憶體錯誤在此是被回報而非致命的，所以 accumulation 會繼續，呼叫者可以重試。"
+  ],
+  "stem": "A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?",
  "options": [
   "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. Each constant names what kind of thing is wrong: the out-of-range index, the absent privilege, the unresolvable identity.",
   "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHO; a caller that is not that core's current assigner gives HUH. Privilege comes last so that a structurally broken call is never turned away merely for who happened to submit it.",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "appB-three-invocations",
  "ch": "B", "section": "B.2–B.4 Invocations", "gpRef": "eq. B.1–B.2, B.5–B.6, B.9–B.11",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "pvm"],
- "stem": "The PVM has three invocation types. Which statement about their host-call sets is correct in GP 0.8.0?",
+  "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，關於它們各自的 host call 集合，哪個敘述正確？",
+  "optionsZh": [
+   "Ψ_I（is-authorized，無狀態）：只有 gas、grow_heap、fetch；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、lookup、read、write、info、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
+   "Ψ_I（is-authorized，無狀態）：只有 gas、grow_heap、fetch；Ψ_R（refine）：gas、grow_heap、fetch、lookup、read、write、info、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、historical_lookup、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
+   "Ψ_I（is-authorized）：gas、grow_heap、fetch、historical_lookup；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、lookup、read、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、write、info、export、machine、peek、poke、pages、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
+   "Ψ_I（is-authorized，無狀態）：只有 gas、fetch；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、fetch、lookup、read、write、info、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；grow_heap 只限 refine，因為只有 in-core 的執行才可以調整 RAM 大小，而其他任何 id 都會 panic（☇）且不扣 gas"
+  ],
+  "stem": "The PVM has three invocation types. Which statement about their host-call sets is correct in GP 0.8.0?",
  "options": [
   "Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, lookup, read, write, info, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT",
   "Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, lookup, read, write, info, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, historical_lookup, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "appB-accumulate-invocation",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.7–B.14",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "accumulate"],
- "stem": "Which statement about the accumulate invocation Ψ_A(e, t, s, g, i) is correct?",
+  "stemZh": "關於 accumulate 的 invocation Ψ_A(e, t, s, g, i)，哪個敘述正確？",
+  "optionsZh": [
+   "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 5, g, E(t, s, |i|), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 y；32 位元組的回傳 blob 會成為 yield 的雜湊；輸入透過 `fetch` 讀取",
+   "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 1, g, E(t, s, |i|) ⌢ E(i), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 x，所以出錯前做過的一切都會保留；32 位元組的回傳 blob 會成為 yield 的雜湊",
+   "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 0, g, E(t, s, |i|), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 y；而 i 當中的 deferred transfer 改由另一個獨立的 Ψ_T on-transfer invocation 送達",
+   "若該 service 的程式碼不可得或大於 W_C，它會以 work error BAD 或 BIG 停止，與 Ψ_I 和 Ψ_R 完全相同；否則由 guarantor 在 core 內執行 Ψ_M(code, 進入點 5, g, E(c, i, s, payload, H(p)), F, I(s, s)^2)，而出塊者只記下產生的雜湊；系統仍保有 regular context x 與 exceptional context y（只有 `checkpoint` 會把 x 複製到 y），遇到 ☇ 或 ∞ 時結果收斂到 y"
+  ],
+  "stem": "Which statement about the accumulate invocation Ψ_A(e, t, s, g, i) is correct?",
  "options": [
   "If the service's code is unavailable or > W_C it returns the state with incoming transfer amounts already credited and no other effect; otherwise it runs Ψ_M(code, entry 5, g, E(t, s, |i|), F, I(s, s)^2) with a regular context x and an exceptional context y (only `checkpoint` copies x into y); on ☇ or ∞ the result collapses to y; a 32-octet return blob becomes the yield hash; inputs are read via `fetch`",
   "If the service's code is unavailable or > W_C it returns the state with incoming transfer amounts already credited and no other effect; otherwise it runs Ψ_M(code, entry 1, g, E(t, s, |i|) ⌢ E(i), F, I(s, s)^2) with a regular context x and an exceptional context y (only `checkpoint` copies x into y); on ☇ or ∞ the result collapses to x, so everything done before the fault is kept; a 32-octet return blob becomes the yield hash",
@@ -68,7 +89,14 @@ ITEMS = [
  "id": "appB-new-service-index",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.10, B.14 & `new` (§B.7)",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "accounts"],
- "stem": "How are new service indices chosen by the `new` host call in GP 0.8.0?",
+  "stemZh": "在 GP 0.8.0 中，`new` host call 是怎麼挑選新的 service index 的？",
+  "optionsZh": [
+   "context 的 next-free id 起始於 check(decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S − 2^8) + S)，其中 S = 2^16；check() 以線性探測（+1，在 [S, 2^32 − 2^8) 內回繞）直到找到一個不在 keys(δ) 裡的索引；每次 `new` 之後，下一個候選是 check(S + (i − S + 42) mod (2^32 − S − 2^8))；只有 registrar 可以改為指定某個小於 S 的索引，若該索引已存在則回傳 FULL",
+   "context 的 next-free id 起始於 check(decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S − 2^8) + S)，其中 S = 2^16；check() 以線性探測（+1，在 [S, 2^32 − 2^8) 內回繞）直到找到一個不在 keys(δ) 裡的索引；每次 `new` 之後，下一個候選就只是 check(i + 1)；只有 registrar 可以改為指定某個小於 S 的索引，若該索引已存在則回傳 WHO",
+   "context 的 next-free id 起始於 check(decode_4(H(E(s, η_0, H_T))) mod (2^32 − S − 2^8) + S)，其中 S = 2^8；check() 以線性探測（+1，在 [S, 2^32 − 2^8) 內回繞）直到找到一個不在 keys(δ) 裡的索引；每次 `new` 之後，下一個候選是 check(S + (i − S + 42) mod (2^32 − S − 2^8))；只有 registrar 可以改為指定某個小於 S 的索引，若該索引已存在則回傳 FULL",
+   "context 的 next-free id 就從 S 本身開始（S = 2^16），所以這個序列是由出塊者而非由熵決定的；check() 以線性探測（+1，在 [S, 2^32 − 2^8) 內回繞）直到找到一個不在 keys(δ) 裡的索引；每次 `new` 之後，下一個候選是 check(i + 1)；只有 registrar 可以改為指定某個小於 S 的索引，若該索引已存在則回傳 FULL"
+  ],
+  "stem": "How are new service indices chosen by the `new` host call in GP 0.8.0?",
  "options": [
   "The context's next-free id starts at check(decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S − 2^8) + S) with S = 2^16; check() linearly probes (+1 wrapping inside [S, 2^32 − 2^8)) until an index not in keys(δ); after each `new` the next candidate is check(S + (i − S + 42) mod (2^32 − S − 2^8)); only the registrar may instead request a specific index < S, which returns FULL if that index already exists",
   "The context's next-free id starts at check(decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S − 2^8) + S) with S = 2^16; check() linearly probes (+1 wrapping inside [S, 2^32 − 2^8)) until an index not in keys(δ); after each `new` the next candidate is simply check(i + 1); only the registrar may instead request a specific index < S, which returns WHO if that index already exists",
@@ -89,7 +117,14 @@ ITEMS = [
  "id": "appB-transfer-rules",
  "ch": "B", "section": "B.7 Accumulate Functions — transfer", "gpRef": "`transfer` = 21",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "transfers"],
- "stem": "The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. Which order/meaning is correct?",
+  "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。哪一組順序與意義是正確的？",
+  "optionsZh": [
+   "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ LOW；餘額 − a < 自身門檻 a_t → CASH；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並扣 gas g = M_T + l",
+   "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ CASH；餘額 − a < 自身門檻 a_t → LOW；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並扣 gas g = M_T + l",
+   "memo 讀不到 → HUH；d ∉ keys(δ) → WHO；l < 發送方自己的 minmemogas a_m → LOW；餘額 − a < 0 → CASH；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並只扣 gas g = M_T",
+   "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ LOW；餘額 − a < 自身門檻 a_t → CASH；其餘為 OK：a 在這次 host call 內就被移入 δ[d] 的餘額，收款方也立即被以那 128 位元組的 memo 進入執行，並扣 gas g = M_T + l"
+  ],
+  "stem": "The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. Which order/meaning is correct?",
  "options": [
   "Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → LOW; balance − a < own threshold a_t → CASH; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged",
   "Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → CASH; balance − a < own threshold a_t → LOW; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged",
@@ -110,7 +145,14 @@ ITEMS = [
  "id": "appB-solicit-forget",
  "ch": "B", "section": "B.7 — solicit / forget / eject", "gpRef": "`solicit` = 24, `forget` = 25, `eject` = 22",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "preimages"],
- "stem": "Given request status l = a_l[(h, z)] and current slot t, which transitions do `solicit` and `forget` perform?",
+  "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前時槽 t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
+  "optionsZh": [
+   "solicit：沒有該項 → []（若新的 footprint 付不起則 FULL）；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → [x, t]；[x, y, w] 且 y < t − D → [w, t]；其餘 → HUH",
+   "solicit：沒有該項 → []（若新的 footprint 付不起則 CASH）；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → []（立即變為不可用）；[x, y, w] 且 y < t − D → [w, t]；其餘 → HUH",
+   "solicit：沒有該項 → [t]；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → [x, t]；[x, y, w] 且 w < t − D → [w, t]；其餘 → HUH。兩個呼叫在帳戶付不起新門檻時都回傳 FULL",
+   "solicit 與 forget 是管理 D3L segment 的 refine host call：solicit 保留下一個 export 索引（W_X 用盡時回 FULL）、forget 釋放一個，索引不對時兩者都回 HUH；而 [] → [x] → [x, y] → [x, y, w] 這個狀態格則純粹由 preimages extrinsic E_P 驅動"
+  ],
+  "stem": "Given request status l = a_l[(h, z)] and current slot t, which transitions do `solicit` and `forget` perform?",
  "options": [
   "solicit: no entry → [] (FULL if the new footprint is unaffordable); [x, y] → [x, y, t]; anything else → HUH. forget: [] or [x, y] with y < t − D → delete request and preimage; [x] → [x, t]; [x, y, w] with y < t − D → [w, t]; anything else → HUH",
   "solicit: no entry → [] (CASH if the new footprint is unaffordable); [x, y] → [x, y, t]; anything else → HUH. forget: [] or [x, y] with y < t − D → delete request and preimage; [x] → [] (unavailable at once); [x, y, w] with y < t − D → [w, t]; anything else → HUH",
@@ -131,7 +173,14 @@ ITEMS = [
  "id": "appB-bless-assign-designate",
  "ch": "B", "section": "B.7 — bless / assign / designate", "gpRef": "`bless` = 15, `assign` = 16, `designate` = 17",
  "difficulty": 2, "kind": "delta", "tags": ["host-calls", "privileges", "delta-0.8.0"],
- "stem": "Which privilege checks do bless, assign and designate perform in GP 0.8.0?",
+  "stemZh": "在 GP 0.8.0 中，bless、assign 與 designate 各自執行哪些權限檢查？",
+  "optionsZh": [
+   "bless：呼叫者必須是當前的 manager χ_M（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → CORE，呼叫者必須是 χ_A[c]（否則 HUH），寫入 80 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_V（否則 HUH），把 ι 設為 z 把 336 位元組的金鑰",
+   "bless：呼叫者必須是當前的 registrar χ_R（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → CORE，呼叫者必須是 χ_A[c]（否則 HUH），寫入 80 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_M（否則 HUH），把 ι 設為 z 把 336 位元組的金鑰",
+   "bless：呼叫者必須是當前的 manager χ_M（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → HUH，呼叫者必須是 χ_A[c]（否則 CORE），寫入 32 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_V（否則 HUH），把 ι 設為 z 把 32 位元組的 Ed25519 金鑰",
+   "三者都只以 manager 為關卡：除非呼叫者是 χ_M，否則各自回傳 HUH。bless 另外在 m、v 或 r 不是 service index 時回傳 WHO，assign 另外在 c ≥ C 時回傳 CORE 並寫入 80 項的佇列 φ[c]，designate 則另外要求 z ∈ N_V；χ_A[c] 與 χ_V 是唯讀的，只有 bless 能改動它們"
+  ],
+  "stem": "Which privilege checks do bless, assign and designate perform in GP 0.8.0?",
  "options": [
   "bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 336-octet keys",
   "bless: caller must be the current registrar χ_R (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_M (else HUH), sets ι to z 336-octet keys",
@@ -152,7 +201,14 @@ ITEMS = [
  "id": "appB-checkpoint-yield",
  "ch": "B", "section": "B.7 — checkpoint / yield / provide", "gpRef": "`checkpoint` = 18, `yield` = 26, `provide` = 27",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "accumulate"],
- "stem": "What do `checkpoint`, `yield` and `provide` do inside accumulate?",
+  "stemZh": "在 accumulate 之中，`checkpoint`、`yield` 與 `provide` 各自做什麼？",
+  "optionsZh": [
+   "checkpoint：把 regular context x 複製到 exceptional context y（因此之後的 panic／OOG 會提交存檔當下的狀態），並在 φ_7 回傳剩餘 gas；yield(o)：把位址 o 處的 32 位元組雜湊記為該 service 的 accumulation 產出（θ 的條目／BEEFY 可見的承諾）；provide(s, o, z)：為 service s（若 φ_7 = 2^64−1 則為呼叫者自己）某個狀態為 [] 的 request 提供 preimage 位元組，出錯時回傳 WHO／HUH，並在該輪之後才整合",
+   "checkpoint：把 exceptional context y 複製到 regular context x（因此之後的 panic／OOG 會倒回這次 accumulation 的起點），並在 φ_7 回傳已用掉的 gas；yield(o)：把位址 o 處的 32 位元組雜湊記為該 service 的 accumulation 產出（θ 的條目／BEEFY 可見的承諾）；provide(s, o, z)：為 service s（若 φ_7 = 2^64−1 則為呼叫者自己）某個狀態為 [] 的 request 提供 preimage 位元組，出錯時回傳 WHO／HUH，並在該輪之後才整合",
+   "checkpoint：把 regular context x 複製到 exceptional context y（因此之後的 panic／OOG 會提交存檔當下的狀態），並在 φ_7 回傳剩餘 gas；yield(o)：當場結束這次 invocation、提交 x 並放棄未用完的 gas，以位址 o 處的 32 位元組作為產出；provide(s, o, z)：在同一次 host call 內就把 preimage 直接寫進 δ[s]_p，並把 a_l[(H(i), z)] 移到 [t]",
+   "三者都屬於 refine invocation：checkpoint 為內層 PVM 的映射 m 拍快照，好讓之後的 panic 能還原，並在 φ_7 回傳剩餘 gas；yield(o) 把位址 o 處的 32 位元組附加到匯出序列 e；provide(s, o, z) 把 preimage 位元組交給該 guarantor 的本地快取，出錯時回傳 WHO／HUH；accumulate 則改用 write、export 與 transfer 達成同樣的效果"
+  ],
+  "stem": "What do `checkpoint`, `yield` and `provide` do inside accumulate?",
  "options": [
   "checkpoint: copies the regular context x into the exceptional context y (so a later panic/OOG commits the checkpointed state) and returns remaining gas in φ_7; yield(o): records the 32-octet hash at o as the service's accumulation output (θ entry / BEEFY-visible commitment); provide(s, o, z): supplies preimage bytes for a request [] of service s (or the caller if φ_7 = 2^64−1), returning WHO/HUH on errors, integrated after the round",
   "checkpoint: copies the exceptional context y into the regular context x (so a later panic/OOG rewinds to the start of the accumulation) and returns the gas already used in φ_7; yield(o): records the 32-octet hash at o as the service's accumulation output (θ entry / BEEFY-visible commitment); provide(s, o, z): supplies preimage bytes for a request [] of service s (or the caller if φ_7 = 2^64−1), returning WHO/HUH on errors, integrated after the round",

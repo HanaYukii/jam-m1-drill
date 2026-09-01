@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch05-header-fields",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.1",
  "difficulty": 1, "kind": "concept", "tags": ["header"],
- "stem": "GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?",
+  "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。哪一個欄位**不屬於** header？",
+  "optionsZh": [
+   "H_R——先前的 state root，也就是父區塊執行後的 state root",
+   "H_W——winning-tickets marker，攜帶下個 epoch 的 E = 600 張 ticket",
+   "H_B——BEEFY root，承諾本區塊自己的 accumulation 產出",
+   "H_V——產生熵的 VRF 簽章，餵給累積器 η_0"
+  ],
+  "stem": "GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?",
  "options": [
   "H_R — the prior state root, which is the parent block's posterior state root",
   "H_W — the winning-tickets marker, carrying the next epoch's E = 600 tickets",
@@ -54,7 +61,14 @@ ITEMS = [
  "id": "ch05-extrinsic-hash-080",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7 (H_x)",
  "difficulty": 3, "kind": "delta", "tags": ["header", "delta-0.8.0", "codec"],
- "stem": "GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?",
+  "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
+  "optionsZh": [
+   "p 與 g 是 E_P 與 E_G 完整的 codec 編碼，與區塊本體攜帶的一模一樣，所以 a 承諾了每一個 preimage blob 與每一份完整的 work-report",
+   "p 編碼的是 (E_4(service), H(data)) 配對的序列，g 編碼的是 (H(work-report), E_4(slot), var(credential)) 三元組的序列，兩個序列都帶變長前綴",
+   "p 是把所有 preimage blob 串接後的 Blake2b 雜湊、g 是把所有 work-report 串接後的 Keccak 雜湊，所以 a 各只帶一個 32 位元組的葉子",
+   "p 與 g 從 a 中被移除，a 因此是三元素序列 [E_T(E_T), E_A(E_A), E_D(E_D)]；preimage 與 guarantee 只透過先前的 state root 被承諾"
+  ],
+  "stem": "GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?",
  "options": [
   "p and g are the full codec encodings of E_P and E_G exactly as the block body carries them, so a commits to every preimage blob and every complete work-report",
   "p encodes the sequence of (E_4(service), H(data)) pairs and g encodes the sequence of (H(work-report), E_4(slot), var(credential)) tuples, each sequence var-length prefixed",
@@ -103,7 +117,14 @@ ITEMS = [
  "id": "ch05-author-index",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 (H_i, H_a)",
  "difficulty": 2, "kind": "concept", "tags": ["header", "validators"],
- "stem": "The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?",
+  "stemZh": "出塊者索引 H_I 指涉的是哪一個 validator 集合？出塊者的 Bandersnatch 金鑰 H_A 又是怎麼取得的？",
+  "optionsZh": [
+   "指涉 prior 的 active set κ；H_A = κ[H_I]_b，而且 H_A 會與 H_I 並列、序列化成 header 的第十一個欄位",
+   "指涉 posterior 的 active set κ′；H_A ≡ κ′[H_I]_b，而且 H_A **不會**被序列化——它只是一個等價式",
+   "指涉 pending set γ_k；H_A = γ_k[H_I]_b，這也是為什麼在一個 epoch 的第一塊裡 H_I 可能超過 |κ′|",
+   "指涉 staging set ι；H_A = ι[H_I]_b，因為 ι 持有 delegator 為下一個 epoch 指定的金鑰"
+  ],
+  "stem": "The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?",
  "options": [
   "Into the prior active set κ; H_A = κ[H_I]_b, and H_A is serialized as an eleventh header field beside H_I",
   "Into the posterior active set κ′; H_A ≡ κ′[H_I]_b, and H_A is NOT serialized — it is merely an equivalence",
@@ -125,7 +146,14 @@ ITEMS = [
   "alsoCh": ["11"],
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
  "difficulty": 2, "kind": "concept", "tags": ["header", "ancestry"],
- "stem": "The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?",
+  "stemZh": "GP 只要求實作保存過去 L = 14,400 個時槽（24 小時）內出塊的祖先 header。是哪一項鏈上檢查需要這個祖先集合 A？",
+  "optionsZh": [
+   "驗證某個 guarantee 的 lookup-anchor 區塊（雜湊、時槽與執行後的 state root）確實出現在這條鏈上——這是狀態 σ 自己無法佐證的",
+   "驗證每個新區塊的父雜湊 H_P 確實是父 header 的 Blake2b——這需要回溯到最後一個被定案的區塊為止的每一個 header",
+   "驗證每份 availability assurance 的 anchor 與父雜湊 H_P 相符——這需要在保存的 header 裡搜尋以定位那個 anchor",
+   "在跳過一個 epoch 之後重算 fallback 的 slot-sealer 序列 F(η′_2, κ′)——這需要被跳過那個 epoch 裡每個 header 的熵 VRF H_V"
+  ],
+  "stem": "The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?",
  "options": [
   "Verifying that a guarantee's lookup-anchor block (hash, timeslot and posterior state root) really occurs in the chain, which state σ on its own cannot attest",
   "Verifying that each new block's parent hash H_P is the Blake2b of the parent header, which needs every header back to the last finalized block",
@@ -146,7 +174,14 @@ ITEMS = [
  "id": "ch05-markers-types",
  "ch": "5", "section": "5.1 The Markers", "gpRef": "eq. 5.11 (markers)",
  "difficulty": 2, "kind": "concept", "tags": ["header", "markers"],
- "stem": "Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?",
+  "stemZh": "依 eq. 5.11，關於三個 header marker（H_E、H_W、H_O）的敘述哪一個正確？",
+  "optionsZh": [
+   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]——offenders marker 是一個普通序列，可以為空但永遠不是 None",
+   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]?——三者都是 optional，而且在 epoch 第一塊之外三者都是 None",
+   "H_E ∈ ([336 位元組 validator key]_V)?；H_W ∈ ([bandersnatch key]_E)?；H_O ∈ [ed25519 key]——epoch marker 帶的是完整金鑰，winners marker 帶的是 fallback 的封印者",
+   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [N_V]?——offenders marker 是 optional 的，而且裝的是 validator 索引而不是金鑰"
+  ],
+  "stem": "Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?",
  "options": [
   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)? ; H_W ∈ ([ticket]_E)? ; H_O ∈ [ed25519 key] — the offenders marker is a plain sequence that may be empty but is never None",
   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)? ; H_W ∈ ([ticket]_E)? ; H_O ∈ [ed25519 key]? — all three are optional and all three are None outside an epoch's first block",

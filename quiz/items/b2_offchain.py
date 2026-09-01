@@ -5,7 +5,14 @@ ITEMS = [
  "id": "arch-audit-initial-tranche",
  "ch": "ARCH", "section": "17.3 Selection of Reports", "gpRef": "eq. 17.2–17.4",
  "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves"],
- "stem": "How does a validator pick the work-reports it must audit in the INITIAL tranche (a_0)?",
+  "stemZh": "validator 如何挑出自己在**初始 tranche**（a_0）必須稽核的 work-report？",
+  "optionsZh": [
+   "它以 context X_U ⌢ Y(H_V) 對空訊息做一個 Bandersnatch VRF 簽章 s_0，再用 Y(s_0) 對每個 core 的序列 q 做 Fisher-Yates 洗牌，取前十個當中非空的那些",
+   "它稽核本區塊中所有變成 available 的 report：q 每個作用中的 core 一筆，所以初始 tranche 就是它全部的非空項目，過程不涉及任何可驗證隨機性",
+   "它稽核自己在上一個 rotation 擔保過的那些 core 上的 report，沿用該 rotation 的 guarantor 指派 G*，不為這個 tranche 另外抽取新的隨機性",
+   "它用自己的 Ed25519 金鑰簽署區塊雜湊，稽核那些索引與該簽章低位元相符的 core，取用的 core 數以稽核放大係數 F = 2 所允許的為上限"
+  ],
+  "stem": "How does a validator pick the work-reports it must audit in the INITIAL tranche (a_0)?",
  "options": [
   "It makes a Bandersnatch VRF signature s_0 over context X_U ⌢ Y(H_V) with an empty message, then Fisher-Yates shuffles the per-core sequence q using Y(s_0) and keeps the non-empty entries among the first ten",
   "It audits every report that became available in the block: q holds one entry per active core, so the initial tranche is simply all of its non-empty entries and no verifiable randomness is involved",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "arch-audit-outcomes",
  "ch": "ARCH", "section": "17.1 Overview", "gpRef": "§17.1",
  "difficulty": 2, "kind": "concept", "tags": ["auditing", "disputes"],
- "stem": "GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?",
+  "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。哪一組門檻與後果是正確的？",
+  "optionsZh": [
+   "若仍有超過 2/3 的 validator 發出**正面**判定，發出負面判定的人可能因浪費時間而受罰；若有超過 1/3 發出**負面**判定，含有該 report 的區塊會被列入禁用名單，它與其所有後代都會被忽略",
+   "若有超過 1/2 的 validator 發出**負面**判定，該 report 會從它的 availability assignment 中被移除；若不足此數則什麼也不會發生——沒有任何 validator 會因為誤報而受罰，含有該 report 的區塊仍可繼續被建構",
+   "單一個**負面**判定就足夠：它使承載該 report 的區塊無效，並沒收該 core 三位 guarantor 的質押；不需要其他 validator 再判定，也不會有 verdict 進入 disputes extrinsic，2/3 的正面門檻完全不起作用",
+   "負面判定本身沒有任何後果；只有 disputes extrinsic 才算數，那裡的 verdict 需要全體作用中 validator 的一致簽署，而懲罰集合 ψ_O 只會從 culprits 填入、永遠不會從 faults 填入"
+  ],
+  "stem": "GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?",
  "options": [
   "If more than 2/3 of validators still issue POSITIVE judgments, those issuing negative judgments may be punished for time-wasting; if more than 1/3 issue NEGATIVE judgments, the block containing the report is ban-listed and it and all its descendants are disregarded",
   "If more than 1/2 of validators issue NEGATIVE judgments, the report is dropped from its availability assignment; if fewer do, nothing happens at all — no validator is ever punished for a false negative and the block containing the report stays buildable",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "arch-audit-reconstruction",
  "ch": "ARCH", "section": "17.2 Data Fetching", "gpRef": "§17.2–17.3 & appendix H",
  "difficulty": 2, "kind": "concept", "tags": ["auditing", "erasure-coding"],
- "stem": "How does an auditor obtain the data it needs to re-run a work-report?",
+  "stemZh": "auditor 要怎麼取得重跑一份 work-report 所需的資料？",
+  "optionsZh": [
+   "它從大約三分之一的 validator 取得 erasure-coded 的碎片來重建 bundle，並對照 erasure-root 驗證；匯出的 segment 則靠重跑 refine 重新算出來",
+   "它向出塊者下載整份 bundle——GP 要求出塊者保存它 28 天；匯出的 segment 會一併送達，所以完全不需要重跑 refine 的邏輯",
+   "它直接從鏈上狀態讀取匯入與匯出的 segment：兩者都放在該 reporting service 的 preimage 底下，直到該 report 被 accumulate 之後才過期",
+   "它請該 core 另外兩位 guarantor 重新簽署這份 report，並以一對相符的 Ed25519 簽章作為結果正確的證明；不會取得任何 bundle，也從不重跑 refine"
+  ],
+  "stem": "How does an auditor obtain the data it needs to re-run a work-report?",
  "options": [
   "It reconstructs the bundle from erasure-coded chunks fetched from about one-third of the validators, verified against the erasure-root; exported segments are recomputed by re-running refine",
   "It downloads the whole bundle from the block author, who is required by the GP to retain it for 28 days; the exported segments arrive with it, so the refine logic never has to be re-run",

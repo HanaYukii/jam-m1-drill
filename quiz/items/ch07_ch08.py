@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch07-beta-structure",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.1–7.4",
  "difficulty": 2, "kind": "concept", "tags": ["recent-history", "state"],
- "stem": "In GP 0.8.0 the recent-history state is β ≡ (β_H, β_B). What does each recent block entry in β_H hold, and what is β_B?",
+  "stemZh": "在 GP 0.8.0 中，recent-history 狀態是 β ≡ (β_H, β_B)。β_H 的每一筆近期區塊條目裝什麼？β_B 又是什麼？",
+  "optionsZh": [
+   "每筆 β_H 條目為：(header 雜湊 h, state root s, accumulation-output log 的 super-peak b, 時槽 t, 從被回報的 work-package 雜湊映到 segment root 的字典 p)；β_B 是 accumulation-output belt，一個由每塊 accumulation-output root 構成的 MMR",
+   "每筆 β_H 條目為：(header 雜湊, posterior state root, extrinsic 雜湊, 時槽)；β_B 是最近 H = 8 個區塊上蒐集到的 BEEFY 簽章集合，這正是橋接方不必跟隨 header 鏈也能證明 finality 的憑藉",
+   "每筆 β_H 條目為：(header 雜湊, state root, 時槽, 該區塊中每份被擔保 work-report 的雜湊清單)；β_B 是最近 H = 8 個區塊 header 的序列，保留它是為了讓 lookup-anchor 能直接從狀態解出",
+   "β_H 是一個承諾最近 H = 8 個 header 的滾動雜湊，所以近期歷史只佔 32 個位元組的狀態；β_B 是四項的熵累積器，在每個 epoch 邊界輪替並由每個 header 的 VRF 輸出重新播種"
+  ],
+  "stem": "In GP 0.8.0 the recent-history state is β ≡ (β_H, β_B). What does each recent block entry in β_H hold, and what is β_B?",
  "options": [
   "Each β_H entry: (header hash h, state root s, accumulation-output-log super-peak b, timeslot t, dictionary p of reported work-package hash → segment root); β_B is the accumulation-output belt, an MMR of per-block accumulation-output roots",
   "Each β_H entry: (header hash, posterior state root, extrinsic hash, timeslot); β_B is the set of BEEFY signatures gathered over the last H = 8 blocks, which is what lets a bridge prove finality without following the header chain",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "ch07-beta-dagger",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.5 & 7.8",
  "difficulty": 2, "kind": "concept", "tags": ["recent-history", "pipelining"],
- "stem": "Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?",
+  "stemZh": "為什麼區塊 N 結束時，β_H 最新的那筆條目其 state root s = H_0（零雜湊）？它又是怎麼被補正的？",
+  "optionsZh": [
+   "因為算 β′ 的當下還不知道區塊 N 執行後的 state root（header 帶的是先前的 root）；區塊 N+1 會在任何人讀取 β 之前，用自己的 H_R 覆寫最後一筆的 s 來算出 β†（eq. 7.5）",
+   "因為 state root 要到區塊被定案後才有意義：該條目會保持 H_0 直到 Grandpa 定案區塊 N，屆時 finality gadget 會把真正的 root 寫進該條目，eq. 11.36 也才開始接受以它為 anchor",
+   "因為 β_H 的條目根本不帶 state root：eq. 7.2 宣告一個項目為 ⟨h, b, t, p⟩，零雜湊只是 C(3) 會略過的佔位符，所以 eq. 11.36 只憑 header 雜湊、super-peak 與時槽來比對 anchor",
+   "因為 root 是放進 β_B 而不是這裡：每個區塊把自己執行後的 state root 當成 belt 的下一片葉子附加上去，所以 β_H 的項目可以永遠把 s 留在 H_0，而 anchor 的 state root 是拿去對照 b"
+  ],
+  "stem": "Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?",
  "options": [
   "Because the posterior state root of block N is not yet known when β′ is computed (the header carries the prior root); block N+1 computes β† by overwriting the last entry's s with its own H_R (eq. 7.5) before anything reads β",
   "Because a state root only matters once the block is finalized: the entry keeps H_0 until Grandpa finalizes block N, at which point the finality gadget writes the real root into that entry and eq. 11.36 starts accepting anchors on it",
@@ -48,7 +62,14 @@ ITEMS = [
   "alsoCh": ["E"],
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7",
  "difficulty": 2, "kind": "rationale", "tags": ["recent-history", "mmr", "beefy"],
- "stem": "The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?",
+  "stemZh": "accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) 用的是 Keccak（H_K）而不是 Blake2b。s 是什麼？為什麼用 Keccak？",
+  "optionsZh": [
+   "s = [對 θ′ 中每個 (service, hash) 取 E_4(service) ⌢ E(hash)]；使用 Keccak 是「為了最大化與既有系統的相容性」",
+   "s = 本區塊中每份被擔保 work-report 的雜湊序列；選用 Keccak 是因為它比 Blake2b 花費更少的 PVM gas",
+   "s = 正被附加的那個區塊的編碼後 header；必須用 Keccak，因為 Bandersnatch ring VRF 的 transcript 是定義在它之上的",
+   "s = [對每個 guarantee g ∈ E_G 取 H(g_w)]；規定用 Keccak 是為了讓 Grandpa 的 finality 投票能被同一批橋接合約檢查"
+  ],
+  "stem": "The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?",
  "options": [
   "s = [E_4(service) ⌢ E(hash) for each (service, hash) in θ′]; Keccak is used 'to maximize compatibility with legacy systems'",
   "s = the sequence of every work-report hash guaranteed in this block; Keccak is chosen because it costs less PVM gas than Blake2b",
@@ -70,7 +91,14 @@ ITEMS = [
   "alsoCh": ["11"],
  "ch": "7", "section": "7 Recent History", "gpRef": "§7 & eq. 11.36, 11.41–11.44",
  "difficulty": 1, "kind": "concept", "tags": ["recent-history"],
- "stem": "What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?",
+  "stemZh": "依 GP，在 β_H 中保留最近 H = 8 個區塊的主要目的是什麼？",
+  "optionsZh": [
+   "防止重複或過期的 work-report：一份 guarantee 的 refinement-context anchor 必須出現在 β† 裡，而它的 work-package 雜湊不得已經是任何近期區塊之 reported-package 映射的 key",
+   "讓輕客戶端不必持有狀態就能跟隨這條鏈：β_H 是唯一保存最近 H = 8 個 header 雜湊的地方，客戶端因此可以往回走訪它們，而不必從每個 header 讀出 H_P",
+   "為 fallback 的 slot-sealer 序列提供種子：當 ticket 競賽不足額時，F 會抽出 E = 600 把 Bandersnatch 金鑰，而 β_H 裡最近 8 個區塊的雜湊就是那次抽取的隨機性來源",
+   "保存最近 8 個執行後的 state root，好讓 Grandpa 的投票者不必重新執行就能比較候選鏈，而 β_B 則持有對那些 root 的對應 BLS 簽章"
+  ],
+  "stem": "What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?",
  "options": [
   "To preclude duplicate or out-of-date work-reports: a guarantee's refinement-context anchor must appear in β† and its work-package hash must not already be a key of any recent block's reported-package map",
   "To let light clients follow the chain without state: β_H is the only place the last H = 8 header hashes are kept, so a client walks them backwards instead of reading H_P out of each header",
@@ -91,7 +119,14 @@ ITEMS = [
  "id": "ch08-pool-queue-sizes",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.1",
  "difficulty": 1, "kind": "concept", "tags": ["authorization", "state"],
- "stem": "What are the shapes of the authorizer pool α and authorizer queue φ?",
+  "stemZh": "authorizer pool α 與 authorizer queue φ 的形狀各是什麼？",
+  "optionsZh": [
+   "α ∈ [[H]_{:O}]_C，O = 8（每個 core 至多 8 個 authorizer 雜湊）；φ ∈ [[H]_Q]_C，Q = 80（每個 core 恰好 80 個）",
+   "α ∈ [[H]_{:Q}]_C，Q = 80（每個 core 至多 80 個在池中）；φ ∈ [[H]_O]_C，O = 8（每個 core 恰好 8 個在佇列中）",
+   "α ∈ [H]_C——每個 core 一個現行 authorizer、每塊替換；φ ∈ [[H]_E]_C，E = 600，每個 epoch 時槽一筆佇列項目",
+   "α 與 φ 都是從 authorizer 雜湊映到 core 索引的字典 D⟨H → N_C⟩，所以同一個雜湊永遠不會重複、也不需要每個 core 的長度上限"
+  ],
+  "stem": "What are the shapes of the authorizer pool α and authorizer queue φ?",
  "options": [
   "α ∈ [[H]_{:O}]_C with O = 8 (up to 8 authorizer hashes per core); φ ∈ [[H]_Q]_C with Q = 80 (exactly 80 per core)",
   "α ∈ [[H]_{:Q}]_C with Q = 80 (up to 80 pooled per core); φ ∈ [[H]_O]_C with O = 8 (exactly 8 queued per core)",
@@ -112,7 +147,14 @@ ITEMS = [
  "id": "ch08-pool-update",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.2–8.3",
  "difficulty": 3, "kind": "concept", "tags": ["authorization", "calc"],
- "stem": "Core c has pool α[c] = [a, b, a, d] (left = oldest) and a guarantee in E_G for core c whose report has authorizer a. With φ′[c][H_T mod Q] = x and O = 8, what is α′[c]?",
+  "stemZh": "core c 的 pool 為 α[c] = [a, b, a, d]（左邊最舊），而 E_G 中有一份指向 core c 的 guarantee，其 report 的 authorizer 是 a。已知 φ′[c][H_T mod Q] = x 且 O = 8，α′[c] 是什麼？",
+  "optionsZh": [
+   "[b, a, d, x]——最左邊那個 a 被移除，接著附加 x，最後保留最後 O 筆",
+   "[b, d, x]——兩個 a 都在附加 x 之前被移除，因為一個 pool 絕不會同時持有兩個相同的 authorizer",
+   "[a, b, a, d, x]——附加 x 而不移除任何東西，因為 F(c) 只有在 pool 已經持有 O = 8 筆時才會修剪",
+   "[x, a, b, a, d]——佇列項目被插在最前面，而被使用掉的 authorizer 只有在 pool 將超過 O = 8 時才會被丟棄"
+  ],
+  "stem": "Core c has pool α[c] = [a, b, a, d] (left = oldest) and a guarantee in E_G for core c whose report has authorizer a. With φ′[c][H_T mod Q] = x and O = 8, what is α′[c]?",
  "options": [
   "[b, a, d, x] — the leftmost occurrence of a is removed, then x is appended, and the last O entries are kept",
   "[b, d, x] — both copies of a are removed before x is appended, because a pool never holds the same authorizer twice",
@@ -133,7 +175,14 @@ ITEMS = [
  "id": "ch08-authorizer-identity",
  "ch": "8", "section": "8.1 Authorizers and Authorizations", "gpRef": "§8.1 & eq. 14.11 (§14.3; delta #522)",
  "difficulty": 2, "kind": "delta", "tags": ["authorization", "delta-0.8.0"],
- "stem": "How is an authorizer identified in GP 0.8.0, and where is the authorization decision actually made?",
+  "stemZh": "在 GP 0.8.0 中，一個 authorizer 是怎麼被識別的？授權的判定實際上在哪裡進行？",
+  "optionsZh": [
+   "authorizer = H(PVM code hash ⌢ 設定 blob)；is-authorized 的判定完全由 guarantor 在 core 內進行（Ψ_I），鏈上邏輯只檢查該 authorizer 是否在該 core 的 pool 裡",
+   "authorizer = 單獨的 is-authorized code hash，設定 blob 另外傳給 Ψ_I；出塊者在建構區塊時執行那段程式碼，其他 validator 則信任它公布的 trace",
+   "authorizer = H(token ⌢ trace)，所以 pool 項目同時承諾了隨 package 提供的引數與它產生的輸出；因此每位 validator 在區塊匯入時都要重跑 Ψ_I 以重算該雜湊",
+   "authorizer = coretime 購買者的 Ed25519 金鑰，所以 α[c] 是一份至多 O = 8 個買家金鑰的清單；guarantor 驗證的是其中之一對 work-package 雜湊的簽章，而不執行任何 PVM 程式碼"
+  ],
+  "stem": "How is an authorizer identified in GP 0.8.0, and where is the authorization decision actually made?",
  "options": [
   "Authorizer = H(PVM code hash ⌢ configuration blob); the is-authorized decision is made entirely in-core by the guarantors (Ψ_I), while on-chain logic only checks that the authorizer is in the core's pool",
   "Authorizer = the is-authorized code hash alone, with the configuration blob passed to Ψ_I separately; the block author runs that code while building the block and other validators trust the trace it publishes",
@@ -154,7 +203,14 @@ ITEMS = [
  "id": "ch08-why-authorization",
  "ch": "8", "section": "8 Authorization", "gpRef": "§8 intro",
  "difficulty": 1, "kind": "rationale", "tags": ["authorization", "rationale"],
- "stem": "What motivation does the GP give for the authorization system?",
+  "stemZh": "GP 為授權系統給出的動機是什麼？",
+  "optionsZh": [
+   "把「打算使用某段 coretime」這個意圖，與「指定並提交某個特定工作負載」這件事解耦，好讓 JAM 能同時支援 Ethereum 式與 Polkadot 式的互動模式",
+   "給每個 core 自己的 gas 市場：guarantor 逐塊競標 coretime，成交價記錄在 α[c] 中 authorizer 雜湊的旁邊，因此壅塞的 core 使用起來更貴",
+   "用每個 core 的 authorizer 投票取代 Grandpa 的 finality 投票：當某份 work-report 獲得該 core 池中超過三分之二 authorizer 的簽署即為最終，而 O = 8 這個上限正是為此而設",
+   "限制單一 service 可提交多少工作：pool 的 O = 8 個項目扮演每個 service 的速率限制器，所以本時槽已經有 package 被回報的 service，不能在任何 core 上再讓第二份被擔保"
+  ],
+  "stem": "What motivation does the GP give for the authorization system?",
  "options": [
   "To disentangle the intention of using some coretime from the specification and submission of a particular workload, so that JAM can support both Ethereum-style and Polkadot-style interaction patterns",
   "To give each core its own gas market: guarantors bid for coretime block by block and the clearing price is recorded next to the authorizer hash in α[c], so a congested core costs more to use",
