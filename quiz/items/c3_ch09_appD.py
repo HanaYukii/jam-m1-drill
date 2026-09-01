@@ -184,7 +184,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "9", "section": "9.4 Service Privileges",
  "gpRef": "eq. 9.9–9.10 (χ); App. B `bless` (Ω_B), `assign` (Ω_A), `new` (Ω_N)",
  "difficulty": 3, "kind": "delta", "tags": ["accounts", "privileges", "gratis", "delta-0.8.0"],
- "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
+  "stemZh": "你們的 Go 節點停在 GP 0.7.2，那裡的「Owned Privileges」模型讓每個具特權的 service 各自改寫自己在 χ 中的位置。GP 0.8.0 改了什麼？又是誰可以給一個全新帳戶非零的 gratis storage 抵扣 a_f？",
+  "optionsZh": [
+   "Ω_B 仍然可以被五個具特權 service 中的任何一個呼叫，各自只改寫自己擁有的那一格；manager 的特別之處僅在於它可以授予儲存押金額度，而 `new` 接受來自 manager 或 registrar 的 f ≠ 0",
+   "Ω_B 對任何自身索引低於 S = 2^16 的 service 開放，因為佔據保留範圍本身就是特權的來源；χ_A[c] 之後就只有 manager 能移動，而 service 是透過 `upgrade` 提高自己的 a_f",
+   "在 0.8.0 中 χ 已經完全不能被 host call 變動；它只能由列在 χ_Z 中的 service 在每個區塊自動獲得的 accumulation 裡改寫，而 a_f 對每個帳戶在創世時就固定、之後任何人（包括 manager）都無法提高",
+   "Ω_B 是唯一整批改寫 (χ_M, χ_A, χ_V, χ_R, χ_Z) 的 host call，而它現在除非呼叫者本身就是 χ_M、否則產生 HUH，因此沒有任何 service 能把自己升格為 manager；某個 core 的 assigner 仍可透過 `assign` 交出自己的 χ_A[c]，而 `new` 在 f ≠ 0 且呼叫者不是 manager 時產生 HUH"
+  ],
+  "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
  "options": [
   "Ω_B may still be invoked by any of the five privileged services, each rewriting only the slot it owns; the manager is special solely in that it may grant storage deposit credits, and `new` accepts f ≠ 0 from either the manager or the registrar.",
   "Ω_B is open to any service whose own index sits below S = 2^16, since occupying the protected range is what confers privilege in the first place; χ_A[c] may then only be moved by the manager, and a service raises its own a_f through `upgrade`.",
@@ -208,7 +215,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "D", "section": "D.2.1 Node Encoding and Trie Identification",
  "gpRef": "§D.1 (C → B_31); §D.2.1 (nodes fixed at 512 bit)",
  "difficulty": 1, "kind": "rationale", "tags": ["merklization", "trie", "state-keys"],
- "stem": "The state-key constructor C is specified as producing B_31, yet every other quantity in the state trie — child identities, the embedded value slot, H(v) — is 32 octets. What forces the key to be one octet short?",
+  "stemZh": "state-key 建構子 C 被規定產出 B_31，然而 state trie 中其他每一個量——子節點識別、內嵌值的欄位、H(v)——都是 32 個 octet。是什麼迫使 key 少一個 octet？",
+  "optionsZh": [
+   "最高位的那個 octet 被保留下來，好讓 branch／leaf 的判別位元能被攜帶在 key 本身之內，這正是讓驗證者不必取得節點就能分辨兩種節點型別的機制",
+   "一個節點固定為 512 位元，而一片葉子必須容納一個位元組的「判別子加大小」標頭、那把 key、以及一個完整 32 位元組的欄位（放值本身或它的雜湊）：1 + 31 + 32 = 64",
+   "key 是 Blake2b 的輸出，在儲存前把一個位元組的章節索引剝掉了；值的欄位同樣是 31 個 octet，只有在被雜湊時才補到 32",
+   "31 個 octet 讓 branch 節點多留一個備用 octet，好在子 trie 超過 2^8 的分支上限時能附加第三個子節點指標"
+  ],
+  "stem": "The state-key constructor C is specified as producing B_31, yet every other quantity in the state trie — child identities, the embedded value slot, H(v) — is 32 octets. What forces the key to be one octet short?",
  "options": [
   "The top octet is reserved so that the branch/leaf discriminator bit can be carried inside the key itself, which is what lets a verifier tell the two node types apart without fetching the node.",
   "A node is fixed at 512 bit, and a leaf must fit a one-octet discriminator-plus-size header, the key, and a full 32-octet field for either the value or its hash: 1 + 31 + 32 = 64.",
@@ -230,7 +244,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "D", "section": "D.1 Serialization",
  "gpRef": "§D.1 (state-key constructor C; the final four rows of T(σ))",
  "difficulty": 2, "kind": "concept", "tags": ["merklization", "state-keys", "accounts"],
- "stem": "In T(σ) a service's storage entries, its preimages and its lookup-meta entries all go through the very same third form of C. What exactly is passed in, and what keeps the three kinds apart in the trie?",
+  "stemZh": "在 T(σ) 中，某個 service 的 storage 條目、它的 preimage、以及它的 lookup-meta 條目全都走同一個 C 的第三種形式。究竟傳進去的是什麼？又是什麼讓這三類在 trie 中彼此分開？",
+  "optionsZh": [
+   "三者是靠完成後那 31 位元組 key 的第 0 個 octet 區分的：storage 是 0xFD、preimage 是 0xFE、lookup-meta 是 0xFF，其餘 30 個 octet 直接放 H(k) 或雜湊 h，而 service 索引則被摺進值而不是 key 裡",
+   "storage 用帶原始 key 的 C(s, k)、preimage 用章節形式 C(254, s)、lookup-meta 用 C(253, s)；根本不需要任何標記，因為三者已經住在不同的章節索引之下，而 lookup 條目的 (h, l) 配對是從葉子的值而不是它的 key 還原的",
+   "在雜湊之前會先加上一個四位元組的標記——storage 是 E_4(2^32−1) ⌢ k、preimage 是 E_4(2^32−2) ⌢ h、宣告長度為 l 的 lookup-meta 是 E_4(l) ⌢ h——接著 C(s, ·) 把 n = E_4(s) 的四個 octet 與 a = H(·) 的前四個 octet 交錯，再附上 a_4 … a_26",
+   "三者都用 C(s, h)，其中 h 是原始的 storage key 或 preimage 雜湊、完全沒有任何標記；碰撞不可能發生，因為 §9 要求 service 的 storage key 必須恰好 32 個 octet 長，這讓它待在一個與 32 位元組 preimage 雜湊互斥的命名空間裡"
+  ],
+  "stem": "In T(σ) a service's storage entries, its preimages and its lookup-meta entries all go through the very same third form of C. What exactly is passed in, and what keeps the three kinds apart in the trie?",
  "options": [
   "The three kinds are told apart by octet 0 of the finished 31-octet key, which is 0xFD for storage, 0xFE for a preimage and 0xFF for lookup-meta, with the remaining 30 octets holding H(k) or the hash h directly and the service index folded into the value rather than the key.",
   "Storage uses C(s, k) with the raw key, preimages use the chapter form C(254, s) and lookup-meta uses C(253, s); no marker is needed at all because the three already live under distinct chapter indices, and the (h, l) pair of a lookup entry is recovered from the leaf's value rather than its key.",
@@ -252,7 +273,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "D", "section": "D.1 Serialization",
  "gpRef": "§D.1 T(σ) row C(10); eq. 11.1 (ρ spec)",
  "difficulty": 3, "kind": "delta", "tags": ["merklization", "state-keys", "rho", "delta-0.8.0"],
- "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
+  "stemZh": "你們 0.7.2 的編碼器把 T(σ) 的 C(10) 條目寫成：每個 core 一個「work-report 與回報時槽」的 optional 配對。GP 0.8.0 改成放什麼？",
+  "optionsZh": [
+   "與先前完全相同的「每個 core 一個 work-report 與時槽的 optional 配對」；0.8.0 只是把時槽收緊成定長的 E_4 編碼，酬載本身沒有更動",
+   "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是**整份 guarantee** G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
+   "當前區塊的 availability assurances extrinsic，好讓某位 assurer 的 bitfield 不必重放該區塊就能對照 state root 被證明",
+   "只放每個 core 待處理 report 的 availability specification（package 雜湊、erasure root、segment root、bundle 長度），而 guarantee 本身由 guarantor 保存在鏈外直到稽核要求為止；這正是 0.8.0 所追求的體積縮減"
+  ],
+  "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
  "options": [
   "Per core an optional pair of work-report and timeslot exactly as before; 0.8.0 only tightened the timeslot to a fixed-length E_4 encoding and left the payload alone.",
   "Per core an optional pair ⟨a_g, E_4(a_t)⟩ written with the ? option discriminator, where a_g is the entire guarantee G ≡ (r work-report, t timeslot, a credential of 2–3 (validator index, Ed25519 signature) pairs) — so the guarantors' signatures are now part of committed state.",
@@ -274,7 +302,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "D", "section": "D.2 Merklization",
  "gpRef": "§D.2 (M over D⟨b → (B_31, B)⟩); §3 notation (bits(·) is most-significant-first)",
  "difficulty": 3, "kind": "code", "tags": ["merklization", "trie", "state-root", "incremental"],
- "stem": "M is defined over a dictionary keyed by bits(k), while the team's Go partitions one slice in place at each depth. A teammate proposes replacing it with 'sort the key-vals ascending, then fold them pairwise like M_B — same leaves, same root, and it vectorizes better'. Which statement is correct?",
+  "stemZh": "M 是定義在以 bits(k) 為鍵的字典之上，而團隊的 Go 是在每個深度就地切分同一個 slice。有位隊友提議把它換成「把 key-val 升冪排序，然後像 M_B 那樣兩兩摺疊——同樣的葉子、同樣的 root，而且更好向量化」。哪個敘述正確？",
+  "optionsZh": [
+   "這個提議是可行的：升冪的 key 順序恰好就是 Patricia trie 的前序走訪，所以兩兩摺疊會重建出完全相同的形狀與 root；就地切分只不過是一項配置最佳化，而葉子快取兩種做法都能繼續運作，因為一片葉子的雜湊只取決於它自己的 key 與 value",
+   "bits(·) 是最低位在前，好與附錄 C 的位元序列編碼 E(b) 一致，所以深度 d 必須對第 ⌊d/8⌋ 個 octet 的第 d mod 8 位元分支；因此圖中的切分方向是反的，而這種實作之所以還能對上向量，只是因為它的 state-key 建構子也一併反了",
+   "插入順序在這裡確實重要：GP 要求葉子必須依升冪 key 順序摺疊，因為產生的 root 是要被 M_R 附加到 accumulation-output belt（一個 append-only 結構）上的；因此跨區塊快取葉子雜湊並不可靠，trie 每個區塊都必須整棵重建",
+   "bits(·) 是最高位在前，所以深度 d 對第 ⌊d/8⌋ 個 octet 的第 7 − (d mod 8) 位元分支；樹形只由 key 的位元前綴決定、從不取決於 slice 的順序，這正是讓葉子雜湊可以被快取、而只需重算「從變動葉子到 root」那條路徑的原因——把排序後的葉子兩兩摺疊建出來的是一棵平衡樹，root 也不同"
+  ],
+  "stem": "M is defined over a dictionary keyed by bits(k), while the team's Go partitions one slice in place at each depth. A teammate proposes replacing it with 'sort the key-vals ascending, then fold them pairwise like M_B — same leaves, same root, and it vectorizes better'. Which statement is correct?",
  "code": {
   "lang": "go",
   "caption": "internal/utilities/merklization/merklization.go (partitionByBit, merklizeWithCache)",

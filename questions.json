@@ -939,6 +939,13 @@
     "architecture",
     "history"
    ],
+   "stemZh": "JAM 這個名字從何而來？原始 CoreJam 模型的哪些階段真的在鏈上執行？",
+   "optionsZh": [
+    "來自「Joint Availability Mechanism」，以位於其核心的 erasure-coded D3L 命名；RFC-31 早已用 CoreJam 這個名字提出過同一套完整協定，而只有 Collect 在鏈上執行，因為鏈必須先對進來的 work-package 排序，其餘三個階段才能在 core 上執行",
+    "來自「Just Another Machine」，向 Yellow Paper 的命名致意；collect / refine / join / accumulate 這條管線是 RFC-31 後來才加上的，而四個階段全都在鏈上執行，因為所有東西都由單一個 validator 集合在共識中執行",
+    "來自 CoreJam（Polkadot Fellowship RFC-31），以其 Collect / Refine / Join / Accumulate 模型命名；只有 Join 與 Accumulate 發生在鏈上——Collect 與 Refine 是鏈下／in-core 的——因此稱為 Join-Accumulate Machine，而它是一套完整的協定而非 RFC-31 那種範圍受限的改動",
+    "來自 CoreJam（RFC-31），以其四段模型命名；Refine 與 Accumulate 才是鏈上那一對——Collect 與 Join 由 package 建構者在鏈下完成——因此稱為 Join-Accumulate Machine"
+   ],
    "stem": "Where does the name 'JAM' come from, and which stages of the original CoreJam model actually execute on-chain?",
    "options": [
     "From 'Joint Availability Mechanism', after the erasure-coded D3L at its centre; RFC-31 already proposed this same complete protocol under the name CoreJam, and only Collect runs on-chain, since the chain must order incoming work-packages before the other three stages run in-core",
@@ -966,6 +973,13 @@
    "tags": [
     "architecture",
     "rationale"
+   ],
+   "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。哪個敘述正確？",
+   "optionsZh": [
+    "因素為：Speed、Cost、Security、Decentralization、Simplicity；對立發生在 decentralization 與 performance 之間，因為硬體需求是進入 validator 集合的門檻——JAM 的回應是把 validator 硬體固定在 16 核／64 GB／8 TB，並用 SNARK 壓縮工作量，使連貫性完全不需要任何管線就能維持",
+    "因素同上；performance 與 coherency 互相對立，因為簽章驗證無法平行化，所以吞吐必須用較弱的可組合性換來——JAM 的回應是把狀態切成 341 個因果獨立的分片、每片小到足以保持連貫，再以非同步訊息佇列橋接",
+    "因素同上；但對立發生在 resilience 與 accessibility 之間，因為每多一位 validator 就多一次共識往返、而便宜的取用因此迫使集合變小——JAM 的回應是把 validator 集合釘在 1,023 並把後續成長全推給非同步結算的鏈下 roll-up",
+    "因素為：Resilience、Generality、Performance、Coherency、Accessibility；performance 與 coherency 互相對立，因為因果關係受訊號速度所限，所以狀態空間越大就越不連貫——JAM 的回應是把一個高度可擴展、大致連貫的元件（in-core）**管線化**進一個同步、完全連貫的元件（on-chain），以「cache affinity」取代粗暴的分割"
    ],
    "stem": "The GP names five driving factors and a principle called 'size-coherency antagonism'. Which statement is correct?",
    "options": [
@@ -995,6 +1009,13 @@
     "architecture",
     "safrole",
     "rationale"
+   ],
+   "stemZh": "JAM 為什麼採用 Safrole（票券式、匿名、ring-VRF）而不是類似 BABE 的 VRF 抽籤？",
+   "optionsZh": [
+    "Safrole 的優點是可以有多位 validator 同時贏得同一槽、使時槽永不落空：ring VRF 讓他們各自證明自己是 γ_P 的成員，產生的分叉由哪個區塊先抵達 Grandpa 決勝，而 ticket 每一槽都從 η_0 重新抽取，所以沒有出塊者能被預測超過一槽以上",
+    "Safrole 的存在是為了把簽章移出熱路徑：ticket 是一個在封印時揭露的單純雜湊原像，所以檢查一個 seal 只要一次雜湊而不是一次 VRF 驗證；匿名來自 validator 每個 epoch 輪換 Ed25519 金鑰，而熵池 η 直接取自區塊雜湊，因為雜湊本來就是均勻的",
+    "Safrole 把每個 6 秒時槽限定給恰好一位事先決定的金鑰持有者（近乎無分叉）、讓未來時槽出塊者的身分在封印之前保持匿名（抗 DoS），並產生高品質且不可偏置的熵池；而 best-chain 規則另外偏好 ticket 封印（相對於 fallback）祖先較多的鏈",
+    "Safrole 是坐在 Grandpa 之下的 finality gadget：它指派每一槽一位出塊者，而該出塊者必須先蒐集 2/3+1 的預投票，該區塊才能延伸這條鏈，這正是 JAM 完全沒有分叉、也不需要 fork-choice 規則的原因；fallback 金鑰只用在創世 epoch、也就是還沒有任何 ticket 累積之前"
    ],
    "stem": "Why does JAM use Safrole (ticket-based, anonymous, ring-VRF) rather than a BABE-like VRF lottery?",
    "options": [
@@ -1028,6 +1049,13 @@
     "rationale",
     "elves"
    ],
+   "stemZh": "JAM 為什麼**同時**需要可得性（assurance + erasure coding）**與**稽核／爭議，才能保障 in-core 的運算？",
+   "optionsZh": [
+    "擔保為無效結果附上經濟成本；但 auditor 只有在輸入可取回時才能重新執行，所以必須先有 2/3+1 的 validator 背書自己持有 erasure-coded 的碎片（任意 1/3 即可重建）；接著隨機抽選的 auditor（ELVES）重跑那些 report，並在出現負面判定或缺席時升級處理；最後由 disputes 在鏈上為判決定案、封禁該 report 與 offender",
+    "稽核在前：validator 在某份 report 一被擔保時就立刻重新執行它，只有通過稽核的 report 才會被 erasure-code 並分發；1/3 的背書門檻就夠了，因為一位誠實的碎片持有者永遠能發出警報；而 disputes 的存在只是為了重新分配 guarantor 的押金，所以可得性只是疊加在一套已然完整之稽核之上的儲存最佳化",
+    "兩者是同一個機制的兩半：一個 core 的三位 guarantor 簽署該 report、然後互相重跑彼此的工作——這種相互檢查就是 GP 所謂的稽核——而 assurance 只是確認收到了該區塊；既然 guarantor 已經質押，就不會抽出外部 auditor，而負面判定會直接沒收回報者，不需要任何鏈上判決",
+    "erasure coding 本身就確立了有效性：因為每個碎片都被 Merklize 在該 work-report 的 erasure-root 之下，所以重建出 bundle 的 validator 不必重跑 refine 就能檢查結果，因此光靠 assurance 就能定奪正確性；稽核只是給想提早 accumulate 的節點用的延遲最佳化，而 disputes extrinsic 只是記錄誰太晚背書"
+   ],
    "stem": "Why does JAM need BOTH availability (assurances + erasure coding) AND auditing/disputes to secure in-core computation?",
    "options": [
     "Guaranteeing attaches economic cost to invalid results; but auditors can only re-execute if the inputs are retrievable, so 2/3+1 of validators must first assure they hold erasure-coded shards (any 1/3 reconstruct); then randomly-selected auditors (ELVES) re-run reports and escalate on negative judgments or no-shows; disputes finalize the verdict on-chain and ban the report/offenders",
@@ -1055,6 +1083,13 @@
    "tags": [
     "architecture",
     "pipelining"
+   ],
+   "stemZh": "JAM 的設計讓一個區塊的大部分工作能在該區塊傳播的同時進行。是哪些設計特徵讓這件事成為可能？",
+   "optionsZh": [
+    "refine 與 accumulate 兩者都在鏈下執行：某個 core 的 guarantor 執行整條管線、只發布一份狀態差異，讓鏈上那一步只剩一次 Merkle 修補；因此 header 的 state-root 欄位被留成零雜湊、只在 Grandpa 定案該區塊之後才修正，這正是把管線限制在 8 塊近期歷史窗口內的原因",
+    "**時間上的平行（管線化）**：header 帶的是**先前**的 state root，所以一個區塊可以在新狀態尚未 Merklize 完成之前就發布——那份成本落在下一個時槽；再加上**空間上的平行**，既跨越 σ 中大致獨立的各分量（§4.2.1 刻意讓其依賴圖保持淺），也跨越各個 core",
+    "時間上的平行來自 header 帶著**執行後**的 state root，這讓節點不必重放就能接受一個區塊，所以 Merklization 必須在發布前完成、但永遠不必重做；空間上的平行則來自給每個 core 自己的 σ 片段，所以兩個 core 永遠不會碰到同一個狀態分量、accumulation 完全平行",
+    "區塊是提早一槽出的：時槽 n+1 的持票人在時槽 n 的狀態一存在時就拿到它、預先算好自己的區塊，等時槽開啟時只需簽名，所以執行後的 root 早已知道、可以放進 header；接著那 341 個 core 各自重放該區塊，把 Merklization 的成本分攤 341 份"
    ],
    "stem": "JAM is designed so that most of a block's work can proceed while the block propagates. Which design features make that possible?",
    "options": [
@@ -1084,6 +1119,13 @@
     "architecture",
     "services"
    ],
+   "stemZh": "JAM 的 service 與 Ethereum 的帳戶模型有何不同？外部資料又是怎麼進入狀態的？",
+   "optionsZh": [
+    "JAM 保留了 Ethereum 的二分法只是改了名字：service 帳戶持有程式碼、餘額與狀態，而「authorizer 帳戶」持有私鑰與 nonce 好簽署 work-package；refine 與 accumulate 都是鏈上入口，而外部資料以簽署交易的形式抵達、由 authorizer 帳戶從自己的餘額支付",
+    "JAM 只有 service 帳戶（沒有私鑰、沒有 nonce），但一個 service 只暴露單一個入口，由 guarantor 在 core 上執行、鏈上再重跑一次以驗證；外部資料以 extrinsic 的形式進入區塊本體，而 coretime 是按該 extrinsic 的位元組計費，很像 Ethereum 收 gas",
+    "JAM 的 service 是 parachain 的直接後繼：每一個都對應註冊到一個固定的 core、提供一支由 guarantor 執行的驗證函數，並透過類似 XCM 的非同步佇列與其他 service 溝通；資料經由 collator 的有效性證明進入，而 accumulate 這個入口只是為了在 service 之間移動餘額",
+    "JAM 只有 service 帳戶（程式碼 + 餘額 + 狀態，沒有私鑰、沒有 nonce）；每個都有兩個入口——refine（in-core、無狀態、任意輸入 → 小的 digest）與 accumulate（鏈上、有狀態）；所有外部資料都透過 refine、在 work-package 內進入，並以 coretime／authorizer 而不是簽署過的交易來授權"
+   ],
    "stem": "How do JAM services differ from Ethereum's account model, and how does external data enter the state?",
    "options": [
     "JAM keeps Ethereum's split but renames it: service accounts hold code, balance and state, while 'authorizer accounts' hold a secret key and a nonce so they can sign work-packages; refine and accumulate are both on-chain entry points, and external data arrives as signed transactions the authorizer account pays for from its balance",
@@ -1110,6 +1152,13 @@
    "kind": "concept",
    "tags": [
     "constants"
+   ],
+   "stemZh": "哪一組 full 設定的常數是正確的？",
+   "optionsZh": [
+    "C = 341 個 core（full 設定下 |κ| = 3C = 1023；V 本身不再是協定常數）、E = 600 槽／epoch、P = 6 秒、Y = 500、R = 10、H = 8、L = 14,400、D = 19,200、U = 5、K = 16、O = 8、Q = 80、I = 16、J = 8、T = 128、W_G = 4,104、W_R = 48 KiB、W_B = 13,791,360、W_C = 4,000,000、G_A = 10^7、G_R = 5·10^9、G_T = 3.5·10^9、G_I = 5·10^7、A = 8 秒、F = 2",
+    "C = 341 個 core 而 |κ| = 3C = 1023 在每一種設定下都固定、E = 600 槽／epoch、**P = 12 秒**、Y = 300、R = 10、H = 24、L = 600、D = 19,200、U = 5…、A = 6 秒、F = 3",
+    "C = 341 個 core（full 下 |κ| = 1023）、E = 600、P = 6 秒、Y = 500、R = 10、H = 8、L = 14,400、**D = 14,400（與 L 相同）**、U = 5、K = 3、O = 80、Q = 8、I = 8、J = 16、T = 16、W_G = 4,096、W_R = 12 MB、W_B = 48 KiB、W_C = 64,000、G_A = 5·10^9、G_R = 10^7、G_T = 3.5·10^9、G_I = 5·10^7、A = 8 秒、F = 2",
+    "C = 1023 個 core 而 V = 341 位 validator 仍由協定固定、E = 3,600 槽／epoch、P = 6 秒、Y = 600、R = 60，其餘同上"
    ],
    "stem": "Which set of full-configuration constants is correct?",
    "options": [
@@ -1139,6 +1188,13 @@
     "architecture",
     "rationale"
    ],
+   "stemZh": "依 GP 的「Previous Work」分析，Polkadot 1.0 與 Ethereum 式 rollup 的主要侷限是什麼？JAM 想克服的又是什麼？",
+   "optionsZh": [
+    "Polkadot：它的弱點在於所有 parachain 共用同一個 validator 集合，所以安全性被單一質押池封頂，而 XCMP 必須維持同步才安全；rollup：證明成本已經進入密碼經濟驗證的可及範圍、只剩 sequencer 的可用性未解——因此 JAM 捨棄了 ELVES 稽核賽局改用 SNARK 驗證的 core，並給每個 service 自己的 validator 子集",
+    "Polkadot：它無法安全地承載超過約 50 條 parachain，因為 ELVES 稽核賽局是瓶頸；rollup：證明產生已經夠便宜，但 Dank-sharding 在二元體上的 erasure coding 加 Merklization 才是使它們中心化的原因——JAM 的回應是採用 KZG 多項式承諾的可得性，並以樂觀詐欺證明取代稽核",
+    "Polkadot：parachain 是彼此隔離的生態系，XCMP 非同步且顆粒粗，而取用受限於約 50 個拍賣插槽；rollup：安全性與經濟性異質、SNARK 的證明成本高出好幾個數量級（RISC-Zero 約比原生慢 61,000 倍）、而 sequencer 走向中心化——JAM 保留 Polkadot 的 ELVES 機制，但讓 core 變得無定見、無許可且半連貫",
+    "Polkadot：parachain 隔離、XCMP 非同步且粗糙；rollup：它們的碎片化是良性的，因為 Ethereum 的 validator 集合給了每個 roll-up 完全相同的通訊、安全與經濟性質，唯一真正的障礙是證明 EVM——JAM 的回應是把 parachain 驗證固定為 core 唯一能執行的函數，而 coretime 仍以長期插槽拍賣"
+   ],
    "stem": "According to the GP's 'Previous Work' analysis, what are the main limitations of Polkadot 1.0 and of Ethereum-style rollups that JAM tries to overcome?",
    "options": [
     "Polkadot: its weakness is that all parachains share one validator set, so security is capped by a single stake pool and XCMP must stay synchronous to be safe; rollups: proving costs are already within reach of crypto-economic verification and only sequencer uptime is unsolved — JAM therefore drops the ELVES audit game for SNARK-verified cores and gives each service its own validator subset",
@@ -1165,6 +1221,13 @@
    "kind": "concept",
    "tags": [
     "work-packages"
+   ],
+   "stemZh": "一份 work-package（eq. 14.2，屬於集合 ℙ）是 ⟨j, h, u, f, c, w⟩。哪個描述正確？",
+   "optionsZh": [
+    "j 授權 token（一個不透明的 blob）；h 該 package 所指向的 **core 索引**；u authorizer code hash；f 設定 blob；c refinement context；w 是 1 到 I = 16 個 work-item，每個帶 service、code hash、payload、兩個 gas 上限、**內嵌的匯入 segment 資料**、extrinsic 配對、以及匯出 segment 的雜湊",
+    "j 授權 token；h 將 accumulate 這些結果的 service 索引；u 第一個 work-item 的 refine code hash；f 設定 blob；c availability context（erasure-root 加碎片索引）；w 是 1 到 **T = 128** 個 work-item，每個帶單一個合併的 gas 上限、匯入 segment 的雜湊、以及內嵌的匯出 segment",
+    "j 是 guarantor 對該 package 的簽章；h 是該 package 自身的雜湊；u 是其 refine 程式碼將被執行的那個 service 的索引；f 是所有項目共用的 gas 上限；c 是 availability specification；w 是 1 到 I = 16 個 work-item，每個帶自己的授權 token",
+    "j 授權 token；h auth-service 索引（承載 authorizer 程式碼的那個 service）；u authorizer code hash；f 設定 blob（參數化）；c refinement context；w 是 1 到 I = 16 個 work-item，每個帶 service、code hash、payload、refine 與 accumulate 的 gas 上限、imports（segment root／雜湊 + 索引）、extrinsic 的 (雜湊, 長度) 配對、以及匯出計數"
    ],
    "stem": "A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. Which description is correct?",
    "options": [
@@ -1193,6 +1256,13 @@
    "tags": [
     "delta-0.8.0"
    ],
+   "stemZh": "你們的實作以 GP 0.7.2 為目標，而當前的 GP 是 0.8.0。哪一份清單**只**包含真正屬於 0.8.0 的變動？",
+   "optionsZh": [
+    "以 fetch 取代 import host call；記憶體存取例外的形式化與功能凍結宣告；以 prior validator 集合檢查 assurance；epoch marker 中加入 Ed25519 金鑰並附上活動統計；provide host call、以及 import 與 export 的分離；「super-fetch」、gratis storage 與帳戶 metadata；最大程式碼大小與過大 report 的處理；更嚴格的 opcode 與跳躍有效性",
+    "把每個變長項目移到其編碼末端的「Macrofication Marathon」；定長的 validator 索引序列化；讓 W* 依賴 ρ†；accumulate 吸收 on_transfer 使 service 只剩一個鏈上入口；把 core 索引加入 refine 的引數並從 guarantee 的酬載移除；小型 service ID；帳戶序列化前綴版本位元組；χ 的「Owned Privileges」",
+    "可變的 validator 集合大小（3 的倍數、6…1023，門檻由 |κ| 導出）；ρ 中保留完整的 guarantee；verdict／culprit／fault 各 16 的硬上限，且 bad verdict 不再要求必須有 culprit；bless 限縮給 manager service；authorizer = H(auth code hash ⌢ config)；refinement context 新增 anchor slot 與 lookup-anchor 的 posterior root；以 basic block 為單位的 gas 模型、並以 grow_heap 取代 sbrk；每位 validator 的 ticket 數 = ⌈2E/|γ′_P|⌉",
+    "全面的 64 位元 PVM 暫存器與 64 位元定址；guarantor 指派攜帶完整的 validator 金鑰；erasure-coding 公式修正；info host call 新增暫存器 9 與 10；明確的逐 invocation out-of-gas 檢查；transfer 的 gas 計費修正與 work-package 大小上限修正；preimage 整合的簡化；posterior state root 定案；程式碼 blob 的 metadata 前綴"
+   ],
    "stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. Which list contains ONLY genuine 0.8.0 changes?",
    "options": [
     "fetch replacing the import host call; memory-access exceptions formalized and a feature freeze declared; assurances checked with the prior validator set; Ed25519 keys in the epoch marker alongside activity statistics; the provide host call, with imports separated from exports; 'super-fetch', gratis storage and account metadata; maximum code sizes with oversize reports handled; stricter opcode and jump validity",
@@ -1220,6 +1290,13 @@
    "tags": [
     "tiny",
     "test-vectors"
+   ],
+   "stemZh": "哪一組數值描述的是 W3F 向量與 conformance fuzzer 所使用的「tiny」測試向量設定？",
+   "optionsZh": [
+    "12 位 validator、4 個 core、epoch 60 槽、ticket 提交止於第 50 槽、rotation 週期 10、preimage expunge 期 64、超級多數 12 取 9、verdict 門檻 9/0/4、ring 大小 12",
+    "1023 位 validator、341 個 core、epoch 600 槽、ticket 提交止於第 500 槽、rotation 週期 10、preimage expunge 期 19,200、超級多數 1023 取 683、verdict 門檻 683/0/341、ring 大小 1023",
+    "6 位 validator、2 個 core、epoch 12 槽、ticket 提交止於第 10 槽、rotation 週期 4、preimage expunge 期 32、超級多數 6 取 5、verdict 門檻 5/0/2、ring 大小 6",
+    "6 位 validator、2 個 core、epoch 12 槽、ticket 提交止於第 **12** 槽、rotation 週期 4、preimage expunge 期 32、超級多數 6 取 **4**、verdict 門檻 **4**/0/2、ring 大小 6"
    ],
    "stem": "Which values describe the 'tiny' test-vector configuration used by the W3F vectors and the conformance fuzzer?",
    "options": [
@@ -1976,6 +2053,13 @@
     "bridging",
     "off-chain"
    ],
+   "stemZh": "依 Beefy Distribution 這一章，validator 用哪把金鑰、在什麼時候、簽什麼？這個簽章又是拿來做什麼的？",
+   "optionsZh": [
+    "對它所出的每個區塊：以 Bandersnatch VRF 簽章（context $jam_beefy）簽該區塊的 accumulation 輸出 root M_B(s, H_K)，放進 header 的 H_O marker，而那正是 Grandpa 投票者在定案該區塊時所簽的資料",
+    "在匯入每個已定案的區塊之後：以 κ′[v] 的 BLS 金鑰對 $jam_beefy ⌢ b 做一個 BLS12-381 簽章，其中 b 是最新 β_H 條目所持有、accumulation 輸出腰帶的 Keccak MMR super-peak；這些簽章可自由發布，以便聚合成精簡的定案證明供橋接等第三方系統使用",
+    "在匯入每個區塊之後（不論是否已定案）：以該 validator 的 BLS 金鑰對 posterior state root M_σ(σ′) 做 BLS12-381 簽章，好讓輕節點能驗證最新狀態；Grandpa 接著把這些簽章聚合成它的定案證明，而不再跑自己的投票回合",
+    "每個 epoch 一次：對該 epoch 最後一個 header 的 Keccak 雜湊做 Ed25519 簽章，與 epoch marker H_E 一同發布，好讓經由 CoreChains service 橋接的 parachain 能證明整個 epoch 都已定案、而不必追蹤個別區塊"
+   ],
    "stem": "Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?",
    "options": [
     "For each block it authors: a Bandersnatch VRF signature (context $jam_beefy) over the accumulation-output root M_B(s, H_K) of that block, which is placed in the header's H_O marker and is the datum that Grandpa voters sign when they finalize the block",
@@ -2005,6 +2089,13 @@
     "grandpa",
     "auditing",
     "off-chain"
+   ],
+   "stemZh": "一個節點如何選出它據以建塊、並投 Grandpa 票的最佳區塊 B♭？這張票又攜帶什麼資料？",
+   "optionsZh": [
+    "候選者是所有父區塊已知的區塊；帶有最多 fallback 封緘祖先的那條鏈勝出，因為 fallback 金鑰屬於誠實多數；票中攜帶 header 加上 accumulation 輸出的 super-peak，好讓橋接能重用 Grandpa 的定案證明",
+    "候選者必須是最新已定案區塊的後代、必須被視為已稽核、且不得含有「位於節點已見過 equivocation 之 timeslot」的未定案祖先；在這些之中，帶有最多 ticket 封緘（非 fallback）祖先的那條鏈勝出；票中攜帶最佳 header 連同它的 posterior state root",
+    "在已定案區塊的後代之中採最長鏈規則；同一個 timeslot 的兩個有效區塊都會保留，因為 Safrole 容忍 equivocation；是否已稽核只影響 accumulation、不影響投票；票中攜帶 header 雜湊連同取自 header 的先前狀態 root H_R",
+    "候選者必須是已定案區塊的後代且帶有最多 guarantee；累計 timeslot 最大的那條鏈勝出，好懲罰停滯的 core；票中只攜帶 header，因為 Grandpa 與狀態無關、state root 由 Beefy 提供"
    ],
    "stem": "How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?",
    "options": [
@@ -2036,6 +2127,13 @@
     "tranches",
     "off-chain"
    ],
+   "stemZh": "在稽核協定中，一位 validator 如何決定它必須稽核哪些剛變為可得的 work-report？這個集合又是如何隨時間成長的？",
+   "optionsZh": [
+    "Tranche 0：以一個 Bandersnatch VRF 輸出（context $jam_audit ⌢ Y(H_V)）洗牌每個 core 上剛變可得的 report 清單，取前 10 個非空條目；每 A = 8 秒開始一個新 tranche，加入一份 report 的方式或是無條件（曾看到負面判決）、或是靠一個逐 report 的 VRF，其接受機率隨前一個 tranche 的缺席數成長，調校成每個缺席期望有 F = 2 位 validator 補上",
+    "Tranche 0：每位 validator 稽核它在當前 rotation 所 guarantee 的那些 core 的 report，因為它本來就持有 bundle；每 8 秒再以 η′_3 洗牌選出 F = 3 份 report 加入；一份 report 一旦其三位 guarantor 重新背書即算已稽核，而負面判決在 validator 之間流言傳播、但從不放上鏈",
+    "Tranche 0：每個 core 的三位 guarantor 重跑自己的 report，好讓被指控方承擔成本；每 6 秒（一個 slot）依序輪替加入其餘 validator，直到超過 2/3 做出判決，此時該 report 即算已稽核，而任何做出負面判決的 validator 會被罰沒；不需要任何公告，因為輪替順序可由區塊雜湊導出",
+    "Tranche 0：以 η′_2 為種子對 κ 做 Fisher–Yates 洗牌，為每份 report 指派恰好 30 位 auditor，對應 §20 每份 report 30 次稽核；一旦這 30 個正面判決到齊該 report 即算已稽核，而 tranche 0 之後不涉及 VRF，因為指派整個 epoch 都固定；後續 tranche 只有在出現負面判決時才會發生"
+   ],
    "stem": "In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?",
    "options": [
     "Tranche 0: shuffle the per-core list of just-available reports with a Bandersnatch VRF output (context $jam_audit ⌢ Y(H_V)) and take the first 10 non-empty entries; a new tranche starts every A = 8 s, adding a report either unconditionally (a negative judgment was seen) or by a per-report VRF whose acceptance chance grows with the previous tranche's no-shows, tuned so that F = 2 validators are expected per no-show",
@@ -2064,6 +2162,13 @@
     "guaranteeing",
     "off-chain",
     "work-reports"
+   ],
+   "stemZh": "關於 Guaranteeing 一章所描述的誠實 guarantor 策略，哪個敘述正確？",
+   "optionsZh": [
+    "以 Bandersnatch 金鑰在 $jam_guarantee context 下簽署該 report，好讓 ring 證明隱藏是該 core 的哪位 guarantor 簽的，所以鏈上 credential 不帶 validator 索引；兩個簽章足以散播；guarantor 每個 epoch 絕不該簽超過一份 report，否則出塊者的反垃圾過濾器會在該 epoch 剩下的時間裡無視他們",
+    "先跑完每個 work-item 的 refine、之後才檢查授權，因為 pool 反正會在鏈上重新驗證、而 refine 才是成本大宗；必須集齊全部三位 guarantor 的簽章才能把 report 送給出塊者；出塊者拒絕收納的任何 report 都算違規、會像無效 report 一樣被罰沒；一位 guarantor 每個 rotation 至多簽一份 report",
+    "pool 檢查要用該 report 的 lookup-anchor 當時的鏈狀態、而不是當前鏈頭，好讓該 core 的所有 guarantor 對同一份視圖取得共識；單一個簽章就足以散播，因為出塊者會自行收集其餘 credential；因此 credential 清單可以未排序地抵達，而 GP 對一位 guarantor 每個 slot 能簽幾份 report 沒有給出指引",
+    "在跑任何 refine 邏輯之前，先拿最新鏈狀態的 authorizer pool 檢查該 package 的授權（連同其他鏈上收納條件）；算出 r = Ξ(p, c, l, v) 之後，以 Ed25519 簽 $jam_guarantee ⌢ H(E(r))；兩個簽章就足以把 report 送給下一位出塊者；一份無法被收納的 report 只是損失獎勵，而謊報 Ξ 結果則會受重罰；平均每個 timeslot 至多簽兩份 report"
    ],
    "stem": "Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?",
    "options": [
@@ -2095,6 +2200,13 @@
     "d3l",
     "off-chain"
    ],
+   "stemZh": "在一位 validator 於它的 assurance 中把某個 core 的位元設起之前，它必須持有哪些 erasure 編碼的資料？這些資料如何驗證？又必須保存多久？",
+   "optionsZh": [
+    "它的 bundle 分片與 segment 分片，驗證是對 segments-root 而非 erasure-root，因為 erasure-root 只承諾了 bundle；bundle 分片保存 28 天，而 segment 分片在該 report 被 accumulate 後即可丟棄，因為 accumulation 會把匯出的 segment 複製進鏈上 service 儲存",
+    "完整的 work-package bundle 加上每一個匯出 segment 的明文（不是分片），驗證方式是在背書前於本地重算該 work-report，並保存 D = 19,200 個 slot，好讓該 package 所引用的任何原像能在爭議視窗期間重新驗證",
+    "只需要它那一份 work-package bundle 的分片；segment 分片由後續的匯入者直接向匯出 package 的 guarantor 惰性取得；bundle 分片保存 L = 14,400 個 slot（24 小時）好讓 lookup-anchor 維持可稽核，而且不需要證明，因為 assurance 簽章會在鏈上對該 report 的 erasure-root 檢查",
+    "兩者都要：它那份可稽核 bundle 的分片（只保存到該 report 被視為已稽核／其區塊定案為止，在那之前依請求提供），以及該 report 的 segments-root 之下每一個匯出 segment 的分片加上分頁證明資料（長期的 D³L，保存 ≥ 28 天 = 672 個 epoch）；在宣稱持有之前，各自都要以 Merkle 證明對該 report 的 erasure-root 驗證"
+   ],
    "stem": "Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?",
    "options": [
     "Its bundle shard and segment shards, verified against the segments-root rather than the erasure-root since the erasure-root only commits to the bundle; the bundle shard is kept for 28 days while segment shards may be dropped once the report is accumulated, because accumulation copies the exported segments into on-chain service storage",
@@ -2125,6 +2237,13 @@
     "throughput",
     "rationale"
    ],
+   "stemZh": "Discussion 一章如何刻劃一份 work-package 在 JAM core 上所取得的「虛擬硬體」？它的結果之後又會怎樣？",
+   "optionsZh": [
+    "大約一顆一般 CPU 核心、以原生速度的 25–50% 執行整個 6 秒 slot，約 2 MB/s 的通用 I/O（其中包含對近期 JAM 狀態的免信任讀取）與至多 2 GB RAM，外加對半靜態原像庫的無上限讀取；結果至多 48 KB，接著在同一台機器上取得約 10 ms、沒有外部 I/O 但對鏈狀態有完整且即時的存取",
+    "一顆以 25–50% 速度執行、配 2 GB RAM 的 CPU 核心，但完全無法存取鏈狀態，因為 refine 在構造上就是無狀態的；I/O 無上限，因為沒有任何東西會離開 core；那份 48 KB 的結果接著在稽核預算（10/16 的 CPU 時間）之內 accumulate，這也是每份 report 上限 10^7 gas、每個區塊 3.5·10^9 的原因",
+    "一整台 validator 機器（16 核、64 GB RAM、8 TB）獨佔一個 6 秒的 slot、鏈狀態 I/O 無上限；結果最大可達 12 MB，接著以相同的 I/O 預算 accumulate 至多一秒，這也是效能模型裡把 2/16 的 validator CPU 時間分給區塊執行的原因，而原像查詢也計入同一份 12 MB 預算",
+    "一顆 CPU 核心以原生速度跑一秒，外加每 6 秒 slot 5 MB 的 I/O——原封不動沿用 Polkadot 的 parachain 預算，好讓 CoreChains 不必重新調校——結果至多 90 KB，並在下一個 slot 以完整狀態存取加上另外 6 秒的執行時間 accumulate；半靜態原像庫在 core 上完全無法觸及"
+   ],
    "stem": "How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?",
    "options": [
     "Roughly one regular CPU core at 25–50% of native speed for the whole 6-second slot, about 2 MB/s of general-purpose I/O (which includes trustless reads of recent JAM state) and up to 2 GB of RAM, plus unlimited reads from a semi-static preimage store; the result is at most 48 KB and then gets ~10 ms on the same machine with no external I/O but full, immediate access to chain state",
@@ -2153,6 +2272,13 @@
     "rationale",
     "future-work",
     "architecture"
+   ],
+   "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。哪個摘要正確？",
+   "optionsZh": [
+    "甜蜜點＝在安全、有韌性的共識之下進行大量運算（不同於完全同步的模型），同時對一台單體狀態機提供嚴格的時序與整合保證（不同於持續碎片化的模型）；考慮中：accumulate 中的同步 service 呼叫、為了平行 accumulation 而限制 `transfer`、在特定條件下保留額外的 accumulate 運算、以及把 work-package 格式 Merkle 化好讓授權無需完整下載；網路層與代幣／coretime／質押層則留白",
+    "甜蜜點＝像 Cosmos 那樣完全碎片化但共用同一個 validator 集合的設計；考慮中：捨棄 Beefy 改採純 Grandpa 證明、讓鏈上治理能原地升級 service、加入原生的簽署交易（因為 transfer 模型顯示只靠 refine 的轉帳受限於 I/O）、以及提高 48 kB 的 work-result 上限好讓 accumulate 看到更多資料；coretime 銷售與質押已在附錄規範",
+    "甜蜜點＝341 個 core 恰好塞滿一條 0.5 GbE 連線的那個點；考慮中：refine 期間 service 之間的同步呼叫、完全移除 `transfer` host call、解除每區塊的 accumulate gas 上限 G_T、以及在 state trie 中引入 Merklization 好讓授權無需完整下載即可判定；網路協定已在附錄完整規範，而 validator 獎勵已在鏈上追蹤",
+    "甜蜜點＝在接受 Solana 級硬體需求的前提下，達到與完全同步鏈相當的連貫性；未決事項：一旦證明成本降到原生的 50,000 倍以下就以 SNARK 證明取代 ELVES 稽核、把 D³L 保存期從 28 天縮短為 24 小時、把 refine 的匯入 segment 移進區塊本體、以及把 coretime 銷售與質押寫進後續章節而非委由系統 service；網路協定已在附錄中定案"
    ],
    "stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?",
    "options": [
@@ -2185,6 +2311,13 @@
     "delta-0.8.0",
     "code-gap"
    ],
+   "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。比較 GP 0.7.2 與 0.8.0，哪個敘述正確？",
+   "optionsZh": [
+    "這個 blob 在 0.7.2 與 0.8.0 之間沒有變（33 個定寬小端欄位、134 位元組）；0.8.0 反而把 V 與 N 移進創世 header 的 epoch marker H_E，所以 chainspec 必須在那裡重複 validator 數量，而節點從它匯入的第一個 epoch marker 讀取 ticket 數；因此既有解碼器除了也要解析 H_E 之外不需改動",
+    "0.8.0 拿掉四個欄位——N（每位 validator 的 ticket 數，現為 ⌈2E/|γ′_P|⌉）、V（validator 數量，現由創世狀態中的 validator 集合隱含）、W_E 與 W_P（erasure 編碼大小，現由 validator 數量導出）——使該 blob 從 33 欄／134 位元組縮為 29 欄／122 位元組；解析器、以及任何仍從中覆寫「每 validator ticket 數／validator 數量／EC 大小」的『套用參數』程式碼都必須修改",
+    "0.8.0 為新的 gas 模型常數（C_gasunknown 與各 host call 的基本成本）以及稽核常數 F 與 A 新增欄位，好讓 service 能透過 fetch(0) 讀取；V 留在 blob 裡，因為 validator 集合現在可變，而 service 必須知道集合大小才能為它的匯出計算 erasure 編碼參數，所以該 blob 從 33 欄／134 位元組成長為 41 欄／168 位元組",
+    "0.8.0 保留全部 33 個欄位，但把它們從定寬小端整數改為通用的緊湊編碼 E(x)，所以 blob 長度現在取決於數值（例如 1,023 與 6 位 validator 的差別）；JIP-4 同時把 `genesis_state` 的 key 從 31 位元組加寬為 32 位元組，好讓 state trie 無需重新雜湊即可載入，而一份 tiny chainspec 現在編碼後遠小於 122 位元組"
+   ],
    "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?",
    "options": [
     "The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports; existing decoders therefore need no change beyond also parsing H_E",
@@ -2215,6 +2348,13 @@
     "history",
     "m1"
    ],
+   "stemZh": "關於 W3F 用於 M1 稽核的 jam-conformance fuzz 協定，哪個描述正確？",
+   "optionsZh": [
+    "一個架在「由目標端監聽的 Unix domain socket」之上的同步請求／回應協定；訊息以 JAM codec 編碼、前綴一個 u32 小端長度；在 PeerInfo 握手（features = 雙方的位元 AND）之後，fuzzer 送出 Initialize（header、狀態鍵值、祖先清單），接著送 ImportBlock 請求，每個都以 posterior state root 或 Error（狀態不變）回覆；root 不符會觸發 GetState；ancestry 與分叉對 M1 是必備的",
+    "一個基於檔案的協定：fuzzer 把編號的區塊 .bin 檔寫進共享目錄，目標端在旁邊寫出 post-state JSON；握手是一個版本檔而不是 PeerInfo 交換，所以沒有功能協商、ancestry 與分叉一律開啟；第一次 state root 不符就中止該次執行、不產生報告，且該 GP 版本的送審視為失敗",
+    "一條 TCP 串流，由目標端撥接 fuzzer 並送出第一個握手訊息；區塊以 SCALE 編碼、前綴一個 u16 大端長度；fuzzer 在每個區塊後比對完整狀態傾印而非 root，無效區塊是靠乾脆不回應來表示，而 ancestry 功能對 M1 是選用的，因為 lookup-anchor 檢查約束的是出塊者而不是匯入者",
+    "一個架在 WebSocket（連接埠 19800）之上的 JSON-RPC 2.0 會話，由 fuzzer 監聽、目標端撥接；區塊以十六進位字串傳輸，每次 importBlock 呼叫回覆的是 header 雜湊而不是 state root；區塊被拒會關閉連線，ancestry 由 fuzzer 從 finalizedBlock 訂閱重建而非由外部提供，而且從不產生分叉，因為 Safrole 排除了 equivocation"
+   ],
    "stem": "Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?",
    "options": [
     "A synchronous request/response protocol over a Unix domain socket the target binds; messages are JAM-codec encoded with a u32 little-endian length prefix; after a PeerInfo handshake (features = bitwise AND of both sides) the fuzzer sends Initialize (header, state key-vals, ancestor list) then ImportBlock requests, each answered by the posterior state root or an Error (state unchanged); a root mismatch triggers GetState; ancestry and forks are mandatory for M1",
@@ -2243,6 +2383,13 @@
     "prize",
     "history",
     "interview"
+   ],
+   "stemZh": "依 JAM Prize 規則與里程碑交付條款，送審後的口試其目的與地位是什麼？",
+   "optionsZh": [
+    "它是對效能測試（gas、trie／DB、簽章驗證、可得性）的強制口頭答辯，由基金會在標準硬體上執行；主持者是 W3F 員工而非 Fellowship，且不錄影，第 12 條只涵蓋 benchmark harness 的著作權，生成式 AI 的使用另依 clean-room 規則處理，而且設計上其結果無法改變所頒發的獎項",
+    "它可在送審後被要求，用以查驗團隊成員是否為正當作者（排除生成式 AI）、並對 Gray Paper 與自家程式碼庫兩者都具備確切的專業；交付範本使團隊承諾接受一場由 Polkadot Technical Fellowship 進行、且錄影的口試，並以鏈上的 Fellowship remark 批准，而未能證明專業可能導致獎金減少或團隊被取消資格",
+    "它是與 Parity 稽核者針對 conformance fuzzer 發現所做的選擇性問答；通過它就不必再通過公開與私有的一致性測試，結果由基金會在鏈下記錄而非由 Fellowship 在鏈上批准，而既然是選擇性的，婉拒的團隊只需等下一個審查視窗、對其獎項毫無影響",
+    "它是僅限於 PVM 與 host call 實作的程式碼審查會；使用過生成式 AI 的團隊只要在交付文件中事先申報仍可通過，主持者取自該團隊自己的客戶端實作同儕，而表現不佳唯一可能的後果是付款延後到協定 1.0 版獲批准為止"
    ],
    "stem": "According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?",
    "options": [
@@ -3352,6 +3499,13 @@
     "tiny",
     "epoch-boundary"
    ],
+   "stemZh": "tiny 設定（E = 12）。一個 H_T = 24 的區塊——epoch 2 的第一個區塊——被匯入到 τ = 23 的父區塊之上，而它的 E_D 含有 verdict。依 eq. 10.2–10.4，這些 verdict 可以帶哪些 epoch 索引 a？各由哪個 validator 集合 K(a) 驗證？",
+   "optionsZh": [
+    "a ∈ {2, 1, 0}：在 epoch 邊界的區塊裡，來自 κ′、κ 與 λ 的判決全都可受理，每個 verdict 仍需要 ⌊2|k|/3⌋+1 = 5 個簽章",
+    "a ∈ {1, 0}：a = 1 選出先前的 κ（epoch 1 期間生效的那個集合）、a = 0 選出先前的 λ；即使該區塊本身屬於 epoch 2，a = 2 仍被拒絕",
+    "a ∈ {2, 1}：a = 2 選出先前的 κ、a = 1 選出先前的 λ，因為 ⌊H_T/E⌋ = 2 就是 verdict 必須指名的 epoch 索引；a = 0 因太舊被拒絕",
+    "a ∈ {2, 1}：a = 2 選出 κ′（此區塊輪入的那個集合）、a = 1 選出 κ，因為索引是從區塊自身的 timeslot H_T 導出的；a = 0 被拒絕，因為 λ 到此已經過時兩個 epoch"
+   ],
    "stem": "Tiny config (E = 12). A block with H_T = 24 — the first block of epoch 2 — is imported on top of a parent whose τ = 23, and its E_D contains verdicts. Per eq. 10.2–10.4, which epoch indices a may those verdicts carry, and which validator set K(a) verifies each of them?",
    "options": [
     "a ∈ {2, 1, 0}: in an epoch-boundary block judgments from κ′, κ and λ are all admissible, each verdict still needing ⌊2|k|/3⌋+1 = 5 signatures",
@@ -3381,6 +3535,13 @@
     "code",
     "fuzzer",
     "edge-case"
+   ],
+   "stemZh": "此鏈仍在創世 epoch（先前的 τ < E，所以 ⌊τ/E⌋ = 0）。這段程式碼會接受哪個 verdict `Age`、而 GP 0.8.0（eq. 10.2–10.3）其實會判該區塊無效？屆時它又會拿哪一組金鑰去驗證這些判決？",
+   "optionsZh": [
+    "Age = 0 且判決由 λ 金鑰簽署：既然創世時無法匹配 a−1，程式碼就落到 λ 分支，並為當前 epoch 接受 λ 簽章",
+    "Age = 1：因為該檢查對 a 與 a−1 是對稱比較的，下一個 epoch 的索引也會通過，於是判決會被拿去對 κ 驗證，彷彿 epoch 已經翻頁",
+    "沒有：`a-1` 環繞後的值永遠不可能等於一個解碼出來的 32 位元 Age，所以創世時只有 Age = 0 會通過，這段程式碼恰好就是 GP 的規則",
+    "Age = 2^32 − 1：`a-1` 在 U32 底下環繞（wrap around），於是 age 檢查通過、判決被拿去對 λ 驗證，然而 ⌊τ/E⌋ − N_2 在 epoch 0 根本沒有前一個 epoch"
    ],
    "stem": "The chain is still in its genesis epoch (prior τ < E, so ⌊τ/E⌋ = 0). Which verdict `Age` does this code accept although GP 0.8.0 (eq. 10.2–10.3) makes the block invalid — and against which key set would it then verify the judgments?",
    "code": {
@@ -3417,6 +3578,13 @@
     "faults",
     "edge-case"
    ],
+   "stemZh": "在這個區塊裡，一個 verdict 把 report r 判為 wonky（恰好 ⌊|k|/3⌋ 個正面判決），所以 r ∈ ψ′_W 而 r ∉ ψ′_G ∪ ψ′_B。E_F 同時帶了一個 fault (r, ⊥, k, s)，簽章正確、來自一把不在 ψ_O 的 κ ∪ λ 金鑰。依 GP 0.8.0 eq. 10.7，這個區塊有效嗎？這段程式碼又會怎麼處理？",
+   "optionsZh": [
+    "無效，而且程式碼也會拒絕：在 inGood = inBad = false 之下兩個子句都塌縮成該投票本身，所以 v = ⊥ 時會回傳 fault_verdict_wrong",
+    "無效：該等價式迫使 r 必須恰好落在 ψ′_B、ψ′_G 其中之一，所以一份 wonky 的 report 不容許任何 v 的 fault；但這段程式碼仍會接受它，因為它只拒絕 (v ∧ good) 或 (¬v ∧ bad)",
+    "只有 v = ⊤ 時才有效——對一份不在 ψ′_G 的 report 投「有效」正是 fault 所記錄的那種違規——而程式碼透過 inGood 拒絕的正好就是這個組合",
+    "有效：v = ⊥ 並未與一個非 good 的 verdict 相矛盾，所以這個 fault 成立、k 進入 ψ′_O 與 H_O；程式碼與此一致，因為對 wonky 的目標而言 inGood 與 inBad 都沒被設起"
+   ],
    "stem": "In this block a verdict classifies report r as wonky (exactly ⌊|k|/3⌋ positive judgments), so r ∈ ψ′_W and r ∉ ψ′_G ∪ ψ′_B. E_F also carries a fault (r, ⊥, k, s) with a correct signature from a κ ∪ λ key that is not in ψ_O. Per GP 0.8.0 eq. 10.7, is the block valid — and what does this code do with it?",
    "code": {
     "lang": "go",
@@ -3451,6 +3619,13 @@
     "rationale",
     "hashing"
    ],
+   "stemZh": "ψ_G、ψ_B、ψ_W、每一則判決訊息、每一份 culprit 證明、以及 ρ† 的清除規則（eq. 10.14），全都用同一個 32 位元組的雜湊來指認爭議中的項目。那是哪個雜湊？為什麼它是爭議的正確身分？",
+   "optionsZh": [
+    "H(E(g))——含 credential 與 slot 的整份 guarantee 的雜湊，如此簽署的 guarantor 就被綁進被判物件裡，culprit 便可單由 verdict 導出",
+    "erasure root (w_s)_u，因為爭議說到底是在爭該 report 背後、經 erasure 編碼的 bundle 能不能還原成有效資料，而那正是 auditor 重新執行的東西",
+    "H(E(w))——編碼後 work-report 的雜湊：它正是 guarantor 所簽的東西（X_G ⌢ H(w)），所以 culprit 證明就是原本那個 guarantee 簽章，而 eq. 10.14 用 H((ρ[c]_g)_w) 來比對 core",
+    "work-package 雜湊 (w_s)_h：package 才是工作的單位，所以判它就等於封禁針對該 package 做過的每一份 report，而 eq. 10.14 是拿 ρ[c] 裡持有的 package 雜湊與 verdict 比對"
+   ],
    "stem": "ψ_G, ψ_B, ψ_W, every judgment message, every culprit proof and the ρ† clearing rule (eq. 10.14) all identify the disputed item by one 32-byte hash. Which hash is it, and why is that the right identity for a dispute?",
    "options": [
     "H(E(g)) — the hash of the whole guarantee including its credential and slot, so that the guarantors who signed are bound into the judged object and culprits can be derived from the verdict alone",
@@ -3482,6 +3657,13 @@
     "tiny",
     "timeout"
    ],
+   "stemZh": "tiny 設定（|κ| = 6、U = 5），單一 core c = 0，沒有爭議。slot 40 的區塊：E_G 帶了 core 0 的 guarantee g₁。slot 42 的區塊：E_A 有 4 份把 bit 0 設起的 assurance。slot 45 的區塊：E_A 有 3 份把 bit 0 設起的 assurance，且 E_G 帶了另一份對 core 0、其餘皆有效的 guarantee g₂。在 slot 45 的區塊之後，ρ‡[0] 與 ρ′[0] 各是什麼？g₁ 的 report 曾被 accumulate 嗎？",
+   "optionsZh": [
+    "ρ‡[0] = ∅，因為累計的 7 份 assurance 使該 report 可得；它在此區塊 accumulate，而 ρ′[0] = (g₂, 45)",
+    "ρ‡[0] = (g₁, 40)：逾時要到 H_T > t + U 才觸發，也就是從 slot 46 起，所以 g₂ 因 core_engaged 被拒",
+    "ρ‡[0] = ∅，因為 45 ≥ 40 + U；g₁ 的 report 從未進入 R，未經 accumulate 就被丟棄；g₂ 被接受，所以 ρ′[0] = (g₂, 45)",
+    "ρ‡[0] = (g₁, 40)：至今累積的 4 + 3 = 7 份 assurance 已超過門檻 5，所以該 report 在 R 之中並會 accumulate，而 g₂ 因 core_engaged 被拒"
+   ],
    "stem": "Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?",
    "options": [
     "ρ‡[0] = ∅ because the cumulative 7 assurances made the report available; it accumulates in this block and ρ′[0] = (g₂, 45)",
@@ -3510,6 +3692,13 @@
     "guarantees",
     "rotation",
     "calc"
+   ],
+   "stemZh": "full 設定（R = 10）。正在匯入的區塊 τ′ = 57。對 E_G 中的 guarantee g = (w, t, a)，依 eq. 11.28 哪些 t 值可接受？各由哪個指派（M 或 M*）驗證其 credential？",
+   "optionsZh": [
+    "只有 t ∈ [50, 57]——即當前 rotation，全部對 M 驗證——因為只有在前一個 rotation 落在前一個 epoch 時才會去查 M*",
+    "t ∈ [47, 57]——一個以 τ′ 結尾、長 R 個 slot 的滑動視窗；t ∈ [47, 49] 對 M* 驗證、t ∈ [50, 57] 對 M 驗證；t = 46 因太舊被拒",
+    "t ∈ [40, 59]——整個前一與當前 rotation——且允許 t > τ′，因為 guarantee 可能在收納它的區塊之前就產生了",
+    "t ∈ [40, 57]：t ∈ [40, 49] 對 M*（rotation 索引 4）驗證、t ∈ [50, 57] 對 M（rotation 索引 5）驗證；t = 39 與 t = 58 都被拒"
    ],
    "stem": "Full config (R = 10). The block being imported has τ′ = 57. For a guarantee g = (w, t, a) in E_G, which values of t are acceptable under eq. 11.28, and which assignment (M or M*) verifies the credential for each?",
    "options": [
@@ -3541,6 +3730,13 @@
     "calc",
     "epoch-boundary"
    ],
+   "stemZh": "full 設定（E = 600、R = 10）。τ′ = 603 的區塊收納了一份 t = 595 的 guarantee。它的 credential 必須對哪個指派檢查？",
+   "optionsZh": [
+    "M* = (P(|κ′|, η′_2, 593), Φ(κ′))：前一個 rotation 一律使用當前 epoch 的熵與集合，只有 rotation 索引不同",
+    "該 guarantee 無效：guarantee 不得跨越 epoch 邊界，因為 validator 集合可能已經改變",
+    "M = (P(|κ′|, η′_2, 603), Φ(κ′))，rotation 索引 0，因為 t 落在 τ′ 的 R 個 slot 之內",
+    "M* = (P(|λ′|, η′_3, 593), Φ(λ′))：前一個 rotation（索引 59）屬於前一個 epoch，所以要改由 λ′ 與 η′_3 重新計算"
+   ],
    "stem": "Full config (E = 600, R = 10). A block at τ′ = 603 includes a guarantee with t = 595. Which assignment must its credential be checked against?",
    "options": [
     "M* = (P(|κ′|, η′_2, 593), Φ(κ′)): the previous rotation always uses the current epoch's entropy and set, only the rotation index differs",
@@ -3570,6 +3766,13 @@
     "shuffle",
     "code",
     "delta-0.8.0"
+   ],
+   "stemZh": "這是團隊的 P（GP 0.7.2）。在一條 C = 341 個 core、validator 序列 |κ′| = 9 的鏈上，依 GP 0.8.0（eq. 11.20–11.21）會有什麼改變？",
+   "optionsZh": [
+    "0.8.0 建的基底是 [⌊i/3⌋ | i ∈ N_9] = [0,0,0,1,1,1,2,2,2]，並對 |κ′|/3 = 3 取模旋轉；而這段程式碼建的是 ⌊341·i/9⌋ = [0, 37, 75, …, 303] 並對 341 取模旋轉，把 guarantor 撒到了未啟用的 core 上",
+    "沒有可觀察的差別：對 eq. 6.8 允許的每一種 validator 數量，⌊C·i/V⌋ 與 ⌊i/3⌋ 都一致，且基於同樣理由 mod C 等於 mod V/3，所以兩版之間只有常數名稱不同",
+    "0.8.0 保留 ⌊C·i/V⌋ = [0, 37, 75, …, 303] 當基底，但把旋轉的模數從 C 改成 E/R = 60，也就是每 epoch 的 rotation 數，於是洗牌輸出每個 epoch 循環一次",
+    "0.8.0 以對單位指派 [0, 1, 2, …, 8] 的單純旋轉（模 |κ′|/3）取代 Fisher–Yates 洗牌，移除了對 η′_2 的依賴，使指派提前整整一個 epoch 就已知"
    ],
    "stem": "This is the team's P (GP 0.7.2). Under GP 0.8.0 (eq. 11.20–11.21), what changes when the validator sequence has |κ′| = 9 in a chain with C = 341 cores?",
    "code": {
@@ -3606,6 +3809,13 @@
     "code",
     "delta-0.8.0"
    ],
+   "stemZh": "這是團隊的 refinement-context 驗證（GP 0.7.2）。GP 0.8.0 eq. 11.36（anchor）與 eq. 11.38（lookup anchor）所要求、而它缺少的條件是哪些？",
+   "optionsZh": [
+    "除了把 BeefyRoot 改名為 accumulation 輸出的 super-peak b 之外沒別的，新的 BlockInfo timeslot 只是參考用；兩個 anchor 元組在其餘方面都與 0.7.2 相同",
+    "Anchor：拿掉 state-root 比對，因為 0.8.0 的 anchor 帶的是 timeslot 而不是 state root；lookup anchor：只檢查 l_t ≥ H_T − L，因為 ancestor 集合的要求在 0.8.0 已被移除",
+    "Anchor：context 的 anchor timeslot 還必須等於該 β† 條目的 timeslot（x_t = y_t）；lookup anchor：子 header h′（h′_p = H(h)）必須帶有 h′_r = l_s，用以驗證 lookup anchor 的 posterior state root",
+    "Anchor：改成對 β 而不是 β† 比對，因為 0.8.0 不再把父區塊的 state root 補寫進 recent history；lookup anchor：不變，因為 ancestor 集合本來就存了 (slot, 雜湊) 配對"
+   ],
    "stem": "This is the team's refinement-context validation (GP 0.7.2). Which conditions required by GP 0.8.0 eq. 11.36 (anchor) and eq. 11.38 (lookup anchor) are missing from it?",
    "code": {
     "lang": "go",
@@ -3640,6 +3850,13 @@
     "context",
     "fuzzer"
    ],
+   "stemZh": "為什麼 lookup-anchor 的要求（eq. 11.38）無法單靠鏈上狀態 σ 檢查？conformance fuzzer 又是怎麼讓它對 M1 目標變得可檢查的？",
+   "optionsZh": [
+    "它需要 lookup-anchor 區塊的完整 posterior 狀態，才能重算它的 state root r，而 fuzzer 會在該區塊匯入期間透過 GetState 訊息隨需提供",
+    "它需要最近 L 個 slot 的 header（也就是 ancestor 集合，並不屬於 σ），這可由 header 鏈確定性地導出；因此 fuzzer 的 Initialize 訊息會帶一份 (slot, header 雜湊) 的 ancestry 清單，這是 M1 的必備功能",
+    "它只需要 β，也就是最近 H = 8 個區塊，其條目帶有 header 雜湊、state root 與 timeslot，所以這個檢查純粹是鏈上的；fuzzer 只是先重播足夠多的區塊把 β 填滿，才開始送出 guarantee",
+    "fuzzer 略過它：0.8.0 已讓 refinement context 中的 lookup anchor 變成選用，所以向量只演練年齡界限 l_t ≥ H_T − L，且 Initialize 時不傳送 ancestry 清單"
+   ],
    "stem": "Why can the lookup-anchor requirement (eq. 11.38) not be checked from the on-chain state σ alone, and how does the conformance fuzzer make it checkable for an M1 target?",
    "options": [
     "It needs the full posterior state of the lookup-anchor block in order to recompute its state root r, which the fuzzer supplies on demand through GetState messages while the block is being imported",
@@ -3668,6 +3885,13 @@
     "guarantees",
     "dependencies",
     "edge-case"
+   ],
+   "stemZh": "E_G 中的一份 work-report 列了先決條件 p。package p 在 10 個區塊前被 guarantee、8 個區塊前被 accumulate，所以 p ∈ ξ，但 p 已不再出現在 β 的任何條目中（H = 8）。這份 guarantee 有效嗎？",
+   "optionsZh": [
+    "在 guarantee 階段有效，但該 report 會停在 ready 佇列 ω 中，直到 p 在 recent-history 視窗內再次被 report 為止，因為 eq. 11.42 會在 accumulation 期間重新評估",
+    "無效（dependency_missing）：eq. 11.42 要求每個先決條件都必須在同一個區塊裡被 guarantee，所以只有相互依賴與自我依賴可受理，而 β 從不被查詢",
+    "無效（dependency_missing）：eq. 11.42 只在先決條件位於本區塊的 E_G 中、或落在 β 各條目的 reported-package 集合裡時才受理；guarantee 階段不會去查 ξ",
+    "有效：p ∈ ξ 證明該 package 已被 accumulate，而 eq. 11.42 除了 extrinsic 與 β 之外也接受 ξ，所以依賴成立、該 report 一旦可得就會 accumulate"
    ],
    "stem": "A work-report in E_G lists prerequisite p. Package p was guaranteed 10 blocks ago and accumulated 8 blocks ago, so p ∈ ξ but p no longer appears in any entry of β (H = 8). Is the guarantee valid?",
    "options": [
@@ -3698,6 +3922,13 @@
     "digest",
     "edge-case"
    ],
+   "stemZh": "service s 在某份 work-package 建好之後升級了程式碼：該 work-item 的 code hash c 在建置當下是正確的、refine 也執行了 lookup anchor 當時可取得的程式碼，但收納區塊的先前狀態中 δ[s]_c ≠ c。這份 guarantee 在被收納時會如何？",
+   "optionsZh": [
+    "被接受：c 只是記錄 refine 實際執行了哪份程式碼、對 lookup anchor 的 posterior 狀態解析，而 accumulation 屆時就直接跑 δ′[s]_c 裡的東西",
+    "被接受，但該 digest 的結果會在鏈上被覆寫為 BAD 錯誤，因為記錄的 code hash 已無法解析到該 service 仍持有的原像",
+    "被拒（bad_code_hash）：eq. 11.45 要求在收納區塊的先前狀態中 d_c = δ[d_s]_c，所以對已被取代的程式碼所做的 refine 只會被丟棄、不會 accumulate",
+    "只要 lookup anchor 不超過 L = 14,400 個 slot 就被接受，因為程式碼可得性只在 lookup anchor 判定，而 eq. 11.45 約束的是 payload 雜湊、不是 code hash"
+   ],
    "stem": "Service s upgraded its code after a work-package was built: the work-item's code hash c was correct at build time and refine ran the code available at the lookup anchor, but the including block's prior state has δ[s]_c ≠ c. What happens to the guarantee at inclusion?",
    "options": [
     "Accepted: c only records which code refine actually executed, resolved against the lookup anchor's posterior state, and accumulation then simply runs whatever δ′[s]_c holds at that time",
@@ -3727,6 +3958,13 @@
     "assurances",
     "delta-0.8.0",
     "variable-validators"
+   ],
+   "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。哪個敘述正確？",
+   "optionsZh": [
+    "無效：即使在 M* 之下，eq. 11.28 仍以 |κ′|/3 = 3 為 w_c 的上界，所以 core 3 現在是未啟用的；eq. 11.31 要求 (w_s)_v = |κ′| = 9，而不是該 report 所帶的 12 個 chunk；而且 eq. 11.18 因 |κ| ≠ |κ′| 早已把 ρ‡ 清空",
+    "有效：M* 重現了前一個 rotation 的指派，在其之下 core 3 是啟用的、12 個 chunk 也是正確的分片數；eq. 11.28 的 core 界限是依 M* 所選中的集合來讀，而 ρ‡ 在 epoch 更替中原封不動",
+    "無效的唯一理由是簽署者來自 λ′：eq. 11.23 只允許 assurance 讓 M* 退回前一個 epoch 的金鑰，所以 epoch 首個區塊裡的 guarantee 需要 κ′ 簽章，而 w_c 可以是任何小於 C/3 的 core",
+    "有效，但 ρ′[3] 蓋的是該 guarantee 自己的 slot t = 595 而不是 τ′ = 600，於是 eq. 11.18 的 H_T ≥ t + U 在 slot 600 就已成立，該指派在建立它的那個區塊裡就被丟掉"
    ],
    "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?",
    "options": [
@@ -4128,6 +4366,13 @@
     "erasure-root",
     "rationale"
    ],
+   "stemZh": "附錄 E 給了兩個通用 Merkle root 函數：well-balanced 的 M_B 與定深的 M。在 availability specification 中，segment-root a_e 用其中一個、erasure-root a_u 用另一個。是哪個配哪個？well-balanced 的形狀相對於「一律補到 2 的冪」又買到了什麼？",
+   "optionsZh": [
+    "兩個 root 都用 M；M_B 只是一層薄包裝，它處理單一項目的雜湊、其餘一律委派給節點函數 N。補到 2 的冪正是讓一棵樹變成 well-balanced 的做法，'$leaf' 與 '$node' 前綴是兩個 root 函數之間唯一實質的差別，而 erasure-root 的葉子是單一個 32 位元組的碎片雜湊而不是 64 位元組的對",
+    "剛好相反：segment-root 用 M_B，因為一個 segment 有 4,104 個 octet 而 M_B 避免了對每一項做雜湊；erasure-root 用 M，因為碎片數固定為 validator 集合大小、定深樹建起來比較便宜。M_B 在自己的基底情形套用 '$leaf' 前綴，所以不需要另外的前處理器，而 well-balanced 只有在項數很少、log₂ 取整會浪費一層時才有意義",
+    "兩個 root 都用 M_B；定深函數只為附錄 D 的 state trie 而存在，因為它 31 位元組的 key 本來就固定了深度，而前處理器 C 就是那棵 trie 的 key 補齊步驟。偏好 well-balanced 是因為它讓每片葉子有相同的證明長度，而一旦項數本身不是 2 的冪，補到 2 的冪的樹就做不到這點，所以 J_6／L_6 是在那棵 trie 上分頁而不是在一般 Merkle 樹上",
+    "segment-root 用 **M**：前處理器 C 把每一項改寫成 H('$leaf' ⌢ s) 並以零雜湊補到 2^⌈log₂ n⌉ 片葉子，讓所有葉子位於同一深度、使 64 葉子的頁面對 J_6／L_6 保持大小對齊。erasure-root 用 **M_B**，因為它的葉子本來就是 64 位元組的雜湊對、預先雜湊是浪費，而在 ⌈|v|/2⌉ 處切分能讓最深層——以及那一層的葉子數——維持最小"
+   ],
    "stem": "Appendix E gives two general Merkle root functions: the well-balanced M_B and the constant-depth M. In an availability specification the segment-root a_e is built with one of them and the erasure-root a_u with the other. Which way round is it, and what does the well-balanced shape buy over simply padding every tree up to a power of two?",
    "options": [
     "Both roots use M; M_B is only a thin wrapper that hashes a lone item and otherwise defers to the node function N. Padding up to a power of two is exactly what makes a tree well-balanced, the '$leaf' versus '$node' prefixes are the only substantive difference between the two root functions, and the erasure-root's leaves are single 32-octet chunk hashes rather than 64-octet pairs.",
@@ -4157,6 +4402,13 @@
     "justification",
     "proof-path",
     "bug"
+   ],
+   "stemZh": "以下是團隊的 trace 函數，它產生的是納入佐證的兄弟節點。同一個檔案裡的節點函數 N 是用 `mid := (len(v) + 1) / 2` 切分輸入的。把兩者合起來看，缺陷是什麼？它又實際在哪裡咬人？",
+   "optionsZh": [
+    "照現況是沒問題的：對一棵 well-balanced 的樹而言，兩種取整慣例描述的是同一棵樹，因為 N 遞迴的正是這個函數所走訪的那些半邊。與 GP 唯一真正的分歧是順序——它回傳的序列是由葉子往上，而 GP 送出的是由 root 往下的另一組節點，所以在 CE 140 的呼叫點把 slice 反轉就是全部的修法",
+    "遞迴下降的是**兄弟**那一半而不是含有目標索引的那一半，所以回傳的 co-path 是正確者的鏡像。長度總是與 GP 相符，這正是為什麼針對證明長度的單元測試會通過、而對照 root 的驗證卻失敗。分頁證明逃過一劫是因為 2 的冪的樹是對稱的，所以只有 CE 140 的 co-path 受影響",
+    "它在把兄弟節點摺進路徑時漏掉了 '$node' 的 domain-separation 前綴，所以它回傳的雜湊無法被重新組合成 root；修法是在這個函數內部加上該前綴，而不是依賴節點函數去做。奇數長度的層不受影響，因為兩個函數的切分取整方式相同，而分頁證明失敗的頻率與直接呼叫完全一樣",
+    "它把切分**向下**取整，而 GP——以及這個檔案自己的節點函數——是**向上**取整，所以在任何長度為奇數的遞迴層上，兄弟節點乃至路徑長度都是錯的：三個項目、索引 0 時，GP 給出兩個節點而它只給一個。分頁證明逃過一劫是因為 C 已經先補到 2 的冪，但直接建構 CE 140 segment-shard co-path 的那次呼叫沒有"
    ],
    "stem": "Below is the team's trace function, the one that produces the sibling nodes of an inclusion justification. In the same file the node function N splits its input with `mid := (len(v) + 1) / 2`. Reading the two together, what is the defect and where does it actually bite?",
    "code": {
@@ -4193,6 +4445,13 @@
     "accumulation-log",
     "beefy"
    ],
+   "stemZh": "Accumulation Output Log β_B 是一個 optional 雜湊的序列而不是單一個 root，然而每筆近期歷史條目只儲存一個由它導出的 32 位元組值 b。為什麼狀態要保留整個 peak 序列？那個單一值又是拿來做什麼的？",
+   "optionsZh": [
+    "append 函數 A 像二進位加法一樣進位——被佔用的槽 n 會與進來的葉子摺疊並進位到槽 n+1，空槽 ∅ 則直接填入——但 peak 序列本身只是一個快取，因為節點需要證明時隨時可以從最近 H 筆近期歷史條目重建它；那個單一值是對各 peak 取的 Blake2b well-balanced root M_B，放在 β_H 裡純粹是讓輕客戶端不必重放 accumulation 就能檢查該 log，而 Beefy 簽的是 state root 而不是那個值",
+    "append 函數 A 每個區塊恰好推入一個新 peak，並在序列超過 H 項時丟掉最舊的，就像近期歷史的環狀緩衝區一樣，所以那些 peak 是一個有界窗口而不是持續成長的承諾，舊的產出就這樣自然失去可證明性；而儲存的那個單一值是編碼後 peak 序列 E_M(β_B) 的 Keccak 雜湊，它進入 β_H、被第三方當成橋接承諾並被 BLS 簽署",
+    "append 函數 A 像二進位加法一樣進位——被佔用的槽會與進來的葉子摺疊並進位，空槽則直接填入——所以那些 peak 正是「繼續附加」以及「提供 O(log N) 納入證明」所需的全部狀態；把它們雜湊掉就等於終結可附加性，這正是為什麼另有一個 super-peak M_R（在 '$peak' 前綴之下對非 ∅ 的 peak 做左結合的 Keccak 摺疊）才是那個進入 β_H、並被 BLS 簽署供 Beefy 使用的 32 位元組值",
+    "append 函數 A 像二進位加法一樣進位，而保留那些 peak 是為了讓該 log 能在分叉時回捲，因為移除最後一片葉子永遠只需要丟掉一個 peak；那個單一值是對**那一個區塊**的 accumulation 產出所取的 well-balanced Keccak root，它進入 β_H 並被 BLS 簽署供 Beefy 使用，所以 peak 序列本身從不離開節點"
+   ],
    "stem": "The Accumulation Output Log β_B is a sequence of optional hashes rather than a single root, yet every recent-history entry stores only one 32-octet value b derived from it. Why does state keep the whole peak sequence, and what is that single value used for?",
    "options": [
     "The append function A carries like binary addition — an occupied slot n is folded with the incoming leaf and carried into slot n+1, an empty slot ∅ is simply filled — but the peak sequence itself is only a cache, since a node can rebuild it from the last H recent-history entries whenever it needs a proof; the single value is the Blake2b well-balanced root M_B taken over the peaks, kept in β_H purely so light clients can check the log without replaying accumulation, and Beefy signs the state root rather than that value.",
@@ -4223,6 +4482,13 @@
     "guarantor-assignment",
     "rationale"
    ],
+   "stemZh": "團隊裡有位審閱者想把洗牌函數 F 中的 `r_0 mod l` 索引選取換成拒絕取樣，理由是只要 l 不整除 2³²，對 32 位元抽樣取模就有偏差。團隊該怎麼回應？",
+   "optionsZh": [
+    "這個更動是多餘而非錯誤：numeric-sequence-from-hash 函數已經藉由從 Blake2b 摘要中切出互不重疊的 4 octet 窗口去除了偏差，所以那個值對剩餘長度取模恰好是均勻的、拒絕取樣會迴圈零次。因此兩種形式逐位元相符，切換過去的節點仍然導出與其他人相同的指派",
+    "接受，但只用在 ticket 的處理上。附錄 F 的洗牌是用來排序 ticket accumulator γ_A、以及 §6 用來建構 fallback 金鑰序列的，而既然 γ_A 在使用前會依識別碼重新排序，那個排列從不進入狀態；guarantor 那條路徑與 tranche-0 的稽核抽選則必須維持 Gray Paper 有偏差的形式，因為那兩者確實進入狀態",
+    "拒絕這個更動。F 是一條**共識規則**而不是統計工具：每個節點都必須從相同的熵導出完全相同的排列，而它的輸出驅動 guarantor 對 core 的指派 P(|κ′|, η′_2, τ′) 以及 tranche-0 的稽核抽選。一個去偏的節點會把 validator 指派到不同的 core，接著拒絕完全有效的 guarantor 簽章並使鏈分裂；32 位元抽樣的殘餘偏差是被刻意接受的",
+    "接受這個更動。Gray Paper 只固定了**分布**——任何能對輸入產生均勻隨機排列的洗牌都是合規的——而 jamtestvectors 的 shuffle 套件也只檢查結果是輸入的一個排列、不檢查是哪一個排列。反正 F 餵給的東西鏈上都不檢查：guarantor 對 core 的指派是由每份 work-report 自己攜帶的 core 索引固定的，而 tranche-0 的稽核純粹是本地選擇"
+   ],
    "stem": "A reviewer on the team wants to replace the `r_0 mod l` index selection in the shuffle F with rejection sampling, on the grounds that a modulo of a 32-bit draw is biased whenever l does not divide 2³². How should the team answer?",
    "options": [
     "The change is unnecessary rather than wrong: the numeric-sequence-from-hash function already removes the bias by slicing non-overlapping 4-octet windows out of a Blake2b digest, so the value taken modulo the remaining length is exactly uniform and rejection sampling would loop zero times. The two forms therefore agree bit for bit, and a node that switches still derives the same assignment P(|κ′|, η′_2, τ′) as everyone else.",
@@ -4252,6 +4518,13 @@
     "entropy",
     "safrole",
     "fallback"
+   ],
+   "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
+   "optionsZh": [
+    "洗牌的展開是每**八個**輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是**每個時槽**雜湊一次，對象是種子串接該時槽索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
+    "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個時槽做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
+    "兩者都是每個輸出雜湊一次（對種子串接該索引的 4 位元組編碼）、也都只取每個摘要的前四個 octet；差別在洗牌接著以 big-endian 解碼並直接使用其自然範圍內的值，而 §6 的 fallback 以 little-endian 解碼並對金鑰序列長度取模，所以位元組序是唯一真正的差異，也是 fallback seal 不符的經典來源",
+    "它們是同一個構造被用了兩次：§6 的 fallback 序列字面上就是把附錄 F 的洗牌套用在 active 金鑰集合 κ′ 上、以 η′_2 為種子、再截斷到 E 項，所以兩者都是每八個輸出做一次 Blake2b（對種子串接 ⌊i/8⌋ 的 4 位元組編碼）、都解碼位於偏移 4i mod 32 的 little-endian 窗口、也都以循環方式索引金鑰序列——這正是為什麼實作只需要一套雜湊展開常式"
    ],
    "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",
    "options": [
@@ -4284,6 +4557,13 @@
     "anonymity",
     "rationale"
    ],
+   "stemZh": "Safrole 本來可以用一般的 IETF VRF 簽章加上提交者已公開的 Bandersnatch 金鑰來證明 ticket 有效。為什麼 Gray Paper 堅持改用 ring VRF 證明？",
+   "optionsZh": [
+    "因為那份證明只顯示它的作者知道某個私鑰、其公鑰落在 γ′_Z 所承諾的 ring 之中，卻從不顯示是哪一個，所以下個 epoch 的 slot-sealer 序列可以放在公開狀態裡而不洩漏誰將在哪一槽出塊；作者只有在 seal 出現時才被識別，這正是鈍化針對性阻斷服務與賄賂的機制",
+    "因為一份 ring 證明可以一次涵蓋某位 validator 的所有 ticket 項目——entry index 搭在訊息裡、而 context 只固定 η′_2——所以 784 個 octet 的成本每位 validator 每個 epoch 只付一次，而不論每人被允許幾個項目，tickets extrinsic 都能待在每塊 16 個的上限之內",
+    "因為它讓任何持有金鑰的人（不論是不是 validator）都能參加 ticket 競賽——證明是對照 144 位元組的 γ′_Z 檢查的，但並不要求 ring 成員資格、只要求知道某個 Bandersnatch 私鑰——這正是在部分 validator 離線時仍能讓 accumulator 保持飽和的機制，也是競賽在該 epoch 第 500 槽關閉的原因",
+    "因為 ring VRF 的輸出不可偏置，而一般 VRF 的輸出可被簽署者靠重複提交來輾磨，所以只有 ring 形式才能讓下個 epoch 的 slot-sealer 序列安全公開；匿名只是樂見的副作用而非理由，而抗輾磨也正是 ticket 的訊息為空、其 context 不帶 entry index 的原因"
+   ],
    "stem": "Safrole could have proved ticket validity with an ordinary IETF VRF signature plus the submitting validator's published Bandersnatch key. Why does the Gray Paper insist on a ring VRF proof instead?",
    "options": [
     "Because the proof shows only that its author knows a secret whose public key lies in the ring committed by γ′_Z, never which one, so next epoch's slot-sealer sequence can sit in public state without revealing who will author which slot; the author is identified only when the seal appears, which is what blunts targeted denial-of-service and bribery.",
@@ -4313,6 +4593,13 @@
     "ring-vrf",
     "ring-root",
     "offenders"
+   ],
+   "stemZh": "epoch root γ′_Z 究竟承諾了什麼？而某位 validator 因其 Ed25519 金鑰落在 offenders 集合中、金鑰元組被 Φ 歸零之後，會怎麼樣？",
+   "optionsZh": [
+    "它承諾的是 pending 集合**完整 336 位元組**的 validator 金鑰元組——Bandersnatch、Ed25519、BLS 與 metadata 一併——是一個在 epoch 邊界重算的定長 144 位元組承諾。既然 Φ 只歸零 Ed25519 那個成分，Bandersnatch 那一半仍然存活並保住索引，所以 offender 在下一次輪替把它移除之前仍能提交 ticket",
+    "它承諾的是 **pending** 金鑰集合（也就是接下來那個 epoch 的 validator）依序排列的 Bandersnatch 成分，是一個在 epoch 邊界重算的定長 144 位元組承諾。一個全零的項目不是合法的曲線點，所以會用 Bandersnatch 的 padding 點代入它：ring 維持原本大小、其他每個成員保住自己的索引，而那個位置永遠產不出任何證明",
+    "它是對 pending 金鑰集合依序排列之 32 位元組 Bandersnatch 成分所取的 well-balanced Merkle root M_B，因此它本身就是 32 個 octet，在 epoch 邊界重算。被歸零的項目就成為一片沒有人知道其開啟方式的葉子：ring 維持大小、其他成員保住索引，而這正是把 offender 排除在競賽之外的機制",
+    "它承諾的是 **active** 金鑰集合 κ′（也就是當前 epoch 的 validator）依序排列的 Bandersnatch 成分，是一個在 offenders 集合改變時就重算的定長 144 位元組承諾。被歸零的項目會被丟棄、倖存金鑰重新編號，所以 ring 會依 offender 數量縮小，而 root 與證明也相應變便宜"
    ],
    "stem": "What exactly does the epoch root γ′_Z commit to, and what becomes of a validator whose key tuple has been zeroed by Φ because its Ed25519 key is in the offenders set?",
    "options": [
@@ -4344,6 +4631,13 @@
     "ticket-identifier",
     "safrole"
    ],
+   "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的封印者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
+   "optionsZh": [
+    "因為儲存的識別碼是那份 ring 證明的 Blake2b 雜湊，而 Bandersnatch 的 ring 證明是確定性的，所以同一把金鑰與 context 會重現完全相同的證明位元組、因而重現相同的雜湊；訊息在那個雜湊裡完全不起作用。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index，seal 的則是同一個字串加 η′_3，而熵的輪替讓那兩串位元組在一個 epoch 之後相等",
+    "因為 VRF 的輸出是一個受 context 影響、但**不受訊息影響**的高熵雜湊，只由私鑰與輸入決定。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index；seal 的則是同一個字串加 η′_3 與該 ticket 的 entry index，而熵的輪替讓那兩串位元組在一個 epoch 之後相等，所以同一把金鑰在兩種簽章型別之下都產出相同的 32 個 octet",
+    "因為識別碼只由 η′_2 連同 entry index 導出，所以每位 validator 不必看過證明就能重算每一個 ticket 識別碼；簽章只提供「有權使用它」的證明，這也是為什麼證明本身不必保留。一個 epoch 之後 seal 在 η′_3 之下簽署，但既然識別碼從不依賴任何私鑰，封印者只需要出示相同的 entry index",
+    "因為 seal 把儲存的 ring 證明重新發布在 seal 欄位裡——96 位元組的形式就是那同一份證明剝掉零知識部分後的樣子，這正是兩種大小不同的原因——所以不論簽的是什麼，它的輸出理所當然不變。context 確實會在 epoch 邊界從 η′_2 移到 η′_3，但被剝除過的證明會把它原本的輸出一併帶著走，所以儲存的識別碼仍然吻合"
+   ],
    "stem": "The ticket accumulator keeps only tuples of a 32-octet identifier and an entry index; the 784-octet ring proof from the extrinsic is thrown away once verified. An epoch later the sealer of a slot must present a 96-octet signature whose output equals that stored identifier, even though it now signs the serialized unsigned header rather than an empty message. What makes that possible?",
    "options": [
     "Because the stored identifier is the Blake2b hash of the ring proof, and a Bandersnatch ring proof is deterministic, so the same key and context regenerate the identical proof bytes and hence the identical hash; the message plays no part in that hash. The ticket's context is the ticket-seal string with η′_2 and the entry index, the seal's is the same string with η′_3, and the entropy rotation makes those two byte strings equal one epoch later.",
@@ -4373,6 +4667,13 @@
     "delta-0.8.0",
     "constants",
     "tiny-vs-full"
+   ],
+   "stemZh": "團隊的 Go 樹停在 GP 0.7.2、把 erasure-coding 的比率寫死如圖。GP 0.8.0 把固定比率換成函數 𝒟(v)。最小的正確遷移是什麼？它對 6 位 validator 的 tiny 設定又有什麼影響？",
+   "optionsZh": [
+    "這些數字**每一個**都變成 report 自己攜帶之 assuring-set 大小的函數：總數就是那個大小（鏈上規則把它釘在 |κ′|）、資料碎片數是使 2d 整除 W_G 且 d 不大於 v/3 + 1 的最大 d、而填補寬度是它的兩倍。在 tiny 上這給出 6 取 3 個資料碎片、填補寬度 6、每 segment 684 片，所以舊的 4 / 1026 那一組必須拿掉",
+    "只有總數需要跟隨 report 自己攜帶的 assuring-set 大小；資料碎片數僅由 segment 大小決定，因為 𝒟 是使 2d 整除 W_G 的最大 d，而填補寬度就是它的兩倍。因此 tiny 維持它的 4 與每 segment 1026 片，只有總數變成可變的，而 buildBCloud 除了讀取 report 的碎片數欄位之外不需要任何更動",
+    "把資料碎片數無條件設為 v/3 + 1、總數設為 report 攜帶的 assuring-set 大小、填補寬度設為碎片數的兩倍。因為合法的 validator 集合大小只含 3 的倍數，「碎片數的兩倍要整除 segment 大小」這個附帶條件自動滿足、可以拿掉；tiny 變成 6 取 3、每 segment 684 片，而 full 維持 1023 取 342",
+    "這個檔案裡除了 segment 常數之外什麼都不用改。𝒟(v) 只管 Import-DA 的 segment 路徑，所以 audit-DA 的 bundle 維持它的 342:1023 比率與 684 位元組填補寬度，只有 segment 路徑改用 report 自己的碎片數；那個不對稱正是 availability spec 新增碎片數欄位的原因，也是 tiny 那一組維持 4 / 1026 而非 3 / 684 的原因"
    ],
    "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
    "code": {
@@ -4409,6 +4710,13 @@
     "audit-da",
     "d3l"
    ],
+   "stemZh": "對於一份 work-report，guarantor 會把哪些資料做 erasure coding 並發出去？單一位 validator 最後又持有什麼？",
+   "optionsZh": [
+    "一份資料集：work-report 本身，補零到資料碎片數兩倍的倍數後編碼成每位 validator 一個碎片，每個產生的碎片再被雜湊；erasure-root 就是對那些碎片雜湊所取的 well-balanced Merkle root。work-package bundle 與匯出 segment 留在 guarantor 手上、稽核時依請求提供，所以一位 validator 持有一個 32 位元組的碎片雜湊、別無其他",
+    "一份資料集：只有 work-package bundle，補零到資料碎片數兩倍的倍數後編碼成與 assurer 數量相同的碎片，每個碎片被雜湊成 erasure-root 的一片葉子。匯出 segment 改由 segment-root 承諾、並在需要時靠重跑 refine 重建，這正是 segment-root 與 erasure-root 分屬不同欄位的原因，所以一位 validator 持有單一個 32 位元組的 bundle 碎片雜湊",
+    "**兩份**資料集：可稽核的 bundle——補零到資料碎片數兩倍的倍數後編碼，每個產生的碎片再被雜湊；以及匯出 segment 連同它們的 paged-proof segment——各自編碼後再轉置，使每個 segment 的一個碎片落在同一位 validator 身上。一位 validator 持有 erasure-root 的一片葉子：它的 bundle 碎片雜湊串接它自己那一欄 segment 的 root",
+    "一份資料集：只有匯出 segment 連同它們的 paged-proof segment 會被編碼、再經轉置讓每個 segment 的一個碎片落在同一位 validator 身上，因為只有它們必須在長期資料湖中存活。可稽核的 bundle 則是整份複製給每位 validator，這正是為什麼它可以在區塊定案後不久就被丟棄，而一位 validator 的 erasure-root 葉子就只是它自己那一欄 segment 的 root"
+   ],
    "stem": "For one work-report, which data does a guarantor erasure-code and hand out, and what does an individual validator end up holding?",
    "options": [
     "One data set: the work-report itself, zero-padded up to a multiple of twice the data-shard count and then coded into one chunk per validator, with each resulting chunk hashed; the erasure-root is the well-balanced Merkle root over those chunk hashes. The work-package bundle and the exported segments stay with the guarantors, who serve them on request during an audit, so a validator holds one 32-octet chunk hash and nothing more.",
@@ -4439,6 +4747,13 @@
     "gf65536",
     "threshold",
     "delta-0.8.0"
+   ],
+   "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。哪一種說法是對的？而這個編碼為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
+   "optionsZh": [
+    "重建必須能在將近三分之二的 validator 惡意或失能時仍然存活，這把資料碎片數壓在 v/3 + 1 附近、並與 2/3+1 的 assurance 超級多數彼此契合；欄位是 16 位元的，所以一個碼字就是一對 octet、而其取值點可以索引到多達 v 個相異的 validator；再者碎片數的兩倍必須整除 4,104 個 octet 的 segment 大小，好讓一個 segment 編碼時完全不需要填補——這正是碎片數取「最大的那個合格值」而不是恰好 v/3 + 1 的原因",
+    "比率的選擇讓三分之二的 assurance 超級多數本身就是重建門檻，這把資料碎片數壓在 2v/3 附近；欄位是 16 位元純粹因為一個 segment 是 4,104 = 2 × 2,052 個 octet、碼字必須整齊地鋪滿它；而那個整除的附帶條件只是為了避免最後一個碎片需要長度前綴。在 1,023 位 validator 上這會給出 682 個資料碎片、每位 validator 每 segment 3 片",
+    "資料碎片數對每一種合法的 validator 集合大小都恰好是 ⌊v/3⌋ + 1，所以那個整除的附帶條件從不生效、可以拿掉；選 GF(2¹⁶) 只是因為在現代硬體上 16 位元的乘加比逐位元組運算快；而 4,104 個 octet 的 segment 大小是**由欄位推導出來**而非反過來，4,104 只是碼字寬度最方便的最小倍數。在 1,002 位 validator 上這給出 335 個資料碎片且無需填補",
+    "比率的設定讓恰好構成完整超級多數的那 683 位 validator 才能重建，這把可得性綁在 finality 上、並把碎片數固定在 2v/3 + 1 而不是最大的合格值；選 GF(2¹⁶) 是因為 Blake2b 送出 32 個 octet、也就是恰好 16 個碼字，所以碎片雜湊與碎片共用一種表示法；而碎片數的兩倍仍然整除 4,104 個 octet 的 segment 大小，因為 1,366 整除 4,104"
    ],
    "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?",
    "options": [
@@ -5177,6 +5492,13 @@
     "gratis",
     "delta-0.8.0"
    ],
+   "stemZh": "你們的 Go 節點停在 GP 0.7.2，那裡的「Owned Privileges」模型讓每個具特權的 service 各自改寫自己在 χ 中的位置。GP 0.8.0 改了什麼？又是誰可以給一個全新帳戶非零的 gratis storage 抵扣 a_f？",
+   "optionsZh": [
+    "Ω_B 是唯一整批改寫 (χ_M, χ_A, χ_V, χ_R, χ_Z) 的 host call，而它現在除非呼叫者本身就是 χ_M、否則產生 HUH，因此沒有任何 service 能把自己升格為 manager；某個 core 的 assigner 仍可透過 `assign` 交出自己的 χ_A[c]，而 `new` 在 f ≠ 0 且呼叫者不是 manager 時產生 HUH",
+    "Ω_B 對任何自身索引低於 S = 2^16 的 service 開放，因為佔據保留範圍本身就是特權的來源；χ_A[c] 之後就只有 manager 能移動，而 service 是透過 `upgrade` 提高自己的 a_f",
+    "Ω_B 仍然可以被五個具特權 service 中的任何一個呼叫，各自只改寫自己擁有的那一格；manager 的特別之處僅在於它可以授予儲存押金額度，而 `new` 接受來自 manager 或 registrar 的 f ≠ 0",
+    "在 0.8.0 中 χ 已經完全不能被 host call 變動；它只能由列在 χ_Z 中的 service 在每個區塊自動獲得的 accumulation 裡改寫，而 a_f 對每個帳戶在創世時就固定、之後任何人（包括 manager）都無法提高"
+   ],
    "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
    "options": [
     "Ω_B is the one host call that rewrites (χ_M, χ_A, χ_V, χ_R, χ_Z) wholesale, and it now yields HUH unless the caller is χ_M itself, so no service can promote itself to manager; a core's assigner may still hand over its own χ_A[c] through `assign`, and `new` yields HUH whenever f ≠ 0 and the caller is not the manager.",
@@ -5206,6 +5528,13 @@
     "trie",
     "state-keys"
    ],
+   "stemZh": "state-key 建構子 C 被規定產出 B_31，然而 state trie 中其他每一個量——子節點識別、內嵌值的欄位、H(v)——都是 32 個 octet。是什麼迫使 key 少一個 octet？",
+   "optionsZh": [
+    "最高位的那個 octet 被保留下來，好讓 branch／leaf 的判別位元能被攜帶在 key 本身之內，這正是讓驗證者不必取得節點就能分辨兩種節點型別的機制",
+    "key 是 Blake2b 的輸出，在儲存前把一個位元組的章節索引剝掉了；值的欄位同樣是 31 個 octet，只有在被雜湊時才補到 32",
+    "一個節點固定為 512 位元，而一片葉子必須容納一個位元組的「判別子加大小」標頭、那把 key、以及一個完整 32 位元組的欄位（放值本身或它的雜湊）：1 + 31 + 32 = 64",
+    "31 個 octet 讓 branch 節點多留一個備用 octet，好在子 trie 超過 2^8 的分支上限時能附加第三個子節點指標"
+   ],
    "stem": "The state-key constructor C is specified as producing B_31, yet every other quantity in the state trie — child identities, the embedded value slot, H(v) — is 32 octets. What forces the key to be one octet short?",
    "options": [
     "The top octet is reserved so that the branch/leaf discriminator bit can be carried inside the key itself, which is what lets a verifier tell the two node types apart without fetching the node.",
@@ -5234,6 +5563,13 @@
     "merklization",
     "state-keys",
     "accounts"
+   ],
+   "stemZh": "在 T(σ) 中，某個 service 的 storage 條目、它的 preimage、以及它的 lookup-meta 條目全都走同一個 C 的第三種形式。究竟傳進去的是什麼？又是什麼讓這三類在 trie 中彼此分開？",
+   "optionsZh": [
+    "三者是靠完成後那 31 位元組 key 的第 0 個 octet 區分的：storage 是 0xFD、preimage 是 0xFE、lookup-meta 是 0xFF，其餘 30 個 octet 直接放 H(k) 或雜湊 h，而 service 索引則被摺進值而不是 key 裡",
+    "三者都用 C(s, h)，其中 h 是原始的 storage key 或 preimage 雜湊、完全沒有任何標記；碰撞不可能發生，因為 §9 要求 service 的 storage key 必須恰好 32 個 octet 長，這讓它待在一個與 32 位元組 preimage 雜湊互斥的命名空間裡",
+    "在雜湊之前會先加上一個四位元組的標記——storage 是 E_4(2^32−1) ⌢ k、preimage 是 E_4(2^32−2) ⌢ h、宣告長度為 l 的 lookup-meta 是 E_4(l) ⌢ h——接著 C(s, ·) 把 n = E_4(s) 的四個 octet 與 a = H(·) 的前四個 octet 交錯，再附上 a_4 … a_26",
+    "storage 用帶原始 key 的 C(s, k)、preimage 用章節形式 C(254, s)、lookup-meta 用 C(253, s)；根本不需要任何標記，因為三者已經住在不同的章節索引之下，而 lookup 條目的 (h, l) 配對是從葉子的值而不是它的 key 還原的"
    ],
    "stem": "In T(σ) a service's storage entries, its preimages and its lookup-meta entries all go through the very same third form of C. What exactly is passed in, and what keeps the three kinds apart in the trie?",
    "options": [
@@ -5265,6 +5601,13 @@
     "rho",
     "delta-0.8.0"
    ],
+   "stemZh": "你們 0.7.2 的編碼器把 T(σ) 的 C(10) 條目寫成：每個 core 一個「work-report 與回報時槽」的 optional 配對。GP 0.8.0 改成放什麼？",
+   "optionsZh": [
+    "與先前完全相同的「每個 core 一個 work-report 與時槽的 optional 配對」；0.8.0 只是把時槽收緊成定長的 E_4 編碼，酬載本身沒有更動",
+    "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是**整份 guarantee** G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
+    "當前區塊的 availability assurances extrinsic，好讓某位 assurer 的 bitfield 不必重放該區塊就能對照 state root 被證明",
+    "只放每個 core 待處理 report 的 availability specification（package 雜湊、erasure root、segment root、bundle 長度），而 guarantee 本身由 guarantor 保存在鏈外直到稽核要求為止；這正是 0.8.0 所追求的體積縮減"
+   ],
    "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
    "options": [
     "Per core an optional pair of work-report and timeslot exactly as before; 0.8.0 only tightened the timeslot to a fixed-length E_4 encoding and left the payload alone.",
@@ -5294,6 +5637,13 @@
     "trie",
     "state-root",
     "incremental"
+   ],
+   "stemZh": "M 是定義在以 bits(k) 為鍵的字典之上，而團隊的 Go 是在每個深度就地切分同一個 slice。有位隊友提議把它換成「把 key-val 升冪排序，然後像 M_B 那樣兩兩摺疊——同樣的葉子、同樣的 root，而且更好向量化」。哪個敘述正確？",
+   "optionsZh": [
+    "bits(·) 是最低位在前，好與附錄 C 的位元序列編碼 E(b) 一致，所以深度 d 必須對第 ⌊d/8⌋ 個 octet 的第 d mod 8 位元分支；因此圖中的切分方向是反的，而這種實作之所以還能對上向量，只是因為它的 state-key 建構子也一併反了",
+    "這個提議是可行的：升冪的 key 順序恰好就是 Patricia trie 的前序走訪，所以兩兩摺疊會重建出完全相同的形狀與 root；就地切分只不過是一項配置最佳化，而葉子快取兩種做法都能繼續運作，因為一片葉子的雜湊只取決於它自己的 key 與 value",
+    "bits(·) 是最高位在前，所以深度 d 對第 ⌊d/8⌋ 個 octet 的第 7 − (d mod 8) 位元分支；樹形只由 key 的位元前綴決定、從不取決於 slice 的順序，這正是讓葉子雜湊可以被快取、而只需重算「從變動葉子到 root」那條路徑的原因——把排序後的葉子兩兩摺疊建出來的是一棵平衡樹，root 也不同",
+    "插入順序在這裡確實重要：GP 要求葉子必須依升冪 key 順序摺疊，因為產生的 root 是要被 M_R 附加到 accumulation-output belt（一個 append-only 結構）上的；因此跨區塊快取葉子雜湊並不可靠，trie 每個區塊都必須整棵重建"
    ],
    "stem": "M is defined over a dictionary keyed by bits(k), while the team's Go partitions one slice in place at each depth. A teammate proposes replacing it with 'sort the key-vals ascending, then fold them pairwise like M_B — same leaves, same root, and it vectorizes better'. Which statement is correct?",
    "code": {
@@ -5330,6 +5680,13 @@
     "notation",
     "delta-0.8.0"
    ],
+   "stemZh": "σ 中由 accumulation 寫入的狀態項目包括 ω、ξ 與 θ。某個 GP 0.7.2 時期的 Go client 仍然把它的 ready-queue 欄位叫做 `Vartheta`。依 GP 0.8.0，哪一組「符號 → 意義」的對應是正確的？",
+   "optionsZh": [
+    "ω ∈ ⟦{H}⟧_E 從 ξ 接手成為已 accumulate 之 work-package 雜湊的一個 epoch 份歷史；ready 佇列在 0.8.0 仍然拼作 ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E，而 θ ∈ ⟦(N_S, H)⟧ 沒有變，所以 0.7.2 的 client 只需要淘汰符號 ξ 並把持有它的 state key 重新指向",
+    "ω ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log、在 0.8.0 從 θ 更名而來；ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready 佇列；而 θ ∈ ⟦(N_S, N_G)⟧ 現在裝的是上一塊 Δ+ 回傳的逐 service gas 用量 u，也就是 accumulation 統計所讀取的東西",
+    "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready（accumulation）佇列，裝著各自配上尚未滿足依賴集合的延後 report——GP 0.7.2 把它寫成 ϑ；ξ ∈ ⟦{H}⟧_E 是已被 accumulate 的 work-package 雜湊之一個 epoch 份歷史；θ ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log，也就是本塊的 (service, 承諾) 配對",
+    "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ 是 0.8.0 新增的狀態項目，裝著在 accumulation 各輪之間傳遞的 deferred transfer 好讓它們跨越區塊邊界存活；ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 仍是 ready 佇列，而 ξ ∈ ⟦{H}⟧_E 仍是已 accumulate 之 work-package 雜湊的一個 epoch 份歷史"
+   ],
    "stem": "Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. Which mapping of symbol → meaning is right for GP 0.8.0?",
    "options": [
     "ω ∈ ⟦{H}⟧_E took over from ξ as the epoch-long history of already-accumulated work-package hashes; the ready queue is still spelled ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E in 0.8.0 and θ ∈ ⟦(N_S, H)⟧ is unchanged, so a 0.7.2 client only has to retire the symbol ξ and repoint the state key that held it",
@@ -5358,6 +5715,13 @@
     "accumulation",
     "operands",
     "work-digest"
+   ],
+   "stemZh": "Δ1 為 service s 的每一份 work-digest 各建一個運算元組來組成 i^U，取自該輪各 report 依序而來。s 的兩份 digest 分別落在不同的 report r₁ 與 r₂ 裡。依 GP 0.8.0，關於一個運算元組攜帶什麼，哪個描述正確？",
+   "optionsZh": [
+    "該集合是 U。每個元組從 digest 取 y、g、l，並從它的 report 取 core 索引與 refinement-context 的 anchor 來取代 package 雜湊與 segment root，好讓 accumulate 能重新驗證可得性；而 l 落在 work-error 集合 E 中的 digest 會在 i^U 被組裝之前先被丟棄，所以那兩個元組只有在雙雙 refine 成功時才會留下",
+    "該集合是 U。運算元組是**每份 report 一個**而不是每份 digest 一個：它的 l 欄位裝著該 report 各 digest 結果的串接、g 欄位裝著它們的 gas 上限總和，而 p、e、a、t 照常從 report 提上來，再由該 service 依 payload 雜湊自行分流結果——所以 s 在這裡收到的是一個元組而不是兩個",
+    "該集合是 U。一個運算元組就是 work-digest 的原樣，所以除了 y、g、l 之外它還帶 c code hash、d_u refine 期間實際用掉的 gas、以及餵給 core 統計的 import／extrinsic／export 計數；沒有任何東西從外圍的 report 提進來，所以那兩個元組只有 payload 雜湊不同",
+    "該集合是 U（而 deferred transfer 是 X，Ψ_A 收下 ⟦U ∪ X⟧）。每個元組混合了 digest 層級的欄位——y payload 雜湊、g accumulate gas 上限、l 結果（是一個 blob 或 work-error 集合 E 的成員）——以及從它**自己所屬 report** 提上來的欄位：p = (r_s)_p package 雜湊、e = (r_s)_e segment root、a = r_a authorizer 雜湊、t = r_t authorizer trace；因此那兩個元組在 report 層級的欄位上並不相同"
    ],
    "stem": "Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. Which description of what an operand tuple carries is right for GP 0.8.0?",
    "options": [
@@ -5388,6 +5752,13 @@
     "dependencies",
     "queue"
    ],
+   "stemZh": "佇列編輯函數 E(r, x) 做兩件事：剝除出現在 x 中的依賴，以及丟棄整筆條目。有位隊友只實作了第一件事。實際上會出什麼錯？",
+   "optionsZh": [
+    "只有 ω′ 受影響——那兩個情形都會留下剛被 accumulate 的 report，所以 ready 佇列會無界成長，直到一個 epoch 長度的位移把陳舊條目丟掉為止。Q 本身仍然安全，因為一旦依賴集合被剝除，每次遞迴收到的都是嚴格更短的序列",
+    "什麼都不會壞。Q 仍然終止，因為它的遞迴受 epoch 長度 E 所限；而 §11.4 的脈絡檢查會拒絕任何 package 雜湊已在 ξ 中的進來 report，所以待在 ω 裡的條目也不可能被 accumulate 第二次；丟棄整筆條目純粹是讓 ω 保持精簡的最佳化",
+    "Q 不再終止——E(r, P(g)) 交回的是同一批條目、其依賴集合仍然為空，所以下一次遞迴永遠挑到同一個 g——而且在區塊邊界上，ω′ 的兩個情形（i = 0 的 E(R^Q, ξ′[E−1]) 與 i ≥ τ′ − τ 的 E(ω↺[m−i], ξ′[E−1])）都會留下剛被 accumulate 的 report，於是它們會在之後的區塊被再 accumulate 一次",
+    "反而是剝除依賴那件事變得多餘：一旦條目永不被移除，一份 report 就只可能被同一佇列中的另一份 report 阻擋，所以每一個 E 本來會剝除的依賴，都屬於 E 本來也會刪除的某個條目。因此 Q 仍然終止、ω′ 仍然會排空，只是比較慢——一次一個 epoch 長度的位移，而不是一次一輪 accumulation"
+   ],
    "stem": "The queue-editing function E(r, x) does two jobs: it strips dependencies that appear in x, and it also discards whole entries. A teammate implements only the first job. What actually goes wrong?",
    "options": [
     "Only ω′ is affected — both the i = 0 case E(R^Q, ξ′[E−1]) and the i ≥ τ′ − τ case E(ω↺[m−i], ξ′[E−1]) would keep reports that were just accumulated, so the ready queue grows without bound until the epoch-long shift drops the stale entries. Q itself stays safe, because each recursion is fed a strictly shorter sequence once its dependency sets have been stripped",
@@ -5416,6 +5787,13 @@
     "accumulation",
     "dependencies",
     "ready-queue"
+   ],
+   "stemZh": "某份 report w 待在 ω 裡、還有一個未滿足的依賴 p，而 package p 永遠不會被 accumulate——攜帶 p 的那份 report 幾個區塊之前被擔保過，但在它的 core 上逾時、從未變成 available。依 GP 0.8.0 追蹤 w 的命運。",
+   "optionsZh": [
+    "Q 永遠不會送出它，而且讓 w 變成 available 的那個區塊是無效的：§12.1 說在依賴無效的情況下 accumulation 會被整個取消，而取消是以拒絕該區塊來表示的，所以一份在 core 上逾時的 report 會回溯地使「第一個排入依賴它之 report」的後續區塊無效",
+    "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；接著它會在**下一個區塊**就被丟掉，因為 E(·, ξ′[E−1]) 會移除任何仍帶有「不存在於 ξ 中之依賴」的條目——GP 正是這樣取消一份帶有無法滿足依賴的 report",
+    "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；它每個區塊只是被 i ≥ τ′ − τ 的情形 ω′↺[m−i] = E(ω↺[m−i], ξ′[E−1]) 往前帶，並在至多一個 epoch 之後、當時槽索引繞回、i = 0 的情形以新區塊的 R^Q 覆寫那一槽時消失",
+    "Q 只會擋它一陣子：在 E = 600 個時槽之後該依賴被視為過期，i ≥ τ′ − τ 的情形不再對那一槽套用 E，於是 Q 把 w 的依賴集合當成空的、以它手上有的運算元把它 accumulate 掉——所以這份工作至多延遲一個 epoch，但絕不會被無聲遺失"
    ],
    "stem": "A report w is sitting in ω with one outstanding dependency p, and package p is never accumulated — the report carrying p was guaranteed a few blocks ago but timed out on its core and never became available. Trace w's fate under GP 0.8.0.",
    "options": [
@@ -5446,6 +5824,13 @@
     "gas",
     "service-accounts"
    ],
+   "stemZh": "G_A = 10,000,000、G_T = 3,500,000,000，而每個 service 帳戶都帶有 a_g 與 a_m。哪個敘述正確地把每一個 accumulate gas 限制——上限與逐 service 的下限——放對了位置？",
+   "optionsZh": [
+    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_A；逐 service：G_A 另外還是 Δ1 內部強制的每塊上限，這正是 eq. 12.23 把該 service 的 g 夾在 G_A 而不是把它的各來源加總的原因；而 a_g 是退款下限而非最低要求——service 未用完而低於 a_g 的部分會在 Δ+ 結尾退回它的餘額，a_m 對 deferred transfer 扮演同樣的角色",
+    "**逐 report**：§11.4 要求各 digest 的 d_g 總和 ≤ G_A、且每份 digest 的 d_g ≥ δ[d_s]_g（目的 service 的 a_g），兩者都在擔保時對照 prior 的 δ 檢查；**逐區塊**：eq. 12.24 把 Δ+ 的預算定為 g = max(G_T, G_A·C + Σ values(χ_Z))；而 `transfer` host call 除非該筆轉帳的 gas l ≥ δ[d]_m 否則以 LOW 拒絕，所以一筆 deferred transfer 抵達時也帶著足夠收款方 Accumulate 的 gas",
+    "兩個上限都是在 accumulation 時於 Δ+ 內部強制、而不是在擔保時：eq. 12.24 的預算涵蓋整個區塊，而 §11.4 的逐 report 總和會在那裡對照 posterior 的 δ 重新檢查，所以 a_g 超過 G_A 的 service 永遠無法被 accumulate——這正是 `new` host call 把 a_g ≤ G_A 維持成狀態不變式的原因，而 a_m 也以同樣方式被 G_T 所界",
+    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_T，G_T 才是限制單一份 report 的數字；逐區塊：eq. 12.24 以 G_A（整塊上限）建構 Δ+ 的預算，這正是 G_T 是兩者中較大常數的原因；而兩個 service 層級的下限剛好相反——a_g 是每筆 deferred transfer 的最低 gas，a_m 是每個 work-item 的最低 gas"
+   ],
    "stem": "G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Which statement correctly places each accumulate-gas limit — the ceilings and the per-service floors?",
    "options": [
     "Per report, §11.4 requires Σ over its digests of d_g ≤ G_A; per service, G_A is additionally a per-block cap enforced inside Δ1, which is why eq. 12.23 clamps that service's g at G_A instead of summing its sources; and a_g is a refund floor rather than a minimum — whatever a service leaves unspent below a_g is credited back to its balance at the end of Δ+, with a_m playing the same role for deferred transfers",
@@ -5474,6 +5859,13 @@
     "accumulation",
     "output-log",
     "beefy"
+   ],
+   "stemZh": "在同一個區塊裡：service 5 被 accumulate 並以一個 32 位元組的雜湊呼叫 `yield`；service 6 被 accumulate、燒了 gas 但從未呼叫 `yield`；service 9 完全沒有 work-digest、只因一筆 deferred transfer 而被觸及，而它呼叫了 `yield`。θ′ 裡最後有什麼？又是誰消費它？",
+   "optionsZh": [
+    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，所以這一塊貢獻的恰好是 service 5 與 9 的配對；但 θ′ 是自創世以來每一筆 accumulation 產出的 append-only log，所以那兩組配對只是它的尾巴，而 belt β_B 是對整份 log 所取 Merkle root 的快取",
+    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，但只有在 R*[..n] 中持有至少一份 work-digest 的 service 才是 s 的成員，所以 θ′ 只帶著 service 5 的配對——service 9 即使 yield 了也被排除，因為只因 deferred transfer 而被觸及的 service 永遠無法承諾一筆 accumulation 產出。θ′ 每塊整批換掉，也是 β′_B 所附加的對象",
+    "θ′ 為 Δ* 的 service 集合 s 中的**每一個** service 各放一項，沒有 yield 的以零雜湊代入，所以 θ′ 同時帶著 service 5、6、9 的配對且 |θ′| = |s|，這正是讓下游驗證者能依位置索引它的原因。它是獨立的狀態項目、每塊整批換掉，也是 β′_B 所附加的對象",
+    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，所以 θ′ 恰好帶著 service 5 與 9 的配對——service 6 會出現在 u 與 accumulation 統計 S 裡，但不在這裡。θ′ 是獨立的狀態項目、每塊整批換掉，而且是 β′_B = A(β_B, M_B(s, H_K), H_K) 的輸入，其 super-peak 儲存在新的 β_H 條目裡"
    ],
    "stem": "In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, and it calls `yield`. What ends up in θ′, and what consumes it?",
    "options": [
@@ -5504,6 +5896,13 @@
     "preimages",
     "provide"
    ],
+   "stemZh": "preimage 整合函數 I 在一個區塊的轉移中被套用了兩次。這兩處分別在哪裡？它的 Y 述詞又靜默地丟棄了什麼？",
+   "optionsZh": [
+    "只有一次，在最後的 δ′ = I(δ‡, E_P)：`provide` host call 在 accumulation 期間就直接寫進該 service 的 a_p 與 a_l 了，所以 Δ* 沒有東西可整合。Y(d, s, i) 除非 s ∈ K(d) 且該 request 為 [] 否則為 ⊥，所以指向同輪被 eject 之 service 的 blob 會被丟棄而不追究——但這只可能咬到 extrinsic，永遠咬不到 `provide`",
+    "一次在每個正在 accumulate 之 service 的 Δ1 內部——所以每個 service 在 Δ* 合併帳戶字典之前先摺進自己的 provision——另一次在最後的 δ′ = I(δ‡, E_P)。Y(d, s, i) 接受形狀為 [] 或 [x, y] 的 request 槽，也就是「已 solicit」或「曾可用而後被 forget」，這正是讓同一份 preimage 能在一個 service 的生命週期中被提供兩次的機制",
+    "一次在 Δ* 內部，形式為 e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p)——把 `provide` host call 所提供的 blob 摺進來，而且是在新建與被移除的 service 都併好之後；另一次在最後，形式為 δ′ = I(δ‡, E_P)。Y(d, s, i) 除非 s ∈ K(d) 且 d[s]_l[(H(i), |i|)] = [] 否則為 ⊥，所以一份指向「同一輪中被 eject 的 service」或指向「不是僅被 solicit 之 request」的 blob 會被丟棄而不追究",
+    "兩次——一次在 Δ* 內部、一次在最後——但兩次的第二個引數都是 E_P，因為 `provide` 提供的 blob 在 Δ* 執行前就已經被併進 E_P 了。Y(d, s, i) 另外要求該 blob 小於 W_C = 4,000,000 個 octet、且該 service 持有它的儲存押金，而任一條件失敗會讓區塊無效而不是丟棄該 blob"
+   ],
    "stem": "The preimage-integration function I is applied twice during a block's transition. Where are the two applications, and what does its Y predicate silently discard?",
    "options": [
     "Only once, at the very end as δ′ = I(δ‡, E_P): the `provide` host call writes straight into the service's a_p and a_l during accumulation, so Δ* has nothing left to integrate. Y(d, s, i) is ⊥ unless s ∈ K(d) and d[s]_l[(H(i), |i|)] = [], so a blob aimed at a service ejected in the same round is dropped without prejudice — but that can only ever bite the extrinsic, never a `provide`",
@@ -5533,6 +5932,13 @@
     "statistics",
     "code",
     "delta-0.8.0"
+   ],
+   "stemZh": "這是團隊 GP 0.7.2 的 accumulation 統計建構器 S。對照 GP 0.8.0，必須補上哪個落差？",
+   "optionsZh": [
+    "N(s) 必須計算完整的 work-**report** 而不是 digest：eq. 12.28 走訪 r ↕ R*[..n]，並為擁有該 report 的 service 各計一次，而這段程式碼是每個相符的 digest 各計一項，所以一份為同一個 service 帶兩份 digest 的 report 會被重複計算",
+    "0.8.0 把 S ∈ ⟨N_S → (N, N, N_G)⟩ 變成三元組 S(s) = (N(s), T(s), G(s))；缺少的中間元素 T(s) 計的是目的地為 s 的已處理 deferred transfer 數，而這迫使 Δ+ 回傳第五個成分——已處理的 transfer 序列 t ⌢ t†——而納入的篩選條件也從加總測試變成 S(s) ≠ (0, 0, 0)",
+    "G(s) 必須是**被配置**的 gas——該 service 各 digest 的 Σ d_g，也就是 §11.4 拿去對照 G_A 檢查的那個數字——而不是實際用掉的 gas，否則一個把 gas 用光的 service 在餵給 π_S 的統計中會被低估；兩元素的形狀與以加總為基礎的納入篩選對 0.8.0 而言都已經正確",
+    "S 必須為 δ 中的每一個 service 都放一項、未被觸及者放全零三元組，好讓該字典的 key 集合逐塊穩定、使 π_S 的序列化長度固定；形狀在 0.8.0 確實變成三元組，但新元素是排在**最後**的 transfer 計數，而且回傳它所建構之已處理 transfer 序列的是 Δ* 而不是 Δ+"
    ],
    "stem": "This is the team's GP 0.7.2 accumulation-statistics builder S. Which gap against GP 0.8.0 must be closed?",
    "code": {
@@ -5568,6 +5974,13 @@
     "determinism",
     "availability"
    ],
+   "stemZh": "R、R!、R^Q 與 R* 全都是序列而不是集合，即使決定哪些 report 有資格的只是「是否為成員」。為什麼順序對共識有影響？它又是在哪裡被固定下來的？",
+   "optionsZh": [
+    "因為 Δ+ 只 accumulate 符合 gas 預算的**前綴** R*[..i]，接著記下 ξ′[E−1] = P(R*[..n])：不同的順序會產生不同的前綴、因而產生不同的 posterior 狀態。順序在 eq. 11.17 就被釘住了——R 是以**遞增的 core 索引**走訪 ρ† 並保留 assurance 超過 2/3·|κ| 者所建構的；R! 沿用該順序，而 Q 則依相依解開的輪次把佇列中的 report 接上去",
+    "順序只影響 accumulation 統計 S、因而只影響 π_S，因為 eq. 12.28 的 N(s) 是依序走訪 R*[..n] 的；service 狀態 δ† 與順序無關，因為每個 service 的 Δ1 都是其自身運算元與自身 prior 帳戶的純函數，而 ξ′[E−1] = P(R*[..n]) 是一個集合，所以它的成員以何種順序產生，在寫入的那一刻就已經遺失",
+    "對 posterior 狀態並沒有影響。Δ* 是平行 accumulate 各 service，而 R* 的任何排列反正都選出同一個符合 gas 的前綴，因為 eq. 12.17 是靠加總取最大的 i、而加法可交換；這正是為什麼 b 是集合而 u 只是個方便的序列，也是為什麼 GP 只在 eq. 12.11 費事固定一個順序、純粹是為了行文能具體談論 R*",
+    "因為 Δ+ 只 accumulate 符合 gas 的前綴 R*[..i]，所以當 gas 不足時是順序決定了誰被丟下。順序在 eq. 11.17 被釘住——R 是依「各 core 蒐集到多少 assurance」排名、背書最多者在前所建構的，好讓被最充分佐證的 report 得以被 accumulate、而邊緣的被延後進 ω"
+   ],
    "stem": "R, R!, R^Q and R* are all sequences rather than sets, even though only membership decides which reports are eligible. Why does the ordering matter for consensus, and where is it fixed?",
    "options": [
     "Because Δ+ accumulates only the gas-fitting prefix R*[..i] and then records ξ′[E−1] = P(R*[..n]): a different ordering yields a different prefix and hence a different posterior state. The order is pinned right back at eq. 11.17, where R is built by walking cores in ascending core index over ρ† and keeping those with more than 2/3·|κ| assurances; R! preserves that order and Q appends the queued reports in dependency-resolution rounds",
@@ -5598,6 +6011,13 @@
     "gas",
     "delta-0.8.0"
    ],
+   "stemZh": "在 Δ+ 的遞迴中途，剩餘的 report 序列已空，但前一輪 Δ* 產出了三筆 deferred transfer t，而交給這次呼叫的 free-accumulation 映射是 ∅。Δ+ 還會做事嗎？在 GP 0.8.0 中它又交回什麼？",
+   "optionsZh": [
+    "會——測試 n = i + |t| + |f| = 3 ≠ 0 觸發——但這一輪是空轉：Δ* 的 service 集合只有 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f)，所以在 r[..i] 為空且 f = ∅ 時它也是空的，那三筆 transfer 被丟棄，只有先前 `transfer` host call 已入帳的餘額存活進 δ†；因此 u 與 b 都空手而回，那三個目的地對 eq. 12.28 的 T(s) 毫無貢獻",
+    "不會。GP 的終止測試是前綴長度 i，而在 r = ⟦⟧ 時符合 gas 的最大前綴是 i = 0，所以基底情形 ⟨0, e, ∅, ⟦⟧, ⟦⟧⟩ 觸發、Δ* 從未被呼叫；那三筆待處理的 transfer 會透過 ω 帶進下一個區塊，這正是 ω 被定型成可以與延後的 report 並存的原因，而它們的 gas 會對照下一塊的預算 g 而非這一塊重新計費",
+    "會。GP 的終止測試是 n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0，所以 Δ* 仍然會被呼叫；它的 service 集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成那三個目的地，而它們只憑那些 transfer 被 accumulate。結果是 ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩，其第五個成分——已處理的 transfer——正是 eq. 12.28 中 T(s) 所計數的東西",
+    "會——測試 n = 3 ≠ 0 觸發、那三個目的地只憑 transfer 被 accumulate——但 Δ+ 仍然像 0.7.2 一樣回傳四元組 ⟨n, e′, b, u⟩；T(s) 所需的已處理 transfer 是事後靠比對 δ† 與 δ 的餘額移動還原出來的，eq. 12.28 是定義在那個還原之上、而不是定義在 Δ+ 交回的任何東西之上"
+   ],
    "stem": "Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and what does it hand back in GP 0.8.0?",
    "options": [
     "Yes — the test n = i + |t| + |f| = 3 ≠ 0 fires — but the round is a no-op: Δ*'s service set is s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) alone, so with r[..i] empty and f = ∅ it is empty too, the three transfers are discarded, and only the balances already credited by the earlier `transfer` host calls survive into δ†; u and b therefore come back empty and the three destinations contribute nothing to eq. 12.28's T(s)",
@@ -5626,6 +6046,13 @@
     "accumulation",
     "privileges",
     "prior-posterior"
+   ],
+   "stemZh": "在 Δ* 內部，core c 的 posterior authorizer 佇列 φ′[c] 與 posterior staging 金鑰 ι′ 各自都是從**恰好一個** service 的 Δ1 輸出中提取出來的。是誰的輸出？又是由哪一個版本的 χ 選出的？",
+   "optionsZh": [
+    "φ′[c] = R(φ[c], (e*_q)[c], ((Δ(χ_A[c])_e)_q)[c])——它是跨 manager 與 prior assigner 以 R(o, a, b) 合併的，就和 χ′_A[c] 一樣；而 ι′ 取自「以遞增 service 索引走訪 s 時最後寫入它的那個 service」，所以索引較大的 service 可以覆寫 delegator 那一份",
+    "φ′[c] = ((Δ(χ′_A[c])_e)_q)[c] 而 ι′ = (Δ(χ′_V)_e)_i——**posterior** 的逐 core assigner 與 **posterior** 的 delegator。因此一個在這一塊之內才被授予 assign 特權的 service 可以立刻安裝該塊將要使用的佇列，而且只讀取那個 service 自己那份成分",
+    "φ′[c] = ((Δ(χ_A[c])_e)_q)[c] 而 ι′ = (Δ(χ_V)_e)_i——**prior** 的逐 core assigner 與 **prior** 的 delegator。即使這同一輪改寫了 χ′_A[c] 或 χ′_V，佇列與金鑰仍然來自該輪開始時持有該特權的那一位，而且只讀取那個 service 自己那份成分、逐個 core 索引地讀",
+    "φ′[c] = ((Δ(χ_M)_e)_q)[c] 而 ι′ = (Δ(χ_M)_e)_i——兩者都是從 manager 的輸出 e* = Δ(χ_M)_e 提取的，因為只有 manager 可以更動 χ 的任何成分；assigner 與 delegator 只是在自己的局部狀態裡暫存請求，由 manager 的 Accumulate 在 Δ* 合併之前批准"
    ],
    "stem": "Inside Δ*, core c's posterior authorizer queue φ′[c] and the posterior staging keys ι′ are each lifted out of exactly one service's Δ1 output. Whose output, and selected by which version of χ?",
    "options": [
@@ -5656,6 +6083,13 @@
     "determinism",
     "transfers",
     "code"
+   ],
+   "stemZh": "在團隊的 Δ* 中，service 集合 s 是一個 Go map，而這個迴圈從逐 service 的結果蒐集 u 與 t′。它違反了 GP 0.8.0 的哪項要求？可觀察的症狀又是什麼？",
+   "optionsZh": [
+    "沒有違反任何與共識相關的要求：eq. 12.18 把 t′ 寫成集合，而 u 只被 eq. 12.28 的 G(s) 消費、後者是逐 service 加總，所以兩者都與順序無關。攤平後的 ⌢⌢t′ 確實會以任意順序抵達下一輪 Δ+，但 eq. 12.23 會在 Ψ_A 看到之前先把每個目的地的 i^T 依發送方重新排序，所以兩個匯入同一區塊的節點仍會對 state root 取得一致",
+    "違反之處在 set_s 而不在這個迴圈：只有攜帶 work-digest 的 service 才可以貢獻 u 與 t′，所以 transfer 的目的地與 always-accumulate 的 service 必須在這個迴圈執行之前被從 s 過濾掉。map 的走訪本身是無害的，因為 eq. 12.18 對 u 與 t′ 用的是 ∈ 而不是 ↕，而且兩者都被以與順序無關的方式消費",
+    "eq. 12.18 把 u 寫成 ⟦(s, Δ(s)_u) | s ↕ s⟧、t′ 寫成 ⟦Δ(s)_t | s ↕ s⟧，帶有**有序走訪**的標記、也就是遞增的 service 索引，而 Go 的 map 走訪是隨機化的。因此攤平後的 ⌢⌢t′ 會以被打亂的順序抵達下一輪 Δ+，於是每個目的地的 i^T——連同 Ψ_A 的運算元序列、它入帳的餘額、以及最終的 state root——都可能在兩個匯入**同一個區塊**的節點之間不同",
+    "eq. 12.18 的 ↕ 標記確實要求一個確定性的走訪，但那是依 **report 順序**——也就是每個 service 的第一份 digest 在 r[..i] 中出現的順序——所以依遞增 service 索引排序會和 map 順序一樣錯。兩種情況的症狀相同：攤平後的 ⌢⌢t′ 以被打亂的順序抵達下一輪，兩個匯入同一區塊的節點對 state root 不一致"
    ],
    "stem": "In the team's Δ*, the service set s is a Go map and this loop collects u and t′ from the per-service results. Which GP 0.8.0 requirement does it violate, and what is the observable symptom?",
    "code": {
@@ -5926,6 +6360,13 @@
     "encoding",
     "bijection"
    ],
+   "stemZh": "GP §C.1 為一般的自然數給出了一種變長編碼 E(x)。是什麼決定一個值佔幾個位元組？為什麼這個設計對 GP 而言是被逼出來的、而不只是方便？",
+   "optionsZh": [
+    "長度由外層結構自己的長度前綴在帶外攜帶，所以 E(x) 本身只是小端序的數字；GP 依靠外層元組讓整體編碼無歧義，而不是依靠 E(x) 本身",
+    "編碼器輸出最少的位元組數，而解碼器靠掃描終止位元組來還原長度；唯一性只是一種慣例，鼓勵但不強制實作遵守，因為 state root 取的是解碼後的值",
+    "每個自然數都被填補到固定的八個位元組，好讓結構內的欄位偏移量保持不變；正是這個固定寬度使編碼成為單射，而較短的形式只存在於不做雜湊的 work-package 酬載中",
+    "第一個位元組裡的前綴宣告了長度，而每個值恰有唯一一種有效編碼；state root 雜湊的是編碼後的狀態，所以一個值有兩種編碼、或一段編碼能被讀成兩個值，都會讓誠實節點對 root 產生分歧"
+   ],
    "stem": "GP §C.1 gives a variable-length encoding E(x) for a general natural number. What determines how many octets a value takes, and why is that design forced on the GP rather than merely convenient?",
    "options": [
     "The length is carried out-of-band by the enclosing structure's own length prefix, so E(x) itself is just the little-endian digits; the GP relies on the enclosing tuple to make the whole encoding unambiguous rather than on E(x) alone",
@@ -5958,6 +6399,13 @@
     "trie",
     "state-root"
    ],
+   "stemZh": "state trie 的節點大小全都一樣。在走訪 trie 時，讀取者如何分辨三種節點？又是什麼決定一個 leaf 存的是值本身、還是只存它的雜湊？",
+   "optionsZh": [
+    "節點種類是從抵達它的深度還原的——branch 只出現在最後一層之上——而是否內嵌取決於值能不能塞進扣掉 state key 後剩下的 31 個位元組，所以分界是 31 而不是 32 個位元組",
+    "每個節點前有一個位元組的 tag 指名三種之一；只要值比它原本會被換成的那個雜湊還小就會內嵌，這由編碼器逐節點決定並記在該 tag 裡",
+    "branch 與 leaf 靠節點後半段是不是一個有效的雜湊原像來區分；值一律以雜湊儲存好讓節點大小固定，而內嵌形式只存在於 service-info 的 leaf 裡",
+    "第一個位元區分 branch 與 leaf、第二個位元區分內嵌值的 leaf 與一般 leaf；至多 32 位元組的值會被內嵌（其長度就放在該位元組剩下的位元裡），更長的則以雜湊取代"
+   ],
    "stem": "State-trie nodes are all the same size. Walking the trie, how does a reader tell the three node kinds apart, and what decides whether a leaf stores the value itself or only its hash?",
    "options": [
     "The node kind is recovered from the depth at which it was reached — branches only appear above the last level — and embedding is decided by whether the value fits in the 31 octets left over after the state key, so the cut-off is 31 rather than 32 octets",
@@ -5986,6 +6434,13 @@
     "beefy",
     "recent-history"
    ],
+   "stemZh": "β_B 是一個 Merkle Mountain Range，每個區塊長出一個 root。描述 append 對這個結構做了什麼，以及 GP 為什麼在這裡選 MMR、而不是每個區塊重建一棵平衡的 Merkle 樹。",
+   "optionsZh": [
+    "append 把新 root 插進「區塊 timeslot 模 belt 長度」所指的位置、覆寫原本的內容；因此這條 belt 是環狀緩衝區、舊輸出會自動老化淘汰，鏈上狀態因而有界",
+    "append 會重建整個 range，使各 peak 之間的高度始終相差不到一層，藉此讓證明長度一致；舊證明必須在每個區塊後重新發出，這是可接受的，因為 BEEFY 只會證明最新的那個區塊",
+    "append 把單一 root 換成「舊 root 與新項目」的雜湊，所以這個 range 其實是一條雜湊鏈；這讓狀態保持很小，並讓驗證者能以常數空間從當前 root 往回走到任何較早的輸出",
+    "append 把新的 root 放在高度 0，並與任何同高度的既有 peak 向上合併，留下一組 peak，其高度正是計數的二進位位數；這個結構是唯讀附加的，所以每次 append 花 O(log n)，而先前發出的證明仍然有效"
+   ],
    "stem": "β_B is a Merkle Mountain Range that grows by one root per block. Describe what the append does to the structure, and why the GP chose an MMR here rather than rebuilding a balanced Merkle tree each block.",
    "options": [
     "Appending inserts the new root at the position given by the block's timeslot modulo the belt length, overwriting whatever was there; the belt is therefore a ring buffer and old outputs age out automatically, which bounds the on-chain state",
@@ -6013,6 +6468,13 @@
     "assurance",
     "availability",
     "signature"
+   ],
+   "stemZh": "一份 assurance 帶有一個「每個 core 一位元」的 bitfield 加上一個簽章。實際被簽的是什麼？如果簽章只涵蓋 bitfield，會壞在哪裡？",
+   "optionsZh": [
+    "簽章涵蓋背書者自己的 validator 索引與 bitfield，這正是鏈能歸屬該 assurance 的依據；父雜湊是另外拿去和 header 比對來檢查的，而不是靠被簽進去",
+    "簽章涵蓋每個被設起位元的 core 其 work-report 雜湊，所以背書者是對特定的 report 做出承諾；父 header 雜湊不涉入，因為 report 的壽命比 guarantee 它的那個區塊還長",
+    "簽章只涵蓋 bitfield，而重播是靠鏈上規則防止的——每位 validator 每個區塊至多出現一次；綁定區塊是多餘的，因為該 extrinsic 本來就在被簽的那個區塊裡面",
+    "簽章涵蓋的是「父 header 雜湊連同編碼後 bitfield」的一個帶域分隔的雜湊；少了父雜湊，同一份簽好的 bitfield 就能被重播進較晚的區塊，使一位 validator 被算成在為它已不再持有的資料背書"
    ],
    "stem": "An assurance carries a bitfield with one bit per core plus a signature. What is actually signed, and what would break if the signature covered only the bitfield?",
    "options": [
@@ -6045,6 +6507,13 @@
     "oversize",
     "limits"
    ],
+   "stemZh": "一份 work-package 的各項目接連 refine，而 report 有大小上限 W_R。這個上限是逐項套用、還是套用於整份 report？會越界的項目又會怎麼樣？",
+   "optionsZh": [
+    "是逐項的：每個輸出各自與 W_R 比較，所以一份 package 只有在單一項目過大時才會失敗；整份 report 是無界的，因為需要由可得性承載的是 bundle 而不是 report",
+    "是累計的，而輸出是被截斷而非替換，截斷長度記在 digest 裡，好讓重跑 refine 的 auditor 能重現出完全相同的位元組",
+    "是累計的：每個項目的輸出是拿 authorizer trace 加上已被接受的輸出一起衡量，而第一個會越過 W_R 的項目，其輸出被換成 OVERSIZE 錯誤，後面的項目仍照常 refine",
+    "是累計的，但越過上限會使整份 work-report 失效，所以 guarantor 必須丟棄該 package、其所有項目都不會被 report——這正是阻止某個 service 靠灌水輸出把別人擠掉的機制"
+   ],
    "stem": "A work-package's items refine one after another and the report has a size ceiling W_R. Is the ceiling applied per item or to the report as a whole, and what happens to an item that would cross it?",
    "options": [
     "It is per item: each output is compared against W_R on its own, so a package can only fail if a single item is oversized; the report as a whole is unbounded because the bundle, not the report, is what availability has to carry",
@@ -6073,6 +6542,13 @@
     "page-fault",
     "memory"
    ],
+   "stemZh": "一次多位元組的 store 跨越了兩個 page：第一個可寫、第二個未配置。PVM 會回報什麼？回報的位址為什麼要那樣定義？",
+   "optionsZh": [
+    "一個 page fault，帶著「此次存取所觸及、最低的不可存取位元組」其 page 對齊後的位址；對齊到 page 正是讓這個值成為 host 能據以行動的東西——它恰好就是 host 在恢復程式前必須映射的那個 page",
+    "一個 page fault，帶著「含有此次存取起點」那個 page 的基底位址，好讓整次存取能從一個已知已映射的位置重試；機器會先寫入可存取的前綴，再從 fault 位址繼續",
+    "一個 page fault，帶著第一個不可存取位元組的精確位址，好讓 host 確知存取停在哪裡；host 被預期要自行對齊該值再映射，因為對齊是 host 的事、不屬於機器語意",
+    "一個 panic，因為跨越 page 邊界進入未配置記憶體的存取按定義就是畸形的；page fault 保留給完全落在單一個未映射 page 之內、因而能靠映射一個 page 就滿足的存取"
+   ],
    "stem": "A multi-octet store straddles two pages: the first is writable, the second is not allocated. What does the PVM report, and why is the reported address defined the way it is?",
    "options": [
     "A page fault carrying the page-aligned address of the lowest inaccessible octet touched by the access; aligning to the page is what makes the value something the host can act on — it is exactly the page the host must map before the program is resumed",
@@ -6100,6 +6576,13 @@
     "pvm",
     "control-flow",
     "gas"
+   ],
+   "stemZh": "PVM 同時有靜態解析的跳躍與由暫存器算出的間接跳躍。間接跳躍的目標必須額外滿足哪些條件？如果把這些條件拿掉，gas 模型會壞在哪裡？",
+   "optionsZh": [
+    "間接跳躍的目標必須對齊、非零、位於 jump table 之中，且落在某個 basic block 的起點；少了「落在 block 起點」這項要求，程式就能從第一條指令以下進入一個 block 並執行它，而該 block 的 gas 從未被計費",
+    "間接跳躍的目標必須是程式符號表所記載的某個函數起點，而那正是 jump table 所存的東西；gas 模型不受影響，因為間接跳躍以立即運算元攜帶自己的 gas 成本",
+    "間接跳躍的目標只需是 page 大小的倍數，好讓一次跳躍永遠不會跨 page；gas 是按退休的指令數而不是按 block 計費，所以控制流落在哪裡對計帳毫無影響",
+    "間接跳躍的目標只需落在 code blob 之內並且對齊；不要求 block 起點，因為機器會從程式計數器重新導出所在的 block 並在進入時計費，所以不論如何 gas 計帳都不受影響"
    ],
    "stem": "The PVM has both statically-resolved jumps and indirect jumps computed from a register. What extra conditions must an indirect target satisfy, and what would break in the gas model if they were dropped?",
    "options": [
@@ -6130,6 +6613,13 @@
     "gas",
     "delta-0.8.0"
    ],
+   "stemZh": "GP 0.8.0 重做了 host call 的計費方式。描述新收費的形狀，以及當一個 service 呼叫某個在它這次 invocation 中不可用的索引時會發生什麼。",
+   "optionsZh": [
+    "每個呼叫有一個基本成本，並在它搬移資料時再加上一項與所觸及 KiB 數成正比的費用；未知或不可用的索引會先被收取一個預設成本，所以剩餘 gas 不足的呼叫會以 out-of-gas 退出、而不是回傳錯誤碼",
+    "每個呼叫不論搬多少資料都收同樣的固定金額，這正是讓 basic block 的成本能靜態算出的原因；未知索引是免費的、單純回傳 WHAT，因為對什麼都沒做的呼叫收費並不公平",
+    "成本由 service 在其 metadata 中宣告、並於註冊時驗證，這讓 service 能為自己的最壞情況設限；未知索引會以 panic 中止整個 accumulation，好讓錯誤在開發期間高聲浮現",
+    "成本是在呼叫之後、依 host 實際消耗的 gas 計算的，所以搬愈多資料的呼叫自然愈貴；未知索引回傳 WHAT，而機器不收任何費用、計數器原封不動"
+   ],
    "stem": "GP 0.8.0 reworked how a host call is charged. Describe the shape of the new charge and what happens when a service invokes an index that is not available in its invocation.",
    "options": [
     "Each call has a base cost plus, where it moves data, a term proportional to the number of KiB touched; an index that is unknown or unavailable is charged a default cost first, so a call with too little gas left exits out-of-gas rather than returning an error code",
@@ -6157,6 +6647,13 @@
     "host-call",
     "memory",
     "delta-0.8.0"
+   ],
+   "stemZh": "GP 0.8.0 移除了 sbrk 指令，改以 grow_heap 這個 host call 提供堆積成長。呼叫者要傳什麼？在 0.8.0 的 gas 模型下，為什麼 host call 才是這個操作的正確歸屬？",
+   "optionsZh": [
+    "呼叫者傳入想要的終點 page，而成本事後才依 host 實際的配置成本結算，這正是它不能是指令的原因——指令必須在執行前就知道成本，而 host call 是回傳時才計費",
+    "呼叫者指名它想要的堆積終點，並依新變為可寫的 page 數按比例計費；一條成本取決於其運算元的指令會破壞「basic block 的價格能在該 block 執行前靜態算出」這個保證",
+    "呼叫者傳入要增加的位元組數並被收取固定金額；它被移出指令集純粹是為了編碼空間，因為該 opcode 得留給 0.8.0 新引入的某條無引數指令",
+    "呼叫者傳入 page 數量而該呼叫免費，因為記憶體在程式初始化時就已保留；把它做成 host call 只是為了讓 host 能在機器被巢狀於某個內層 PVM 時拒絕成長"
    ],
    "stem": "GP 0.8.0 removes the sbrk instruction and provides heap growth as the grow_heap host call instead. What does the caller pass, and why is a host call the right home for this operation under the 0.8.0 gas model?",
    "options": [
@@ -6186,6 +6683,13 @@
     "refine",
     "design"
    ],
+   "stemZh": "fetch 是單一個 host call、在三種 invocation 中都可用，其第一個引數選擇要讀哪一份資料。GP 為什麼把這麼多資料來源摺進同一個呼叫，而不是各給一個索引？",
+   "optionsZh": [
+    "因為這些來源共用同一個 gas 價格，而 GP 是按 host-call 索引計費；把它們摺在一起才使得讀取協定常數的價格與讀取 work-package 匯入的價格完全相同",
+    "因為每種 invocation 暴露的來源子集不同，而單一個呼叫是唯一能表達這件事的方式——若用分開的索引，機器就無法分辨哪些在 refine 中合法、哪些在 accumulate 中合法",
+    "因為選擇子讓該呼叫的暫存器簽章維持在 host call 可用的四個引數暫存器之內，而分開的索引做不到這點，因為每個來源都需要自己的偏移量與長度配對",
+    "因為 host call 的編號是每個已部署 service 所編譯依循的 ABI 的一部分：用一個選擇子引數就能新增資料來源而不必重新編號，而每個來源各給一個新索引，最終會逼既有 service 重新建置"
+   ],
    "stem": "fetch is a single host call, available in all three invocations, whose first argument selects which piece of data to read. Why did the GP fold this many data sources into one call instead of giving each its own index?",
    "options": [
     "Because the sources share one gas price, and the GP charges per host-call index; folding them together is what keeps the price of reading the protocol constants identical to the price of reading a work-package's imports",
@@ -6214,6 +6718,13 @@
     "work-digest",
     "errors"
    ],
+   "stemZh": "一份 work digest 的 result 欄位存的不是 refine 的輸出、就是錯誤集合 𝔼 的某個成員。這種二擇一是怎麼編碼的？GP 為什麼把 refine 失敗當成值放上鏈，而不是直接拒絕該 report？",
+   "optionsZh": [
+    "任一項目失敗就會讓整份 work-report 無效，所以這個編碼根本沒有錯誤的情形；𝔼 集合的存在只是為了替 guarantor 在決定是否簽署 report 前於鏈下檢查的那些條件命名",
+    "成功是一個判別位元組後接帶長度前綴的 blob，而每種錯誤各是一個相異的單一位元組；把失敗保留為一般的值，讓 accumulate 能確切看到某項目是怎麼失敗的，也讓一個項目失敗不會使 package 中其他項目失效",
+    "成功與失敗共用同樣的形狀——帶長度前綴的 blob，失敗時為空——原因另外由 report 的 authorizer trace 攜帶；這讓 digest 保持定寬，而 erasure 編碼器仰賴這一點",
+    "錯誤被編碼成任何成功的 refine 都產不出的保留 blob 值，所以不需要判別子；含有錯誤的 report 仍然有效但會被 accumulate 略過，這也是為什麼那些錯誤變體不需要鏈上意義"
+   ],
    "stem": "A work digest's result field holds either the refine output or a member of the error set 𝔼. How is that alternative encoded, and why does the GP put refine failures on-chain as values rather than rejecting the report?",
    "options": [
     "A failing item makes the whole work-report invalid, so the encoding has no error case at all; the 𝔼 set exists only to name the conditions guarantors check off-chain before deciding whether to sign the report",
@@ -6241,6 +6752,13 @@
     "safrole",
     "fallback",
     "anonymity"
+   ],
+   "stemZh": "當抵達的 ticket 太少時，γ′_S 會退回到一個由熵與啟用 validator 集合導出的金鑰序列。每個 slot 的出塊者是怎麼選出來的？在 fallback 生效期間，這條鏈放棄了什麼性質？",
+   "optionsZh": [
+    "每個 slot 的出塊者是把熵與 slot 索引一起雜湊、再對集合大小取模而選出的；整個 epoch 的排程因此可以事先被公開算出，所以 ring VRF ticket 所買到的匿名性在那個 epoch 就沒了",
+    "fallback 把每個 slot 都指派給整個 validator 集合、並接受第一個抵達的有效 seal；匿名性不受影響，因為根本沒有排程，代價是偶爾會出現同高度的競爭區塊",
+    "出塊者是從前一個 epoch 的 ticket 累加器中抽出、重用那些未被消耗的最新 ticket；匿名性得以保留，因為那些 ticket 仍是 ring-VRF 證明，但活性會受損，因為這個池最終會用完",
+    "每個 slot 的出塊者是索引等於「slot 編號模集合大小」的那位 validator，所以排程就是單純的輪替；除了公平性之外沒有損失，因為輪替會讓某些 validator 拿到略多的 slot"
    ],
    "stem": "When too few tickets arrive, γ′_S falls back to a key sequence derived from entropy and the active validator set. How is each slot's author chosen, and what property does the chain give up while the fallback is in force?",
    "options": [

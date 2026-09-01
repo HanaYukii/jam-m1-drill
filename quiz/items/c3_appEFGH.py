@@ -13,7 +13,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "rationale",
         "tags": ["merklization", "segment-root", "erasure-root", "rationale"],
-        "stem": "Appendix E gives two general Merkle root functions: the well-balanced M_B and the constant-depth M. In an availability specification the segment-root a_e is built with one of them and the erasure-root a_u with the other. Which way round is it, and what does the well-balanced shape buy over simply padding every tree up to a power of two?",
+  "stemZh": "附錄 E 給了兩個通用 Merkle root 函數：well-balanced 的 M_B 與定深的 M。在 availability specification 中，segment-root a_e 用其中一個、erasure-root a_u 用另一個。是哪個配哪個？well-balanced 的形狀相對於「一律補到 2 的冪」又買到了什麼？",
+  "optionsZh": [
+   "segment-root 用 **M**：前處理器 C 把每一項改寫成 H('$leaf' ⌢ s) 並以零雜湊補到 2^⌈log₂ n⌉ 片葉子，讓所有葉子位於同一深度、使 64 葉子的頁面對 J_6／L_6 保持大小對齊。erasure-root 用 **M_B**，因為它的葉子本來就是 64 位元組的雜湊對、預先雜湊是浪費，而在 ⌈|v|/2⌉ 處切分能讓最深層——以及那一層的葉子數——維持最小",
+   "剛好相反：segment-root 用 M_B，因為一個 segment 有 4,104 個 octet 而 M_B 避免了對每一項做雜湊；erasure-root 用 M，因為碎片數固定為 validator 集合大小、定深樹建起來比較便宜。M_B 在自己的基底情形套用 '$leaf' 前綴，所以不需要另外的前處理器，而 well-balanced 只有在項數很少、log₂ 取整會浪費一層時才有意義",
+   "兩個 root 都用 M_B；定深函數只為附錄 D 的 state trie 而存在，因為它 31 位元組的 key 本來就固定了深度，而前處理器 C 就是那棵 trie 的 key 補齊步驟。偏好 well-balanced 是因為它讓每片葉子有相同的證明長度，而一旦項數本身不是 2 的冪，補到 2 的冪的樹就做不到這點，所以 J_6／L_6 是在那棵 trie 上分頁而不是在一般 Merkle 樹上",
+   "兩個 root 都用 M；M_B 只是一層薄包裝，它處理單一項目的雜湊、其餘一律委派給節點函數 N。補到 2 的冪正是讓一棵樹變成 well-balanced 的做法，'$leaf' 與 '$node' 前綴是兩個 root 函數之間唯一實質的差別，而 erasure-root 的葉子是單一個 32 位元組的碎片雜湊而不是 64 位元組的對"
+  ],
+  "stem": "Appendix E gives two general Merkle root functions: the well-balanced M_B and the constant-depth M. In an availability specification the segment-root a_e is built with one of them and the erasure-root a_u with the other. Which way round is it, and what does the well-balanced shape buy over simply padding every tree up to a power of two?",
         "options": [
             "The segment-root uses M: the preprocessor C rewrites every item as H('$leaf' ⌢ s) and pads to 2^⌈log₂ n⌉ zero-hash leaves, so all leaves sit at one depth and 64-leaf pages stay size-aligned for J_6/L_6. The erasure-root uses M_B, whose leaves are already 64-octet hash pairs, so pre-hashing would be wasted and splitting at ⌈|v|/2⌉ keeps the deepest level — and the count of leaves on it — minimal.",
             "The other way round: the segment-root uses M_B because a segment is 4,104 octets and M_B avoids hashing each item, while the erasure-root uses M because the chunk count is fixed at the validator-set size, so a constant-depth tree is cheaper to build. M_B applies the '$leaf' prefix in its own base case, so no separate preprocessor is needed, and well-balancedness only matters for very short sequences where log₂ rounding wastes one level.",
@@ -39,7 +46,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "code",
         "tags": ["merklization", "justification", "proof-path", "bug"],
-        "stem": "Below is the team's trace function, the one that produces the sibling nodes of an inclusion justification. In the same file the node function N splits its input with `mid := (len(v) + 1) / 2`. Reading the two together, what is the defect and where does it actually bite?",
+  "stemZh": "以下是團隊的 trace 函數，它產生的是納入佐證的兄弟節點。同一個檔案裡的節點函數 N 是用 `mid := (len(v) + 1) / 2` 切分輸入的。把兩者合起來看，缺陷是什麼？它又實際在哪裡咬人？",
+  "optionsZh": [
+   "照現況是沒問題的：對一棵 well-balanced 的樹而言，兩種取整慣例描述的是同一棵樹，因為 N 遞迴的正是這個函數所走訪的那些半邊。與 GP 唯一真正的分歧是順序——它回傳的序列是由葉子往上，而 GP 送出的是由 root 往下的另一組節點，所以在 CE 140 的呼叫點把 slice 反轉就是全部的修法",
+   "遞迴下降的是**兄弟**那一半而不是含有目標索引的那一半，所以回傳的 co-path 是正確者的鏡像。長度總是與 GP 相符，這正是為什麼針對證明長度的單元測試會通過、而對照 root 的驗證卻失敗。分頁證明逃過一劫是因為 2 的冪的樹是對稱的，所以只有 CE 140 的 co-path 受影響",
+   "它把切分**向下**取整，而 GP——以及這個檔案自己的節點函數——是**向上**取整，所以在任何長度為奇數的遞迴層上，兄弟節點乃至路徑長度都是錯的：三個項目、索引 0 時，GP 給出兩個節點而它只給一個。分頁證明逃過一劫是因為 C 已經先補到 2 的冪，但直接建構 CE 140 segment-shard co-path 的那次呼叫沒有",
+   "它在把兄弟節點摺進路徑時漏掉了 '$node' 的 domain-separation 前綴，所以它回傳的雜湊無法被重新組合成 root；修法是在這個函數內部加上該前綴，而不是依賴節點函數去做。奇數長度的層不受影響，因為兩個函數的切分取整方式相同，而分頁證明失敗的頻率與直接呼叫完全一樣"
+  ],
+  "stem": "Below is the team's trace function, the one that produces the sibling nodes of an inclusion justification. In the same file the node function N splits its input with `mid := (len(v) + 1) / 2`. Reading the two together, what is the defect and where does it actually bite?",
         "code": {
             "lang": "go",
             "caption": "internal/utilities/merkle_tree/merkle_tree.go (T) — compare with N in the same file",
@@ -94,7 +108,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["mmr", "mmb", "accumulation-log", "beefy"],
-        "stem": "The Accumulation Output Log β_B is a sequence of optional hashes rather than a single root, yet every recent-history entry stores only one 32-octet value b derived from it. Why does state keep the whole peak sequence, and what is that single value used for?",
+  "stemZh": "Accumulation Output Log β_B 是一個 optional 雜湊的序列而不是單一個 root，然而每筆近期歷史條目只儲存一個由它導出的 32 位元組值 b。為什麼狀態要保留整個 peak 序列？那個單一值又是拿來做什麼的？",
+  "optionsZh": [
+   "append 函數 A 像二進位加法一樣進位——被佔用的槽 n 會與進來的葉子摺疊並進位到槽 n+1，空槽 ∅ 則直接填入——但 peak 序列本身只是一個快取，因為節點需要證明時隨時可以從最近 H 筆近期歷史條目重建它；那個單一值是對各 peak 取的 Blake2b well-balanced root M_B，放在 β_H 裡純粹是讓輕客戶端不必重放 accumulation 就能檢查該 log，而 Beefy 簽的是 state root 而不是那個值",
+   "append 函數 A 像二進位加法一樣進位——被佔用的槽會與進來的葉子摺疊並進位，空槽則直接填入——所以那些 peak 正是「繼續附加」以及「提供 O(log N) 納入證明」所需的全部狀態；把它們雜湊掉就等於終結可附加性，這正是為什麼另有一個 super-peak M_R（在 '$peak' 前綴之下對非 ∅ 的 peak 做左結合的 Keccak 摺疊）才是那個進入 β_H、並被 BLS 簽署供 Beefy 使用的 32 位元組值",
+   "append 函數 A 每個區塊恰好推入一個新 peak，並在序列超過 H 項時丟掉最舊的，就像近期歷史的環狀緩衝區一樣，所以那些 peak 是一個有界窗口而不是持續成長的承諾，舊的產出就這樣自然失去可證明性；而儲存的那個單一值是編碼後 peak 序列 E_M(β_B) 的 Keccak 雜湊，它進入 β_H、被第三方當成橋接承諾並被 BLS 簽署",
+   "append 函數 A 像二進位加法一樣進位，而保留那些 peak 是為了讓該 log 能在分叉時回捲，因為移除最後一片葉子永遠只需要丟掉一個 peak；那個單一值是對**那一個區塊**的 accumulation 產出所取的 well-balanced Keccak root，它進入 β_H 並被 BLS 簽署供 Beefy 使用，所以 peak 序列本身從不離開節點"
+  ],
+  "stem": "The Accumulation Output Log β_B is a sequence of optional hashes rather than a single root, yet every recent-history entry stores only one 32-octet value b derived from it. Why does state keep the whole peak sequence, and what is that single value used for?",
         "options": [
             "The append function A carries like binary addition — an occupied slot n is folded with the incoming leaf and carried into slot n+1, an empty slot ∅ is simply filled — but the peak sequence itself is only a cache, since a node can rebuild it from the last H recent-history entries whenever it needs a proof; the single value is the Blake2b well-balanced root M_B taken over the peaks, kept in β_H purely so light clients can check the log without replaying accumulation, and Beefy signs the state root rather than that value.",
             "The append function A carries like binary addition — an occupied slot n is folded with the incoming leaf and carried into slot n+1, an empty slot ∅ is simply filled — so the peaks are exactly the state needed to keep appending and to serve O(log N) inclusion proofs; hashing them away would end appendability, which is why the separate super-peak M_R (a left-associated Keccak fold over the non-∅ peaks under a '$peak' prefix) is the one 32-octet value that enters β_H and is BLS-signed for Beefy.",
@@ -121,7 +142,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "rationale",
         "tags": ["shuffle", "determinism", "guarantor-assignment", "rationale"],
-        "stem": "A reviewer on the team wants to replace the `r_0 mod l` index selection in the shuffle F with rejection sampling, on the grounds that a modulo of a 32-bit draw is biased whenever l does not divide 2³². How should the team answer?",
+  "stemZh": "團隊裡有位審閱者想把洗牌函數 F 中的 `r_0 mod l` 索引選取換成拒絕取樣，理由是只要 l 不整除 2³²，對 32 位元抽樣取模就有偏差。團隊該怎麼回應？",
+  "optionsZh": [
+   "拒絕這個更動。F 是一條**共識規則**而不是統計工具：每個節點都必須從相同的熵導出完全相同的排列，而它的輸出驅動 guarantor 對 core 的指派 P(|κ′|, η′_2, τ′) 以及 tranche-0 的稽核抽選。一個去偏的節點會把 validator 指派到不同的 core，接著拒絕完全有效的 guarantor 簽章並使鏈分裂；32 位元抽樣的殘餘偏差是被刻意接受的",
+   "接受這個更動。Gray Paper 只固定了**分布**——任何能對輸入產生均勻隨機排列的洗牌都是合規的——而 jamtestvectors 的 shuffle 套件也只檢查結果是輸入的一個排列、不檢查是哪一個排列。反正 F 餵給的東西鏈上都不檢查：guarantor 對 core 的指派是由每份 work-report 自己攜帶的 core 索引固定的，而 tranche-0 的稽核純粹是本地選擇",
+   "這個更動是多餘而非錯誤：numeric-sequence-from-hash 函數已經藉由從 Blake2b 摘要中切出互不重疊的 4 octet 窗口去除了偏差，所以那個值對剩餘長度取模恰好是均勻的、拒絕取樣會迴圈零次。因此兩種形式逐位元相符，切換過去的節點仍然導出與其他人相同的指派",
+   "接受，但只用在 ticket 的處理上。附錄 F 的洗牌是用來排序 ticket accumulator γ_A、以及 §6 用來建構 fallback 金鑰序列的，而既然 γ_A 在使用前會依識別碼重新排序，那個排列從不進入狀態；guarantor 那條路徑與 tranche-0 的稽核抽選則必須維持 Gray Paper 有偏差的形式，因為那兩者確實進入狀態"
+  ],
+  "stem": "A reviewer on the team wants to replace the `r_0 mod l` index selection in the shuffle F with rejection sampling, on the grounds that a modulo of a 32-bit draw is biased whenever l does not divide 2³². How should the team answer?",
         "options": [
             "Reject the change. F is a consensus rule, not a statistics utility: every node must derive the identical permutation from the same entropy, and its output drives the guarantor-to-core assignment P(|κ′|, η′_2, τ′) and the tranche-0 audit selection. A node that de-biases assigns validators to different cores, then rejects perfectly valid guarantor signatures and splits the chain; the residual bias across 32-bit draws is deliberately accepted.",
             "Accept the change. The Gray Paper fixes only the distribution — any shuffle that yields a uniformly random permutation of the input is conformant — and the jamtestvectors shuffle suite checks only that the result is a permutation of the input, not which permutation. F feeds nothing that is checked on chain anyway: the guarantor-to-core assignment is fixed by the core index each work-report carries, and tranche-0 auditing is a purely local choice.",
@@ -147,7 +175,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["shuffle", "entropy", "safrole", "fallback"],
-        "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",
+  "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
+  "optionsZh": [
+   "它們是同一個構造被用了兩次：§6 的 fallback 序列字面上就是把附錄 F 的洗牌套用在 active 金鑰集合 κ′ 上、以 η′_2 為種子、再截斷到 E 項，所以兩者都是每八個輸出做一次 Blake2b（對種子串接 ⌊i/8⌋ 的 4 位元組編碼）、都解碼位於偏移 4i mod 32 的 little-endian 窗口、也都以循環方式索引金鑰序列——這正是為什麼實作只需要一套雜湊展開常式",
+   "洗牌的展開是每**八個**輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是**每個時槽**雜湊一次，對象是種子串接該時槽索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
+   "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個時槽做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
+   "兩者都是每個輸出雜湊一次（對種子串接該索引的 4 位元組編碼）、也都只取每個摘要的前四個 octet；差別在洗牌接著以 big-endian 解碼並直接使用其自然範圍內的值，而 §6 的 fallback 以 little-endian 解碼並對金鑰序列長度取模，所以位元組序是唯一真正的差異，也是 fallback seal 不符的經典來源"
+  ],
+  "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",
         "options": [
             "They are the same construction used twice: §6's fallback sequence is literally the appendix-F shuffle applied to the active key set κ′ with η′_2 as the seed and then truncated to E entries, so both make one Blake2b call per eight outputs over the seed concatenated with the 4-octet encoding of ⌊i/8⌋, both decode the little-endian window at offset 4i mod 32, and both index the key sequence cyclically — which is why an implementation only needs one hash-expansion routine.",
             "The shuffle's expansion makes one Blake2b call per eight outputs — hashing the seed concatenated with the 4-octet encoding of ⌊i/8⌋ — and decodes the little-endian 4-octet window at offset 4i mod 32, so one 32-octet digest supplies eight consecutive 32-bit numbers. §6's fallback hashes once per slot, over the seed concatenated with the encoding of the slot index, and decodes only the leading 4 octets, using the result to index the key sequence cyclically.",
@@ -174,7 +209,14 @@ ITEMS = [
         "difficulty": 1,
         "kind": "rationale",
         "tags": ["bandersnatch", "ring-vrf", "safrole", "anonymity", "rationale"],
-        "stem": "Safrole could have proved ticket validity with an ordinary IETF VRF signature plus the submitting validator's published Bandersnatch key. Why does the Gray Paper insist on a ring VRF proof instead?",
+  "stemZh": "Safrole 本來可以用一般的 IETF VRF 簽章加上提交者已公開的 Bandersnatch 金鑰來證明 ticket 有效。為什麼 Gray Paper 堅持改用 ring VRF 證明？",
+  "optionsZh": [
+   "因為 ring VRF 的輸出不可偏置，而一般 VRF 的輸出可被簽署者靠重複提交來輾磨，所以只有 ring 形式才能讓下個 epoch 的 slot-sealer 序列安全公開；匿名只是樂見的副作用而非理由，而抗輾磨也正是 ticket 的訊息為空、其 context 不帶 entry index 的原因",
+   "因為一份 ring 證明可以一次涵蓋某位 validator 的所有 ticket 項目——entry index 搭在訊息裡、而 context 只固定 η′_2——所以 784 個 octet 的成本每位 validator 每個 epoch 只付一次，而不論每人被允許幾個項目，tickets extrinsic 都能待在每塊 16 個的上限之內",
+   "因為那份證明只顯示它的作者知道某個私鑰、其公鑰落在 γ′_Z 所承諾的 ring 之中，卻從不顯示是哪一個，所以下個 epoch 的 slot-sealer 序列可以放在公開狀態裡而不洩漏誰將在哪一槽出塊；作者只有在 seal 出現時才被識別，這正是鈍化針對性阻斷服務與賄賂的機制",
+   "因為它讓任何持有金鑰的人（不論是不是 validator）都能參加 ticket 競賽——證明是對照 144 位元組的 γ′_Z 檢查的，但並不要求 ring 成員資格、只要求知道某個 Bandersnatch 私鑰——這正是在部分 validator 離線時仍能讓 accumulator 保持飽和的機制，也是競賽在該 epoch 第 500 槽關閉的原因"
+  ],
+  "stem": "Safrole could have proved ticket validity with an ordinary IETF VRF signature plus the submitting validator's published Bandersnatch key. Why does the Gray Paper insist on a ring VRF proof instead?",
         "options": [
             "Because a ring VRF output is unbiasable whereas a plain VRF output can be ground by its signer through resubmission, so only the ring form makes next epoch's slot-sealer sequence safe to publish; anonymity is a welcome side effect but not the reason, and grinding resistance is also why the ticket's message is empty and its context carries no entry index.",
             "Because one ring proof can carry all of a validator's ticket entries at once — the entry indices ride in the message while the context fixes only η′_2 — so the 784-octet cost is paid once per validator per epoch and the tickets extrinsic stays inside its 16-per-block cap however many entries each validator is allowed.",
@@ -200,7 +242,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["bandersnatch", "ring-vrf", "ring-root", "offenders"],
-        "stem": "What exactly does the epoch root γ′_Z commit to, and what becomes of a validator whose key tuple has been zeroed by Φ because its Ed25519 key is in the offenders set?",
+  "stemZh": "epoch root γ′_Z 究竟承諾了什麼？而某位 validator 因其 Ed25519 金鑰落在 offenders 集合中、金鑰元組被 Φ 歸零之後，會怎麼樣？",
+  "optionsZh": [
+   "它承諾的是 **pending** 金鑰集合（也就是接下來那個 epoch 的 validator）依序排列的 Bandersnatch 成分，是一個在 epoch 邊界重算的定長 144 位元組承諾。一個全零的項目不是合法的曲線點，所以會用 Bandersnatch 的 padding 點代入它：ring 維持原本大小、其他每個成員保住自己的索引，而那個位置永遠產不出任何證明",
+   "它承諾的是 **active** 金鑰集合 κ′（也就是當前 epoch 的 validator）依序排列的 Bandersnatch 成分，是一個在 offenders 集合改變時就重算的定長 144 位元組承諾。被歸零的項目會被丟棄、倖存金鑰重新編號，所以 ring 會依 offender 數量縮小，而 root 與證明也相應變便宜",
+   "它是對 pending 金鑰集合依序排列之 32 位元組 Bandersnatch 成分所取的 well-balanced Merkle root M_B，因此它本身就是 32 個 octet，在 epoch 邊界重算。被歸零的項目就成為一片沒有人知道其開啟方式的葉子：ring 維持大小、其他成員保住索引，而這正是把 offender 排除在競賽之外的機制",
+   "它承諾的是 pending 集合**完整 336 位元組**的 validator 金鑰元組——Bandersnatch、Ed25519、BLS 與 metadata 一併——是一個在 epoch 邊界重算的定長 144 位元組承諾。既然 Φ 只歸零 Ed25519 那個成分，Bandersnatch 那一半仍然存活並保住索引，所以 offender 在下一次輪替把它移除之前仍能提交 ticket"
+  ],
+  "stem": "What exactly does the epoch root γ′_Z commit to, and what becomes of a validator whose key tuple has been zeroed by Φ because its Ed25519 key is in the offenders set?",
         "options": [
             "It commits to the ordered Bandersnatch components of the pending key set — the validators of the coming epoch — as a fixed 144-octet commitment recomputed at the epoch boundary. An all-zero entry is not a valid curve point, so the Bandersnatch padding point is substituted for it: the ring keeps its size, every other member keeps its index, and no proof can ever be produced for that position.",
             "It commits to the ordered Bandersnatch components of the active key set κ′ — the validators of the current epoch — as a fixed 144-octet commitment recomputed whenever the offenders set changes. Zeroed entries are dropped and the surviving keys re-indexed, so the ring shrinks by the number of offenders and both the root and the proofs get correspondingly cheaper.",
@@ -226,7 +275,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "concept",
         "tags": ["bandersnatch", "vrf-output", "ticket-identifier", "safrole"],
-        "stem": "The ticket accumulator keeps only tuples of a 32-octet identifier and an entry index; the 784-octet ring proof from the extrinsic is thrown away once verified. An epoch later the sealer of a slot must present a 96-octet signature whose output equals that stored identifier, even though it now signs the serialized unsigned header rather than an empty message. What makes that possible?",
+  "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的封印者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
+  "optionsZh": [
+   "因為儲存的識別碼是那份 ring 證明的 Blake2b 雜湊，而 Bandersnatch 的 ring 證明是確定性的，所以同一把金鑰與 context 會重現完全相同的證明位元組、因而重現相同的雜湊；訊息在那個雜湊裡完全不起作用。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index，seal 的則是同一個字串加 η′_3，而熵的輪替讓那兩串位元組在一個 epoch 之後相等",
+   "因為 seal 把儲存的 ring 證明重新發布在 seal 欄位裡——96 位元組的形式就是那同一份證明剝掉零知識部分後的樣子，這正是兩種大小不同的原因——所以不論簽的是什麼，它的輸出理所當然不變。context 確實會在 epoch 邊界從 η′_2 移到 η′_3，但被剝除過的證明會把它原本的輸出一併帶著走，所以儲存的識別碼仍然吻合",
+   "因為 VRF 的輸出是一個受 context 影響、但**不受訊息影響**的高熵雜湊，只由私鑰與輸入決定。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index；seal 的則是同一個字串加 η′_3 與該 ticket 的 entry index，而熵的輪替讓那兩串位元組在一個 epoch 之後相等，所以同一把金鑰在兩種簽章型別之下都產出相同的 32 個 octet",
+   "因為識別碼只由 η′_2 連同 entry index 導出，所以每位 validator 不必看過證明就能重算每一個 ticket 識別碼；簽章只提供「有權使用它」的證明，這也是為什麼證明本身不必保留。一個 epoch 之後 seal 在 η′_3 之下簽署，但既然識別碼從不依賴任何私鑰，封印者只需要出示相同的 entry index"
+  ],
+  "stem": "The ticket accumulator keeps only tuples of a 32-octet identifier and an entry index; the 784-octet ring proof from the extrinsic is thrown away once verified. An epoch later the sealer of a slot must present a 96-octet signature whose output equals that stored identifier, even though it now signs the serialized unsigned header rather than an empty message. What makes that possible?",
         "options": [
             "Because the stored identifier is the Blake2b hash of the ring proof, and a Bandersnatch ring proof is deterministic, so the same key and context regenerate the identical proof bytes and hence the identical hash; the message plays no part in that hash. The ticket's context is the ticket-seal string with η′_2 and the entry index, the seal's is the same string with η′_3, and the entropy rotation makes those two byte strings equal one epoch later.",
             "Because the seal republishes the stored ring proof inside the seal field — the 96-octet form is that same proof with the zero-knowledge portion stripped, which is exactly why the two sizes differ — so its output is trivially unchanged no matter what is signed. The context does move from η′_2 to η′_3 across the epoch boundary, but a stripped proof carries its original output along with it, so the stored identifier still matches.",
@@ -253,7 +309,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "code",
         "tags": ["erasure-coding", "delta-0.8.0", "constants", "tiny-vs-full"],
-        "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
+  "stemZh": "團隊的 Go 樹停在 GP 0.7.2、把 erasure-coding 的比率寫死如圖。GP 0.8.0 把固定比率換成函數 𝒟(v)。最小的正確遷移是什麼？它對 6 位 validator 的 tiny 設定又有什麼影響？",
+  "optionsZh": [
+   "只有總數需要跟隨 report 自己攜帶的 assuring-set 大小；資料碎片數僅由 segment 大小決定，因為 𝒟 是使 2d 整除 W_G 的最大 d，而填補寬度就是它的兩倍。因此 tiny 維持它的 4 與每 segment 1026 片，只有總數變成可變的，而 buildBCloud 除了讀取 report 的碎片數欄位之外不需要任何更動",
+   "這些數字**每一個**都變成 report 自己攜帶之 assuring-set 大小的函數：總數就是那個大小（鏈上規則把它釘在 |κ′|）、資料碎片數是使 2d 整除 W_G 且 d 不大於 v/3 + 1 的最大 d、而填補寬度是它的兩倍。在 tiny 上這給出 6 取 3 個資料碎片、填補寬度 6、每 segment 684 片，所以舊的 4 / 1026 那一組必須拿掉",
+   "把資料碎片數無條件設為 v/3 + 1、總數設為 report 攜帶的 assuring-set 大小、填補寬度設為碎片數的兩倍。因為合法的 validator 集合大小只含 3 的倍數，「碎片數的兩倍要整除 segment 大小」這個附帶條件自動滿足、可以拿掉；tiny 變成 6 取 3、每 segment 684 片，而 full 維持 1023 取 342",
+   "這個檔案裡除了 segment 常數之外什麼都不用改。𝒟(v) 只管 Import-DA 的 segment 路徑，所以 audit-DA 的 bundle 維持它的 342:1023 比率與 684 位元組填補寬度，只有 segment 路徑改用 report 自己的碎片數；那個不對稱正是 availability spec 新增碎片數欄位的原因，也是 tiny 那一組維持 4 / 1026 而非 3 / 684 的原因"
+  ],
+  "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
         "code": {
             "lang": "go",
             "caption": "internal/types/const.go (mode setters + package constants) and internal/work_package/work_package.go (buildBCloud)",
@@ -305,7 +368,14 @@ const (
         "difficulty": 1,
         "kind": "concept",
         "tags": ["erasure-coding", "availability", "audit-da", "d3l"],
-        "stem": "For one work-report, which data does a guarantor erasure-code and hand out, and what does an individual validator end up holding?",
+  "stemZh": "對於一份 work-report，guarantor 會把哪些資料做 erasure coding 並發出去？單一位 validator 最後又持有什麼？",
+  "optionsZh": [
+   "一份資料集：work-report 本身，補零到資料碎片數兩倍的倍數後編碼成每位 validator 一個碎片，每個產生的碎片再被雜湊；erasure-root 就是對那些碎片雜湊所取的 well-balanced Merkle root。work-package bundle 與匯出 segment 留在 guarantor 手上、稽核時依請求提供，所以一位 validator 持有一個 32 位元組的碎片雜湊、別無其他",
+   "一份資料集：只有匯出 segment 連同它們的 paged-proof segment 會被編碼、再經轉置讓每個 segment 的一個碎片落在同一位 validator 身上，因為只有它們必須在長期資料湖中存活。可稽核的 bundle 則是整份複製給每位 validator，這正是為什麼它可以在區塊定案後不久就被丟棄，而一位 validator 的 erasure-root 葉子就只是它自己那一欄 segment 的 root",
+   "**兩份**資料集：可稽核的 bundle——補零到資料碎片數兩倍的倍數後編碼，每個產生的碎片再被雜湊；以及匯出 segment 連同它們的 paged-proof segment——各自編碼後再轉置，使每個 segment 的一個碎片落在同一位 validator 身上。一位 validator 持有 erasure-root 的一片葉子：它的 bundle 碎片雜湊串接它自己那一欄 segment 的 root",
+   "一份資料集：只有 work-package bundle，補零到資料碎片數兩倍的倍數後編碼成與 assurer 數量相同的碎片，每個碎片被雜湊成 erasure-root 的一片葉子。匯出 segment 改由 segment-root 承諾、並在需要時靠重跑 refine 重建，這正是 segment-root 與 erasure-root 分屬不同欄位的原因，所以一位 validator 持有單一個 32 位元組的 bundle 碎片雜湊"
+  ],
+  "stem": "For one work-report, which data does a guarantor erasure-code and hand out, and what does an individual validator end up holding?",
         "options": [
             "One data set: the work-report itself, zero-padded up to a multiple of twice the data-shard count and then coded into one chunk per validator, with each resulting chunk hashed; the erasure-root is the well-balanced Merkle root over those chunk hashes. The work-package bundle and the exported segments stay with the guarantors, who serve them on request during an audit, so a validator holds one 32-octet chunk hash and nothing more.",
             "One data set: only the exported segments, together with their paged-proof segments, are coded and then transposed so that one chunk of every segment lands on the same validator, because only they must survive in the long-term data lake. The auditable bundle is replicated whole to every validator, which is precisely why it may be discarded soon after the block is finalized, and a validator's erasure-root leaf is just the root over its own segment column.",
@@ -331,7 +401,14 @@ const (
         "difficulty": 2,
         "kind": "rationale",
         "tags": ["erasure-coding", "rationale", "gf65536", "threshold", "delta-0.8.0"],
-        "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?",
+  "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。哪一種說法是對的？而這個編碼為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
+  "optionsZh": [
+   "重建必須能在將近三分之二的 validator 惡意或失能時仍然存活，這把資料碎片數壓在 v/3 + 1 附近、並與 2/3+1 的 assurance 超級多數彼此契合；欄位是 16 位元的，所以一個碼字就是一對 octet、而其取值點可以索引到多達 v 個相異的 validator；再者碎片數的兩倍必須整除 4,104 個 octet 的 segment 大小，好讓一個 segment 編碼時完全不需要填補——這正是碎片數取「最大的那個合格值」而不是恰好 v/3 + 1 的原因",
+   "比率的選擇讓三分之二的 assurance 超級多數本身就是重建門檻，這把資料碎片數壓在 2v/3 附近；欄位是 16 位元純粹因為一個 segment 是 4,104 = 2 × 2,052 個 octet、碼字必須整齊地鋪滿它；而那個整除的附帶條件只是為了避免最後一個碎片需要長度前綴。在 1,023 位 validator 上這會給出 682 個資料碎片、每位 validator 每 segment 3 片",
+   "資料碎片數對每一種合法的 validator 集合大小都恰好是 ⌊v/3⌋ + 1，所以那個整除的附帶條件從不生效、可以拿掉；選 GF(2¹⁶) 只是因為在現代硬體上 16 位元的乘加比逐位元組運算快；而 4,104 個 octet 的 segment 大小是**由欄位推導出來**而非反過來，4,104 只是碼字寬度最方便的最小倍數。在 1,002 位 validator 上這給出 335 個資料碎片且無需填補",
+   "比率的設定讓恰好構成完整超級多數的那 683 位 validator 才能重建，這把可得性綁在 finality 上、並把碎片數固定在 2v/3 + 1 而不是最大的合格值；選 GF(2¹⁶) 是因為 Blake2b 送出 32 個 octet、也就是恰好 16 個碼字，所以碎片雜湊與碎片共用一種表示法；而碎片數的兩倍仍然整除 4,104 個 octet 的 segment 大小，因為 1,366 整除 4,104"
+  ],
+  "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?",
         "options": [
             "Reconstruction must survive almost two-thirds of the validators being malicious or incapacitated, which puts the data-shard count near v/3 + 1 and dovetails with the 2/3+1 assurance super-majority; the field is 16-bit, so one code word is an octet pair and the evaluation points can index up to v distinct validators; and twice the shard count must divide the 4,104-octet segment size so that a segment codes with no padding at all, which is why the count is the largest such value rather than exactly v/3 + 1.",
             "The rate is chosen so that a two-thirds super-majority of assurances is itself the reconstruction threshold, which puts the data-shard count near 2v/3; the field is 16-bit purely because a segment is 4,104 = 2 × 2,052 octets and the code words must tile it evenly; and the divisibility side condition exists only to keep the last chunk from needing a length prefix, which is why the count is the largest admissible value rather than exactly 2v/3. On 1,023 validators that gives 682 data shards and 3 pieces per validator per segment.",

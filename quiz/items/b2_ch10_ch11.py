@@ -6,7 +6,14 @@ ITEMS = [
  "id": "ch10-verdict-keyset-epoch-boundary",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.4",
  "difficulty": 3, "kind": "concept", "tags": ["disputes", "calc", "tiny", "epoch-boundary"],
- "stem": "Tiny config (E = 12). A block with H_T = 24 — the first block of epoch 2 — is imported on top of a parent whose τ = 23, and its E_D contains verdicts. Per eq. 10.2–10.4, which epoch indices a may those verdicts carry, and which validator set K(a) verifies each of them?",
+  "stemZh": "tiny 設定（E = 12）。一個 H_T = 24 的區塊——epoch 2 的第一個區塊——被匯入到 τ = 23 的父區塊之上，而它的 E_D 含有 verdict。依 eq. 10.2–10.4，這些 verdict 可以帶哪些 epoch 索引 a？各由哪個 validator 集合 K(a) 驗證？",
+  "optionsZh": [
+   "a ∈ {1, 0}：a = 1 選出先前的 κ（epoch 1 期間生效的那個集合）、a = 0 選出先前的 λ；即使該區塊本身屬於 epoch 2，a = 2 仍被拒絕",
+   "a ∈ {2, 1}：a = 2 選出 κ′（此區塊輪入的那個集合）、a = 1 選出 κ，因為索引是從區塊自身的 timeslot H_T 導出的；a = 0 被拒絕，因為 λ 到此已經過時兩個 epoch",
+   "a ∈ {2, 1}：a = 2 選出先前的 κ、a = 1 選出先前的 λ，因為 ⌊H_T/E⌋ = 2 就是 verdict 必須指名的 epoch 索引；a = 0 因太舊被拒絕",
+   "a ∈ {2, 1, 0}：在 epoch 邊界的區塊裡，來自 κ′、κ 與 λ 的判決全都可受理，每個 verdict 仍需要 ⌊2|k|/3⌋+1 = 5 個簽章"
+  ],
+  "stem": "Tiny config (E = 12). A block with H_T = 24 — the first block of epoch 2 — is imported on top of a parent whose τ = 23, and its E_D contains verdicts. Per eq. 10.2–10.4, which epoch indices a may those verdicts carry, and which validator set K(a) verifies each of them?",
  "options": [
   "a ∈ {1, 0}: a = 1 selects the prior κ (the set active during epoch 1) and a = 0 the prior λ; a = 2 is rejected even though the block itself belongs to epoch 2",
   "a ∈ {2, 1}: a = 2 selects κ′ (the set this block rotates in) and a = 1 selects κ, because the index is derived from the block's own timeslot H_T; a = 0 is rejected since λ is two epochs stale by now",
@@ -27,7 +34,14 @@ ITEMS = [
  "id": "ch10-code-genesis-age-underflow",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.3 — internal/extrinsic/verdict_controller.go VerifySignature",
  "difficulty": 3, "kind": "code", "tags": ["disputes", "code", "fuzzer", "edge-case"],
- "stem": "The chain is still in its genesis epoch (prior τ < E, so ⌊τ/E⌋ = 0). Which verdict `Age` does this code accept although GP 0.8.0 (eq. 10.2–10.3) makes the block invalid — and against which key set would it then verify the judgments?",
+  "stemZh": "此鏈仍在創世 epoch（先前的 τ < E，所以 ⌊τ/E⌋ = 0）。這段程式碼會接受哪個 verdict `Age`、而 GP 0.8.0（eq. 10.2–10.3）其實會判該區塊無效？屆時它又會拿哪一組金鑰去驗證這些判決？",
+  "optionsZh": [
+   "Age = 1：因為該檢查對 a 與 a−1 是對稱比較的，下一個 epoch 的索引也會通過，於是判決會被拿去對 κ 驗證，彷彿 epoch 已經翻頁",
+   "Age = 0 且判決由 λ 金鑰簽署：既然創世時無法匹配 a−1，程式碼就落到 λ 分支，並為當前 epoch 接受 λ 簽章",
+   "Age = 2^32 − 1：`a-1` 在 U32 底下環繞（wrap around），於是 age 檢查通過、判決被拿去對 λ 驗證，然而 ⌊τ/E⌋ − N_2 在 epoch 0 根本沒有前一個 epoch",
+   "沒有：`a-1` 環繞後的值永遠不可能等於一個解碼出來的 32 位元 Age，所以創世時只有 Age = 0 會通過，這段程式碼恰好就是 GP 的規則"
+  ],
+  "stem": "The chain is still in its genesis epoch (prior τ < E, so ⌊τ/E⌋ = 0). Which verdict `Age` does this code accept although GP 0.8.0 (eq. 10.2–10.3) makes the block invalid — and against which key set would it then verify the judgments?",
  "code": {"lang": "go", "caption": "internal/extrinsic/verdict_controller.go (VerdictWrapper.VerifySignature)", "src": """func (v *VerdictWrapper) VerifySignature() error {
 
     state := blockchain.GetInstance().GetPriorStates()
@@ -63,7 +77,14 @@ ITEMS = [
  "id": "ch10-code-fault-equivalence-wonky",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.7 — internal/extrinsic/fault_controller.go VerifyReportHashValidty",
  "difficulty": 3, "kind": "code", "tags": ["disputes", "code", "faults", "edge-case"],
- "stem": "In this block a verdict classifies report r as wonky (exactly ⌊|k|/3⌋ positive judgments), so r ∈ ψ′_W and r ∉ ψ′_G ∪ ψ′_B. E_F also carries a fault (r, ⊥, k, s) with a correct signature from a κ ∪ λ key that is not in ψ_O. Per GP 0.8.0 eq. 10.7, is the block valid — and what does this code do with it?",
+  "stemZh": "在這個區塊裡，一個 verdict 把 report r 判為 wonky（恰好 ⌊|k|/3⌋ 個正面判決），所以 r ∈ ψ′_W 而 r ∉ ψ′_G ∪ ψ′_B。E_F 同時帶了一個 fault (r, ⊥, k, s)，簽章正確、來自一把不在 ψ_O 的 κ ∪ λ 金鑰。依 GP 0.8.0 eq. 10.7，這個區塊有效嗎？這段程式碼又會怎麼處理？",
+  "optionsZh": [
+   "有效：v = ⊥ 並未與一個非 good 的 verdict 相矛盾，所以這個 fault 成立、k 進入 ψ′_O 與 H_O；程式碼與此一致，因為對 wonky 的目標而言 inGood 與 inBad 都沒被設起",
+   "無效：該等價式迫使 r 必須恰好落在 ψ′_B、ψ′_G 其中之一，所以一份 wonky 的 report 不容許任何 v 的 fault；但這段程式碼仍會接受它，因為它只拒絕 (v ∧ good) 或 (¬v ∧ bad)",
+   "無效，而且程式碼也會拒絕：在 inGood = inBad = false 之下兩個子句都塌縮成該投票本身，所以 v = ⊥ 時會回傳 fault_verdict_wrong",
+   "只有 v = ⊤ 時才有效——對一份不在 ψ′_G 的 report 投「有效」正是 fault 所記錄的那種違規——而程式碼透過 inGood 拒絕的正好就是這個組合"
+  ],
+  "stem": "In this block a verdict classifies report r as wonky (exactly ⌊|k|/3⌋ positive judgments), so r ∈ ψ′_W and r ∉ ψ′_G ∪ ψ′_B. E_F also carries a fault (r, ⊥, k, s) with a correct signature from a κ ∪ λ key that is not in ψ_O. Per GP 0.8.0 eq. 10.7, is the block valid — and what does this code do with it?",
  "code": {"lang": "go", "caption": "internal/extrinsic/fault_controller.go (FaultController.VerifyReportHashValidty)", "src": """func (f *FaultController) VerifyReportHashValidty() error {
     posteriorStates := blockchain.GetInstance().GetPosteriorStates()
     psiBad := posteriorStates.GetPsiB()
@@ -101,7 +122,14 @@ ITEMS = [
  "id": "ch10-report-hash-identity",
  "ch": "10", "section": "10.1 The State", "gpRef": "eq. 10.1, 10.6, 10.14; cf. eq. 11.28",
  "difficulty": 2, "kind": "rationale", "tags": ["disputes", "rationale", "hashing"],
- "stem": "ψ_G, ψ_B, ψ_W, every judgment message, every culprit proof and the ρ† clearing rule (eq. 10.14) all identify the disputed item by one 32-byte hash. Which hash is it, and why is that the right identity for a dispute?",
+  "stemZh": "ψ_G、ψ_B、ψ_W、每一則判決訊息、每一份 culprit 證明、以及 ρ† 的清除規則（eq. 10.14），全都用同一個 32 位元組的雜湊來指認爭議中的項目。那是哪個雜湊？為什麼它是爭議的正確身分？",
+  "optionsZh": [
+   "work-package 雜湊 (w_s)_h：package 才是工作的單位，所以判它就等於封禁針對該 package 做過的每一份 report，而 eq. 10.14 是拿 ρ[c] 裡持有的 package 雜湊與 verdict 比對",
+   "H(E(g))——含 credential 與 slot 的整份 guarantee 的雜湊，如此簽署的 guarantor 就被綁進被判物件裡，culprit 便可單由 verdict 導出",
+   "H(E(w))——編碼後 work-report 的雜湊：它正是 guarantor 所簽的東西（X_G ⌢ H(w)），所以 culprit 證明就是原本那個 guarantee 簽章，而 eq. 10.14 用 H((ρ[c]_g)_w) 來比對 core",
+   "erasure root (w_s)_u，因為爭議說到底是在爭該 report 背後、經 erasure 編碼的 bundle 能不能還原成有效資料，而那正是 auditor 重新執行的東西"
+  ],
+  "stem": "ψ_G, ψ_B, ψ_W, every judgment message, every culprit proof and the ρ† clearing rule (eq. 10.14) all identify the disputed item by one 32-byte hash. Which hash is it, and why is that the right identity for a dispute?",
  "options": [
   "The work-package hash (w_s)_h: the package is the unit of work, so judging it bans every report ever made of that package, and eq. 10.14 compares the package hash held in ρ[c] against the verdict",
   "H(E(g)) — the hash of the whole guarantee including its credential and slot, so that the guarantors who signed are bound into the judged object and culprits can be derived from the verdict alone",
@@ -122,7 +150,14 @@ ITEMS = [
  "id": "ch11-rho-pipeline-worked",
  "ch": "11", "section": "11.2 Package Availability Assurances / 11.5 Transitioning for Reports", "gpRef": "eq. 11.16–11.18, 11.32, 11.46",
  "difficulty": 3, "kind": "concept", "tags": ["assurances", "guarantees", "calc", "tiny", "timeout"],
- "stem": "Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?",
+  "stemZh": "tiny 設定（|κ| = 6、U = 5），單一 core c = 0，沒有爭議。slot 40 的區塊：E_G 帶了 core 0 的 guarantee g₁。slot 42 的區塊：E_A 有 4 份把 bit 0 設起的 assurance。slot 45 的區塊：E_A 有 3 份把 bit 0 設起的 assurance，且 E_G 帶了另一份對 core 0、其餘皆有效的 guarantee g₂。在 slot 45 的區塊之後，ρ‡[0] 與 ρ′[0] 各是什麼？g₁ 的 report 曾被 accumulate 嗎？",
+  "optionsZh": [
+   "ρ‡[0] = ∅，因為 45 ≥ 40 + U；g₁ 的 report 從未進入 R，未經 accumulate 就被丟棄；g₂ 被接受，所以 ρ′[0] = (g₂, 45)",
+   "ρ‡[0] = (g₁, 40)：至今累積的 4 + 3 = 7 份 assurance 已超過門檻 5，所以該 report 在 R 之中並會 accumulate，而 g₂ 因 core_engaged 被拒",
+   "ρ‡[0] = ∅，因為累計的 7 份 assurance 使該 report 可得；它在此區塊 accumulate，而 ρ′[0] = (g₂, 45)",
+   "ρ‡[0] = (g₁, 40)：逾時要到 H_T > t + U 才觸發，也就是從 slot 46 起，所以 g₂ 因 core_engaged 被拒"
+  ],
+  "stem": "Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?",
  "options": [
   "ρ‡[0] = ∅ because 45 ≥ 40 + U; g₁'s report never enters R and is dropped without accumulation; g₂ is accepted, so ρ′[0] = (g₂, 45)",
   "ρ‡[0] = (g₁, 40): the 4 + 3 = 7 assurances gathered so far exceed the threshold of 5, so the report is in R and accumulates, while g₂ is rejected as core_engaged",
@@ -143,7 +178,14 @@ ITEMS = [
  "id": "ch11-guarantee-slot-window-calc",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.28",
  "difficulty": 2, "kind": "concept", "tags": ["guarantees", "rotation", "calc"],
- "stem": "Full config (R = 10). The block being imported has τ′ = 57. For a guarantee g = (w, t, a) in E_G, which values of t are acceptable under eq. 11.28, and which assignment (M or M*) verifies the credential for each?",
+  "stemZh": "full 設定（R = 10）。正在匯入的區塊 τ′ = 57。對 E_G 中的 guarantee g = (w, t, a)，依 eq. 11.28 哪些 t 值可接受？各由哪個指派（M 或 M*）驗證其 credential？",
+  "optionsZh": [
+   "t ∈ [47, 57]——一個以 τ′ 結尾、長 R 個 slot 的滑動視窗；t ∈ [47, 49] 對 M* 驗證、t ∈ [50, 57] 對 M 驗證；t = 46 因太舊被拒",
+   "t ∈ [40, 57]：t ∈ [40, 49] 對 M*（rotation 索引 4）驗證、t ∈ [50, 57] 對 M（rotation 索引 5）驗證；t = 39 與 t = 58 都被拒",
+   "只有 t ∈ [50, 57]——即當前 rotation，全部對 M 驗證——因為只有在前一個 rotation 落在前一個 epoch 時才會去查 M*",
+   "t ∈ [40, 59]——整個前一與當前 rotation——且允許 t > τ′，因為 guarantee 可能在收納它的區塊之前就產生了"
+  ],
+  "stem": "Full config (R = 10). The block being imported has τ′ = 57. For a guarantee g = (w, t, a) in E_G, which values of t are acceptable under eq. 11.28, and which assignment (M or M*) verifies the credential for each?",
  "options": [
   "t ∈ [47, 57] — a sliding window of R slots ending at τ′; t ∈ [47, 49] is verified against M* and t ∈ [50, 57] against M; t = 46 is rejected as too old",
   "t ∈ [40, 57]: t ∈ [40, 49] is verified against M* (rotation index 4) and t ∈ [50, 57] against M (rotation index 5); t = 39 and t = 58 are both rejected",
@@ -164,7 +206,14 @@ ITEMS = [
  "id": "ch11-rotation-epoch-boundary-mstar",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.23, 11.28",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "rotation", "calc", "epoch-boundary"],
- "stem": "Full config (E = 600, R = 10). A block at τ′ = 603 includes a guarantee with t = 595. Which assignment must its credential be checked against?",
+  "stemZh": "full 設定（E = 600、R = 10）。τ′ = 603 的區塊收納了一份 t = 595 的 guarantee。它的 credential 必須對哪個指派檢查？",
+  "optionsZh": [
+   "M* = (P(|κ′|, η′_2, 593), Φ(κ′))：前一個 rotation 一律使用當前 epoch 的熵與集合，只有 rotation 索引不同",
+   "M = (P(|κ′|, η′_2, 603), Φ(κ′))，rotation 索引 0，因為 t 落在 τ′ 的 R 個 slot 之內",
+   "該 guarantee 無效：guarantee 不得跨越 epoch 邊界，因為 validator 集合可能已經改變",
+   "M* = (P(|λ′|, η′_3, 593), Φ(λ′))：前一個 rotation（索引 59）屬於前一個 epoch，所以要改由 λ′ 與 η′_3 重新計算"
+  ],
+  "stem": "Full config (E = 600, R = 10). A block at τ′ = 603 includes a guarantee with t = 595. Which assignment must its credential be checked against?",
  "options": [
   "M* = (P(|κ′|, η′_2, 593), Φ(κ′)): the previous rotation always uses the current epoch's entropy and set, only the rotation index differs",
   "M = (P(|κ′|, η′_2, 603), Φ(κ′)) at rotation index 0, because t is within R slots of τ′",
@@ -185,7 +234,14 @@ ITEMS = [
  "id": "ch11-code-permute-080",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.20–11.22 — internal/extrinsic/guarantor_assignments.go permute",
  "difficulty": 2, "kind": "code", "tags": ["guarantees", "shuffle", "code", "delta-0.8.0"],
- "stem": "This is the team's P (GP 0.7.2). Under GP 0.8.0 (eq. 11.20–11.21), what changes when the validator sequence has |κ′| = 9 in a chain with C = 341 cores?",
+  "stemZh": "這是團隊的 P（GP 0.7.2）。在一條 C = 341 個 core、validator 序列 |κ′| = 9 的鏈上，依 GP 0.8.0（eq. 11.20–11.21）會有什麼改變？",
+  "optionsZh": [
+   "0.8.0 建的基底是 [⌊i/3⌋ | i ∈ N_9] = [0,0,0,1,1,1,2,2,2]，並對 |κ′|/3 = 3 取模旋轉；而這段程式碼建的是 ⌊341·i/9⌋ = [0, 37, 75, …, 303] 並對 341 取模旋轉，把 guarantor 撒到了未啟用的 core 上",
+   "沒有可觀察的差別：對 eq. 6.8 允許的每一種 validator 數量，⌊C·i/V⌋ 與 ⌊i/3⌋ 都一致，且基於同樣理由 mod C 等於 mod V/3，所以兩版之間只有常數名稱不同",
+   "0.8.0 保留 ⌊C·i/V⌋ = [0, 37, 75, …, 303] 當基底，但把旋轉的模數從 C 改成 E/R = 60，也就是每 epoch 的 rotation 數，於是洗牌輸出每個 epoch 循環一次",
+   "0.8.0 以對單位指派 [0, 1, 2, …, 8] 的單純旋轉（模 |κ′|/3）取代 Fisher–Yates 洗牌，移除了對 η′_2 的依賴，使指派提前整整一個 epoch 就已知"
+  ],
+  "stem": "This is the team's P (GP 0.7.2). Under GP 0.8.0 (eq. 11.20–11.21), what changes when the validator sequence has |κ′| = 9 in a chain with C = 341 cores?",
  "code": {"lang": "go", "caption": "internal/extrinsic/guarantor_assignments.go (rotateCores, permute)", "src": """// (11.19) R(c, n) = [(x + n) mod C | x ∈ c]
 func rotateCores(in []types.U32, n types.U32) []types.U32 {
     out := make([]types.U32, len(in))
@@ -230,7 +286,14 @@ func permute(e types.Entropy, currentSlot types.TimeSlot) []types.CoreIndex {
  "id": "ch11-code-anchor-checks-080",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.36, 11.38 — internal/extrinsic/guarantee_controller.go ValidateContexts",
  "difficulty": 2, "kind": "code", "tags": ["guarantees", "context", "code", "delta-0.8.0"],
- "stem": "This is the team's refinement-context validation (GP 0.7.2). Which conditions required by GP 0.8.0 eq. 11.36 (anchor) and eq. 11.38 (lookup anchor) are missing from it?",
+  "stemZh": "這是團隊的 refinement-context 驗證（GP 0.7.2）。GP 0.8.0 eq. 11.36（anchor）與 eq. 11.38（lookup anchor）所要求、而它缺少的條件是哪些？",
+  "optionsZh": [
+   "Anchor：改成對 β 而不是 β† 比對，因為 0.8.0 不再把父區塊的 state root 補寫進 recent history；lookup anchor：不變，因為 ancestor 集合本來就存了 (slot, 雜湊) 配對",
+   "Anchor：context 的 anchor timeslot 還必須等於該 β† 條目的 timeslot（x_t = y_t）；lookup anchor：子 header h′（h′_p = H(h)）必須帶有 h′_r = l_s，用以驗證 lookup anchor 的 posterior state root",
+   "Anchor：拿掉 state-root 比對，因為 0.8.0 的 anchor 帶的是 timeslot 而不是 state root；lookup anchor：只檢查 l_t ≥ H_T − L，因為 ancestor 集合的要求在 0.8.0 已被移除",
+   "除了把 BeefyRoot 改名為 accumulation 輸出的 super-peak b 之外沒別的，新的 BlockInfo timeslot 只是參考用；兩個 anchor 元組在其餘方面都與 0.7.2 相同"
+  ],
+  "stem": "This is the team's refinement-context validation (GP 0.7.2). Which conditions required by GP 0.8.0 eq. 11.36 (anchor) and eq. 11.38 (lookup anchor) are missing from it?",
  "code": {"lang": "go", "caption": "internal/extrinsic/guarantee_controller.go (GuaranteeController.ValidateContexts)", "src": """for _, context := range contexts {
     recentAnchorMatch := false
     stateRootMatch := false
@@ -282,7 +345,14 @@ if len(ancestry) > 0 {
  "id": "ch11-lookup-anchor-ancestry",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.37–11.38",
  "difficulty": 2, "kind": "concept", "tags": ["guarantees", "context", "fuzzer"],
- "stem": "Why can the lookup-anchor requirement (eq. 11.38) not be checked from the on-chain state σ alone, and how does the conformance fuzzer make it checkable for an M1 target?",
+  "stemZh": "為什麼 lookup-anchor 的要求（eq. 11.38）無法單靠鏈上狀態 σ 檢查？conformance fuzzer 又是怎麼讓它對 M1 目標變得可檢查的？",
+  "optionsZh": [
+   "它只需要 β，也就是最近 H = 8 個區塊，其條目帶有 header 雜湊、state root 與 timeslot，所以這個檢查純粹是鏈上的；fuzzer 只是先重播足夠多的區塊把 β 填滿，才開始送出 guarantee",
+   "它需要 lookup-anchor 區塊的完整 posterior 狀態，才能重算它的 state root r，而 fuzzer 會在該區塊匯入期間透過 GetState 訊息隨需提供",
+   "它需要最近 L 個 slot 的 header（也就是 ancestor 集合，並不屬於 σ），這可由 header 鏈確定性地導出；因此 fuzzer 的 Initialize 訊息會帶一份 (slot, header 雜湊) 的 ancestry 清單，這是 M1 的必備功能",
+   "fuzzer 略過它：0.8.0 已讓 refinement context 中的 lookup anchor 變成選用，所以向量只演練年齡界限 l_t ≥ H_T − L，且 Initialize 時不傳送 ancestry 清單"
+  ],
+  "stem": "Why can the lookup-anchor requirement (eq. 11.38) not be checked from the on-chain state σ alone, and how does the conformance fuzzer make it checkable for an M1 target?",
  "options": [
   "It only needs β, the last H = 8 blocks, whose entries carry a header hash, a state root and a timeslot, so the check is purely on-chain; the fuzzer merely replays enough blocks to fill β before it submits any guarantees",
   "It needs the full posterior state of the lookup-anchor block in order to recompute its state root r, which the fuzzer supplies on demand through GetState messages while the block is being imported",
@@ -303,7 +373,14 @@ if len(ancestry) > 0 {
  "id": "ch11-prerequisite-window",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.42",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "dependencies", "edge-case"],
- "stem": "A work-report in E_G lists prerequisite p. Package p was guaranteed 10 blocks ago and accumulated 8 blocks ago, so p ∈ ξ but p no longer appears in any entry of β (H = 8). Is the guarantee valid?",
+  "stemZh": "E_G 中的一份 work-report 列了先決條件 p。package p 在 10 個區塊前被 guarantee、8 個區塊前被 accumulate，所以 p ∈ ξ，但 p 已不再出現在 β 的任何條目中（H = 8）。這份 guarantee 有效嗎？",
+  "optionsZh": [
+   "有效：p ∈ ξ 證明該 package 已被 accumulate，而 eq. 11.42 除了 extrinsic 與 β 之外也接受 ξ，所以依賴成立、該 report 一旦可得就會 accumulate",
+   "無效（dependency_missing）：eq. 11.42 只在先決條件位於本區塊的 E_G 中、或落在 β 各條目的 reported-package 集合裡時才受理；guarantee 階段不會去查 ξ",
+   "在 guarantee 階段有效，但該 report 會停在 ready 佇列 ω 中，直到 p 在 recent-history 視窗內再次被 report 為止，因為 eq. 11.42 會在 accumulation 期間重新評估",
+   "無效（dependency_missing）：eq. 11.42 要求每個先決條件都必須在同一個區塊裡被 guarantee，所以只有相互依賴與自我依賴可受理，而 β 從不被查詢"
+  ],
+  "stem": "A work-report in E_G lists prerequisite p. Package p was guaranteed 10 blocks ago and accumulated 8 blocks ago, so p ∈ ξ but p no longer appears in any entry of β (H = 8). Is the guarantee valid?",
  "options": [
   "Valid: p ∈ ξ proves the package was accumulated, and eq. 11.42 accepts ξ alongside the extrinsic and β, so the dependency holds and the report accumulates as soon as it is available",
   "Invalid (dependency_missing): eq. 11.42 admits a prerequisite only if it is in this block's E_G or among the reported-package sets of β; ξ is not consulted at guarantee time",
@@ -324,7 +401,14 @@ if len(ancestry) > 0 {
  "id": "ch11-code-hash-prediction",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.45",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "digest", "edge-case"],
- "stem": "Service s upgraded its code after a work-package was built: the work-item's code hash c was correct at build time and refine ran the code available at the lookup anchor, but the including block's prior state has δ[s]_c ≠ c. What happens to the guarantee at inclusion?",
+  "stemZh": "service s 在某份 work-package 建好之後升級了程式碼：該 work-item 的 code hash c 在建置當下是正確的、refine 也執行了 lookup anchor 當時可取得的程式碼，但收納區塊的先前狀態中 δ[s]_c ≠ c。這份 guarantee 在被收納時會如何？",
+  "optionsZh": [
+   "被接受：c 只是記錄 refine 實際執行了哪份程式碼、對 lookup anchor 的 posterior 狀態解析，而 accumulation 屆時就直接跑 δ′[s]_c 裡的東西",
+   "被接受，但該 digest 的結果會在鏈上被覆寫為 BAD 錯誤，因為記錄的 code hash 已無法解析到該 service 仍持有的原像",
+   "只要 lookup anchor 不超過 L = 14,400 個 slot 就被接受，因為程式碼可得性只在 lookup anchor 判定，而 eq. 11.45 約束的是 payload 雜湊、不是 code hash",
+   "被拒（bad_code_hash）：eq. 11.45 要求在收納區塊的先前狀態中 d_c = δ[d_s]_c，所以對已被取代的程式碼所做的 refine 只會被丟棄、不會 accumulate"
+  ],
+  "stem": "Service s upgraded its code after a work-package was built: the work-item's code hash c was correct at build time and refine ran the code available at the lookup anchor, but the including block's prior state has δ[s]_c ≠ c. What happens to the guarantee at inclusion?",
  "options": [
   "Accepted: c only records which code refine actually executed, resolved against the lookup anchor's posterior state, and accumulation then simply runs whatever δ′[s]_c holds at that time",
   "Accepted, but the digest's result is overwritten on-chain with the BAD error, since the recorded code hash no longer resolves to a preimage the service still holds in its lookup dictionary",
@@ -345,7 +429,14 @@ if len(ancestry) > 0 {
  "id": "ch11-inactive-core-set-shrink",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.18, 11.23, 11.28, 11.31",
  "difficulty": 3, "kind": "delta", "tags": ["guarantees", "assurances", "delta-0.8.0", "variable-validators"],
- "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?",
+  "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。哪個敘述正確？",
+  "optionsZh": [
+   "有效：M* 重現了前一個 rotation 的指派，在其之下 core 3 是啟用的、12 個 chunk 也是正確的分片數；eq. 11.28 的 core 界限是依 M* 所選中的集合來讀，而 ρ‡ 在 epoch 更替中原封不動",
+   "有效，但 ρ′[3] 蓋的是該 guarantee 自己的 slot t = 595 而不是 τ′ = 600，於是 eq. 11.18 的 H_T ≥ t + U 在 slot 600 就已成立，該指派在建立它的那個區塊裡就被丟掉",
+   "無效：即使在 M* 之下，eq. 11.28 仍以 |κ′|/3 = 3 為 w_c 的上界，所以 core 3 現在是未啟用的；eq. 11.31 要求 (w_s)_v = |κ′| = 9，而不是該 report 所帶的 12 個 chunk；而且 eq. 11.18 因 |κ| ≠ |κ′| 早已把 ρ‡ 清空",
+   "無效的唯一理由是簽署者來自 λ′：eq. 11.23 只允許 assurance 讓 M* 退回前一個 epoch 的金鑰，所以 epoch 首個區塊裡的 guarantee 需要 κ′ 簽章，而 w_c 可以是任何小於 C/3 的 core"
+  ],
+  "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?",
  "options": [
   "Valid: M* reproduces the previous rotation's assignment, under which core 3 was active and 12 chunks were the right shard count; eq. 11.28's core bound is read against whichever set M* selects, and ρ‡ survives an epoch change untouched",
   "Valid, but ρ′[3] is stamped with the guarantee's own slot t = 595 instead of τ′ = 600, so eq. 11.18's H_T ≥ t + U already holds at slot 600 and the assignment is dropped in the very block that created it",

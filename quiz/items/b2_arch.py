@@ -7,7 +7,14 @@ ITEMS = [
  "id": "arch-beefy-commitment",
  "ch": "ARCH", "section": "18 Beefy Distribution (ch. 18)", "gpRef": "eq. 18.1–18.2; eq. 7.7–7.8; §19–20",
  "difficulty": 2, "kind": "concept", "tags": ["beefy", "grandpa", "bridging", "off-chain"],
- "stem": "Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?",
+  "stemZh": "依 Beefy Distribution 這一章，validator 用哪把金鑰、在什麼時候、簽什麼？這個簽章又是拿來做什麼的？",
+  "optionsZh": [
+   "在匯入每個已定案的區塊之後：以 κ′[v] 的 BLS 金鑰對 $jam_beefy ⌢ b 做一個 BLS12-381 簽章，其中 b 是最新 β_H 條目所持有、accumulation 輸出腰帶的 Keccak MMR super-peak；這些簽章可自由發布，以便聚合成精簡的定案證明供橋接等第三方系統使用",
+   "在匯入每個區塊之後（不論是否已定案）：以該 validator 的 BLS 金鑰對 posterior state root M_σ(σ′) 做 BLS12-381 簽章，好讓輕節點能驗證最新狀態；Grandpa 接著把這些簽章聚合成它的定案證明，而不再跑自己的投票回合",
+   "每個 epoch 一次：對該 epoch 最後一個 header 的 Keccak 雜湊做 Ed25519 簽章，與 epoch marker H_E 一同發布，好讓經由 CoreChains service 橋接的 parachain 能證明整個 epoch 都已定案、而不必追蹤個別區塊",
+   "對它所出的每個區塊：以 Bandersnatch VRF 簽章（context $jam_beefy）簽該區塊的 accumulation 輸出 root M_B(s, H_K)，放進 header 的 H_O marker，而那正是 Grandpa 投票者在定案該區塊時所簽的資料"
+  ],
+  "stem": "Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?",
  "options": [
   "After importing each finalized block: a BLS12-381 signature under κ′[v]'s BLS key over $jam_beefy ⌢ b, where b is the Keccak MMR super-peak of the accumulation-output belt held in the newest β_H entry; the signatures are published freely so they can be aggregated into concise finality proofs for third-party systems such as bridges",
   "After importing every block, finalized or not: a BLS12-381 signature under the validator's BLS key over the posterior state root M_σ(σ′), so that light clients can verify the newest state; Grandpa then aggregates these signatures into its finality justification instead of running its own vote round",
@@ -28,7 +35,14 @@ ITEMS = [
  "id": "arch-best-chain-selection",
  "ch": "ARCH", "section": "19 Grandpa and the Best Chain (ch. 19)", "gpRef": "eq. 19.1–19.4; §17 (ban-listing)",
  "difficulty": 2, "kind": "concept", "tags": ["best-chain", "grandpa", "auditing", "off-chain"],
- "stem": "How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?",
+  "stemZh": "一個節點如何選出它據以建塊、並投 Grandpa 票的最佳區塊 B♭？這張票又攜帶什麼資料？",
+  "optionsZh": [
+   "在已定案區塊的後代之中採最長鏈規則；同一個 timeslot 的兩個有效區塊都會保留，因為 Safrole 容忍 equivocation；是否已稽核只影響 accumulation、不影響投票；票中攜帶 header 雜湊連同取自 header 的先前狀態 root H_R",
+   "候選者必須是最新已定案區塊的後代、必須被視為已稽核、且不得含有「位於節點已見過 equivocation 之 timeslot」的未定案祖先；在這些之中，帶有最多 ticket 封緘（非 fallback）祖先的那條鏈勝出；票中攜帶最佳 header 連同它的 posterior state root",
+   "候選者必須是已定案區塊的後代且帶有最多 guarantee；累計 timeslot 最大的那條鏈勝出，好懲罰停滯的 core；票中只攜帶 header，因為 Grandpa 與狀態無關、state root 由 Beefy 提供",
+   "候選者是所有父區塊已知的區塊；帶有最多 fallback 封緘祖先的那條鏈勝出，因為 fallback 金鑰屬於誠實多數；票中攜帶 header 加上 accumulation 輸出的 super-peak，好讓橋接能重用 Grandpa 的定案證明"
+  ],
+  "stem": "How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?",
  "options": [
   "Longest-chain rule among descendants of the finalized block; two valid blocks at the same timeslot are both kept because Safrole tolerates equivocation; audited status only gates accumulation, not voting; the vote carries the header hash together with the prior state root H_R taken from the header",
   "Candidates must descend from the latest finalized block, be considered audited, and contain no unfinalized ancestor at a timeslot where the node has seen an equivocation; among them the chain with the most ticket-sealed (non-fallback) ancestors wins; the vote carries the best header together with its posterior state root",
@@ -49,7 +63,14 @@ ITEMS = [
  "id": "arch-audit-tranches",
  "ch": "ARCH", "section": "17 Auditing and Judging (ch. 17)", "gpRef": "eq. 17.1–17.19 (PDF numbering); §20 (10 audits/validator/slot)",
  "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves", "tranches", "off-chain"],
- "stem": "In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?",
+  "stemZh": "在稽核協定中，一位 validator 如何決定它必須稽核哪些剛變為可得的 work-report？這個集合又是如何隨時間成長的？",
+  "optionsZh": [
+   "Tranche 0：每個 core 的三位 guarantor 重跑自己的 report，好讓被指控方承擔成本；每 6 秒（一個 slot）依序輪替加入其餘 validator，直到超過 2/3 做出判決，此時該 report 即算已稽核，而任何做出負面判決的 validator 會被罰沒；不需要任何公告，因為輪替順序可由區塊雜湊導出",
+   "Tranche 0：以 η′_2 為種子對 κ 做 Fisher–Yates 洗牌，為每份 report 指派恰好 30 位 auditor，對應 §20 每份 report 30 次稽核；一旦這 30 個正面判決到齊該 report 即算已稽核，而 tranche 0 之後不涉及 VRF，因為指派整個 epoch 都固定；後續 tranche 只有在出現負面判決時才會發生",
+   "Tranche 0：以一個 Bandersnatch VRF 輸出（context $jam_audit ⌢ Y(H_V)）洗牌每個 core 上剛變可得的 report 清單，取前 10 個非空條目；每 A = 8 秒開始一個新 tranche，加入一份 report 的方式或是無條件（曾看到負面判決）、或是靠一個逐 report 的 VRF，其接受機率隨前一個 tranche 的缺席數成長，調校成每個缺席期望有 F = 2 位 validator 補上",
+   "Tranche 0：每位 validator 稽核它在當前 rotation 所 guarantee 的那些 core 的 report，因為它本來就持有 bundle；每 8 秒再以 η′_3 洗牌選出 F = 3 份 report 加入；一份 report 一旦其三位 guarantor 重新背書即算已稽核，而負面判決在 validator 之間流言傳播、但從不放上鏈"
+  ],
+  "stem": "In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?",
  "options": [
   "Tranche 0: the three guarantors of each core re-execute their own report so that the accused party bears the cost; every 6 s (one slot) the remaining validators are added round-robin until more than 2/3 have judged, at which point the report counts as audited and any validator that judged negatively is slashed; no announcements are needed because the round-robin order follows from the block hash",
   "Tranche 0: a Fisher–Yates shuffle of κ seeded with η′_2 assigns exactly 30 auditors to every report, matching the 30 audits per report of §20; a report is audited once those 30 positive judgments are in, and no VRF is involved after tranche 0 because the assignment is fixed for the whole epoch; later tranches only ever occur if a negative judgment appears",
@@ -70,7 +91,14 @@ ITEMS = [
  "id": "arch-guaranteeing-procedure",
  "ch": "ARCH", "section": "15 Guaranteeing (ch. 15)", "gpRef": "§15; eq. 14.13 (Ξ); eq. 11.24, 11.28",
  "difficulty": 2, "kind": "concept", "tags": ["guaranteeing", "off-chain", "work-reports"],
- "stem": "Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?",
+  "stemZh": "關於 Guaranteeing 一章所描述的誠實 guarantor 策略，哪個敘述正確？",
+  "optionsZh": [
+   "在跑任何 refine 邏輯之前，先拿最新鏈狀態的 authorizer pool 檢查該 package 的授權（連同其他鏈上收納條件）；算出 r = Ξ(p, c, l, v) 之後，以 Ed25519 簽 $jam_guarantee ⌢ H(E(r))；兩個簽章就足以把 report 送給下一位出塊者；一份無法被收納的 report 只是損失獎勵，而謊報 Ξ 結果則會受重罰；平均每個 timeslot 至多簽兩份 report",
+   "先跑完每個 work-item 的 refine、之後才檢查授權，因為 pool 反正會在鏈上重新驗證、而 refine 才是成本大宗；必須集齊全部三位 guarantor 的簽章才能把 report 送給出塊者；出塊者拒絕收納的任何 report 都算違規、會像無效 report 一樣被罰沒；一位 guarantor 每個 rotation 至多簽一份 report",
+   "pool 檢查要用該 report 的 lookup-anchor 當時的鏈狀態、而不是當前鏈頭，好讓該 core 的所有 guarantor 對同一份視圖取得共識；單一個簽章就足以散播，因為出塊者會自行收集其餘 credential；因此 credential 清單可以未排序地抵達，而 GP 對一位 guarantor 每個 slot 能簽幾份 report 沒有給出指引",
+   "以 Bandersnatch 金鑰在 $jam_guarantee context 下簽署該 report，好讓 ring 證明隱藏是該 core 的哪位 guarantor 簽的，所以鏈上 credential 不帶 validator 索引；兩個簽章足以散播；guarantor 每個 epoch 絕不該簽超過一份 report，否則出塊者的反垃圾過濾器會在該 epoch 剩下的時間裡無視他們"
+  ],
+  "stem": "Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?",
  "options": [
   "Check the package's authorization against the authorizer pool of the most recent chain state (plus the other on-chain inclusion conditions) before running any refine logic; after r = Ξ(p, c, l, v), Ed25519-sign $jam_guarantee ⌢ H(E(r)); two signatures suffice to send the report to the next block author; an unincludable report only forfeits reward, a misrepresented Ξ result is punished severely; sign on average at most two reports per timeslot",
   "Run every work-item's refine first and check authorization only afterwards, since the pool is re-verified on-chain anyway and refine dominates the cost; all three guarantors' signatures must be collected before the report may be sent to the block author; any report the block author declines to include counts as an offence and is slashed exactly like an invalid report; a guarantor may sign at most one report per rotation",
@@ -91,7 +119,14 @@ ITEMS = [
  "id": "arch-two-da-classes",
  "ch": "ARCH", "section": "16 Availability Assurance (ch. 16) & 14 Exporting / Availability Specifier", "gpRef": "§16; §14 (Exporting, eq. 14.18); eq. 11.5, 11.11–11.18",
  "difficulty": 2, "kind": "concept", "tags": ["availability", "erasure-coding", "d3l", "off-chain"],
- "stem": "Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?",
+  "stemZh": "在一位 validator 於它的 assurance 中把某個 core 的位元設起之前，它必須持有哪些 erasure 編碼的資料？這些資料如何驗證？又必須保存多久？",
+  "optionsZh": [
+   "只需要它那一份 work-package bundle 的分片；segment 分片由後續的匯入者直接向匯出 package 的 guarantor 惰性取得；bundle 分片保存 L = 14,400 個 slot（24 小時）好讓 lookup-anchor 維持可稽核，而且不需要證明，因為 assurance 簽章會在鏈上對該 report 的 erasure-root 檢查",
+   "完整的 work-package bundle 加上每一個匯出 segment 的明文（不是分片），驗證方式是在背書前於本地重算該 work-report，並保存 D = 19,200 個 slot，好讓該 package 所引用的任何原像能在爭議視窗期間重新驗證",
+   "兩者都要：它那份可稽核 bundle 的分片（只保存到該 report 被視為已稽核／其區塊定案為止，在那之前依請求提供），以及該 report 的 segments-root 之下每一個匯出 segment 的分片加上分頁證明資料（長期的 D³L，保存 ≥ 28 天 = 672 個 epoch）；在宣稱持有之前，各自都要以 Merkle 證明對該 report 的 erasure-root 驗證",
+   "它的 bundle 分片與 segment 分片，驗證是對 segments-root 而非 erasure-root，因為 erasure-root 只承諾了 bundle；bundle 分片保存 28 天，而 segment 分片在該 report 被 accumulate 後即可丟棄，因為 accumulation 會把匯出的 segment 複製進鏈上 service 儲存"
+  ],
+  "stem": "Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?",
  "options": [
   "Only its shard of the work-package bundle; segment shards are fetched lazily by later importers directly from the guarantors of the exporting package; the bundle shard is retained for L = 14,400 slots (24 h) so that lookup-anchors stay auditable, and no proof is needed because the assurance signature is checked on-chain against the report's erasure-root",
   "The full work-package bundle plus every exported segment in clear (not shards), verified by recomputing the work-report locally before assuring, and kept for D = 19,200 slots so that any preimage referenced by the package can be re-verified during the dispute window",
@@ -112,7 +147,14 @@ ITEMS = [
  "id": "arch-core-virtual-hardware",
  "ch": "ARCH", "section": "20.1 Technical Characteristics & 20.2 Illustrating Performance (ch. 20)", "gpRef": "§20 Discussion",
  "difficulty": 2, "kind": "concept", "tags": ["performance", "hardware", "throughput", "rationale"],
- "stem": "How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?",
+  "stemZh": "Discussion 一章如何刻劃一份 work-package 在 JAM core 上所取得的「虛擬硬體」？它的結果之後又會怎樣？",
+  "optionsZh": [
+   "一整台 validator 機器（16 核、64 GB RAM、8 TB）獨佔一個 6 秒的 slot、鏈狀態 I/O 無上限；結果最大可達 12 MB，接著以相同的 I/O 預算 accumulate 至多一秒，這也是效能模型裡把 2/16 的 validator CPU 時間分給區塊執行的原因，而原像查詢也計入同一份 12 MB 預算",
+   "大約一顆一般 CPU 核心、以原生速度的 25–50% 執行整個 6 秒 slot，約 2 MB/s 的通用 I/O（其中包含對近期 JAM 狀態的免信任讀取）與至多 2 GB RAM，外加對半靜態原像庫的無上限讀取；結果至多 48 KB，接著在同一台機器上取得約 10 ms、沒有外部 I/O 但對鏈狀態有完整且即時的存取",
+   "一顆 CPU 核心以原生速度跑一秒，外加每 6 秒 slot 5 MB 的 I/O——原封不動沿用 Polkadot 的 parachain 預算，好讓 CoreChains 不必重新調校——結果至多 90 KB，並在下一個 slot 以完整狀態存取加上另外 6 秒的執行時間 accumulate；半靜態原像庫在 core 上完全無法觸及",
+   "一顆以 25–50% 速度執行、配 2 GB RAM 的 CPU 核心，但完全無法存取鏈狀態，因為 refine 在構造上就是無狀態的；I/O 無上限，因為沒有任何東西會離開 core；那份 48 KB 的結果接著在稽核預算（10/16 的 CPU 時間）之內 accumulate，這也是每份 report 上限 10^7 gas、每個區塊 3.5·10^9 的原因"
+  ],
+  "stem": "How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?",
  "options": [
   "A full validator machine (16 cores, 64 GB RAM, 8 TB) for one 6-second slot with unlimited chain-state I/O; the result may be up to 12 MB and is then accumulated for up to one second with the same I/O budget, which is why block execution is allotted 2/16 of validator CPU time in the performance model, and preimage lookups are metered against that same 12 MB budget",
   "Roughly one regular CPU core at 25–50% of native speed for the whole 6-second slot, about 2 MB/s of general-purpose I/O (which includes trustless reads of recent JAM state) and up to 2 GB of RAM, plus unlimited reads from a semi-static preimage store; the result is at most 48 KB and then gets ~10 ms on the same machine with no external I/O but full, immediate access to chain state",
@@ -133,7 +175,14 @@ ITEMS = [
  "id": "arch-sweet-spot-further-work",
  "ch": "ARCH", "section": "21 Conclusion / 21.1 Further Work (ch. 21)", "gpRef": "§21",
  "difficulty": 2, "kind": "rationale", "tags": ["rationale", "future-work", "architecture"],
- "stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?",
+  "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。哪個摘要正確？",
+  "optionsZh": [
+   "甜蜜點＝在接受 Solana 級硬體需求的前提下，達到與完全同步鏈相當的連貫性；未決事項：一旦證明成本降到原生的 50,000 倍以下就以 SNARK 證明取代 ELVES 稽核、把 D³L 保存期從 28 天縮短為 24 小時、把 refine 的匯入 segment 移進區塊本體、以及把 coretime 銷售與質押寫進後續章節而非委由系統 service；網路協定已在附錄中定案",
+   "甜蜜點＝341 個 core 恰好塞滿一條 0.5 GbE 連線的那個點；考慮中：refine 期間 service 之間的同步呼叫、完全移除 `transfer` host call、解除每區塊的 accumulate gas 上限 G_T、以及在 state trie 中引入 Merklization 好讓授權無需完整下載即可判定；網路協定已在附錄完整規範，而 validator 獎勵已在鏈上追蹤",
+   "甜蜜點＝像 Cosmos 那樣完全碎片化但共用同一個 validator 集合的設計；考慮中：捨棄 Beefy 改採純 Grandpa 證明、讓鏈上治理能原地升級 service、加入原生的簽署交易（因為 transfer 模型顯示只靠 refine 的轉帳受限於 I/O）、以及提高 48 kB 的 work-result 上限好讓 accumulate 看到更多資料；coretime 銷售與質押已在附錄規範",
+   "甜蜜點＝在安全、有韌性的共識之下進行大量運算（不同於完全同步的模型），同時對一台單體狀態機提供嚴格的時序與整合保證（不同於持續碎片化的模型）；考慮中：accumulate 中的同步 service 呼叫、為了平行 accumulation 而限制 `transfer`、在特定條件下保留額外的 accumulate 運算、以及把 work-package 格式 Merkle 化好讓授權無需完整下載；網路層與代幣／coretime／質押層則留白"
+  ],
+  "stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?",
  "options": [
   "Sweet spot = as coherent as a fully synchronous chain while accepting Solana-class hardware requirements; open items: replacing ELVES auditing with SNARK proofs once proving cost falls under 50,000× native, shortening D³L retention from 28 days to 24 hours, moving refine's imported segments into the block body, and writing coretime sales and staking into a later chapter rather than delegating them to system services; the networking protocol is already fixed in an appendix",
   "Sweet spot = the point where 341 cores exactly saturate a 0.5 GbE link; under consideration: synchronous calls between services during refine, removing the `transfer` host call entirely, lifting the per-block accumulate gas limit G_T, and introducing Merklization into the state trie so authorization can be judged without a full download; the networking protocol is fully specified in an appendix and validator rewards are already tracked on-chain",
@@ -154,7 +203,14 @@ ITEMS = [
  "id": "arch-jip4-protocol-parameters-080",
  "ch": "ARCH", "section": "JIP-4 chainspec `protocol_parameters` = fetch(0) encoding (App. B), 0.7.2 → 0.8.0", "gpRef": "App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5",
  "difficulty": 3, "kind": "delta", "tags": ["jip", "chainspec", "fetch", "delta-0.8.0", "code-gap"],
- "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?",
+  "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。比較 GP 0.7.2 與 0.8.0，哪個敘述正確？",
+  "optionsZh": [
+   "這個 blob 在 0.7.2 與 0.8.0 之間沒有變（33 個定寬小端欄位、134 位元組）；0.8.0 反而把 V 與 N 移進創世 header 的 epoch marker H_E，所以 chainspec 必須在那裡重複 validator 數量，而節點從它匯入的第一個 epoch marker 讀取 ticket 數；因此既有解碼器除了也要解析 H_E 之外不需改動",
+   "0.8.0 拿掉四個欄位——N（每位 validator 的 ticket 數，現為 ⌈2E/|γ′_P|⌉）、V（validator 數量，現由創世狀態中的 validator 集合隱含）、W_E 與 W_P（erasure 編碼大小，現由 validator 數量導出）——使該 blob 從 33 欄／134 位元組縮為 29 欄／122 位元組；解析器、以及任何仍從中覆寫「每 validator ticket 數／validator 數量／EC 大小」的『套用參數』程式碼都必須修改",
+   "0.8.0 為新的 gas 模型常數（C_gasunknown 與各 host call 的基本成本）以及稽核常數 F 與 A 新增欄位，好讓 service 能透過 fetch(0) 讀取；V 留在 blob 裡，因為 validator 集合現在可變，而 service 必須知道集合大小才能為它的匯出計算 erasure 編碼參數，所以該 blob 從 33 欄／134 位元組成長為 41 欄／168 位元組",
+   "0.8.0 保留全部 33 個欄位，但把它們從定寬小端整數改為通用的緊湊編碼 E(x)，所以 blob 長度現在取決於數值（例如 1,023 與 6 位 validator 的差別）；JIP-4 同時把 `genesis_state` 的 key 從 31 位元組加寬為 32 位元組，好讓 state trie 無需重新雜湊即可載入，而一份 tiny chainspec 現在編碼後遠小於 122 位元組"
+  ],
+  "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?",
  "options": [
   "The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports; existing decoders therefore need no change beyond also parsing H_E",
   "0.8.0 drops four fields — N (tickets per validator, now ⌈2E/|γ′_P|⌉), V (validator count, now implied by the validator sets in the genesis state), W_E and W_P (erasure-coding sizes, now derived from the validator count) — shrinking the blob from 33 fields / 134 bytes to 29 fields / 122 bytes; parsers and any 'apply parameters' code that still overwrites tickets-per-validator, validator count or EC sizes from it must change",
@@ -175,7 +231,14 @@ ITEMS = [
  "id": "arch-fuzz-protocol-m1",
  "ch": "ARCH", "section": "jam-conformance fuzz protocol & the M1 evaluation pipeline", "gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
  "difficulty": 2, "kind": "concept", "tags": ["conformance", "fuzzer", "history", "m1"],
- "stem": "Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?",
+  "stemZh": "關於 W3F 用於 M1 稽核的 jam-conformance fuzz 協定，哪個描述正確？",
+  "optionsZh": [
+   "一個架在 WebSocket（連接埠 19800）之上的 JSON-RPC 2.0 會話，由 fuzzer 監聽、目標端撥接；區塊以十六進位字串傳輸，每次 importBlock 呼叫回覆的是 header 雜湊而不是 state root；區塊被拒會關閉連線，ancestry 由 fuzzer 從 finalizedBlock 訂閱重建而非由外部提供，而且從不產生分叉，因為 Safrole 排除了 equivocation",
+   "一條 TCP 串流，由目標端撥接 fuzzer 並送出第一個握手訊息；區塊以 SCALE 編碼、前綴一個 u16 大端長度；fuzzer 在每個區塊後比對完整狀態傾印而非 root，無效區塊是靠乾脆不回應來表示，而 ancestry 功能對 M1 是選用的，因為 lookup-anchor 檢查約束的是出塊者而不是匯入者",
+   "一個基於檔案的協定：fuzzer 把編號的區塊 .bin 檔寫進共享目錄，目標端在旁邊寫出 post-state JSON；握手是一個版本檔而不是 PeerInfo 交換，所以沒有功能協商、ancestry 與分叉一律開啟；第一次 state root 不符就中止該次執行、不產生報告，且該 GP 版本的送審視為失敗",
+   "一個架在「由目標端監聽的 Unix domain socket」之上的同步請求／回應協定；訊息以 JAM codec 編碼、前綴一個 u32 小端長度；在 PeerInfo 握手（features = 雙方的位元 AND）之後，fuzzer 送出 Initialize（header、狀態鍵值、祖先清單），接著送 ImportBlock 請求，每個都以 posterior state root 或 Error（狀態不變）回覆；root 不符會觸發 GetState；ancestry 與分叉對 M1 是必備的"
+  ],
+  "stem": "Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?",
  "options": [
   "A JSON-RPC 2.0 session over WebSockets (port 19800) that the fuzzer binds and the target dials; blocks travel as hex strings and each importBlock call is answered with the header hash rather than a state root; a rejected block closes the connection, ancestry is reconstructed by the fuzzer from a finalizedBlock subscription instead of being supplied, and forks are never generated because Safrole precludes equivocation",
   "A TCP stream on which the target dials the fuzzer and sends the first handshake message; blocks are SCALE-encoded behind a u16 big-endian length prefix; the fuzzer diffs a full state dump after every block rather than a root, an invalid block is signalled by simply omitting the response, and the ancestry feature is optional for M1 because lookup-anchor checks bind block authors rather than importers",
@@ -196,7 +259,14 @@ ITEMS = [
  "id": "arch-prize-interview-rule12",
  "ch": "ARCH", "section": "JAM Prize rules (rule 12) & milestone-delivery T&Cs", "gpRef": "jam.web3.foundation/rules #12; T&C 3.5 / 6.1 / 8.4; delivery template",
  "difficulty": 1, "kind": "concept", "tags": ["prize", "history", "interview"],
- "stem": "According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?",
+  "stemZh": "依 JAM Prize 規則與里程碑交付條款，送審後的口試其目的與地位是什麼？",
+  "optionsZh": [
+   "它是對效能測試（gas、trie／DB、簽章驗證、可得性）的強制口頭答辯，由基金會在標準硬體上執行；主持者是 W3F 員工而非 Fellowship，且不錄影，第 12 條只涵蓋 benchmark harness 的著作權，生成式 AI 的使用另依 clean-room 規則處理，而且設計上其結果無法改變所頒發的獎項",
+   "它是與 Parity 稽核者針對 conformance fuzzer 發現所做的選擇性問答；通過它就不必再通過公開與私有的一致性測試，結果由基金會在鏈下記錄而非由 Fellowship 在鏈上批准，而既然是選擇性的，婉拒的團隊只需等下一個審查視窗、對其獎項毫無影響",
+   "它可在送審後被要求，用以查驗團隊成員是否為正當作者（排除生成式 AI）、並對 Gray Paper 與自家程式碼庫兩者都具備確切的專業；交付範本使團隊承諾接受一場由 Polkadot Technical Fellowship 進行、且錄影的口試，並以鏈上的 Fellowship remark 批准，而未能證明專業可能導致獎金減少或團隊被取消資格",
+   "它是僅限於 PVM 與 host call 實作的程式碼審查會；使用過生成式 AI 的團隊只要在交付文件中事先申報仍可通過，主持者取自該團隊自己的客戶端實作同儕，而表現不佳唯一可能的後果是付款延後到協定 1.0 版獲批准為止"
+  ],
+  "stem": "According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?",
  "options": [
   "It is a mandatory oral defence of the performance tests (gas, trie/DB, signature verification, availability) that the Foundation runs on standard hardware; it is conducted by W3F staff rather than the Fellowship and is not recorded, rule 12 covering only authorship of the benchmark harness, generative-AI use being handled separately under the clean-room rule, and by design the outcome cannot change the prize awarded",
   "It is an optional Q&A with Parity's auditors about findings from the conformance fuzzer; passing it replaces the need to pass the public and private conformance tests, the outcome is recorded off-chain by the Foundation rather than ratified by the Fellowship on-chain, and because it is optional a team that declines simply waits for the next review window with no effect on its prize",

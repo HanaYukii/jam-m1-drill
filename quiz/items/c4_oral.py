@@ -8,7 +8,14 @@ ITEMS = [
  "ch": "C", "section": "C.1 General Natural Number Serialization",
  "gpRef": "§C.1", "difficulty": 2, "kind": "concept",
  "tags": ["codec", "encoding", "bijection"],
- "stem": "GP §C.1 gives a variable-length encoding E(x) for a general natural number. What determines how many octets a value takes, and why is that design forced on the GP rather than merely convenient?",
+  "stemZh": "GP §C.1 為一般的自然數給出了一種變長編碼 E(x)。是什麼決定一個值佔幾個位元組？為什麼這個設計對 GP 而言是被逼出來的、而不只是方便？",
+  "optionsZh": [
+   "第一個位元組裡的前綴宣告了長度，而每個值恰有唯一一種有效編碼；state root 雜湊的是編碼後的狀態，所以一個值有兩種編碼、或一段編碼能被讀成兩個值，都會讓誠實節點對 root 產生分歧",
+   "編碼器輸出最少的位元組數，而解碼器靠掃描終止位元組來還原長度；唯一性只是一種慣例，鼓勵但不強制實作遵守，因為 state root 取的是解碼後的值",
+   "每個自然數都被填補到固定的八個位元組，好讓結構內的欄位偏移量保持不變；正是這個固定寬度使編碼成為單射，而較短的形式只存在於不做雜湊的 work-package 酬載中",
+   "長度由外層結構自己的長度前綴在帶外攜帶，所以 E(x) 本身只是小端序的數字；GP 依靠外層元組讓整體編碼無歧義，而不是依靠 E(x) 本身"
+  ],
+  "stem": "GP §C.1 gives a variable-length encoding E(x) for a general natural number. What determines how many octets a value takes, and why is that design forced on the GP rather than merely convenient?",
  "options": [
   "A prefix in the first octet announces the length, and each value has exactly one valid encoding; the state root hashes encoded state, so two encodings of one value — or one encoding readable as two values — would let honest nodes disagree on the root",
   "The encoder emits the minimum number of octets and a decoder recovers the length by scanning for a terminator octet; uniqueness is a convention that implementations are encouraged but not required to follow, since the state root is taken over the decoded values",
@@ -31,7 +38,14 @@ ITEMS = [
  "ch": "D", "section": "D.2.1 Trie Node Encoding",
  "gpRef": "§D.2.1", "difficulty": 2, "kind": "concept",
  "tags": ["merklization", "trie", "state-root"],
- "stem": "State-trie nodes are all the same size. Walking the trie, how does a reader tell the three node kinds apart, and what decides whether a leaf stores the value itself or only its hash?",
+  "stemZh": "state trie 的節點大小全都一樣。在走訪 trie 時，讀取者如何分辨三種節點？又是什麼決定一個 leaf 存的是值本身、還是只存它的雜湊？",
+  "optionsZh": [
+   "第一個位元區分 branch 與 leaf、第二個位元區分內嵌值的 leaf 與一般 leaf；至多 32 位元組的值會被內嵌（其長度就放在該位元組剩下的位元裡），更長的則以雜湊取代",
+   "節點種類是從抵達它的深度還原的——branch 只出現在最後一層之上——而是否內嵌取決於值能不能塞進扣掉 state key 後剩下的 31 個位元組，所以分界是 31 而不是 32 個位元組",
+   "每個節點前有一個位元組的 tag 指名三種之一；只要值比它原本會被換成的那個雜湊還小就會內嵌，這由編碼器逐節點決定並記在該 tag 裡",
+   "branch 與 leaf 靠節點後半段是不是一個有效的雜湊原像來區分；值一律以雜湊儲存好讓節點大小固定，而內嵌形式只存在於 service-info 的 leaf 裡"
+  ],
+  "stem": "State-trie nodes are all the same size. Walking the trie, how does a reader tell the three node kinds apart, and what decides whether a leaf stores the value itself or only its hash?",
  "options": [
   "The first bit separates branch from leaf and the second separates an embedded-value leaf from a regular one; a value of at most 32 octets is embedded (its length lives in the remaining bits of that octet), anything longer is replaced by its hash",
   "The node kind is recovered from the depth at which it was reached — branches only appear above the last level — and embedding is decided by whether the value fits in the 31 octets left over after the state key, so the cut-off is 31 rather than 32 octets",
@@ -52,7 +66,14 @@ ITEMS = [
  "ch": "7", "section": "7.4 The Accumulation Output Belt",
  "gpRef": "§7.4; §E.3", "difficulty": 2, "kind": "concept",
  "tags": ["mmr", "beefy", "recent-history"],
- "stem": "β_B is a Merkle Mountain Range that grows by one root per block. Describe what the append does to the structure, and why the GP chose an MMR here rather than rebuilding a balanced Merkle tree each block.",
+  "stemZh": "β_B 是一個 Merkle Mountain Range，每個區塊長出一個 root。描述 append 對這個結構做了什麼，以及 GP 為什麼在這裡選 MMR、而不是每個區塊重建一棵平衡的 Merkle 樹。",
+  "optionsZh": [
+   "append 把新的 root 放在高度 0，並與任何同高度的既有 peak 向上合併，留下一組 peak，其高度正是計數的二進位位數；這個結構是唯讀附加的，所以每次 append 花 O(log n)，而先前發出的證明仍然有效",
+   "append 會重建整個 range，使各 peak 之間的高度始終相差不到一層，藉此讓證明長度一致；舊證明必須在每個區塊後重新發出，這是可接受的，因為 BEEFY 只會證明最新的那個區塊",
+   "append 把單一 root 換成「舊 root 與新項目」的雜湊，所以這個 range 其實是一條雜湊鏈；這讓狀態保持很小，並讓驗證者能以常數空間從當前 root 往回走到任何較早的輸出",
+   "append 把新 root 插進「區塊 timeslot 模 belt 長度」所指的位置、覆寫原本的內容；因此這條 belt 是環狀緩衝區、舊輸出會自動老化淘汰，鏈上狀態因而有界"
+  ],
+  "stem": "β_B is a Merkle Mountain Range that grows by one root per block. Describe what the append does to the structure, and why the GP chose an MMR here rather than rebuilding a balanced Merkle tree each block.",
  "options": [
   "Appending places the new root at height 0 and merges it upward with any existing peak of equal height, leaving a set of peaks whose heights are the binary digits of the count; the structure is append-only, so each append costs O(log n) and previously issued proofs remain valid",
   "Appending rebuilds the range so that the peaks are always balanced within one level of each other, which keeps proof length uniform; older proofs must be reissued after each block, which is acceptable because BEEFY only ever proves the most recent block",
@@ -73,7 +94,14 @@ ITEMS = [
  "ch": "11", "section": "11.2 Assurances",
  "gpRef": "§11.2", "difficulty": 2, "kind": "concept",
  "tags": ["assurance", "availability", "signature"],
- "stem": "An assurance carries a bitfield with one bit per core plus a signature. What is actually signed, and what would break if the signature covered only the bitfield?",
+  "stemZh": "一份 assurance 帶有一個「每個 core 一位元」的 bitfield 加上一個簽章。實際被簽的是什麼？如果簽章只涵蓋 bitfield，會壞在哪裡？",
+  "optionsZh": [
+   "簽章涵蓋的是「父 header 雜湊連同編碼後 bitfield」的一個帶域分隔的雜湊；少了父雜湊，同一份簽好的 bitfield 就能被重播進較晚的區塊，使一位 validator 被算成在為它已不再持有的資料背書",
+   "簽章只涵蓋 bitfield，而重播是靠鏈上規則防止的——每位 validator 每個區塊至多出現一次；綁定區塊是多餘的，因為該 extrinsic 本來就在被簽的那個區塊裡面",
+   "簽章涵蓋每個被設起位元的 core 其 work-report 雜湊，所以背書者是對特定的 report 做出承諾；父 header 雜湊不涉入，因為 report 的壽命比 guarantee 它的那個區塊還長",
+   "簽章涵蓋背書者自己的 validator 索引與 bitfield，這正是鏈能歸屬該 assurance 的依據；父雜湊是另外拿去和 header 比對來檢查的，而不是靠被簽進去"
+  ],
+  "stem": "An assurance carries a bitfield with one bit per core plus a signature. What is actually signed, and what would break if the signature covered only the bitfield?",
  "options": [
   "The signature covers a domain-separated hash of the parent header hash together with the encoded bitfield; without the parent hash the same signed bitfield could be replayed into a later block, letting a validator be counted as assuring data it no longer holds",
   "The signature covers only the bitfield, and replay is prevented by the on-chain rule that each validator may appear at most once per block; binding a block would be redundant because the extrinsic is already inside the block being signed",
@@ -95,7 +123,14 @@ ITEMS = [
  "ch": "14", "section": "14.4 Work Result Size",
  "gpRef": "§14; eq. 11.x (W_R)", "difficulty": 2, "kind": "concept",
  "tags": ["work-report", "oversize", "limits"],
- "stem": "A work-package's items refine one after another and the report has a size ceiling W_R. Is the ceiling applied per item or to the report as a whole, and what happens to an item that would cross it?",
+  "stemZh": "一份 work-package 的各項目接連 refine，而 report 有大小上限 W_R。這個上限是逐項套用、還是套用於整份 report？會越界的項目又會怎麼樣？",
+  "optionsZh": [
+   "是累計的：每個項目的輸出是拿 authorizer trace 加上已被接受的輸出一起衡量，而第一個會越過 W_R 的項目，其輸出被換成 OVERSIZE 錯誤，後面的項目仍照常 refine",
+   "是逐項的：每個輸出各自與 W_R 比較，所以一份 package 只有在單一項目過大時才會失敗；整份 report 是無界的，因為需要由可得性承載的是 bundle 而不是 report",
+   "是累計的，但越過上限會使整份 work-report 失效，所以 guarantor 必須丟棄該 package、其所有項目都不會被 report——這正是阻止某個 service 靠灌水輸出把別人擠掉的機制",
+   "是累計的，而輸出是被截斷而非替換，截斷長度記在 digest 裡，好讓重跑 refine 的 auditor 能重現出完全相同的位元組"
+  ],
+  "stem": "A work-package's items refine one after another and the report has a size ceiling W_R. Is the ceiling applied per item or to the report as a whole, and what happens to an item that would cross it?",
  "options": [
   "It is cumulative: each item's output is measured against the authorizer trace plus the outputs already accepted, and the first item that would cross W_R has its output replaced by the OVERSIZE error while later items are still refined normally",
   "It is per item: each output is compared against W_R on its own, so a package can only fail if a single item is oversized; the report as a whole is unbounded because the bundle, not the report, is what availability has to carry",
@@ -116,7 +151,14 @@ ITEMS = [
  "ch": "A", "section": "A.4 Memory & Page Faults",
  "gpRef": "eq. A.9", "difficulty": 2, "kind": "concept",
  "tags": ["pvm", "page-fault", "memory"],
- "stem": "A multi-octet store straddles two pages: the first is writable, the second is not allocated. What does the PVM report, and why is the reported address defined the way it is?",
+  "stemZh": "一次多位元組的 store 跨越了兩個 page：第一個可寫、第二個未配置。PVM 會回報什麼？回報的位址為什麼要那樣定義？",
+  "optionsZh": [
+   "一個 page fault，帶著「此次存取所觸及、最低的不可存取位元組」其 page 對齊後的位址；對齊到 page 正是讓這個值成為 host 能據以行動的東西——它恰好就是 host 在恢復程式前必須映射的那個 page",
+   "一個 page fault，帶著第一個不可存取位元組的精確位址，好讓 host 確知存取停在哪裡；host 被預期要自行對齊該值再映射，因為對齊是 host 的事、不屬於機器語意",
+   "一個 panic，因為跨越 page 邊界進入未配置記憶體的存取按定義就是畸形的；page fault 保留給完全落在單一個未映射 page 之內、因而能靠映射一個 page 就滿足的存取",
+   "一個 page fault，帶著「含有此次存取起點」那個 page 的基底位址，好讓整次存取能從一個已知已映射的位置重試；機器會先寫入可存取的前綴，再從 fault 位址繼續"
+  ],
+  "stem": "A multi-octet store straddles two pages: the first is writable, the second is not allocated. What does the PVM report, and why is the reported address defined the way it is?",
  "options": [
   "A page fault carrying the page-aligned address of the lowest inaccessible octet touched by the access; aligning to the page is what makes the value something the host can act on — it is exactly the page the host must map before the program is resumed",
   "A page fault carrying the exact address of the first inaccessible octet, so the host learns precisely where the access stopped; the host is expected to align the value itself before mapping, since alignment is a host concern rather than part of the machine's semantics",
@@ -137,7 +179,14 @@ ITEMS = [
  "ch": "A", "section": "A.3 Basic Blocks & Control Transfer",
  "gpRef": "§A.3; §A.5", "difficulty": 2, "kind": "concept",
  "tags": ["pvm", "control-flow", "gas"],
- "stem": "The PVM has both statically-resolved jumps and indirect jumps computed from a register. What extra conditions must an indirect target satisfy, and what would break in the gas model if they were dropped?",
+  "stemZh": "PVM 同時有靜態解析的跳躍與由暫存器算出的間接跳躍。間接跳躍的目標必須額外滿足哪些條件？如果把這些條件拿掉，gas 模型會壞在哪裡？",
+  "optionsZh": [
+   "間接跳躍的目標必須對齊、非零、位於 jump table 之中，且落在某個 basic block 的起點；少了「落在 block 起點」這項要求，程式就能從第一條指令以下進入一個 block 並執行它，而該 block 的 gas 從未被計費",
+   "間接跳躍的目標只需落在 code blob 之內並且對齊；不要求 block 起點，因為機器會從程式計數器重新導出所在的 block 並在進入時計費，所以不論如何 gas 計帳都不受影響",
+   "間接跳躍的目標必須是程式符號表所記載的某個函數起點，而那正是 jump table 所存的東西；gas 模型不受影響，因為間接跳躍以立即運算元攜帶自己的 gas 成本",
+   "間接跳躍的目標只需是 page 大小的倍數，好讓一次跳躍永遠不會跨 page；gas 是按退休的指令數而不是按 block 計費，所以控制流落在哪裡對計帳毫無影響"
+  ],
+  "stem": "The PVM has both statically-resolved jumps and indirect jumps computed from a register. What extra conditions must an indirect target satisfy, and what would break in the gas model if they were dropped?",
  "options": [
   "An indirect target must be aligned, non-zero, inside the jump table and land on a basic-block start; without the block-start requirement a program could enter a block below its first instruction and execute it without the block's gas ever being charged",
   "An indirect target must merely lie inside the code blob and be aligned; block starts are not required because the machine re-derives the enclosing block from the program counter and charges that block on entry, so gas accounting is unaffected either way",
@@ -159,7 +208,14 @@ ITEMS = [
  "ch": "B", "section": "B.1 Host Call Gas",
  "gpRef": "§B（PR #517）", "difficulty": 2, "kind": "delta",
  "tags": ["host-call", "gas", "delta-0.8.0"],
- "stem": "GP 0.8.0 reworked how a host call is charged. Describe the shape of the new charge and what happens when a service invokes an index that is not available in its invocation.",
+  "stemZh": "GP 0.8.0 重做了 host call 的計費方式。描述新收費的形狀，以及當一個 service 呼叫某個在它這次 invocation 中不可用的索引時會發生什麼。",
+  "optionsZh": [
+   "每個呼叫有一個基本成本，並在它搬移資料時再加上一項與所觸及 KiB 數成正比的費用；未知或不可用的索引會先被收取一個預設成本，所以剩餘 gas 不足的呼叫會以 out-of-gas 退出、而不是回傳錯誤碼",
+   "每個呼叫不論搬多少資料都收同樣的固定金額，這正是讓 basic block 的成本能靜態算出的原因；未知索引是免費的、單純回傳 WHAT，因為對什麼都沒做的呼叫收費並不公平",
+   "成本是在呼叫之後、依 host 實際消耗的 gas 計算的，所以搬愈多資料的呼叫自然愈貴；未知索引回傳 WHAT，而機器不收任何費用、計數器原封不動",
+   "成本由 service 在其 metadata 中宣告、並於註冊時驗證，這讓 service 能為自己的最壞情況設限；未知索引會以 panic 中止整個 accumulation，好讓錯誤在開發期間高聲浮現"
+  ],
+  "stem": "GP 0.8.0 reworked how a host call is charged. Describe the shape of the new charge and what happens when a service invokes an index that is not available in its invocation.",
  "options": [
   "Each call has a base cost plus, where it moves data, a term proportional to the number of KiB touched; an index that is unknown or unavailable is charged a default cost first, so a call with too little gas left exits out-of-gas rather than returning an error code",
   "Each call costs the same flat amount regardless of the data it moves, which is what keeps a basic block's cost statically computable; an unknown index is free and simply returns WHAT, since charging for a call that did nothing would be unfair",
@@ -180,7 +236,14 @@ ITEMS = [
  "ch": "B", "section": "B.2 grow_heap",
  "gpRef": "§B（PR #508 / #517）", "difficulty": 2, "kind": "delta",
  "tags": ["host-call", "memory", "delta-0.8.0"],
- "stem": "GP 0.8.0 removes the sbrk instruction and provides heap growth as the grow_heap host call instead. What does the caller pass, and why is a host call the right home for this operation under the 0.8.0 gas model?",
+  "stemZh": "GP 0.8.0 移除了 sbrk 指令，改以 grow_heap 這個 host call 提供堆積成長。呼叫者要傳什麼？在 0.8.0 的 gas 模型下，為什麼 host call 才是這個操作的正確歸屬？",
+  "optionsZh": [
+   "呼叫者指名它想要的堆積終點，並依新變為可寫的 page 數按比例計費；一條成本取決於其運算元的指令會破壞「basic block 的價格能在該 block 執行前靜態算出」這個保證",
+   "呼叫者傳入要增加的位元組數並被收取固定金額；它被移出指令集純粹是為了編碼空間，因為該 opcode 得留給 0.8.0 新引入的某條無引數指令",
+   "呼叫者傳入 page 數量而該呼叫免費，因為記憶體在程式初始化時就已保留；把它做成 host call 只是為了讓 host 能在機器被巢狀於某個內層 PVM 時拒絕成長",
+   "呼叫者傳入想要的終點 page，而成本事後才依 host 實際的配置成本結算，這正是它不能是指令的原因——指令必須在執行前就知道成本，而 host call 是回傳時才計費"
+  ],
+  "stem": "GP 0.8.0 removes the sbrk instruction and provides heap growth as the grow_heap host call instead. What does the caller pass, and why is a host call the right home for this operation under the 0.8.0 gas model?",
  "options": [
   "The caller names the heap end it wants and is charged in proportion to the pages newly made writable; an instruction whose cost depends on its operand would break the promise that a basic block's price can be computed statically before the block runs",
   "The caller passes the number of octets to add and is charged a flat amount; it was moved out of the instruction set purely for encoding space, since the opcode was needed for one of the new no-argument instructions introduced in 0.8.0",
@@ -201,7 +264,14 @@ ITEMS = [
  "ch": "B", "section": "B.2 fetch",
  "gpRef": "§B", "difficulty": 2, "kind": "concept",
  "tags": ["host-call", "refine", "design"],
- "stem": "fetch is a single host call, available in all three invocations, whose first argument selects which piece of data to read. Why did the GP fold this many data sources into one call instead of giving each its own index?",
+  "stemZh": "fetch 是單一個 host call、在三種 invocation 中都可用，其第一個引數選擇要讀哪一份資料。GP 為什麼把這麼多資料來源摺進同一個呼叫，而不是各給一個索引？",
+  "optionsZh": [
+   "因為 host call 的編號是每個已部署 service 所編譯依循的 ABI 的一部分：用一個選擇子引數就能新增資料來源而不必重新編號，而每個來源各給一個新索引，最終會逼既有 service 重新建置",
+   "因為每種 invocation 暴露的來源子集不同，而單一個呼叫是唯一能表達這件事的方式——若用分開的索引，機器就無法分辨哪些在 refine 中合法、哪些在 accumulate 中合法",
+   "因為這些來源共用同一個 gas 價格，而 GP 是按 host-call 索引計費；把它們摺在一起才使得讀取協定常數的價格與讀取 work-package 匯入的價格完全相同",
+   "因為選擇子讓該呼叫的暫存器簽章維持在 host call 可用的四個引數暫存器之內，而分開的索引做不到這點，因為每個來源都需要自己的偏移量與長度配對"
+  ],
+  "stem": "fetch is a single host call, available in all three invocations, whose first argument selects which piece of data to read. Why did the GP fold this many data sources into one call instead of giving each its own index?",
  "options": [
   "Because the host-call numbering is part of the ABI every deployed service compiles against: a selector argument lets new data sources be added without renumbering anything, while a new index per source would eventually force existing services to be rebuilt",
   "Because each invocation exposes a different subset of the sources, and a single call is the only way to express that — with separate indices the machine could not tell which ones are legal in refine as opposed to accumulate",
@@ -222,7 +292,14 @@ ITEMS = [
  "ch": "C", "section": "C.x Work Digest",
  "gpRef": "§C；eq. 11.7（𝔼）", "difficulty": 2, "kind": "concept",
  "tags": ["codec", "work-digest", "errors"],
- "stem": "A work digest's result field holds either the refine output or a member of the error set 𝔼. How is that alternative encoded, and why does the GP put refine failures on-chain as values rather than rejecting the report?",
+  "stemZh": "一份 work digest 的 result 欄位存的不是 refine 的輸出、就是錯誤集合 𝔼 的某個成員。這種二擇一是怎麼編碼的？GP 為什麼把 refine 失敗當成值放上鏈，而不是直接拒絕該 report？",
+  "optionsZh": [
+   "成功是一個判別位元組後接帶長度前綴的 blob，而每種錯誤各是一個相異的單一位元組；把失敗保留為一般的值，讓 accumulate 能確切看到某項目是怎麼失敗的，也讓一個項目失敗不會使 package 中其他項目失效",
+   "成功與失敗共用同樣的形狀——帶長度前綴的 blob，失敗時為空——原因另外由 report 的 authorizer trace 攜帶；這讓 digest 保持定寬，而 erasure 編碼器仰賴這一點",
+   "錯誤被編碼成任何成功的 refine 都產不出的保留 blob 值，所以不需要判別子；含有錯誤的 report 仍然有效但會被 accumulate 略過，這也是為什麼那些錯誤變體不需要鏈上意義",
+   "任一項目失敗就會讓整份 work-report 無效，所以這個編碼根本沒有錯誤的情形；𝔼 集合的存在只是為了替 guarantor 在決定是否簽署 report 前於鏈下檢查的那些條件命名"
+  ],
+  "stem": "A work digest's result field holds either the refine output or a member of the error set 𝔼. How is that alternative encoded, and why does the GP put refine failures on-chain as values rather than rejecting the report?",
  "options": [
   "Success is a discriminant octet followed by the length-prefixed blob, and each error is a single distinct octet; keeping failures as ordinary values lets accumulate see exactly how an item failed, and lets one item fail without invalidating the others in the package",
   "Success and failure share the same shape — a length-prefixed blob, empty in the failure case — with the reason carried separately in the report's authorizer trace; this keeps the digest fixed-width, which the erasure coder relies on",
@@ -243,7 +320,14 @@ ITEMS = [
  "ch": "6", "section": "6.5 The Slot Key Sequence",
  "gpRef": "eq. 6.25, 6.27 (F)", "difficulty": 2, "kind": "concept",
  "tags": ["safrole", "fallback", "anonymity"],
- "stem": "When too few tickets arrive, γ′_S falls back to a key sequence derived from entropy and the active validator set. How is each slot's author chosen, and what property does the chain give up while the fallback is in force?",
+  "stemZh": "當抵達的 ticket 太少時，γ′_S 會退回到一個由熵與啟用 validator 集合導出的金鑰序列。每個 slot 的出塊者是怎麼選出來的？在 fallback 生效期間，這條鏈放棄了什麼性質？",
+  "optionsZh": [
+   "每個 slot 的出塊者是把熵與 slot 索引一起雜湊、再對集合大小取模而選出的；整個 epoch 的排程因此可以事先被公開算出，所以 ring VRF ticket 所買到的匿名性在那個 epoch 就沒了",
+   "每個 slot 的出塊者是索引等於「slot 編號模集合大小」的那位 validator，所以排程就是單純的輪替；除了公平性之外沒有損失，因為輪替會讓某些 validator 拿到略多的 slot",
+   "出塊者是從前一個 epoch 的 ticket 累加器中抽出、重用那些未被消耗的最新 ticket；匿名性得以保留，因為那些 ticket 仍是 ring-VRF 證明，但活性會受損，因為這個池最終會用完",
+   "fallback 把每個 slot 都指派給整個 validator 集合、並接受第一個抵達的有效 seal；匿名性不受影響，因為根本沒有排程，代價是偶爾會出現同高度的競爭區塊"
+  ],
+  "stem": "When too few tickets arrive, γ′_S falls back to a key sequence derived from entropy and the active validator set. How is each slot's author chosen, and what property does the chain give up while the fallback is in force?",
  "options": [
   "Each slot's author is picked by hashing the entropy together with the slot index and reducing the result modulo the set size; the whole epoch's schedule becomes publicly computable in advance, so the anonymity that ring VRF tickets buy is lost for that epoch",
   "Each slot's author is the validator whose index equals the slot number modulo the set size, so the schedule is a plain round robin; nothing is lost beyond fairness, since a round robin gives some validators marginally more slots than others",
