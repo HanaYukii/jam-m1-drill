@@ -6,7 +6,14 @@ ITEMS = [
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.2", "difficulty": 2, "kind": "concept",
  "tags": ["header", "parent-hash", "seal"],
- "stem": "H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?",
+  "stemZh": "H_P 被定義為父 header 某種編碼的 Blake2b 雜湊。被雜湊的是哪一種編碼？這個選擇帶來什麼後果？",
+  "optionsZh": [
+   "**完整**編碼，含父區塊的 seal，所以子區塊承諾的是父區塊實際被發布出去的那串位元組；任何人都無法重簽一個 header——即使作者與內容都相同——而不讓所有已經建在其上的區塊脫鏈",
+   "**未簽署**的編碼，讓父區塊的 seal 留在承諾鏈之外；這使得 validator 可以替換遺失的 seal 而不干擾其後代，這正是無 seal 封存儲存得以成立的原因",
+   "完整編碼，但把 marker 清成空的形式，好讓同一個父區塊不論是否開啟了一個 epoch 都得到同一個雜湊；這讓雜湊在 marker 較晚才加入的 epoch 邊界上保持穩定",
+   "只雜湊父區塊的 state root 與時槽，因為這兩個欄位已經唯一決定了父區塊；雜湊整個 header 會讓這個承諾依賴於子區塊無法獨立重建的資料"
+  ],
+  "stem": "H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?",
  "options": [
   "The full encoding including the parent's seal, so a child commits to the exact sealed bytes its parent was published as; nobody can re-seal a header — even with the same author and contents — without orphaning every block already built on it",
   "The unsigned encoding, so that the parent's seal stays outside the chain of commitments; this lets a validator replace a lost seal without disturbing its descendants, which is what makes seal-less archival storage possible",
@@ -28,7 +35,14 @@ ITEMS = [
  "ch": "5", "section": "5.1–5.3",
  "gpRef": "§5; eq. 5.8; eq. 5.9", "difficulty": 3, "kind": "concept",
  "tags": ["header", "light-client", "validation"],
- "stem": "A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?",
+  "stemZh": "一個節點只收到一個 header，既沒有區塊本體也沒有任何鏈上狀態。它能完成哪些檢查？第一個做不到的又是哪一個？",
+  "optionsZh": [
+   "它能檢查結構是否完整、時槽是否大於父區塊的、以及該時槽是否未落在未來；它無法驗證 seal，因為要知道誰有資格出那一槽，需要 sealer 序列，而它住在狀態裡",
+   "除了 extrinsic 雜湊之外它什麼都能檢查，因為只有那個欄位依賴 header 之外的資料；seal 是自足的，因為出塊者的公鑰本身就是 header 的欄位之一、不需要任何外部查找",
+   "它能檢查 seal 與熵簽章，因為兩者光憑出塊者索引就能驗證；它無法檢查的是時槽，因為要與父區塊比較就必須保存過父 header",
+   "沒有狀態它什麼都檢查不了，因為連時槽的界限都是對著 posterior 的 validator 集合表述的；這正是為什麼 GP 要求實作在驗證任何 header 之前先保存 24 小時的祖先"
+  ],
+  "stem": "A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?",
  "options": [
   "It can check structural well-formedness, that the timeslot exceeds its parent's, and that the slot is not in the future; it cannot verify the seal, because knowing who was entitled to author that slot requires the sealer sequence, which lives in state",
   "It can check everything except the extrinsic hash, since only that field depends on data outside the header; the seal is self-contained because the author's public key is one of the header's own fields and needs no external lookup",
@@ -50,7 +64,14 @@ ITEMS = [
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "§5（genesis header 與 σ_g）", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "genesis", "trust"],
- "stem": "The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?",
+  "stemZh": "GP 說對 genesis header 及其所代表狀態的共識是**預設**而非推導出來的。為什麼一個鏈的定義非得包含這樣一個假設不可？",
+  "optionsZh": [
+   "因為每個 header 的有效性都是相對於它的父區塊定義的，所以這條遞迴需要一個在鏈外達成共識的基底；沒有基底的話，任何自洽的鏈都會和其他鏈一樣有效，「這條」鏈也就沒有明確定義",
+   "因為 genesis 狀態太大，無法用後續區塊所用的同一個函數來 Merklize，所以它的 root 必須另外公布並暫且信任，直到第一個真正的區塊建立起常規的不變式",
+   "因為 genesis 區塊沒有出塊者、因而沒有 seal，而 GP 的有效性規則只針對已封印的 header 陳述；預設 genesis 是一種記號上的捷徑，正式的鏈會用一個 genesis seal 來取代它",
+   "因為 genesis 時的 validator 集合無法被承諾在它本應授權的那份狀態之內，所以啟動用的金鑰是由 chain spec 分發的，而 state root 由每個節點自行從那個檔案重算"
+  ],
+  "stem": "The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?",
  "options": [
   "Because every header's validity is defined relative to its parent, so the recursion needs a base case that is agreed out-of-band; without one, any self-consistent chain would be as valid as any other and 'the' chain would not be well defined",
   "Because the genesis state is too large to Merklize with the same function used for later blocks, so its root has to be published separately and taken on trust until the first real block establishes the normal invariants",
@@ -71,7 +92,14 @@ ITEMS = [
  "ch": "5", "section": "5.2 The Extrinsic Hash",
  "gpRef": "eq. 5.4–5.7", "difficulty": 3, "kind": "rationale",
  "tags": ["header", "extrinsic-hash", "light-client"],
- "stem": "H_X hashes a sequence of five per-component hashes, and inside two of those components each item is itself reduced to a hash. What is that shape buying, and why are only those two treated that way?",
+  "stemZh": "H_X 雜湊的是五個各成分雜湊所組成的序列，而其中兩個成分的內部又把每一項各自化約成一個雜湊。這種形狀買到了什麼？為什麼只有那兩個被這樣處理？",
+  "optionsZh": [
+   "它讓第三方能夠證明某一份 preimage 或某一份 guarantee 被納入，而不必交出 extrinsic 的其餘部分；因此那些「外界會在意個別項目」的成分被逐項化，其餘的則整批承諾",
+   "它讓五個成分可以彼此獨立地被傳播與驗證，這正是 validator 能夠接受某個區塊的 assurance、同時仍在等待它的 guarantee 從網路上抵達的原因",
+   "它讓某個成分改變時重算雜湊變得便宜，所以正在組裝區塊的出塊者可以換上一組更好的 guarantee，而不必重新雜湊已經定案的 ticket、assurance 與 dispute",
+   "它限制了 extrinsic 的大小，因為一個逐項雜湊的成分可以對照逐項的上限來檢查，而單一份扁平編碼會讓鏈上的有效性規則看不到那個上限"
+  ],
+  "stem": "H_X hashes a sequence of five per-component hashes, and inside two of those components each item is itself reduced to a hash. What is that shape buying, and why are only those two treated that way?",
  "options": [
   "It lets a third party prove one preimage or one guarantee was included without shipping the rest of the extrinsic, so the components whose individual items outsiders care about are itemized while the others are committed to wholesale",
   "It lets the five components be gossiped and verified independently of one another, which is what allows a validator to accept the assurances of a block while still waiting for its guarantees to arrive over the network",
@@ -92,7 +120,14 @@ ITEMS = [
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§6.6", "difficulty": 2, "kind": "concept",
  "tags": ["header", "markers", "epoch"],
- "stem": "When a block is the first of a new epoch, its epoch marker is populated. What does that marker carry, and who is it for?",
+  "stemZh": "當一個區塊是某個新 epoch 的第一塊時，它的 epoch marker 會被填入內容。這個 marker 帶什麼？又是給誰用的？",
+  "optionsZh": [
+   "下一個與當前 epoch 的隨機數，加上接下來那個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰——足夠讓只讀 header 的追隨者重建出誰可以出塊、並驗證他們的簽章",
+   "上一個 epoch 最終狀態的雜湊，以及 ticket accumulator 在邊界時的樣子，好讓追隨者能自行重放那場 ticket 競賽、確認 sealer 序列是誠實導出的",
+   "完整的下一個 epoch slot-sealer 序列，這也是為什麼這個 marker 是 optional 的——若每個 header 都帶，成本會是每塊 600 筆而不是每個 epoch 一次",
+   "離開與加入的 validator 身分，以相對於前一個集合的差異表示，並附上將為接下來那個 epoch 的洗牌播種的熵"
+  ],
+  "stem": "When a block is the first of a new epoch, its epoch marker is populated. What does that marker carry, and who is it for?",
  "options": [
   "The next and current epoch randomness plus, for every validator of the coming epoch, its Bandersnatch and Ed25519 keys — enough for a header-only follower to reconstruct who may author and to verify their signatures",
   "The hash of the previous epoch's final state and the ticket accumulator as it stood at the boundary, so that a follower can replay the ticket contest itself and confirm the sealer sequence was derived honestly",
@@ -113,7 +148,14 @@ ITEMS = [
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.10", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "author", "design"],
- "stem": "The header identifies its author by an index rather than by a public key. Beyond saving bytes, what does that choice force, and what does it cost?",
+  "stemZh": "header 以索引而非公鑰來標識它的出塊者。除了省下位元組之外，這個選擇強制了什麼？代價又是什麼？",
+  "optionsZh": [
+   "它強制每位驗證者事先就對 posterior 的 active set 有共識，因為索引離開它就沒有意義；代價是一個 header 無法被孤立地解讀，而這正是 epoch marker 存在的原因",
+   "它強制出塊者另外證明集合成員資格，因為光憑一個索引無法拿去對照簽章；代價是每塊多一份 ring proof，這也是 seal 與熵簽章各自獨立的原因",
+   "它強制 validator 集合依公鑰排序好讓索引具有正規性；代價是集合一變動所有索引都會重排，這也是為什麼 offender 是就地歸零而不是被移除",
+   "它強制索引在 disputes 之後重新導出，因為被懲罰者的位置會被重複使用；代價是同一個 epoch 內的兩個區塊可能合法地為不同的出塊者帶著相同的索引"
+  ],
+  "stem": "The header identifies its author by an index rather than by a public key. Beyond saving bytes, what does that choice force, and what does it cost?",
  "options": [
   "It forces every verifier to already agree on the posterior active set, since the index means nothing without it; the cost is that a header cannot be interpreted in isolation, which is precisely why the epoch marker exists",
   "It forces the author to prove set membership separately, since an index alone cannot be checked against a signature; the cost is an extra ring proof per block, which is why the seal and the entropy signature are distinct",
@@ -135,7 +177,14 @@ ITEMS = [
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§10", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "markers", "disputes"],
- "stem": "The offenders marker is a plain sequence of Ed25519 keys, empty in almost every block, and it duplicates information that disputes processing already puts into state. Why carry it in the header?",
+  "stemZh": "offenders marker 是一串普通的 Ed25519 金鑰、幾乎每一塊都是空的，而且它重複了 disputes 處理本來就會寫進狀態的資訊。為什麼還要放進 header？",
+  "optionsZh": [
+   "因為懲罰會改變之後哪些金鑰可以簽署，而只讀 header 的追隨者若沒有它，就會持續接受那些鏈上早已排除的 validator 的簽章",
+   "因為 disputes extrinsic 是 optional 的、在封存的區塊中可能被裁剪掉，所以這個 marker 是關於「誰在何時被懲罰」的唯一持久鏈上紀錄",
+   "因為 offender 必須在其判決生效前一個區塊就被公告，好給被指控者一個在排除定案之前發表反證的窗口",
+   "因為 accumulation 階段在改寫 validator 佇列時讀的正是這個 marker，所以少了它，這次懲罰對下個 epoch 的金鑰輪替就會是不可見的"
+  ],
+  "stem": "The offenders marker is a plain sequence of Ed25519 keys, empty in almost every block, and it duplicates information that disputes processing already puts into state. Why carry it in the header?",
  "options": [
   "Because punishment changes which keys may sign later, and a follower that only reads headers would otherwise keep accepting signatures from validators the chain has already excluded",
   "Because the disputes extrinsic is optional and may be pruned from archived blocks, so the marker is the only durable on-chain record of who was punished and when",
@@ -157,7 +206,14 @@ ITEMS = [
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11", "difficulty": 2, "kind": "concept",
  "tags": ["header", "markers", "size"],
- "stem": "Two of the three markers are optional and one is not. What does that asymmetry buy, given how often each is populated and how large each can get?",
+  "stemZh": "三個 marker 中有兩個是 optional、一個不是。考慮到各自被填入的頻率與可能的大小，這個不對稱買到了什麼？",
+  "optionsZh": [
+   "那兩個可能很大的——一整套金鑰、以及一整個 epoch 的 ticket——每個 epoch 至多出現一次，所以做成 optional 能讓平常的 header 維持固定的小尺寸；第三個平常是空的，而空序列本來就幾乎不佔空間",
+   "做成 optional 的那兩個是驗證者可以合法忽略的，所以信任對等節點的節點可以跳過解碼它們；第三個則必須永遠存在，因為 seal 是對它計算的，欄位缺席會改變被簽署的訊息",
+   "這個不對稱反映的是哪些欄位由 Safrole 產生、哪些由 disputes 產生：Safrole 產出的一切都是 optional，因為 ticket 競賽可能失敗；而 disputes 的產出是必要的，因為 verdict 不可能無法作結",
+   "它讓編碼器能區分「沒有發生 epoch 變更」與「發生了 epoch 變更但金鑰集合是空的」，而這個區別在 genesis 以及集合大小變成零位 validator 之後很重要"
+  ],
+  "stem": "Two of the three markers are optional and one is not. What does that asymmetry buy, given how often each is populated and how large each can get?",
  "options": [
   "The two that can be large — a full key set and a whole epoch of tickets — appear at most once per epoch, so making them optional keeps the ordinary header to a fixed small size; the third is normally empty and an empty sequence already costs almost nothing",
   "The two that are optional are the ones a verifier may legitimately ignore, so a node that trusts its peers can skip decoding them; the third must always be present because the seal is computed over it and a missing field would change the signed message",
@@ -178,7 +234,14 @@ ITEMS = [
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "§5.3；§6.6", "difficulty": 3, "kind": "concept",
  "tags": ["header", "markers", "validity"],
- "stem": "A block arrives mid-epoch carrying a populated epoch marker. How should a validator treat it, and what is the general principle behind that treatment?",
+  "stemZh": "一個區塊在 epoch 中途抵達，卻帶著已填入內容的 epoch marker。validator 該怎麼處理它？這個處理背後的通則又是什麼？",
+  "optionsZh": [
+   "拒絕該區塊：marker 不是可以自由填寫的註記，而是由狀態轉移本身決定的值，所以一個 marker 與轉移產出不一致的 header，根本就不是一個有效的 header",
+   "接受該區塊但忽略那個 marker，因為 marker 是給輕客戶端的輔助資訊，全節點會自己從狀態導出同樣的資訊；只有當某個 marker 以影響 seal 的方式與狀態相牴觸時才會使區塊無效",
+   "接受該區塊並採納那個 marker，把它當成對接下來 epoch 的提前公告；這正是出塊者得以預先發布一個狀態尚未套用之集合變更的機制",
+   "只有當該 marker 的金鑰集合與狀態裡已有的不同時才拒絕；一個僅僅出現在非預期時間點的 marker 是無害的，因為它的內容仍然正確"
+  ],
+  "stem": "A block arrives mid-epoch carrying a populated epoch marker. How should a validator treat it, and what is the general principle behind that treatment?",
  "options": [
   "Reject the block: the markers are not free-form annotations but values the state transition itself determines, so a header whose marker disagrees with what the transition produces is simply not a valid header",
   "Accept the block but ignore the marker, since markers are advisory aids for light clients and a full node derives the same information from state; only a marker that contradicts state in a way affecting the seal can invalidate a block",
@@ -200,7 +263,14 @@ ITEMS = [
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.1；§4", "difficulty": 3, "kind": "rationale",
  "tags": ["header", "design", "comparison"],
- "stem": "An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?",
+  "stemZh": "Ethereum 的 header 承諾了執行後的狀態、一個 receipts root、以及消耗掉的 gas。JAM 的 header 三者皆無。這三個角色分別跑到哪裡去了？",
+  "optionsZh": [
+   "執行後的狀態以下一個區塊的先前 state root 之姿出現；逐項的結果住在 report 內部的 work-digest 裡而不在 header；而資源用量是靠 core time 與 gas 上限**事先**設限，而不是事後回報",
+   "三者都被摺進 extrinsic 雜湊，它的五個成分裡包含一個 results 成分；JAM 只是把同樣的承諾重新組織到單一欄位底下，好讓輕客戶端只需跟隨一個 root 而不是三個",
+   "執行後的狀態由 seal 承諾，因為它簽署了出塊者算出的 state root；receipt 被 header 裡的 accumulation output log 取代；而 gas 被省略是因為 JAM 是以時槽而非以 gas 計量 core time",
+   "三者都被延後到 BEEFY 的承諾，這也是 JAM 的 header 比較小的原因：任何外部驗證者需要的東西都是對著 accumulation-output MMR 證明的，而不是對著 header 本身"
+  ],
+  "stem": "An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?",
  "options": [
   "The post-state appears as the next block's prior state root; per-item outcomes live in work-digests inside reports rather than in the header; and resource use is bounded in advance by core time and gas ceilings instead of being reported after the fact",
   "All three are folded into the extrinsic hash, whose five components include a results component; JAM simply reorganizes the same commitments under one field so that light clients need to follow only one root rather than three",

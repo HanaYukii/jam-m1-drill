@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch12-history-queue-state",
  "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.1–12.3",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "state"],
- "stem": "What are ξ (accumulated) and ω (ready) and how big are they?",
+  "stemZh": "ξ（accumulated）與 ω（ready）是什麼？它們各有多大？",
+  "optionsZh": [
+   "ξ ∈ [{H}]_E——最近 E = 600 個時槽、每槽一個已 accumulate 的 work-package 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽一串「該槽變為 available 但依賴仍未滿足」的 report，每筆配上它**尚未滿足**的依賴集合",
+   "ξ ∈ [{H}]_E——最近 E = 600 個時槽、每槽一個已 accumulate 的 **work-report** 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽收錄該槽變為 available 的**每一份** report，不論依賴是否已滿足，每筆配上它原本宣告的完整依賴集合",
+   "ξ ∈ {H}——一個扁平集合，裝下有史以來每一個被 accumulate 的 work-package 雜湊、永不修剪；ω ∈ [[(𝕎, {H})]]_E——每槽一串該槽變為 available 但依賴仍未滿足的 **work-item**，每筆配上它尚未滿足的依賴集合",
+   "ξ ∈ [{H}]_C——每個 core 一個已 accumulate 的 work-package 雜湊集合，共 C = 341 個；ω ∈ [[(ℝ, {H})]]_C——每個 core 一條佇列，裝該 core 依賴仍未滿足的 report，每筆配上它尚未滿足的依賴集合"
+  ],
+  "stem": "What are ξ (accumulated) and ω (ready) and how big are they?",
  "options": [
   "ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set",
   "ξ ∈ [{H}]_E — one set of accumulated WORK-REPORT hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, every report that became available in that slot, whether or not its dependencies are met, each paired with the full dependency set it originally declared",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "ch12-W-partition",
  "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.4–12.12 (W!, W^Q, E, Q, W*)",
  "difficulty": 3, "kind": "concept", "tags": ["accumulation", "dependencies"],
- "stem": "How is the sequence of accumulatable reports R* built from the newly available reports R?",
+  "stemZh": "可被 accumulate 的 report 序列 R* 是怎麼從新變為 available 的 report R 建構出來的？",
+  "optionsZh": [
+   "R! = 沒有 prerequisites 且 segment-root lookup 為空的 report，立即 accumulate；R^Q = 其餘者，各自配上依賴集合（prerequisites ∪ srlookup 的 key）並先用 ξ_∪ 修剪；R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!)))，其中 Q 反覆取出依賴集合為空的 report、E 則扣掉已滿足的依賴",
+   "R! = 沒有 prerequisites 且 segment-root lookup 為空的 report，立即 accumulate；R^Q = 其餘者，各自配上依賴集合（prerequisites ∪ srlookup 的 key）並先用 ξ_∪ 修剪；R* = R! ⌢ Q(E(ω[..m] ⌢ ω[m..] ⌢ R^Q, P(R!)))，也就是 ready queue 從當前時槽 m 往後讀，好讓最新排入的 report 先輪到",
+   "R! = 沒有 prerequisites 的 report（不論其 segment-root lookup 裝了什麼），立即 accumulate；R^Q = 其餘者，各自只配上 prerequisite 集合，並只用 ξ[E−1]（僅前一槽 accumulate 掉的 package）修剪；R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!)))，Q 取出依賴集合為空的 report",
+   "R! = 沒有 prerequisites 且 segment-root lookup 為空的 report，立即 accumulate；R^Q = 其餘者，各自配上依賴集合（prerequisites ∪ srlookup 的 key）並先用 ξ_∪ 修剪；R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!)))，其中 Q 對佇列只走**一遍**，事後仍持有依賴的 report 會讓該區塊無效"
+  ],
+  "stem": "How is the sequence of accumulatable reports R* built from the newly available reports R?",
  "options": [
   "R! = reports with no prerequisites and empty segment-root lookup, accumulated immediately; R^Q = the rest, each paired with its dependency set (prerequisites ∪ keys of srlookup) pruned by ξ_∪; R* = R! ⌢ Q(E(ω[m..] ⌢ ω[..m] ⌢ R^Q, P(R!))) where Q repeatedly extracts reports whose dependency set is empty and E removes satisfied dependencies",
   "R! = reports with no prerequisites and empty segment-root lookup, accumulated immediately; R^Q = the rest, each paired with its dependency set (prerequisites ∪ keys of srlookup) pruned by ξ_∪; R* = R! ⌢ Q(E(ω[..m] ⌢ ω[m..] ⌢ R^Q, P(R!))), i.e. the ready queue is read from the current slot m forwards so that the freshest queued reports get their turn first",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "ch12-gas-budget",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24 (g) & 12.17 (Δ+)",
  "difficulty": 3, "kind": "delta", "tags": ["accumulation", "gas", "delta-0.8.0"],
- "stem": "What total gas budget g is handed to the outer accumulation Δ+ in a block, and how does Δ+ choose how many reports to accumulate in a round?",
+  "stemZh": "一個區塊交給外層 accumulation Δ+ 的總 gas 預算 g 是多少？Δ+ 又是怎麼決定一輪要 accumulate 幾份 report 的？",
+  "optionsZh": [
+   "g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x)；Δ+ 取最大的前綴 i，使得那 i 份 report 的 digest gas 上限總和 + 待處理 deferred transfer 的 gas 總和 + free-accumulation 的 gas 總和 ≤ g，對它們執行 Δ*，然後以 g* = g + Σ(新產生 transfer 的 gas) − Σ 實際用掉的 gas、以及一個空的 free-accumulation 映射遞迴下去",
+   "g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x)；Δ+ 取最大的前綴 i，使得**只有**那 i 份 report 的 digest gas 上限總和 ≤ g——transfer 的 gas 與 free-accumulation 的 gas 都不參與這個判斷——對它們執行 Δ*，然後以 g* = g − Σ 實際用掉的 gas 遞迴，並把同一個 free-accumulation 映射帶進每一輪",
+   "g 恰好是 G_A·C = 3.41·10^9，而 always-accumulate 的額度 χ_Z 也從這個總額裡支出；Δ+ 取最大的前綴 i，使得 digest gas 上限總和 + 待處理 deferred transfer 的 gas 總和 ≤ g，對它們執行 Δ*，然後以 g* = g − Σ 實際用掉的 gas 與同一個 free-accumulation 映射遞迴",
+   "g = G_R = 5·10^9，也就是把每個 package 的 refine 額度直接拿來當區塊的 accumulation 預算；Δ+ 每一輪只 accumulate **一份** report 而不是一個前綴，每次從 g 扣掉那份 report 實際用掉的 gas，並在任何 service 的 Accumulate panic 時立即停止，丟棄其餘 report 與它們產生的 transfer"
+  ],
+  "stem": "What total gas budget g is handed to the outer accumulation Δ+ in a block, and how does Δ+ choose how many reports to accumulate in a round?",
  "options": [
   "g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports + Σ gas of pending deferred transfers + Σ free-accumulation gas ≤ g, runs Δ* on them, then recurses with g* = g + Σ(new transfers' gas) − Σ gas actually used and an empty free-accumulation map",
   "g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports alone ≤ g — transfer gas and free-accumulation gas play no part in the test — runs Δ* on them, then recurses with g* = g − Σ gas actually used, carrying the same free-accumulation map into every round",
@@ -68,7 +89,14 @@ ITEMS = [
  "id": "ch12-delta-star",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.18–12.19 (Δ*, R)",
  "difficulty": 3, "kind": "concept", "tags": ["accumulation", "privileges"],
- "stem": "In Δ* (parallel accumulation), which services get accumulated? And when the manager and a privileged service both write to the same privileged index — assigners, delegator or registrar — which write survives?",
+  "stemZh": "在 Δ*（平行 accumulation）中，哪些 service 會被 accumulate？當 manager 與某個具特權的 service 同時寫入同一個特權索引——assigners、delegator 或 registrar——時，哪一次寫入會存活？",
+  "optionsZh": [
+   "s = {有 digest 的 service} ∪ keys(f) ∪ {deferred transfer 的收款方}；每一個都透過 Δ1 恰好被 accumulate 一次；χ′_M 與 χ′_Z 單獨由 manager 的輸出決定；至於 assigners、delegator 與 registrar，衝突解析函數是 R(o, a, b) = b 當 a = o、否則為 a",
+   "s = 只有 {有 digest 的 service}，所以僅僅收到 deferred transfer 或享有 free accumulation 的 service 會被略過；每一個都透過 Δ1 恰好被 accumulate 一次；χ′_M 與 χ′_Z 單獨由 manager 的輸出決定，而 assigners、delegator 與 registrar 只有 manager 能更動",
+   "s = keys(δ) 裡的每一個 service；每個 service 是**每份 digest** 被 accumulate 一次而非每輪一次，所以持有三份 digest 的 service 會跑三次 Δ1；χ′_M 與 χ′_Z 單獨由 manager 的輸出決定；同一輪內若某個特權同時被 manager 與它當前的持有者更動，該區塊無效",
+   "s = {有 digest 的 service} ∪ keys(f) ∪ {deferred transfer 的收款方}；每一個都透過 Δ1 恰好被 accumulate 一次；χ′_M 與 χ′_Z 取自 **registrar** 的輸出；衝突解析函數是 R(o, a, b) = a 當 a = o、否則為 b"
+  ],
+  "stem": "In Δ* (parallel accumulation), which services get accumulated? And when the manager and a privileged service both write to the same privileged index — assigners, delegator or registrar — which write survives?",
  "options": [
   "s = {services with a digest} ∪ keys(f) ∪ {destinations of deferred transfers}; each is accumulated exactly once via Δ1; the manager's output alone decides χ′_M and χ′_Z; for assigners, delegator and registrar the conflict resolver is R(o, a, b) = b when a = o, else a",
   "s = {services with a digest} only, so a service that merely receives a deferred transfer or enjoys free accumulation is skipped; each is accumulated exactly once via Δ1; the manager's output alone decides χ′_M and χ′_Z, and assigners, delegator and registrar are changeable only by the manager",
@@ -89,7 +117,14 @@ ITEMS = [
  "id": "ch12-delta-one-gas",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.23 (Δ1)",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "gas"],
- "stem": "For a single service s, Δ1 invokes Ψ_A(e, τ′, s, g, i^T ⌢ i^U). How is the gas g computed and what are the inputs?",
+  "stemZh": "對單一個 service s，Δ1 會呼叫 Ψ_A(e, τ′, s, g, i^T ⌢ i^U)。gas g 是怎麼算出來的？輸入又是什麼？",
+  "optionsZh": [
+   "g = f[s]（free 額度，若無則為 0）+ 送往 s 的 deferred transfer 的 gas 總和 + 本輪各 report 中屬於 s 的 digest 之 accumulate gas 上限總和；i^T 是送往 s 的 transfer（依序），i^U 是 s 的每份 digest 一個運算元組（依 report 順序）",
+   "g = f[s]（free 額度，若無則為 0）+ 送往 s 的 deferred transfer 的 gas 總和，而 digest 的 accumulate gas 上限**不**加進來，因為 Δ+ 已經把它們計入區塊預算了；i^T 是送往 s 的 transfer（依序），i^U 是 s 的每份 digest 一個運算元組（依 report 順序）",
+   "g = δ[s]_g，也就是該 service 自己的 minaccgas，並以 G_A = 10^7 為上限；i^T 是送往 s 的 transfer（依序），i^U 是**每份至少含有一個 s 之 digest 的 work-report** 一個運算元組，而不是每份 digest 一個",
+   "g = f[s]（free 額度，若無則為 0）+ 送往 s 的 deferred transfer 的 gas 總和 + 本輪各 report 中屬於 s 的 digest 之 accumulate gas 上限總和；但引數序列是 i^U ⌢ i^T，本輪的運算元組排在任何從上一輪帶過來的 transfer 之前"
+  ],
+  "stem": "For a single service s, Δ1 invokes Ψ_A(e, τ′, s, g, i^T ⌢ i^U). How is the gas g computed and what are the inputs?",
  "options": [
   "g = f[s] (free allowance, or 0) + Σ gas of deferred transfers destined to s + Σ accumulate gas-limits of s's digests across the round's reports; i^T = the transfers to s (in order), i^U = one operand tuple per digest of s (report order)",
   "g = f[s] (free allowance, or 0) + Σ gas of deferred transfers destined to s, the digests' accumulate gas-limits NOT being added because Δ+ already charged them against the block budget; i^T = the transfers to s (in order), i^U = one operand tuple per digest of s (report order)",
@@ -110,7 +145,14 @@ ITEMS = [
  "id": "ch12-deferred-transfer",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.14 & B.transfer",
  "difficulty": 1, "kind": "concept", "tags": ["accumulation", "transfers"],
- "stem": "A deferred transfer T = (s, d, a, m, g). What are the fields, and when is the balance moved?",
+  "stemZh": "一筆 deferred transfer T = (s, d, a, m, g)。這些欄位是什麼？餘額又是在什麼時候移動的？",
+  "optionsZh": [
+   "s 來源 service、d 目的地、a 金額、m 為 W_T = 128 個 octet 的 memo、g 是給收款方處理用的 gas 上限；發送方的餘額在呼叫 `transfer` 當下就被扣除，而該金額要到之後某一輪目的地被 accumulate 時才入帳",
+   "s 是發送方的 Ed25519 公鑰、d 是目的 service、a 是金額、m 是 32 個 octet 的 memo 雜湊、g 是發送方願意支付的 gas 價格；發送方的餘額在呼叫 `transfer` 當下被扣除，並在**同一輪** Δ* 之內就入帳給目的地",
+   "s 來源 service、d 是目的 **core** 索引、a 金額、m 為 W_T = 128 個 octet 的 memo、g 是給收款方處理用的 gas 上限；在目的地真正被 accumulate 之前發送方分文未失，所以一筆指向同輪內被刪除之 service 的轉帳，對發送方毫無成本",
+   "s 來源 service、d 目的地、a 金額、m 為 W_T = 128 個 octet 的 memo、g 是給收款方處理用的 gas 上限；發送方在呼叫 `transfer` 時被扣款，而目的地在**同一輪**稍後由 Δ* 在 digest 處理完之後所呼叫的獨立 on-transfer 進入點 Ψ_T 入帳"
+  ],
+  "stem": "A deferred transfer T = (s, d, a, m, g). What are the fields, and when is the balance moved?",
  "options": [
   "s source service, d destination, a amount, m memo of W_T = 128 octets, g gas limit for the recipient's handling; the sender's balance is deducted when `transfer` is called, and the amount is credited to the destination when it is accumulated in a later round",
   "s the sender's Ed25519 public key, d the destination service, a the amount, m a 32-octet memo hash, g the gas price the sender is willing to pay; the sender's balance is deducted when `transfer` is called and credited to the destination inside the very same Δ* round",
@@ -131,7 +173,14 @@ ITEMS = [
  "id": "ch12-outputs",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24–12.33 (δ† → δ‡ → δ′)",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "state"],
- "stem": "After Δ+ returns (n, e′, b, u, t), which statements about the final integration are correct?",
+  "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，關於最終整合的哪些敘述是正確的？",
+  "optionsZh": [
+   "θ′ = b 中的 (service, 雜湊) 配對（那些 yield 出 32 位元組雜湊的 service）；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（accumulate 掉的項數 N、處理掉的 transfer 數 T、用掉的 gas G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
+   "θ′ = H(E(δ†))，一個對整份 posterior service 狀態的單一承諾；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*)，也就是整個可 accumulate 序列",
+   "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（項數 N、用掉的 gas G），transfer 計數已被移除；δ‡ 把 keys(δ†) 中每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
+   "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])，而 ω′ 會被完全清空，因此排隊中的 report 永遠無法跨越一個區塊存活"
+  ],
+  "stem": "After Δ+ returns (n, e′, b, u, t), which statements about the final integration are correct?",
  "options": [
   "θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])",
   "θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence",
@@ -152,7 +201,14 @@ ITEMS = [
  "id": "ch12-preimage-integration",
  "ch": "12", "section": "12.4 Preimage Integration", "gpRef": "eq. 12.34–12.37",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "preimages"],
- "stem": "Which rule governs the preimages extrinsic E_P and its integration into δ′?",
+  "stemZh": "哪一條規則管轄 preimages extrinsic E_P 以及它併入 δ′ 的方式？",
+  "optionsZh": [
+   "E_P ∈ [(s, d)] 依序且唯一；每一組 (s, d) 都必須在 **prior** 的 δ 上為 providable——該 service 存在，且 δ[s]_l[(H(d), |d|)] = []（已請求、尚未提供）；整合發生在 accumulation **之後**：δ′ = I(δ‡, E_P)，把 a_l[(H(d),|d|)] 設為 [τ′] 並寫入 a_p[H(d)] = d，任何已不再有用的 preimage 會被靜默丟棄",
+   "E_P ∈ [(s, d)] 依序且唯一；每一組 (s, d) 都必須在 **posterior** 的 δ‡ 上為 providable——該 service 在那裡必須仍然存在且 δ‡[s]_l[(H(d), |d|)] = []——所以同一塊內被 accumulation 撤掉的 request 會讓整個區塊無效；接著整合為 δ′ = I(δ‡, E_P)，設定 a_l 與 a_p",
+   "E_P ∈ [(s, d)] 依序且唯一；任何 preimage 都可以被納入，不論該 service 是否請求過，因為 I 會保存交給它的每一組；整合發生在 accumulation **之前**，δ† = I(δ, E_P)，好讓 service 的 Accumulate 能讀到同一塊內提供的 preimage，並設定 a_l 與 a_p",
+   "E_P ∈ [(s, d)] 只需沒有重複，排序不受限制；每一組 (s, d) 都必須在 prior 的 δ 上為 providable，而且還必須由該 service 的 manager 簽署；整合發生在 accumulation 之後：δ′ = I(δ‡, E_P)，設定 a_l 與 a_p，任何已不再有用的 preimage 會被靜默丟棄"
+  ],
+  "stem": "Which rule governs the preimages extrinsic E_P and its integration into δ′?",
  "options": [
   "E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the PRIOR δ — the service exists and δ[s]_l[(H(d), |d|)] = [] (requested, not yet provided); integration happens after accumulation: δ′ = I(δ‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d, silently dropping any preimage that is no longer useful",
   "E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the POSTERIOR δ‡ — the service must still exist there and δ‡[s]_l[(H(d), |d|)] = [] — so a request that accumulation dropped in the same block makes the whole block invalid; integration is then δ′ = I(δ‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d",
@@ -173,7 +229,14 @@ ITEMS = [
  "id": "ch12-code-outer-accumulation",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.17 — internal/accumulation/accumulation.go OuterAccumulation",
  "difficulty": 3, "kind": "code", "tags": ["accumulation", "code", "delta-0.8.0"],
- "stem": "This is the team's prefix selection in Δ+. Compared with GP 0.8.0 eq. 12.17, what is missing?",
+  "stemZh": "這是團隊在 Δ+ 中的前綴選取程式碼。對照 GP 0.8.0 的 eq. 12.17，還缺了什麼？",
+  "optionsZh": [
+   "0.8.0 要求預算判斷必須把待處理 deferred transfer 的 gas 總和 t 與 free-accumulation 額度總和 f 一併計入（Σ d_g + Σ t_g + Σ f ≤ g），所以 gasSum 必須從那兩個總和起算而不是從 0",
+   "用錯了 gas 數字：eq. 12.17 在該前綴上加總的是每份 digest **實際用掉**的 gas d_u 而不是宣告的上限 d_g，因為 Δ* 會在預算被檢查之前先把真實用量交回來",
+   "判斷應該逐份 report 進行而不是累計：eq. 12.17 要求 r[..i] 中的**每一份** report 各自滿足 Σ d_g ≤ G_A = 10^7，所以迴圈必須在第一份超過該單份上限的 report 處中斷",
+   "i 的界限錯了：eq. 12.17 是在 N_{|r|+1} 上取最大值，所以 i 可以到達 |r|，而迴圈裡的 `i = idx + 1` 卻把它卡在 |r| − 1，永遠會把最後一份 report 留給下一輪"
+  ],
+  "stem": "This is the team's prefix selection in Δ+. Compared with GP 0.8.0 eq. 12.17, what is missing?",
  "code": {"lang": "go", "caption": "internal/accumulation/accumulation.go (OuterAccumulation, 0.7.2)", "src": """gasSum := types.Gas(0)
 i := 0
 // Determine the maximal prefix of reports that fits within the gas limit
@@ -209,7 +272,14 @@ n := len(t) + i + len(f)"""},
  "id": "ch13-validator-stats",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "eq. 13.1–13.6",
  "difficulty": 2, "kind": "delta", "tags": ["statistics", "delta-0.8.0"],
- "stem": "π ≡ (π_V, π_L, π_C, π_S). Which statement about the validator statistics is correct in GP 0.8.0?",
+  "stemZh": "π ≡ (π_V, π_L, π_C, π_S)。在 GP 0.8.0 中，關於 validator 統計的哪個敘述正確？",
+  "optionsZh": [
+   "每位 validator 的紀錄有六個計數器（出塊 b、ticket t、preimage 數 p、preimage 大小 d、guarantee g、assurance a）；本塊的 assurance 在 epoch 換屆判斷**之前**就記進 π_V†；當 e′ ≠ e 時 π_L ← π_V† 且 π_V 重設；接著 b/t/p/d 記給出塊者 H_I，而 g 記給 reporters 集合 G 裡的每一位",
+   "每位 validator 的紀錄有五個計數器（b、t、p、d、g），assurance 改為逐 core 記在 π_C 裡；當 e′ ≠ e 時 π_V 與 π_L 都被歸零，好讓新 epoch 從零開始；接著 b/t/p/d 記給出塊者 H_I，而 g 記給 reporters 集合 G",
+   "每位 validator 的紀錄有六個計數器；本塊的 assurance 在 epoch 換屆判斷**之後**才記，所以當 e′ ≠ e 時它們會落進全新的 π′_V 而不是 π′_L；π_L 取的則是 π_V 而不是 π_V†；b/t/p/d 給出塊者 H_I、g 給 reporters 集合 G",
+   "每位 validator 的紀錄有六個計數器；本塊的 assurance 在 epoch 換屆判斷之前就記進 π_V†；當 e′ ≠ e 時 π_L ← π_V† 且 π_V 重設；接著 b/t/p/d 記給**每一位其簽章出現在對應 extrinsic 中的 validator**，而 g 記給出塊者 H_I"
+  ],
+  "stem": "π ≡ (π_V, π_L, π_C, π_S). Which statement about the validator statistics is correct in GP 0.8.0?",
  "options": [
   "Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G",
   "Each validator record has five counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g), assurances being tracked per core in π_C instead; on e′ ≠ e both π_V and π_L are zeroed so that the new epoch starts from nothing; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G",
@@ -231,7 +301,14 @@ n := len(t) + i + len(f)"""},
   "alsoCh": ["11"],
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.7, 13.9–13.12",
  "difficulty": 3, "kind": "concept", "tags": ["statistics"],
- "stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?",
+  "stemZh": "core 統計 π_C 與 service 統計 π_S 都是逐區塊（而非逐 epoch）的。關於 core 統計的哪個描述正確？",
+  "optionsZh": [
+   "逐 core：d（DA 負載）= 對本塊變為 **available** 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= bitfield 設起該 core 的 assurance 數量；i、x、z、e、u、l 則是對本塊**被擔保**的那些 report（集合 I）中屬於該 core 者加總",
+   "逐 core：d（DA 負載）= 對本塊**被擔保**的那些 report（集合 I）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= 在該 core 上被擔保的 report 數量；i、x、z、e、u、l 也同樣對 I 加總，所以 π′_C 的每個欄位都出自同一個來源",
+   "逐 core：d（DA 負載）= 對本塊變為 available 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·segment 數，不計 paged proof；p（popularity）= bitfield 設起該 core 的 assurance 數量；i、x、z、e、u、l 也同樣對 R 加總，所以八個欄位全都跟隨可得性",
+   "逐 core：d（DA 負載）= 對本塊變為 available 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= 支持該 core 各 report 的 guarantor 簽章數量；i、x、z、e、u 對本塊被擔保的那些 report（集合 I）加總，但 l 是該 core 上最大的 bundle 長度而不是它們的總和"
+  ],
+  "stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?",
  "options": [
   "Per core: d (DA load) = Σ over the reports that became AVAILABLE this block (the set R) on that core of bundle length + W_G·⌈65·segment_count/64⌉; p (popularity) = the number of assurances whose bitfield has that core set; i, x, z, e, u and l are summed over the reports GUARANTEED this block (the set I) on that core",
   "Per core: d (DA load) = Σ over the reports GUARANTEED this block (the set I) on that core of bundle length + W_G·⌈65·segment_count/64⌉; p (popularity) = the number of reports guaranteed on that core; i, x, z, e, u and l are summed over I as well, so every field of π′_C comes from one and the same source",
@@ -252,7 +329,14 @@ n := len(t) + i + len(f)"""},
  "id": "ch13-service-stats",
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.8, 13.13–13.17",
  "difficulty": 2, "kind": "concept", "tags": ["statistics"],
- "stem": "Which services appear in π′_S for a block, and what does the accumulation entry hold?",
+  "stemZh": "一個區塊的 π′_S 裡會出現哪些 service？accumulation 那一項又裝什麼？",
+  "optionsZh": [
+   "s = 在本塊各 report 中有 digest 的 service ∪ 在 E_P 中收到 preimage 的 service ∪ accumulation 統計的 key；每項裝有來自 E_P 的 provision（筆數、總大小）、refinement（筆數、gas）、imports／extrinsics／exports，以及 accumulation = S(s) = (項數 N, transfer 數 T, gas G) 或 (0,0,0)",
+   "s = keys(δ) 裡的每一個 service，所以每個區塊的 π′_S 都為每個現存帳戶帶一項；每項裝有來自 E_P 的 provision（筆數、總大小）、refinement（筆數、gas）、imports／extrinsics／exports，以及 accumulation = S(s) 或 (0,0,0)",
+   "s = 只有 accumulation 統計的 key，所以本塊僅僅被回報過、或僅僅收到 preimage 的 service 完全不會有條目；每項裝有來自 E_P 的 provision（筆數、總大小）、refinement（筆數、gas）、imports／extrinsics／exports，以及 accumulation = (項數 N, gas G)",
+   "s = 自本 epoch 開始以來被觸及過的每個 service，因為 π_S 是跨 epoch 累積、只在 e′ ≠ e 時才清空；每項裝有取自 digest 的 provision（筆數、總大小）、refinement（筆數、gas）、imports／extrinsics／exports，以及 accumulation = S(s) 或 (0,0,0)"
+  ],
+  "stem": "Which services appear in π′_S for a block, and what does the accumulation entry hold?",
  "options": [
   "s = services with a digest in this block's reports ∪ services that received a preimage in E_P ∪ keys of the accumulation statistics; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)",
   "s = every service in keys(δ), so π′_S carries one entry per existing account in every block; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)",

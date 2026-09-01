@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch11-rho-state",
  "ch": "11", "section": "11.1 State", "gpRef": "eq. 11.1 (ρ)",
  "difficulty": 2, "kind": "delta", "tags": ["reports", "state", "delta-0.8.0"],
- "stem": "What does each entry of ρ (the availability assignments) hold in GP 0.8.0, and why did PR #494 change it?",
+  "stemZh": "在 GP 0.8.0 中，ρ（availability assignments）的每一項裝什麼？PR #494 又為什麼要改它？",
+  "optionsZh": [
+   "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C——整份 guarantee，也就是 work-report 連同它的 2–3 個 guarantor 簽章，再加上它被回報的那個時槽",
+   "ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C——只有 report 與它的時槽、沒有簽章，與 0.7.2 相同；guarantor 的身分改由 β 中記錄的 guarantee 還原",
+   "ρ ∈ [(h ∈ ℍ report 雜湊, t ∈ N_T timeslot)?]_C——每個 core 只有一個 32 位元組的承諾，guarantee 本身在該 report 被 accumulate 之前都由 guarantor 保存在鏈外",
+   "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot, f ∈ bits[|κ|])?]_C——guarantee、時槽，加上一個跨區塊累積 assurance 直到達成超級多數的 bitfield"
+  ],
+  "stem": "What does each entry of ρ (the availability assignments) hold in GP 0.8.0, and why did PR #494 change it?",
  "options": [
   "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C — the whole guarantee, i.e. the work-report together with its 2–3 guarantor signatures, plus the slot at which it was reported",
   "ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C — the report and its slot but no signatures, as in 0.7.2; guarantor identities are recovered from the guarantees recorded in β instead",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "ch11-workreport-fields",
  "ch": "11", "section": "11.1.1 Work Report", "gpRef": "eq. 11.2–11.3",
  "difficulty": 2, "kind": "concept", "tags": ["reports"],
- "stem": "A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. Which field description is WRONG?",
+  "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。哪一個欄位描述是**錯的**？",
+  "optionsZh": [
+   "s——availability specification（package 雜湊、bundle 長度、erasure root、shard 數、segment root、segment 數）",
+   "l——segment-root lookup 字典（work-package 雜湊 → segment root），它與 context 的 prerequisites 合計上限為 J = 8 項",
+   "g——該 package 中所有 refine 呼叫所用掉的 gas 總量",
+   "d——work-digest，數量在 1 到 I = 16 之間"
+  ],
+  "stem": "A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. Which field description is WRONG?",
  "options": [
   "s — the availability specification (package hash, bundle length, erasure root, shard count, segment root, segment count)",
   "l — the segment-root lookup dictionary (work-package hash → segment root), which together with the context's prerequisites is limited to J = 8 entries",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "ch11-refinement-context",
  "ch": "11", "section": "11.1.2 Refinement Context", "gpRef": "eq. 11.4",
  "difficulty": 2, "kind": "delta", "tags": ["reports", "delta-0.8.0"],
- "stem": "Which fields does the refinement context (eq. 11.4, of the set ℂ) contain in GP 0.8.0 (PR #526)?",
+  "stemZh": "在 GP 0.8.0（PR #526）中，refinement context（eq. 11.4，屬於集合 ℂ）包含哪些欄位？",
+  "optionsZh": [
+   "anchor：header 雜湊 a、時槽 n、posterior state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t、posterior state root r；prerequisites p（一組 package 雜湊）——共 8 個欄位",
+   "anchor：header 雜湊 a、posterior state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t；prerequisites p（一組 package 雜湊）——共 6 個欄位，與 0.7.2 相同未變",
+   "anchor：header 雜湊 a、時槽 n、posterior state root s、BEEFY root b；lookup-anchor：header 雜湊 l、時槽 t、posterior state root r；core 索引 c 與 prerequisites p（一組 package 雜湊）——共 9 個欄位",
+   "anchor：header 雜湊 a、時槽 n、**prior** state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t、**prior** state root r；prerequisites p（一組 package 雜湊）——共 8 個欄位"
+  ],
+  "stem": "Which fields does the refinement context (eq. 11.4, of the set ℂ) contain in GP 0.8.0 (PR #526)?",
  "options": [
   "Anchor: header hash a, timeslot n, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t, posterior state root r; prerequisites p (a set of package hashes) — 8 fields",
   "Anchor: header hash a, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t; prerequisites p (a set of package hashes) — 6 fields, unchanged from 0.7.2",
@@ -69,7 +90,14 @@ ITEMS = [
   "alsoCh": ["14", "H"],
  "ch": "11", "section": "11.1.3 Availability", "gpRef": "eq. 11.5, 11.31",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "availability"],
- "stem": "The availability specification (eq. 11.5) is s ≡ (p, l, u, v, e, n). What do u, v and e denote, and what constraint does eq. 11.31 place on v?",
+  "stemZh": "availability specification（eq. 11.5）是 s ≡ (p, l, u, v, e, n)。u、v、e 各代表什麼？eq. 11.31 又對 v 施加了什麼約束？",
+  "optionsZh": [
+   "u = erasure root，是對那 v 個把 bundle 與匯出 segment 一起 erasure-code 出來的碎片所取的 Merkle root；v = erasure 碎片數，eq. 11.31 強制它等於 |κ′|；e = segment root，一棵對匯出 segment 雜湊所建的定深樹；n = segment 數",
+   "u = 對匯出 segment 雜湊所取的 segment root；v = 該 package 中 work-item 的數量，eq. 11.31 強制它至多為 I = 16；e = 對編碼後碎片所取的 erasure root；n = 為該 core 背書的 validator 數",
+   "u = erasure root，是對那 v 個把 bundle 與匯出 segment 一起 erasure-code 出來的碎片所取的 Merkle root；v = erasure 碎片數，eq. 11.31 在每一種設定下都把它固定為 1023；e = segment root，一棵對匯出 segment 雜湊所建的定深樹；n = segment 數",
+   "u = 可稽核 work bundle 的雜湊；v = 為該 report 背書的 guarantor 數量，eq. 11.31 強制它是 2 或 3；e = 該 bundle 之 extrinsic 的 erasure root；n = 該 package 所針對之 core 的索引"
+  ],
+  "stem": "The availability specification (eq. 11.5) is s ≡ (p, l, u, v, e, n). What do u, v and e denote, and what constraint does eq. 11.31 place on v?",
  "options": [
   "u = erasure root, the Merkle root over the v chunks that erasure-code the bundle plus exported segments; v = the erasure-chunk count, which eq. 11.31 forces to equal |κ′|; e = segment root, a constant-depth tree over the exported segment hashes; n = the segment count",
   "u = segment root over the exported segment hashes; v = the number of work-items in the package, which eq. 11.31 forces to be at most I = 16; e = erasure root over the coded chunks; n = the number of validators assuring the core",
@@ -90,7 +118,14 @@ ITEMS = [
  "id": "ch11-work-errors",
  "ch": "11", "section": "11.1.4 Work Digest", "gpRef": "eq. 11.6–11.7",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "errors"],
- "stem": "A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). Which meaning is correct?",
+  "stemZh": "一個 work-digest 的結果不是 blob 就是錯誤集合 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG}（eq. 11.7）的成員。哪一組意義是正確的？",
+  "optionsZh": [
+   "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 程式碼超過 W_C = 4,000,000",
+   "∞ guarantor 偵測到無窮迴圈；☇ host-call 錯誤；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 該 bundle 超過 W_B",
+   "∞ out-of-gas；☇ PVM 的 page fault；BADEXPORTS **匯入** segment 的數量回報錯誤；OVERSIZE 該 bundle 會超過 W_B；BAD authorizer 拒絕了該 package；BIG work-item 超過 I = 16 個",
+   "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 程式碼可得但超過 W_C = 4,000,000；BIG 程式碼在 lookup-anchor 當時不可得"
+  ],
+  "stem": "A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). Which meaning is correct?",
  "options": [
   "∞ out-of-gas; ☇ panic; BADEXPORTS the number of exports was misreported; OVERSIZE the refine output would exceed the size limit; BAD service code unavailable at the lookup-anchor; BIG code exceeds W_C = 4,000,000",
   "∞ an infinite loop was detected by the guarantor; ☇ a host-call fault; BADEXPORTS the number of exports was misreported; OVERSIZE the refine output would exceed the size limit; BAD service code unavailable at the lookup-anchor; BIG the bundle exceeds W_B",
@@ -111,7 +146,14 @@ ITEMS = [
  "id": "ch11-report-size-limit",
  "ch": "11", "section": "11.1.4 Work Digest", "gpRef": "eq. 11.8",
  "difficulty": 1, "kind": "concept", "tags": ["reports", "limits"],
- "stem": "What is the on-chain limit on the variable-size content of a single work-report?",
+  "stemZh": "單一份 work-report 中可變大小內容的鏈上上限是什麼？",
+  "optionsZh": [
+   "|authorizer trace t| + 各 digest 的 |結果 blob| 總和（錯誤計為 0）≤ W_R = 48·2^10 = 49,152 個 octet",
+   "|authorizer trace t| + 各 digest 的 |結果 blob| 總和（錯誤依其編碼長度計算）≤ W_B = 13,791,360 個 octet",
+   "只計各 digest 的 |結果 blob| 總和、authorizer trace 不受限，≤ W_R = 48·2^10 = 49,152 個 octet",
+   "|authorizer trace t| ≤ 32 個 octet，且每個 digest 的結果 blob ≤ W_G = 4,104 個 octet，最多 I = 16 個 blob"
+  ],
+  "stem": "What is the on-chain limit on the variable-size content of a single work-report?",
  "options": [
   "|authorizer trace t| + Σ over digests of |result blob| (errors count as 0) ≤ W_R = 48·2^10 = 49,152 octets",
   "|authorizer trace t| + Σ over digests of |result blob| (errors count as their encoded length) ≤ W_B = 13,791,360 octets",
@@ -132,7 +174,14 @@ ITEMS = [
  "id": "ch11-assurance-rules",
  "ch": "11", "section": "11.2 Package Availability Assurances", "gpRef": "eq. 11.11–11.16",
  "difficulty": 2, "kind": "concept", "tags": ["assurances"],
- "stem": "Which set of rules applies to the assurances extrinsic E_A?",
+  "stemZh": "哪一組規則適用於 assurances extrinsic E_A？",
+  "optionsZh": [
+   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 v 嚴格排序（因此每位 validator 至多一份）；簽章由 κ[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
+   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於**正在建構那個區塊**的雜湊；assurance 依 v 嚴格排序；簽章由 κ′[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
+   "每份 assurance = (anchor a, bitfield f ∈ bits[|κ|], validator 索引 v, **Bandersnatch** 簽章)；a 必須等於 H_P；同一位 validator 可以送出數份 assurance，只要它們仍依 v 排序；簽章對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
+   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 **core 索引**排序；簽章由 κ[v]_e 對 X_A ⌢ 每份被背書 report 的 erasure root 做出；某一位只有在 ρ‡[c] ≠ ∅ 時才可被設起"
+  ],
+  "stem": "Which set of rules applies to the assurances extrinsic E_A?",
  "options": [
   "Each assurance = (anchor a, bitfield f ∈ bits[C], validator index v, Ed25519 sig); a must equal H_P; assurances strictly ordered by v (so at most one per validator); the signature by κ[v]_e is over X_A ⌢ H(E(H_P, f)); a bit may be set only if ρ†[c] ≠ ∅",
   "Each assurance = (anchor a, bitfield f ∈ bits[C], validator index v, Ed25519 sig); a must equal the hash of the block being built; assurances strictly ordered by v; the signature by κ′[v]_e is over X_A ⌢ H(E(H_P, f)); a bit may be set only if ρ†[c] ≠ ∅",
@@ -153,7 +202,14 @@ ITEMS = [
  "id": "ch11-availability-threshold",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17–11.18",
  "difficulty": 2, "kind": "delta", "tags": ["assurances", "delta-0.8.0", "tiny"],
- "stem": "When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?",
+  "stemZh": "在 GP 0.8.0 中，一份 report 什麼時候變成 available（R）？待處理的 assignment 又在什麼時候從 ρ‡ 被清除？",
+  "optionsZh": [
+   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個時槽）、或 |κ| ≠ |κ′|（validator 集合大小改變了）",
+   "當設起 bit c 的 assurance 數量 ≥ 2/3·|κ| 時即為 available（tiny：6 取 4 以上；full：682 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個時槽）、或 |κ| ≠ |κ′|",
+   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U 但 U = 10 個時槽、或 epoch 索引已改變",
+   "當設起 bit c 的 assurance 數量 > 1/2·|κ| 時即為 available（tiny：6 取 4 以上；full：512 以上）；ρ‡[c] 只有在該 report 已被 accumulate 之後才會 = ∅，所以 assignment 永遠不會逾時、也不會對 |κ| 的改變有任何反應"
+  ],
+  "stem": "When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?",
  "options": [
   "Available iff the number of assurances with bit c set is > 2/3·|κ| (tiny: ≥ 5 of 6; full: ≥ 683); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)",
   "Available iff the number of assurances with bit c set is ≥ 2/3·|κ| (tiny: ≥ 4 of 6; full: ≥ 682); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)",
@@ -174,7 +230,14 @@ ITEMS = [
  "id": "ch11-guarantor-assignment",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.19–11.23",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "shuffle"],
- "stem": "How are validators assigned to cores for guaranteeing in GP 0.8.0?",
+  "stemZh": "在 GP 0.8.0 中，validator 是怎麼被指派到 core 上去做擔保的？",
+  "optionsZh": [
+   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：序列 [0,0,0,1,1,1,…] 以熵 e = η′_2 做 Fisher-Yates 洗牌，再依 rotation 索引（R = 10 個時槽）旋轉；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
+   "P(v, e, t) = R(F([⌊C·i/v⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：基底序列先把 v 位 validator 攤平到全部 C 個 core 上，再以熵 e = η′_2 做 Fisher-Yates 洗牌；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——全部 C = 341 個 core 都是作用中的",
+   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)，洗牌用的熵是 η′_1、旋轉週期是 R = 600，也就是每個 epoch 旋轉一次；M = (P(|κ′|, η′_1, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
+   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), t mod R)：洗好的序列每個時槽旋轉一次，所以每位 validator 的 core 每塊往前推進一格，熵為 e = η′_2；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的"
+  ],
+  "stem": "How are validators assigned to cores for guaranteeing in GP 0.8.0?",
  "options": [
   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the sequence [0,0,0,1,1,1,…] is Fisher-Yates shuffled with entropy e = η′_2, then rotated by the rotation index (R = 10 slots); M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — only cores < |κ′|/3 are active",
   "P(v, e, t) = R(F([⌊C·i/v⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the base sequence spreads the v validators over all C cores before the Fisher-Yates shuffle with entropy e = η′_2; M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — all C = 341 cores are active",
@@ -195,7 +258,14 @@ ITEMS = [
  "id": "ch11-guarantee-validity",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.24–11.29",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees"],
- "stem": "Which statement about a guarantee g = (w, t, a) in E_G is correct?",
+  "stemZh": "關於 E_G 裡的一份 guarantee g = (w, t, a)，哪個敘述正確？",
+  "optionsZh": [
+   "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < |κ′|/3",
+   "a 恰好有 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；t 必須等於 τ′；每個簽章都是直接對編碼後的 report E(w) 本身做出；w_c < |κ′|/3",
+   "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；簽署者可以是 κ′ ∪ λ′ 的任何成員、不論他們被指派到哪個 core；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；可以使用任何小於 C = 341 的 core 索引",
+   "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 **M\\*** 之下被指派到 core w_c、否則在 **M** 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < C/3"
+  ],
+  "stem": "Which statement about a guarantee g = (w, t, a) in E_G is correct?",
  "options": [
   "a has 2 or 3 (validator index, Ed25519 sig) pairs ordered by index; every signer must be assigned to core w_c under M when t is in the current rotation and under M* otherwise; R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′; each signature is over X_G ⌢ H(E(w)); w_c < |κ′|/3",
   "a has exactly 3 (validator index, Ed25519 sig) pairs ordered by index; every signer must be assigned to core w_c under M when t is in the current rotation and under M* otherwise; t must equal τ′; each signature is over the encoded report E(w) itself; w_c < |κ′|/3",
@@ -216,7 +286,14 @@ ITEMS = [
  "id": "ch11-report-checks-state",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.31–11.33",
  "difficulty": 2, "kind": "concept", "tags": ["guarantees", "gas"],
- "stem": "Which on-chain checks apply to each incoming report w before it is placed in ρ′?",
+  "stemZh": "在一份進來的 report w 被放進 ρ′ 之前，要通過哪些鏈上檢查？",
+  "optionsZh": [
+   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]（authorizer 在 **prior** 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
+   "ρ[w_c] = ∅（該 core 在 prior 狀態下是空的）；w_a ∈ α′[w_c]（authorizer 在 **posterior** 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_T = 3,500,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
+   "ρ‡[w_c] = ∅，而且該 core 還必須已經空置滿 U = 5 個時槽；w_a ∈ α[w_c]；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000 且沒有每個 service 的下限；erasure 碎片數等於 |κ′|",
+   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]；各 digest 用掉的 **refine** gas 總和 ≤ G_R = 5,000,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 prior 狀態下的 |κ|"
+  ],
+  "stem": "Which on-chain checks apply to each incoming report w before it is placed in ρ′?",
  "options": [
   "ρ‡[w_c] = ∅ (core free after disputes and assurances); w_a ∈ α[w_c] (authorizer in the PRIOR pool); Σ digest accumulate-gas ≤ G_A = 10,000,000 and each digest's gas ≥ δ[d_s]_g; the erasure-chunk count equals |κ′|",
   "ρ[w_c] = ∅ (core free in the prior state); w_a ∈ α′[w_c] (authorizer in the POSTERIOR pool); Σ digest accumulate-gas ≤ G_T = 3,500,000,000 and each digest's gas ≥ δ[d_s]_g; the erasure-chunk count equals |κ′|",
@@ -237,7 +314,14 @@ ITEMS = [
  "id": "ch11-contextual-validity",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.35–11.45",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "context"],
- "stem": "Which of the following is NOT one of the contextual validity requirements for reports in E_G?",
+  "stemZh": "下列哪一項**不是** E_G 中 report 的脈絡有效性要求？",
+  "optionsZh": [
+   "該 extrinsic 中沒有任何兩份 report 共用同一個 work-package 雜湊，而且任何 package 雜湊都不得出現在 β 的 reported 集合、ξ（已 accumulate）、ready queue ω 或 ρ 的某個待處理 assignment 裡",
+   "anchor 的 (a, n, s, b) 必須與 β† 的某一項相符；lookup-anchor 的時間必須 ≥ H_T − L，而 lookup-anchor 的 header 必須能在祖先集合 A 中找到",
+   "每個 prerequisite 以及每個 segment-root-lookup 的 key 都必須出現在這份 extrinsic 或 β 的 reported 集合裡，而被查到的 segment root 必須與那些紀錄相符",
+   "每個 digest 的 service 都必須在最近一個 epoch E 之內至少被 accumulate 過一次，閒置更久的 service 必須先重新註冊才能再被回報"
+  ],
+  "stem": "Which of the following is NOT one of the contextual validity requirements for reports in E_G?",
  "options": [
   "No two reports in the extrinsic share a work-package hash, and no package hash may appear in β's reported sets, in ξ (accumulated), in the ready queue ω or in a pending assignment of ρ",
   "The anchor's (a, n, s, b) must match an entry of β†; the lookup-anchor time must be ≥ H_T − L, and the lookup-anchor header must be found in the ancestor set A",
@@ -258,7 +342,14 @@ ITEMS = [
  "id": "ch11-rho-prime",
  "ch": "11", "section": "11.5 Transitioning for Reports", "gpRef": "eq. 11.46",
  "difficulty": 1, "kind": "concept", "tags": ["guarantees", "state"],
- "stem": "After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?",
+  "stemZh": "處理完 E_G 之後，對於收到一份新 guarantee g 的 core，ρ′[c] 裝的是什麼？",
+  "optionsZh": [
+   "(g, τ′)——整份 guarantee 配上當前區塊的時槽 τ′ 作為它的指派時間",
+   "(g, g_t)——整份 guarantee 配上該 guarantee 自己的時槽 t，而它可能早了一整個 rotation",
+   "(w, τ′)——只有 work-report，guarantor 的憑證在被驗證之後就被丟棄",
+   "(H(E(w)), τ′)——report 的雜湊配上當前區塊的時槽，而該 guarantee 移入 β"
+  ],
+  "stem": "After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?",
  "options": [
   "(g, τ′) — the whole guarantee paired with the current block's timeslot τ′ as its assignment time",
   "(g, g_t) — the whole guarantee paired with the guarantee's own slot t, which may lie a rotation earlier",
@@ -279,7 +370,14 @@ ITEMS = [
  "id": "ch11-code-availability",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17 — internal/extrinsic/assurance_controller.go",
  "difficulty": 2, "kind": "code", "tags": ["assurances", "code", "delta-0.8.0"],
- "stem": "The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Which statement is accurate?",
+  "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。哪個敘述正確？",
+  "optionsZh": [
+   "只要 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 是從 κ 的**即時**大小導出的——tiny 是 6 取 5、full 是 1023 取 683——而不是來自編譯期常數，它就與 GP 嚴格的「> 2/3·|κ|」完全相符",
+   "它是錯的：eq. 11.17 只要求 ≥ 2/3·|κ|，所以 tiny 下 6 取 4、full 下 1023 取 682 就夠了；比較的對象應該是 ⌈2|κ|/3⌉ 而不是一個超級多數常數",
+   "它是錯的：eq. 11.17 是逐 core 計算「設起該 core 那一位的 assurer 數」，而這個迴圈必須先數出 E_A 中任何位置出現過的相異 validator，再拿那個數字去和超級多數比較",
+   "它是錯的：rhoDagger 項為 nil 的 core 仍然必須貢獻它的 report，因為 eq. 11.18 是在本區塊的可得性計數已經完成之後才清空 ρ‡ 的"
+  ],
+  "stem": "The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Which statement is accurate?",
  "code": {"lang": "go", "caption": "internal/extrinsic/assurance_controller.go (UpdateNewlyAvailableWorkReports)", "src": """for i := 0; i < types.CoresCount; i++ {
     // If the votes for this core are greater than the available number, add the work report
     if totalAvailable[i] >= types.ValidatorsSuperMajority {

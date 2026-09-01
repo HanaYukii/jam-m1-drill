@@ -5,7 +5,14 @@ ITEMS = [
  "id": "ch06-gamma-components",
  "ch": "6", "section": "6.2 Safrole Basic State", "gpRef": "eq. 6.3–6.6",
  "difficulty": 1, "kind": "concept", "tags": ["safrole", "state"],
- "stem": "The Safrole state γ ≡ (γ_P, γ_Z, γ_S, γ_A). Which description is correct?",
+  "stemZh": "Safrole 狀態 γ ≡ (γ_P, γ_Z, γ_S, γ_A)。哪一個描述是正確的？",
+  "optionsZh": [
+   "γ_P 是下個 epoch 的 pending validator 金鑰；γ_Z 是對 γ_P 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是供下個 epoch 用的 ticket accumulator（至多 E 張）",
+   "γ_P 是上個 epoch 的 validator 金鑰（也就是 λ 集合）；γ_Z 是對 active set κ 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是供下個 epoch 用的 ticket accumulator（至多 E 張）",
+   "γ_P 是下個 epoch 的 pending validator 金鑰；γ_Z 是對 γ_P 取的 **Ed25519** ring root；γ_S 是供下個 epoch 用的 ticket accumulator（至多 E 張）；γ_A 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）",
+   "γ_P 是供下個 epoch 用的 ticket accumulator（至多 E 張）；γ_Z 是對 γ_P 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是 pending validator 金鑰，並在每個 epoch 開始時重設為 ι"
+  ],
+  "stem": "The Safrole state γ ≡ (γ_P, γ_Z, γ_S, γ_A). Which description is correct?",
  "options": [
   "γ_P pending validator keys for the next epoch; γ_Z the Bandersnatch ring root over γ_P; γ_S the current epoch's slot-sealer sequence (E tickets or E keys); γ_A the ticket accumulator (≤ E tickets) for the next epoch",
   "γ_P the previous epoch's validator keys (the λ set); γ_Z the Bandersnatch ring root over the active set κ; γ_S the current epoch's slot-sealer sequence (E tickets or E keys); γ_A the ticket accumulator (≤ E tickets) for the next epoch",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "ch06-key-rotation",
  "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.14–6.15",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "validators", "epoch"],
- "stem": "On an epoch change (e′ > e), how are the validator key sets rotated per eq. 6.14?",
+  "stemZh": "在 epoch 換屆（e′ > e）時，依 eq. 6.14，validator 的金鑰集合是怎麼輪替的？",
+  "optionsZh": [
+   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)，其中 z 是對 γ′_P 的 Bandersnatch 金鑰取的 ring root，而 Φ 會把任何 Ed25519 金鑰落在 ψ′_O 裡的 validator 整組金鑰歸零",
+   "(γ′_P, κ′, λ′, γ′_Z) = (ι, γ_P, κ, z)，其中 z 是對 γ′_P 的 Bandersnatch 金鑰取的 ring root，且不做任何 offender 過濾——offender 是之後在 guarantor 指派時才被跳過的",
+   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), ι, κ, z)，其中 z 是對 **κ′** 的 Bandersnatch 金鑰取的 ring root，而 Φ 歸零的是 **prior** 的 ψ_O 而非 posterior 集合裡的 offender",
+   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(γ_P), κ, λ, γ_Z)，ring root 只在 ι 改變時才重算，而 Φ 歸零的是 ψ′_O 裡的 offender——這些序列每個區塊都前進一步"
+  ],
+  "stem": "On an epoch change (e′ > e), how are the validator key sets rotated per eq. 6.14?",
  "options": [
   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z) where z is the ring root over the Bandersnatch keys of γ′_P and Φ nulls the entire key tuple of any validator whose Ed25519 key is in ψ′_O",
   "(γ′_P, κ′, λ′, γ′_Z) = (ι, γ_P, κ, z) where z is the ring root over γ′_P's Bandersnatch keys and no offender filtering is applied — offenders are skipped later by the guarantor assignment",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "ch06-valcount",
  "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.7–6.8 (valcount)",
  "difficulty": 2, "kind": "delta", "tags": ["safrole", "validators", "delta-0.8.0"],
- "stem": "GP 0.8.0 (PR #514) generalized the validator-set size. Which sizes are permitted for ι, γ_P, κ and λ?",
+  "stemZh": "GP 0.8.0（PR #514）把 validator 集合的大小一般化了。ι、γ_P、κ 與 λ 允許哪些大小？",
+  "optionsZh": [
+   "永遠恰好 1023 位 validator——這個大小是固定常數 3·C，其中 C = 341 個 core",
+   "6 到 1023 之間的任何大小（含端點），沒有整除規則（N_V ≡ N_{6..3·C+1}）",
+   "6 到 3·C = 1023 之間任何 3 的倍數（含端點）（N_V ≡ {3c | c ∈ N_{2..C+1}}）",
+   "3 到 3·C − 3 = 1020 之間任何 3 的倍數（含端點）（N_V ≡ {3c | c ∈ N_{1..C}}）"
+  ],
+  "stem": "GP 0.8.0 (PR #514) generalized the validator-set size. Which sizes are permitted for ι, γ_P, κ and λ?",
  "options": [
   "Exactly 1023 validators always — the size is the fixed constant 3·C with C = 341 cores",
   "Any size between 6 and 1023 inclusive, with no divisibility rule (N_V ≡ N_{6..3·C+1})",
@@ -68,7 +89,14 @@ ITEMS = [
  "id": "ch06-validator-key-layout",
  "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.9–6.13",
  "difficulty": 1, "kind": "concept", "tags": ["safrole", "validators", "codec"],
- "stem": "A validator key K is a 336-octet sequence. What is the layout?",
+  "stemZh": "一把 validator 金鑰 K 是 336 位元組的序列。它的版面配置是什麼？",
+  "optionsZh": [
+   "Bandersnatch 32 | Ed25519 32 | BLS 144 | metadata 128",
+   "Ed25519 32 | Bandersnatch 32 | BLS 96 | metadata 176",
+   "Bandersnatch 32 | BLS 144 | Ed25519 32 | metadata 128",
+   "Bandersnatch 33 | Ed25519 32 | BLS 143 | metadata 128"
+  ],
+  "stem": "A validator key K is a 336-octet sequence. What is the layout?",
  "options": [
   "Bandersnatch 32 | Ed25519 32 | BLS 144 | metadata 128",
   "Ed25519 32 | Bandersnatch 32 | BLS 96 | metadata 176",
@@ -89,7 +117,14 @@ ITEMS = [
  "id": "ch06-entropy-update",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.22–6.24",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "entropy"],
- "stem": "How is the entropy accumulator η updated in each block, and on an epoch change?",
+  "stemZh": "熵累積器 η 在每個區塊、以及在 epoch 換屆時是怎麼更新的？",
+  "optionsZh": [
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))，把熵 VRF 的**輸出**混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則 (η_1, η_2, η_3) 不變",
+   "每個區塊 η′_0 = H(η_0 ⌢ H_V)，雜湊的是整個 VRF **簽章**而不是它的 32 位元組輸出；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則不變",
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_S))，把 **seal** 的 VRF 輸出混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η′_0, η_1, η_2)，把 posterior 的累積器推進歷史",
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))；而歷史也**每個區塊**都輪替，所以 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2) 無條件成立，η_3 永遠是三個區塊以前的值"
+  ],
+  "stem": "How is the entropy accumulator η updated in each block, and on an epoch change?",
  "options": [
   "η′_0 = H(η_0 ⌢ Y(H_V)) every block, folding in the entropy VRF's output; on e′ > e additionally (η′_1, η′_2, η′_3) = (η_0, η_1, η_2), otherwise (η_1, η_2, η_3) unchanged",
   "η′_0 = H(η_0 ⌢ H_V) every block, hashing the whole VRF signature rather than its 32-byte output; on e′ > e additionally (η′_1, η′_2, η′_3) = (η_0, η_1, η_2), otherwise unchanged",
@@ -111,7 +146,14 @@ ITEMS = [
   "alsoCh": ["11"],
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.25, 6.30, 11.22",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "entropy"],
- "stem": "Each of η′_2 and η′_3 has specific uses in GP 0.8.0. Which assignment is correct?",
+  "stemZh": "在 GP 0.8.0 中，η′_2 與 η′_3 各有特定的用途。哪一組對應是正確的？",
+  "optionsZh": [
+   "η′_2：ticket 的 ring-proof context（X_T ⌢ η′_2 ++ r）、fallback 金鑰序列 F(η′_2, κ′)、guarantor 指派的洗牌；η′_3：驗證 seal 簽章的 context（X_T ⌢ η′_3 ++ i_e 或 X_F ⌢ η′_3）",
+   "η′_2：驗證 seal 簽章的 context（X_T ⌢ η′_2 ++ i_e 或 X_F ⌢ η′_2）；η′_3：ticket 的 ring-proof context（X_T ⌢ η′_3 ++ r）、fallback 金鑰序列 F(η′_3, κ′)、guarantor 指派的洗牌",
+   "η′_1：ticket 的 ring-proof context（X_T ⌢ η′_1 ++ r）與 fallback 金鑰序列 F(η′_1, κ′)；η′_2：驗證 seal 簽章的 context（X_T ⌢ η′_2 ++ i_e）；η′_3：guarantor 指派的洗牌 P(|κ′|, η′_3, τ′)",
+   "η′_0：ticket 的 ring-proof context（X_T ⌢ η′_0 ++ r）與 guarantor 指派的洗牌；η′_1：fallback 金鑰序列 F(η′_1, κ′) 與 seal 的驗證；η′_2 與 η′_3 只用來填 epoch marker H_E"
+  ],
+  "stem": "Each of η′_2 and η′_3 has specific uses in GP 0.8.0. Which assignment is correct?",
  "options": [
   "η′_2: ticket ring-proof context (X_T ⌢ η′_2 ++ r), fallback key sequence F(η′_2, κ′), guarantor assignment shuffle; η′_3: verifying the seal signature context (X_T ⌢ η′_3 ++ i_e or X_F ⌢ η′_3)",
   "η′_2: verifying the seal signature context (X_T ⌢ η′_2 ++ i_e or X_F ⌢ η′_2); η′_3: ticket ring-proof context (X_T ⌢ η′_3 ++ r), fallback key sequence F(η′_3, κ′), guarantor assignment shuffle",
@@ -132,7 +174,14 @@ ITEMS = [
  "id": "ch06-seal-ticket-condition",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16 (ticket seal)",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "seal"],
- "stem": "When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. Which set is exactly right?",
+  "stemZh": "當 γ′_S 是一串 ticket 時，seal H_S 必須滿足三個條件（eq. 6.16），其中 i = γ′_S[H_T mod E]。哪一組完全正確？",
+  "optionsZh": [
+   "i_y = Y(H_S)；H_S 是由 H_A 對 context X_T ⌢ η′_3 ++ i_e、訊息為 E_U(H)（未含 seal 的 header）所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 1（ticketed）",
+   "i_y = H(H_S)，也就是 seal 位元組的 Blake2b 雜湊；H_S 是對 γ′_Z 的 ring-VRF 證明，context 為 X_T ⌢ η′_3 ++ i_e、訊息為 E(H)（完整 header）；而且該區塊被標記為 T = 1（ticketed）",
+   "i_y = Y(H_S)；H_S 是由 H_A 對 context X_T ⌢ **η′_2** ++ i_e、訊息為 E_U(H)（未含 seal 的 header）所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 1（ticketed）",
+   "i = H_A（該 sealer 項目就是出塊者自己的 Bandersnatch 金鑰）；H_S 是由 H_A 對 context X_F ⌢ η′_3、訊息為 E_U(H) 所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 0"
+  ],
+  "stem": "When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. Which set is exactly right?",
  "options": [
   "i_y = Y(H_S); H_S is a Bandersnatch signature by H_A over context X_T ⌢ η′_3 ++ i_e with message E_U(H) (the unsigned header); and the block is marked T = 1 (ticketed)",
   "i_y = H(H_S), the Blake2b hash of the seal bytes; H_S is a ring-VRF proof against γ′_Z over context X_T ⌢ η′_3 ++ i_e with message E(H) (the full header); and the block is marked T = 1 (ticketed)",
@@ -153,7 +202,14 @@ ITEMS = [
  "id": "ch06-slot-sealer-cases",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "fallback"],
- "stem": "The posterior slot-sealer sequence γ′_S has three cases. A block arrives with e′ = e + 1, the previous block was at slot phase m = 480 (< Y = 500) and γ_A holds 600 tickets. What is γ′_S?",
+  "stemZh": "posterior 的 slot-sealer 序列 γ′_S 有三種情形。現在來了一個區塊，e′ = e + 1、前一塊的 slot phase m = 480（< Y = 500）、而 γ_A 持有 600 張 ticket。γ′_S 是什麼？",
+  "optionsZh": [
+   "Z(γ_A)——accumulator 的 outside-in 排序，因為 e′ = e + 1 與 |γ_A| = E 都成立，而 m ≥ Y 那個子句約束的是新區塊的 phase m′、不是前一塊的",
+   "γ_S——維持不變，因為 eq. 6.25 的第二種情形涵蓋任何其前一塊仍位於同一個 epoch 之投票期內的區塊，只有 m ≥ Y 才會逼出一份新序列",
+   "F(η′_2, κ′)——fallback 金鑰，因為 eq. 6.25 的第一種情形還需要 m ≥ Y，而前一塊的 phase 仍在 ticket 投票期之內，所以那場競賽從未收尾",
+   "F(η_2, κ)——fallback 金鑰，因為 m = 480 < Y 確實選中第三種情形，但 F 的種子是前一塊出塊當時生效的 prior η_2 與 prior active set κ"
+  ],
+  "stem": "The posterior slot-sealer sequence γ′_S has three cases. A block arrives with e′ = e + 1, the previous block was at slot phase m = 480 (< Y = 500) and γ_A holds 600 tickets. What is γ′_S?",
  "options": [
   "Z(γ_A) — the outside-in ordering of the accumulator, because e′ = e + 1 and |γ_A| = E both hold and the m ≥ Y clause constrains m′, the new block's phase, not the prior block's",
   "γ_S — unchanged, because the second case of eq. 6.25 covers any block whose prior still sat inside the same epoch's ticket-submission window, and only m ≥ Y forces a fresh sequence",
@@ -174,7 +230,14 @@ ITEMS = [
  "id": "ch06-outside-in-Z",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.26 (Z)",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
- "stem": "The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?",
+  "stemZh": "ticket accumulator γ_A 保留 id 最小的 E 張 ticket 並依升冪排序，而 eq. 6.25 讓下個 epoch 的 slot-sealer 序列成為 Z(γ_A)。一張存活下來的 ticket，其排名如何對應到它可以封印的時槽？",
+  "optionsZh": [
+   "最小的 id 封印第一個時槽、最大的封印第二個、第二小的封印第三個，依此類推：Z 同時從排序好的序列兩端往內取，所以排名的兩個極端會並排坐在 epoch 的開頭",
+   "排名順序與時槽順序一致，因為 accumulator 在插入時就已排序；Z 只對 fallback 序列有意義，而後者由熵導出、抵達時本來就毫無順序可言",
+   "最大的 id 封印第一個時槽、最小的封印第二個，所以 Z 一樣是從兩端往內取，只是從排名的另一端開始而不是從頭開始",
+   "排名被交替發配到 epoch 的兩半，所以最小的 id 封印第一個時槽、次小的封印中間那個時槽、第三小的封印第二個，如此橫跨兩半交錯下去"
+  ],
+  "stem": "The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?",
  "options": [
   "The lowest identifier seals the first slot, the highest the second, the second-lowest the third, and so on: Z consumes the sorted sequence from both ends inward at once, so the two extremes of the ranking sit side by side at the head of the epoch.",
   "Rank order and slot order coincide, because the accumulator is already sorted on insertion; Z matters only for the fallback sequence, which is derived from entropy and therefore arrives in no particular order at all.",
@@ -195,7 +258,14 @@ ITEMS = [
  "id": "ch06-epoch-marker",
  "ch": "6", "section": "6.6 The Markers", "gpRef": "eq. 6.28",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "markers"],
- "stem": "What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?",
+  "stemZh": "在一個新 epoch 的第一塊（e′ > e）中，epoch marker H_E 究竟包含什麼？",
+  "optionsZh": [
+   "(η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])——prior 的 η_0 與 η_1，加上將在下個 epoch 接手的 pending validator γ′_P 的 Bandersnatch 與 Ed25519 金鑰",
+   "(η′_0, η′_1, [(k_b, k_e) | k ∈ κ′])——posterior 的 η′_0 與 η′_1，加上剛在本 epoch 變為 active 的那批 validator 的 Bandersnatch 與 Ed25519 金鑰",
+   "(η_2, η_3, [(k_b, k_e) | k ∈ ι])——兩個最舊的歷史熵，加上 staging 集合的 Bandersnatch 與 Ed25519 金鑰，內容就是 designate host call 留下的樣子",
+   "(η_0, η_1, Z(γ_A))——prior 的 η_0 與 η_1，加上以 outside-in 排序的 ticket 識別碼，每個時槽一張，用來封印接下來那個 epoch 的每一槽"
+  ],
+  "stem": "What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?",
  "options": [
   "(η_0, η_1, [(k_b, k_e) | k ∈ γ′_P]) — the prior η_0 and η_1 plus the Bandersnatch and Ed25519 keys of the pending validators γ′_P who take over in the next epoch",
   "(η′_0, η′_1, [(k_b, k_e) | k ∈ κ′]) — the posterior η′_0 and η′_1 plus the Bandersnatch and Ed25519 keys of the validators that have just become active in this epoch",
@@ -216,7 +286,14 @@ ITEMS = [
  "id": "ch06-winning-tickets-marker",
  "ch": "6", "section": "6.6 The Markers", "gpRef": "eq. 6.29",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "markers"],
- "stem": "Under which exact condition is the winning-tickets marker H_W non-empty?",
+  "stemZh": "winning-tickets marker H_W 在什麼樣的確切條件下才非空？",
+  "optionsZh": [
+   "e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E——同一個 epoch 內、其 slot phase 首次跨越 tail 起點 Y 的那一塊，且 accumulator 已飽和；此時 H_W = Z(γ_A)",
+   "e′ > e ∧ m ≥ Y ∧ |γ_A| = E——新 epoch 的第一塊，只要上個 epoch 的 tail 已經到達且 accumulator 已飽和；此時 H_W = Z(γ_A)",
+   "e′ = e ∧ Y ≤ m < m′ ∧ |γ_A| = E——ticket 投票已經關閉之後、該 epoch tail 期間的**每一塊**，只要 accumulator 已飽和；此時 H_W = Z(γ_A)",
+   "e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| ≥ 1——同一個 epoch 內、其 slot phase 首次跨越 tail 起點 Y 的那一塊，且 accumulator 只要非空即可；此時 H_W = Z(γ_A)"
+  ],
+  "stem": "Under which exact condition is the winning-tickets marker H_W non-empty?",
  "options": [
   "e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E — the first block of the same epoch whose slot phase crosses the tail start Y, with a saturated accumulator; then H_W = Z(γ_A)",
   "e′ > e ∧ m ≥ Y ∧ |γ_A| = E — the first block of a new epoch, once the previous epoch's tail has been reached and the accumulator is saturated; then H_W = Z(γ_A)",
@@ -237,7 +314,14 @@ ITEMS = [
  "id": "ch06-ticket-extrinsic-limits",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30–6.32",
  "difficulty": 2, "kind": "delta", "tags": ["safrole", "tickets", "delta-0.8.0"],
- "stem": "Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?",
+  "stemZh": "依 GP 0.8.0，tickets extrinsic E_T 受哪些界限約束？",
+  "optionsZh": [
+   "m′ < Y 時 |E_T| ≤ K = 16，否則 |E_T| = 0；每個 entry index e < n，其中 n = ⌈2E / |γ′_P|⌉——所以 full 設定下是 2（E = 600、|γ′_P| = 1023）",
+   "每一塊都是 |E_T| ≤ K = 16，包含 tail 期間的區塊；每個 entry index e < N = 2，這是一個不依賴 validator 集合大小的固定常數（E = 600、|κ| = 1023）",
+   "|E_T| ≤ E = 600，而且是整個 epoch 加總而非每塊計算；每個 entry index e < n，其中 n = ⌈2E / |γ′_P|⌉——所以 full 設定下是 2（E = 600、|γ′_P| = 1023）",
+   "m′ ≤ Y 時 |E_T| ≤ K = 16，否則 |E_T| = 0；每個 entry index e < n，其中 n = ⌈|γ′_P| / 2E⌉——所以 full 設定下是 1（E = 600、|γ′_P| = 1023）"
+  ],
+  "stem": "Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?",
  "options": [
   "|E_T| ≤ K = 16 when m′ < Y, otherwise |E_T| = 0; each entry index e < n where n = ⌈2E / |γ′_P|⌉ — so 2 in the full configuration (E = 600, |γ′_P| = 1023)",
   "|E_T| ≤ K = 16 in every block including those in the tail; each entry index e < N = 2, a fixed constant that does not depend on the validator-set size (E = 600, |κ| = 1023)",
@@ -258,7 +342,14 @@ ITEMS = [
  "id": "ch06-ticket-accumulator-rules",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.33–6.36",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
- "stem": "Which statement about the new tickets n and the posterior accumulator γ′_A is FALSE?",
+  "stemZh": "關於新進的 ticket n 與 posterior 的 accumulator γ′_A，哪一個敘述是**錯的**？",
+  "optionsZh": [
+   "n 必須依 ticket id 升冪排序且不得重複，而且 n 裡的任何 id 都不得已經在 γ_A 裡",
+   "γ′_A 是 n 與（γ_A，若 e′ > e 則為 ∅）的排序聯集當中最小的 E 筆",
+   "每一張被提交的 ticket 都必須出現在 γ′_A 裡——會被 accumulator 上限擠掉的 ticket 是無用的，會讓該 extrinsic 無效",
+   "id 較大的 ticket 較受青睞，所以 γ′_A 保留的是最大的 E 筆"
+  ],
+  "stem": "Which statement about the new tickets n and the posterior accumulator γ′_A is FALSE?",
  "options": [
   "n must be sorted ascending by ticket id and contain no duplicates, and no id in n may already be in γ_A",
   "γ′_A is the lowest E entries of the sorted union of n and (γ_A, or ∅ if e′ > e)",
@@ -279,7 +370,14 @@ ITEMS = [
  "id": "ch06-ticket-proof-context",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30, 6.32",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets", "vrf"],
- "stem": "A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?",
+  "stemZh": "E_T 裡的一份 ticket 證明 p 是 Bandersnatch ring-VRF 證明。它是對哪個 ring root、用什麼 context 驗證的？ticket 的識別碼又是什麼？",
+  "optionsZh": [
+   "對 γ′_Z（posterior 的 ring root）驗證，context 為 X_T ⌢ η′_2 ++ r，訊息為空序列 []；ticket id 是 VRF 輸出 Y(p)",
+   "對 γ_Z（prior 的 ring root）驗證，context 為 X_T ⌢ η′_3 ++ r，訊息為 E_U(H)（未含 seal 的 header）；ticket id 是 Blake2b 雜湊 H(p)",
+   "對 κ′（active set）的 Ed25519 金鑰驗證，context 為 X_T ⌢ η_0 ++ r，訊息為空序列 []；ticket id 就是那份證明 p 本身",
+   "對 γ′_Z（posterior 的 ring root）驗證，context 為 X_E ⌢ Y(H_S)，訊息為 E_U(H)（未含 seal 的 header）；ticket id 是 VRF 輸出 Y(p)"
+  ],
+  "stem": "A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?",
  "options": [
   "Against γ′_Z (the posterior ring root), context X_T ⌢ η′_2 ++ r, empty message []; the ticket id is the VRF output Y(p)",
   "Against γ_Z (the prior ring root), context X_T ⌢ η′_3 ++ r, message E_U(H) (the unsigned header); the ticket id is the Blake2b hash H(p)",
@@ -300,7 +398,14 @@ ITEMS = [
  "id": "ch06-seal-fallback",
  "ch": "6", "section": "6.4 Sealing", "gpRef": "eq. 6.17–6.18",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "seal", "fallback"],
- "stem": "In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?",
+  "stemZh": "在 fallback 模式下（γ′_S 是一串 Bandersnatch 金鑰），header 要通過哪些檢查？",
+  "optionsZh": [
+   "γ′_S[H_T mod E] 必須等於 H_A；H_S 是由 H_A 以 context X_F ⌢ η′_3 對 E_U(H) 所做的 Bandersnatch 簽章；T = 0；而 H_V 仍然必要，其 context 為 X_E ⌢ Y(H_S)、訊息為 []",
+   "γ′_S[H_T mod E] 必須等於 H_A；H_S 是由 H_A 以 context X_F ⌢ η′_2 對 E_U(H) 所做的 Bandersnatch 簽章；T = 0；而 H_V 仍然必要，其 context 為 X_E ⌢ Y(H_S)、訊息為 E_U(H)",
+   "γ′_S[H_T mod E] 必須等於出塊者的 Ed25519 金鑰；H_S 是對 γ′_Z 的 ring-VRF 證明，context 為 X_F ⌢ η′_3、訊息為 E_U(H)；T = 1；而 H_V 仍然必要，其 context 為 X_E ⌢ Y(H_S)、訊息為 []",
+   "γ′_S[H_T mod E] 必須等於 H_A；fallback 模式下不需要 seal，因為沒有 ticket 識別碼可供綁定；T = 0；只檢查 H_V，其 context 為 X_E ⌢ η′_3、訊息為 []"
+  ],
+  "stem": "In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?",
  "options": [
   "γ′_S[H_T mod E] must equal H_A; H_S is a Bandersnatch signature by H_A with context X_F ⌢ η′_3 over E_U(H); T = 0; and H_V is still required with context X_E ⌢ Y(H_S) over []",
   "γ′_S[H_T mod E] must equal H_A; H_S is a Bandersnatch signature by H_A with context X_F ⌢ η′_2 over E_U(H); T = 0; and H_V is still required with context X_E ⌢ Y(H_S) over E_U(H)",
@@ -321,7 +426,14 @@ ITEMS = [
  "id": "ch06-code-slot-key-sequence",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25 — internal/safrole/sealing.go UpdateSlotKeySequence",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code"],
- "stem": "This is the team's implementation of γ′_S. Which claim about it is correct?",
+  "stemZh": "這是團隊對 γ′_S 的實作。關於它的哪一個說法是正確的？",
+  "optionsZh": [
+   "`slotIndex` 是 m——**前一塊**的 slot phase（τ mod E）——而 `gammaA` 是 prior 的 accumulator；`etaPrime[2]` 與 `posteriorState.GetKappa()` 都是 posterior 值，與 F(η′_2, κ′) 相符",
+   "`slotIndex` 應該是 m′——正在匯入這一塊的 phase，也就是 H_T mod E——因為 eq. 6.25 問的是「到當前這一塊為止競賽是否已結束」；讀前一塊的 τ mod E 是差一錯誤",
+   "fallback 分支應該把 prior 的 κ 與 prior 的 η_2 一起傳入，因為新進的 validator 要從該 epoch 的第二塊起才取得出塊權",
+   "只要 |γ_A| = E 且 m ≥ Y，第一個分支在 ePrime ≥ e + 2 時也應該觸發，因為累積的 ticket 在被消耗之前一直有效；把它限制在 e + 1 是不必要地強迫走 fallback"
+  ],
+  "stem": "This is the team's implementation of γ′_S. Which claim about it is correct?",
  "code": {"lang": "go", "caption": "internal/safrole/sealing.go (UpdateSlotKeySequence)", "src": """if ePrime == e+1 && len(gammaA) == types.EpochLength && int(slotIndex) >= types.SlotSubmissionEnd {
     // Z(γa) if e′ = e + 1 ∧ m ≥ Y ∧ |γa| = E
     newGammaS.Tickets = OutsideInSequencer(&gammaA)
@@ -351,7 +463,14 @@ posteriorState.SetGammaS(newGammaS)"""},
  "id": "ch06-code-fallback-hash",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.27 — internal/safrole/slot_key_sequence.go",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "fallback"],
- "stem": "Read the team's FallbackKeySequence. Which statement is accurate about its conformance to eq. 6.27?",
+  "stemZh": "讀團隊的 FallbackKeySequence。關於它是否符合 eq. 6.27，哪個敘述正確？",
+  "optionsZh": [
+   "雜湊是對的——Blake2b 就是 GP 的 H，而且前 4 個 octet 是以 little-endian 解碼——但 eq. 6.27 的 cyclic 下標是對**傳入的金鑰序列長度**（也就是 |κ′|）取模，程式碼卻是對編譯期常數 ValidatorsCount 取模",
+   "雜湊是錯的——§3.8 把 H 保留給 Blake2b-256，但 eq. 6.27 要的是 H_K、也就是 Keccak-256，正如那段殘留的註解所說——而模數是對的，因為 cyclic 下標就是對 ValidatorsCount 所持的固定 validator 數取模",
+   "取的片段是錯的——eq. 6.27 的下標取的是 H(r ⌢ E_4(i)) 的**最後**四個 octet 並以 big-endian 解碼，所以 Blake2bHashPartial(·, 4) 讀錯了一端——而對 ValidatorsCount 取模則與該式的 cyclic 下標完全相符",
+   "那個取模是多餘的——四個 Blake2b octet 的 decode_4 本來就落在 N_E 之內，而 eq. 6.27 根本沒有任何模數，所以 `%= ValidatorsCount` 是憑空多出來的一步，可能把兩個不同的時槽映到同一位 validator、破壞「一槽一人」"
+  ],
+  "stem": "Read the team's FallbackKeySequence. Which statement is accurate about its conformance to eq. 6.27?",
  "code": {"lang": "go", "caption": "internal/safrole/slot_key_sequence.go", "src": """for i = 0; i < epochLength; i++ {
     serial := utils.SerializeFixedLength(i, 4)          // E_4(i)
     concatenation := append(entropy[:], serial...)      // r ⌢ E_4(i)
@@ -381,7 +500,14 @@ posteriorState.SetGammaS(newGammaS)"""},
  "id": "ch06-code-entropy-order",
  "ch": "6", "section": "6.4 Sealing and Entropy", "gpRef": "eq. 6.23–6.24 — internal/safrole/sealing.go UpdateEntropy",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "entropy"],
- "stem": "In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?",
+  "stemZh": "在團隊的 UpdateEntropy 中，為什麼 `eta[0]` 是在輪替迴圈**之後**才被 posterior 的 η′_0 覆寫？如果讓迴圈在 UpdateEtaPrime0 寫入同一個陣列之後才跑，會出什麼問題？",
+  "optionsZh": [
+   "因為 eq. 6.24 輪替進 η′_1 的是 **prior** 的 η_0；若被輪替的是 η′_0（它已經混入本塊的 VRF 輸出），η′_1 就會錯誤地包含當前這一塊的熵",
+   "因為 eq. 6.24 會在 epoch 換屆時為累積器重新播種：η′_0 必須在輪替之後重設，好讓新的 epoch 從一個乾淨的值開始，而最後才寫 eta[0] 正是達成這件事",
+   "因為那個遞減的迴圈正是防止 η_0 被複製進全部三個歷史欄位的關鍵；對 eta[0] 的寫入與 eq. 6.24 無關，放在輪替之前執行也一樣可以",
+   "因為 eq. 6.24 是以 posterior 值陳述的，(η′_1, η′_2, η′_3) = (η′_0, η′_1, η′_2)，所以 η′_0 必須先定案，而迴圈之後的那個賦值是對錯誤順序所做的補償性修正"
+  ],
+  "stem": "In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?",
  "code": {"lang": "go", "caption": "internal/safrole/sealing.go", "src": """eta := cs.GetPriorStates().GetEta()
 if ePrime > e {
     for i := 2; i >= 0; i-- {
