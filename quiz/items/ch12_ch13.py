@@ -228,6 +228,7 @@ n := len(t) + i + len(f)"""},
 },
 {
  "id": "ch13-core-service-stats",
+  "alsoCh": ["11"],
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.7, 13.9–13.12",
  "difficulty": 3, "kind": "concept", "tags": ["statistics"],
  "stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?",

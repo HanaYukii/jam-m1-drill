@@ -24,6 +24,7 @@ ITEMS = [
 },
 {
  "id": "ch05-what-header-alone-proves",
+  "alsoCh": ["6"],
  "ch": "5", "section": "5.1–5.3",
  "gpRef": "§5; eq. 5.8; eq. 5.9", "difficulty": 3, "kind": "concept",
  "tags": ["header", "light-client", "validation"],
@@ -130,6 +131,7 @@ ITEMS = [
 },
 {
  "id": "ch05-offenders-marker-why",
+  "alsoCh": ["10", "6"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§10", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "markers", "disputes"],
@@ -151,6 +153,7 @@ ITEMS = [
 },
 {
  "id": "ch05-markers-optionality-cost",
+  "alsoCh": ["6", "10"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11", "difficulty": 2, "kind": "concept",
  "tags": ["header", "markers", "size"],

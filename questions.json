@@ -1,9 +1,44 @@
 {
  "meta": {
-  "bankVersion": "bank v1.0 (2026-08-31)",
+  "bankVersion": "bank v1.0 (2026-09-01)",
   "gpVersion": "Gray Paper 0.8.0",
   "team": "New-JAMneration M1 interview prep",
   "chapters": [
+   {
+    "key": "N1",
+    "name": "JAM 是什麼",
+    "group": "基礎"
+   },
+   {
+    "key": "N2",
+    "name": "區塊與狀態",
+    "group": "基礎"
+   },
+   {
+    "key": "N3",
+    "name": "時間與出塊",
+    "group": "基礎"
+   },
+   {
+    "key": "N4",
+    "name": "Core 與 Service",
+    "group": "基礎"
+   },
+   {
+    "key": "N5",
+    "name": "一份工作的一生",
+    "group": "基礎"
+   },
+   {
+    "key": "N6",
+    "name": "資料可得性與稽核",
+    "group": "基礎"
+   },
+   {
+    "key": "N7",
+    "name": "PVM 與 gas",
+    "group": "基礎"
+   },
    {
     "key": "3",
     "name": "Notation",
@@ -110,7 +145,7 @@
     "group": "Interview extras"
    }
   ],
-  "count": 270,
+  "count": 326,
   "glossaryCats": {
    "state": "狀態與區塊",
    "block": "狀態與區塊",
@@ -826,6 +861,9 @@
   },
   {
    "id": "arch-availability-auditing",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "ARCH",
    "section": "4.8.1, 11, 16, 17 rationale",
    "gpRef": "§4.9.1, §16–17, ELVES paper",
@@ -4023,6 +4061,9 @@
   },
   {
    "id": "c3-ch07-reported-map-downstream",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "7",
    "section": "7 Recent History",
    "gpRef": "eq. 7.8 & eq. 11.41–11.44",
@@ -5183,6 +5224,9 @@
   },
   {
    "id": "appD-node-discrimination",
+   "alsoCh": [
+    "C"
+   ],
    "ch": "D",
    "section": "D.2.1 Trie Node Encoding",
    "gpRef": "§D.2.1",
@@ -5267,6 +5311,9 @@
   },
   {
    "id": "ch14-oversize-rule",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "14",
    "section": "14.4 Work Result Size",
    "gpRef": "§14; eq. 11.x (W_R)",
@@ -5521,6 +5568,9 @@
   },
   {
    "id": "ch05-what-header-alone-proves",
+   "alsoCh": [
+    "6"
+   ],
    "ch": "5",
    "section": "5.1–5.3",
    "gpRef": "§5; eq. 5.8; eq. 5.9",
@@ -5662,6 +5712,10 @@
   },
   {
    "id": "ch05-offenders-marker-why",
+   "alsoCh": [
+    "10",
+    "6"
+   ],
    "ch": "5",
    "section": "5.3 The Markers",
    "gpRef": "eq. 5.11；§10",
@@ -5690,6 +5744,10 @@
   },
   {
    "id": "ch05-markers-optionality-cost",
+   "alsoCh": [
+    "6",
+    "10"
+   ],
    "ch": "5",
    "section": "5.3 The Markers",
    "gpRef": "eq. 5.11",
@@ -5830,6 +5888,10 @@
   },
   {
    "id": "ch04-dependency-graph-alpha",
+   "alsoCh": [
+    "8",
+    "12"
+   ],
    "ch": "4",
    "section": "4.2.1 State Transition Dependency Graph",
    "gpRef": "eq. 4.5–4.20",
@@ -6059,6 +6121,13 @@
     "header",
     "pipelining"
    ],
+   "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是**先前**的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
+   "optionsZh": [
+    "為了讓區塊運算——特別是 Merklization——能夠管線化：出塊者不必先把新狀態 Merklize 完才能發布區塊",
+    "為了讓分叉時兩個競爭區塊帶有相同的 state root，使 best-chain 規則能單純比較時槽而不必比較狀態",
+    "為了縮小 header：先前的 state root 可以用較短的編碼表示，而執行後的 root 必須用完整的 32 位元組",
+    "為了讓輕客戶端只靠 header 鏈就能驗證狀態，因為先前的 root 已經被父區塊簽署過，不需要再自行推導"
+   ],
    "stem": "Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?",
    "options": [
     "To reduce header size: the extrinsic hash H_X already commits to every input that can change state, so committing a second 32-octet root would be redundant",
@@ -6116,6 +6185,13 @@
     "header",
     "time"
    ],
+   "stemZh": "一個區塊的時槽 H_T 必須滿足什麼條件，現在才算有效？",
+   "optionsZh": [
+    "P(H)_t < H_T ∧ H_T · P ≥ 𝕋——時槽必須落在未來，讓其他 validator 有時間在該槽到來前收到區塊",
+    "P(H)_t < H_T ∧ H_T · P ≤ 𝕋——嚴格大於父區塊的時槽，且換算成秒之後不得晚於目前的牆鐘時間 𝕋",
+    "P(H)_t ≤ H_T ∧ H_T · P ≤ 𝕋——允許與父區塊同一個時槽，因為同槽的兩個區塊會由 best-chain 規則決定取捨",
+    "只要求 P(H)_t < H_T——牆鐘的比較屬於鏈下的傳播策略，不是區塊有效性的一部分"
+   ],
    "stem": "Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?",
    "options": [
     "P(H)_t < H_T ∧ H_T · P ≥ T — strictly greater than the parent's slot, and at or beyond the current wall-clock time T",
@@ -6163,6 +6239,9 @@
   },
   {
    "id": "ch05-ancestors-lookup-anchor",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "5",
    "section": "5 The Header",
    "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
@@ -6362,6 +6441,9 @@
   },
   {
    "id": "ch06-which-eta-where",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "6",
    "section": "6.4 Sealing and Entropy Accumulation",
    "gpRef": "eq. 6.16–6.18, 6.25, 6.30, 11.22",
@@ -6802,6 +6884,9 @@
   },
   {
    "id": "ch07-belt-keccak",
+   "alsoCh": [
+    "E"
+   ],
    "ch": "7",
    "section": "7 Recent History",
    "gpRef": "eq. 7.6–7.7",
@@ -6831,6 +6916,9 @@
   },
   {
    "id": "ch07-purpose",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "7",
    "section": "7 Recent History",
    "gpRef": "§7 & eq. 11.36, 11.41–11.44",
@@ -7026,6 +7114,9 @@
   },
   {
    "id": "ch09-lookup-status",
+   "alsoCh": [
+    "14"
+   ],
    "ch": "9",
    "section": "9.2 Preimage Lookups",
    "gpRef": "§9.2.2 Semantics, eq. 9.7",
@@ -7483,6 +7574,10 @@
   },
   {
    "id": "ch11-avspec",
+   "alsoCh": [
+    "14",
+    "H"
+   ],
    "ch": "11",
    "section": "11.1.3 Availability",
    "gpRef": "eq. 11.5, 11.31",
@@ -8083,6 +8178,9 @@
   },
   {
    "id": "ch13-core-service-stats",
+   "alsoCh": [
+    "11"
+   ],
    "ch": "13",
    "section": "13.2 Cores and Services",
    "gpRef": "eq. 13.7, 13.9–13.12",
@@ -8134,6 +8232,2030 @@
    ],
    "explanation": "**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**版本沿革值得記，因為是 delta 考點**：0.7.1 拿掉了 `on_transfer` 的統計；0.8.0（PR #502）又把「處理掉的 transfer 數」加回 accumulation 那個三元組裡。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。",
    "trap": "π_S 的 accumulation 是 (N, T, G) 三元組。"
+  },
+  {
+   "id": "n1-what-problem",
+   "ch": "N1",
+   "section": "§1 Introduction",
+   "gpRef": "§1",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "overview"
+   ],
+   "stemZh": "一句話說，JAM 想成為什麼？",
+   "optionsZh": [
+    "一條能為許多獨立 service 執行大量運算的鏈：多數工作由少數 validator 在主鏈之外平行完成，鏈上只對結果達成共識",
+    "一條隱私鏈，每筆運算都要先產生零知識證明才會被接受，因此 validator 從不需要看見自己正在確認的工作的輸入",
+    "一個通用的 rollup host，只負責保存其他鏈的資料並定期公布它們的 state root，本身不對那些資料做任何運算",
+    "一個更快的支付網路，用平行執行把每秒轉帳筆數推高到超過單一機器能簽署的量"
+   ],
+   "stem": "In one sentence, what does JAM set out to be?",
+   "options": [
+    "A single chain that runs a large amount of computation for many independent services, by having most work done by a few validators in parallel off the main chain and only the results agreed on-chain",
+    "A privacy-preserving chain where every computation is proved in zero knowledge before it is accepted, so validators never see the inputs to the work they are agreeing on",
+    "A general-purpose rollup host that stores the data of other chains and periodically posts their state roots, without running any computation of its own on that data",
+    "A faster payment network that settles transfers between accounts, using parallel execution to raise the number of transfers each second above what a single machine could sign"
+   ],
+   "answer": 0,
+   "explanation": "JAM 的核心主張是「把重活搬到鏈外做、只把結果放上鏈」。§1 描述它是一個能承載大量獨立服務的單一鏈，作法是讓少數被指派的 validator 在**core** 上平行執行工作（in-core），主鏈只負責對結果達成共識（on-chain）。這個分工是理解後面所有章節的地基：work-package 在 core 上被 refine、產出的 work-report 才上鏈、再由 accumulate 寫進狀態。JAM 不是支付網路（它沒有內建的轉帳語意，service 才決定自己在做什麼），也不是只存資料的 rollup host（它真的執行計算），更不是 zk 鏈（它靠重跑與稽核而不是證明來確保正確）。",
+   "optNotes": [
+    "in-core 平行執行、on-chain 只收結果——這正是 JAM 全篇的架構主軸。",
+    "JAM 用「重跑 + 稽核」確保正確性（ELVES），不是用零知識證明。",
+    "rollup host 只存資料不算，JAM 的 core 是真的在跑 service 的程式碼。",
+    "JAM 沒有內建轉帳語意；要不要做支付是各個 service 自己的事。"
+   ],
+   "trap": "一句話版本：少數人平行做、全體只對結果達成共識。"
+  },
+  {
+   "id": "n1-in-core-vs-on-chain-basic",
+   "ch": "N1",
+   "section": "§1; §4 Overview",
+   "gpRef": "§1 & §4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "in-core"
+   ],
+   "stemZh": "「in-core」執行的工作與「on-chain」執行的工作，差別在哪裡？",
+   "optionsZh": [
+    "in-core 的工作只由被指派的少數 validator 執行、其他人不重跑；on-chain 的工作屬於狀態轉移的一部分，每個節點都會執行",
+    "in-core 的工作跑在 PVM 裡，on-chain 的工作直接跑在 validator 自己的硬體上，所以前者必須計量而後者不必",
+    "in-core 是任何碰到 service 自有 storage 的工作，on-chain 是任何碰到餘額的工作，界線跟著寫入哪一塊狀態走",
+    "in-core 發生在區塊被封印之前、on-chain 發生在它被 finalize 之後，兩者的差別是時間先後而不是由誰執行"
+   ],
+   "stem": "What is the difference between work done 'in-core' and work done 'on-chain'?",
+   "options": [
+    "In-core work is executed by a small assigned subset of validators and is not re-run by everyone; on-chain work is part of the state transition and every node executes it",
+    "In-core work runs inside the PVM while on-chain work runs natively on the validator's own hardware, which is why in-core work must be metered but on-chain work need not be",
+    "In-core work is anything touching a service's own storage, while on-chain work is anything touching balances, so the split follows which part of the state is written",
+    "In-core work happens before a block is sealed and on-chain work happens after it is finalized, so the two differ by when in the block's life they run rather than by who runs them"
+   ],
+   "answer": 0,
+   "explanation": "分界線是**誰執行**，不是執行在哪種硬體上、也不是碰哪塊狀態。in-core：一份 work-package 被指派到某個 core，只有該 core 的少數 guarantor 真的跑它（refine），其他人不重跑——這正是 JAM 能承載大量計算的原因，因為總算力不再被「每個人都要跑一遍」綁住。on-chain：accumulate 屬於狀態轉移的一部分，**每個節點都會執行**，所以它必須便宜且結果小。少數人執行帶來的風險，由稽核機制補上：auditor 會隨機抽樣重跑 in-core 的結果，錯了就進 disputes。兩者都在 PVM 裡跑，所以「native vs VM」的說法不成立。",
+   "optNotes": [
+    "分界是「少數人跑 vs 全體跑」，而稽核正是為了補上前者的信任缺口。",
+    "refine 與 accumulate 都在 PVM 裡執行，不存在誰跑原生碼的差別。",
+    "碰哪塊狀態不是判準；refine 根本不能寫狀態，accumulate 才能。",
+    "時間先後不是判準，兩者都發生在同一個區塊的處理過程中。"
+   ],
+   "trap": "in-core = 少數人跑、要靠稽核擔保；on-chain = 全體跑、所以必須小。"
+  },
+  {
+   "id": "n1-vs-ethereum-model",
+   "ch": "N1",
+   "section": "§2 Previous Work; §4.9",
+   "gpRef": "§2 & §4",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "comparison"
+   ],
+   "alsoCh": [
+    "N4"
+   ],
+   "stemZh": "與 Ethereum 相比，JAM 把使用者請求所執行的程式碼放在哪裡？這個選擇帶來什麼後果？",
+   "optionsZh": [
+    "Ethereum 在依 shard 選出的節點子集上執行合約，JAM 則到處都跑，用吞吐換取一個不需要稽核層的簡單安全論證",
+    "Ethereum 把合約程式碼存在鏈上，JAM 則完全存在鏈外，所以 JAM 的容量來自於狀態裡從不需要支付程式碼的儲存成本",
+    "Ethereum 的每次合約呼叫都由每個節點重跑，吞吐因此被單一機器綁住；JAM 讓 service 最重的那一步只在一個 core 上執行，所以增加 core 就能增加容量",
+    "兩者都是全網重跑，差別只在 JAM 的虛擬機是暫存器式而非堆疊式，這才是它每條指令更快的原因"
+   ],
+   "stem": "Compared with Ethereum, where does JAM put the code that a user's request runs, and what follows from that choice?",
+   "options": [
+    "Ethereum runs contracts on a subset of nodes chosen per shard while JAM runs them everywhere, trading throughput for a simpler security argument that needs no auditing layer",
+    "Ethereum stores contract code on-chain while JAM stores it off-chain entirely, so JAM's capacity comes from never having to pay for code storage in the state",
+    "Ethereum re-executes every contract call on every node, so throughput is bounded by one machine; JAM runs a service's heavy step on one core only, so adding cores adds capacity",
+    "Both re-execute everywhere, and the difference is only that JAM's virtual machine is register-based rather than stack-based, which is what makes it faster per instruction"
+   ],
+   "answer": 2,
+   "explanation": "這題問的是**擴展性從哪裡來**。Ethereum 的每一次合約呼叫都由全網每個節點重跑，因此整條鏈的處理能力大約等於一台機器的能力——加節點只會增加安全性，不會增加吞吐。JAM 把最重的那一步（refine）放在 core 上，一份 work-package 只由被指派到該 core 的少數 guarantor 執行；core 數量增加，總能力就跟著增加。代價是「只有少數人跑過」這件事本身不可信，所以必須另外付出稽核成本（erasure coding 讓資料可重建、auditor 隨機重跑、disputes 處理歧見）。register-based VM 與 code 存哪裡都是次要差異，不是擴展性的來源。",
+   "optNotes": [
+    "方向反了，而且 JAM 需要稽核層恰恰因為它不是全網重跑。",
+    "service 的 code 一樣存在狀態裡（透過 preimage），不是存在鏈外。",
+    "全網重跑 vs 單一 core 執行，正是「加 core 就加容量」的來源。",
+    "PVM 是 register-based 沒錯，但那影響的是單指令效率，不是擴展性。"
+   ],
+   "trap": "擴展性來自「不是每個人都跑」，代價是必須額外買一套稽核機制。"
+  },
+  {
+   "id": "n1-name-corejam",
+   "ch": "N1",
+   "section": "§1",
+   "gpRef": "§1",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "naming"
+   ],
+   "stemZh": "JAM 這個名字由兩個字組成。是哪兩個字，它們又指什麼？",
+   "optionsZh": [
+    "Justified Availability Merkleization——一份 work-report 的輸出要能寫進狀態之前必須滿足的三個性質",
+    "Jump And Map——PVM 在 RISC-V 之上額外加入的兩個原語，讓 service 能定址被匯入自己 core 的 segment",
+    "Just Another Machine——一個刻意平凡的名字，用來表明這條鏈提供的是通用虛擬機而非任何特定應用的功能集",
+    "Join 與 Accumulate——把 in-core 的結果帶回鏈上的兩個階段，也是每個 service 都必須定義的操作"
+   ],
+   "stem": "The name JAM comes from two words. Which pair, and what do they refer to?",
+   "options": [
+    "Justified Availability Merkleization — the three properties a work-report must satisfy before its outputs may be written into the state",
+    "Jump And Map — the two primitives the PVM adds on top of RISC-V so that a service can address the segments imported into its core",
+    "Just Another Machine — a deliberately plain name signalling that the chain offers a general virtual machine rather than any application-specific feature set",
+    "Join and Accumulate — the two stages that bring in-core results back on-chain, which are the operations every service must define"
+   ],
+   "answer": 3,
+   "explanation": "JAM = **Join-Accumulate Machine**。這兩個字對應把 in-core 的結果帶回鏈上的兩個階段，源頭是更早的 CoreJam 模型（RFC-31）裡的 Collect-Refine-Join-Accumulate 四段。實際落到 Gray Paper 裡，真正在鏈上執行的只有 accumulate 這一段（join 的角色被吸收進 accumulate 的批次處理），refine 則在 core 上執行，collect 屬於鏈下的收集行為。記住這個名字的來源有實際好處：它直接提醒你「一份工作有 in-core 與 on-chain 兩段」，而這正是整份規格的骨架。",
+   "optNotes": [
+    "這三個詞都是 JAM 的概念，但湊起來不是名字的來源。",
+    "PVM 沒有這兩個特殊 primitive，它是 RV64EM 的精簡子集。",
+    "名字不是這樣來的；JAM 確實提供通用 VM，但那不是命名的由來。",
+    "Join-Accumulate 出自 CoreJam 的四段模型，正是把結果帶回鏈上的那兩段。"
+   ],
+   "trap": "Join-Accumulate Machine，源自 CoreJam 的 Collect-Refine-Join-Accumulate。"
+  },
+  {
+   "id": "n1-why-one-chain",
+   "ch": "N1",
+   "section": "§1; §2 Previous Work",
+   "gpRef": "§1 & §2",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "architecture"
+   ],
+   "stem": "Polkadot gets its capacity from many parallel chains. JAM keeps a single chain and gets capacity from cores instead. What does that buy?",
+   "stemZh": "Polkadot 的處理能力來自許多條平行的鏈，JAM 卻只保留單一條鏈、改用 core 來取得能力。這樣做買到了什麼？",
+   "options": [
+    "One shared state and one set of rules, so services can call and pay each other synchronously instead of passing asynchronous messages between separate chains",
+    "Freedom from erasure coding, since with one chain every validator already holds the whole state and no data needs to be reconstructed from shards",
+    "A smaller validator set, because a single chain needs fewer validators than many parallel chains and can therefore reach agreement in fewer rounds",
+    "Cheaper finality, because a single chain can finalize on every block whereas parallel chains must wait for a shared relay chain to finalize them together"
+   ],
+   "optionsZh": [
+    "單一份共享狀態與單一套規則，因此 service 之間可以同步互相呼叫與付費，不必在不同鏈之間傳遞非同步訊息",
+    "不需要 erasure coding，因為只有一條鏈時每個 validator 本來就持有完整狀態，沒有資料需要從碎片重建",
+    "較小的 validator 集合，因為單一條鏈需要的 validator 比許多平行鏈少，達成共識的輪數也因此較少",
+    "更便宜的 finality，因為單一條鏈可以每塊都 finalize，而平行鏈必須等共用的 relay chain 一起把它們 finalize"
+   ],
+   "answer": 0,
+   "explanation": "差別在**狀態是不是同一份**。Polkadot 的每條 parachain 有自己的狀態，跨鏈只能靠非同步訊息（XCMP），這讓「A 呼叫 B 並拿回結果」這種再普通不過的事變得困難。JAM 只有一條鏈、一份狀態 σ，所有 service 都住在同一個 δ 裡，因此可以同步互動、互相轉帳。能力則由 core 提供：core 不是獨立的鏈，而是同一條鏈上平行執行的運算單位，它們的結果最後都回到同一份狀態。至於 erasure coding，正因為 in-core 的資料沒有全網保存，**才更需要**它；validator 集合大小與 finality 都不是這個選擇的產物。",
+   "optNotes": [
+    "一份共享狀態才能讓 service 同步互相呼叫，這是單鏈換來的核心好處。",
+    "方向反了：正因為只有少數人持有 in-core 資料，才需要 erasure coding。",
+    "validator 數量與鏈的數目無關，JAM 的 core 數還是綁在 |κ|/3 上。",
+    "finality 由 Grandpa 負責，跟「一條鏈或多條鏈」不是同一個維度。"
+   ],
+   "trap": "單鏈買到的是「同一份狀態」；能力來自 core，而 core 不是另一條鏈。"
+  },
+  {
+   "id": "n1-what-is-a-core",
+   "ch": "N1",
+   "section": "§4.9 The Core Model",
+   "gpRef": "§4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "core"
+   ],
+   "alsoCh": [
+    "N4",
+    "N5"
+   ],
+   "stem": "What is a 'core' in JAM?",
+   "stemZh": "JAM 裡的 core 是什麼？",
+   "options": [
+    "A slot of parallel computation on the one chain: a few validators are assigned to it, they run the work sent there, and only their agreed result comes back on-chain",
+    "A physical CPU core on each validator's machine, so the core count is set by the hardware requirement the protocol places on validators",
+    "A separate blockchain with its own state and its own validators, connected to the main chain by the same kind of bridge Polkadot uses for its parachains",
+    "A storage partition of the state, so that a service's data lives on one core and requests touching two services must be split across two cores"
+   ],
+   "optionsZh": [
+    "同一條鏈上的一個平行運算位置：少數 validator 被指派到它、執行送進來的工作，只有他們一致同意的結果會回到鏈上",
+    "每台 validator 機器上的一個實體 CPU 核心，因此 core 的數量由協定對 validator 的硬體要求決定",
+    "一條擁有自己的狀態與自己 validator 的獨立區塊鏈，用 Polkadot 連接 parachain 的那種橋接方式接到主鏈",
+    "狀態的一個儲存分區，所以一個 service 的資料住在某個 core 上，跨兩個 service 的請求必須拆成兩個 core 處理"
+   ],
+   "answer": 0,
+   "explanation": "core 是**同一條鏈上的一個平行運算位置**，不是另一條鏈、不是硬體、也不是儲存分區。每個 core 在每個 rotation 被指派 3 名 guarantor，他們執行送到該 core 的 work-package（refine），產出的 work-report 才進入區塊。所以「加 core 就加運算能力」，而狀態始終只有一份——core 之間不需要橋接，因為它們的產出最後都寫進同一個 σ。名稱容易誤導：它借用 CPU 的比喻表達「平行的執行單位」，但一個 core 在任一時刻只掛一份工作（ρ[c] 至多一筆），而且能同時運作的 core 數受限於 |κ′|/3，因為每個 core 要 3 名 guarantor。",
+   "optNotes": [
+    "少數 validator 被指派、執行後只回傳結果——這正是 core 作為平行運算位置的定義。",
+    "core 是協定層的抽象，與 validator 機器上有幾顆實體 CPU 無關。",
+    "core 沒有自己的狀態、也不需要橋接，所有產出都回到同一份 σ。",
+    "狀態沒有依 core 分區；service 全部住在同一個 δ 裡，這正是單鏈的好處。"
+   ],
+   "trap": "core = 平行的執行位置，不是平行的鏈；狀態永遠只有一份。"
+  },
+  {
+   "id": "n1-validator-roles",
+   "ch": "N1",
+   "section": "§1; §11; §17",
+   "gpRef": "§1, §11 & §17",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "roles"
+   ],
+   "alsoCh": [
+    "N6"
+   ],
+   "stem": "The same validators take on several different jobs around one piece of work. Which description of guarantor, assurer and auditor is right?",
+   "stemZh": "同一批 validator 會圍繞同一份工作扮演幾種不同的角色。關於 guarantor、assurer、auditor 的描述，哪一個是對的？",
+   "options": [
+    "A guarantor and an assurer are two names for the same role at different stages, while an auditor is a separate permissionless participant who need not be a validator at all",
+    "A guarantor executes the work, an assurer finalizes the block containing it, and an auditor settles disputes by voting on which of two competing chains should survive",
+    "A guarantor runs the work and signs for its result; an assurer states that it holds a piece of the data needed to re-run it; an auditor re-runs the work and publicly judges whether the result was right",
+    "A guarantor proposes the work, an assurer executes it and signs the result, and an auditor stores the data long enough for anyone else to repeat the execution later if they wish"
+   ],
+   "optionsZh": [
+    "guarantor 與 assurer 是同一個角色在不同階段的兩個名稱，而 auditor 是獨立的無許可參與者、不必是 validator",
+    "guarantor 執行工作，assurer 為含有它的區塊定案，auditor 則透過投票決定兩條競爭的鏈哪一條該存活來解決爭議",
+    "guarantor 執行工作並為結果簽名；assurer 宣告自己持有重跑該工作所需的一份資料；auditor 重新執行該工作並公開判定結果是否正確",
+    "guarantor 提出工作，assurer 執行它並為結果簽名，auditor 則把資料保存夠久，讓其他人日後想重跑時有東西可用"
+   ],
+   "answer": 2,
+   "explanation": "三個角色對應一份工作的三個階段，而且**都是 validator 在做**。guarantor：被指派到某個 core，實際執行 refine 並在 work-report 上簽名——他是那份結果的擔保人。assurer：宣告自己持有該 work-package 的一份 erasure-coded shard；當超過 2/3 的 assurer 都這麼說，報告才算 available，意思是「這份資料救得回來」。auditor：隨機被抽中去重跑那份工作，公開判定結果對不對；判定不一致就進 disputes。三者環環相扣：沒有 assurer 的保證，auditor 拿不到重跑所需的資料；沒有 auditor，guarantor 的簽名就沒有制衡。finality 是 Grandpa 的事，不屬於這三個角色。",
+   "optNotes": [
+    "三者是不同角色，而且 auditor 必須是 validator（由 VRF 隨機抽出）。",
+    "區塊定案是 Grandpa 的工作，爭議也不是靠投票選鏈而是判定 report 對錯。",
+    "執行、持有資料、重跑判定——三個階段各對應一個角色，正是稽核鏈的骨架。",
+    "順序反了：執行的是 guarantor，assurer 只宣告自己持有資料、不執行。"
+   ],
+   "trap": "guarantor 做、assurer 存、auditor 查；三者都是 validator。"
+  },
+  {
+   "id": "n1-gp-structure",
+   "ch": "N1",
+   "section": "Gray Paper 全書結構",
+   "gpRef": "§3–§14 & App. A–H",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "reading-guide"
+   ],
+   "stem": "You open the Gray Paper for the first time. Which description of how it is laid out will help you find things?",
+   "stemZh": "你第一次打開 Gray Paper。關於它的編排方式，哪一個描述能幫你找到東西？",
+   "options": [
+    "Chapters 3 to 13 walk the state transition component by component, chapter 14 onward covers what happens off-chain, and the appendices hold the machinery the chapters lean on",
+    "The appendices are informative background only, so an implementation that follows chapters 3 to 14 is already complete and conformant without reading any of them",
+    "Each chapter is self-contained and defines the notation it needs at the point of use, so any chapter can be read on its own without reference to the rest of the document",
+    "The chapters are ordered by how a block is processed from start to finish, so reading them in order traces one block through the node exactly once, with the appendices covering the same ground in more detail"
+   ],
+   "optionsZh": [
+    "第 3 到 13 章逐一走過狀態轉移的各個分量，第 14 章之後談鏈下發生的事，附錄則收放各章所倚賴的機制",
+    "附錄只是補充背景，所以一份實作只要照著第 3 到 14 章做就已經完整且合規，完全不必讀附錄",
+    "每一章都自成一體、在用到的地方各自定義所需記號，因此任何一章都可以不參照文件其他部分獨立閱讀",
+    "章節是按照一個區塊從頭到尾的處理順序排列的，所以照順序讀完就等於完整追蹤一個區塊走過節點一次，附錄則是同樣內容的細節版"
+   ],
+   "answer": 0,
+   "explanation": "把結構記住能省下大量翻找時間。**§3** 先把記號定義完（序列、字典、雜湊、簽章），後面所有章節都靠它；**§4** 給出全貌與狀態 σ 的分量清單；**§5–§13** 則逐一定義各分量怎麼轉移——header、Safrole、recent history、authorization、service accounts、disputes、reporting & assurance、accumulation、statistics；**§14 起**進入鏈下：work-package 的形狀、guaranteeing、availability、auditing。**附錄 A–H 是必要機制而非補充**：PVM（A）、host call（B）、codec（C）、state Merklization（D）、一般 Merklization（E）、shuffle（F）、Bandersnatch（G）、erasure coding（H）——沒有它們，正文的公式無法實作。章節順序**不等於**區塊處理順序（例如 disputes 在 §10、但處理時排在很前面）。",
+   "optNotes": [
+    "§3 記號、§4 全貌、§5–13 逐分量、§14+ 鏈下、附錄放機制——這是最實用的地圖。",
+    "附錄是實作必需（PVM、codec、Merklization…），不是可略過的背景。",
+    "記號集中在 §3，其他章大量沿用；沒有哪一章是可以完全獨立閱讀的。",
+    "章節順序不是處理順序；例如 disputes 在 §10，但區塊處理時它排在 reporting 之前。"
+   ],
+   "trap": "附錄不是補充讀物，是正文公式的實作依據。"
+  },
+  {
+   "id": "n2-block-shape",
+   "ch": "N2",
+   "section": "§4.1 The Block",
+   "gpRef": "§4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "block"
+   ],
+   "stem": "What are the two parts of a JAM block?",
+   "stemZh": "一個 JAM 區塊由哪兩個部分組成？",
+   "options": [
+    "A list of transactions and a receipts section, mirroring the layout Ethereum uses so that existing tooling can read JAM blocks",
+    "A header and a set of work-reports, since reports are the only thing a block ever carries and every other input reaches the state elsewhere",
+    "A header, which is small and fixed in shape, and an extrinsic, which carries the data brought in from outside the state",
+    "A header and a state root, with the block's data kept off-chain and referenced by the root so that blocks stay a constant size"
+   ],
+   "optionsZh": [
+    "一串交易加上一個 receipts 區段，沿用 Ethereum 的版面配置，好讓既有工具能讀 JAM 的區塊",
+    "一個 header 與一組 work-report，因為 report 是區塊唯一會攜帶的東西，其他輸入都從別處進入狀態",
+    "一個 header——體積小、形狀固定，以及一份 extrinsic——承載從狀態之外帶進來的資料",
+    "一個 header 與一個 state root，區塊資料存在鏈外並由該 root 指涉，因此區塊大小恆定"
+   ],
+   "answer": 2,
+   "explanation": "B ≡ (H, E)：**header 加 extrinsic**。header 是固定的十個欄位，小而可獨立傳播——輕客戶端只跟著 header 鏈走就能追上大部分變化。extrinsic 則是本塊從外界帶進來的東西，共五個成分（tickets、disputes、preimages、assurances、guarantees）。注意 work-report 只是 extrinsic 五個成分中 guarantees 那一項的內容，不是全部；而狀態本身不在區塊裡，區塊只描述「狀態怎麼變」。",
+   "optNotes": [
+    "JAM 沒有使用者交易、也沒有 receipt 這一層，這是它與 Ethereum 最根本的差異之一。",
+    "work-report 只是 extrinsic 五個成分之一（guarantees）的內容，不是區塊的全部。",
+    "header 小而固定、extrinsic 帶外部輸入，這就是 B ≡ (H, E) 的兩半。",
+    "區塊資料沒有存在鏈外；extrinsic 本身就在區塊裡，只有 work-package 的內容才走鏈下。"
+   ],
+   "trap": "B = header + extrinsic；狀態不在區塊裡，區塊只說明狀態怎麼變。"
+  },
+  {
+   "id": "n2-no-transactions",
+   "ch": "N2",
+   "section": "§4.1; §4.9",
+   "gpRef": "§4",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "extrinsic"
+   ],
+   "alsoCh": [
+    "N4"
+   ],
+   "stem": "JAM is described as transactionless. If there are no user transactions, how does anything from outside get into the state?",
+   "stemZh": "JAM 被描述為 transactionless。既然沒有使用者交易，外界的東西要怎麼進入狀態？",
+   "options": [
+    "Through direct writes by the block author, who is trusted to apply user requests during its own slot and is punished later if it applies them incorrectly",
+    "It cannot: JAM's state is closed and evolves only from its own prior contents, which is what allows the whole transition to be verified without external data",
+    "Through work-packages, which validators execute in-core and bring back as reports, and through preimages, which are blobs a service has already asked for",
+    "Through a special system transaction type that only validators may sign, which wraps the user's original request and carries it into the block unchanged"
+   ],
+   "optionsZh": [
+    "由出塊者直接寫入：出塊者在自己的時槽內被信任去套用使用者請求，事後若套用有誤才會被懲罰",
+    "進不去：JAM 的狀態是封閉的，只從自身先前的內容演化，這正是整個轉移不需要外部資料就能被驗證的原因",
+    "透過 work-package——由 validator 在 core 上執行後以 report 帶回，以及透過 preimage——service 事先請求過的資料 blob",
+    "透過一種只有 validator 能簽署的特殊系統交易，它把使用者的原始請求包起來、原封不動帶進區塊"
+   ],
+   "answer": 2,
+   "explanation": "「transactionless」指的是**沒有使用者簽名的交易**——extrinsic 的五個成分全部由 validator 產生並簽署。外部資料有兩條路進來：**work-package**（使用者把工作交給某個 core，guarantor 執行 refine 後以 work-report 經 E_G 進鏈）與 **preimage**（經 E_P 把 blob 本身放進狀態，但前提是某個 service 事先用 `solicit` 請求過）。兩條路都必須先經過某個 validator，這正是「in-core 做重活、on-chain 只收結果」的直接體現。",
+   "optNotes": [
+    "出塊者不能直接寫狀態，它和其他人一樣受同一套狀態轉移規則約束。",
+    "狀態當然接受外部輸入，否則這條鏈就沒有用途了。",
+    "work-package 與 preimage 是外部資料進入狀態的兩條路，都要先經過 validator。",
+    "JAM 沒有任何交易型別；五個 extrinsic 成分全部由 validator 產生。"
+   ],
+   "trap": "transactionless ≠ 封閉；只是外部資料必須經由 work-package 或 preimage 進來。"
+  },
+  {
+   "id": "n2-state-components-basic",
+   "ch": "N2",
+   "section": "§4.2 The State",
+   "gpRef": "§4",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "state"
+   ],
+   "stem": "The state σ is split into many named components. What is the point of splitting it that way rather than treating it as one blob?",
+   "stemZh": "狀態 σ 被拆成許多具名的分量。這樣拆而不是當成單一個大 blob，用意是什麼？",
+   "options": [
+    "Each component has its own transition rule and its own dependencies, so splitting them lets independent parts of a block's work be computed in parallel and reasoned about separately",
+    "Each component is stored on a different core, so the split is what allows the state to be larger than any single validator could hold on its own machine",
+    "The split exists only for readability in the document; implementations are free to store the state however they like because the Merklization flattens it anyway",
+    "Each component is Merklized into its own separate trie with its own root, and the header carries all of those roots so that a proof can target one component"
+   ],
+   "optionsZh": [
+    "每個分量有自己的轉移規則與自己的相依關係，拆開之後，一個區塊裡互不相干的工作就能平行計算、也能各自獨立推理",
+    "每個分量存放在不同的 core 上，正是這個拆分讓狀態能大於任何單一 validator 機器所能容納的量",
+    "拆分只是為了文件好讀；實作可以任意選擇儲存方式，因為 Merklization 反正會把它攤平",
+    "每個分量各自 Merklize 成獨立的 trie 與獨立的 root，header 帶著所有這些 root，讓證明可以只針對某一個分量"
+   ],
+   "answer": 0,
+   "explanation": "拆分的用意是**相依關係與平行性**。§4 給出一張狀態轉移的依賴圖，每個分量寫成「α′ ≺ (…)」的形式，明確標出它需要哪些輸入。這讓兩件事成為可能：實作可以把互不相依的部分平行算；讀規格的人可以一次只推理一個分量。狀態沒有依 core 分區（只有一份 σ），也不是每個分量一棵 trie（整個狀態進同一棵 Patricia trie、header 只帶一個 root）。拆分也不只是文件排版——依賴圖規定了計算順序，順序錯了 state root 就會不同。",
+   "optNotes": [
+    "各分量有自己的轉移規則與依賴，這正是依賴圖與平行計算的基礎。",
+    "狀態只有一份、不依 core 分區；那是 JAM 刻意選擇單鏈的結果。",
+    "依賴圖規定了計算順序，不是純粹的排版選擇——順序錯就算出不同的 root。",
+    "整個狀態進同一棵 trie、header 只帶一個 root，不是每個分量一棵。"
+   ],
+   "trap": "分量的意義在依賴圖；狀態實體上仍然是一份、一棵 trie、一個 root。"
+  },
+  {
+   "id": "n2-prior-state-root-basic",
+   "ch": "N2",
+   "section": "§5.1 The Header",
+   "gpRef": "§5",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "header"
+   ],
+   "alsoCh": [
+    "N3"
+   ],
+   "stem": "A JAM header carries the state root from before the block ran, not after. What does that make possible?",
+   "stemZh": "JAM 的 header 帶的是區塊執行**之前**的 state root，而不是執行之後的。這讓什麼事情變得可能？",
+   "options": [
+    "A verifier can check the block without holding any state at all, because the prior root is enough to confirm every field the block contains",
+    "The author can publish the block before finishing the slow Merklization of the new state, because that root is not needed until the next block is authored",
+    "Two blocks built on the same parent are guaranteed to carry the same root, so a fork can be resolved by comparing timeslots alone without touching state",
+    "The state can be Merklized lazily and skipped entirely for blocks that no service wrote to, since an unchanged state needs no new root"
+   ],
+   "optionsZh": [
+    "驗證者可以完全不持有狀態就檢查區塊，因為先前的 root 已足以確認區塊裡的每一個欄位",
+    "出塊者可以在還沒把新狀態 Merklize 完之前就發布區塊，因為那個 root 要到下一個區塊出塊時才會被用到",
+    "建在同一個父區塊上的兩個區塊必定帶有相同的 root，因此分叉可以只比較時槽而不必碰狀態就解決",
+    "狀態可以延遲 Merklize，而且對沒有任何 service 寫入的區塊可以整個略過，因為狀態沒變就不需要新的 root"
+   ],
+   "answer": 1,
+   "explanation": "Merklization（走完整棵狀態 trie 算出 root）是狀態轉移裡最慢的一步。header 帶 prior root 的意思是：**本塊的執行結果要到下一塊才被承諾**，所以出塊者可以先把區塊發出去，讓傳播與 Merklization 重疊而不是排隊。GP 說得很直接——「to facilitate the pipelining of block computation and in particular of Merklization」。代價是 β_H 最新一筆的 state root 當下填不出來，只能先放零、由下一塊補正。",
+   "optNotes": [
+    "驗 seal 需要 κ′ 與 γ′_S，都是狀態；光有 prior root 驗不完一個 header。",
+    "先發布、後 Merklize，讓傳播與計算重疊——這正是 pipelining 的意思。",
+    "同一個父區塊的兩個子塊確實帶同樣的 H_R，但那是巧合而非目的，分叉也不是這樣解的。",
+    "每塊都要算 root，沒有「狀態沒變就略過」這回事。"
+   ],
+   "trap": "prior root 換來的是 pipelining；代價是 β_H 要多一個補正步驟。"
+  },
+  {
+   "id": "n2-why-state-root",
+   "ch": "N2",
+   "section": "§4.2; App. D",
+   "gpRef": "§4 & App. D",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "merklization"
+   ],
+   "stem": "Why does the state get reduced to a single 32-octet root at all?",
+   "stemZh": "為什麼要把整個狀態壓縮成單一個 32 位元組的 root？",
+   "options": [
+    "So that the state can be compressed for transmission, with the root acting as the checksum that tells a receiving node the compression was applied correctly",
+    "So that the state can be stored in the header, which keeps a full copy of every service's data available to light clients without any further requests",
+    "So that two nodes can compare their entire state by comparing one value, and so that anyone can prove a single entry's value with a short path instead of the whole state",
+    "So that services cannot read each other's storage, since only the root is visible on-chain and the underlying entries stay private to each service"
+   ],
+   "optionsZh": [
+    "讓狀態能被壓縮以便傳輸，root 則充當檢查碼，告訴接收端壓縮有被正確套用",
+    "讓狀態可以被存進 header，使輕客戶端不必再發出任何請求就能取得每個 service 的完整資料副本",
+    "讓兩個節點只要比較一個值就能比對整份狀態，也讓任何人都能用一條短路徑證明某一筆資料的值，而不必出示整個狀態",
+    "讓 service 無法讀取彼此的 storage，因為鏈上只看得到 root，底層的資料項對各個 service 保持私有"
+   ],
+   "answer": 2,
+   "explanation": "Merkle root 買到兩件事。**其一是比對**：兩個節點只要 root 相同，整份狀態就相同——共識因此不必逐項比對。**其二是證明**：任何人可以用一條從葉子到 root 的路徑（深度乘以節點大小）證明「某個 key 的值是什麼」，而不必持有或傳送整個狀態，這是輕客戶端與跨鏈橋接的基礎。root 不會被存進 header 之外的地方，也跟壓縮、隱私都無關——狀態內容本身是公開的。",
+   "optNotes": [
+    "root 是承諾不是檢查碼，跟壓縮無關。",
+    "header 帶的是 root 不是狀態本身；狀態遠大於任何 header 能容納的量。",
+    "一個值就能比對全部、一條短路徑就能證明單筆——這是 Merkle root 的兩個用途。",
+    "Merklization 不提供隱私；狀態內容是公開的，service 之間的隔離靠的是 host call 的權限規則。"
+   ],
+   "trap": "root 的兩個用途：比對整份狀態、證明單一筆資料。"
+  },
+  {
+   "id": "n2-extrinsic-hash-basic",
+   "ch": "N2",
+   "section": "§5.1",
+   "gpRef": "§5",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "header"
+   ],
+   "stem": "The header does not contain the extrinsic itself, only a hash of it. What does that hash have to support, beyond simply detecting tampering?",
+   "stemZh": "header 並不包含 extrinsic 本身，只有它的雜湊。除了偵測竄改之外，這個雜湊還必須支援什麼？",
+   "options": [
+    "Ordering the extrinsic components, since the hash is computed over them in sequence and a verifier recovers the intended order from the hash value",
+    "Proving that one particular preimage or one particular report was included, without having to hand over the rest of the block's extrinsic data",
+    "Bounding the extrinsic's size, because the hashing scheme only accepts inputs below a fixed length and so caps how much a block may carry",
+    "Reconstructing the extrinsic from the hash alone, so that a node which has lost the block body can recover it from the header it already holds"
+   ],
+   "optionsZh": [
+    "決定 extrinsic 各成分的順序，因為雜湊是依序對它們計算的，驗證者能從雜湊值還原出預期的順序",
+    "證明某一份特定的 preimage 或某一份特定的 report 有被納入，而不必交出區塊其餘的 extrinsic 資料",
+    "限制 extrinsic 的大小，因為該雜湊方案只接受低於固定長度的輸入，因而限制了一個區塊能攜帶的量",
+    "單憑雜湊重建出 extrinsic，讓遺失了區塊本體的節點能從手上已有的 header 把它復原"
+   ],
+   "answer": 1,
+   "explanation": "H_X 不是把整份 extrinsic 直接雜湊，而是**五個成分各自先雜湊、再一起雜湊**，而且 preimage 與 guarantee 這兩個成分內部還把每一項換成它自己的雜湊。GP 說明理由是「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——要能單獨證明某一筆被納入。這樣做的好處是證明時不必搬運整份資料：一份 work-report 可能接近 48 KiB，preimage 更是任意大小。雜湊當然無法反推原文，也不決定順序或大小上限。",
+   "optNotes": [
+    "順序由編碼規格決定，不是從雜湊值還原出來的。",
+    "單獨證明某筆被納入而不必交出其餘資料，正是這個兩層結構的目的。",
+    "大小上限由 W_R 之類的常數規定，跟雜湊函數的輸入長度無關。",
+    "雜湊是單向的，無法從中重建原始資料。"
+   ],
+   "trap": "H_X 是兩層結構，為的是「單獨證明某一筆存在」而不是只防竄改。"
+  },
+  {
+   "id": "n2-what-a-transition-is",
+   "ch": "N2",
+   "section": "§4.2",
+   "gpRef": "§4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "stf"
+   ],
+   "stem": "What does it mean to say a node 'imports' a block?",
+   "stemZh": "說一個節點「import」一個區塊，是什麼意思？",
+   "options": [
+    "It asks the validators who authored the block for a proof of the new state root, and accepts the block once enough of them have signed that proof",
+    "It applies the block's changes optimistically and rolls them back later only if an auditor raises a dispute about one of the reports it contained",
+    "It downloads the block and stores it, then trusts the header's signatures to attest that the transition was performed correctly by the block's author",
+    "It re-runs the state transition the block describes, from the state it already holds, and checks that every commitment in the header matches what it computed"
+   ],
+   "optionsZh": [
+    "它向出塊的 validator 索取新 state root 的證明，等到足夠多人簽署了該證明就接受這個區塊",
+    "它樂觀地套用該區塊的變更，只有當 auditor 對其中某份 report 提出爭議時才回滾",
+    "它下載並保存該區塊，然後信任 header 上的簽章，以此證明轉移已由該區塊的出塊者正確執行",
+    "它從自己手上已有的狀態出發，重新執行該區塊所描述的狀態轉移，並檢查 header 裡的每一項承諾都與自己算出來的相符"
+   ],
+   "answer": 3,
+   "explanation": "import 就是**自己重跑一遍再對答案**。節點從自己持有的 prior state 出發，照規格執行區塊描述的轉移，然後檢查 header 的每一項承諾——H_R 對得上父塊的 posterior root、H_X 對得上實際的 extrinsic、marker 對得上 Safrole 與 disputes 算出來的值、seal 由該 slot 該出塊的人簽。任何一項對不上，區塊就是無效。這裡沒有「信任出塊者」的空間；簽章證明的是「誰出的塊」，不是「他算對了」。真正沒有全網重跑的只有 in-core 那一段，而那一段靠稽核補上。",
+   "optNotes": [
+    "沒有這種索取 root 證明的流程；每個節點自己算得出 root。",
+    "on-chain 的部分不是樂觀執行；樂觀加稽核的是 in-core 那一段。",
+    "簽章只證明出自誰之手，不證明計算正確；正確性靠每個人自己重算。",
+    "重跑轉移、逐項核對承諾——這就是 import，沒有信任的成分。"
+   ],
+   "trap": "on-chain 全體重跑、逐項對承諾；只有 in-core 那段才是樂觀加稽核。"
+  },
+  {
+   "id": "n2-header-vs-state",
+   "ch": "N2",
+   "section": "§5.1; §5.3",
+   "gpRef": "§5",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "header",
+    "light-client"
+   ],
+   "alsoCh": [
+    "N3"
+   ],
+   "stem": "Someone follows only the chain of headers and never downloads a block body or any state. What can they still keep track of, and what stops them?",
+   "stemZh": "有人只跟著 header 鏈走，從不下載區塊本體或任何狀態。他仍然能追蹤什麼？又會卡在哪裡？",
+   "options": [
+    "They can track nothing useful, since headers commit to state they cannot read; the protocol expects every participant to hold the full state and offers no header-only mode",
+    "They can track balances and service storage, since both are summarized in the state root each header carries; what they cannot see is which validator authored the block",
+    "They can follow which validators are in charge, because the markers announce key and ticket changes in the header itself; they cannot verify anything that depends on reading the state",
+    "They can verify the whole transition, because every commitment the header carries is self-contained; nothing about the block requires them to consult the state at all"
+   ],
+   "optionsZh": [
+    "他什麼有用的都追蹤不了，因為 header 承諾的是他讀不到的狀態；協定預期每個參與者都持有完整狀態，並未提供只看 header 的模式",
+    "他能追蹤餘額與 service 的 storage，因為兩者都摘要在每個 header 帶的 state root 裡；他看不到的是這個區塊由哪位 validator 出的",
+    "他能追蹤由誰負責出塊，因為 marker 直接在 header 裡公告金鑰與 ticket 的變化；但凡是需要讀取狀態才能判定的事情，他都驗不了",
+    "他能驗證整個轉移，因為 header 帶的每一項承諾都是自足的；這個區塊沒有任何一處需要他去查閱狀態"
+   ],
+   "answer": 2,
+   "explanation": "這正是 **marker 存在的理由**。只讀 header 的人沒有狀態，所以像 seal 這種需要知道「這個 slot 該由誰出塊」的檢查他做不了——那來自 γ′_S 與 κ′，都在狀態裡。但 header 帶了三個 marker：epoch marker 公告下個 epoch 的 entropy 與整組 validator 金鑰、winning-tickets marker 公告該 epoch 的出塊表、offenders marker 公告誰被剔除。有了它們，輕客戶端就能自己推出 validator 集合的變化，往後一路驗下去。至於 state root，它只是一個承諾——要讀出裡面某筆資料，還需要對方提供 Merkle 證明。",
+   "optNotes": [
+    "協定確實照顧了 header-only 的參與者，marker 就是為他們設計的。",
+    "state root 是承諾不是內容；要讀某筆資料還需要別人給 Merkle 證明。",
+    "marker 讓 header-only 的人跟上 validator 變化，而狀態相關的檢查仍然做不到。",
+    "seal 的驗證需要 κ′ 與 γ′_S，兩者都在狀態裡，所以 header 並非自足。"
+   ],
+   "trap": "header-only 能跟上「誰負責」，跟不上「狀態是什麼」——除非有人給你證明。"
+  },
+  {
+   "id": "n3-slots-and-epochs",
+   "ch": "N3",
+   "section": "§4.8 Epochs and Slots",
+   "gpRef": "§4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "time"
+   ],
+   "stem": "How is time organised in JAM?",
+   "stemZh": "JAM 的時間是怎麼組織的？",
+   "options": [
+    "Into six-second timeslots, grouped into epochs of 600 slots, with at most one block per slot and a single validator entitled to author it",
+    "Into rounds rather than slots, where a round ends once two thirds of validators have signed the same block, so its length depends on network latency",
+    "Into six-second timeslots grouped into epochs, with several blocks allowed per slot so long as they build on different parents and are later merged",
+    "Into blocks of variable duration, where a slot begins when the previous block is seen and ends when the next author has collected enough work to fill one"
+   ],
+   "optionsZh": [
+    "切成 6 秒一個時槽，600 個時槽組成一個 epoch；每個時槽至多一個區塊，而且只有一位 validator 有資格出塊",
+    "切成回合而非時槽：一個回合在三分之二的 validator 簽署同一個區塊後結束，長度因此取決於網路延遲",
+    "切成 6 秒一個時槽並組成 epoch，但每個時槽允許多個區塊，只要它們建在不同的父區塊上、之後再合併",
+    "切成長度不定的區塊：一個時槽從看到前一個區塊開始，到下一位出塊者蒐集到足夠工作填滿一塊為止"
+   ],
+   "answer": 0,
+   "explanation": "**P = 6 秒是一個時槽，E = 600 個時槽是一個 epoch**（所以一個 epoch 是一小時）。時槽是絕對時間的格子，從 JAM Common Era（2025-01-01 1200 UTC）起算——不是「上一塊之後六秒」，而是掛在牆鐘上的固定刻度，所以每個節點都能獨立算出現在是第幾槽。每個時槽至多一個合法區塊，出塊權由 Safrole 事先指派給唯一一位 validator。這也是 JAM「幾乎不分叉」的來源：同一格只有一個人有資格，分叉只會因為網路問題或 fallback 才發生。",
+   "optNotes": [
+    "6 秒一槽、600 槽一 epoch、每槽一人有資格——三個數字撐起整個出塊模型。",
+    "出塊不等待簽署門檻；那是 finality（Grandpa）的事，與出塊節奏無關。",
+    "同一個時槽只有一位有出塊資格，不存在「允許多塊之後再合併」這回事。",
+    "時槽掛在牆鐘上而非相對於前一塊，所以每個節點都算得出現在是第幾槽。"
+   ],
+   "trap": "P = 6 秒、E = 600 槽；時槽是絕對刻度，不是相對於前一塊。"
+  },
+  {
+   "id": "n3-what-safrole-does",
+   "ch": "N3",
+   "section": "§6 Safrole",
+   "gpRef": "§6",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "safrole"
+   ],
+   "stem": "What is Safrole for, in one sentence?",
+   "stemZh": "一句話說，Safrole 是做什麼用的？",
+   "options": [
+    "It decides, ahead of time and anonymously, which single validator may author each slot of the coming epoch",
+    "It finalizes blocks by collecting supermajority signatures, so that a block past a certain depth can never be reverted",
+    "It spreads each work-package's erasure-coded shards across validators so a report's data stays recoverable",
+    "It assigns validators to cores so each core has three guarantors, rotating that assignment every few slots"
+   ],
+   "optionsZh": [
+    "它事先且匿名地決定，接下來那個 epoch 的每一個時槽由哪一位 validator 出塊",
+    "它藉由蒐集超級多數的簽章來為區塊定案，使超過一定深度的區塊永遠不會被回滾",
+    "它把每份 work-package 的 erasure-coded 碎片分發給 validator，使報告背後的資料保持可重建",
+    "它把 validator 指派到各個 core，讓每個 core 有三名 guarantor，並每隔幾槽輪換一次以限制串通"
+   ],
+   "answer": 0,
+   "explanation": "Safrole 只做一件事：**產生「這個 epoch 每一槽由誰出塊」的名單**，而且要在事前決定、同時保持匿名。事前決定讓每槽只有一位合法出塊者（因此幾乎不分叉）；匿名則讓別人無法預先知道下一槽是誰，也就無法針對性攻擊他。其他三個選項都是 JAM 的重要機制但屬於別章：finality 是 Grandpa（§19）、guarantor 對 core 的指派在 §11、erasure coding 的分發在 §11 與附錄 H。",
+   "optNotes": [
+    "事先決定＋匿名，正是 Safrole 的兩個要求，也是它比一般 VRF 抽籤複雜的原因。",
+    "finality 是 Grandpa 的工作，Safrole 只管出塊資格。",
+    "shard 的分發屬於 availability，與出塊資格無關。",
+    "guarantor 對 core 的指派用的是 entropy 洗牌，不經過 Safrole 的票券機制。"
+   ],
+   "trap": "Safrole = 出塊排班表；finality、core 指派、資料分發都是別的機制。"
+  },
+  {
+   "id": "n3-why-anonymous",
+   "ch": "N3",
+   "section": "§6 Safrole",
+   "gpRef": "§6",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "safrole",
+    "security"
+   ],
+   "stem": "Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?",
+   "stemZh": "Safrole 花了不少力氣讓未來時槽的出塊者身分保密。如果出塊表是公開的，會出什麼問題？",
+   "options": [
+    "Anyone could compute the same schedule and author in someone else's slot, because knowing who is next is what proves entitlement to seal a block",
+    "Anyone could see who is about to author and attack or bribe exactly that validator, so a cheap targeted action could stop blocks that a network-wide attack could not",
+    "The schedule would leak the validator set to observers who have not synchronized the state, which would let them forge the epoch marker in a header",
+    "Validators could see their own future slots and withhold their tickets until the last moment, which would leave the accumulator empty and stall the epoch"
+   ],
+   "optionsZh": [
+    "任何人都能算出同一份出塊表，因而能在別人的時槽出塊，因為「知道下一個是誰」正是封印區塊的資格證明",
+    "任何人都能看出接下來由誰出塊，於是可以精準攻擊或收買那一位；一個廉價的針對性行動就能擋下區塊，而全網規模的攻擊反而做不到",
+    "出塊表會把 validator 集合洩漏給尚未同步狀態的觀察者，讓他們能偽造 header 裡的 epoch marker",
+    "validator 能看見自己未來的時槽，於是會把票拖到最後一刻才提交，導致 accumulator 空著、整個 epoch 停擺"
+   ],
+   "answer": 1,
+   "explanation": "匿名買到的是**抗針對性攻擊**。如果所有人都知道第 N 槽由某位 validator 出塊，攻擊者只要在那六秒內癱瘓那一台機器（DoS），或事先收買他，就能讓那一槽出不了塊——成本遠低於攻擊整個網路。Safrole 用 ring VRF 讓驗證者只能確認「某位 γ′_P 的成員擁有這張票」而不知道是誰，直到他真的出塊為止。要注意匿名不是靠保密實現的：出塊資格由密碼學證明（持票人才能產生對應的 VRF 輸出），別人算得出票在哪一槽，但算不出票屬於誰。",
+   "optNotes": [
+    "出塊資格由密碼學證明，知道「誰是下一個」並不能讓你冒名出塊。",
+    "針對性 DoS 與賄賂的成本遠低於全網攻擊，這正是匿名要擋的東西。",
+    "validator 集合本來就是公開的（epoch marker 就在 header 裡），保密的是「票屬於誰」。",
+    "票券的提交期限由 Y = 500 的 tail 規定，與匿名與否無關。"
+   ],
+   "trap": "匿名擋的是針對性攻擊；公開的是「哪一槽有票」，保密的是「票是誰的」。"
+  },
+  {
+   "id": "n3-fallback-basic",
+   "ch": "N3",
+   "section": "§6.5",
+   "gpRef": "§6",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "safrole",
+    "fallback"
+   ],
+   "stem": "If too few tickets are collected during an epoch, JAM does not stall. What does it do instead, and what is given up?",
+   "stemZh": "如果一個 epoch 內收集到的票太少，JAM 不會停擺。它改用什麼做法？又放棄了什麼？",
+   "options": [
+    "It reuses the previous epoch's schedule, which preserves anonymity but gives the same validators the same slots twice in a row",
+    "It extends the epoch until enough tickets arrive, which preserves anonymity but leaves the chain producing blocks at an unpredictable rate meanwhile",
+    "It falls back to picking authors from the entropy and the validator set, which keeps blocks coming but makes the whole epoch's schedule publicly computable",
+    "It lets any validator author any slot on a first-come basis, which keeps blocks coming but allows two validators to seal the same slot and fork the chain"
+   ],
+   "optionsZh": [
+    "沿用上一個 epoch 的出塊表：匿名性得以保留，但同一批 validator 會連續兩輪拿到相同的時槽",
+    "延長該 epoch 直到收到足夠的票：匿名性得以保留，但這段期間整條鏈的出塊速率會變得無法預測",
+    "退回用 entropy 與 validator 集合挑選出塊者：區塊照樣產出，但整個 epoch 的出塊表變成任何人都算得出來",
+    "讓任何 validator 以先到先得的方式出任何一槽：區塊照樣產出，但可能有兩位 validator 封印同一槽而造成分叉"
+   ],
+   "answer": 2,
+   "explanation": "票不夠時走 **fallback**：直接用 entropy 與 active validator 集合算出每一槽的出塊者。這條路的計算輸入在 epoch 一開始就全部公開，所以**整個 epoch 的出塊表任何人都能算出來**——匿名性在這段期間完全消失，針對性 DoS 與賄賂重新變得可行。GP 仍然這樣設計，是因為**活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。這也解釋了為什麼票券投票有 Y = 500 的截止線——留 500 個時槽讓票累積，盡量不走到 fallback。",
+   "optNotes": [
+    "沿用舊排班會讓同一批人重複出塊且可預測，GP 沒有採用這個做法。",
+    "epoch 長度固定為 E = 600，不會為了等票而延長。",
+    "用 entropy 直接算出塊者，代價是整個 epoch 的排班變成公開資訊。",
+    "每一槽仍然只有一位合法出塊者，fallback 不會退化成先到先得。"
+   ],
+   "trap": "fallback 保住活性、犧牲匿名；它不是停擺也不是先到先得。"
+  },
+  {
+   "id": "n3-safrole-vs-grandpa",
+   "ch": "N3",
+   "section": "§4.3; §19",
+   "gpRef": "§4 & §19",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "finality"
+   ],
+   "alsoCh": [
+    "N1"
+   ],
+   "stem": "JAM runs two separate consensus mechanisms. What does each one guarantee that the other does not?",
+   "stemZh": "JAM 同時跑兩套共識機制。各自保證了什麼對方不保證的事？",
+   "options": [
+    "Safrole decides which chain is best when a fork appears; Grandpa decides who may author, so the two run in sequence rather than in parallel",
+    "Safrole guarantees that every slot produces a block; Grandpa guarantees that every block is eventually audited, so together they cover liveness and correctness",
+    "Safrole makes it rare for two blocks to compete for the same position; Grandpa makes a block past a certain point permanent, which block production alone can never promise",
+    "Safrole orders transactions within a block; Grandpa orders blocks relative to each other, so together they give a single total order over all work"
+   ],
+   "optionsZh": [
+    "Safrole 在分叉出現時決定哪條鏈最好，Grandpa 決定由誰出塊，所以兩者是先後執行而非平行運作",
+    "Safrole 保證每個時槽都會產出區塊，Grandpa 保證每個區塊最終都會被稽核，兩者合起來涵蓋活性與正確性",
+    "Safrole 讓兩個區塊競爭同一個位置變得罕見；Grandpa 讓超過某個點的區塊成為永久，而這是出塊機制本身永遠無法承諾的",
+    "Safrole 決定區塊內部交易的順序，Grandpa 決定區塊彼此之間的順序，兩者合起來給出所有工作的單一全序"
+   ],
+   "answer": 2,
+   "explanation": "兩者解決的是**不同的問題**。Safrole 管「誰可以出塊」：每槽只有一位有資格，因此很少長出兩個競爭的 head——但它無法保證某個區塊永遠不會被回滾，因為更長的鏈隨時可能出現。Grandpa 管 **finality**：一旦足夠多的 validator 對某個區塊表態，它就永久留在歷史裡。GP §4.3 列了三個目標：很少分叉（Safrole）、分叉快速收斂（兩者共同）、能指出某個近期區塊永久留存（Grandpa）。JAM 沒有交易也就沒有「交易排序」，稽核則是另一套機制（ELVES）。",
+   "optNotes": [
+    "角色反了：出塊資格是 Safrole 的事，best-chain 規則另有定義。",
+    "Safrole 不保證每槽都出塊（持票人可能離線），稽核也不是 Grandpa 負責。",
+    "很少分叉 vs 永不回滾——這正是出塊機制與 finality gadget 的分工。",
+    "JAM 沒有交易，也就沒有「區塊內的交易排序」這件事。"
+   ],
+   "trap": "Safrole 管資格、Grandpa 管永久；分叉快速收斂才是兩者共同的貢獻。"
+  },
+  {
+   "id": "n3-two-signatures",
+   "ch": "N3",
+   "section": "§5.1; §6.4",
+   "gpRef": "§5 & §6",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "header",
+    "entropy"
+   ],
+   "stem": "Every header carries two Bandersnatch signatures, not one. What is the second one for?",
+   "stemZh": "每個 header 都帶兩個 Bandersnatch 簽章而不是一個。第二個是做什麼用的？",
+   "options": [
+    "One is used during normal operation and the other only during fallback, so a verifier can tell from the header which mode the epoch is in",
+    "One seals the block and proves the author was entitled to the slot; the other produces the fresh randomness that gets folded into the chain's entropy pool",
+    "One is signed by the author and the other by the previous author, so the pair chains the two blocks together in addition to the parent hash",
+    "One covers the header and the other covers the extrinsic, so a node can check the header before it has downloaded the block body"
+   ],
+   "optionsZh": [
+    "一個用於正常運作、另一個只在 fallback 時使用，讓驗證者能從 header 看出這個 epoch 處於哪種模式",
+    "一個封印區塊、證明出塊者對這個時槽有資格；另一個產生新的隨機性，被混進整條鏈的 entropy pool",
+    "一個由本塊出塊者簽、另一個由上一塊的出塊者簽，兩者除了父雜湊之外再把兩個區塊串在一起",
+    "一個涵蓋 header、另一個涵蓋 extrinsic，讓節點在還沒下載區塊本體之前就能先檢查 header"
+   ],
+   "answer": 1,
+   "explanation": "**H_S（seal）證明資格，H_V（entropy VRF）產生隨機性。** 兩者都是 Bandersnatch VRF 簽章，但用途完全不同：seal 簽的是不含 seal 自己的 header 編碼，用來證明「這一槽本來就該由我出」；entropy 簽章的輸出 Y(H_V) 則被混進 η_0，成為下個 epoch 抽籤與 guarantor 洗牌的隨機性來源。分成兩個而不是共用一個，是為了讓熵不可被操縱——熵簽章的 context 綁在 seal 的輸出上，訊息在產生熵之前就已經固定，出塊者無法試很多份區塊挑一個對自己有利的結果。",
+   "optNotes": [
+    "模式（ticket 或 fallback）由 context 字串區分，但那是同一個 seal 的兩種形式，不是兩個簽章。",
+    "一個證明資格、一個產生熵，兩者用途獨立但透過 context 綁在一起。",
+    "兩個簽章都由本塊出塊者產生，與上一塊的作者無關。",
+    "seal 簽的是 header 編碼；extrinsic 的完整性由 H_X 這個雜湊承諾，不需要另一個簽章。"
+   ],
+   "trap": "H_S 證明資格、H_V 產生熵；分開是為了讓熵不可被出塊者挑選。"
+  },
+  {
+   "id": "n3-entropy-basic",
+   "ch": "N3",
+   "section": "§6.4 Entropy",
+   "gpRef": "§6",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "entropy"
+   ],
+   "stem": "The chain needs randomness for the ticket lottery and for assigning validators to cores. Why can it not simply hash the latest block?",
+   "stemZh": "這條鏈需要隨機性來做票券抽籤與 validator 對 core 的指派。為什麼不能就直接雜湊最新的區塊？",
+   "options": [
+    "Because the block hash is not known until the block has propagated to its peers, and the lottery for the coming epoch must be resolved before that broadcast begins",
+    "Because hashing is deterministic, and a lottery needs a source that no other participant can reproduce once its result has already been consumed",
+    "Because a block hash is only 32 octets, which is too little entropy to seed a lottery over hundreds of validators across six hundred slots without repeating itself",
+    "Because the author chooses the block's contents, so it could try many variations and publish the one whose hash favours it; a VRF output is fixed by the key, not by the contents"
+   ],
+   "optionsZh": [
+    "因為區塊雜湊要等區塊傳播之後才知道，而抽籤必須在區塊廣播給任何人之前就完成",
+    "因為雜湊是確定性的，而抽籤需要一個一旦被使用就無法被別人重現的來源",
+    "因為區塊雜湊只有 32 位元組，用來為橫跨六百個時槽、數百位 validator 的抽籤提供種子，熵量太少",
+    "因為區塊內容由出塊者決定，他可以試很多種版本、挑一個雜湊對自己有利的發布出來；VRF 的輸出則由金鑰決定，不由內容決定"
+   ],
+   "answer": 3,
+   "explanation": "問題在**可偏置（bias）**。如果隨機性直接來自區塊雜湊，出塊者可以微調區塊內容（多放一筆、少放一筆、換個順序）試出很多不同的雜湊，再挑一個讓自己下個 epoch 拿到好時槽的版本發布——這叫 grinding attack。JAM 改用 VRF：Y(H_V) 的值由**私鑰與 context 決定**，出塊者換再多內容也只能得到同一個輸出，沒有可挑的餘地。而且 context 綁在 seal 的輸出上，訊息在產生熵之前就固定了。確定性本身不是問題——隨機性必須人人可重算，否則無法達成共識。",
+   "optNotes": [
+    "抽籤本來就發生在區塊產生之後，時序不是理由。",
+    "隨機性必須人人可重算才能達成共識，「不可重現」反而是不可接受的。",
+    "32 位元組是標準的種子長度，熵量從來不是問題。",
+    "出塊者能試很多版本挑對自己有利的雜湊，這正是 VRF 要擋掉的 grinding。"
+   ],
+   "trap": "要防的是 grinding：VRF 讓出塊者無法挑選自己的熵。"
+  },
+  {
+   "id": "n3-block-too-new",
+   "ch": "N3",
+   "section": "§5.1",
+   "gpRef": "§5",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "validity"
+   ],
+   "alsoCh": [
+    "N2"
+   ],
+   "stem": "A node receives a well-formed block whose timeslot is a few seconds in the future. How should it treat it?",
+   "stemZh": "一個節點收到一個格式正確、但時槽比現在早了幾秒（屬於未來）的區塊。它應該怎麼處理？",
+   "options": [
+    "Accept it but withhold it from peers until the slot arrives, because forwarding a future block would let it propagate faster than the protocol intends",
+    "Accept it immediately, because the timeslot is only used for ordering and the seal already proves the author was entitled to that slot whenever it arrives",
+    "Reject it permanently and treat the sender as misbehaving, because a block claiming a future slot can only come from an author trying to seize a slot it was not given",
+    "Treat it as not yet valid rather than invalid, because the same block becomes valid as the clock advances and discarding it would punish a peer for a small clock difference"
+   ],
+   "optionsZh": [
+    "接受但先不轉發給其他節點，直到該時槽到來，因為轉發未來區塊會讓它傳播得比協定預期更快",
+    "立刻接受，因為時槽只用於排序，而 seal 已經證明出塊者對該時槽有資格，不論它何時抵達",
+    "永久拒絕並把發送方視為行為不端，因為宣稱未來時槽的區塊只可能來自想搶奪非屬自己時槽的出塊者",
+    "當成「還不到時候」而不是無效，因為同一個區塊會隨著時鐘前進而變得有效；丟棄它等於因為一點時鐘誤差就懲罰對方"
+   ],
+   "answer": 3,
+   "explanation": "有效性條件是 P(H)_T < H_T ∧ H_T · P ≤ 𝕋，其中後半是**暫時性**的。GP 特別補了一句：「Blocks considered invalid by this rule may become valid as 𝕋 advances」——來自未來的區塊只是還沒到時候，不是攻擊。實作上通常先留著、等時間到再處理。把它當成永久無效並封鎖來源是常見的錯誤，在節點之間時鐘略有偏差時會造成不必要的斷線。相對地，前半（必須嚴格大於父區塊的時槽）是永久性的，違反就是真的無效。",
+   "optNotes": [
+    "協定沒有規定要延遲轉發；傳播策略不影響有效性判定。",
+    "時槽不只用於排序，它本身就是有效性條件的一部分。",
+    "時鐘小幅偏差就足以產生「未來區塊」，直接視為惡意會造成不必要的斷線。",
+    "GP 明說這類區塊會隨時間推進而變有效，所以是暫時無效而非永久拒絕。"
+   ],
+   "trap": "「太未來」是暫時無效；「不大於父區塊」才是永久無效。"
+  },
+  {
+   "id": "n4-what-is-a-service",
+   "ch": "N4",
+   "section": "§9 Service Accounts",
+   "gpRef": "§9",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "service"
+   ],
+   "stem": "What is a service in JAM?",
+   "stemZh": "JAM 裡的 service 是什麼？",
+   "options": [
+    "An account holding code, storage and a balance, whose code defines what happens to it when work is done for it on a core",
+    "A registered chain that rents core time from JAM and keeps its own separate state, much as a parachain rents a slot",
+    "A long-running process that a validator starts on request and keeps alive between blocks so that it can hold state in memory",
+    "A library of functions that other accounts may call, holding no state of its own and existing only while a call is running"
+   ],
+   "optionsZh": [
+    "一個持有程式碼、storage 與餘額的帳戶；當有工作在 core 上為它執行時，它的程式碼決定會發生什麼事",
+    "一條註冊過的鏈，向 JAM 承租 core time 並保有自己獨立的狀態，就像 parachain 承租一個插槽那樣",
+    "一個長期執行的行程，由 validator 依請求啟動並在區塊之間保持存活，好讓它把狀態留在記憶體裡",
+    "一組可供其他帳戶呼叫的函式庫，本身不持有任何狀態，只在呼叫進行期間存在"
+   ],
+   "answer": 0,
+   "explanation": "service 就是 JAM 版的「帳戶」：它有 code、有 storage、有 balance，住在狀態的 δ 分量裡，用一個 u32 的 service index 指涉。它跟 Ethereum 合約帳戶最像，差別在**入口**——service 定義兩個函數：refine（在 core 上執行、無狀態）與 accumulate（在鏈上執行、可寫狀態）。它不是常駐行程（每次執行都從乾淨的 PVM 起跑），也不是獨立的鏈（沒有自己的狀態，全部住在同一個 σ 裡）。",
+   "optNotes": [
+    "code、storage、balance 加上兩個入口函數，這就是 service 的全部。",
+    "service 沒有自己的狀態或鏈，全部住在同一份 σ 的 δ 裡。",
+    "每次執行都從乾淨的 PVM 起跑，沒有跨區塊常駐的記憶體。",
+    "service 有自己的持久 storage，不是無狀態的函式庫。"
+   ],
+   "trap": "service ≈ 帳戶；特別的是它有 refine 與 accumulate 兩個入口。"
+  },
+  {
+   "id": "n4-refine-vs-accumulate",
+   "ch": "N4",
+   "section": "§4.9; §12; §14",
+   "gpRef": "§4, §12 & §14",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "service"
+   ],
+   "alsoCh": [
+    "N5"
+   ],
+   "stem": "A service defines two entry points, refine and accumulate. How do they differ?",
+   "stemZh": "一個 service 定義兩個入口：refine 與 accumulate。兩者有什麼不同？",
+   "options": [
+    "refine runs when the service is called directly and accumulate runs when it receives a transfer, so the split follows how the service was reached",
+    "refine runs first to validate the request and accumulate runs second to execute it, so the split is between checking inputs and doing the actual work",
+    "refine handles requests from other services and accumulate handles requests from users, so the split follows where the incoming request came from",
+    "refine runs on a core, sees no chain state and may be given a lot of work; accumulate runs on-chain, may write state, and must therefore stay small"
+   ],
+   "optionsZh": [
+    "refine 在 service 被直接呼叫時執行、accumulate 在它收到轉帳時執行，分界跟著 service 被觸及的方式走",
+    "refine 先執行以驗證請求、accumulate 後執行以實際處理，所以分界是「檢查輸入」與「做事」之間",
+    "refine 處理來自其他 service 的請求、accumulate 處理來自使用者的請求，分界跟著請求的來源走",
+    "refine 在 core 上執行、看不到鏈上狀態、可以承接大量工作；accumulate 在鏈上執行、可以寫狀態，因此必須維持很小"
+   ],
+   "answer": 3,
+   "explanation": "這是整個 JAM 架構落到 service 層的樣子。**refine**：在 core 上由少數 guarantor 執行，**看不到鏈上狀態**，可以吃大量輸入、跑很久，但只能吐出一個小的結果（work-digest）。**accumulate**：在鏈上執行，**每個節點都會跑**，所以必須便宜；它可以讀寫自己的 storage、轉帳、建立新 service。記法是「refine 做重活但不能碰狀態，accumulate 能碰狀態但必須很輕」——這個限制不是任意的，而是「少數人跑 vs 全體跑」的直接後果。",
+   "optNotes": [
+    "收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口（0.7.1 起併入）。",
+    "兩者不是「先檢查後執行」；refine 就是在做真正的計算。",
+    "請求來源不影響走哪個入口；work-package 一律先 refine 再 accumulate。",
+    "無狀態的重活 vs 能寫狀態的輕活，正好對應 in-core 與 on-chain。"
+   ],
+   "trap": "refine 重但不能寫狀態；accumulate 能寫狀態但必須輕。"
+  },
+  {
+   "id": "n4-why-refine-stateless",
+   "ch": "N4",
+   "section": "§14; §17",
+   "gpRef": "§14 & §17",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "refine",
+    "audit"
+   ],
+   "alsoCh": [
+    "N6"
+   ],
+   "stem": "Why is refine forbidden from reading the chain state?",
+   "stemZh": "為什麼 refine 被禁止讀取鏈上狀態？",
+   "options": [
+    "So that two work-packages on different cores can never conflict, since without state access neither can observe or disturb what the other is doing",
+    "So that the refine step stays cheap enough to be metered by a simple instruction count rather than by the full gas model used on-chain",
+    "So that a work-package can be executed by any validator without first synchronizing the chain, which is what allows guarantors to be chosen at random",
+    "So that an auditor can re-run it later from the work-package alone and expect the identical result, without having to reconstruct the state as it was at that moment"
+   ],
+   "optionsZh": [
+    "好讓不同 core 上的兩份 work-package 永遠不會衝突，因為沒有狀態存取，誰也觀察不到或干擾不了對方",
+    "好讓 refine 這一步便宜到可以用單純的指令計數來計量，而不必用鏈上那套完整的 gas 模型",
+    "好讓任何 validator 不必先同步鏈就能執行 work-package，這正是 guarantor 能被隨機選出的原因",
+    "好讓 auditor 事後能只憑 work-package 重跑一次並期待得到完全相同的結果，而不必重建當時那一刻的狀態"
+   ],
+   "answer": 3,
+   "explanation": "**核心理由是可稽核性。** JAM 的安全論證是「少數人執行、但任何人都能重跑檢查」。如果 refine 能讀狀態，auditor 想重跑就必須先重建「當時那一刻」的完整狀態——那既昂貴又容易有歧義（哪一刻？哪個分叉？）。禁止讀狀態之後，refine 的輸入就完全由 work-package 本身決定：同樣的 package 永遠得到同樣的結果，重跑變成一件確定且便宜的事。這也是為什麼 import segment 必須明確宣告——所有輸入都要寫在 package 裡，不能臨時去撈。",
+   "optNotes": [
+    "不同 core 之間的隔離來自各自獨立的 package，不是因為禁止讀狀態。",
+    "refine 一樣用 gas 計量，而且預算（G_R）比 accumulate 大得多。",
+    "guarantor 仍然是完整節點；隨機選人跟能不能讀狀態無關。",
+    "重跑必須只依賴 work-package，這是整個稽核機制成立的前提。"
+   ],
+   "trap": "無狀態是為了讓「重跑」變成確定的事——稽核靠它。"
+  },
+  {
+   "id": "n4-service-code",
+   "ch": "N4",
+   "section": "§9.2 Preimage Lookups",
+   "gpRef": "§9",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "service",
+    "preimage"
+   ],
+   "stem": "A service account stores a code hash, not the code itself. How does the code actually become available to run?",
+   "stemZh": "service 帳戶存的是 code hash 而不是程式碼本身。程式碼實際上是怎麼變成可執行的？",
+   "options": [
+    "The code is uploaded when the service is created and kept in the account itself, with the hash retained afterwards only as an integrity check",
+    "The code is fetched from a peer over the network whenever a core needs it, so it is never part of the state and never needs to be supplied on-chain",
+    "Someone supplies the matching blob through the preimages extrinsic, after the service has requested that hash, and it is then stored and looked up by hash",
+    "The code is reconstructed from the erasure-coded shards held by assurers, which is why enough of them must be online before a service can run"
+   ],
+   "optionsZh": [
+    "程式碼在 service 建立時就上傳並保存在帳戶本身，hash 只是事後留著當作完整性檢查",
+    "每當某個 core 需要時就從對等節點透過網路抓取，所以它從不屬於狀態、也不需要在鏈上被提供",
+    "在 service 請求過那個 hash 之後，由某人透過 preimages extrinsic 提供對應的 blob；之後它就被保存下來、依 hash 查找",
+    "程式碼由 assurer 持有的 erasure-coded 碎片重建，這也是為什麼必須有足夠多的 assurer 在線，service 才能執行"
+   ],
+   "answer": 2,
+   "explanation": "JAM 的資料模型把「請求」與「提供」分開。service 先用 `solicit` 宣告「我要 hash h、長度 z 的那份 blob」，這一刻就開始付押金（footprint 算的是 requests 而不是已提供的 preimage，防止免費占位）。之後任何人都可以透過 **E_P（preimages extrinsic）** 把符合的 blob 送上鏈；系統驗證雜湊相符後存起來，service 就能依 hash 查到它。code 只是這個機制的一個用途——同一套 preimage 機制也用來提供 refine 需要的其他資料。",
+   "optNotes": [
+    "帳戶存的是 hash；blob 存在另一個字典裡，兩者分開是為了讓計價與生命週期可控。",
+    "程式碼是狀態的一部分、必須上鏈提供，否則不同節點會執行到不同的東西。",
+    "先 solicit 再由 E_P 提供，這是 JAM 統一的 preimage 機制，code 只是其中一種用途。",
+    "erasure coding 用於 work-package 的資料可得性，與 service 的程式碼無關。"
+   ],
+   "trap": "solicit（請求、開始付押金）→ E_P（提供）→ 依 hash 查找。"
+  },
+  {
+   "id": "n4-threshold-balance",
+   "ch": "N4",
+   "section": "§9.3",
+   "gpRef": "§9",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "economics"
+   ],
+   "stem": "A service's balance must stay above a threshold that grows with how much it stores. What is that rule preventing?",
+   "stemZh": "一個 service 的餘額必須高於一個隨其儲存量成長的門檻。這條規則在防什麼？",
+   "options": [
+    "A service spending its balance faster than it earns, which would leave it unable to pay the gas for its own accumulate step",
+    "A service occupying state that every validator must keep forever while holding nothing at stake against that ongoing cost",
+    "A service transferring its whole balance away in one block, which would make the resulting account impossible to reason about",
+    "A service being created by an attacker purely to consume service indices, since each new account permanently uses one up"
+   ],
+   "optionsZh": [
+    "一個 service 花錢比賺錢快，最後付不出自己 accumulate 步驟所需的 gas",
+    "一個 service 佔用著每位 validator 都必須永久保存的狀態，卻沒有為這份持續成本抵押任何東西",
+    "一個 service 在單一區塊內把全部餘額轉走，使得剩下的帳戶變得無法推理",
+    "攻擊者純粹為了消耗 service index 而大量建立 service，因為每個新帳戶都會永久用掉一個編號"
+   ],
+   "answer": 1,
+   "explanation": "狀態是**每個 validator 都要永久保存**的稀缺資源。如果佔用狀態不需要成本，任何人都能無限寫入、把狀態撐爆到沒人跑得動節點。門檻餘額 a_t 的作法是：依這個帳戶的 footprint（幾筆資料、多少位元組）算出一個最低餘額，帳戶必須一直維持在它之上——等於為佔用的空間押了一筆錢。想少押就得少存。這也是為什麼 `transfer` 在扣款後會檢查自身門檻：不能靠轉帳把錢掏空、留下沒有擔保的狀態。",
+   "optNotes": [
+    "gas 不足只會讓那次 accumulate 失敗，不需要用餘額門檻來防。",
+    "狀態要每個 validator 永久保存，押金是為這份持續成本提供擔保。",
+    "轉帳確實受門檻限制，但那是這條規則的結果而不是它的目的。",
+    "service index 是 u32，數量不是稀缺資源；真正稀缺的是狀態空間。"
+   ],
+   "trap": "押金對應的是「佔用狀態」這件事，不是花費或編號。"
+  },
+  {
+   "id": "n4-privileges-basic",
+   "ch": "N4",
+   "section": "§9.4 Privileges",
+   "gpRef": "§9",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "privileges"
+   ],
+   "stem": "A few service indices are recorded in the state as privileged. What does that privilege amount to?",
+   "stemZh": "狀態裡記錄了少數幾個具有特權的 service index。這個特權具體是什麼？",
+   "options": [
+    "The right to read and write the storage belonging to any other service, which is how system services keep the rest of the state consistent across a protocol upgrade",
+    "The right to author blocks out of turn, so that a privileged service can push an urgent change into the chain immediately rather than waiting for a slot of its own",
+    "The right to bypass the gas model, so a privileged service may run for as long as its work needs without having its accumulate step metered, throttled or cut short",
+    "The right to change protocol-level settings such as which authorizers a core will accept or who the next validators will be, exercised through host calls during accumulate"
+   ],
+   "optionsZh": [
+    "有權讀寫任何其他 service 的 storage，系統 service 就是靠這個在升級後維持其餘狀態的一致",
+    "有權不按順序出塊，使具特權的 service 能把緊急變更硬塞進鏈裡，不必等自己的時槽",
+    "有權繞過 gas 模型，因此具特權的 service 想跑多久就跑多久，它的 accumulate 不會被計量、限流或中途截斷",
+    "有權變更協定層級的設定，例如某個 core 會接受哪些 authorizer、下一批 validator 是誰；透過 accumulate 期間的 host call 行使"
+   ],
+   "answer": 3,
+   "explanation": "特權是**改動協定層設定的權力**，而且全部透過 accumulate 期間的 host call 行使。χ 記錄五種：manager（可改特權本身）、每個 core 的 assigner（用 `assign` 改該 core 的 authorizer queue）、delegator（用 `designate` 改下一批 validator）、registrar、以及 always-accumulate 集合。重點是**特權沒有跳出規則之外**：具特權的 service 一樣要跑 accumulate、一樣被計 gas、一樣不能讀別人的 storage。它只是被允許呼叫某些平常會回 HUH 的 host call。",
+   "optNotes": [
+    "沒有任何 service 能讀寫別人的 storage，這是 accumulate 隔離性的底線。",
+    "出塊資格由 Safrole 決定，與 service 特權完全無關。",
+    "特權 service 一樣受 gas 約束，沒有任何豁免。",
+    "改協定層設定、經由 host call 行使——特權的範圍就這麼大。"
+   ],
+   "trap": "特權 = 能呼叫某些 host call；不是豁免規則。"
+  },
+  {
+   "id": "n4-core-count-limit",
+   "ch": "N4",
+   "section": "§11.3",
+   "gpRef": "§11",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "core"
+   ],
+   "alsoCh": [
+    "N6"
+   ],
+   "stem": "The protocol defines many cores, but only some of them can be working at any time. What sets that limit?",
+   "stemZh": "協定定義了很多 core，但任一時刻只有其中一部分能運作。是什麼設下這個上限？",
+   "options": [
+    "Each active core needs a full copy of the state on the machines assigned to it, so the limit is how much state a validator can store",
+    "Each active core must be assured by every validator, so the limit is how many assurance signatures will fit inside one block's extrinsic",
+    "Each active core consumes one entry of the authorizer pool per block, so the limit is the pool size of eight multiplied by the number of blocks",
+    "Each active core needs three guarantors, so the number of cores that can be busy is the validator count divided by three"
+   ],
+   "optionsZh": [
+    "每個運作中的 core 需要被指派的機器上有一份完整狀態，所以上限取決於一位 validator 能存多少狀態",
+    "每個運作中的 core 必須被每一位 validator 背書，所以上限是一個區塊的 extrinsic 能容納多少背書簽章",
+    "每個運作中的 core 每塊消耗一個 authorizer pool 項目，所以上限是 pool 大小 8 乘上區塊數",
+    "每個運作中的 core 需要三名 guarantor，所以能同時忙碌的 core 數就是 validator 數除以三"
+   ],
+   "answer": 3,
+   "explanation": "**上限是 |κ′| / 3**：每個運作中的 core 要指派三名 guarantor（三個人各自執行同一份工作再互相比對，才有意義），validator 只有 |κ′| 位，所以最多 |κ′|/3 個 core 能同時有工作。這也是為什麼 §6 規定 validator 數必須是 3 的倍數（𝕍 = {3c | c ∈ N_{2…C+1}}）。full 設定下 |κ| = 1023 → 341 個 core；tiny 設定 |κ| = 6 → 只有 2 個。所以「core 數」在協定裡是 C = 341 這個常數，但**實際能動的**由當下的 validator 數決定。",
+   "optNotes": [
+    "guarantor 是完整節點本來就有狀態，狀態容量不是這裡的限制。",
+    "assurance 不需要每位 validator 都給，門檻是超過 2/3。",
+    "authorizer pool 管的是「可接受哪些工作」，與能開幾個 core 無關。",
+    "三名 guarantor 一個 core，|κ′|/3 就是同時能運作的上限。"
+   ],
+   "trap": "C = 341 是協定常數；真正能動的 core 數是 |κ′|/3。"
+  },
+  {
+   "id": "n4-services-dont-call-directly",
+   "ch": "N4",
+   "section": "§12.4 Deferred Transfers",
+   "gpRef": "§12",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "service"
+   ],
+   "stem": "One service wants to send value and a message to another. It cannot simply call into that service and wait for a reply. Why not?",
+   "stemZh": "一個 service 想送一筆錢和一則訊息給另一個 service。它不能直接呼叫對方並等待回覆。為什麼？",
+   "options": [
+    "Because the two services may be accumulated on different cores within the same block, and a call reaching across cores would require the two of them to share memory",
+    "Because a synchronous call would let services re-enter each other to arbitrary depth, which would make gas impossible to budget and results impossible to reproduce",
+    "Because a reply would have to be signed by the receiving service, and a service holds no key material of its own with which it could sign anything at all",
+    "Because the receiving service may not exist yet at the moment of the call, and the protocol offers no way to check whether an index resolves during accumulate"
+   ],
+   "optionsZh": [
+    "因為兩個 service 可能在同一個區塊裡於不同的 core 上被 accumulate，而跨越 core 的呼叫會要求它們兩者共用記憶體",
+    "因為同步呼叫會讓 service 之間以任意深度互相重入，使 gas 無法預先編列、結果也無法重現",
+    "因為回覆必須由接收方簽署，而 service 並不持有任何可以拿來簽名的金鑰",
+    "因為接收方在呼叫的當下可能還不存在，而協定在 accumulate 期間無法檢查一個 service 是否存在"
+   ],
+   "answer": 1,
+   "explanation": "JAM 用的是 **deferred transfer**：`transfer` 只是把 (來源, 目的, 金額, memo, gas) 附加到一個序列裡並立刻從發送方扣款，接收方要到**下一輪** accumulate 才收到並執行自己的處理。理由是**確定性與計價**：如果呼叫是同步的，A 呼叫 B、B 又呼叫 A，重入深度沒有上限，那麼「這次 accumulate 要花多少 gas」在執行前就無法估算，而 accumulate 是每個節點都要跑的，預算失控等於整條鏈失控。代價是收款方不存在時那筆轉帳會被丟棄，但錢已經扣了——所以呼叫方要自己確認目標存在。",
+   "optNotes": [
+    "accumulate 是在鏈上執行的，不分 core，也不存在跨 core 記憶體的問題。",
+    "同步呼叫會帶來無上限的重入，gas 預算與結果重現性都會失控。",
+    "service 之間的呼叫不需要簽章，權限由協定規則而非簽名決定。",
+    "accumulate 查得到 service 是否存在（不存在會回 WHO），所以這不是理由。"
+   ],
+   "trap": "延後轉帳換來的是「gas 可預估、結果可重現」；代價是要自己確認目標存在。"
+  },
+  {
+   "id": "n5-pipeline-order",
+   "ch": "N5",
+   "section": "§11; §12; §14",
+   "gpRef": "§11, §12 & §14",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "pipeline"
+   ],
+   "alsoCh": [
+    "N4",
+    "N6"
+   ],
+   "stem": "Put the life of one piece of work in order, from a user handing it over to its effect landing in the state.",
+   "stemZh": "把一份工作從使用者交出、到它的效果落進狀態為止的過程排出順序。",
+   "options": [
+    "A work-package is accumulated first to reserve its gas; guarantors then refine it on a core; the report is written back and validators assure the result was correct",
+    "A work-package is sent to a core; guarantors refine it into a work-report; the report enters a block; validators assure they hold its data; once enough do, it is accumulated",
+    "A work-package enters a block; validators vote on whether to run it; the winning core refines it into a report; the report is accumulated and the data is discarded afterwards",
+    "A work-package is refined by every validator; the results are compared and the majority result becomes a report; the report is accumulated once the block is finalized"
+   ],
+   "optionsZh": [
+    "work-package 先被 accumulate 以預留 gas；接著 guarantor 在 core 上 refine 它；report 寫回鏈上後由 validator 宣告結果正確",
+    "work-package 被送到某個 core；guarantor 把它 refine 成 work-report；report 進入區塊；validator 宣告自己持有它的資料；當足夠多人宣告後，它才被 accumulate",
+    "work-package 先進入區塊；validator 投票決定要不要執行它；勝出的 core 把它 refine 成 report；report 被 accumulate 之後資料就丟棄",
+    "work-package 由每一位 validator 各自 refine；比對結果後以多數決產生 report；等區塊被 finalize 之後該 report 才被 accumulate"
+   ],
+   "answer": 1,
+   "explanation": "五個階段，順序不能亂：**① 送到 core**——使用者把 work-package 交給某個 core（要通過該 core 的 authorizer 檢查）。**② refine**——被指派的 3 名 guarantor 在 core 上執行，產出小的 work-report。**③ 進區塊**——report 經 E_G 上鏈（此時還不生效）。**④ available**——validator 用 assurance 宣告自己持有 erasure-coded 的碎片，超過 2/3 才算數。**⑤ accumulate**——這時才真的執行 service 的鏈上邏輯、寫進狀態。第四步常被跳過理解，但它是整個安全模型的關鍵：**沒有可得性就無法稽核**。",
+   "optNotes": [
+    "accumulate 是最後一步；gas 的預留發生在 accumulate 當下，不是事前。",
+    "送到 core → refine → 進區塊 → 湊到可得性 → accumulate，五步缺一不可。",
+    "沒有「投票決定要不要跑」這一步；能不能跑由 authorizer 決定。",
+    "只有被指派的 3 名 guarantor 執行 refine，不是全網重跑再多數決。"
+   ],
+   "trap": "「available」是獨立的一步，而且是稽核的前提，不是可有可無的細節。"
+  },
+  {
+   "id": "n5-what-is-a-work-package",
+   "ch": "N5",
+   "section": "§14 Work Packages",
+   "gpRef": "§14",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "work-package"
+   ],
+   "stem": "What does a work-package contain?",
+   "stemZh": "一份 work-package 裡面有什麼？",
+   "options": [
+    "A signed request from the user, the fee they are paying and the address of the service, with the service then deciding for itself what code to execute",
+    "An authorization token and the code that checks it, plus one or more work-items, each naming the service to run, the code to run and the payload to run it on",
+    "A compiled program and its full input data, with no reference to any service, since a package is executed on its own and its result is credited to the submitter",
+    "A list of state keys the work will read and write, along with the code, so that conflicting packages can be detected before either of them is executed"
+   ],
+   "optionsZh": [
+    "一份使用者簽署的請求、他支付的費用、以及該 service 的位址；至於要執行什麼程式碼，則由該 service 自行決定",
+    "一個授權 token 與檢查它的程式碼，加上一或多個 work-item，每個 item 指明要執行的 service、要跑的程式碼、以及要處理的 payload",
+    "一支編譯好的程式與它完整的輸入資料，不指涉任何 service，因為 package 是獨立執行的、結果歸屬於提交者",
+    "一份這項工作會讀寫的 state key 清單以及程式碼，好讓互相衝突的 package 在任一方執行之前就被偵測出來"
+   ],
+   "answer": 1,
+   "explanation": "work-package 的核心是 **authorization + 一串 work-item**。authorization 那部分回答「這個 core 憑什麼接受這份工作」——它帶一個 token 與一個 is-authorized 的程式（Ψ_I），由 core 先跑一次決定收不收。work-item 則是實際的工作單位，每個指明 service、code hash 與 payload，以及要匯入／匯出哪些 segment。注意它**沒有使用者簽名**（JAM 是 transactionless 的），付費模型也不是隨包附錢——core time 本身才是被爭奪的資源。也沒有預先宣告的讀寫集合，因為 refine 根本不能讀狀態。",
+   "optNotes": [
+    "package 不帶使用者簽名，JAM 沒有交易；能不能執行由 authorizer 決定。",
+    "授權加上一串 work-item，這就是 work-package 的兩個部分。",
+    "每個 work-item 都明確指名 service 與 code hash，不是獨立執行的程式。",
+    "沒有讀寫集合宣告——refine 不能讀狀態，也就無從衝突。"
+   ],
+   "trap": "package = 授權 + work-item；沒有簽名、沒有讀寫集合。"
+  },
+  {
+   "id": "n5-why-report-is-small",
+   "ch": "N5",
+   "section": "§11.1; §14",
+   "gpRef": "§11 & §14",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "work-report"
+   ],
+   "stem": "A work-package can be many megabytes, but the work-report that reaches the chain is capped at tens of kilobytes. Why the difference?",
+   "stemZh": "一份 work-package 可以有好幾 MB，但真正上鏈的 work-report 卻被限制在幾十 KB。為什麼差這麼多？",
+   "options": [
+    "The report holds only the parts of the package that changed the state, with unchanged inputs omitted because replaying them would produce no observable effect",
+    "The package is compressed before it is hashed into the report, so the size difference is the compression ratio and the full data is still recoverable from the report",
+    "The package includes debugging information that is stripped once refine has finished, leaving only the parts of the input the service actually read during execution",
+    "The package is the input that only the core needs to see; the report is the summary every node must store forever, so the two live under completely different budgets"
+   ],
+   "optionsZh": [
+    "report 只保留 package 中改變了狀態的部分，未改變的輸入被省略，因為重放它們不會產生可觀察的效果",
+    "package 在被雜湊進 report 之前會先壓縮，所以大小差距就是壓縮比，完整資料仍可從 report 還原",
+    "package 含有除錯資訊，refine 結束後會被剝除，只留下 service 執行期間真正讀取過的那些輸入",
+    "package 是只有 core 需要看到的輸入；report 則是每個節點都必須永久保存的摘要，兩者受完全不同的預算約束"
+   ],
+   "answer": 3,
+   "explanation": "這是 JAM 整個架構的縮影：**輸入留在鏈外、結果才上鏈**。work-package bundle 的上限 W_B 約 13 MB——它只需要被該 core 的 guarantor 看到，以及被 erasure-code 分散給 validator 以備稽核。work-report 的上限 W_R = 48 KiB——它會進入區塊，每個節點都要處理與保存。這兩個數字差了近 300 倍，正好對應「少數人看大資料、全體只看小摘要」。report 也**不是**壓縮或裁剪過的 package：它是 refine 的**輸出**（各 work-item 的 digest），與輸入是不同的東西。",
+   "optNotes": [
+    "report 不是 package 的子集；它是執行後產生的新資料。",
+    "report 是 refine 的輸出而不是壓縮過的輸入，無法從中還原 package。",
+    "沒有「剝除除錯資訊」這種步驟；輸入與輸出是兩種不同的東西。",
+    "只有 core 看的輸入 vs 全體保存的摘要，W_B 與 W_R 差近 300 倍正是這個分工。"
+   ],
+   "trap": "package 是輸入（W_B ≈ 13 MB）、report 是輸出（W_R = 48 KiB），不是同一份東西的兩種大小。"
+  },
+  {
+   "id": "n5-what-available-means",
+   "ch": "N5",
+   "section": "§11.2 Assurance",
+   "gpRef": "§11",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "availability"
+   ],
+   "alsoCh": [
+    "N6"
+   ],
+   "stem": "A report sits in a block but cannot be accumulated until it becomes 'available'. What does available actually mean here?",
+   "stemZh": "一份 report 已經在區塊裡，但要等到「available」之後才能被 accumulate。這裡的 available 究竟是什麼意思？",
+   "options": [
+    "That enough validators have said they hold a piece of the underlying data, so anyone who later wants to re-run the work can reconstruct its input from those pieces",
+    "That the data has been published somewhere any node can download it on demand, so availability is a statement about a public endpoint rather than about validators",
+    "That the block containing the report has been finalized by Grandpa, so the report can no longer disappear through a reorganization of the chain",
+    "That the report has been checked by enough validators for correctness, so a supermajority has independently confirmed the result before it touches the state"
+   ],
+   "optionsZh": [
+    "已經有足夠多的 validator 宣告自己持有底層資料的一份碎片，因此日後任何想重跑這份工作的人，都能從那些碎片重建出它的輸入",
+    "資料已經發布在某個任何節點都能隨時下載的地方，所以可得性談的是一個公開端點而不是 validator",
+    "含有該 report 的區塊已被 Grandpa 定案，因此這份 report 不會再因為鏈的重組而消失",
+    "這份 report 已被足夠多的 validator 檢查過正確性，也就是超級多數在它碰到狀態之前已獨立確認過結果"
+   ],
+   "answer": 0,
+   "explanation": "available 談的是**資料救不救得回來**，不是結果對不對。work-package 被 erasure-code 成碎片分給每位 validator，assurance 就是「我持有我那一份」的宣告；超過 2/3 的人這麼說，就代表即使部分節點離線或作惡，剩下的碎片仍足以重建原始輸入。**為什麼這是 accumulate 的前提**：JAM 的正確性靠 auditor 事後重跑，而重跑需要輸入；如果輸入救不回來，這份 report 就永遠無法被查核，等於沒有擔保。所以順序是「先確保查得了，再讓它生效」。",
+   "optNotes": [
+    "assurance 保證的是資料可重建，這正是事後稽核的前提。",
+    "資料是分散在 validator 手上的碎片，沒有任何公開端點的概念。",
+    "finality 是 Grandpa 的事，與 available 是兩個獨立的條件。",
+    "正確性由 auditor 事後重跑判定，assurance 完全不檢查結果對不對。"
+   ],
+   "trap": "available = 資料救得回來（能被稽核），不是結果被驗證過。"
+  },
+  {
+   "id": "n5-what-accumulate-does",
+   "ch": "N5",
+   "section": "§12 Accumulation",
+   "gpRef": "§12",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "accumulate"
+   ],
+   "stem": "When a report finally gets accumulated, what happens?",
+   "stemZh": "當一份 report 終於被 accumulate 時，發生了什麼事？",
+   "options": [
+    "The report's outputs are copied verbatim into the service's storage by the protocol, without running any service code, which is why accumulation is cheap",
+    "The report is re-executed on-chain by every node to confirm the guarantors' result, and only a matching result is written into the state",
+    "The report is handed to the next block's author, who decides which of its outputs are worth applying and writes those into the state on the service's behalf",
+    "Each service named in the report runs its own on-chain code, seeing the refine results as input, and may write its storage, move balances or create services"
+   ],
+   "optionsZh": [
+    "協定把 report 的輸出原封不動複製進該 service 的 storage，完全不執行任何 service 程式碼，這正是 accumulation 便宜的原因",
+    "report 由每個節點在鏈上重新執行一次以確認 guarantor 的結果，只有結果相符時才寫進狀態",
+    "report 被交給下一個區塊的出塊者，由他決定哪些輸出值得套用，並代表該 service 把那些寫進狀態",
+    "report 裡指名的每個 service 執行自己的鏈上程式碼，把 refine 的結果當成輸入，並可以寫自己的 storage、轉移餘額或建立新的 service"
+   ],
+   "answer": 3,
+   "explanation": "accumulate 是 service **自己的鏈上程式碼**在跑，不是協定代勞。輸入是 refine 產出的 work-digest（包含結果 blob 或錯誤值），service 據此決定要做什麼——寫 storage、轉帳、建立新 service、呼叫 `yield` 產出一個對外的承諾。這一步每個節點都會執行，所以受 gas 嚴格約束（單份 report 上限 G_A、整塊上限 G_T）。也因此 accumulate **不會重跑 refine**：重跑是 auditor 的工作，而且只在 core 上抽樣進行，不是全網每塊都做。",
+   "optNotes": [
+    "協定不會代為複製輸出；要做什麼完全由 service 的程式碼決定。",
+    "全網重跑 refine 正是 JAM 要避免的事；重跑是 auditor 抽樣做的。",
+    "出塊者沒有選擇權，accumulate 依規則進行、每個節點結果一致。",
+    "service 自己的鏈上程式碼執行、可寫狀態——這就是 accumulate。"
+   ],
+   "trap": "accumulate = service 的鏈上邏輯在跑；它不重跑 refine。"
+  },
+  {
+   "id": "n5-why-authorizer",
+   "ch": "N5",
+   "section": "§8 Authorization",
+   "gpRef": "§8",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "authorization"
+   ],
+   "stem": "Before a core will work on a package, the package must satisfy that core's authorizer. What problem does that solve?",
+   "stemZh": "在 core 願意處理一份 package 之前，該 package 必須通過該 core 的 authorizer。這解決了什麼問題？",
+   "options": [
+    "Cores are assigned to validators at random, so without a gate a validator could refuse work; the authorizer is what forces a core to accept the packages sent to it",
+    "Core time is scarce and unpriced at submission, so without a gate anyone could flood a core with work; the authorizer is where the right to use a core is decided",
+    "Reports must be small, so without a gate an oversized package could produce an oversized report; the authorizer is where the size limits are actually enforced",
+    "Packages may contain arbitrary code, so without a gate a malicious package could escape the virtual machine; the authorizer is where the code is checked for safety"
+   ],
+   "optionsZh": [
+    "core 是隨機指派給 validator 的，所以沒有一道關卡的話 validator 可以拒絕工作；authorizer 正是強制 core 接受送來的 package 的機制",
+    "core time 稀缺、而且在提交當下並未被定價，所以沒有一道關卡的話任何人都能用工作淹沒一個 core；authorizer 正是決定「誰有權使用這個 core」的地方",
+    "report 必須夠小，所以沒有一道關卡的話過大的 package 會產生過大的 report；authorizer 正是實際執行大小限制的地方",
+    "package 可能含有任意程式碼，所以沒有一道關卡的話惡意 package 可能逃出虛擬機；authorizer 正是檢查程式碼安全性的地方"
+   ],
+   "answer": 1,
+   "explanation": "authorizer 是 **core time 的門禁**。JAM 沒有「提交時附上手續費」這種機制——core time 是被排程的稀缺資源，誰能用必須事先決定。作法是：每個 core 有一個 authorizer pool（最多 8 個 authorizer hash），package 必須帶一個能通過其中某個 authorizer 的 token，該 core 才會處理它。而 pool 的內容由具 assigner 特權的 service 透過 `assign` 管理——換句話說，**「誰能用這個 core」這個問題被外包給一個 service 去定義策略**，協定本身不規定商業模式。VM 的隔離、大小限制都是別的機制在管。",
+   "optNotes": [
+    "authorizer 不強制 core 接受任何東西，它是在篩選而不是在強迫。",
+    "core time 稀缺且提交時未定價，authorizer 就是那道門禁。",
+    "大小限制由 W_R 等常數在 refine 期間執行，與授權無關。",
+    "VM 的隔離由 PVM 本身保證，不需要事前檢查程式碼。"
+   ],
+   "trap": "authorizer 管的是「誰有權用這個 core」，策略由 service 定義而非協定。"
+  },
+  {
+   "id": "n5-segments-basic",
+   "ch": "N5",
+   "section": "§14",
+   "gpRef": "§14",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "segments"
+   ],
+   "stem": "Work-packages can import segments exported by earlier packages. Why is that needed at all, given refine cannot read the chain state?",
+   "stemZh": "work-package 可以匯入先前 package 匯出的 segment。既然 refine 讀不到鏈上狀態，為什麼還需要這個機制？",
+   "options": [
+    "It is how a package reads the current state indirectly, because segments are snapshots of state entries exported by the protocol at the end of each block",
+    "It is the only way one piece of in-core work can build on another's output, since results large enough to matter never reach the state for a later package to read",
+    "It is a caching mechanism only, letting a package skip recomputing something, and any package could always recompute the imported data from its own inputs instead",
+    "It is how a package receives its authorization token, which the previous package on the same core exports so that core time can be handed along a chain of work"
+   ],
+   "optionsZh": [
+    "這是 package 間接讀取當前狀態的方式，因為 segment 是協定在每個區塊結束時匯出的狀態條目快照",
+    "這是一份 in-core 工作能建立在另一份工作產出之上的唯一途徑，因為夠大而有意義的結果從來不會進入狀態、讓後續的 package 去讀",
+    "這純粹是一種快取機制，讓 package 省下重算的功夫；任何 package 其實都能改用自己的輸入重新算出被匯入的資料",
+    "這是 package 取得授權 token 的方式，由同一個 core 上前一份 package 匯出，好讓 core time 能沿著一連串工作傳遞下去"
+   ],
+   "answer": 1,
+   "explanation": "關鍵在於**大的結果從來不上鏈**。refine 的輸出只有一小份 digest 進 work-report，真正龐大的產物（例如一段被處理過的資料）是以 **export segment** 的形式留在 core 的資料可得性層裡。如果後續的工作想接著處理它，唯一的辦法就是 import 那些 segment——因為它們既不在狀態裡（太大），refine 也讀不到狀態。這讓「一連串 in-core 工作接力」成為可能，而每一步都仍然是無狀態且可重跑的：import 的內容由 package 明確宣告，並靠 segment root 驗證。",
+   "optNotes": [
+    "segment 不是狀態的快照，協定沒有這種匯出機制。",
+    "大的結果不上鏈，所以接力只能靠 segment，這是 in-core 工作串接的唯一途徑。",
+    "被匯入的資料通常是別人算出來的，重算未必可能、也違背接力的目的。",
+    "授權 token 由提交者提供，不是從前一份 package 傳遞下來的。"
+   ],
+   "trap": "segment 是 in-core 工作之間的接力棒；狀態太小裝不下這些結果。"
+  },
+  {
+   "id": "n5-refine-failure",
+   "ch": "N5",
+   "section": "§11.1; §14",
+   "gpRef": "§11 & §14",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "errors"
+   ],
+   "stem": "One work-item inside a package runs out of gas during refine. What happens to that item and to the rest of the package?",
+   "stemZh": "package 裡的某一個 work-item 在 refine 期間耗盡 gas。這個 item 與 package 的其餘部分會怎麼樣？",
+   "options": [
+    "That item's result becomes an error value that travels on-chain like any other result; the other items still run and the report is still perfectly valid",
+    "The report is produced but marked invalid, so it enters the block and is then rejected during accumulation before it can affect any service's state",
+    "The whole package is discarded and never becomes a report, because a package is treated as one unit of work that either completes or does not",
+    "That item is retried on another core with a larger allowance, and only if it fails there too does the package as a whole get abandoned"
+   ],
+   "optionsZh": [
+    "該 item 的結果變成一個錯誤值，像其他結果一樣被帶上鏈；其餘的 item 照樣執行，這份 report 仍然完全有效",
+    "report 仍然會產生但被標記為無效，於是它進入區塊、然後在 accumulation 階段被拒絕，不會影響任何 service 的狀態",
+    "整份 package 被丟棄、永遠不會變成 report，因為 package 被當成一個工作單位，要嘛完成要嘛不完成",
+    "該 item 會在另一個 core 上以更大的額度重試，只有在那裡也失敗，整份 package 才會被放棄"
+   ],
+   "answer": 0,
+   "explanation": "**失敗是一個「值」，不是一個「例外」。** work-digest 的 result 欄位可以是成功的 blob，也可以是錯誤集合 𝔼 裡的一員（out-of-gas、panic、輸出過大等）。它會照常隨 report 上鏈、被 accumulate 讀到，由 service 自己決定要重試、退款還是只記一筆帳。這樣設計有三個好處：service 知道失敗的原因；**同包裡其他 item 不受牽連**（否則一個服務失控就能吃掉同包所有人的工作）；而且失敗本身也可被稽核——auditor 重跑時比對的是「同樣的輸入是否同樣地失敗」。",
+   "optNotes": [
+    "失敗是可被 accumulate 讀到的值，其他 item 照跑、report 依然有效。",
+    "report 不會因為含有失敗的 item 而無效，錯誤值是合法內容。",
+    "package 不是全有全無；每個 item 各自有自己的結果。",
+    "沒有跨 core 重試的機制；重試與否由 service 自己決定。"
+   ],
+   "trap": "refine 的失敗是資料不是例外；同包其他 item 不受影響。"
+  },
+  {
+   "id": "n6-why-erasure-coding",
+   "ch": "N6",
+   "section": "§11.2; App. H",
+   "gpRef": "§11 & App. H",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "availability"
+   ],
+   "stem": "Why does JAM erasure-code a work-package instead of simply asking every validator to keep a full copy?",
+   "stemZh": "JAM 為什麼要把 work-package 做 erasure coding，而不是直接要求每位 validator 各留一份完整副本？",
+   "options": [
+    "A full copy per validator would be unsafe, because any single validator could then publish the package and expose data the submitter intended to keep private from others",
+    "A full copy per validator would multiply the storage cost by the validator count; coding lets each hold a small piece while the whole stays recoverable from a fraction of them",
+    "A full copy per validator would be impossible, because the package never leaves the core it was sent to and no validator outside that core ever receives any of it",
+    "A full copy per validator would be slower, because coding lets the pieces be transmitted in parallel whereas a full copy has to be sent to each validator in turn"
+   ],
+   "optionsZh": [
+    "每位 validator 各存一份完整副本並不安全，因為任何單一 validator 都能把該 package 公開，洩漏提交者原本想對其他人保密的資料",
+    "每位 validator 各存一份完整副本會讓儲存成本乘上 validator 數量；編碼後每人只持有一小片，而整份資料仍能從其中一部分重建",
+    "每位 validator 各存一份完整副本並不可能，因為 package 從未離開它被送往的那個 core，該 core 以外的 validator 從來收不到任何部分",
+    "每位 validator 各存一份完整副本會比較慢，因為編碼後各片可以平行傳輸，而完整副本必須逐一送給每位 validator"
+   ],
+   "answer": 1,
+   "explanation": "問題是**成本**。work-package bundle 可以到十幾 MB，如果 1023 位 validator 每人存一份，一份工作就要佔掉數十 GB 的總儲存與頻寬——這會直接抵消掉 JAM 「少數人執行」省下來的成本。Reed–Solomon 讓每人只拿一小片，而**任何 1/3 的片就能重建全部**，所以即使將近 2/3 的節點離線或作惡，資料仍然救得回來。資料本身是公開的（沒有隱私考量），而且它確實會離開 core——分發給所有 validator 正是重點。",
+   "optNotes": [
+    "work-package 的內容是公開的，erasure coding 不提供任何隱私。",
+    "成本乘上 validator 數是不可接受的，編碼讓每人只付一小片的代價。",
+    "資料必須離開 core 才有意義——分發給所有 validator 正是可得性的定義。",
+    "傳輸速度不是設計動機；重點在總儲存量與容錯門檻。"
+   ],
+   "trap": "編碼買到的是「省成本」加「容錯」：1/3 的碎片就能重建。"
+  },
+  {
+   "id": "n6-what-auditing-does",
+   "ch": "N6",
+   "section": "§17 Auditing",
+   "gpRef": "§17",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "audit"
+   ],
+   "alsoCh": [
+    "N1"
+   ],
+   "stem": "Only three guarantors actually ran a piece of work. What stops them from simply lying about the result?",
+   "stemZh": "一份工作實際上只有三位 guarantor 跑過。是什麼阻止他們乾脆對結果說謊？",
+   "options": [
+    "The three guarantors must produce identical results before the report is accepted, so a lie would require all three of them to collude perfectly on the same wrong value",
+    "The result is checked against a zero-knowledge proof that the guarantors must attach, so an incorrect result cannot be signed in the first place",
+    "The result is only provisional until the service itself confirms it during accumulation, at which point a service may reject a result it does not recognise",
+    "Randomly chosen validators re-run the work afterwards and publish their own judgment, so a false result is expected to be caught and its guarantors punished"
+   ],
+   "optionsZh": [
+    "三位 guarantor 必須產生完全相同的結果，report 才會被接受，所以說謊需要三人在同一個錯誤值上完美串通",
+    "結果會與 guarantor 必須附上的零知識證明比對，因此不正確的結果根本無法被簽署",
+    "結果在 accumulation 階段由 service 自己確認之前都只是暫定的，屆時 service 可以拒絕它不認得的結果",
+    "隨機選出的 validator 事後會重跑這份工作並公開自己的判定，因此虛假的結果預期會被抓到、其擔保人會受罰"
+   ],
+   "answer": 3,
+   "explanation": "答案是**事後隨機重跑**（ELVES）。guarantor 的簽名不代表結果正確，它代表「我為這個結果負責」。之後會有隨機抽中的 auditor 拿回原始輸入（靠可得性重建）重跑一次，公開發表判定；若判定不一致就進 disputes，錯的一方被列為 offender、金鑰被歸零。三人簽名相同確實是必要條件，但**三人可以串通**——所以那不是安全來源。JAM 也沒有用零知識證明，而且 service 在 accumulate 時無從得知結果對不對（它沒有重跑的能力）。",
+   "optNotes": [
+    "三人可以串通，所以「三人一致」本身不構成安全保證。",
+    "JAM 不使用零知識證明，它靠的是重跑與經濟懲罰。",
+    "service 在 accumulate 時沒有重跑能力，也就無法判斷結果對錯。",
+    "隨機抽樣重跑加上事後懲罰，這才是 in-core 結果可信的根源。"
+   ],
+   "trap": "簽名 = 負責，不 = 正確；正確性靠事後抽樣重跑。"
+  },
+  {
+   "id": "n6-why-random-auditors",
+   "ch": "N6",
+   "section": "§17",
+   "gpRef": "§17",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "audit"
+   ],
+   "stem": "Auditors are picked by a verifiable random function rather than volunteering or being appointed. Why does that matter?",
+   "stemZh": "auditor 是由可驗證隨機函數選出的，而不是自願或被指派。為什麼這件事重要？",
+   "options": [
+    "Nobody is appointed, so the protocol needs no privileged service to maintain the auditor list, which keeps the whole auditing mechanism outside the state entirely",
+    "Nobody can know in advance who will check a given report, so a dishonest guarantor cannot bribe or target the checkers, and everyone can verify the selection was fair",
+    "Nobody has to volunteer, so the protocol avoids the free-rider problem in which every validator would rather let someone else pay the cost of re-running the work",
+    "Nobody audits twice, so the random selection guarantees each validator checks a different report and the workload is spread evenly across the validator set"
+   ],
+   "optionsZh": [
+    "沒有人被指派，協定因此不需要一個具特權的 service 來維護 auditor 名單，讓整個稽核機制完全留在狀態之外",
+    "沒有人能事先知道某份 report 會由誰查核，所以不誠實的 guarantor 無法賄賂或針對查核者，而且任何人都能驗證這個抽選是公正的",
+    "沒有人需要自願，協定因此避開了搭便車問題——否則每位 validator 都寧可讓別人去付重跑的成本",
+    "沒有人會稽核兩次，隨機抽選保證每位 validator 查核不同的 report，工作量因此平均分散在整個 validator 集合"
+   ],
+   "answer": 1,
+   "explanation": "隨機性擋的是**針對性攻擊**。如果 auditor 事先可知，一個打算說謊的 guarantor 只要收買或癱瘓那幾位就能矇混過關——稽核就形同虛設。VRF 選人讓兩件事同時成立：**事前不可預測**（連被選中的人自己也要到那一刻才知道），以及**事後可驗證**（他可以出示證明說「我確實被選中」，沒被選中的人無法偽裝）。搭便車問題是靠協定義務與獎懲處理的，不是靠隨機；而隨機抽樣也不保證不重複。",
+   "optNotes": [
+    "auditor 的抽選用的是狀態裡的 entropy，並沒有離開狀態。",
+    "事前不可預測、事後可驗證，這兩點才是 VRF 抽選的價值。",
+    "搭便車靠的是義務與獎懲，隨機抽選本身解決不了誰願意付成本。",
+    "隨機抽樣不保證不重複，也不以平均分攤工作量為目標。"
+   ],
+   "trap": "隨機的價值在「不可預測 + 可驗證」，不是公平分攤。"
+  },
+  {
+   "id": "n6-disputes-three-outcomes",
+   "ch": "N6",
+   "section": "§10 Disputes",
+   "gpRef": "§10",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "disputes"
+   ],
+   "stem": "A dispute over one report ends in one of three verdicts. What are they, and what is the third one for?",
+   "stemZh": "對一份 report 的爭議會以三種判決之一收場。是哪三種？第三種又是為了什麼？",
+   "options": [
+    "Good, bad, and pending — the last covering a dispute that has not yet gathered enough judgments, which is revisited once more validators have weighed in",
+    "Good, bad, and appealed — the last covering a verdict that a guarantor has formally challenged, which then escalates to the full validator set for a second round",
+    "Good, bad, and expired — the last covering a dispute raised too late to matter, since the report it concerns has already been accumulated into the state",
+    "Good, bad, and wonky — the last covering the case where the validators split roughly evenly, so no conclusion can be drawn and nobody is punished for it"
+   ],
+   "optionsZh": [
+    "good、bad、pending——最後一種涵蓋尚未蒐集到足夠判定的爭議，等更多 validator 表態之後會再處理一次",
+    "good、bad、appealed——最後一種涵蓋 guarantor 正式提出異議的判決，會升級到全體 validator 進行第二輪",
+    "good、bad、expired——最後一種涵蓋提得太晚而無關緊要的爭議，因為它所針對的 report 早已被 accumulate 進狀態",
+    "good、bad、wonky——最後一種涵蓋 validator 意見大致對半分裂、無法得出結論的情況，這種情形不罰任何人"
+   ],
+   "answer": 3,
+   "explanation": "三種判決是 **good（⊤）、bad（⊥）、wonky（∅）**。前兩種好理解：一致認為結果正確、或一致認為錯誤。**wonky 是給「連 validator 自己都無法達成一致」的情況**——票數恰好卡在三分之一那個門檻。這種時候協定不假裝知道答案：該 report 作廢，但**不懲罰任何人**，因為無法認定誰說謊。這個設計反映一個務實的判斷：分不出對錯時，最安全的做法是丟掉這份工作而不是隨便罰人。三個門檻都是**等式**而非區間，落在其外的票數分布會讓整個區塊無效。",
+   "optNotes": [
+    "沒有 pending 這種狀態；一份 verdict 必須帶足額的判定才合法。",
+    "沒有申訴或第二輪機制，判決一次定讞。",
+    "沒有過期概念；爭議的 epoch 範圍另有規定，但那不是第三種判決。",
+    "wonky 對應無法認定的分裂情況，作廢該 report 但不罰任何人。"
+   ],
+   "trap": "第三種是 wonky（分不出對錯）：報告作廢、但不罰人。"
+  },
+  {
+   "id": "n6-offender-consequence",
+   "ch": "N6",
+   "section": "§10; §6.3",
+   "gpRef": "§10 & §6",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "disputes"
+   ],
+   "alsoCh": [
+    "N3"
+   ],
+   "stem": "A validator is found to have guaranteed a report that turned out to be bad. What does JAM itself do to them?",
+   "stemZh": "某位 validator 被認定擔保了一份後來被判定為錯誤的 report。JAM 本身會對他做什麼？",
+   "options": [
+    "It reassigns all of their pending work to other cores and bars them from guaranteeing again, while leaving their ability to assure and audit completely untouched",
+    "It records their key in an offenders set and zeroes their entry at the next epoch change, so they can no longer author or sign; the actual slashing is left to the staking layer above",
+    "It deducts a fixed penalty from their balance immediately and removes them from the validator set within the same block, so the punishment lands before the next block is authored",
+    "It marks them for a probation period during which their signatures still count but carry less weight, and removes them only if they offend a second time within the epoch"
+   ],
+   "optionsZh": [
+    "把他所有待處理的工作重新指派到其他 core，並禁止他再擔保，但完全不影響他背書與稽核的能力",
+    "把他的金鑰記進 offenders 集合，並在下一次 epoch 換屆時把他的項目歸零，使他不能再出塊或簽署；實際的沒收則交給上層的 staking 機制處理",
+    "立刻從他的餘額扣除一筆固定罰金，並在同一個區塊內把他移出 validator 集合，讓懲罰在下一個區塊出塊之前就落地",
+    "把他標記為觀察期，期間他的簽章仍然算數但權重較低，只有在同一個 epoch 內再犯才會被移除"
+   ],
+   "answer": 1,
+   "explanation": "JAM 的分工很清楚：**它負責「認定」，不負責「沒收」**。被認定的 validator 其 Ed25519 金鑰進入 ψ_O（offenders 集合），到下一個 epoch 換屆時，Φ 會把他那整筆 validator key 換成全零——從此不能出塊、不能擔保、不能背書。§10 明說 JAM 自己不動餘額，實際的 slash 由上層的 staking 系統依這份紀錄執行。這個分層是刻意的：JAM 是一台通用機器，質押與代幣經濟屬於建在它上面的 service。另外要注意歸零是**就地**進行而不是移除，所以 validator 集合的長度與索引不會位移。",
+   "optNotes": [
+    "金鑰歸零之後所有角色都做不了，不是只擋擔保。",
+    "認定與紀錄由 JAM 做、實際沒收由上層做——這個分層是刻意的。",
+    "JAM 不會直接扣餘額，§10 明說它不處理罰金。",
+    "沒有觀察期或權重折減這種機制，認定即失效。"
+   ],
+   "trap": "JAM 只認定並歸零金鑰；扣錢是上層 staking 的事。"
+  },
+  {
+   "id": "n6-why-two-thirds",
+   "ch": "N6",
+   "section": "§11.2; §17",
+   "gpRef": "§11 & §17",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "thresholds"
+   ],
+   "stem": "The availability threshold is set above two thirds of validators. Why not a simple majority?",
+   "stemZh": "可得性門檻訂在超過三分之二的 validator。為什麼不是簡單多數就好？",
+   "options": [
+    "Because a simple majority would be reached too quickly, and the protocol needs the extra delay so that auditors have time to fetch the data before accumulation begins",
+    "Because the security model assumes up to a third may be dishonest, so only a two-thirds threshold guarantees that at least some honest validators are among those attesting",
+    "Because the erasure coding needs exactly two thirds of the shards to reconstruct, so the threshold is a direct consequence of the coding rate that was chosen",
+    "Because a simple majority could be split evenly on an even-sized validator set, and two thirds is the smallest fraction that avoids the possibility of a tie"
+   ],
+   "optionsZh": [
+    "因為簡單多數會太快達成，協定需要這段額外延遲，好讓 auditor 在 accumulation 開始前有時間取得資料",
+    "因為安全模型假設最多可能有三分之一不誠實，只有三分之二的門檻才能保證表態者當中至少有一部分是誠實的",
+    "因為 erasure coding 恰好需要三分之二的碎片才能重建，所以這個門檻是所選編碼率的直接結果",
+    "因為在偶數大小的 validator 集合上簡單多數可能剛好對半，而三分之二是能避免平手的最小比例"
+   ],
+   "answer": 1,
+   "explanation": "門檻來自**拜占庭容錯的標準假設**：最多有 1/3 的參與者可能作惡。若只要求簡單多數，一群串通的不誠實 validator 有可能自己湊出過半、宣稱資料可得，但實際上誰也沒有留著它——結果是 auditor 事後拿不到輸入，稽核失效。要求超過 2/3 就保證了表態的人裡面必定有誠實的一群，而誠實的人不會謊稱自己持有碎片。順帶注意 erasure coding 的重建門檻是 **1/3** 不是 2/3——兩個數字都出現在同一段機制裡，但意義不同，很容易記混。",
+   "optNotes": [
+    "門檻不是為了製造延遲；稽核時間由別的機制安排。",
+    "1/3 作惡的假設決定了 2/3 的門檻，這是拜占庭容錯的標準推論。",
+    "重建只需要 1/3 的碎片，這與表態門檻是兩個不同的數字。",
+    "避免平手不是理由；三態判決另有自己的門檻設計。"
+   ],
+   "trap": "背書門檻 2/3（因為 1/3 可能作惡）；重建門檻 1/3（因為編碼率）。兩者別搞混。"
+  },
+  {
+   "id": "n6-chain-of-guarantees",
+   "ch": "N6",
+   "section": "§11; §17; §10",
+   "gpRef": "§11, §17 & §10",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "security"
+   ],
+   "alsoCh": [
+    "N5"
+   ],
+   "stem": "Availability, auditing and disputes are three separate mechanisms. What breaks if you remove availability and keep the other two?",
+   "stemZh": "可得性、稽核、爭議是三套獨立的機制。如果拿掉可得性、只留另外兩套，會壞在哪裡？",
+   "options": [
+    "Disputes lose their evidence: a verdict could still be reached but nobody could prove which guarantors signed the report, so no offender could ever be identified",
+    "Auditing loses its randomness: without assurances there is nothing for the selection function to draw on, so auditors could no longer be chosen unpredictably",
+    "Auditing loses its input: an auditor asked to re-run a report may find the data gone, so a dishonest guarantor could simply withhold it and never be contradicted",
+    "Disputes lose their bound: without availability there is no timeout, so a report could stay pending forever and its dispute window would never actually close"
+   ],
+   "optionsZh": [
+    "爭議失去證據：判決仍然做得出來，但沒有人能證明是哪些 guarantor 簽署了該 report，因此永遠無法認定任何 offender",
+    "稽核失去隨機性：沒有 assurance 就沒有東西可供抽選函數取用，auditor 也就無法再被不可預測地選出",
+    "稽核失去輸入：被要求重跑某份 report 的 auditor 可能發現資料已經不見，於是不誠實的 guarantor 只要把資料藏起來就永遠不會被反駁",
+    "爭議失去邊界：沒有可得性就沒有逾時機制，一份 report 可能永遠處於待處理狀態，它的爭議窗口也就永遠不會關閉"
+   ],
+   "answer": 2,
+   "explanation": "三者是一條**依序相扣的鏈**：可得性保證資料救得回來 → 稽核靠那份資料重跑 → 爭議處理重跑後的歧見。抽掉第一環，第二環就懸空：auditor 被抽中去查某份 report，卻拿不到原始輸入，於是「查不出錯」與「沒有錯」變得無法區分。更糟的是這給了作惡者一個乾淨的策略——**簽一個假結果，然後把資料丟掉**。這正是為什麼 accumulate 必須等到 available 之後才發生：先確保查得了，再讓它生效。guarantor 的簽章一直都在 report 裡（0.8.0 起連簽章一起存進 ρ），所以證據不是問題。",
+   "optNotes": [
+    "guarantor 的簽章存在 report 與 ρ 裡，證據不會因為缺少可得性而消失。",
+    "auditor 的抽選用的是狀態裡的 entropy，與 assurance 無關。",
+    "沒有資料就無法重跑，「藏起資料」會變成一個乾淨的作弊策略。",
+    "逾時是 ρ 自己的規則（U = 5 個時槽），不依賴可得性機制存在。"
+   ],
+   "trap": "可得性 → 稽核 → 爭議是一條鏈；斷第一環，作惡者只要丟掉資料就贏了。"
+  },
+  {
+   "id": "n6-two-da-basic",
+   "ch": "N6",
+   "section": "§11.2; §14",
+   "gpRef": "§11 & §14",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "availability"
+   ],
+   "stem": "JAM keeps two different kinds of data available, with different lifetimes. What are they for?",
+   "stemZh": "JAM 讓兩種不同的資料保持可得，而且保存期限不同。它們各自的用途是什麼？",
+   "options": [
+    "One holds the package bundle so auditors can re-run the work; the other holds the exported segments so later packages can import them, and needs to last much longer",
+    "One holds data for cores that are currently busy and the other for cores that are idle, so that a core can be brought back into service without refetching anything",
+    "One holds the package bundle for auditors; the other holds a copy of the chain state so that a node which falls behind can rebuild it without replaying every block",
+    "One holds the data for the current epoch and the other holds an archive of previous epochs, so the split is by age rather than by what the data is used for"
+   ],
+   "optionsZh": [
+    "一種保存 package bundle，好讓 auditor 能重跑那份工作；另一種保存匯出的 segment，好讓後續的 package 能匯入它們，而且必須保存久得多",
+    "一種保存目前忙碌中的 core 的資料、另一種保存閒置 core 的，好讓一個 core 重新投入服務時不必重新抓取任何東西",
+    "一種為 auditor 保存 package bundle；另一種保存鏈上狀態的副本，好讓落後的節點不必重放每個區塊就能重建狀態",
+    "一種保存當前 epoch 的資料、另一種保存先前 epoch 的封存，所以區分依據是資料的新舊而非用途"
+   ],
+   "answer": 0,
+   "explanation": "兩種可得性對應**兩種不同的需求**。**Audit DA**：保存 work-package bundle，供 auditor 事後重跑用；它只需要撐過稽核窗口，時間相對短。**Import/Segment DA**：保存匯出的 segment，供**後續的 work-package** 匯入使用；因為接力可能隔很久才發生，它必須保存得久得多（規格上是 28 天）。分開設計的理由很直接：兩者的讀取者不同（auditor vs 後續的 package）、保存期限差很多，混在一起就得一律用長的那個期限，成本會浪費在不需要長存的 bundle 上。",
+   "optNotes": [
+    "稽核用的 bundle 與接力用的 segment，讀者與期限都不同，所以分開處理。",
+    "core 沒有閒置與否的資料區分；可得性是針對 package 而非 core。",
+    "JAM 的可得性層不保存狀態副本；狀態同步是另一回事。",
+    "區分依據是用途而不是新舊；兩種資料在同一時間都可能存在。"
+   ],
+   "trap": "Audit DA（給 auditor、短）vs Segment DA（給後續 package、28 天）。"
+  },
+  {
+   "id": "n7-what-is-pvm",
+   "ch": "N7",
+   "section": "§4.7; App. A",
+   "gpRef": "§4 & App. A",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "pvm"
+   ],
+   "stem": "What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?",
+   "stemZh": "PVM 是什麼？JAM 為什麼要自己定義一個，而不沿用既有的虛擬機？",
+   "options": [
+    "A sandbox that isolates service code from the host, defined by JAM because existing virtual machines cannot prevent a program from reading memory belonging to another service",
+    "A just-in-time compiler specification, defined by JAM so that service code can be translated to native instructions and run at speeds an interpreter could never reach",
+    "A small deterministic register machine based on RISC-V, defined precisely so that every node and every auditor executing the same program gets exactly the same result and gas cost",
+    "A bytecode format designed for small program size, defined by JAM because service code must fit inside a work-package and existing formats are far too verbose for that"
+   ],
+   "optionsZh": [
+    "一個把 service 程式碼與宿主隔離的沙箱，由 JAM 自行定義，因為既有的虛擬機無法阻止程式讀取屬於另一個 service 的記憶體",
+    "一份即時編譯器規格，由 JAM 定義，好讓 service 程式碼能被翻譯成原生指令、跑出直譯器永遠達不到的速度",
+    "一台以 RISC-V 為基礎的小型確定性暫存器機，被精確定義，好讓每個節點與每位 auditor 執行同一支程式時都得到完全相同的結果與 gas 花費",
+    "一種為縮小程式體積而設計的位元碼格式，由 JAM 定義，因為 service 程式碼必須塞進 work-package，而既有格式對此太過冗長"
+   ],
+   "answer": 2,
+   "explanation": "PVM 存在的理由是**確定性**，不是速度或體積。JAM 的安全模型建立在「同一份輸入重跑會得到同一份輸出」上——auditor 才有辦法反駁 guarantor。這要求執行語意與 gas 計費都被規格逐條釘死，不能有「依實作而異」的空間。既有的 VM 要嘛語意有未定義的角落、要嘛計費模型不適合，所以 GP 自己定義了一台以 RISC-V 的 RV64EM 為基礎的暫存器機。隔離、JIT、體積都是次要考量（JIT 甚至是允許的實作手法，只要結果一致）。",
+   "optNotes": [
+    "隔離是任何 VM 都能做到的，不足以構成自訂一台的理由。",
+    "JIT 是實作選擇；規格關心的是結果一致而非執行速度。",
+    "確定性是核心：重跑必須得到相同結果與相同 gas，稽核才成立。",
+    "程式碼透過 preimage 進入狀態，體積不是設計 PVM 的動機。"
+   ],
+   "trap": "自訂 VM 是為了「重跑結果必須一致」，不是為了快或小。"
+  },
+  {
+   "id": "n7-why-riscv",
+   "ch": "N7",
+   "section": "§4.7; App. A",
+   "gpRef": "§4 & App. A",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "pvm"
+   ],
+   "stem": "The PVM is based on RISC-V rather than on a bespoke instruction set. What does that buy?",
+   "stemZh": "PVM 以 RISC-V 為基礎而不是自創一套指令集。這樣做買到了什麼？",
+   "options": [
+    "Existing hardware can execute it directly without any translation layer, so a validator with a RISC-V processor runs service code at full native speed with no interpreter",
+    "Existing formal proofs of the RISC-V specification carry over, so the PVM's determinism is inherited from that work rather than needing to be established separately",
+    "Existing RISC-V programs run unmodified, so software written for general-purpose operating systems can be deployed as a JAM service without being recompiled at all",
+    "Existing compilers already target it, so services can be written in ordinary languages, and its register machine maps onto real hardware more directly than a stack machine"
+   ],
+   "optionsZh": [
+    "既有硬體可以直接執行它、不需要任何翻譯層，所以配備 RISC-V 處理器的 validator 能以完整原生速度執行 service 程式碼、不必直譯",
+    "既有對 RISC-V 規格的形式化證明可以直接沿用，所以 PVM 的確定性繼承自那些成果，不需要另外建立",
+    "既有的 RISC-V 程式可以原封不動執行，所以為一般作業系統寫的軟體不必重新編譯就能部署成 JAM service",
+    "既有的編譯器已經支援它，所以 service 可以用一般語言撰寫；而且暫存器機比堆疊機更直接對應到真實硬體"
+   ],
+   "answer": 3,
+   "explanation": "兩個實際好處。**工具鏈**：LLVM 等既有編譯器已經能產生 RISC-V 程式碼，所以 service 可以用 Rust、C 這類一般語言寫，不必為了一套自創指令集重建整條工具鏈。**執行效率**：暫存器機的指令與真實 CPU 的暫存器一一對應，實作要做 JIT 或 AOT 翻譯時比堆疊機（例如 EVM）容易得多。但 PVM **不是** RISC-V：它是 RV64EM 的精簡子集，拿掉了密碼學與環境互動的指令，另外加上自己的計價與記憶體模型，所以既有的 RISC-V 程式不能直接跑。",
+   "optNotes": [
+    "PVM 是精簡子集加上自己的計價與記憶體模型，硬體無法直接執行。",
+    "確定性來自 GP 自己的逐條定義，不是繼承自 RISC-V 的既有成果。",
+    "一般 RISC-V 程式依賴系統呼叫與完整指令集，不能原封不動部署。",
+    "既有工具鏈可用、暫存器機好翻譯，這是選 RISC-V 的兩個實際理由。"
+   ],
+   "trap": "PVM 是 RV64EM 的子集，不是 RISC-V 本身；好處在工具鏈與翻譯難度。"
+  },
+  {
+   "id": "n7-what-gas-is-for",
+   "ch": "N7",
+   "section": "§4.7",
+   "gpRef": "§4",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "gas"
+   ],
+   "stem": "What is gas actually protecting in JAM?",
+   "stemZh": "JAM 的 gas 實際上在保護什麼？",
+   "options": [
+    "The privacy of a service's execution, so that observers cannot infer what a program did by measuring how long its accumulate step happened to take",
+    "The integrity of the state, so that a service which runs out of resources cannot leave its storage half-written and inconsistent for the next block to read",
+    "The fairness of pricing between services, so that two services doing similar amounts of work end up paying similar amounts for the core time they consumed",
+    "The bound on how long execution may run, so that one service cannot consume a validator's time indefinitely and stall everyone else's work along with it"
+   ],
+   "optionsZh": [
+    "service 執行過程的隱私，讓觀察者無法藉由測量 accumulate 步驟花了多久來推斷程式做了什麼",
+    "狀態的完整性，讓資源耗盡的 service 不會留下寫到一半、不一致的 storage 給下一個區塊讀到",
+    "service 之間定價的公平性，讓兩個做了差不多工作量的 service，最終為所消耗的 core time 付出差不多的代價",
+    "執行時間的上界，讓單一 service 無法無止盡地佔用 validator 的時間、連帶拖住其他所有人的工作"
+   ],
+   "answer": 3,
+   "explanation": "gas 是**停機問題的實用解法**。沒有它，一支寫了無窮迴圈的 service 程式會讓執行它的節點永遠卡住——in-core 會拖垮那個 core，on-chain 更會讓整條鏈停擺，因為 accumulate 是每個節點都要跑的。gas 給每次執行一個上界，用完就中止（OOG）。定價公平性是次要的（實際計價還牽涉 core time 的分配）；狀態一致性靠的是 accumulate 的 checkpoint 與 collapse 機制而不是 gas；隱私則完全不在 JAM 的目標裡。",
+   "optNotes": [
+    "JAM 不提供執行隱私，狀態與程式碼都是公開的。",
+    "半寫入的狀態由 checkpoint 與 collapse 處理，不是 gas 的職責。",
+    "定價公平是附帶效果，gas 的首要任務是保證會停下來。",
+    "gas 給執行設上界，這是防止無窮迴圈拖垮節點的唯一手段。"
+   ],
+   "trap": "gas 保護的是「一定會停下來」；一致性與定價是別的機制。"
+  },
+  {
+   "id": "n7-determinism-requirement",
+   "ch": "N7",
+   "section": "App. A; §17",
+   "gpRef": "App. A & §17",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "pvm",
+    "audit"
+   ],
+   "alsoCh": [
+    "N6"
+   ],
+   "stem": "The PVM has no instruction for reading a clock, generating randomness or opening a socket. What would go wrong if it did?",
+   "stemZh": "PVM 沒有任何讀取時鐘、產生隨機數或開啟網路連線的指令。如果有的話會出什麼問題？",
+   "options": [
+    "The gas cost of an instruction would depend on how long the outside world took to respond, so a basic block's price could no longer be computed before it runs",
+    "A malicious service could exhaust the validator's file handles or sockets, so one program could degrade the machine for every other service scheduled after it",
+    "Two honest nodes running the same program could reach different results, so an auditor's re-run would prove nothing and every disagreement would become unresolvable",
+    "A service could reach outside the chain to fetch data, so the state would depend on external systems that the protocol has no way to hold accountable for their answers"
+   ],
+   "optionsZh": [
+    "一條指令的 gas 成本會取決於外界回應的快慢，於是一個 basic block 的價格在執行之前就再也算不出來",
+    "惡意的 service 可能耗盡 validator 的檔案描述子或連線，於是一支程式就能拖累排在它之後的其他所有 service",
+    "兩個誠實節點跑同一支程式可能得到不同結果，於是 auditor 的重跑什麼也證明不了，任何歧見都變得無法裁決",
+    "service 可以伸手到鏈外抓資料，於是狀態會依賴外部系統，而協定無從對那些系統給出的答案追究責任"
+   ],
+   "answer": 2,
+   "explanation": "根本問題是**確定性**。JAM 的整個正確性論證是「少數人執行、任何人可重跑檢查」；重跑要有意義，前提是同樣的輸入必然得到同樣的輸出。如果程式能讀時鐘或產生真隨機數，兩個誠實節點跑同一支程式就會得到不同結果——這時 auditor 說「我算出來不一樣」完全無法證明 guarantor 說謊，爭議機制也就失去判準。其他三個選項描述的後果都真實存在，但它們是**衍生的問題**；沒有確定性，稽核這一層直接崩塌。",
+   "optNotes": [
+    "計價可預測是重要的，但那是確定性在 gas 這個面向的表現。",
+    "資源耗盡屬於沙箱層面的顧慮，不是禁止這些指令的主要理由。",
+    "誠實節點得到不同結果，稽核與爭議就失去判準——這是最根本的後果。",
+    "外部依賴確實是問題，但它之所以致命是因為破壞確定性。"
+   ],
+   "trap": "禁止這些指令是為了保住「重跑必然一致」——稽核的地基。"
+  },
+  {
+   "id": "n7-host-calls-basic",
+   "ch": "N7",
+   "section": "App. B",
+   "gpRef": "App. B",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "host-calls"
+   ],
+   "stem": "If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?",
+   "stemZh": "既然 PVM 碰不到外界，一個 service 要怎麼讀取自己的 storage 或轉帳給另一個 service？",
+   "options": [
+    "Through privileged instructions: the PVM has a second instruction set that only becomes available during accumulate and is otherwise treated as invalid opcodes",
+    "Through host calls: a special instruction hands control to the protocol, which performs the operation under its own rules and returns a result the program can read",
+    "Through the work-package: everything a service may read or write must be declared in the package up front, and the protocol applies the declared changes afterwards",
+    "Through reserved memory regions: the protocol maps the service's storage into the address space, so reading it is an ordinary load and writing it an ordinary store"
+   ],
+   "optionsZh": [
+    "透過特權指令：PVM 有第二套指令集，只在 accumulate 期間才可用，其餘時候一律視為非法的 opcode",
+    "透過 host call：一條特殊指令把控制權交給協定，由協定依自己的規則執行該操作，再回傳一個程式讀得到的結果",
+    "透過 work-package：一個 service 可以讀寫的東西必須事先全部宣告在 package 裡，協定事後再套用那些被宣告的變更",
+    "透過保留的記憶體區段：協定把該 service 的 storage 映射進位址空間，因此讀取只是普通的 load、寫入只是普通的 store"
+   ],
+   "answer": 1,
+   "explanation": "答案是 **host call**：程式執行 `ecalli` 這條指令，控制權交回協定，協定依規則完成操作（讀 storage、轉帳、建立 service…）再把結果放回暫存器，程式繼續跑。這個設計讓兩件事成立：**所有對外的效果都經過協定的規則**（權限、計價、驗證都在這一層執行），以及**動態成本被隔離在 host call 裡**——指令層因此可以維持靜態可計價。記憶體映射的作法會讓 storage 的存取繞過權限檢查；work-package 事先宣告則不可能，因為 accumulate 要寫什麼取決於執行結果。",
+   "optNotes": [
+    "PVM 只有一套指令集；能不能用某個 host call 由 invocation 種類決定。",
+    "把控制權交回協定執行、再回傳結果，這正是 host call 的形狀。",
+    "accumulate 要寫什麼取決於執行結果，不可能事先宣告。",
+    "記憶體映射會讓 storage 存取繞過權限與計價，協定無從介入。"
+   ],
+   "trap": "host call 是「唯一的對外出口」，也是動態成本的統一入口。"
+  },
+  {
+   "id": "n7-no-crypto-instructions",
+   "ch": "N7",
+   "section": "§4.7; App. B",
+   "gpRef": "§4 & App. B",
+   "difficulty": 2,
+   "kind": "rationale",
+   "tags": [
+    "basics",
+    "pvm"
+   ],
+   "stem": "The PVM deliberately omits instructions for cryptographic operations. Does that mean a service cannot hash anything?",
+   "stemZh": "PVM 刻意省略了密碼學運算的指令。這是否表示 service 沒辦法做雜湊？",
+   "options": [
+    "Yes — services are not expected to hash anything themselves, because every commitment a service needs is computed for it by the protocol during accumulation",
+    "Yes — hashing inside a service would be non-deterministic across implementations, so the protocol forbids it and computes all digests outside the virtual machine",
+    "No — a service can implement them in ordinary instructions, and the omission simply reflects that the protocol has no opinion on which primitives a service should use",
+    "No — such operations are offered as host calls instead, which lets the protocol price them realistically rather than as some number of ordinary instructions"
+   ],
+   "optionsZh": [
+    "會——service 本來就不需要自己做雜湊，因為它需要的每一個承諾都由協定在 accumulation 期間代為計算",
+    "會——在 service 內部做雜湊在不同實作之間會產生不確定性，所以協定禁止它，並在虛擬機外計算所有摘要",
+    "不會——service 可以用普通指令自己實作，這個省略只是反映協定對 service 該用哪些原語沒有意見",
+    "不會——這類運算改以 host call 提供，讓協定能對它們做出貼近實際的定價，而不是折算成某個數量的普通指令"
+   ],
+   "answer": 3,
+   "explanation": "省略指令不等於不能用——這些運算改由 **host call** 提供。理由是**計價**：一次 Blake2b 的實際成本遠高於一條普通指令，如果硬用普通指令實作，計價就得靠「大約等於幾百條指令」這種粗糙的折算，而且不同實作的效率差異會讓那個折算失準。做成 host call 之後，協定可以直接對它訂一個貼近實際成本的價格。當然 service 理論上仍可用普通指令自己寫一份雜湊實作，只是慢又貴——這正是設計要引導的方向。雜湊本身完全是確定性的，不存在不確定性的問題。",
+   "optNotes": [
+    "service 當然會需要自己做雜湊，協定不會代勞。",
+    "雜湊是完全確定性的運算，不確定性不是這裡的問題。",
+    "自己用普通指令實作在技術上可行，只是慢又貴，設計刻意不鼓勵。",
+    "改以 host call 提供是為了能對真實成本定價，而不是為了禁止。"
+   ],
+   "trap": "拿掉指令是為了「能正確定價」，功能改由 host call 提供。"
+  },
+  {
+   "id": "n7-memory-basic",
+   "ch": "N7",
+   "section": "§4.7; App. A",
+   "gpRef": "§4 & App. A",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "pvm",
+    "memory"
+   ],
+   "stem": "The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?",
+   "stemZh": "PVM 的記憶體是分頁的，碰到未映射的頁會引發 fault 而不是直接殺掉程式。這讓什麼變得可能？",
+   "options": [
+    "Sharing memory between services: a faulting page can be resolved to a region another service owns, which is how two services exchange large values without copying",
+    "Recovering from bugs: a program that reads uninitialised memory gets a chance to handle the fault and continue, instead of being terminated for a simple mistake",
+    "Loading input on demand: a program can be started without every segment it might read already in memory, and the host maps a page only when it is actually touched",
+    "Growing the stack without limit: a fault on the page below the stack is what tells the host to extend it, so a program need never declare how deep its recursion goes"
+   ],
+   "optionsZh": [
+    "在 service 之間共享記憶體：出錯的那一頁可以被解析到另一個 service 擁有的區段，兩個 service 就是靠這個交換大型資料而不必複製",
+    "從 bug 中復原：讀到未初始化記憶體的程式有機會處理該 fault 並繼續執行，而不是因為一個簡單的錯誤就被終止",
+    "按需載入輸入：程式啟動時不必把所有可能讀到的 segment 都先放進記憶體，宿主只在某一頁真的被碰到時才映射它",
+    "無限制地擴張堆疊：堆疊下方那一頁的 fault 正是通知宿主延展它的信號，因此程式永遠不必宣告自己的遞迴有多深"
+   ],
+   "answer": 2,
+   "explanation": "**按需分頁讓「宣告很多、實際只碰一小部分」變成可行。** refine 可能宣告匯入上千個 segment，但實際執行往往只讀其中幾個；如果啟動前就得把全部塞進記憶體，work-package 會大到不切實際。page fault 是**可回復的退出理由**：宿主把那一頁映射進來，程式從中斷處繼續。這也是為什麼 fault 回報的是**頁對齊的位址**——那正好是宿主需要映射的單位。至於跨 service 共享記憶體，JAM 沒有這種機制（隔離是硬性的）；堆疊擴張走的是 `grow_heap` 這類 host call。",
+   "optNotes": [
+    "service 之間完全隔離，沒有共享記憶體的機制。",
+    "fault 不是給程式自己處理的例外；它把控制權交給宿主。",
+    "按需載入讓「宣告多、實際碰少」可行，這是 fault 可回復的主要價值。",
+    "堆疊與堆的擴張走 host call（0.8.0 的 grow_heap），不是靠 fault 觸發。"
+   ],
+   "trap": "page fault 是可回復的，為的是按需載入輸入——不是錯誤處理機制。"
+  },
+  {
+   "id": "n7-two-gas-budgets",
+   "ch": "N7",
+   "section": "§11.3; §12; §14",
+   "gpRef": "§11, §12 & §14",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "basics",
+    "gas"
+   ],
+   "alsoCh": [
+    "N5"
+   ],
+   "stem": "refine and accumulate are given very different gas budgets. Why should the on-chain step get so much less?",
+   "stemZh": "refine 與 accumulate 拿到的 gas 預算差距很大。為什麼鏈上那一步應該少那麼多？",
+   "options": [
+    "Because refine is audited afterwards and accumulate is not, so accumulate must be kept small enough that any error it makes is cheap to detect and correct later",
+    "Because refine runs once on one core while accumulate runs on every node in the network, so the same amount of gas costs the system hundreds of times more on-chain",
+    "Because refine works on data that is already available while accumulate must fetch what it needs from storage, and storage access is what the budget is really limiting",
+    "Because refine is paid for by the submitter of the work-package while accumulate is paid for by the service itself, and services are expected to hold smaller balances"
+   ],
+   "optionsZh": [
+    "因為 refine 事後會被稽核而 accumulate 不會，所以 accumulate 必須小到即使出錯，事後偵測與修正的代價也很低",
+    "因為 refine 只在一個 core 上執行一次，而 accumulate 在網路上的每個節點都要執行，所以同樣的 gas 量在鏈上讓整個系統付出數百倍的代價",
+    "因為 refine 處理的是已經備妥的資料，而 accumulate 必須從 storage 取用所需內容，而預算真正在限制的正是 storage 存取",
+    "因為 refine 由 work-package 的提交者付費、accumulate 由 service 自己付費，而 service 通常被預期持有較小的餘額"
+   ],
+   "answer": 1,
+   "explanation": "差別來自**誰在執行**。refine 只在一個 core 上由 3 名 guarantor 跑一次；accumulate 屬於狀態轉移，**網路上每個節點都要跑一遍**。所以同樣一單位的 gas，花在 accumulate 上對整個系統的真實成本是花在 refine 上的數百倍（大約等於節點數量的倍數）。這就是為什麼 refine 的預算（G_R）是數十億，而單份 report 的 accumulate 預算（G_A）只有一千萬——差了約三個數量級。這個比例不是任意的，它直接反映 JAM「in-core 做重活、on-chain 只收結果」的架構。",
+   "optNotes": [
+    "accumulate 沒有被稽核，但那正是它必須簡單的原因之一，不是預算大小的來源。",
+    "一個 core 跑一次 vs 全網每個節點都跑，成本差距約等於節點數量。",
+    "兩者都會存取資料；storage 存取本身不是預算差距的解釋。",
+    "付費方不同確實存在，但預算的比例反映的是系統成本而非帳戶餘額。"
+   ],
+   "trap": "預算差三個數量級，因為 accumulate 的成本要乘上節點數。"
   }
  ],
  "terms": [

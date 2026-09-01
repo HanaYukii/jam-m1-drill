@@ -27,6 +27,7 @@ ITEMS = [
 },
 {
  "id": "appD-node-discrimination",
+  "alsoCh": ["C"],
  "ch": "D", "section": "D.2.1 Trie Node Encoding",
  "gpRef": "§D.2.1", "difficulty": 2, "kind": "concept",
  "tags": ["merklization", "trie", "state-root"],
@@ -90,6 +91,7 @@ ITEMS = [
 },
 {
  "id": "ch14-oversize-rule",
+  "alsoCh": ["11"],
  "ch": "14", "section": "14.4 Work Result Size",
  "gpRef": "§14; eq. 11.x (W_R)", "difficulty": 2, "kind": "concept",
  "tags": ["work-report", "oversize", "limits"],

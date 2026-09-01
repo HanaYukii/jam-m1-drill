@@ -45,6 +45,7 @@ ITEMS = [
 },
 {
  "id": "ch04-dependency-graph-alpha",
+  "alsoCh": ["8", "12"],
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.5–4.20",
  "difficulty": 2, "kind": "concept", "tags": ["stf", "ordering"],
  "stem": "In the state-transition dependency graph, the posterior authorizer pool α′ is defined as α′ ≺ (H, E_G, φ′, α). What does this imply for the order of computation inside a block import?",

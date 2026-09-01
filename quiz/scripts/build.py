@@ -10,6 +10,7 @@ os.makedirs(DIST, exist_ok=True)
 
 BANK_VERSION = "bank v1.0 (" + datetime.date.today().isoformat() + ")"
 GROUPS = {
+    **{k: "基礎" for k in ["N1","N2","N3","N4","N5","N6","N7"]},
     **{k: "Chapters 3–13" for k in ["3","4","5","6","7","8","9","10","11","12","13"]},
     "14": "Off-chain (14+)",
     **{k: "Appendices" for k in ["A","B","C","D","E","F","G","H"]},
@@ -95,6 +96,9 @@ def shuffle_options(item):
     out["answer"] = new_ans
     if item.get("optNotes"):
         out["optNotes"] = [item["optNotes"][i] for i in order]
+    if item.get("optionsZh"):
+        # must ride the same permutation, or option and translation come apart
+        out["optionsZh"] = [item["optionsZh"][i] for i in order]
     return out
 
 def main():

@@ -7,6 +7,10 @@ import importlib.util, glob, os, sys, re, collections, json
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ITEMS_DIR = os.path.join(ROOT, "items")
 CHAPTERS = {
+    # 基礎套題：主題式，只考主幹（不是 GP 章節的鏡像）
+    "N1": "JAM 是什麼", "N2": "區塊與狀態", "N3": "時間與出塊", "N4": "Core 與 Service",
+    "N5": "一份工作的一生", "N6": "資料可得性與稽核", "N7": "PVM 與 gas",
+    # M1 套題：對應 Gray Paper 章節
     "3": "Notation", "4": "Overview", "5": "The Header", "6": "Safrole", "7": "Recent History",
     "8": "Authorization", "9": "Service Accounts", "10": "Disputes", "11": "Reporting & Assurance",
     "12": "Accumulation", "13": "Statistics", "14": "Work Packages & Reports",
@@ -15,7 +19,7 @@ CHAPTERS = {
 }
 KINDS = {"concept", "code", "calc", "delta", "rationale"}
 REQUIRED = ["id", "ch", "section", "gpRef", "difficulty", "kind", "tags", "stem", "options", "answer", "explanation"]
-OPTIONAL = ["code", "trap", "optNotes"]
+OPTIONAL = ["code", "trap", "optNotes", "alsoCh", "stemZh", "optionsZh"]
 
 
 GLOSS_DIR = os.path.join(ROOT, "glossary")
@@ -107,6 +111,33 @@ def validate(items, srcs):
             errors.append(f"{where}: unknown fields {sorted(extra)}")
         if it.get("ch") not in CHAPTERS:
             errors.append(f"{where}: bad chapter {it.get('ch')}")
+        # optional Chinese rendering of the question itself (the interview is in English,
+        # so this is a reading aid, not a replacement)
+        if "optionsZh" in it:
+            z = it["optionsZh"]
+            if not (isinstance(z, (list, tuple)) and len(z) == 4):
+                errors.append(f"{where}: optionsZh must be a list of exactly 4 strings")
+            elif any(not isinstance(t, str) or len(t.strip()) < 10 for t in z):
+                errors.append(f"{where}: optionsZh entry too short")
+            elif len(set(z)) != 4:
+                errors.append(f"{where}: optionsZh entries must be distinct")
+            if "stemZh" not in it:
+                errors.append(f"{where}: optionsZh without stemZh (translate both or neither)")
+        if "stemZh" in it and "optionsZh" not in it:
+            errors.append(f"{where}: stemZh without optionsZh (translate both or neither)")
+        # cross-chapter items: keep one primary ch, list the others in alsoCh
+        also = it.get("alsoCh")
+        if also is not None:
+            if not isinstance(also, (list, tuple)) or not also:
+                errors.append(f"{where}: alsoCh must be a non-empty list of chapter keys")
+            else:
+                for c in also:
+                    if c not in CHAPTERS:
+                        errors.append(f"{where}: alsoCh has unknown chapter {c!r}")
+                    if c == it.get("ch"):
+                        errors.append(f"{where}: alsoCh repeats the primary chapter {c!r}")
+                if len(set(also)) != len(also):
+                    errors.append(f"{where}: alsoCh has duplicates")
         if it.get("kind") not in KINDS:
             errors.append(f"{where}: bad kind {it.get('kind')}")
         if it.get("difficulty") not in (1, 2, 3):

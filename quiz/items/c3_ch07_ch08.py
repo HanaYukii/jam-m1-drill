@@ -38,6 +38,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch07-reported-map-downstream",
+  "alsoCh": ["11"],
         "ch": "7",
         "section": "7 Recent History",
         "gpRef": "eq. 7.8 & eq. 11.41–11.44",

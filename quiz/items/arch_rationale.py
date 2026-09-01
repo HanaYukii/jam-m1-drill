@@ -66,6 +66,7 @@ ITEMS = [
 },
 {
  "id": "arch-availability-auditing",
+  "alsoCh": ["11"],
  "ch": "ARCH", "section": "4.8.1, 11, 16, 17 rationale", "gpRef": "§4.9.1, §16–17, ELVES paper",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale", "elves"],
  "stem": "Why does JAM need BOTH availability (assurances + erasure coding) AND auditing/disputes to secure in-core computation?",

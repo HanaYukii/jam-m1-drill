@@ -45,6 +45,7 @@ ITEMS = [
 },
 {
  "id": "ch07-belt-keccak",
+  "alsoCh": ["E"],
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7",
  "difficulty": 2, "kind": "rationale", "tags": ["recent-history", "mmr", "beefy"],
  "stem": "The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?",
@@ -66,6 +67,7 @@ ITEMS = [
 },
 {
  "id": "ch07-purpose",
+  "alsoCh": ["11"],
  "ch": "7", "section": "7 Recent History", "gpRef": "§7 & eq. 11.36, 11.41–11.44",
  "difficulty": 1, "kind": "concept", "tags": ["recent-history"],
  "stem": "What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?",

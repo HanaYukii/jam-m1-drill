@@ -45,6 +45,7 @@ ITEMS = [
 },
 {
  "id": "ch09-lookup-status",
+  "alsoCh": ["14"],
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2.2 Semantics, eq. 9.7",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages"],
  "stem": "A request entry a_l[(h, len)] holds a sequence of up to 3 timeslots. What does [x, y] mean, and what does [x, y, z] mean?",

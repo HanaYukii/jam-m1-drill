@@ -66,6 +66,7 @@ ITEMS = [
 },
 {
  "id": "ch11-avspec",
+  "alsoCh": ["14", "H"],
  "ch": "11", "section": "11.1.3 Availability", "gpRef": "eq. 11.5, 11.31",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "availability"],
  "stem": "The availability specification (eq. 11.5) is s ≡ (p, l, u, v, e, n). What do u, v and e denote, and what constraint does eq. 11.31 place on v?",

@@ -1,13 +1,20 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 270 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-08-31
+Gray Paper **0.8.0** · 21 章速記 · 326 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-01
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
 ## 目錄
 
 - [速記（考前濃縮）](#cheat)
+- [附錄 N1 · JAM 是什麼](#ch-n1) — 8 題
+- [附錄 N2 · 區塊與狀態](#ch-n2) — 8 題
+- [附錄 N3 · 時間與出塊](#ch-n3) — 8 題
+- [附錄 N4 · Core 與 Service](#ch-n4) — 8 題
+- [附錄 N5 · 一份工作的一生](#ch-n5) — 8 題
+- [附錄 N6 · 資料可得性與稽核](#ch-n6) — 8 題
+- [附錄 N7 · PVM 與 gas](#ch-n7) — 8 題
 - [§3 Notation](#ch-3) — 10 題
 - [§4 Overview](#ch-4) — 13 題
 - [§5 The Header](#ch-5) — 21 題
@@ -1060,6 +1067,1441 @@ JAM = 一條「不做通用計算」的中繼鏈，只負責排序、資料可�
 
 
 # 題庫
+
+
+<a id="ch-n1"></a>
+
+## 附錄 N1 · JAM 是什麼　<sub>8 題</sub>
+
+### N1-1　In one sentence, what does JAM set out to be?
+
+<sub>§1 Introduction — ●○○ · 概念 · §1</sub>
+
+**標準答案**　A single chain that runs a large amount of computation for many independent services, by having most work done by a few validators in parallel off the main chain and only the results agreed on-chain
+
+JAM 的核心主張是「把重活搬到鏈外做、只把結果放上鏈」。§1 描述它是一個能承載大量獨立服務的單一鏈，作法是讓少數被指派的 validator 在**core** 上平行執行工作（in-core），主鏈只負責對結果達成共識（on-chain）。這個分工是理解後面所有章節的地基：work-package 在 core 上被 refine、產出的 work-report 才上鏈、再由 accumulate 寫進狀態。JAM 不是支付網路（它沒有內建的轉帳語意，service 才決定自己在做什麼），也不是只存資料的 rollup host（它真的執行計算），更不是 zk 鏈（它靠重跑與稽核而不是證明來確保正確）。
+
+**逐項辨析**
+
+1. ✅ A single chain that runs a large amount of computation for many independent services, by having most work done by a few validators in parallel off the main chain and only the results agreed on-chain  
+   in-core 平行執行、on-chain 只收結果——這正是 JAM 全篇的架構主軸。
+2. ❌ A faster payment network that settles transfers between accounts, using parallel execution to raise the number of transfers each second above what a single machine could sign  
+   JAM 沒有內建轉帳語意；要不要做支付是各個 service 自己的事。
+3. ❌ A general-purpose rollup host that stores the data of other chains and periodically posts their state roots, without running any computation of its own on that data  
+   rollup host 只存資料不算，JAM 的 core 是真的在跑 service 的程式碼。
+4. ❌ A privacy-preserving chain where every computation is proved in zero knowledge before it is accepted, so validators never see the inputs to the work they are agreeing on  
+   JAM 用「重跑 + 稽核」確保正確性（ELVES），不是用零知識證明。
+
+> **陷阱**　一句話版本：少數人平行做、全體只對結果達成共識。
+
+<sub>`n1-what-problem`</sub>
+
+---
+
+### N1-2　What is the difference between work done 'in-core' and work done 'on-chain'?
+
+<sub>§1; §4 Overview — ●○○ · 概念 · §1 & §4</sub>
+
+**標準答案**　In-core work is executed by a small assigned subset of validators and is not re-run by everyone; on-chain work is part of the state transition and every node executes it
+
+分界線是**誰執行**，不是執行在哪種硬體上、也不是碰哪塊狀態。in-core：一份 work-package 被指派到某個 core，只有該 core 的少數 guarantor 真的跑它（refine），其他人不重跑——這正是 JAM 能承載大量計算的原因，因為總算力不再被「每個人都要跑一遍」綁住。on-chain：accumulate 屬於狀態轉移的一部分，**每個節點都會執行**，所以它必須便宜且結果小。少數人執行帶來的風險，由稽核機制補上：auditor 會隨機抽樣重跑 in-core 的結果，錯了就進 disputes。兩者都在 PVM 裡跑，所以「native vs VM」的說法不成立。
+
+**逐項辨析**
+
+1. ✅ In-core work is executed by a small assigned subset of validators and is not re-run by everyone; on-chain work is part of the state transition and every node executes it  
+   分界是「少數人跑 vs 全體跑」，而稽核正是為了補上前者的信任缺口。
+2. ❌ In-core work runs inside the PVM while on-chain work runs natively on the validator's own hardware, which is why in-core work must be metered but on-chain work need not be  
+   refine 與 accumulate 都在 PVM 裡執行，不存在誰跑原生碼的差別。
+3. ❌ In-core work is anything touching a service's own storage, while on-chain work is anything touching balances, so the split follows which part of the state is written  
+   碰哪塊狀態不是判準；refine 根本不能寫狀態，accumulate 才能。
+4. ❌ In-core work happens before a block is sealed and on-chain work happens after it is finalized, so the two differ by when in the block's life they run rather than by who runs them  
+   時間先後不是判準，兩者都發生在同一個區塊的處理過程中。
+
+> **陷阱**　in-core = 少數人跑、要靠稽核擔保；on-chain = 全體跑、所以必須小。
+
+<sub>`n1-in-core-vs-on-chain-basic`</sub>
+
+---
+
+### N1-3　Compared with Ethereum, where does JAM put the code that a user's request runs, and what follows from that choice?
+
+<sub>§2 Previous Work; §4.9 — ●●○ · 設計理由 · §2 & §4</sub>
+
+**標準答案**　Ethereum re-executes every contract call on every node, so throughput is bounded by one machine; JAM runs a service's heavy step on one core only, so adding cores adds capacity
+
+這題問的是**擴展性從哪裡來**。Ethereum 的每一次合約呼叫都由全網每個節點重跑，因此整條鏈的處理能力大約等於一台機器的能力——加節點只會增加安全性，不會增加吞吐。JAM 把最重的那一步（refine）放在 core 上，一份 work-package 只由被指派到該 core 的少數 guarantor 執行；core 數量增加，總能力就跟著增加。代價是「只有少數人跑過」這件事本身不可信，所以必須另外付出稽核成本（erasure coding 讓資料可重建、auditor 隨機重跑、disputes 處理歧見）。register-based VM 與 code 存哪裡都是次要差異，不是擴展性的來源。
+
+**逐項辨析**
+
+1. ✅ Ethereum re-executes every contract call on every node, so throughput is bounded by one machine; JAM runs a service's heavy step on one core only, so adding cores adds capacity  
+   全網重跑 vs 單一 core 執行，正是「加 core 就加容量」的來源。
+2. ❌ Ethereum runs contracts on a subset of nodes chosen per shard while JAM runs them everywhere, trading throughput for a simpler security argument that needs no auditing layer  
+   方向反了，而且 JAM 需要稽核層恰恰因為它不是全網重跑。
+3. ❌ Both re-execute everywhere, and the difference is only that JAM's virtual machine is register-based rather than stack-based, which is what makes it faster per instruction  
+   PVM 是 register-based 沒錯，但那影響的是單指令效率，不是擴展性。
+4. ❌ Ethereum stores contract code on-chain while JAM stores it off-chain entirely, so JAM's capacity comes from never having to pay for code storage in the state  
+   service 的 code 一樣存在狀態裡（透過 preimage），不是存在鏈外。
+
+> **陷阱**　擴展性來自「不是每個人都跑」，代價是必須額外買一套稽核機制。
+
+<sub>`n1-vs-ethereum-model`</sub>
+
+---
+
+### N1-4　The name JAM comes from two words. Which pair, and what do they refer to?
+
+<sub>§1 — ●○○ · 概念 · §1</sub>
+
+**標準答案**　Join and Accumulate — the two stages that bring in-core results back on-chain, which are the operations every service must define
+
+JAM = **Join-Accumulate Machine**。這兩個字對應把 in-core 的結果帶回鏈上的兩個階段，源頭是更早的 CoreJam 模型（RFC-31）裡的 Collect-Refine-Join-Accumulate 四段。實際落到 Gray Paper 裡，真正在鏈上執行的只有 accumulate 這一段（join 的角色被吸收進 accumulate 的批次處理），refine 則在 core 上執行，collect 屬於鏈下的收集行為。記住這個名字的來源有實際好處：它直接提醒你「一份工作有 in-core 與 on-chain 兩段」，而這正是整份規格的骨架。
+
+**逐項辨析**
+
+1. ✅ Join and Accumulate — the two stages that bring in-core results back on-chain, which are the operations every service must define  
+   Join-Accumulate 出自 CoreJam 的四段模型，正是把結果帶回鏈上的那兩段。
+2. ❌ Just Another Machine — a deliberately plain name signalling that the chain offers a general virtual machine rather than any application-specific feature set  
+   名字不是這樣來的；JAM 確實提供通用 VM，但那不是命名的由來。
+3. ❌ Justified Availability Merkleization — the three properties a work-report must satisfy before its outputs may be written into the state  
+   這三個詞都是 JAM 的概念，但湊起來不是名字的來源。
+4. ❌ Jump And Map — the two primitives the PVM adds on top of RISC-V so that a service can address the segments imported into its core  
+   PVM 沒有這兩個特殊 primitive，它是 RV64EM 的精簡子集。
+
+> **陷阱**　Join-Accumulate Machine，源自 CoreJam 的 Collect-Refine-Join-Accumulate。
+
+<sub>`n1-name-corejam`</sub>
+
+---
+
+### N1-5　Polkadot gets its capacity from many parallel chains. JAM keeps a single chain and gets capacity from cores instead. What does that buy?
+
+<sub>§1; §2 Previous Work — ●●○ · 設計理由 · §1 & §2</sub>
+
+**標準答案**　One shared state and one set of rules, so services can call and pay each other synchronously instead of passing asynchronous messages between separate chains
+
+差別在**狀態是不是同一份**。Polkadot 的每條 parachain 有自己的狀態，跨鏈只能靠非同步訊息（XCMP），這讓「A 呼叫 B 並拿回結果」這種再普通不過的事變得困難。JAM 只有一條鏈、一份狀態 σ，所有 service 都住在同一個 δ 裡，因此可以同步互動、互相轉帳。能力則由 core 提供：core 不是獨立的鏈，而是同一條鏈上平行執行的運算單位，它們的結果最後都回到同一份狀態。至於 erasure coding，正因為 in-core 的資料沒有全網保存，**才更需要**它；validator 集合大小與 finality 都不是這個選擇的產物。
+
+**逐項辨析**
+
+1. ✅ One shared state and one set of rules, so services can call and pay each other synchronously instead of passing asynchronous messages between separate chains  
+   一份共享狀態才能讓 service 同步互相呼叫，這是單鏈換來的核心好處。
+2. ❌ A smaller validator set, because a single chain needs fewer validators than many parallel chains and can therefore reach agreement in fewer rounds  
+   validator 數量與鏈的數目無關，JAM 的 core 數還是綁在 |κ|/3 上。
+3. ❌ Freedom from erasure coding, since with one chain every validator already holds the whole state and no data needs to be reconstructed from shards  
+   方向反了：正因為只有少數人持有 in-core 資料，才需要 erasure coding。
+4. ❌ Cheaper finality, because a single chain can finalize on every block whereas parallel chains must wait for a shared relay chain to finalize them together  
+   finality 由 Grandpa 負責，跟「一條鏈或多條鏈」不是同一個維度。
+
+> **陷阱**　單鏈買到的是「同一份狀態」；能力來自 core，而 core 不是另一條鏈。
+
+<sub>`n1-why-one-chain`</sub>
+
+---
+
+### N1-6　What is a 'core' in JAM?
+
+<sub>§4.9 The Core Model — ●○○ · 概念 · §4</sub>
+
+**標準答案**　A slot of parallel computation on the one chain: a few validators are assigned to it, they run the work sent there, and only their agreed result comes back on-chain
+
+core 是**同一條鏈上的一個平行運算位置**，不是另一條鏈、不是硬體、也不是儲存分區。每個 core 在每個 rotation 被指派 3 名 guarantor，他們執行送到該 core 的 work-package（refine），產出的 work-report 才進入區塊。所以「加 core 就加運算能力」，而狀態始終只有一份——core 之間不需要橋接，因為它們的產出最後都寫進同一個 σ。名稱容易誤導：它借用 CPU 的比喻表達「平行的執行單位」，但一個 core 在任一時刻只掛一份工作（ρ[c] 至多一筆），而且能同時運作的 core 數受限於 |κ′|/3，因為每個 core 要 3 名 guarantor。
+
+**逐項辨析**
+
+1. ✅ A slot of parallel computation on the one chain: a few validators are assigned to it, they run the work sent there, and only their agreed result comes back on-chain  
+   少數 validator 被指派、執行後只回傳結果——這正是 core 作為平行運算位置的定義。
+2. ❌ A separate blockchain with its own state and its own validators, connected to the main chain by the same kind of bridge Polkadot uses for its parachains  
+   core 沒有自己的狀態、也不需要橋接，所有產出都回到同一份 σ。
+3. ❌ A physical CPU core on each validator's machine, so the core count is set by the hardware requirement the protocol places on validators  
+   core 是協定層的抽象，與 validator 機器上有幾顆實體 CPU 無關。
+4. ❌ A storage partition of the state, so that a service's data lives on one core and requests touching two services must be split across two cores  
+   狀態沒有依 core 分區；service 全部住在同一個 δ 裡，這正是單鏈的好處。
+
+> **陷阱**　core = 平行的執行位置，不是平行的鏈；狀態永遠只有一份。
+
+<sub>`n1-what-is-a-core`</sub>
+
+---
+
+### N1-7　The same validators take on several different jobs around one piece of work. Which description of guarantor, assurer and auditor is right?
+
+<sub>§1; §11; §17 — ●●○ · 概念 · §1, §11 & §17</sub>
+
+**標準答案**　A guarantor runs the work and signs for its result; an assurer states that it holds a piece of the data needed to re-run it; an auditor re-runs the work and publicly judges whether the result was right
+
+三個角色對應一份工作的三個階段，而且**都是 validator 在做**。guarantor：被指派到某個 core，實際執行 refine 並在 work-report 上簽名——他是那份結果的擔保人。assurer：宣告自己持有該 work-package 的一份 erasure-coded shard；當超過 2/3 的 assurer 都這麼說，報告才算 available，意思是「這份資料救得回來」。auditor：隨機被抽中去重跑那份工作，公開判定結果對不對；判定不一致就進 disputes。三者環環相扣：沒有 assurer 的保證，auditor 拿不到重跑所需的資料；沒有 auditor，guarantor 的簽名就沒有制衡。finality 是 Grandpa 的事，不屬於這三個角色。
+
+**逐項辨析**
+
+1. ✅ A guarantor runs the work and signs for its result; an assurer states that it holds a piece of the data needed to re-run it; an auditor re-runs the work and publicly judges whether the result was right  
+   執行、持有資料、重跑判定——三個階段各對應一個角色，正是稽核鏈的骨架。
+2. ❌ A guarantor proposes the work, an assurer executes it and signs the result, and an auditor stores the data long enough for anyone else to repeat the execution later if they wish  
+   順序反了：執行的是 guarantor，assurer 只宣告自己持有資料、不執行。
+3. ❌ A guarantor and an assurer are two names for the same role at different stages, while an auditor is a separate permissionless participant who need not be a validator at all  
+   三者是不同角色，而且 auditor 必須是 validator（由 VRF 隨機抽出）。
+4. ❌ A guarantor executes the work, an assurer finalizes the block containing it, and an auditor settles disputes by voting on which of two competing chains should survive  
+   區塊定案是 Grandpa 的工作，爭議也不是靠投票選鏈而是判定 report 對錯。
+
+> **陷阱**　guarantor 做、assurer 存、auditor 查；三者都是 validator。
+
+<sub>`n1-validator-roles`</sub>
+
+---
+
+### N1-8　You open the Gray Paper for the first time. Which description of how it is laid out will help you find things?
+
+<sub>Gray Paper 全書結構 — ●○○ · 概念 · §3–§14 & App. A–H</sub>
+
+**標準答案**　Chapters 3 to 13 walk the state transition component by component, chapter 14 onward covers what happens off-chain, and the appendices hold the machinery the chapters lean on
+
+把結構記住能省下大量翻找時間。**§3** 先把記號定義完（序列、字典、雜湊、簽章），後面所有章節都靠它；**§4** 給出全貌與狀態 σ 的分量清單；**§5–§13** 則逐一定義各分量怎麼轉移——header、Safrole、recent history、authorization、service accounts、disputes、reporting & assurance、accumulation、statistics；**§14 起**進入鏈下：work-package 的形狀、guaranteeing、availability、auditing。**附錄 A–H 是必要機制而非補充**：PVM（A）、host call（B）、codec（C）、state Merklization（D）、一般 Merklization（E）、shuffle（F）、Bandersnatch（G）、erasure coding（H）——沒有它們，正文的公式無法實作。章節順序**不等於**區塊處理順序（例如 disputes 在 §10、但處理時排在很前面）。
+
+**逐項辨析**
+
+1. ✅ Chapters 3 to 13 walk the state transition component by component, chapter 14 onward covers what happens off-chain, and the appendices hold the machinery the chapters lean on  
+   §3 記號、§4 全貌、§5–13 逐分量、§14+ 鏈下、附錄放機制——這是最實用的地圖。
+2. ❌ The chapters are ordered by how a block is processed from start to finish, so reading them in order traces one block through the node exactly once, with the appendices covering the same ground in more detail  
+   章節順序不是處理順序；例如 disputes 在 §10，但區塊處理時它排在 reporting 之前。
+3. ❌ Each chapter is self-contained and defines the notation it needs at the point of use, so any chapter can be read on its own without reference to the rest of the document  
+   記號集中在 §3，其他章大量沿用；沒有哪一章是可以完全獨立閱讀的。
+4. ❌ The appendices are informative background only, so an implementation that follows chapters 3 to 14 is already complete and conformant without reading any of them  
+   附錄是實作必需（PVM、codec、Merklization…），不是可略過的背景。
+
+> **陷阱**　附錄不是補充讀物，是正文公式的實作依據。
+
+<sub>`n1-gp-structure`</sub>
+
+---
+
+
+<a id="ch-n2"></a>
+
+## 附錄 N2 · 區塊與狀態　<sub>8 題</sub>
+
+### N2-1　What are the two parts of a JAM block?
+
+<sub>§4.1 The Block — ●○○ · 概念 · §4</sub>
+
+**標準答案**　A header, which is small and fixed in shape, and an extrinsic, which carries the data brought in from outside the state
+
+B ≡ (H, E)：**header 加 extrinsic**。header 是固定的十個欄位，小而可獨立傳播——輕客戶端只跟著 header 鏈走就能追上大部分變化。extrinsic 則是本塊從外界帶進來的東西，共五個成分（tickets、disputes、preimages、assurances、guarantees）。注意 work-report 只是 extrinsic 五個成分中 guarantees 那一項的內容，不是全部；而狀態本身不在區塊裡，區塊只描述「狀態怎麼變」。
+
+**逐項辨析**
+
+1. ✅ A header, which is small and fixed in shape, and an extrinsic, which carries the data brought in from outside the state  
+   header 小而固定、extrinsic 帶外部輸入，這就是 B ≡ (H, E) 的兩半。
+2. ❌ A header and a state root, with the block's data kept off-chain and referenced by the root so that blocks stay a constant size  
+   區塊資料沒有存在鏈外；extrinsic 本身就在區塊裡，只有 work-package 的內容才走鏈下。
+3. ❌ A list of transactions and a receipts section, mirroring the layout Ethereum uses so that existing tooling can read JAM blocks  
+   JAM 沒有使用者交易、也沒有 receipt 這一層，這是它與 Ethereum 最根本的差異之一。
+4. ❌ A header and a set of work-reports, since reports are the only thing a block ever carries and every other input reaches the state elsewhere  
+   work-report 只是 extrinsic 五個成分之一（guarantees）的內容，不是區塊的全部。
+
+> **陷阱**　B = header + extrinsic；狀態不在區塊裡，區塊只說明狀態怎麼變。
+
+<sub>`n2-block-shape`</sub>
+
+---
+
+### N2-2　JAM is described as transactionless. If there are no user transactions, how does anything from outside get into the state?
+
+<sub>§4.1; §4.9 — ●●○ · 概念 · §4</sub>
+
+**標準答案**　Through work-packages, which validators execute in-core and bring back as reports, and through preimages, which are blobs a service has already asked for
+
+「transactionless」指的是**沒有使用者簽名的交易**——extrinsic 的五個成分全部由 validator 產生並簽署。外部資料有兩條路進來：**work-package**（使用者把工作交給某個 core，guarantor 執行 refine 後以 work-report 經 E_G 進鏈）與 **preimage**（經 E_P 把 blob 本身放進狀態，但前提是某個 service 事先用 `solicit` 請求過）。兩條路都必須先經過某個 validator，這正是「in-core 做重活、on-chain 只收結果」的直接體現。
+
+**逐項辨析**
+
+1. ✅ Through work-packages, which validators execute in-core and bring back as reports, and through preimages, which are blobs a service has already asked for  
+   work-package 與 preimage 是外部資料進入狀態的兩條路，都要先經過 validator。
+2. ❌ Through a special system transaction type that only validators may sign, which wraps the user's original request and carries it into the block unchanged  
+   JAM 沒有任何交易型別；五個 extrinsic 成分全部由 validator 產生。
+3. ❌ Through direct writes by the block author, who is trusted to apply user requests during its own slot and is punished later if it applies them incorrectly  
+   出塊者不能直接寫狀態，它和其他人一樣受同一套狀態轉移規則約束。
+4. ❌ It cannot: JAM's state is closed and evolves only from its own prior contents, which is what allows the whole transition to be verified without external data  
+   狀態當然接受外部輸入，否則這條鏈就沒有用途了。
+
+> **陷阱**　transactionless ≠ 封閉；只是外部資料必須經由 work-package 或 preimage 進來。
+
+<sub>`n2-no-transactions`</sub>
+
+---
+
+### N2-3　The state σ is split into many named components. What is the point of splitting it that way rather than treating it as one blob?
+
+<sub>§4.2 The State — ●●○ · 概念 · §4</sub>
+
+**標準答案**　Each component has its own transition rule and its own dependencies, so splitting them lets independent parts of a block's work be computed in parallel and reasoned about separately
+
+拆分的用意是**相依關係與平行性**。§4 給出一張狀態轉移的依賴圖，每個分量寫成「α′ ≺ (…)」的形式，明確標出它需要哪些輸入。這讓兩件事成為可能：實作可以把互不相依的部分平行算；讀規格的人可以一次只推理一個分量。狀態沒有依 core 分區（只有一份 σ），也不是每個分量一棵 trie（整個狀態進同一棵 Patricia trie、header 只帶一個 root）。拆分也不只是文件排版——依賴圖規定了計算順序，順序錯了 state root 就會不同。
+
+**逐項辨析**
+
+1. ✅ Each component has its own transition rule and its own dependencies, so splitting them lets independent parts of a block's work be computed in parallel and reasoned about separately  
+   各分量有自己的轉移規則與依賴，這正是依賴圖與平行計算的基礎。
+2. ❌ Each component is stored on a different core, so the split is what allows the state to be larger than any single validator could hold on its own machine  
+   狀態只有一份、不依 core 分區；那是 JAM 刻意選擇單鏈的結果。
+3. ❌ Each component is Merklized into its own separate trie with its own root, and the header carries all of those roots so that a proof can target one component  
+   整個狀態進同一棵 trie、header 只帶一個 root，不是每個分量一棵。
+4. ❌ The split exists only for readability in the document; implementations are free to store the state however they like because the Merklization flattens it anyway  
+   依賴圖規定了計算順序，不是純粹的排版選擇——順序錯就算出不同的 root。
+
+> **陷阱**　分量的意義在依賴圖；狀態實體上仍然是一份、一棵 trie、一個 root。
+
+<sub>`n2-state-components-basic`</sub>
+
+---
+
+### N2-4　A JAM header carries the state root from before the block ran, not after. What does that make possible?
+
+<sub>§5.1 The Header — ●●○ · 設計理由 · §5</sub>
+
+**標準答案**　The author can publish the block before finishing the slow Merklization of the new state, because that root is not needed until the next block is authored
+
+Merklization（走完整棵狀態 trie 算出 root）是狀態轉移裡最慢的一步。header 帶 prior root 的意思是：**本塊的執行結果要到下一塊才被承諾**，所以出塊者可以先把區塊發出去，讓傳播與 Merklization 重疊而不是排隊。GP 說得很直接——「to facilitate the pipelining of block computation and in particular of Merklization」。代價是 β_H 最新一筆的 state root 當下填不出來，只能先放零、由下一塊補正。
+
+**逐項辨析**
+
+1. ✅ The author can publish the block before finishing the slow Merklization of the new state, because that root is not needed until the next block is authored  
+   先發布、後 Merklize，讓傳播與計算重疊——這正是 pipelining 的意思。
+2. ❌ A verifier can check the block without holding any state at all, because the prior root is enough to confirm every field the block contains  
+   驗 seal 需要 κ′ 與 γ′_S，都是狀態；光有 prior root 驗不完一個 header。
+3. ❌ Two blocks built on the same parent are guaranteed to carry the same root, so a fork can be resolved by comparing timeslots alone without touching state  
+   同一個父區塊的兩個子塊確實帶同樣的 H_R，但那是巧合而非目的，分叉也不是這樣解的。
+4. ❌ The state can be Merklized lazily and skipped entirely for blocks that no service wrote to, since an unchanged state needs no new root  
+   每塊都要算 root，沒有「狀態沒變就略過」這回事。
+
+> **陷阱**　prior root 換來的是 pipelining；代價是 β_H 要多一個補正步驟。
+
+<sub>`n2-prior-state-root-basic`</sub>
+
+---
+
+### N2-5　Why does the state get reduced to a single 32-octet root at all?
+
+<sub>§4.2; App. D — ●○○ · 概念 · §4 & App. D</sub>
+
+**標準答案**　So that two nodes can compare their entire state by comparing one value, and so that anyone can prove a single entry's value with a short path instead of the whole state
+
+Merkle root 買到兩件事。**其一是比對**：兩個節點只要 root 相同，整份狀態就相同——共識因此不必逐項比對。**其二是證明**：任何人可以用一條從葉子到 root 的路徑（深度乘以節點大小）證明「某個 key 的值是什麼」，而不必持有或傳送整個狀態，這是輕客戶端與跨鏈橋接的基礎。root 不會被存進 header 之外的地方，也跟壓縮、隱私都無關——狀態內容本身是公開的。
+
+**逐項辨析**
+
+1. ✅ So that two nodes can compare their entire state by comparing one value, and so that anyone can prove a single entry's value with a short path instead of the whole state  
+   一個值就能比對全部、一條短路徑就能證明單筆——這是 Merkle root 的兩個用途。
+2. ❌ So that the state can be stored in the header, which keeps a full copy of every service's data available to light clients without any further requests  
+   header 帶的是 root 不是狀態本身；狀態遠大於任何 header 能容納的量。
+3. ❌ So that the state can be compressed for transmission, with the root acting as the checksum that tells a receiving node the compression was applied correctly  
+   root 是承諾不是檢查碼，跟壓縮無關。
+4. ❌ So that services cannot read each other's storage, since only the root is visible on-chain and the underlying entries stay private to each service  
+   Merklization 不提供隱私；狀態內容是公開的，service 之間的隔離靠的是 host call 的權限規則。
+
+> **陷阱**　root 的兩個用途：比對整份狀態、證明單一筆資料。
+
+<sub>`n2-why-state-root`</sub>
+
+---
+
+### N2-6　The header does not contain the extrinsic itself, only a hash of it. What does that hash have to support, beyond simply detecting tampering?
+
+<sub>§5.1 — ●●○ · 設計理由 · §5</sub>
+
+**標準答案**　Proving that one particular preimage or one particular report was included, without having to hand over the rest of the block's extrinsic data
+
+H_X 不是把整份 extrinsic 直接雜湊，而是**五個成分各自先雜湊、再一起雜湊**，而且 preimage 與 guarantee 這兩個成分內部還把每一項換成它自己的雜湊。GP 說明理由是「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——要能單獨證明某一筆被納入。這樣做的好處是證明時不必搬運整份資料：一份 work-report 可能接近 48 KiB，preimage 更是任意大小。雜湊當然無法反推原文，也不決定順序或大小上限。
+
+**逐項辨析**
+
+1. ✅ Proving that one particular preimage or one particular report was included, without having to hand over the rest of the block's extrinsic data  
+   單獨證明某筆被納入而不必交出其餘資料，正是這個兩層結構的目的。
+2. ❌ Reconstructing the extrinsic from the hash alone, so that a node which has lost the block body can recover it from the header it already holds  
+   雜湊是單向的，無法從中重建原始資料。
+3. ❌ Ordering the extrinsic components, since the hash is computed over them in sequence and a verifier recovers the intended order from the hash value  
+   順序由編碼規格決定，不是從雜湊值還原出來的。
+4. ❌ Bounding the extrinsic's size, because the hashing scheme only accepts inputs below a fixed length and so caps how much a block may carry  
+   大小上限由 W_R 之類的常數規定，跟雜湊函數的輸入長度無關。
+
+> **陷阱**　H_X 是兩層結構，為的是「單獨證明某一筆存在」而不是只防竄改。
+
+<sub>`n2-extrinsic-hash-basic`</sub>
+
+---
+
+### N2-7　What does it mean to say a node 'imports' a block?
+
+<sub>§4.2 — ●○○ · 概念 · §4</sub>
+
+**標準答案**　It re-runs the state transition the block describes, from the state it already holds, and checks that every commitment in the header matches what it computed
+
+import 就是**自己重跑一遍再對答案**。節點從自己持有的 prior state 出發，照規格執行區塊描述的轉移，然後檢查 header 的每一項承諾——H_R 對得上父塊的 posterior root、H_X 對得上實際的 extrinsic、marker 對得上 Safrole 與 disputes 算出來的值、seal 由該 slot 該出塊的人簽。任何一項對不上，區塊就是無效。這裡沒有「信任出塊者」的空間；簽章證明的是「誰出的塊」，不是「他算對了」。真正沒有全網重跑的只有 in-core 那一段，而那一段靠稽核補上。
+
+**逐項辨析**
+
+1. ✅ It re-runs the state transition the block describes, from the state it already holds, and checks that every commitment in the header matches what it computed  
+   重跑轉移、逐項核對承諾——這就是 import，沒有信任的成分。
+2. ❌ It downloads the block and stores it, then trusts the header's signatures to attest that the transition was performed correctly by the block's author  
+   簽章只證明出自誰之手，不證明計算正確；正確性靠每個人自己重算。
+3. ❌ It asks the validators who authored the block for a proof of the new state root, and accepts the block once enough of them have signed that proof  
+   沒有這種索取 root 證明的流程；每個節點自己算得出 root。
+4. ❌ It applies the block's changes optimistically and rolls them back later only if an auditor raises a dispute about one of the reports it contained  
+   on-chain 的部分不是樂觀執行；樂觀加稽核的是 in-core 那一段。
+
+> **陷阱**　on-chain 全體重跑、逐項對承諾；只有 in-core 那段才是樂觀加稽核。
+
+<sub>`n2-what-a-transition-is`</sub>
+
+---
+
+### N2-8　Someone follows only the chain of headers and never downloads a block body or any state. What can they still keep track of, and what stops them?
+
+<sub>§5.1; §5.3 — ●●○ · 概念 · §5</sub>
+
+**標準答案**　They can follow which validators are in charge, because the markers announce key and ticket changes in the header itself; they cannot verify anything that depends on reading the state
+
+這正是 **marker 存在的理由**。只讀 header 的人沒有狀態，所以像 seal 這種需要知道「這個 slot 該由誰出塊」的檢查他做不了——那來自 γ′_S 與 κ′，都在狀態裡。但 header 帶了三個 marker：epoch marker 公告下個 epoch 的 entropy 與整組 validator 金鑰、winning-tickets marker 公告該 epoch 的出塊表、offenders marker 公告誰被剔除。有了它們，輕客戶端就能自己推出 validator 集合的變化，往後一路驗下去。至於 state root，它只是一個承諾——要讀出裡面某筆資料，還需要對方提供 Merkle 證明。
+
+**逐項辨析**
+
+1. ✅ They can follow which validators are in charge, because the markers announce key and ticket changes in the header itself; they cannot verify anything that depends on reading the state  
+   marker 讓 header-only 的人跟上 validator 變化，而狀態相關的檢查仍然做不到。
+2. ❌ They can verify the whole transition, because every commitment the header carries is self-contained; nothing about the block requires them to consult the state at all  
+   seal 的驗證需要 κ′ 與 γ′_S，兩者都在狀態裡，所以 header 並非自足。
+3. ❌ They can track balances and service storage, since both are summarized in the state root each header carries; what they cannot see is which validator authored the block  
+   state root 是承諾不是內容；要讀某筆資料還需要別人給 Merkle 證明。
+4. ❌ They can track nothing useful, since headers commit to state they cannot read; the protocol expects every participant to hold the full state and offers no header-only mode  
+   協定確實照顧了 header-only 的參與者，marker 就是為他們設計的。
+
+> **陷阱**　header-only 能跟上「誰負責」，跟不上「狀態是什麼」——除非有人給你證明。
+
+<sub>`n2-header-vs-state`</sub>
+
+---
+
+
+<a id="ch-n3"></a>
+
+## 附錄 N3 · 時間與出塊　<sub>8 題</sub>
+
+### N3-1　How is time organised in JAM?
+
+<sub>§4.8 Epochs and Slots — ●○○ · 概念 · §4</sub>
+
+**標準答案**　Into six-second timeslots, grouped into epochs of 600 slots, with at most one block per slot and a single validator entitled to author it
+
+**P = 6 秒是一個時槽，E = 600 個時槽是一個 epoch**（所以一個 epoch 是一小時）。時槽是絕對時間的格子，從 JAM Common Era（2025-01-01 1200 UTC）起算——不是「上一塊之後六秒」，而是掛在牆鐘上的固定刻度，所以每個節點都能獨立算出現在是第幾槽。每個時槽至多一個合法區塊，出塊權由 Safrole 事先指派給唯一一位 validator。這也是 JAM「幾乎不分叉」的來源：同一格只有一個人有資格，分叉只會因為網路問題或 fallback 才發生。
+
+**逐項辨析**
+
+1. ✅ Into six-second timeslots, grouped into epochs of 600 slots, with at most one block per slot and a single validator entitled to author it  
+   6 秒一槽、600 槽一 epoch、每槽一人有資格——三個數字撐起整個出塊模型。
+2. ❌ Into blocks of variable duration, where a slot begins when the previous block is seen and ends when the next author has collected enough work to fill one  
+   時槽掛在牆鐘上而非相對於前一塊，所以每個節點都算得出現在是第幾槽。
+3. ❌ Into six-second timeslots grouped into epochs, with several blocks allowed per slot so long as they build on different parents and are later merged  
+   同一個時槽只有一位有出塊資格，不存在「允許多塊之後再合併」這回事。
+4. ❌ Into rounds rather than slots, where a round ends once two thirds of validators have signed the same block, so its length depends on network latency  
+   出塊不等待簽署門檻；那是 finality（Grandpa）的事，與出塊節奏無關。
+
+> **陷阱**　P = 6 秒、E = 600 槽；時槽是絕對刻度，不是相對於前一塊。
+
+<sub>`n3-slots-and-epochs`</sub>
+
+---
+
+### N3-2　What is Safrole for, in one sentence?
+
+<sub>§6 Safrole — ●○○ · 概念 · §6</sub>
+
+**標準答案**　It decides, ahead of time and anonymously, which single validator may author each slot of the coming epoch
+
+Safrole 只做一件事：**產生「這個 epoch 每一槽由誰出塊」的名單**，而且要在事前決定、同時保持匿名。事前決定讓每槽只有一位合法出塊者（因此幾乎不分叉）；匿名則讓別人無法預先知道下一槽是誰，也就無法針對性攻擊他。其他三個選項都是 JAM 的重要機制但屬於別章：finality 是 Grandpa（§19）、guarantor 對 core 的指派在 §11、erasure coding 的分發在 §11 與附錄 H。
+
+**逐項辨析**
+
+1. ✅ It decides, ahead of time and anonymously, which single validator may author each slot of the coming epoch  
+   事先決定＋匿名，正是 Safrole 的兩個要求，也是它比一般 VRF 抽籤複雜的原因。
+2. ❌ It finalizes blocks by collecting supermajority signatures, so that a block past a certain depth can never be reverted  
+   finality 是 Grandpa 的工作，Safrole 只管出塊資格。
+3. ❌ It assigns validators to cores so each core has three guarantors, rotating that assignment every few slots  
+   guarantor 對 core 的指派用的是 entropy 洗牌，不經過 Safrole 的票券機制。
+4. ❌ It spreads each work-package's erasure-coded shards across validators so a report's data stays recoverable  
+   shard 的分發屬於 availability，與出塊資格無關。
+
+> **陷阱**　Safrole = 出塊排班表；finality、core 指派、資料分發都是別的機制。
+
+<sub>`n3-what-safrole-does`</sub>
+
+---
+
+### N3-3　Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?
+
+<sub>§6 Safrole — ●●○ · 設計理由 · §6</sub>
+
+**標準答案**　Anyone could see who is about to author and attack or bribe exactly that validator, so a cheap targeted action could stop blocks that a network-wide attack could not
+
+匿名買到的是**抗針對性攻擊**。如果所有人都知道第 N 槽由某位 validator 出塊，攻擊者只要在那六秒內癱瘓那一台機器（DoS），或事先收買他，就能讓那一槽出不了塊——成本遠低於攻擊整個網路。Safrole 用 ring VRF 讓驗證者只能確認「某位 γ′_P 的成員擁有這張票」而不知道是誰，直到他真的出塊為止。要注意匿名不是靠保密實現的：出塊資格由密碼學證明（持票人才能產生對應的 VRF 輸出），別人算得出票在哪一槽，但算不出票屬於誰。
+
+**逐項辨析**
+
+1. ✅ Anyone could see who is about to author and attack or bribe exactly that validator, so a cheap targeted action could stop blocks that a network-wide attack could not  
+   針對性 DoS 與賄賂的成本遠低於全網攻擊，這正是匿名要擋的東西。
+2. ❌ Anyone could compute the same schedule and author in someone else's slot, because knowing who is next is what proves entitlement to seal a block  
+   出塊資格由密碼學證明，知道「誰是下一個」並不能讓你冒名出塊。
+3. ❌ Validators could see their own future slots and withhold their tickets until the last moment, which would leave the accumulator empty and stall the epoch  
+   票券的提交期限由 Y = 500 的 tail 規定，與匿名與否無關。
+4. ❌ The schedule would leak the validator set to observers who have not synchronized the state, which would let them forge the epoch marker in a header  
+   validator 集合本來就是公開的（epoch marker 就在 header 裡），保密的是「票屬於誰」。
+
+> **陷阱**　匿名擋的是針對性攻擊；公開的是「哪一槽有票」，保密的是「票是誰的」。
+
+<sub>`n3-why-anonymous`</sub>
+
+---
+
+### N3-4　If too few tickets are collected during an epoch, JAM does not stall. What does it do instead, and what is given up?
+
+<sub>§6.5 — ●●○ · 概念 · §6</sub>
+
+**標準答案**　It falls back to picking authors from the entropy and the validator set, which keeps blocks coming but makes the whole epoch's schedule publicly computable
+
+票不夠時走 **fallback**：直接用 entropy 與 active validator 集合算出每一槽的出塊者。這條路的計算輸入在 epoch 一開始就全部公開，所以**整個 epoch 的出塊表任何人都能算出來**——匿名性在這段期間完全消失，針對性 DoS 與賄賂重新變得可行。GP 仍然這樣設計，是因為**活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。這也解釋了為什麼票券投票有 Y = 500 的截止線——留 500 個時槽讓票累積，盡量不走到 fallback。
+
+**逐項辨析**
+
+1. ✅ It falls back to picking authors from the entropy and the validator set, which keeps blocks coming but makes the whole epoch's schedule publicly computable  
+   用 entropy 直接算出塊者，代價是整個 epoch 的排班變成公開資訊。
+2. ❌ It extends the epoch until enough tickets arrive, which preserves anonymity but leaves the chain producing blocks at an unpredictable rate meanwhile  
+   epoch 長度固定為 E = 600，不會為了等票而延長。
+3. ❌ It lets any validator author any slot on a first-come basis, which keeps blocks coming but allows two validators to seal the same slot and fork the chain  
+   每一槽仍然只有一位合法出塊者，fallback 不會退化成先到先得。
+4. ❌ It reuses the previous epoch's schedule, which preserves anonymity but gives the same validators the same slots twice in a row  
+   沿用舊排班會讓同一批人重複出塊且可預測，GP 沒有採用這個做法。
+
+> **陷阱**　fallback 保住活性、犧牲匿名；它不是停擺也不是先到先得。
+
+<sub>`n3-fallback-basic`</sub>
+
+---
+
+### N3-5　JAM runs two separate consensus mechanisms. What does each one guarantee that the other does not?
+
+<sub>§4.3; §19 — ●●○ · 概念 · §4 & §19</sub>
+
+**標準答案**　Safrole makes it rare for two blocks to compete for the same position; Grandpa makes a block past a certain point permanent, which block production alone can never promise
+
+兩者解決的是**不同的問題**。Safrole 管「誰可以出塊」：每槽只有一位有資格，因此很少長出兩個競爭的 head——但它無法保證某個區塊永遠不會被回滾，因為更長的鏈隨時可能出現。Grandpa 管 **finality**：一旦足夠多的 validator 對某個區塊表態，它就永久留在歷史裡。GP §4.3 列了三個目標：很少分叉（Safrole）、分叉快速收斂（兩者共同）、能指出某個近期區塊永久留存（Grandpa）。JAM 沒有交易也就沒有「交易排序」，稽核則是另一套機制（ELVES）。
+
+**逐項辨析**
+
+1. ✅ Safrole makes it rare for two blocks to compete for the same position; Grandpa makes a block past a certain point permanent, which block production alone can never promise  
+   很少分叉 vs 永不回滾——這正是出塊機制與 finality gadget 的分工。
+2. ❌ Safrole orders transactions within a block; Grandpa orders blocks relative to each other, so together they give a single total order over all work  
+   JAM 沒有交易，也就沒有「區塊內的交易排序」這件事。
+3. ❌ Safrole decides which chain is best when a fork appears; Grandpa decides who may author, so the two run in sequence rather than in parallel  
+   角色反了：出塊資格是 Safrole 的事，best-chain 規則另有定義。
+4. ❌ Safrole guarantees that every slot produces a block; Grandpa guarantees that every block is eventually audited, so together they cover liveness and correctness  
+   Safrole 不保證每槽都出塊（持票人可能離線），稽核也不是 Grandpa 負責。
+
+> **陷阱**　Safrole 管資格、Grandpa 管永久；分叉快速收斂才是兩者共同的貢獻。
+
+<sub>`n3-safrole-vs-grandpa`</sub>
+
+---
+
+### N3-6　Every header carries two Bandersnatch signatures, not one. What is the second one for?
+
+<sub>§5.1; §6.4 — ●●○ · 概念 · §5 & §6</sub>
+
+**標準答案**　One seals the block and proves the author was entitled to the slot; the other produces the fresh randomness that gets folded into the chain's entropy pool
+
+**H_S（seal）證明資格，H_V（entropy VRF）產生隨機性。** 兩者都是 Bandersnatch VRF 簽章，但用途完全不同：seal 簽的是不含 seal 自己的 header 編碼，用來證明「這一槽本來就該由我出」；entropy 簽章的輸出 Y(H_V) 則被混進 η_0，成為下個 epoch 抽籤與 guarantor 洗牌的隨機性來源。分成兩個而不是共用一個，是為了讓熵不可被操縱——熵簽章的 context 綁在 seal 的輸出上，訊息在產生熵之前就已經固定，出塊者無法試很多份區塊挑一個對自己有利的結果。
+
+**逐項辨析**
+
+1. ✅ One seals the block and proves the author was entitled to the slot; the other produces the fresh randomness that gets folded into the chain's entropy pool  
+   一個證明資格、一個產生熵，兩者用途獨立但透過 context 綁在一起。
+2. ❌ One is signed by the author and the other by the previous author, so the pair chains the two blocks together in addition to the parent hash  
+   兩個簽章都由本塊出塊者產生，與上一塊的作者無關。
+3. ❌ One covers the header and the other covers the extrinsic, so a node can check the header before it has downloaded the block body  
+   seal 簽的是 header 編碼；extrinsic 的完整性由 H_X 這個雜湊承諾，不需要另一個簽章。
+4. ❌ One is used during normal operation and the other only during fallback, so a verifier can tell from the header which mode the epoch is in  
+   模式（ticket 或 fallback）由 context 字串區分，但那是同一個 seal 的兩種形式，不是兩個簽章。
+
+> **陷阱**　H_S 證明資格、H_V 產生熵；分開是為了讓熵不可被出塊者挑選。
+
+<sub>`n3-two-signatures`</sub>
+
+---
+
+### N3-7　The chain needs randomness for the ticket lottery and for assigning validators to cores. Why can it not simply hash the latest block?
+
+<sub>§6.4 Entropy — ●●○ · 設計理由 · §6</sub>
+
+**標準答案**　Because the author chooses the block's contents, so it could try many variations and publish the one whose hash favours it; a VRF output is fixed by the key, not by the contents
+
+問題在**可偏置（bias）**。如果隨機性直接來自區塊雜湊，出塊者可以微調區塊內容（多放一筆、少放一筆、換個順序）試出很多不同的雜湊，再挑一個讓自己下個 epoch 拿到好時槽的版本發布——這叫 grinding attack。JAM 改用 VRF：Y(H_V) 的值由**私鑰與 context 決定**，出塊者換再多內容也只能得到同一個輸出，沒有可挑的餘地。而且 context 綁在 seal 的輸出上，訊息在產生熵之前就固定了。確定性本身不是問題——隨機性必須人人可重算，否則無法達成共識。
+
+**逐項辨析**
+
+1. ✅ Because the author chooses the block's contents, so it could try many variations and publish the one whose hash favours it; a VRF output is fixed by the key, not by the contents  
+   出塊者能試很多版本挑對自己有利的雜湊，這正是 VRF 要擋掉的 grinding。
+2. ❌ Because a block hash is only 32 octets, which is too little entropy to seed a lottery over hundreds of validators across six hundred slots without repeating itself  
+   32 位元組是標準的種子長度，熵量從來不是問題。
+3. ❌ Because the block hash is not known until the block has propagated to its peers, and the lottery for the coming epoch must be resolved before that broadcast begins  
+   抽籤本來就發生在區塊產生之後，時序不是理由。
+4. ❌ Because hashing is deterministic, and a lottery needs a source that no other participant can reproduce once its result has already been consumed  
+   隨機性必須人人可重算才能達成共識，「不可重現」反而是不可接受的。
+
+> **陷阱**　要防的是 grinding：VRF 讓出塊者無法挑選自己的熵。
+
+<sub>`n3-entropy-basic`</sub>
+
+---
+
+### N3-8　A node receives a well-formed block whose timeslot is a few seconds in the future. How should it treat it?
+
+<sub>§5.1 — ●○○ · 概念 · §5</sub>
+
+**標準答案**　Treat it as not yet valid rather than invalid, because the same block becomes valid as the clock advances and discarding it would punish a peer for a small clock difference
+
+有效性條件是 P(H)_T < H_T ∧ H_T · P ≤ 𝕋，其中後半是**暫時性**的。GP 特別補了一句：「Blocks considered invalid by this rule may become valid as 𝕋 advances」——來自未來的區塊只是還沒到時候，不是攻擊。實作上通常先留著、等時間到再處理。把它當成永久無效並封鎖來源是常見的錯誤，在節點之間時鐘略有偏差時會造成不必要的斷線。相對地，前半（必須嚴格大於父區塊的時槽）是永久性的，違反就是真的無效。
+
+**逐項辨析**
+
+1. ✅ Treat it as not yet valid rather than invalid, because the same block becomes valid as the clock advances and discarding it would punish a peer for a small clock difference  
+   GP 明說這類區塊會隨時間推進而變有效，所以是暫時無效而非永久拒絕。
+2. ❌ Reject it permanently and treat the sender as misbehaving, because a block claiming a future slot can only come from an author trying to seize a slot it was not given  
+   時鐘小幅偏差就足以產生「未來區塊」，直接視為惡意會造成不必要的斷線。
+3. ❌ Accept it immediately, because the timeslot is only used for ordering and the seal already proves the author was entitled to that slot whenever it arrives  
+   時槽不只用於排序，它本身就是有效性條件的一部分。
+4. ❌ Accept it but withhold it from peers until the slot arrives, because forwarding a future block would let it propagate faster than the protocol intends  
+   協定沒有規定要延遲轉發；傳播策略不影響有效性判定。
+
+> **陷阱**　「太未來」是暫時無效；「不大於父區塊」才是永久無效。
+
+<sub>`n3-block-too-new`</sub>
+
+---
+
+
+<a id="ch-n4"></a>
+
+## 附錄 N4 · Core 與 Service　<sub>8 題</sub>
+
+### N4-1　What is a service in JAM?
+
+<sub>§9 Service Accounts — ●○○ · 概念 · §9</sub>
+
+**標準答案**　An account holding code, storage and a balance, whose code defines what happens to it when work is done for it on a core
+
+service 就是 JAM 版的「帳戶」：它有 code、有 storage、有 balance，住在狀態的 δ 分量裡，用一個 u32 的 service index 指涉。它跟 Ethereum 合約帳戶最像，差別在**入口**——service 定義兩個函數：refine（在 core 上執行、無狀態）與 accumulate（在鏈上執行、可寫狀態）。它不是常駐行程（每次執行都從乾淨的 PVM 起跑），也不是獨立的鏈（沒有自己的狀態，全部住在同一個 σ 裡）。
+
+**逐項辨析**
+
+1. ✅ An account holding code, storage and a balance, whose code defines what happens to it when work is done for it on a core  
+   code、storage、balance 加上兩個入口函數，這就是 service 的全部。
+2. ❌ A long-running process that a validator starts on request and keeps alive between blocks so that it can hold state in memory  
+   每次執行都從乾淨的 PVM 起跑，沒有跨區塊常駐的記憶體。
+3. ❌ A registered chain that rents core time from JAM and keeps its own separate state, much as a parachain rents a slot  
+   service 沒有自己的狀態或鏈，全部住在同一份 σ 的 δ 裡。
+4. ❌ A library of functions that other accounts may call, holding no state of its own and existing only while a call is running  
+   service 有自己的持久 storage，不是無狀態的函式庫。
+
+> **陷阱**　service ≈ 帳戶；特別的是它有 refine 與 accumulate 兩個入口。
+
+<sub>`n4-what-is-a-service`</sub>
+
+---
+
+### N4-2　A service defines two entry points, refine and accumulate. How do they differ?
+
+<sub>§4.9; §12; §14 — ●○○ · 概念 · §4, §12 & §14</sub>
+
+**標準答案**　refine runs on a core, sees no chain state and may be given a lot of work; accumulate runs on-chain, may write state, and must therefore stay small
+
+這是整個 JAM 架構落到 service 層的樣子。**refine**：在 core 上由少數 guarantor 執行，**看不到鏈上狀態**，可以吃大量輸入、跑很久，但只能吐出一個小的結果（work-digest）。**accumulate**：在鏈上執行，**每個節點都會跑**，所以必須便宜；它可以讀寫自己的 storage、轉帳、建立新 service。記法是「refine 做重活但不能碰狀態，accumulate 能碰狀態但必須很輕」——這個限制不是任意的，而是「少數人跑 vs 全體跑」的直接後果。
+
+**逐項辨析**
+
+1. ✅ refine runs on a core, sees no chain state and may be given a lot of work; accumulate runs on-chain, may write state, and must therefore stay small  
+   無狀態的重活 vs 能寫狀態的輕活，正好對應 in-core 與 on-chain。
+2. ❌ refine runs first to validate the request and accumulate runs second to execute it, so the split is between checking inputs and doing the actual work  
+   兩者不是「先檢查後執行」；refine 就是在做真正的計算。
+3. ❌ refine handles requests from other services and accumulate handles requests from users, so the split follows where the incoming request came from  
+   請求來源不影響走哪個入口；work-package 一律先 refine 再 accumulate。
+4. ❌ refine runs when the service is called directly and accumulate runs when it receives a transfer, so the split follows how the service was reached  
+   收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口（0.7.1 起併入）。
+
+> **陷阱**　refine 重但不能寫狀態；accumulate 能寫狀態但必須輕。
+
+<sub>`n4-refine-vs-accumulate`</sub>
+
+---
+
+### N4-3　Why is refine forbidden from reading the chain state?
+
+<sub>§14; §17 — ●●○ · 設計理由 · §14 & §17</sub>
+
+**標準答案**　So that an auditor can re-run it later from the work-package alone and expect the identical result, without having to reconstruct the state as it was at that moment
+
+**核心理由是可稽核性。** JAM 的安全論證是「少數人執行、但任何人都能重跑檢查」。如果 refine 能讀狀態，auditor 想重跑就必須先重建「當時那一刻」的完整狀態——那既昂貴又容易有歧義（哪一刻？哪個分叉？）。禁止讀狀態之後，refine 的輸入就完全由 work-package 本身決定：同樣的 package 永遠得到同樣的結果，重跑變成一件確定且便宜的事。這也是為什麼 import segment 必須明確宣告——所有輸入都要寫在 package 裡，不能臨時去撈。
+
+**逐項辨析**
+
+1. ✅ So that an auditor can re-run it later from the work-package alone and expect the identical result, without having to reconstruct the state as it was at that moment  
+   重跑必須只依賴 work-package，這是整個稽核機制成立的前提。
+2. ❌ So that a work-package can be executed by any validator without first synchronizing the chain, which is what allows guarantors to be chosen at random  
+   guarantor 仍然是完整節點；隨機選人跟能不能讀狀態無關。
+3. ❌ So that two work-packages on different cores can never conflict, since without state access neither can observe or disturb what the other is doing  
+   不同 core 之間的隔離來自各自獨立的 package，不是因為禁止讀狀態。
+4. ❌ So that the refine step stays cheap enough to be metered by a simple instruction count rather than by the full gas model used on-chain  
+   refine 一樣用 gas 計量，而且預算（G_R）比 accumulate 大得多。
+
+> **陷阱**　無狀態是為了讓「重跑」變成確定的事——稽核靠它。
+
+<sub>`n4-why-refine-stateless`</sub>
+
+---
+
+### N4-4　A service account stores a code hash, not the code itself. How does the code actually become available to run?
+
+<sub>§9.2 Preimage Lookups — ●●○ · 概念 · §9</sub>
+
+**標準答案**　Someone supplies the matching blob through the preimages extrinsic, after the service has requested that hash, and it is then stored and looked up by hash
+
+JAM 的資料模型把「請求」與「提供」分開。service 先用 `solicit` 宣告「我要 hash h、長度 z 的那份 blob」，這一刻就開始付押金（footprint 算的是 requests 而不是已提供的 preimage，防止免費占位）。之後任何人都可以透過 **E_P（preimages extrinsic）** 把符合的 blob 送上鏈；系統驗證雜湊相符後存起來，service 就能依 hash 查到它。code 只是這個機制的一個用途——同一套 preimage 機制也用來提供 refine 需要的其他資料。
+
+**逐項辨析**
+
+1. ✅ Someone supplies the matching blob through the preimages extrinsic, after the service has requested that hash, and it is then stored and looked up by hash  
+   先 solicit 再由 E_P 提供，這是 JAM 統一的 preimage 機制，code 只是其中一種用途。
+2. ❌ The code is uploaded when the service is created and kept in the account itself, with the hash retained afterwards only as an integrity check  
+   帳戶存的是 hash；blob 存在另一個字典裡，兩者分開是為了讓計價與生命週期可控。
+3. ❌ The code is fetched from a peer over the network whenever a core needs it, so it is never part of the state and never needs to be supplied on-chain  
+   程式碼是狀態的一部分、必須上鏈提供，否則不同節點會執行到不同的東西。
+4. ❌ The code is reconstructed from the erasure-coded shards held by assurers, which is why enough of them must be online before a service can run  
+   erasure coding 用於 work-package 的資料可得性，與 service 的程式碼無關。
+
+> **陷阱**　solicit（請求、開始付押金）→ E_P（提供）→ 依 hash 查找。
+
+<sub>`n4-service-code`</sub>
+
+---
+
+### N4-5　A service's balance must stay above a threshold that grows with how much it stores. What is that rule preventing?
+
+<sub>§9.3 — ●●○ · 設計理由 · §9</sub>
+
+**標準答案**　A service occupying state that every validator must keep forever while holding nothing at stake against that ongoing cost
+
+狀態是**每個 validator 都要永久保存**的稀缺資源。如果佔用狀態不需要成本，任何人都能無限寫入、把狀態撐爆到沒人跑得動節點。門檻餘額 a_t 的作法是：依這個帳戶的 footprint（幾筆資料、多少位元組）算出一個最低餘額，帳戶必須一直維持在它之上——等於為佔用的空間押了一筆錢。想少押就得少存。這也是為什麼 `transfer` 在扣款後會檢查自身門檻：不能靠轉帳把錢掏空、留下沒有擔保的狀態。
+
+**逐項辨析**
+
+1. ✅ A service occupying state that every validator must keep forever while holding nothing at stake against that ongoing cost  
+   狀態要每個 validator 永久保存，押金是為這份持續成本提供擔保。
+2. ❌ A service spending its balance faster than it earns, which would leave it unable to pay the gas for its own accumulate step  
+   gas 不足只會讓那次 accumulate 失敗，不需要用餘額門檻來防。
+3. ❌ A service being created by an attacker purely to consume service indices, since each new account permanently uses one up  
+   service index 是 u32，數量不是稀缺資源；真正稀缺的是狀態空間。
+4. ❌ A service transferring its whole balance away in one block, which would make the resulting account impossible to reason about  
+   轉帳確實受門檻限制，但那是這條規則的結果而不是它的目的。
+
+> **陷阱**　押金對應的是「佔用狀態」這件事，不是花費或編號。
+
+<sub>`n4-threshold-balance`</sub>
+
+---
+
+### N4-6　A few service indices are recorded in the state as privileged. What does that privilege amount to?
+
+<sub>§9.4 Privileges — ●●○ · 概念 · §9</sub>
+
+**標準答案**　The right to change protocol-level settings such as which authorizers a core will accept or who the next validators will be, exercised through host calls during accumulate
+
+特權是**改動協定層設定的權力**，而且全部透過 accumulate 期間的 host call 行使。χ 記錄五種：manager（可改特權本身）、每個 core 的 assigner（用 `assign` 改該 core 的 authorizer queue）、delegator（用 `designate` 改下一批 validator）、registrar、以及 always-accumulate 集合。重點是**特權沒有跳出規則之外**：具特權的 service 一樣要跑 accumulate、一樣被計 gas、一樣不能讀別人的 storage。它只是被允許呼叫某些平常會回 HUH 的 host call。
+
+**逐項辨析**
+
+1. ✅ The right to change protocol-level settings such as which authorizers a core will accept or who the next validators will be, exercised through host calls during accumulate  
+   改協定層設定、經由 host call 行使——特權的範圍就這麼大。
+2. ❌ The right to bypass the gas model, so a privileged service may run for as long as its work needs without having its accumulate step metered, throttled or cut short  
+   特權 service 一樣受 gas 約束，沒有任何豁免。
+3. ❌ The right to read and write the storage belonging to any other service, which is how system services keep the rest of the state consistent across a protocol upgrade  
+   沒有任何 service 能讀寫別人的 storage，這是 accumulate 隔離性的底線。
+4. ❌ The right to author blocks out of turn, so that a privileged service can push an urgent change into the chain immediately rather than waiting for a slot of its own  
+   出塊資格由 Safrole 決定，與 service 特權完全無關。
+
+> **陷阱**　特權 = 能呼叫某些 host call；不是豁免規則。
+
+<sub>`n4-privileges-basic`</sub>
+
+---
+
+### N4-7　The protocol defines many cores, but only some of them can be working at any time. What sets that limit?
+
+<sub>§11.3 — ●●○ · 概念 · §11</sub>
+
+**標準答案**　Each active core needs three guarantors, so the number of cores that can be busy is the validator count divided by three
+
+**上限是 |κ′| / 3**：每個運作中的 core 要指派三名 guarantor（三個人各自執行同一份工作再互相比對，才有意義），validator 只有 |κ′| 位，所以最多 |κ′|/3 個 core 能同時有工作。這也是為什麼 §6 規定 validator 數必須是 3 的倍數（𝕍 = {3c | c ∈ N_{2…C+1}}）。full 設定下 |κ| = 1023 → 341 個 core；tiny 設定 |κ| = 6 → 只有 2 個。所以「core 數」在協定裡是 C = 341 這個常數，但**實際能動的**由當下的 validator 數決定。
+
+**逐項辨析**
+
+1. ✅ Each active core needs three guarantors, so the number of cores that can be busy is the validator count divided by three  
+   三名 guarantor 一個 core，|κ′|/3 就是同時能運作的上限。
+2. ❌ Each active core needs a full copy of the state on the machines assigned to it, so the limit is how much state a validator can store  
+   guarantor 是完整節點本來就有狀態，狀態容量不是這裡的限制。
+3. ❌ Each active core consumes one entry of the authorizer pool per block, so the limit is the pool size of eight multiplied by the number of blocks  
+   authorizer pool 管的是「可接受哪些工作」，與能開幾個 core 無關。
+4. ❌ Each active core must be assured by every validator, so the limit is how many assurance signatures will fit inside one block's extrinsic  
+   assurance 不需要每位 validator 都給，門檻是超過 2/3。
+
+> **陷阱**　C = 341 是協定常數；真正能動的 core 數是 |κ′|/3。
+
+<sub>`n4-core-count-limit`</sub>
+
+---
+
+### N4-8　One service wants to send value and a message to another. It cannot simply call into that service and wait for a reply. Why not?
+
+<sub>§12.4 Deferred Transfers — ●●○ · 設計理由 · §12</sub>
+
+**標準答案**　Because a synchronous call would let services re-enter each other to arbitrary depth, which would make gas impossible to budget and results impossible to reproduce
+
+JAM 用的是 **deferred transfer**：`transfer` 只是把 (來源, 目的, 金額, memo, gas) 附加到一個序列裡並立刻從發送方扣款，接收方要到**下一輪** accumulate 才收到並執行自己的處理。理由是**確定性與計價**：如果呼叫是同步的，A 呼叫 B、B 又呼叫 A，重入深度沒有上限，那麼「這次 accumulate 要花多少 gas」在執行前就無法估算，而 accumulate 是每個節點都要跑的，預算失控等於整條鏈失控。代價是收款方不存在時那筆轉帳會被丟棄，但錢已經扣了——所以呼叫方要自己確認目標存在。
+
+**逐項辨析**
+
+1. ✅ Because a synchronous call would let services re-enter each other to arbitrary depth, which would make gas impossible to budget and results impossible to reproduce  
+   同步呼叫會帶來無上限的重入，gas 預算與結果重現性都會失控。
+2. ❌ Because the two services may be accumulated on different cores within the same block, and a call reaching across cores would require the two of them to share memory  
+   accumulate 是在鏈上執行的，不分 core，也不存在跨 core 記憶體的問題。
+3. ❌ Because the receiving service may not exist yet at the moment of the call, and the protocol offers no way to check whether an index resolves during accumulate  
+   accumulate 查得到 service 是否存在（不存在會回 WHO），所以這不是理由。
+4. ❌ Because a reply would have to be signed by the receiving service, and a service holds no key material of its own with which it could sign anything at all  
+   service 之間的呼叫不需要簽章，權限由協定規則而非簽名決定。
+
+> **陷阱**　延後轉帳換來的是「gas 可預估、結果可重現」；代價是要自己確認目標存在。
+
+<sub>`n4-services-dont-call-directly`</sub>
+
+---
+
+
+<a id="ch-n5"></a>
+
+## 附錄 N5 · 一份工作的一生　<sub>8 題</sub>
+
+### N5-1　Put the life of one piece of work in order, from a user handing it over to its effect landing in the state.
+
+<sub>§11; §12; §14 — ●○○ · 概念 · §11, §12 & §14</sub>
+
+**標準答案**　A work-package is sent to a core; guarantors refine it into a work-report; the report enters a block; validators assure they hold its data; once enough do, it is accumulated
+
+五個階段，順序不能亂：**① 送到 core**——使用者把 work-package 交給某個 core（要通過該 core 的 authorizer 檢查）。**② refine**——被指派的 3 名 guarantor 在 core 上執行，產出小的 work-report。**③ 進區塊**——report 經 E_G 上鏈（此時還不生效）。**④ available**——validator 用 assurance 宣告自己持有 erasure-coded 的碎片，超過 2/3 才算數。**⑤ accumulate**——這時才真的執行 service 的鏈上邏輯、寫進狀態。第四步常被跳過理解，但它是整個安全模型的關鍵：**沒有可得性就無法稽核**。
+
+**逐項辨析**
+
+1. ✅ A work-package is sent to a core; guarantors refine it into a work-report; the report enters a block; validators assure they hold its data; once enough do, it is accumulated  
+   送到 core → refine → 進區塊 → 湊到可得性 → accumulate，五步缺一不可。
+2. ❌ A work-package enters a block; validators vote on whether to run it; the winning core refines it into a report; the report is accumulated and the data is discarded afterwards  
+   沒有「投票決定要不要跑」這一步；能不能跑由 authorizer 決定。
+3. ❌ A work-package is refined by every validator; the results are compared and the majority result becomes a report; the report is accumulated once the block is finalized  
+   只有被指派的 3 名 guarantor 執行 refine，不是全網重跑再多數決。
+4. ❌ A work-package is accumulated first to reserve its gas; guarantors then refine it on a core; the report is written back and validators assure the result was correct  
+   accumulate 是最後一步；gas 的預留發生在 accumulate 當下，不是事前。
+
+> **陷阱**　「available」是獨立的一步，而且是稽核的前提，不是可有可無的細節。
+
+<sub>`n5-pipeline-order`</sub>
+
+---
+
+### N5-2　What does a work-package contain?
+
+<sub>§14 Work Packages — ●○○ · 概念 · §14</sub>
+
+**標準答案**　An authorization token and the code that checks it, plus one or more work-items, each naming the service to run, the code to run and the payload to run it on
+
+work-package 的核心是 **authorization + 一串 work-item**。authorization 那部分回答「這個 core 憑什麼接受這份工作」——它帶一個 token 與一個 is-authorized 的程式（Ψ_I），由 core 先跑一次決定收不收。work-item 則是實際的工作單位，每個指明 service、code hash 與 payload，以及要匯入／匯出哪些 segment。注意它**沒有使用者簽名**（JAM 是 transactionless 的），付費模型也不是隨包附錢——core time 本身才是被爭奪的資源。也沒有預先宣告的讀寫集合，因為 refine 根本不能讀狀態。
+
+**逐項辨析**
+
+1. ✅ An authorization token and the code that checks it, plus one or more work-items, each naming the service to run, the code to run and the payload to run it on  
+   授權加上一串 work-item，這就是 work-package 的兩個部分。
+2. ❌ A signed request from the user, the fee they are paying and the address of the service, with the service then deciding for itself what code to execute  
+   package 不帶使用者簽名，JAM 沒有交易；能不能執行由 authorizer 決定。
+3. ❌ A compiled program and its full input data, with no reference to any service, since a package is executed on its own and its result is credited to the submitter  
+   每個 work-item 都明確指名 service 與 code hash，不是獨立執行的程式。
+4. ❌ A list of state keys the work will read and write, along with the code, so that conflicting packages can be detected before either of them is executed  
+   沒有讀寫集合宣告——refine 不能讀狀態，也就無從衝突。
+
+> **陷阱**　package = 授權 + work-item；沒有簽名、沒有讀寫集合。
+
+<sub>`n5-what-is-a-work-package`</sub>
+
+---
+
+### N5-3　A work-package can be many megabytes, but the work-report that reaches the chain is capped at tens of kilobytes. Why the difference?
+
+<sub>§11.1; §14 — ●●○ · 設計理由 · §11 & §14</sub>
+
+**標準答案**　The package is the input that only the core needs to see; the report is the summary every node must store forever, so the two live under completely different budgets
+
+這是 JAM 整個架構的縮影：**輸入留在鏈外、結果才上鏈**。work-package bundle 的上限 W_B 約 13 MB——它只需要被該 core 的 guarantor 看到，以及被 erasure-code 分散給 validator 以備稽核。work-report 的上限 W_R = 48 KiB——它會進入區塊，每個節點都要處理與保存。這兩個數字差了近 300 倍，正好對應「少數人看大資料、全體只看小摘要」。report 也**不是**壓縮或裁剪過的 package：它是 refine 的**輸出**（各 work-item 的 digest），與輸入是不同的東西。
+
+**逐項辨析**
+
+1. ✅ The package is the input that only the core needs to see; the report is the summary every node must store forever, so the two live under completely different budgets  
+   只有 core 看的輸入 vs 全體保存的摘要，W_B 與 W_R 差近 300 倍正是這個分工。
+2. ❌ The package is compressed before it is hashed into the report, so the size difference is the compression ratio and the full data is still recoverable from the report  
+   report 是 refine 的輸出而不是壓縮過的輸入，無法從中還原 package。
+3. ❌ The package includes debugging information that is stripped once refine has finished, leaving only the parts of the input the service actually read during execution  
+   沒有「剝除除錯資訊」這種步驟；輸入與輸出是兩種不同的東西。
+4. ❌ The report holds only the parts of the package that changed the state, with unchanged inputs omitted because replaying them would produce no observable effect  
+   report 不是 package 的子集；它是執行後產生的新資料。
+
+> **陷阱**　package 是輸入（W_B ≈ 13 MB）、report 是輸出（W_R = 48 KiB），不是同一份東西的兩種大小。
+
+<sub>`n5-why-report-is-small`</sub>
+
+---
+
+### N5-4　A report sits in a block but cannot be accumulated until it becomes 'available'. What does available actually mean here?
+
+<sub>§11.2 Assurance — ●●○ · 概念 · §11</sub>
+
+**標準答案**　That enough validators have said they hold a piece of the underlying data, so anyone who later wants to re-run the work can reconstruct its input from those pieces
+
+available 談的是**資料救不救得回來**，不是結果對不對。work-package 被 erasure-code 成碎片分給每位 validator，assurance 就是「我持有我那一份」的宣告；超過 2/3 的人這麼說，就代表即使部分節點離線或作惡，剩下的碎片仍足以重建原始輸入。**為什麼這是 accumulate 的前提**：JAM 的正確性靠 auditor 事後重跑，而重跑需要輸入；如果輸入救不回來，這份 report 就永遠無法被查核，等於沒有擔保。所以順序是「先確保查得了，再讓它生效」。
+
+**逐項辨析**
+
+1. ✅ That enough validators have said they hold a piece of the underlying data, so anyone who later wants to re-run the work can reconstruct its input from those pieces  
+   assurance 保證的是資料可重建，這正是事後稽核的前提。
+2. ❌ That the report has been checked by enough validators for correctness, so a supermajority has independently confirmed the result before it touches the state  
+   正確性由 auditor 事後重跑判定，assurance 完全不檢查結果對不對。
+3. ❌ That the data has been published somewhere any node can download it on demand, so availability is a statement about a public endpoint rather than about validators  
+   資料是分散在 validator 手上的碎片，沒有任何公開端點的概念。
+4. ❌ That the block containing the report has been finalized by Grandpa, so the report can no longer disappear through a reorganization of the chain  
+   finality 是 Grandpa 的事，與 available 是兩個獨立的條件。
+
+> **陷阱**　available = 資料救得回來（能被稽核），不是結果被驗證過。
+
+<sub>`n5-what-available-means`</sub>
+
+---
+
+### N5-5　When a report finally gets accumulated, what happens?
+
+<sub>§12 Accumulation — ●○○ · 概念 · §12</sub>
+
+**標準答案**　Each service named in the report runs its own on-chain code, seeing the refine results as input, and may write its storage, move balances or create services
+
+accumulate 是 service **自己的鏈上程式碼**在跑，不是協定代勞。輸入是 refine 產出的 work-digest（包含結果 blob 或錯誤值），service 據此決定要做什麼——寫 storage、轉帳、建立新 service、呼叫 `yield` 產出一個對外的承諾。這一步每個節點都會執行，所以受 gas 嚴格約束（單份 report 上限 G_A、整塊上限 G_T）。也因此 accumulate **不會重跑 refine**：重跑是 auditor 的工作，而且只在 core 上抽樣進行，不是全網每塊都做。
+
+**逐項辨析**
+
+1. ✅ Each service named in the report runs its own on-chain code, seeing the refine results as input, and may write its storage, move balances or create services  
+   service 自己的鏈上程式碼執行、可寫狀態——這就是 accumulate。
+2. ❌ The report's outputs are copied verbatim into the service's storage by the protocol, without running any service code, which is why accumulation is cheap  
+   協定不會代為複製輸出；要做什麼完全由 service 的程式碼決定。
+3. ❌ The report is re-executed on-chain by every node to confirm the guarantors' result, and only a matching result is written into the state  
+   全網重跑 refine 正是 JAM 要避免的事；重跑是 auditor 抽樣做的。
+4. ❌ The report is handed to the next block's author, who decides which of its outputs are worth applying and writes those into the state on the service's behalf  
+   出塊者沒有選擇權，accumulate 依規則進行、每個節點結果一致。
+
+> **陷阱**　accumulate = service 的鏈上邏輯在跑；它不重跑 refine。
+
+<sub>`n5-what-accumulate-does`</sub>
+
+---
+
+### N5-6　Before a core will work on a package, the package must satisfy that core's authorizer. What problem does that solve?
+
+<sub>§8 Authorization — ●●○ · 設計理由 · §8</sub>
+
+**標準答案**　Core time is scarce and unpriced at submission, so without a gate anyone could flood a core with work; the authorizer is where the right to use a core is decided
+
+authorizer 是 **core time 的門禁**。JAM 沒有「提交時附上手續費」這種機制——core time 是被排程的稀缺資源，誰能用必須事先決定。作法是：每個 core 有一個 authorizer pool（最多 8 個 authorizer hash），package 必須帶一個能通過其中某個 authorizer 的 token，該 core 才會處理它。而 pool 的內容由具 assigner 特權的 service 透過 `assign` 管理——換句話說，**「誰能用這個 core」這個問題被外包給一個 service 去定義策略**，協定本身不規定商業模式。VM 的隔離、大小限制都是別的機制在管。
+
+**逐項辨析**
+
+1. ✅ Core time is scarce and unpriced at submission, so without a gate anyone could flood a core with work; the authorizer is where the right to use a core is decided  
+   core time 稀缺且提交時未定價，authorizer 就是那道門禁。
+2. ❌ Packages may contain arbitrary code, so without a gate a malicious package could escape the virtual machine; the authorizer is where the code is checked for safety  
+   VM 的隔離由 PVM 本身保證，不需要事前檢查程式碼。
+3. ❌ Cores are assigned to validators at random, so without a gate a validator could refuse work; the authorizer is what forces a core to accept the packages sent to it  
+   authorizer 不強制 core 接受任何東西，它是在篩選而不是在強迫。
+4. ❌ Reports must be small, so without a gate an oversized package could produce an oversized report; the authorizer is where the size limits are actually enforced  
+   大小限制由 W_R 等常數在 refine 期間執行，與授權無關。
+
+> **陷阱**　authorizer 管的是「誰有權用這個 core」，策略由 service 定義而非協定。
+
+<sub>`n5-why-authorizer`</sub>
+
+---
+
+### N5-7　Work-packages can import segments exported by earlier packages. Why is that needed at all, given refine cannot read the chain state?
+
+<sub>§14 — ●●○ · 概念 · §14</sub>
+
+**標準答案**　It is the only way one piece of in-core work can build on another's output, since results large enough to matter never reach the state for a later package to read
+
+關鍵在於**大的結果從來不上鏈**。refine 的輸出只有一小份 digest 進 work-report，真正龐大的產物（例如一段被處理過的資料）是以 **export segment** 的形式留在 core 的資料可得性層裡。如果後續的工作想接著處理它，唯一的辦法就是 import 那些 segment——因為它們既不在狀態裡（太大），refine 也讀不到狀態。這讓「一連串 in-core 工作接力」成為可能，而每一步都仍然是無狀態且可重跑的：import 的內容由 package 明確宣告，並靠 segment root 驗證。
+
+**逐項辨析**
+
+1. ✅ It is the only way one piece of in-core work can build on another's output, since results large enough to matter never reach the state for a later package to read  
+   大的結果不上鏈，所以接力只能靠 segment，這是 in-core 工作串接的唯一途徑。
+2. ❌ It is how a package reads the current state indirectly, because segments are snapshots of state entries exported by the protocol at the end of each block  
+   segment 不是狀態的快照，協定沒有這種匯出機制。
+3. ❌ It is a caching mechanism only, letting a package skip recomputing something, and any package could always recompute the imported data from its own inputs instead  
+   被匯入的資料通常是別人算出來的，重算未必可能、也違背接力的目的。
+4. ❌ It is how a package receives its authorization token, which the previous package on the same core exports so that core time can be handed along a chain of work  
+   授權 token 由提交者提供，不是從前一份 package 傳遞下來的。
+
+> **陷阱**　segment 是 in-core 工作之間的接力棒；狀態太小裝不下這些結果。
+
+<sub>`n5-segments-basic`</sub>
+
+---
+
+### N5-8　One work-item inside a package runs out of gas during refine. What happens to that item and to the rest of the package?
+
+<sub>§11.1; §14 — ●●○ · 概念 · §11 & §14</sub>
+
+**標準答案**　That item's result becomes an error value that travels on-chain like any other result; the other items still run and the report is still perfectly valid
+
+**失敗是一個「值」，不是一個「例外」。** work-digest 的 result 欄位可以是成功的 blob，也可以是錯誤集合 𝔼 裡的一員（out-of-gas、panic、輸出過大等）。它會照常隨 report 上鏈、被 accumulate 讀到，由 service 自己決定要重試、退款還是只記一筆帳。這樣設計有三個好處：service 知道失敗的原因；**同包裡其他 item 不受牽連**（否則一個服務失控就能吃掉同包所有人的工作）；而且失敗本身也可被稽核——auditor 重跑時比對的是「同樣的輸入是否同樣地失敗」。
+
+**逐項辨析**
+
+1. ✅ That item's result becomes an error value that travels on-chain like any other result; the other items still run and the report is still perfectly valid  
+   失敗是可被 accumulate 讀到的值，其他 item 照跑、report 依然有效。
+2. ❌ The whole package is discarded and never becomes a report, because a package is treated as one unit of work that either completes or does not  
+   package 不是全有全無；每個 item 各自有自己的結果。
+3. ❌ That item is retried on another core with a larger allowance, and only if it fails there too does the package as a whole get abandoned  
+   沒有跨 core 重試的機制；重試與否由 service 自己決定。
+4. ❌ The report is produced but marked invalid, so it enters the block and is then rejected during accumulation before it can affect any service's state  
+   report 不會因為含有失敗的 item 而無效，錯誤值是合法內容。
+
+> **陷阱**　refine 的失敗是資料不是例外；同包其他 item 不受影響。
+
+<sub>`n5-refine-failure`</sub>
+
+---
+
+
+<a id="ch-n6"></a>
+
+## 附錄 N6 · 資料可得性與稽核　<sub>8 題</sub>
+
+### N6-1　Why does JAM erasure-code a work-package instead of simply asking every validator to keep a full copy?
+
+<sub>§11.2; App. H — ●●○ · 設計理由 · §11 & App. H</sub>
+
+**標準答案**　A full copy per validator would multiply the storage cost by the validator count; coding lets each hold a small piece while the whole stays recoverable from a fraction of them
+
+問題是**成本**。work-package bundle 可以到十幾 MB，如果 1023 位 validator 每人存一份，一份工作就要佔掉數十 GB 的總儲存與頻寬——這會直接抵消掉 JAM 「少數人執行」省下來的成本。Reed–Solomon 讓每人只拿一小片，而**任何 1/3 的片就能重建全部**，所以即使將近 2/3 的節點離線或作惡，資料仍然救得回來。資料本身是公開的（沒有隱私考量），而且它確實會離開 core——分發給所有 validator 正是重點。
+
+**逐項辨析**
+
+1. ✅ A full copy per validator would multiply the storage cost by the validator count; coding lets each hold a small piece while the whole stays recoverable from a fraction of them  
+   成本乘上 validator 數是不可接受的，編碼讓每人只付一小片的代價。
+2. ❌ A full copy per validator would be unsafe, because any single validator could then publish the package and expose data the submitter intended to keep private from others  
+   work-package 的內容是公開的，erasure coding 不提供任何隱私。
+3. ❌ A full copy per validator would be impossible, because the package never leaves the core it was sent to and no validator outside that core ever receives any of it  
+   資料必須離開 core 才有意義——分發給所有 validator 正是可得性的定義。
+4. ❌ A full copy per validator would be slower, because coding lets the pieces be transmitted in parallel whereas a full copy has to be sent to each validator in turn  
+   傳輸速度不是設計動機；重點在總儲存量與容錯門檻。
+
+> **陷阱**　編碼買到的是「省成本」加「容錯」：1/3 的碎片就能重建。
+
+<sub>`n6-why-erasure-coding`</sub>
+
+---
+
+### N6-2　Only three guarantors actually ran a piece of work. What stops them from simply lying about the result?
+
+<sub>§17 Auditing — ●○○ · 概念 · §17</sub>
+
+**標準答案**　Randomly chosen validators re-run the work afterwards and publish their own judgment, so a false result is expected to be caught and its guarantors punished
+
+答案是**事後隨機重跑**（ELVES）。guarantor 的簽名不代表結果正確，它代表「我為這個結果負責」。之後會有隨機抽中的 auditor 拿回原始輸入（靠可得性重建）重跑一次，公開發表判定；若判定不一致就進 disputes，錯的一方被列為 offender、金鑰被歸零。三人簽名相同確實是必要條件，但**三人可以串通**——所以那不是安全來源。JAM 也沒有用零知識證明，而且 service 在 accumulate 時無從得知結果對不對（它沒有重跑的能力）。
+
+**逐項辨析**
+
+1. ✅ Randomly chosen validators re-run the work afterwards and publish their own judgment, so a false result is expected to be caught and its guarantors punished  
+   隨機抽樣重跑加上事後懲罰，這才是 in-core 結果可信的根源。
+2. ❌ The three guarantors must produce identical results before the report is accepted, so a lie would require all three of them to collude perfectly on the same wrong value  
+   三人可以串通，所以「三人一致」本身不構成安全保證。
+3. ❌ The result is checked against a zero-knowledge proof that the guarantors must attach, so an incorrect result cannot be signed in the first place  
+   JAM 不使用零知識證明，它靠的是重跑與經濟懲罰。
+4. ❌ The result is only provisional until the service itself confirms it during accumulation, at which point a service may reject a result it does not recognise  
+   service 在 accumulate 時沒有重跑能力，也就無法判斷結果對錯。
+
+> **陷阱**　簽名 = 負責，不 = 正確；正確性靠事後抽樣重跑。
+
+<sub>`n6-what-auditing-does`</sub>
+
+---
+
+### N6-3　Auditors are picked by a verifiable random function rather than volunteering or being appointed. Why does that matter?
+
+<sub>§17 — ●●○ · 設計理由 · §17</sub>
+
+**標準答案**　Nobody can know in advance who will check a given report, so a dishonest guarantor cannot bribe or target the checkers, and everyone can verify the selection was fair
+
+隨機性擋的是**針對性攻擊**。如果 auditor 事先可知，一個打算說謊的 guarantor 只要收買或癱瘓那幾位就能矇混過關——稽核就形同虛設。VRF 選人讓兩件事同時成立：**事前不可預測**（連被選中的人自己也要到那一刻才知道），以及**事後可驗證**（他可以出示證明說「我確實被選中」，沒被選中的人無法偽裝）。搭便車問題是靠協定義務與獎懲處理的，不是靠隨機；而隨機抽樣也不保證不重複。
+
+**逐項辨析**
+
+1. ✅ Nobody can know in advance who will check a given report, so a dishonest guarantor cannot bribe or target the checkers, and everyone can verify the selection was fair  
+   事前不可預測、事後可驗證，這兩點才是 VRF 抽選的價值。
+2. ❌ Nobody has to volunteer, so the protocol avoids the free-rider problem in which every validator would rather let someone else pay the cost of re-running the work  
+   搭便車靠的是義務與獎懲，隨機抽選本身解決不了誰願意付成本。
+3. ❌ Nobody is appointed, so the protocol needs no privileged service to maintain the auditor list, which keeps the whole auditing mechanism outside the state entirely  
+   auditor 的抽選用的是狀態裡的 entropy，並沒有離開狀態。
+4. ❌ Nobody audits twice, so the random selection guarantees each validator checks a different report and the workload is spread evenly across the validator set  
+   隨機抽樣不保證不重複，也不以平均分攤工作量為目標。
+
+> **陷阱**　隨機的價值在「不可預測 + 可驗證」，不是公平分攤。
+
+<sub>`n6-why-random-auditors`</sub>
+
+---
+
+### N6-4　A dispute over one report ends in one of three verdicts. What are they, and what is the third one for?
+
+<sub>§10 Disputes — ●●○ · 概念 · §10</sub>
+
+**標準答案**　Good, bad, and wonky — the last covering the case where the validators split roughly evenly, so no conclusion can be drawn and nobody is punished for it
+
+三種判決是 **good（⊤）、bad（⊥）、wonky（∅）**。前兩種好理解：一致認為結果正確、或一致認為錯誤。**wonky 是給「連 validator 自己都無法達成一致」的情況**——票數恰好卡在三分之一那個門檻。這種時候協定不假裝知道答案：該 report 作廢，但**不懲罰任何人**，因為無法認定誰說謊。這個設計反映一個務實的判斷：分不出對錯時，最安全的做法是丟掉這份工作而不是隨便罰人。三個門檻都是**等式**而非區間，落在其外的票數分布會讓整個區塊無效。
+
+**逐項辨析**
+
+1. ✅ Good, bad, and wonky — the last covering the case where the validators split roughly evenly, so no conclusion can be drawn and nobody is punished for it  
+   wonky 對應無法認定的分裂情況，作廢該 report 但不罰任何人。
+2. ❌ Good, bad, and pending — the last covering a dispute that has not yet gathered enough judgments, which is revisited once more validators have weighed in  
+   沒有 pending 這種狀態；一份 verdict 必須帶足額的判定才合法。
+3. ❌ Good, bad, and appealed — the last covering a verdict that a guarantor has formally challenged, which then escalates to the full validator set for a second round  
+   沒有申訴或第二輪機制，判決一次定讞。
+4. ❌ Good, bad, and expired — the last covering a dispute raised too late to matter, since the report it concerns has already been accumulated into the state  
+   沒有過期概念；爭議的 epoch 範圍另有規定，但那不是第三種判決。
+
+> **陷阱**　第三種是 wonky（分不出對錯）：報告作廢、但不罰人。
+
+<sub>`n6-disputes-three-outcomes`</sub>
+
+---
+
+### N6-5　A validator is found to have guaranteed a report that turned out to be bad. What does JAM itself do to them?
+
+<sub>§10; §6.3 — ●●○ · 概念 · §10 & §6</sub>
+
+**標準答案**　It records their key in an offenders set and zeroes their entry at the next epoch change, so they can no longer author or sign; the actual slashing is left to the staking layer above
+
+JAM 的分工很清楚：**它負責「認定」，不負責「沒收」**。被認定的 validator 其 Ed25519 金鑰進入 ψ_O（offenders 集合），到下一個 epoch 換屆時，Φ 會把他那整筆 validator key 換成全零——從此不能出塊、不能擔保、不能背書。§10 明說 JAM 自己不動餘額，實際的 slash 由上層的 staking 系統依這份紀錄執行。這個分層是刻意的：JAM 是一台通用機器，質押與代幣經濟屬於建在它上面的 service。另外要注意歸零是**就地**進行而不是移除，所以 validator 集合的長度與索引不會位移。
+
+**逐項辨析**
+
+1. ✅ It records their key in an offenders set and zeroes their entry at the next epoch change, so they can no longer author or sign; the actual slashing is left to the staking layer above  
+   認定與紀錄由 JAM 做、實際沒收由上層做——這個分層是刻意的。
+2. ❌ It deducts a fixed penalty from their balance immediately and removes them from the validator set within the same block, so the punishment lands before the next block is authored  
+   JAM 不會直接扣餘額，§10 明說它不處理罰金。
+3. ❌ It marks them for a probation period during which their signatures still count but carry less weight, and removes them only if they offend a second time within the epoch  
+   沒有觀察期或權重折減這種機制，認定即失效。
+4. ❌ It reassigns all of their pending work to other cores and bars them from guaranteeing again, while leaving their ability to assure and audit completely untouched  
+   金鑰歸零之後所有角色都做不了，不是只擋擔保。
+
+> **陷阱**　JAM 只認定並歸零金鑰；扣錢是上層 staking 的事。
+
+<sub>`n6-offender-consequence`</sub>
+
+---
+
+### N6-6　The availability threshold is set above two thirds of validators. Why not a simple majority?
+
+<sub>§11.2; §17 — ●●○ · 設計理由 · §11 & §17</sub>
+
+**標準答案**　Because the security model assumes up to a third may be dishonest, so only a two-thirds threshold guarantees that at least some honest validators are among those attesting
+
+門檻來自**拜占庭容錯的標準假設**：最多有 1/3 的參與者可能作惡。若只要求簡單多數，一群串通的不誠實 validator 有可能自己湊出過半、宣稱資料可得，但實際上誰也沒有留著它——結果是 auditor 事後拿不到輸入，稽核失效。要求超過 2/3 就保證了表態的人裡面必定有誠實的一群，而誠實的人不會謊稱自己持有碎片。順帶注意 erasure coding 的重建門檻是 **1/3** 不是 2/3——兩個數字都出現在同一段機制裡，但意義不同，很容易記混。
+
+**逐項辨析**
+
+1. ✅ Because the security model assumes up to a third may be dishonest, so only a two-thirds threshold guarantees that at least some honest validators are among those attesting  
+   1/3 作惡的假設決定了 2/3 的門檻，這是拜占庭容錯的標準推論。
+2. ❌ Because a simple majority would be reached too quickly, and the protocol needs the extra delay so that auditors have time to fetch the data before accumulation begins  
+   門檻不是為了製造延遲；稽核時間由別的機制安排。
+3. ❌ Because the erasure coding needs exactly two thirds of the shards to reconstruct, so the threshold is a direct consequence of the coding rate that was chosen  
+   重建只需要 1/3 的碎片，這與表態門檻是兩個不同的數字。
+4. ❌ Because a simple majority could be split evenly on an even-sized validator set, and two thirds is the smallest fraction that avoids the possibility of a tie  
+   避免平手不是理由；三態判決另有自己的門檻設計。
+
+> **陷阱**　背書門檻 2/3（因為 1/3 可能作惡）；重建門檻 1/3（因為編碼率）。兩者別搞混。
+
+<sub>`n6-why-two-thirds`</sub>
+
+---
+
+### N6-7　Availability, auditing and disputes are three separate mechanisms. What breaks if you remove availability and keep the other two?
+
+<sub>§11; §17; §10 — ●●○ · 設計理由 · §11, §17 & §10</sub>
+
+**標準答案**　Auditing loses its input: an auditor asked to re-run a report may find the data gone, so a dishonest guarantor could simply withhold it and never be contradicted
+
+三者是一條**依序相扣的鏈**：可得性保證資料救得回來 → 稽核靠那份資料重跑 → 爭議處理重跑後的歧見。抽掉第一環，第二環就懸空：auditor 被抽中去查某份 report，卻拿不到原始輸入，於是「查不出錯」與「沒有錯」變得無法區分。更糟的是這給了作惡者一個乾淨的策略——**簽一個假結果，然後把資料丟掉**。這正是為什麼 accumulate 必須等到 available 之後才發生：先確保查得了，再讓它生效。guarantor 的簽章一直都在 report 裡（0.8.0 起連簽章一起存進 ρ），所以證據不是問題。
+
+**逐項辨析**
+
+1. ✅ Auditing loses its input: an auditor asked to re-run a report may find the data gone, so a dishonest guarantor could simply withhold it and never be contradicted  
+   沒有資料就無法重跑，「藏起資料」會變成一個乾淨的作弊策略。
+2. ❌ Disputes lose their evidence: a verdict could still be reached but nobody could prove which guarantors signed the report, so no offender could ever be identified  
+   guarantor 的簽章存在 report 與 ρ 裡，證據不會因為缺少可得性而消失。
+3. ❌ Auditing loses its randomness: without assurances there is nothing for the selection function to draw on, so auditors could no longer be chosen unpredictably  
+   auditor 的抽選用的是狀態裡的 entropy，與 assurance 無關。
+4. ❌ Disputes lose their bound: without availability there is no timeout, so a report could stay pending forever and its dispute window would never actually close  
+   逾時是 ρ 自己的規則（U = 5 個時槽），不依賴可得性機制存在。
+
+> **陷阱**　可得性 → 稽核 → 爭議是一條鏈；斷第一環，作惡者只要丟掉資料就贏了。
+
+<sub>`n6-chain-of-guarantees`</sub>
+
+---
+
+### N6-8　JAM keeps two different kinds of data available, with different lifetimes. What are they for?
+
+<sub>§11.2; §14 — ●●○ · 概念 · §11 & §14</sub>
+
+**標準答案**　One holds the package bundle so auditors can re-run the work; the other holds the exported segments so later packages can import them, and needs to last much longer
+
+兩種可得性對應**兩種不同的需求**。**Audit DA**：保存 work-package bundle，供 auditor 事後重跑用；它只需要撐過稽核窗口，時間相對短。**Import/Segment DA**：保存匯出的 segment，供**後續的 work-package** 匯入使用；因為接力可能隔很久才發生，它必須保存得久得多（規格上是 28 天）。分開設計的理由很直接：兩者的讀取者不同（auditor vs 後續的 package）、保存期限差很多，混在一起就得一律用長的那個期限，成本會浪費在不需要長存的 bundle 上。
+
+**逐項辨析**
+
+1. ✅ One holds the package bundle so auditors can re-run the work; the other holds the exported segments so later packages can import them, and needs to last much longer  
+   稽核用的 bundle 與接力用的 segment，讀者與期限都不同，所以分開處理。
+2. ❌ One holds the package bundle for auditors; the other holds a copy of the chain state so that a node which falls behind can rebuild it without replaying every block  
+   JAM 的可得性層不保存狀態副本；狀態同步是另一回事。
+3. ❌ One holds the data for the current epoch and the other holds an archive of previous epochs, so the split is by age rather than by what the data is used for  
+   區分依據是用途而不是新舊；兩種資料在同一時間都可能存在。
+4. ❌ One holds data for cores that are currently busy and the other for cores that are idle, so that a core can be brought back into service without refetching anything  
+   core 沒有閒置與否的資料區分；可得性是針對 package 而非 core。
+
+> **陷阱**　Audit DA（給 auditor、短）vs Segment DA（給後續 package、28 天）。
+
+<sub>`n6-two-da-basic`</sub>
+
+---
+
+
+<a id="ch-n7"></a>
+
+## 附錄 N7 · PVM 與 gas　<sub>8 題</sub>
+
+### N7-1　What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?
+
+<sub>§4.7; App. A — ●○○ · 概念 · §4 & App. A</sub>
+
+**標準答案**　A small deterministic register machine based on RISC-V, defined precisely so that every node and every auditor executing the same program gets exactly the same result and gas cost
+
+PVM 存在的理由是**確定性**，不是速度或體積。JAM 的安全模型建立在「同一份輸入重跑會得到同一份輸出」上——auditor 才有辦法反駁 guarantor。這要求執行語意與 gas 計費都被規格逐條釘死，不能有「依實作而異」的空間。既有的 VM 要嘛語意有未定義的角落、要嘛計費模型不適合，所以 GP 自己定義了一台以 RISC-V 的 RV64EM 為基礎的暫存器機。隔離、JIT、體積都是次要考量（JIT 甚至是允許的實作手法，只要結果一致）。
+
+**逐項辨析**
+
+1. ✅ A small deterministic register machine based on RISC-V, defined precisely so that every node and every auditor executing the same program gets exactly the same result and gas cost  
+   確定性是核心：重跑必須得到相同結果與相同 gas，稽核才成立。
+2. ❌ A sandbox that isolates service code from the host, defined by JAM because existing virtual machines cannot prevent a program from reading memory belonging to another service  
+   隔離是任何 VM 都能做到的，不足以構成自訂一台的理由。
+3. ❌ A just-in-time compiler specification, defined by JAM so that service code can be translated to native instructions and run at speeds an interpreter could never reach  
+   JIT 是實作選擇；規格關心的是結果一致而非執行速度。
+4. ❌ A bytecode format designed for small program size, defined by JAM because service code must fit inside a work-package and existing formats are far too verbose for that  
+   程式碼透過 preimage 進入狀態，體積不是設計 PVM 的動機。
+
+> **陷阱**　自訂 VM 是為了「重跑結果必須一致」，不是為了快或小。
+
+<sub>`n7-what-is-pvm`</sub>
+
+---
+
+### N7-2　The PVM is based on RISC-V rather than on a bespoke instruction set. What does that buy?
+
+<sub>§4.7; App. A — ●●○ · 設計理由 · §4 & App. A</sub>
+
+**標準答案**　Existing compilers already target it, so services can be written in ordinary languages, and its register machine maps onto real hardware more directly than a stack machine
+
+兩個實際好處。**工具鏈**：LLVM 等既有編譯器已經能產生 RISC-V 程式碼，所以 service 可以用 Rust、C 這類一般語言寫，不必為了一套自創指令集重建整條工具鏈。**執行效率**：暫存器機的指令與真實 CPU 的暫存器一一對應，實作要做 JIT 或 AOT 翻譯時比堆疊機（例如 EVM）容易得多。但 PVM **不是** RISC-V：它是 RV64EM 的精簡子集，拿掉了密碼學與環境互動的指令，另外加上自己的計價與記憶體模型，所以既有的 RISC-V 程式不能直接跑。
+
+**逐項辨析**
+
+1. ✅ Existing compilers already target it, so services can be written in ordinary languages, and its register machine maps onto real hardware more directly than a stack machine  
+   既有工具鏈可用、暫存器機好翻譯，這是選 RISC-V 的兩個實際理由。
+2. ❌ Existing hardware can execute it directly without any translation layer, so a validator with a RISC-V processor runs service code at full native speed with no interpreter  
+   PVM 是精簡子集加上自己的計價與記憶體模型，硬體無法直接執行。
+3. ❌ Existing RISC-V programs run unmodified, so software written for general-purpose operating systems can be deployed as a JAM service without being recompiled at all  
+   一般 RISC-V 程式依賴系統呼叫與完整指令集，不能原封不動部署。
+4. ❌ Existing formal proofs of the RISC-V specification carry over, so the PVM's determinism is inherited from that work rather than needing to be established separately  
+   確定性來自 GP 自己的逐條定義，不是繼承自 RISC-V 的既有成果。
+
+> **陷阱**　PVM 是 RV64EM 的子集，不是 RISC-V 本身；好處在工具鏈與翻譯難度。
+
+<sub>`n7-why-riscv`</sub>
+
+---
+
+### N7-3　What is gas actually protecting in JAM?
+
+<sub>§4.7 — ●○○ · 概念 · §4</sub>
+
+**標準答案**　The bound on how long execution may run, so that one service cannot consume a validator's time indefinitely and stall everyone else's work along with it
+
+gas 是**停機問題的實用解法**。沒有它，一支寫了無窮迴圈的 service 程式會讓執行它的節點永遠卡住——in-core 會拖垮那個 core，on-chain 更會讓整條鏈停擺，因為 accumulate 是每個節點都要跑的。gas 給每次執行一個上界，用完就中止（OOG）。定價公平性是次要的（實際計價還牽涉 core time 的分配）；狀態一致性靠的是 accumulate 的 checkpoint 與 collapse 機制而不是 gas；隱私則完全不在 JAM 的目標裡。
+
+**逐項辨析**
+
+1. ✅ The bound on how long execution may run, so that one service cannot consume a validator's time indefinitely and stall everyone else's work along with it  
+   gas 給執行設上界，這是防止無窮迴圈拖垮節點的唯一手段。
+2. ❌ The fairness of pricing between services, so that two services doing similar amounts of work end up paying similar amounts for the core time they consumed  
+   定價公平是附帶效果，gas 的首要任務是保證會停下來。
+3. ❌ The integrity of the state, so that a service which runs out of resources cannot leave its storage half-written and inconsistent for the next block to read  
+   半寫入的狀態由 checkpoint 與 collapse 處理，不是 gas 的職責。
+4. ❌ The privacy of a service's execution, so that observers cannot infer what a program did by measuring how long its accumulate step happened to take  
+   JAM 不提供執行隱私，狀態與程式碼都是公開的。
+
+> **陷阱**　gas 保護的是「一定會停下來」；一致性與定價是別的機制。
+
+<sub>`n7-what-gas-is-for`</sub>
+
+---
+
+### N7-4　The PVM has no instruction for reading a clock, generating randomness or opening a socket. What would go wrong if it did?
+
+<sub>App. A; §17 — ●●○ · 設計理由 · App. A & §17</sub>
+
+**標準答案**　Two honest nodes running the same program could reach different results, so an auditor's re-run would prove nothing and every disagreement would become unresolvable
+
+根本問題是**確定性**。JAM 的整個正確性論證是「少數人執行、任何人可重跑檢查」；重跑要有意義，前提是同樣的輸入必然得到同樣的輸出。如果程式能讀時鐘或產生真隨機數，兩個誠實節點跑同一支程式就會得到不同結果——這時 auditor 說「我算出來不一樣」完全無法證明 guarantor 說謊，爭議機制也就失去判準。其他三個選項描述的後果都真實存在，但它們是**衍生的問題**；沒有確定性，稽核這一層直接崩塌。
+
+**逐項辨析**
+
+1. ✅ Two honest nodes running the same program could reach different results, so an auditor's re-run would prove nothing and every disagreement would become unresolvable  
+   誠實節點得到不同結果，稽核與爭議就失去判準——這是最根本的後果。
+2. ❌ A service could reach outside the chain to fetch data, so the state would depend on external systems that the protocol has no way to hold accountable for their answers  
+   外部依賴確實是問題，但它之所以致命是因為破壞確定性。
+3. ❌ The gas cost of an instruction would depend on how long the outside world took to respond, so a basic block's price could no longer be computed before it runs  
+   計價可預測是重要的，但那是確定性在 gas 這個面向的表現。
+4. ❌ A malicious service could exhaust the validator's file handles or sockets, so one program could degrade the machine for every other service scheduled after it  
+   資源耗盡屬於沙箱層面的顧慮，不是禁止這些指令的主要理由。
+
+> **陷阱**　禁止這些指令是為了保住「重跑必然一致」——稽核的地基。
+
+<sub>`n7-determinism-requirement`</sub>
+
+---
+
+### N7-5　If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?
+
+<sub>App. B — ●●○ · 概念 · App. B</sub>
+
+**標準答案**　Through host calls: a special instruction hands control to the protocol, which performs the operation under its own rules and returns a result the program can read
+
+答案是 **host call**：程式執行 `ecalli` 這條指令，控制權交回協定，協定依規則完成操作（讀 storage、轉帳、建立 service…）再把結果放回暫存器，程式繼續跑。這個設計讓兩件事成立：**所有對外的效果都經過協定的規則**（權限、計價、驗證都在這一層執行），以及**動態成本被隔離在 host call 裡**——指令層因此可以維持靜態可計價。記憶體映射的作法會讓 storage 的存取繞過權限檢查；work-package 事先宣告則不可能，因為 accumulate 要寫什麼取決於執行結果。
+
+**逐項辨析**
+
+1. ✅ Through host calls: a special instruction hands control to the protocol, which performs the operation under its own rules and returns a result the program can read  
+   把控制權交回協定執行、再回傳結果，這正是 host call 的形狀。
+2. ❌ Through reserved memory regions: the protocol maps the service's storage into the address space, so reading it is an ordinary load and writing it an ordinary store  
+   記憶體映射會讓 storage 存取繞過權限與計價，協定無從介入。
+3. ❌ Through the work-package: everything a service may read or write must be declared in the package up front, and the protocol applies the declared changes afterwards  
+   accumulate 要寫什麼取決於執行結果，不可能事先宣告。
+4. ❌ Through privileged instructions: the PVM has a second instruction set that only becomes available during accumulate and is otherwise treated as invalid opcodes  
+   PVM 只有一套指令集；能不能用某個 host call 由 invocation 種類決定。
+
+> **陷阱**　host call 是「唯一的對外出口」，也是動態成本的統一入口。
+
+<sub>`n7-host-calls-basic`</sub>
+
+---
+
+### N7-6　The PVM deliberately omits instructions for cryptographic operations. Does that mean a service cannot hash anything?
+
+<sub>§4.7; App. B — ●●○ · 設計理由 · §4 & App. B</sub>
+
+**標準答案**　No — such operations are offered as host calls instead, which lets the protocol price them realistically rather than as some number of ordinary instructions
+
+省略指令不等於不能用——這些運算改由 **host call** 提供。理由是**計價**：一次 Blake2b 的實際成本遠高於一條普通指令，如果硬用普通指令實作，計價就得靠「大約等於幾百條指令」這種粗糙的折算，而且不同實作的效率差異會讓那個折算失準。做成 host call 之後，協定可以直接對它訂一個貼近實際成本的價格。當然 service 理論上仍可用普通指令自己寫一份雜湊實作，只是慢又貴——這正是設計要引導的方向。雜湊本身完全是確定性的，不存在不確定性的問題。
+
+**逐項辨析**
+
+1. ✅ No — such operations are offered as host calls instead, which lets the protocol price them realistically rather than as some number of ordinary instructions  
+   改以 host call 提供是為了能對真實成本定價，而不是為了禁止。
+2. ❌ No — a service can implement them in ordinary instructions, and the omission simply reflects that the protocol has no opinion on which primitives a service should use  
+   自己用普通指令實作在技術上可行，只是慢又貴，設計刻意不鼓勵。
+3. ❌ Yes — services are not expected to hash anything themselves, because every commitment a service needs is computed for it by the protocol during accumulation  
+   service 當然會需要自己做雜湊，協定不會代勞。
+4. ❌ Yes — hashing inside a service would be non-deterministic across implementations, so the protocol forbids it and computes all digests outside the virtual machine  
+   雜湊是完全確定性的運算，不確定性不是這裡的問題。
+
+> **陷阱**　拿掉指令是為了「能正確定價」，功能改由 host call 提供。
+
+<sub>`n7-no-crypto-instructions`</sub>
+
+---
+
+### N7-7　The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?
+
+<sub>§4.7; App. A — ●●○ · 概念 · §4 & App. A</sub>
+
+**標準答案**　Loading input on demand: a program can be started without every segment it might read already in memory, and the host maps a page only when it is actually touched
+
+**按需分頁讓「宣告很多、實際只碰一小部分」變成可行。** refine 可能宣告匯入上千個 segment，但實際執行往往只讀其中幾個；如果啟動前就得把全部塞進記憶體，work-package 會大到不切實際。page fault 是**可回復的退出理由**：宿主把那一頁映射進來，程式從中斷處繼續。這也是為什麼 fault 回報的是**頁對齊的位址**——那正好是宿主需要映射的單位。至於跨 service 共享記憶體，JAM 沒有這種機制（隔離是硬性的）；堆疊擴張走的是 `grow_heap` 這類 host call。
+
+**逐項辨析**
+
+1. ✅ Loading input on demand: a program can be started without every segment it might read already in memory, and the host maps a page only when it is actually touched  
+   按需載入讓「宣告多、實際碰少」可行，這是 fault 可回復的主要價值。
+2. ❌ Sharing memory between services: a faulting page can be resolved to a region another service owns, which is how two services exchange large values without copying  
+   service 之間完全隔離，沒有共享記憶體的機制。
+3. ❌ Growing the stack without limit: a fault on the page below the stack is what tells the host to extend it, so a program need never declare how deep its recursion goes  
+   堆疊與堆的擴張走 host call（0.8.0 的 grow_heap），不是靠 fault 觸發。
+4. ❌ Recovering from bugs: a program that reads uninitialised memory gets a chance to handle the fault and continue, instead of being terminated for a simple mistake  
+   fault 不是給程式自己處理的例外；它把控制權交給宿主。
+
+> **陷阱**　page fault 是可回復的，為的是按需載入輸入——不是錯誤處理機制。
+
+<sub>`n7-memory-basic`</sub>
+
+---
+
+### N7-8　refine and accumulate are given very different gas budgets. Why should the on-chain step get so much less?
+
+<sub>§11.3; §12; §14 — ●●○ · 概念 · §11, §12 & §14</sub>
+
+**標準答案**　Because refine runs once on one core while accumulate runs on every node in the network, so the same amount of gas costs the system hundreds of times more on-chain
+
+差別來自**誰在執行**。refine 只在一個 core 上由 3 名 guarantor 跑一次；accumulate 屬於狀態轉移，**網路上每個節點都要跑一遍**。所以同樣一單位的 gas，花在 accumulate 上對整個系統的真實成本是花在 refine 上的數百倍（大約等於節點數量的倍數）。這就是為什麼 refine 的預算（G_R）是數十億，而單份 report 的 accumulate 預算（G_A）只有一千萬——差了約三個數量級。這個比例不是任意的，它直接反映 JAM「in-core 做重活、on-chain 只收結果」的架構。
+
+**逐項辨析**
+
+1. ✅ Because refine runs once on one core while accumulate runs on every node in the network, so the same amount of gas costs the system hundreds of times more on-chain  
+   一個 core 跑一次 vs 全網每個節點都跑，成本差距約等於節點數量。
+2. ❌ Because refine is audited afterwards and accumulate is not, so accumulate must be kept small enough that any error it makes is cheap to detect and correct later  
+   accumulate 沒有被稽核，但那正是它必須簡單的原因之一，不是預算大小的來源。
+3. ❌ Because refine works on data that is already available while accumulate must fetch what it needs from storage, and storage access is what the budget is really limiting  
+   兩者都會存取資料；storage 存取本身不是預算差距的解釋。
+4. ❌ Because refine is paid for by the submitter of the work-package while accumulate is paid for by the service itself, and services are expected to hold smaller balances  
+   付費方不同確實存在，但預算的比例反映的是系統成本而非帳戶餘額。
+
+> **陷阱**　預算差三個數量級，因為 accumulate 的成本要乘上節點數。
+
+<sub>`n7-two-gas-budgets`</sub>
+
+---
 
 
 <a id="ch-3"></a>

@@ -173,6 +173,7 @@ pre.code{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--
 .on-tag.ng{background:var(--line-2);color:var(--muted)}
 .on-tag.you{background:var(--bad);color:var(--surface)}
 .sym{border-bottom:1px dotted var(--muted);cursor:help}
+.tag.xch{background:var(--amber-soft);color:var(--amber);border-color:var(--amber);cursor:help}
 .on-x{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line-2);font-size:13.5px;line-height:1.7;color:var(--ink-2)}
 .results-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 10px}
 .results-head h3{font-size:15px;margin:0}
@@ -289,6 +290,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         <div class="chips">
           <button class="chip" id="unseenFirst" aria-pressed="true">未做過優先</button>
           <button class="chip" id="shuffleQ" aria-pressed="true">隨機順序</button>
+          <button class="chip" id="langZh" aria-pressed="false">中文題目</button>
         </div>
       </div>
       <div class="foot">
@@ -354,7 +356,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   // ---------- filtering ----------
   function baseFilter(){
     return ITEMS.filter(it => {
-      if (state.chapter && it.ch !== state.chapter) return false;
+      if (state.chapter && it.ch !== state.chapter
+          && !(it.alsoCh || []).includes(state.chapter)) return false;
       if (state.diffs.size && !state.diffs.has(it.difficulty)) return false;
       if (state.kinds.size){
         const isDelta = it.tags.includes('delta-0.8.0') || it.kind === 'delta';
@@ -363,7 +366,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       }
       if (state.query){
         const q = state.query.toLowerCase();
-        const hay = [it.stem, it.section, it.gpRef, it.tags.join(' '), it.id, it.options.join(' ')].join(' ').toLowerCase();
+        const hay = [it.stem, it.stemZh || '', it.section, it.gpRef, it.tags.join(' '), it.id,
+                     it.options.join(' '), (it.optionsZh || []).join(' ')].join(' ').toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -394,6 +398,11 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     return SYMS[bare.split('_')[0]] || null;
   }
   // only rewrites text between tags, so the HTML inlineCode() just produced stays intact
+  // The interview is in English, so English stays the default; 中文 is a reading aid.
+  // Both fall back per-item, so an untranslated question still renders.
+  function useZh(){ return !!store.prefs.zh; }
+  function qStem(it){ return useZh() && it.stemZh ? it.stemZh : it.stem; }
+  function qOpt(it, i){ return (useZh() && it.optionsZh) ? it.optionsZh[i] : it.options[i]; }
   function glossSyms(html){
     return String(html).split(/(<[^>]*>)/).map((part, i) => i % 2 ? part
       : part.replace(SYM_RE, m => {
@@ -418,7 +427,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function metaRow(it){
     const isDelta = it.tags.includes('delta-0.8.0') || it.kind === 'delta';
     return '<div class="meta">'
-      + '<span class="tag chtag">'+esc(it.ch === 'ARCH' ? 'ARCH' : (isNaN(+it.ch) ? 'App. '+it.ch : '§'+it.ch))+' · '+esc(chName(it.ch))+'</span>'
+      + '<span class="tag chtag">'+esc(chTag(it.ch))+' · '+esc(chName(it.ch))+'</span>'
+      + ((it.alsoCh||[]).length ? '<span class="tag xch" title="'+esc('也涵蓋：'+it.alsoCh.map(chName).join('、'))+'">跨章節</span>' : '')
       + '<span class="sect">'+esc(it.section)+'</span>'
       + dots(it.difficulty)
       + '<span class="tag kind">'+esc(it.kind)+'</span>'
@@ -428,7 +438,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function questionBody(it, order, opts){
     // opts: {revealed, picked, disabled, showKeys}
     let h = metaRow(it);
-    h += '<p class="stem">'+glossSyms(inlineCode(it.stem))+'</p>';
+    h += '<p class="stem">'+glossSyms(inlineCode(qStem(it)))+'</p>';
     if (it.code){
       h += '<pre class="code"><code>'+highlight(it.code.src, it.code.lang)+'</code></pre>';
       if (it.code.caption) h += '<div class="code-cap">'+esc(it.code.caption)+'</div>';
@@ -442,7 +452,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         else cls.push('dim');
       } else if (opts.picked === oi) cls.push('picked');
       h += '<li><button class="'+cls.join(' ')+'" data-oi="'+oi+'" '+(opts.disabled?'disabled':'')+'>'
-        + '<span class="key">'+(pos+1)+'</span><span>'+glossSyms(inlineCode(it.options[oi]))+'</span></button></li>';
+        + '<span class="key">'+(pos+1)+'</span><span>'+glossSyms(inlineCode(qOpt(it, oi)))+'</span></button></li>';
     });
     h += '</ul>';
     return h;
@@ -469,7 +479,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         h += '<li class="'+cls.join(' ')+'"><span class="on-n">'+(pos+1)+'</span>'
            + '<div class="on-b"><div class="on-t">'+(isKey?'<b class="on-tag ok">正解</b>':'<b class="on-tag ng">錯</b>')
            + (picked !== null && oi === picked ? '<b class="on-tag you">你選的</b>' : '')
-           + glossSyms(inlineCode(it.options[oi]))+'</div>'
+           + glossSyms(inlineCode(qOpt(it, oi)))+'</div>'
            + '<div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
       });
       h += '</ol></div>';
@@ -484,19 +494,24 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function renderChapters(){
     const el = $('#chapters');
     const counts = {};
-    ITEMS.forEach(it => { counts[it.ch] = (counts[it.ch]||0)+1; });
+    const touched = {};   // primary or cross-chapter: decides whether a chapter is listed
+    ITEMS.forEach(it => {
+      counts[it.ch] = (counts[it.ch]||0)+1;                       // badge counts the primary only
+      touched[it.ch] = true;
+      (it.alsoCh||[]).forEach(k => { touched[k] = true; });
+    });
     let h = '';
     let lastGroup = null;
     const allP = masteryOf(ITEMS);
     h += '<button class="ch" data-ch="" aria-pressed="'+(state.chapter===null)+'"><span class="num">∀</span><span class="name"><b>全部章節</b>'+barHtml(allP)+'</span><span class="cnt">'+ITEMS.length+'</span></button>';
     CHAPTERS.forEach(c => {
-      if (!counts[c.key]) return;
+      if (!touched[c.key]) return;
       if (c.group !== lastGroup){ h += '<div class="chgroup">'+esc(c.group)+'</div>'; lastGroup = c.group; }
       const p = masteryOf(ITEMS.filter(i=>i.ch===c.key));
       h += '<button class="ch'+(c.group!=='Chapters 3–13'?' app-ch':'')+'" data-ch="'+esc(c.key)+'" aria-pressed="'+(state.chapter===c.key)+'">'
         + '<span class="num">'+esc(c.key==='ARCH'?'★':c.key)+'</span>'
         + '<span class="name"><b>'+esc(c.name)+'</b>'+barHtml(p)+'</span>'
-        + '<span class="cnt">'+counts[c.key]+'</span></button>';
+        + '<span class="cnt">'+(counts[c.key]||0)+'</span></button>';
     });
     el.innerHTML = h;
     $('#chTotal').textContent = '';
@@ -685,7 +700,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     mk.items.forEach((it,i)=>{ const b = byCh[it.ch] || (byCh[it.ch]={n:0,ok:0}); b.n++; if (mk.answers[i]===it.answer) b.ok++; });
     let h = '<div class="card results"><h2>模擬考結果</h2><div class="score">'+correct+' <small>/ '+n+' · '+Math.round(correct/n*100)+'% · '+Math.floor(secs/60)+' 分 '+(secs%60)+' 秒</small></div>';
     h += '<table class="tbl"><thead><tr><th>章節</th><th style="text-align:right">答對</th><th style="text-align:right">題數</th><th style="text-align:right">%</th></tr></thead><tbody>';
-    Object.keys(byCh).sort((a,b)=>chIndex(a)-chIndex(b)).forEach(k=>{ const b=byCh[k]; h += '<tr><td>'+esc((k==='ARCH'?'★ ':(isNaN(+k)?'App. '+k+' ':'§'+k+' '))+chName(k))+'</td><td class="n">'+b.ok+'</td><td class="n">'+b.n+'</td><td class="n">'+Math.round(b.ok/b.n*100)+'</td></tr>'; });
+    Object.keys(byCh).sort((a,b)=>chIndex(a)-chIndex(b)).forEach(k=>{ const b=byCh[k]; h += '<tr><td>'+esc(chTag(k)+' '+chName(k))+'</td><td class="n">'+b.ok+'</td><td class="n">'+b.n+'</td><td class="n">'+Math.round(b.ok/b.n*100)+'</td></tr>'; });
     h += '</tbody></table>';
     const wrongN = mk.items.filter((it,i)=> mk.answers[i]!==it.answer).length;
     h += '<div class="results-head"><h3>逐題檢討</h3><span class="hint">全部 '+n+' 題都附詳解'+(wrongN? '；其中答錯 '+wrongN+' 題':'，全對')+'</span></div>';
@@ -697,7 +712,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       h += '<div class="review-item '+(ok?'is-ok':'is-ng')+'">'
         + '<div class="ri-head"><span class="ri-n">'+(i+1)+'</span>'+metaRow(it)
         + '<span class="ri-mark '+(ok?'ok':'ng')+'">'+(ok?'✓ 答對':(a===null?'— 未作答':'✗ 答錯'))+'</span></div>'
-        + '<div class="q">'+glossSyms(inlineCode(it.stem))+'</div>'
+        + '<div class="q">'+glossSyms(inlineCode(qStem(it)))+'</div>'
         + explanationBlock(it, ok, {order: ord, picked: a, noVerdict: true})
         + '</div>';
     });
@@ -810,20 +825,20 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       h += '<div class="card qa'+(open?' open':'')+'" data-qid="'+esc(it.id)+'">';
       h += metaRow(it);
       h += '<button class="qa-q" type="button"><span class="qa-n">'+(i+1)+'</span>'
-         + '<span class="qa-qt">'+glossSyms(inlineCode(it.stem))+'</span><span class="qa-caret">▾</span></button>';
+         + '<span class="qa-qt">'+glossSyms(inlineCode(qStem(it)))+'</span><span class="qa-caret">▾</span></button>';
       if (it.code){
         h += '<pre class="code"><code>'+highlight(it.code.src, it.code.lang)+'</code></pre>';
         if (it.code.caption) h += '<div class="code-cap">'+esc(it.code.caption)+'</div>';
       }
       h += '<div class="qa-a"'+(open?'':' hidden')+'>';
-      h += '<div class="qa-ans"><b>標準答案</b>'+glossSyms(inlineCode(it.options[it.answer]))+'</div>';
+      h += '<div class="qa-ans"><b>標準答案</b>'+glossSyms(inlineCode(qOpt(it, it.answer)))+'</div>';
       h += '<div class="expl ok">'+inlineCode(it.explanation)+'</div>';
       if (it.optNotes){
         h += '<div class="expl-block"><div class="expl-head">其他選項為什麼錯</div><ol class="optnotes">';
         it.options.forEach((o2, oi) => {
           if (oi === it.answer) return;
           h += '<li class="on ng"><span class="on-n">·</span><div class="on-b">'
-             + '<div class="on-t">'+glossSyms(inlineCode(o2))+'</div><div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
+             + '<div class="on-t">'+glossSyms(inlineCode(qOpt(it, oi)))+'</div><div class="on-x">'+inlineCode(it.optNotes[oi])+'</div></div></li>';
         });
         h += '</ol></div>';
       }
@@ -878,7 +893,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     h += '</div>';
     el.innerHTML = h;
   }
-  function chTag(k){ return k === 'ARCH' ? 'ARCH' : (isNaN(+k) ? 'App. '+k : '§'+k); }
+  function isBasic(k){ return /^N[0-9]$/.test(k); }
+  function chTag(k){ return isBasic(k) ? '基礎' : k === 'ARCH' ? 'ARCH' : (isNaN(+k) ? 'App. '+k : '§'+k); }
 
   function setMode(m){
     state.mode = m; state.queue = []; state.idx = 0; state.answered = null;
@@ -901,6 +917,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   $$('#kindChips .chip').forEach(b=> b.onclick = ()=>{ const k=b.dataset.kind; if (state.kinds.has(k)) state.kinds.delete(k); else state.kinds.add(k); b.setAttribute('aria-pressed', state.kinds.has(k)); refilter(); });
   $('#unseenFirst').onclick = (e)=>{ state.unseenFirst = !state.unseenFirst; e.currentTarget.setAttribute('aria-pressed', state.unseenFirst); refilter(); };
   $('#shuffleQ').onclick = (e)=>{ state.shuffle = !state.shuffle; e.currentTarget.setAttribute('aria-pressed', state.shuffle); refilter(); };
+  $('#langZh').setAttribute('aria-pressed', useZh());
+  $('#langZh').onclick = (e)=>{ store.prefs.zh = !store.prefs.zh; save(); e.currentTarget.setAttribute('aria-pressed', store.prefs.zh); renderAll(); };
   let searchT = null;
   $('#search').addEventListener('input', e => { clearTimeout(searchT); searchT = setTimeout(()=>{ state.query = e.target.value.trim(); refilter(); }, 180); });
   function refilter(){ if (state.mode==='practice') buildQueue(); else if (state.mode==='mock') state.mock=null; renderAll(); }
@@ -924,7 +942,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   if (window.matchMedia('(max-width: 900px)').matches) $('#rail').classList.add('collapsed');
 
   // ---------- boot ----------
-  $('#footMeta').innerHTML = esc(META.bankVersion)+' · '+ITEMS.length+' 題 · '+esc(META.gpVersion)+'<br>題目英文（貼近面試）、詳解繁中；選項每次隨機排列。<br>「名詞」分頁收錄 '+TERMS.length+' 條 GP 0.8.0 符號與術語。<br>進度存於此瀏覽器（localStorage）。';
+  $('#footMeta').innerHTML = esc(META.bankVersion)+' · '+ITEMS.length+' 題 · '+esc(META.gpVersion)+'<br>題目預設英文（貼近面試），可切換中文；詳解繁中。選項每次隨機排列。<br>「名詞」分頁收錄 '+TERMS.length+' 條 GP 0.8.0 符號與術語。<br>進度存於此瀏覽器（localStorage）。';
   $('#brandSub').textContent = META.gpVersion+' · '+META.team;
   $('#rail').dataset.mode = state.mode;
   buildQueue(); renderAll();

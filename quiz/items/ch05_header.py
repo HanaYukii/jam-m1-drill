@@ -26,7 +26,14 @@ ITEMS = [
  "id": "ch05-prior-state-root",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.9 (H_r)",
  "difficulty": 1, "kind": "rationale", "tags": ["header", "pipelining"],
- "stem": "Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?",
+  "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是**先前**的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
+  "optionsZh": [
+   "為了讓區塊運算——特別是 Merklization——能夠管線化：出塊者不必先把新狀態 Merklize 完才能發布區塊",
+   "為了讓輕客戶端只靠 header 鏈就能驗證狀態，因為先前的 root 已經被父區塊簽署過，不需要再自行推導",
+   "為了縮小 header：先前的 state root 可以用較短的編碼表示，而執行後的 root 必須用完整的 32 位元組",
+   "為了讓分叉時兩個競爭區塊帶有相同的 state root，使 best-chain 規則能單純比較時槽而不必比較狀態"
+  ],
+  "stem": "Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?",
  "options": [
   "To reduce header size: the extrinsic hash H_X already commits to every input that can change state, so committing a second 32-octet root would be redundant",
   "To facilitate pipelining of block computation, in particular of Merklization: the author need not finish Merklizing the new state before publishing the block",
@@ -68,7 +75,14 @@ ITEMS = [
  "id": "ch05-timeslot-validity",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8",
  "difficulty": 1, "kind": "concept", "tags": ["header", "time"],
- "stem": "Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?",
+  "stemZh": "一個區塊的時槽 H_T 必須滿足什麼條件，現在才算有效？",
+  "optionsZh": [
+   "P(H)_t < H_T ∧ H_T · P ≤ 𝕋——嚴格大於父區塊的時槽，且換算成秒之後不得晚於目前的牆鐘時間 𝕋",
+   "P(H)_t ≤ H_T ∧ H_T · P ≤ 𝕋——允許與父區塊同一個時槽，因為同槽的兩個區塊會由 best-chain 規則決定取捨",
+   "P(H)_t < H_T ∧ H_T · P ≥ 𝕋——時槽必須落在未來，讓其他 validator 有時間在該槽到來前收到區塊",
+   "只要求 P(H)_t < H_T——牆鐘的比較屬於鏈下的傳播策略，不是區塊有效性的一部分"
+  ],
+  "stem": "Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?",
  "options": [
   "P(H)_t < H_T ∧ H_T · P ≤ T — strictly greater than the parent's slot, and no later than the current wall-clock time T",
   "P(H)_t ≤ H_T ∧ H_T · P ≤ T — greater than or equal to the parent's slot, and no later than the current wall-clock time T",
@@ -108,6 +122,7 @@ ITEMS = [
 },
 {
  "id": "ch05-ancestors-lookup-anchor",
+  "alsoCh": ["11"],
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
  "difficulty": 2, "kind": "concept", "tags": ["header", "ancestry"],
  "stem": "The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?",

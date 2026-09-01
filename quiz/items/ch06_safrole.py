@@ -108,6 +108,7 @@ ITEMS = [
 },
 {
  "id": "ch06-which-eta-where",
+  "alsoCh": ["11"],
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.25, 6.30, 11.22",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "entropy"],
  "stem": "Each of η′_2 and η′_3 has specific uses in GP 0.8.0. Which assignment is correct?",
