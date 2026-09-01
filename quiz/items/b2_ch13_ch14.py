@@ -8,7 +8,14 @@ ITEMS = [
  "id": "ch13-counter-deltas-calc",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "eq. 13.4–13.6 (π_V†, π_V‡, π′_V); eq. 11.28 (reporters set G)",
  "difficulty": 2, "kind": "concept", "tags": ["statistics", "validator-stats", "calc"],
- "stem": "A block in the middle of an epoch (e′ = e) has author index H_I = 3. Its extrinsic contains E_T with 2 tickets, E_P with one preimage of 500 octets, E_A with assurances signed by validators 1 and 2, and E_G with one guarantee whose credential carries the signatures of validators 0 and 4. Which per-validator changes does π′_V show relative to π_V (counters b, t, p, d, g, a)?",
+  "stemZh": "某個 epoch 中段（e′ = e）的區塊，其出塊者索引 H_I = 3。它的 extrinsic 含有：E_T 兩張 ticket、E_P 一份 500 個 octet 的 preimage、E_A 由 validator 1 與 2 簽署的 assurance、E_G 一份 guarantee 且其憑證帶有 validator 0 與 4 的簽章。相對於 π_V，π′_V 會顯示哪些逐 validator 的變動（計數器 b、t、p、d、g、a）？",
+  "optionsZh": [
+   "validator 3：b+1、t+2、p+1、d+500、g+1、a+2——出塊者納入的每一項 extrinsic 都記在出塊者頭上；其他 validator 都不變",
+   "validator 3：b+1、t+2、p+1、**d+1**；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1",
+   "validator 3：b+1、t+2、p+1、d+500；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1；其餘紀錄不變",
+   "validator 3：b+1、p+1、d+500；產生那兩張 ticket 的兩位 validator：各 t+1；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1"
+  ],
+  "stem": "A block in the middle of an epoch (e′ = e) has author index H_I = 3. Its extrinsic contains E_T with 2 tickets, E_P with one preimage of 500 octets, E_A with assurances signed by validators 1 and 2, and E_G with one guarantee whose credential carries the signatures of validators 0 and 4. Which per-validator changes does π′_V show relative to π_V (counters b, t, p, d, g, a)?",
  "options": [
   "Validator 3: b+1, t+2, p+1, d+500, g+1, a+2 — every extrinsic the author includes is credited to the author; no other validator changes",
   "Validator 3: b+1, t+2, p+1, d+1; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each",
@@ -29,7 +36,14 @@ ITEMS = [
  "id": "ch13-why-statistics",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "§13.1 (intro paragraphs); §14.1 honest behavior; C(13) in App. D",
  "difficulty": 1, "kind": "rationale", "tags": ["statistics", "rationale", "staking"],
- "stem": "Why does the JAM chain keep validator activity statistics at all, and what does the GP say about the activities that cannot be measured directly on-chain?",
+  "stemZh": "JAM 這條鏈為什麼要保留 validator 的活動統計？GP 對那些無法在鏈上直接量測的活動又怎麼說？",
+  "optionsZh": [
+   "JAM 直接支付 validator：每個區塊 STF 都會按 π_V 的比例從某個 treasury service 扣款，就像它處理懲罰那樣；出塊、擔保與背書可在鏈上追蹤，而 GRANDPA、BEEFY 與稽核也可以，因為 validator 簽署的每一則訊息最終都會被納入某個區塊",
+   "JAM 自己不發放獎勵，而是把活動資料當成 oracle 提供給質押子系統，就像它處理懲罰資料那樣；出塊、擔保與背書可在鏈上追蹤，而 GRANDPA、BEEFY 與稽核則不行，改由 validator 互相對彼此的努力投票、在 50% 誠實的假設下取中位數",
+   "JAM 自己不發放獎勵，而是把 π 餵給 Safrole，由它把計數器低於門檻的 validator 從 ι′ 中剔除；出塊、擔保與背書可在鏈上追蹤，而 GRANDPA 與 BEEFY 的活動直接從 header 的 finality 欄位讀取，稽核則由 validator 互相投票涵蓋",
+   "JAM 自己不發放獎勵，而這些統計只是為了遙測（JIP-3）與 RPC 而存在：π 位於共識狀態之外、不被 state root 涵蓋，懲罰紀錄 ψ 也是如此；因此 GRANDPA、BEEFY 與稽核的活動只是被省略，並未被 oracle 給任何外部子系統"
+  ],
+  "stem": "Why does the JAM chain keep validator activity statistics at all, and what does the GP say about the activities that cannot be measured directly on-chain?",
  "options": [
   "JAM pays validators directly: each block the STF debits a treasury service in proportion to π_V, exactly as it does for punishment; block production, guaranteeing and assurances are trackable on-chain, and so are GRANDPA, BEEFY and auditing, since every message a validator signs is eventually included in some block",
   "JAM issues no rewards itself but oracles activity data to a staking subsystem, as it does with punishment data; block production, guaranteeing and assurances are trackable on-chain, whereas GRANDPA, BEEFY and auditing are not and are instead covered by validators voting on each other's efforts, with a median accepted under a 50%-honest assumption",
@@ -50,7 +64,14 @@ ITEMS = [
  "id": "ch14-code-digest-mapping",
  "ch": "14", "section": "14.3 Packages and Items", "gpRef": "eq. 14.10 (item-to-digest C); eq. 11.6 (D); eq. 13.10/13.17 — internal/work_package/work_package.go C",
  "difficulty": 2, "kind": "code", "tags": ["work-packages", "digest", "code"],
- "stem": "This is the team's item-to-digest function (GP 0.8.0 eq. 14.10, C). Which statement about it is correct?",
+  "stemZh": "這是團隊的 item-to-digest 函數（GP 0.8.0 eq. 14.10，C）。關於它的哪個敘述正確？",
+  "optionsZh": [
+   "唯一的缺陷是 payload 雜湊：eq. 14.10 要求 y = H(E(w))，也就是**整個編碼後 work-item** 的雜湊而不是只對 payload 取雜湊，所以 PayloadHash 必須改為對 E(item) 取；至於 accumulate gas 上限、import 計數以及三個負載計數器 x = |w_x|、z = extrinsic 長度總和、e = w_e 都指派正確",
+   "AccumulateGas 是唯一的缺陷：一個 digest 的 g 必須是 **refine** gas 上限 w_g，因為 accumulation 的 gas 是由鏈上的 Δ+ 決定而不是由該 package 決定；payload 雜湊 H(w_y)、import 計數 |w_i| 以及三個負載計數器都指派正確",
+   "這段程式碼是對的：eq. 14.10 只釘死了 payload 雜湊、accumulate gas 上限、import 計數與已用 gas，把三個 manifest 計數器 x、z、e 留給 Ψ_R 實際做了什麼，所以只要 guarantor 對最終的 report 雜湊有共識，任何自洽的指派都可以接受",
+   "三個負載計數器被輪換錯位了：eq. 14.10 設定 x = |w_x|（extrinsic 數）、z = extrinsic 長度總和、e = w_e（宣告的匯出數），但程式碼把 w_e 放進 ExtrinsicCount、把 |w_x| 放進 ExtrinsicSize、把長度總和放進 Exports——payload 雜湊、accumulate gas 上限、import 計數與已用 gas 都是對的"
+  ],
+  "stem": "This is the team's item-to-digest function (GP 0.8.0 eq. 14.10, C). Which statement about it is correct?",
  "code": {"lang": "go", "caption": "internal/work_package/work_package.go (C; the '14.8' in the comment is the 0.7.2 number of eq. 14.10)", "src": """// C (14.8)
 func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.WorkResult {
     payloadHash := hash.Blake2bHash(item.Payload)
@@ -95,7 +116,14 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-code-refine-args",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. B.5 (Ψ_R argument a and gas w_g); eq. B.1 (Ψ_I uses E_2(c)); eq. 14.9 (G_R) — PVM/refine_invocation.go RefineInvoke",
  "difficulty": 3, "kind": "code", "tags": ["work-packages", "refine", "pvm-invocation", "code"],
- "stem": "Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Which statement is correct under GP 0.8.0 (eq. B.5)?",
+  "stemZh": "以下是團隊的 Ψ_R 建構交給 Ψ_M 之引數 blob a 的方式。依 GP 0.8.0（eq. B.5），哪個敘述正確？",
+  "optionsZh": [
+   "core 索引必須編碼為 E_2(c)，也就是固定的兩個 octet，與 Ψ_I 的做法完全相同，所以那個緊湊的 EncodeUint 是錯的；至於 service 索引 w_s、緊湊的 i、帶長度前綴的 payload、對編碼後 package 取的 H(p) 以及 gas 上限 w_g 都與 GP 相符",
+   "a 的第三個成分必須是以緊湊自然數表示的 service 索引 w_s，但程式碼附加的是 32 位元組的 code hash w_c；緊湊的 c 與 i、帶長度前綴的 payload、H(p) 以及 gas 上限 w_g 都與 GP 相符",
+   "最後那個雜湊必須是 H(E(w))，也就是正在被 refine 的那個編碼後 work-item 的雜湊，而不是 H(p)；而且交給 Ψ_M 的 gas 上限必須是 G_R = 5·10⁹（每個 package 的 refine 額度）而不是單一項目的 w_g——緊湊的 c 與 i、service 索引 w_s 與帶長度前綴的 payload 都是對的",
+   "payload 必須不帶長度前綴地附加上去，因為 Refine 是改用 fetch host call 取得它的，所以那個 ↕ 是多餘的；緊湊的 c 與 i、service 索引 w_s、H(p) 以及 gas 上限 w_g 都與 eq. B.5 相符"
+  ],
+  "stem": "Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Which statement is correct under GP 0.8.0 (eq. B.5)?",
  "code": {"lang": "go", "caption": "PVM/refine_invocation.go (RefineInvoke, 0.7.2)", "src": """    // otherwise
     var a []byte
     encoder := types.NewEncoder()
@@ -137,7 +165,14 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-compute-report-signature",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31",
  "difficulty": 3, "kind": "delta", "tags": ["work-packages", "compute-report", "delta-0.8.0"],
- "stem": "GP 0.8.0 redefines the work-report computation function Ξ. Which statement about its arguments and its failure condition E is correct?",
+  "stemZh": "GP 0.8.0 重新定義了 work-report 的計算函數 Ξ。關於它的引數與失敗條件 E，哪個敘述正確？",
+  "optionsZh": [
+   "Ξ(p, c, l, v) 收下 package、core、一個 segment-root 字典 l（每個被 h⊞ import 引用到的 work-package 雜湊各一項）以及 assurer 集合大小 v；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob、或 keys(l) 與那組 h⊞ 雜湊不符時才產生 ∇——某個 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束並不會讓 Ξ 失敗",
+   "Ξ(p, c) 一如 0.7.2 只收下 package 與 core；segment-root 字典是在計算期間從鏈上狀態 ρ 讀出的，而碎片數固定為 V = 1,023；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob 時才產生 ∇——某個 work-item 的 Refine 失敗並不會讓 Ξ 失敗",
+   "Ξ(p, c, l, v) 收下 package、core、segment-root 字典 l 與 assurer 集合大小 v；在 Is-Authorized 的結果不合格、keys(l) 不符、**或任何 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束**時都產生 ∇，如此 guarantor 就永遠不會為一份含有失敗項目的 report 簽名",
+   "Ξ(p, c, l, v) 收下 package、core、一個以 **work-item 索引**為 key、每個 import 一項的 segment-root 字典 l，以及 v，也就是該 report 上的 guarantor 簽章數（2 或 3）；只有在 Is-Authorized 的結果不合格、或編碼後的 report 超過 W_B = 13,791,360 個 octet 時才產生 ∇"
+  ],
+  "stem": "GP 0.8.0 redefines the work-report computation function Ξ. Which statement about its arguments and its failure condition E is correct?",
  "options": [
   "Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if keys(l) differ from the set of h⊞ hashes — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail",
   "Ξ(p, c) as in 0.7.2 takes only the package and the core; the segment-root dictionary is read out of the on-chain state ρ during computation and the shard count is fixed at V = 1,023; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail",
@@ -158,7 +193,14 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-paged-proofs",
  "ch": "14", "section": "14.3.1 Exporting / 14.4.1 Availability Specifier", "gpRef": "eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12",
  "difficulty": 2, "kind": "concept", "tags": ["work-packages", "segments", "paged-proofs", "merkle"],
- "stem": "Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. Which statement is correct?",
+  "stemZh": "匯出的 segment 由 availability specification 的 segments-root e 承諾，並透過 paged proof 佐證。哪個敘述正確？",
+  "optionsZh": [
+   "e = M(s)，是對匯出 segment 所建之定深二元 Merkle 樹的 root，葉子加 '$leaf' 前綴並以零雜湊補到 2 的冪；P(s) 產生 ⌈|s|/64⌉ 個額外的 segment，每個都是「通往某個 64 葉子子樹的 Merkle 路徑 J_6(s, i)、加上該子樹那一頁的 64 個葉子雜湊 L_6(s, i)」的補零編碼；兩者都會被 erasure-code 進長期的 D³L",
+   "e = M_B(s)，是對**原始 segment** 取的 well-balanced 二元 Merkle root、不做補齊；P(s) 產生 ⌈|s|/64⌉ 個額外 segment，內容同上；但兩者都存放在可稽核 bundle 之內而不是 D³L 裡",
+   "e = M(s)，定深樹的 root；但 P(s) 是每 32 個匯出 segment 產生一個 4,104 octet 的 segment，各帶一頁 32 個葉子雜湊加上它的子樹路徑；而且它們只存在於短期的 Audit DA 裡，因為只有 auditor 會驗證 import",
+   "e = M(s)，定深樹的 root；但 P(s) 是每一個匯出 segment 各產生一個額外 segment、各自持有該 segment 自己約 350 位元組的佐證，而且每位 validator 都保存全部，好讓任何節點不必取得碎片就能驗證任何 import"
+  ],
+  "stem": "Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. Which statement is correct?",
  "options": [
   "e = M(s) is the root of a constant-depth binary Merkle tree over the exported segments, its leaves '$leaf'-prefixed and zero-hash-padded to a power of two; P(s) yields ⌈|s|/64⌉ extra segments, each the zero-padded encoding of the Merkle path J_6(s, i) to a 64-leaf subtree plus that subtree's page of 64 leaf hashes L_6(s, i); both are erasure-coded into the long-lived D³L",
   "e = M_B(s), the well-balanced binary Merkle root taken over the raw segments with no padding; P(s) yields ⌈|s|/64⌉ extra segments, each the zero-padded encoding of the Merkle path J_6(s, i) to a 64-leaf subtree plus that subtree's page of 64 leaf hashes L_6(s, i); both are stored inside the auditable bundle rather than in the D³L",
@@ -179,7 +221,14 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-makebundle",
  "ch": "14", "section": "14.4 Computation of Work-Report / 14.2.2 Data Collection and Justification", "gpRef": "eq. 14.15–14.17 (X, L_l, S_l, J_l, B, s = A(H(p), B(p, l), e, v)); §14.3.1 (Audit DA vs D³L lifetimes)",
  "difficulty": 2, "kind": "concept", "tags": ["work-packages", "bundle", "audit-da", "d3l"],
- "stem": "What exactly goes into the auditable work-bundle B(p, l) that guarantors erasure-code into the Audit DA, and how does that differ from what goes into the D³L?",
+  "stemZh": "guarantor 會把可稽核的 work-bundle B(p, l) 做 erasure coding 放進 Audit DA。這個 bundle 裡究竟有什麼？它與放進 D³L 的東西又有何不同？",
+  "optionsZh": [
+   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並在後面附上完成的 work-report，好讓 auditor 不必碰鏈上資料就能拿自己的結果與 guarantor 的比對；其中每一個序列都帶長度前綴；而 bundle 與「匯出 segment 加其 paged proof」都被保存在同一個儲存區裡 ≥ 28 天（672 個 epoch）",
+   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))：編碼後的 package、接著每一份 extrinsic blob、再來每一個**匯入**的 segment、最後是那些 import 的 Merkle 佐證——只有佐證路徑帶長度前綴；bundle 屬於短期的 Audit-DA 資料，而匯出 segment 加其 paged proof 則進入長期的 D³L（≥ 28 天 = 672 個 epoch）",
+   "B(p, l) 只有 E(p, X#(p_w))：編碼後的 package 與每一份 extrinsic blob，不含匯入的 segment 也不含佐證——auditor 會自己從 D³L 重新取得那些 segment 並檢查它們的 paged proof，就像 guarantor 當初做的那樣；bundle 屬於短期 Audit-DA 資料，匯出 segment 加 paged proof 則進入長期 D³L",
+   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並附上第五個成分，也就是這個 package 自己的**匯出**：編碼後的 package、每份 extrinsic blob、每個匯入 segment、它們的 Merkle 佐證，最後是這些匯出——只有佐證路徑帶長度前綴；而 bundle 進入長期 D³L（≥ 28 天），只有 paged proof 屬於短期 Audit-DA 資料"
+  ],
+  "stem": "What exactly goes into the auditable work-bundle B(p, l) that guarantors erasure-code into the Audit DA, and how does that differ from what goes into the D³L?",
  "options": [
   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) with the finished work-report appended, so that auditors can compare their own result against the guarantors' without touching on-chain data; every one of the sequences carries a length prefix; both the bundle and the exported segments with their paged proofs are kept for ≥ 28 days (672 epochs) in the same store",
   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)): the encoded package, then every extrinsic blob, then every imported segment and finally the Merkle justifications of those imports — only the justification paths carry length prefixes; the bundle is short-lived Audit-DA data, whereas exported segments plus their paged proofs go to the long-lived D³L (≥ 28 days = 672 epochs)",

@@ -10,7 +10,14 @@ ITEMS = [
  "ch": "9", "section": "9.2 Preimage Lookups",
  "gpRef": "§9.2 (domain of Λ); App. B Refine Invocation (D ≡ L + 4,800 = 19,200)",
  "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "constants"],
- "stem": "§9.2 bounds the timeslot argument of the historical-lookup function Λ to the window (H_t − D … H_t), and the constants appendix fixes D = 19,200 timeslots. What is the GP's stated reason for that particular number?",
+  "stemZh": "§9.2 把歷史查詢函數 Λ 的時槽引數限制在 (H_t − D … H_t) 這個窗口內，而常數附錄把 D 定為 19,200 個時槽。GP 為這個特定數字給出的理由是什麼？",
+  "optionsZh": [
+   "19,200 個時槽恰好是 32 個 epoch，也正是 accumulation 歷史 ξ 保留 work-package 雜湊的時間長度，所以在某份 work-package 還可能被重新 accumulate 之前，它用到的 preimage 不得被丟棄；D 因此被定為 32·E",
+   "這段期間必須比兩個 epoch 的稽核窗口（1,200 個時槽）長十六倍，好讓 erasure-code 過的 bundle 在爭議期間仍能從 1,023 位 validator 的碎片重建；D 是從那個保存期導出的，與任何 anchor 年齡無關",
+   "Ω_H 在**任何仍可能發生稽核的時刻**都必須回傳相同的答案；而 lookup anchor 本身可能比近期歷史再舊上 L = 14,400 個時槽，所以這段期間就是那個 anchor 年齡再加上 4,800 個時槽（八小時）的安全餘裕",
+   "每 octet 的押金 B_L 會在這段期間內線性退還，而 19,200 個時槽在每槽六秒之下正是 32 小時——這是選用性狀態的標準押金退還時程；B_L 會在那些時槽內等額分期退回 a_b"
+  ],
+  "stem": "§9.2 bounds the timeslot argument of the historical-lookup function Λ to the window (H_t − D … H_t), and the constants appendix fixes D = 19,200 timeslots. What is the GP's stated reason for that particular number?",
  "options": [
   "19,200 timeslots is exactly 32 epochs, which is precisely how long the accumulation history ξ keeps work-package hashes, so a preimage may not be dropped before the work-package that used it can no longer be re-accumulated; D is fixed at 32·E for that reason.",
   "The period must exceed the two-epoch audit window (1,200 timeslots) by a factor of sixteen so that erasure-coded bundles can still be reconstructed from the 1,023 validators' shards during a dispute; D is derived from that retention period, not from any anchor age.",
@@ -32,7 +39,14 @@ ITEMS = [
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.3, eq. 9.8; §D.1 T(σ) row C(255, s); App. B `info` (Ω_I)",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "state", "merklization"],
- "stem": "a_i (items), a_o (octets) and a_t (threshold balance) are dependent values — §9.3 derives a_i and a_o from a_s and a_l, and a_t from those two plus the stored gratis offset a_f, and none of them is a member of the eq. 9.3 tuple. Which of them actually reach the Merklized state, and how does that compare with what the `info` host call hands back?",
+  "stemZh": "a_i（項數）、a_o（位元組數）與 a_t（門檻餘額）都是衍生值——§9.3 從 a_s 與 a_l 導出 a_i 與 a_o，再從那兩者加上儲存的 gratis 抵扣 a_f 導出 a_t，而三者都不是 eq. 9.3 元組的成員。它們之中哪些真的進入了被 Merklize 的狀態？與 `info` host call 交回的內容相比又如何？",
+  "optionsZh": [
+   "三者都同時進入兩種編碼，而且兩種編碼逐位元組相同——這正是為什麼實作可以放心地在 trie 葉子與 host call 之間共用同一個 codec，也是為什麼那片葉子可以直接遞給 guest 的緩衝區",
+   "service-info 的葉子帶有 a_i 與 a_o 但**沒有** a_t，而且它以版本位元組 0 開頭；`info` 沒有版本位元組但**有** a_t，其版面為 E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p))",
+   "三者都沒有被序列化到任何地方：trie 只儲存 eq. 9.3 的元組欄位，而 a_i、a_o 與 a_t 是在每次 host call 需要時才從 a_s 與 a_l 重新算出來的",
+   "trie 的葉子帶有 a_t 但沒有 a_i 與 a_o（那兩者按需重算），而 `info` 回傳 a_i 與 a_o 但沒有 a_t；兩種編碼都以版本位元組 0 開頭"
+  ],
+  "stem": "a_i (items), a_o (octets) and a_t (threshold balance) are dependent values — §9.3 derives a_i and a_o from a_s and a_l, and a_t from those two plus the stored gratis offset a_f, and none of them is a member of the eq. 9.3 tuple. Which of them actually reach the Merklized state, and how does that compare with what the `info` host call hands back?",
  "options": [
   "All three reach both encodings, and the two encodings are byte-for-byte identical — which is exactly why an implementation is free to reuse a single codec for the trie leaf and for the host call, and why the leaf can be handed straight to the guest's buffer.",
   "The service-info leaf carries a_i and a_o but not a_t, and it opens with a version octet 0; `info` has no version octet but does include a_t, laid out as E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p)).",
@@ -54,7 +68,14 @@ ITEMS = [
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
  "difficulty": 2, "kind": "code", "tags": ["accounts", "balance", "host-calls", "fuzzer-bug"],
- "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?",
+  "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。哪個敘述符合 GP 0.8.0？",
+  "optionsZh": [
+   "一筆 storage 條目對 a_i 計 1、對 a_o 計 32 + |v|——key 的長度從不計費，因為 JAM 在 trie 裡只存 storage key 的雜湊；而遇到 FULL 時該寫入仍然生效，差額則從餘額中扣除",
+   "一筆 storage 條目對 a_i 計 2、對 a_o 計 81 + |v|，與 lookup-meta 條目完全相同，理由是兩者都恰好佔用 state trie 的一片葉子；而 FULL 只有在餘額本身歸零之後才可能產生，所以一個有償付能力的 service 永遠能完成寫入",
+   "門檻是在 accumulation 結尾重算一次而不是每次 host call 都算，所以 `write` 根本不可能產生 FULL；過度承諾儲存的 service 會在事後被持有其 code-hash 墓碑的那個 service 修剪掉，押金退還給 parent",
+   "一筆 storage 條目對 a_i 計 1、對 a_o 計 34 + |k| + |v|——key 與 value **都**計費；當寫入後的門檻超過餘額時該呼叫產生 FULL，而且該帳戶必須被完全原封交回，這正是 map 的寫入要延到比較之後才進行的原因"
+  ],
+  "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?",
  "code": {
   "lang": "go",
   "caption": "PVM/host_call_general.go (write) + internal/service_account/service_account.go:207 (CalcStorageItemfootprint)",
@@ -105,7 +126,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "9", "section": "9.2.2 Semantics",
  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "host-calls"],
- "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, which set of transitions matches GP 0.8.0?",
+  "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，哪一組轉換符合 GP 0.8.0？",
+  "optionsZh": [
+   "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 該 request 條目與 a_p[h] 兩者都被清除，但只有在 y < t − D 時；[x, y, w] → [w, t]，同樣只有在 y < t − D 時；其餘每一種情況都回傳 HUH",
+   "[] → HUH，沒有東西可忘；[x] → 該 request 條目與 a_p[h] 兩者立即被丟棄；[x, y] → [x, y, t]；[x, y, w] → [w, t] 且不附帶任何年齡條件；其餘每一種情況都回傳 HUH",
+   "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 只要 y < t 就立刻清除該條目與 a_p[h]，不必等 D 個時槽；[x, y, w] → 直接丟棄而不是改寫；其餘每一種情況都回傳 HUH",
+   "[] → 丟棄；[x] → 連同 a_p[h] 一起丟棄；[x, y] → 連同 a_p[h] 一起丟棄；[x, y, w] → 連同 a_p[h] 一起丟棄；每一種形狀都立刻塌陷，而那個 D 個時槽的延遲只管 `eject`"
+  ],
+  "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, which set of transitions matches GP 0.8.0?",
  "options": [
   "[] → the request entry is dropped; [x] → [x, t]; [x, y] → the request entry and a_p[h] are both expunged, but only once y < t − D; [x, y, w] → [w, t], again only once y < t − D; every other case returns HUH.",
   "[] → HUH, there is nothing to forget; [x] → the request entry and a_p[h] are both dropped at once; [x, y] → [x, y, t]; [x, y, w] → [w, t] with no age condition attached; every other case returns HUH.",
@@ -127,7 +155,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "9", "section": "9 Service Accounts",
  "gpRef": "§9 eq. 9.1 (N_S ≡ N_{2^32}); eq. B.14 (check); S = 2^16",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "service-id", "accumulation"],
- "stem": "A service calls `new` during accumulation. How does GP 0.8.0 pick the index of the child account, and how is a clash with an existing service avoided?",
+  "stemZh": "某個 service 在 accumulation 期間呼叫 `new`。GP 0.8.0 如何挑選子帳戶的索引？又如何避免與既有 service 相撞？",
+  "optionsZh": [
+   "索引是新帳戶 code hash 的 Blake2b 對 2^32 取模，好讓相同的程式碼永遠落在同一個位置、使重複部署變得便宜；完全沒有探測，而萬一該索引已被佔用，整個區塊就會被判為無效",
+   "索引是 δ 中當前最大的 key 加一，所以索引在整條鏈上是嚴格循序發放的、依構造不可能相撞；registrar 只是在創世時保留了最前面的 2^16 個，並在鏈外發放它們",
+   "context 的 next free id 起始於 check((E⁻¹_4(H(E(s, η′_0, H_t))) mod (2^32 − S − 2^8)) + S)，其中 S = 2^16，所以它只會落在公開範圍內；check 以 i ↦ (i − S + 1) mod (2^32 − 2^8 − S) + S 向前線性探測，直到落在 K(δ) 之外的索引；而只有 registrar 可以改為指名任何小於 S 的索引",
+   "索引是用 **prior** 的熵累積器從 H(E(s, η_0, H_t)) 導出的，然後**向下**探測直到出現空位；保留區塊是索引空間的最上面 2^16 個而不是最下面的，而且任何 service（不只 registrar）都可以認領那些保留位置之一"
+  ],
+  "stem": "A service calls `new` during accumulation. How does GP 0.8.0 pick the index of the child account, and how is a clash with an existing service avoided?",
  "options": [
   "The index is Blake2b of the new account's code hash reduced mod 2^32, so that identical code always lands on the same slot and duplicate deployments are cheap; there is no probing at all, and should that index already be occupied the whole block is rejected as invalid.",
   "The index is the largest key currently present in δ plus one, so indices are handed out strictly sequentially across the whole chain and a clash is impossible by construction; the registrar merely reserves the first 2^16 of them at genesis and hands them out off-chain.",

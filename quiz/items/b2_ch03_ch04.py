@@ -8,7 +8,14 @@ ITEMS = [
  "id": "ch03-sequence-set-subscripts",
  "ch": "3", "section": "3.7 Sequences", "gpRef": "§3.7 (⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, ⟦T⟧_{n:}, ⟦T⟧_N); applied in eq. 8.1 and eq. 6.22",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "types"],
- "stem": "Eq. 8.1 types the authorizer pool and queue as α ∈ ⟦⟦H⟧_{:O}⟧_C and φ ∈ ⟦⟦H⟧_Q⟧_C, and eq. 6.22 types the entropy as η ∈ ⟦H⟧_4. Using the sequence-set notation of GP §3.7, what do these subscripts say?",
+  "stemZh": "eq. 8.1 把 authorizer pool 與 queue 定型為 α ∈ ⟦⟦H⟧_{:O}⟧_C 與 φ ∈ ⟦⟦H⟧_Q⟧_C，而 eq. 6.22 把熵定型為 η ∈ ⟦H⟧_4。依 GP §3.7 的序列集合記號，這些下標各是什麼意思？",
+  "optionsZh": [
+   "⟦H⟧_{:O} 是長度**至多** O 的雜湊序列集合，⟦H⟧_Q 是長度**恰好** Q 的，⟦H⟧_4 是長度恰好 4 的；而外層的 ⟦·⟧_C 表示每個 core 恰好一個內層序列",
+   "⟦H⟧_{:O} 是長度**至少** O 的雜湊序列集合（pool 必須保持填滿），而 ⟦H⟧_Q 與 ⟦H⟧_4 則分別是長度至多 Q 與至多 4 的序列",
+   "⟦H⟧_{:O} 指的是某個雜湊序列的**前 O 個元素**（一個切片），所以 α 是每個 core 佇列的 O 元素前綴，而 ⟦H⟧_Q 指的是索引 Q 處的單一個元素",
+   "三者都是長度恰好為那個數目的序列；⟦H⟧_{:O} 裡的冒號只是標記該 pool 是以循環方式索引的（H_T mod O）而不是從零開始索引"
+  ],
+  "stem": "Eq. 8.1 types the authorizer pool and queue as α ∈ ⟦⟦H⟧_{:O}⟧_C and φ ∈ ⟦⟦H⟧_Q⟧_C, and eq. 6.22 types the entropy as η ∈ ⟦H⟧_4. Using the sequence-set notation of GP §3.7, what do these subscripts say?",
  "options": [
   "⟦H⟧_{:O} is the set of hash sequences of length at most O, ⟦H⟧_Q of length exactly Q and ⟦H⟧_4 of length exactly 4; the outer ⟦·⟧_C means exactly one inner sequence per core",
   "⟦H⟧_{:O} is the set of hash sequences of length at least O (a pool must be kept full), while ⟦H⟧_Q and ⟦H⟧_4 are sequences of length at most Q and at most 4 respectively",
@@ -29,7 +36,14 @@ ITEMS = [
  "id": "ch03-first-last-n-arrows",
  "ch": "3", "section": "3.7.2 Editing", "gpRef": "§3.7.2 (⌢, ⧺, →s^n, ←s^n) and §3.7 (⟲); applied in eq. 7.8, eq. 8.2 and eq. 6.35",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "arrows"],
- "stem": "Three state-transition rules use the arrow operators of GP §3.7.2: β_H′ ≡ ←(β_H† ⧺ e)^H (eq. 7.8), α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O (eq. 8.2) and γ′_A ≡ →(n ∪ γ_A sorted ascending by ticket id)^E (eq. 6.35). Which reading is correct?",
+  "stemZh": "三條狀態轉移規則用到 GP §3.7.2 的箭號運算子：β_H′ ≡ ←(β_H† ⧺ e)^H（eq. 7.8）、α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O（eq. 8.2）、γ′_A ≡ →(依 ticket id 升冪排序的 n ∪ γ_A)^E（eq. 6.35）。哪一種讀法正確？",
+  "optionsZh": [
+   "←^n 保留**前** n 個元素、→^n 保留**後** n 個：因此 β_H′ 與 α′[c] 在滿了之後會丟掉最新的條目，而 γ′_A 保留的是最大的 E 個 ticket id",
+   "→^n 保留前 n 個元素、←^n 保留後 n 個：因此 β_H′ 與 α′[c] 保留的是最近附加的 H = 8 與 O = 8 筆，而 γ′_A 保留的是最小的 E = 600 個 ticket id",
+   "兩個箭號都是從前面算起保留 n 個元素；方向只記錄該序列是以 ⧺（右側附加）還是以 ⌢（左側插入）延伸的",
+   "這兩個箭號是位移 n 個位置的循環旋轉，與 ⟲ 上標是同一個運算，所以 β_H′ 與 α′[c] 的行為就像最舊的槽會被就地覆寫的環狀緩衝區"
+  ],
+  "stem": "Three state-transition rules use the arrow operators of GP §3.7.2: β_H′ ≡ ←(β_H† ⧺ e)^H (eq. 7.8), α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O (eq. 8.2) and γ′_A ≡ →(n ∪ γ_A sorted ascending by ticket id)^E (eq. 6.35). Which reading is correct?",
  "options": [
   "←^n keeps the first n elements and →^n the last n: β_H′ and α′[c] therefore drop the newest entry once they are full, while γ′_A keeps the E largest ticket ids",
   "→^n keeps the first n elements and ←^n the last n: β_H′ and α′[c] retain the H = 8 and O = 8 most recently appended entries, while γ′_A retains the E = 600 smallest ticket ids",
@@ -50,7 +64,14 @@ ITEMS = [
  "id": "ch03-bits-msb-first-trie",
  "ch": "3", "section": "3.7.3 Boolean values", "gpRef": "§3.7.3 bits(); eq. D.5–D.6 (M_σ, M); App. C.1.4 (bit-sequence encoding); eq. A.15 (PVM ℬ_n)",
  "difficulty": 3, "kind": "code", "tags": ["notation", "bits", "merklization", "codec"],
- "stem": "GP §3.7.3 defines bits(B) for an octet sequence B by the example bits([160, 0]) = [1, 0, 1, 0, 0, …], and M_σ (eq. D.5) keys the state trie by bits(k) of the 31-octet state key. The team's trie splits entries at each depth with the code below. Is it consistent with the GP?",
+  "stemZh": "GP §3.7.3 以 bits([160, 0]) = [1, 0, 1, 0, 0, …] 這個例子定義了 octet 序列 B 的 bits(B)，而 M_σ（eq. D.5）是以 31 位元組 state key 的 bits(k) 為 trie 的鍵。團隊的 trie 用下面這段程式碼在每個深度切分條目。它與 GP 一致嗎？",
+  "optionsZh": [
+   "不一致：bits() 是**最低位在前**，與 codec 的位元序列編碼 E(b ∈ 𝕓)（把 b_i 放進 2^i）相符，所以遮罩必須是 1 << (depth mod 8)",
+   "不一致：bits() 是 MSB-first 沒錯，但 M_σ 是以 bits(H(k))——也就是 state key 的 Blake2b 雜湊——為 trie 的鍵，所以切分必須對 H(k) 而不是對原始 key 進行",
+   "不一致：bits() 是 MSB-first 沒錯，但每個節點的第一個 bit 是 branch／leaf 判別子，所以 key 的路徑必須跳過 key[0] 的 bit 0，而遮罩應該從 1 << (6 − depth mod 8) 開始",
+   "一致：160 = 0b10100000，所以 bits() 是先送出每個 octet 的最高位；用 1 << (7 − depth mod 8) 遮罩 key[depth/8] 正是照那個順序走訪路徑"
+  ],
+  "stem": "GP §3.7.3 defines bits(B) for an octet sequence B by the example bits([160, 0]) = [1, 0, 1, 0, 0, …], and M_σ (eq. D.5) keys the state trie by bits(k) of the 31-octet state key. The team's trie splits entries at each depth with the code below. Is it consistent with the GP?",
  "code": {"lang": "go", "caption": "internal/utilities/merklization/merklization.go (partitionByBit)", "src": """func partitionByBit(entries []types.StateKeyVal, depth int) int {
 	byteIdx := depth / 8
 	bitMask := byte(1 << (7 - depth%8))
@@ -83,7 +104,14 @@ ITEMS = [
  "id": "ch03-vrf-signature-notation",
  "ch": "3", "section": "3.8.2 Signing Schemes", "gpRef": "§3.8.2; applied in eq. 6.16 (seal), eq. 6.18 (H_V), eq. 6.30 (ticket proof) and eq. 6.32 (ticket id = Y)",
  "difficulty": 3, "kind": "concept", "tags": ["notation", "crypto", "vrf", "safrole"],
- "stem": "GP §3.8.2 writes a Bandersnatch VRF signature as Ṽ_k^m⟨x⟩ ⊂ B_96 with VRF output Y(·) ∈ H, and eq. 6.16 requires H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩. Which statement is correct?",
+  "stemZh": "GP §3.8.2 把 Bandersnatch VRF 簽章寫成 Ṽ_k^m⟨x⟩ ⊂ B_96、VRF 輸出為 Y(·) ∈ H，而 eq. 6.16 要求 H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩。哪個敘述正確？",
+  "optionsZh": [
+   "角括號裝的是訊息、上標裝的是 context，所以 Y(H_S) 取決於 header 的序列化 E_U(H)；這正是讓 seal 的 VRF 輸出得以承諾區塊內容的機制",
+   "k = H_A 是簽署者的公鑰，上標 E_U(H) 是被簽的訊息，而角括號裡的項是 context；Y(H_S) 由金鑰與 context 決定，而**不由訊息**決定",
+   "Ṽ 是匿名的 Ring-VRF 形式：H_A 是對 validator 金鑰取的 ring root、簽署者無法被識別，而具識別性的形式 V̊ ⊂ B_784 才是 ticket 所使用的",
+   "Y(H_S) 是一個 96 位元組的值；32 位元組的 ticket 識別碼 i_y 是取 H(Y(H_S)) 得到的，而 Ed25519 簽章 V̄_k⟨m⟩ 同樣定義了一個 VRF 輸出"
+  ],
+  "stem": "GP §3.8.2 writes a Bandersnatch VRF signature as Ṽ_k^m⟨x⟩ ⊂ B_96 with VRF output Y(·) ∈ H, and eq. 6.16 requires H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩. Which statement is correct?",
  "options": [
   "The angle brackets carry the message and the superscript the context, so Y(H_S) depends on the header serialization E_U(H); this is what lets the seal's VRF output commit to the block content",
   "k = H_A is the signer's public key, the superscript E_U(H) is the signed message and the angle-bracketed term is the context; Y(H_S) is determined by the key and the context but not by the message",
@@ -104,7 +132,14 @@ ITEMS = [
  "id": "ch03-hash-functions-and-codec-subscripts",
  "ch": "3", "section": "3.8.1 Hashing", "gpRef": "§3.8.1 (H, H_K, H_0, E_l and E^{-1}_l assertions); Keccak applied in eq. 7.7",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "hashing", "codec"],
- "stem": "Per GP §3.8.1, which statement about the hash functions and the subscripted codec functions is correct?",
+  "stemZh": "依 GP §3.8.1，關於雜湊函數與帶下標的 codec 函數，哪個敘述正確？",
+  "optionsZh": [
+   "H 是 Keccak-256（如 Yellow Paper）而 H_K 是 Blake2b-256；E 上的下標計的是**輸入**的 octet 數，所以 E_4 只接受已經屬於 B_4 的引數，而 E^{-1}_8 只接受小於 2^64 的自然數",
+   "H 是 Blake2b-256 而 H_K 是 Keccak-256；除非明確寫成 H(E(…))，否則對元組取雜湊是未定義的，而 E_4 是上限為四個 octet 的通用變長自然數編碼",
+   "H 是 Blake2b-256 而 H_K 是 Keccak-256，兩者都映到 H ≡ B_32；非 blob 的引數會被隱含地送過 E；E_4(x) 斷言 x ∈ N_2^32 並產出 B_4，而 E^{-1}_8(y) 斷言 y ∈ B_8 並產出 N_2^64",
+   "H 是截斷成 32 個 octet 的 Blake2b-512 而 H_K 是 Keccak-256；H_0 表示 H([])，也就是空 blob 的雜湊，而 M_σ 也正是以它來標識空的子 trie"
+  ],
+  "stem": "Per GP §3.8.1, which statement about the hash functions and the subscripted codec functions is correct?",
  "options": [
   "H is Keccak-256 as in the Yellow Paper and H_K is Blake2b-256; the subscript on E counts the octets of the input, so E_4 accepts only arguments already in B_4 and E^{-1}_8 only naturals below 2^64",
   "H is Blake2b-256 and H_K is Keccak-256; hashing a tuple is undefined unless it is written explicitly as H(E(…)), and E_4 is the general variable-length natural encoding capped at four octets",
@@ -125,7 +160,14 @@ ITEMS = [
  "id": "ch03-dictionary-semantics",
  "ch": "3", "section": "3.5 Dictionaries", "gpRef": "eq. 3.7–3.11; 𝒰 in eq. 3.2; ∅ / A? / ∇ in §3.3",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "dictionaries", "calc"],
- "stem": "Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), which statement is correct?",
+  "stemZh": "令 d = {1 ↦ a, 2 ↦ b} 與 e = {2 ↦ c, 3 ↦ a} 是 ⟨N → B⟩ 中的字典。套用 GP §3.5（eq. 3.7–3.11），哪個敘述正確？",
+  "optionsZh": [
+   "d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a}，因為碰撞時**左**運算元勝出；V(d ∪ e) = [a, b, a] 會依插入順序保留重複值；而 d[3] = ∅ 在任何脈絡下都是一個普通且合法的查閱結果",
+   "d ∪ e 是未定義的，因為 key 2 碰撞了——字典的聯集只有在 K(d) ⫰ K(e) 時才有定義，這正是為什麼 GP 總是明確寫成 (d ∖ K(e)) ∪ e 而不寫 d ∪ e",
+   "d ∖ {2} 移除的是**值**為 2 的配對，所以 d ∖ {2} = d；K(e) = {c, a}；而 d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時右運算元勝出",
+   "d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時**右**運算元勝出；V(d ∪ e) = {a, c}；而在規則中寫下 d[3] 就等於斷言 key 3 存在——一個倚賴它卻未處理 ∅ 的區塊是無效的"
+  ],
+  "stem": "Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), which statement is correct?",
  "options": [
   "d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a} because the left operand wins on a collision; V(d ∪ e) = [a, b, a] keeps duplicates in insertion order; and d[3] = ∅ is an ordinary, valid lookup result in every context",
   "d ∪ e is undefined because key 2 collides — dictionary union is only defined when K(d) ⫰ K(e), which is why the GP always writes (d ∖ K(e)) ∪ e out explicitly instead of d ∪ e",
@@ -149,7 +191,14 @@ ITEMS = [
  "id": "ch04-dagger-intermediate-states",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18",
  "difficulty": 2, "kind": "concept", "tags": ["stf", "intermediate-state", "ordering", "delta-0.8.0"],
- "stem": "GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. Which description of what each one has just absorbed is correct?",
+  "stemZh": "GP 0.8.0 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。關於它們各自剛吸收了什麼，哪個描述正確？",
+  "optionsZh": [
+   "β_H† = β_H 在本塊的 guarantee E_G 被附加到最新條目之後；ρ† = ρ 在處理 assurance E_A 之後；ρ‡ = ρ† 在處理 guarantee E_G 之後；δ‡ = δ 在 preimage E_P 被整合之後、accumulation 執行之前",
+   "β_H† = β_H 把父區塊的 posterior state root H_R 寫進它最新的條目之後；ρ† = ρ 在處理 disputes E_D 之後；ρ‡ = ρ† 在處理 assurance E_A 之後；δ‡ = δ 在 accumulate 完 R* 之後、E_P 被併入之前",
+   "β_H† = β_H 在 accumulation-output log θ′ 被承諾進 belt 之後；ρ† = ρ 在處理 guarantee E_G 之後；ρ‡ = ρ† 在處理 disputes E_D 之後；δ‡ = δ 在 E_P 被整合之後、deferred transfer 被套用之前",
+   "β_H† = β_H 寫入 H_R 之後；ρ† = ρ 在 E_A 之後；ρ‡ = ρ† 在 E_D 之後；δ‡ = δ 在 E_P 之後——disputes 與 assurance 的先後無關緊要，因為兩者都只是從 ρ 移除條目"
+  ],
+  "stem": "GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. Which description of what each one has just absorbed is correct?",
  "options": [
   "β_H† = β_H after this block's guarantees E_G are appended to the newest entry; ρ† = ρ after the assurances E_A; ρ‡ = ρ† after the guarantees E_G; δ‡ = δ after the preimages E_P are integrated, before accumulation runs",
   "β_H† = β_H with the parent's posterior state root H_R written into its newest entry; ρ† = ρ after the disputes E_D; ρ‡ = ρ† after the assurances E_A; δ‡ = δ after accumulating R*, before E_P is folded in",
@@ -170,7 +219,14 @@ ITEMS = [
  "id": "ch04-extrinsic-dependency-inputs",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.11–4.20",
  "difficulty": 3, "kind": "concept", "tags": ["stf", "extrinsic", "ordering"],
- "stem": "Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, which statement about where the five extrinsic components enter the transition is TRUE?",
+  "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），關於五個 extrinsic 成分在哪裡進入狀態轉移，哪個敘述為**真**？",
+  "optionsZh": [
+   "preimages extrinsic E_P 是 accumulation 步驟（eq. 4.16）的輸入，所以某個 service 的 accumulate 程式碼可以讀到同一塊中被提供的 preimage",
+   "assurances extrinsic E_A 是 ρ′ 的直接輸入，也就是 ρ′ ≺ (E_G, E_A, ρ†, κ, τ′)，因為 guarantee 與 assurance 是在對各 core 的同一遍走訪中一起處理的",
+   "guarantees extrinsic E_G 是 ρ′、β_H′、α′ 與 π′ 的輸入，但**不是** accumulation 步驟的輸入——後者唯一由 extrinsic 導出的輸入是 R*（由 E_A 與 ρ† 導出）",
+   "disputes extrinsic E_D 是 π′ 的直接輸入，因為 validator 統計會記錄該區塊中哪些 validator 被回報為 offender"
+  ],
+  "stem": "Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, which statement about where the five extrinsic components enter the transition is TRUE?",
  "options": [
   "The preimages extrinsic E_P is an input to the accumulation step (eq. 4.16), so a service's accumulate code can read a preimage that was provided in the same block",
   "The assurances extrinsic E_A is a direct input to ρ′, i.e. ρ′ ≺ (E_G, E_A, ρ†, κ, τ′), because guarantees and assurances are processed together in one pass over the cores",
@@ -191,7 +247,14 @@ ITEMS = [
  "id": "ch04-in-core-300x-rationale",
  "ch": "4", "section": "4.8.1 In-core Consensus", "gpRef": "§4.9.1",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "in-core", "scalability"],
- "stem": "The Overview states that JAM should be able to do 'upwards of 300 times' the computation in-core as a single machine running the VM at full speed. What justifies this figure, and what keeps such unreplicated computation safe?",
+  "stemZh": "Overview 表示 JAM 在 core 上應能做到單一機器全速執行該 VM 之「300 倍以上」的運算量。這個數字的根據是什麼？又是什麼讓這種未被複製的運算保持安全？",
+  "optionsZh": [
+   "一項給定的運算只由 validator 的一個子集執行，所以吞吐是隨網路規模而非隨單一機器擴展；擔保／背書／稽核（必要時再加判定）這套機制保障它，而無狀態的 in-core 執行可以被任何已同步到已定案鏈的節點重現",
+   "每位 validator 仍然執行每一項 in-core 運算，只是 PVM 的重編譯器讓 RISC-V 程式碼比 EVM 位元碼快約 300 倍；因此安全性來自完全複製、與 on-chain 模型完全相同，也不需要任何稽核階段",
+   "in-core 的結果單憑 guarantor 的簽章就被接受、從不被其他任何人重新執行；guarantor 所抵押的經濟質押（在日後爭議時被沒收）就是讓那個 300 倍數字在沒有進一步驗證下仍然安全的原因",
+   "那 300 倍來自 341 個 core 各自平行地用滿整個 6 秒時槽；in-core 的程式碼可以讀取截至 lookup-anchor 區塊為止的任意鏈上狀態，而正是那個錨定讓它的結果能被其他節點重現"
+  ],
+  "stem": "The Overview states that JAM should be able to do 'upwards of 300 times' the computation in-core as a single machine running the VM at full speed. What justifies this figure, and what keeps such unreplicated computation safe?",
  "options": [
   "A given computation is executed by only a subset of validators, so throughput scales with network size rather than one machine; the guarantee/assure/audit (and if needed judge) game secures it, and stateless in-core execution can be reproduced by any node synced to the finalized chain",
   "Every validator still executes every in-core computation, but the PVM's recompiler makes RISC-V code roughly 300 times faster than EVM bytecode; safety therefore follows from full replication, exactly as in the on-chain model, and no auditing stage is required",
@@ -212,7 +275,14 @@ ITEMS = [
  "id": "ch04-best-block-vs-finalized",
  "ch": "4", "section": "4.6 Best block", "gpRef": "§4.6; §4.3 (head, finalized); §19 (best chain)",
  "difficulty": 2, "kind": "concept", "tags": ["consensus", "grandpa", "best-chain"],
- "stem": "GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. Which statement matches the GP?",
+  "stemZh": "GP §4.6 區分了「best block」與 Grandpa finality gadget 所回報的東西。哪個敘述與 GP 相符？",
+  "optionsZh": [
+   "best block 就是最近一個被 Grandpa 定案的區塊；JAM 節點從不在未定案的區塊之上出塊，這正是為什麼 Grandpa 只落後最新頭部 1–2 塊、也是為什麼從不會有推測性狀態暴露給應用程式",
+   "best block 單純就是頭部——祖先數最多的有效區塊——而競爭頭部之間的平手則以較小的 header 雜湊決勝；Grandpa 只是在幾塊之後確認那個頭部，對於「出塊時該選哪個父區塊」毫無作用",
+   "best block 是 best chain（§19）的頭部，用在延遲比確定性更重要的時候——例如替即將出的區塊選父區塊、或把最新狀態回報給下游應用程式——代價是它可能永遠不會成為正典",
+   "best block 是最近一個時槽不落在未來的區塊；Grandpa 只在事後被諮詢、用來修剪落敗的分叉，所以不論是出塊還是對應用程式提供狀態，都不需要另外的 best-chain 規則"
+  ],
+  "stem": "GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. Which statement matches the GP?",
  "options": [
   "The best block is the latest Grandpa-finalized block; JAM nodes never author on top of an unfinalized block, which is precisely why Grandpa lags only 1–2 blocks behind the most recent head and why no speculative state is ever exposed to applications",
   "The best block is simply the head — the valid block with the most ancestors — with ties between competing heads broken by the smaller header hash; Grandpa merely confirms that head some blocks later and plays no part in choosing a parent for authoring",
