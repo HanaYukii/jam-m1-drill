@@ -79,7 +79,7 @@ ITEMS = [
   "optionsZh": [
    "validator 12 增加 1、validator 30 增加 1、出塊者不動——加上去的那一項是對該 validator 之 Ed25519 金鑰是否屬於某個金鑰集合的布林成員測試，所以同一塊裡簽兩份憑證仍然只前進一步，而索引 v 是透過 posterior 的 active set 解析的",
    "validator 12 增加 2、validator 30 增加 1、出塊者不動——加上去的那一項計的是憑證簽章的數量而不是做成員測試，所以在同一塊的兩份 guarantee 中簽名的 validator 會前進兩步，而索引 v 是透過 posterior 的 active set 解析的",
-   "validator 12 增加 1、validator 30 增加 1，而出塊者另外增加 2——加上去的那一項是布林成員測試，所以每位 guarantor 只前進一步，出塊者則按該塊帶入的每份 report 各記一步，而索引 v 是透過 **prior** 的 active set κ 解析的",
+   "validator 12 增加 1、validator 30 增加 1，而出塊者另外增加 2——加上去的那一項是布林成員測試，所以每位 guarantor 只前進一步，出塊者則按該塊帶入的每份 report 各記一步，而索引 v 是透過 prior 的 active set κ 解析的",
    "只有出塊者變動，而且增加 2——g 記錄的是出塊者帶上鏈的 report 數，每份一步；guarantor 則改由 assurance 計數器 a 記功，而因為那個計數器是對 prior 紀錄遞增的，只要該塊落在 epoch 邊界上，他們的增量就會落進封存"
   ],
   "stem": (
@@ -209,8 +209,8 @@ func UpdateCurrentStatistics(extrinsic types.Extrinsic) {
         },
   "stemZh": "這是團隊 GP 0.7.2 的統計程式碼（已精簡）。對照 GP 0.8.0 的 eq. 13.4–13.6，它在哪些區塊上把某位 validator 的 assurance 增量放進了錯的紀錄？最小的修法又是什麼？",
   "optionsZh": [
-   "只有在 ⌊τ/E⌋ ≠ ⌊τ′/E⌋ 的區塊上。eq. 13.4 是把 assurance 那一輪套用在 prior 紀錄上，而 eq. 13.5 接著把那份**已經加過**的紀錄搬進封存，所以在 epoch 邊界的區塊上，每位 assurer 的增量應該屬於封存，而不是這段程式碼寫進去的那個新配置的 slice。修法是在分支之前先跑 assurance 那一輪，再把已加過的紀錄交給 else 分支的封存賦值",
-   "每一塊都錯。eq. 13.4 是把每筆 assurance 記給**出塊者**而不是簽署它的 assurer，所以可得性那一輪在每一塊上都記錯了人，而不只是在邊界上；至於那筆記功落在兩份紀錄的哪一份，是另一個問題，而這段程式碼已經答對了。修法是像 ticket 與 preimage 那兩輪一樣，用 authorIndex 來索引該增量",
+   "只有在 ⌊τ/E⌋ ≠ ⌊τ′/E⌋ 的區塊上。eq. 13.4 是把 assurance 那一輪套用在 prior 紀錄上，而 eq. 13.5 接著把那份已經加過的紀錄搬進封存，所以在 epoch 邊界的區塊上，每位 assurer 的增量應該屬於封存，而不是這段程式碼寫進去的那個新配置的 slice。修法是在分支之前先跑 assurance 那一輪，再把已加過的紀錄交給 else 分支的封存賦值",
+   "每一塊都錯。eq. 13.4 是把每筆 assurance 記給出塊者而不是簽署它的 assurer，所以可得性那一輪在每一塊上都記錯了人，而不只是在邊界上；至於那筆記功落在兩份紀錄的哪一份，是另一個問題，而這段程式碼已經答對了。修法是像 ticket 與 preimage 那兩輪一樣，用 authorIndex 來索引該增量",
    "只在 epoch 邊界的區塊上錯，但方向相反。eq. 13.6 是在 eq. 13.5 執行換屆之前就把全部六個計數器套用在 π_V† 上，所以在邊界區塊上，出塊者的出塊、ticket 與 preimage 增量也屬於封存，而那個新配置的 slice 必須維持全零序列直到新 epoch 的第二塊。修法是把整個 UpdateCurrentStatistics 提到 epoch 分支之上",
    "沒有任何一塊出錯：assurance 增量的位置已經符合 0.8.0，因為 eq. 13.4 本身就是套用在 π_V‡ 上，而這段程式碼同樣是在 posterior 紀錄上跑可得性那一輪。這裡唯一真正的 0.8.0 落差是 eq. 13.3——它是以 |κ| 與 |λ| 而不是以常數 ValidatorsCount 來決定兩份紀錄的大小。修法是改用 len(kappa) 來配置那個重設的 slice"
   ],

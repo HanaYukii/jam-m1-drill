@@ -9,10 +9,10 @@ ITEMS = [
  "id": "ch06-code-useless-ticket-gap",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.35–6.36 — internal/safrole/extrinsic_tickets.go CreateNewTicketAccumulator",
  "difficulty": 3, "kind": "code", "tags": ["safrole", "tickets", "code", "fuzzer"],
-  "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段（main 與 0.8.0 分支相同），在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都**高於**一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
+  "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段（main 與 0.8.0 分支相同），在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都高於一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
   "optionsZh": [
    "依 eq. 6.35 該區塊有效：γ′_A 就是保留最小的 E 個 id，所以那 3 張 ticket 不會被留下、對該區塊也沒有進一步要求；這段程式碼完全合規、不需要額外檢查",
-   "eq. 6.36（n ⊆ γ′_A）會讓該區塊**無效**，但這段程式碼在 [:E] 的截斷中靜默地丟掉那 3 張 ticket 並接受了它——這是一個參考實作會拒絕的區塊",
+   "eq. 6.36（n ⊆ γ′_A）會讓該區塊無效，但這段程式碼在 [:E] 的截斷中靜默地丟掉那 3 張 ticket 並接受了它——這是一個參考實作會拒絕的區塊",
    "依 eq. 6.34 該區塊無效，因為新的 id 與 γ_A 相撞，而對合併排序後序列所做的 VerifyTicketsDuplicate 正是抓到這個情況的檢查，所以程式碼是合規的",
    "依 eq. 6.31 該區塊無效，因為只有在 |γ_A| < E 時才接受 ticket；程式碼應該在合併之前比較 len(previousTicketsAccumulator) 與 E 並回傳 UnexpectedTicket"
   ],
@@ -67,8 +67,8 @@ return nil"""},
  "difficulty": 2, "kind": "code", "tags": ["safrole", "tickets", "code", "delta-0.8.0"],
   "stemZh": "這是團隊 0.8.0 分支上的 VerifyTicketsAttempt（PR #1025）；在 main（0.7.2）上它是拿 Attempt 與常數 TicketsPerValidator 比較。關於它的哪個敘述正確？",
   "optionsZh": [
-   "它有差一錯誤：eq. 6.30 把 entry index 放在 N_n 裡，而依 §3.4，N_n **包含 n 本身**，所以 Attempt == n 必須被接受、比較應該用 > n 而不是 >= n；在 tiny 模式（E = 12、|γ′_P| = 6）下這會錯誤地拒絕 entry index 4",
-   "它用錯了集合：n 必須從 |κ′|（active set）導出，因為 ticket 是由**現在正在出塊**的 validator 提交的；取 GetGammaK 會讓這個界限在任何集合大小會變動的鏈上提早一個 epoch 改變",
+   "它有差一錯誤：eq. 6.30 把 entry index 放在 N_n 裡，而依 §3.4，N_n 包含 n 本身，所以 Attempt == n 必須被接受、比較應該用 > n 而不是 >= n；在 tiny 模式（E = 12、|γ′_P| = 6）下這會錯誤地拒絕 entry index 4",
+   "它用錯了集合：n 必須從 |κ′|（active set）導出，因為 ticket 是由現在正在出塊的 validator 提交的；取 GetGammaK 會讓這個界限在任何集合大小會變動的鏈上提早一個 epoch 改變",
    "它只是重構：因為 offender 是就地歸零而非移除，|γ′_P| 永遠等於 V，所以 0.7.2 的常數 TicketsPerValidator（tiny 3／full 2）本來就產生完全相同的界限，沒有任何測試向量的行為改變",
    "它實作的是 n = ⌈2E/|γ′_P|⌉，用的是 posterior 的 pending set（團隊的 GammaK），也就是這些 ticket 據以證明的那個 ring；(2E + |γ′_P| − 1) / |γ′_P| 是整數的上取整，而界限是排他的，因為 N_n = {0, …, n−1}"
   ],
@@ -116,7 +116,7 @@ return nil"""},
  "id": "ch06-code-header-checks-posterior",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.28; §5 eq. 5.10 — internal/stf/sft.go RunSTF, validate_header.go ValidateHeaderVrf",
  "difficulty": 3, "kind": "code", "tags": ["safrole", "seal", "markers", "code", "fuzzer", "epoch"],
-  "stemZh": "團隊的 RunSTF 在 UpdateSafrole 前後分兩階段驗證 header；把 **posterior** 狀態傳給第二階段正是 fuzzer bug #784「Header VRF Verification Failure on some cases」的修法（PR #791）。對於一個新 epoch 的第一塊，為什麼 seal H_S、熵來源 H_V 與 epoch marker H_E 只能在第二階段檢查？",
+  "stemZh": "團隊的 RunSTF 在 UpdateSafrole 前後分兩階段驗證 header；把 posterior 狀態傳給第二階段正是 fuzzer bug #784「Header VRF Verification Failure on some cases」的修法（PR #791）。對於一個新 epoch 的第一塊，為什麼 seal H_S、熵來源 H_V 與 epoch marker H_E 只能在第二階段檢查？",
   "optionsZh": [
    "因為 seal 簽的是 E_U(H)，而它內嵌了 H_E 與 H_W，所以那些 marker 必須先定案；validator 集合本身無關緊要，因為只要區塊有效就有 κ′ = κ，而且 seal 的 context η′_3 在每一塊都等於 η_3",
    "因為三者都依賴這一塊自己的輪換：H_S 是對照 γ′_S[H_T mod E]、以 H_A = κ′[H_I]_b 與 context η′_3 檢查的，H_V 對照同一個 H_A，而 H_E 對照 γ′_P = Φ(ι)；用 prior 的 κ／η／γ_S 在 epoch 中段會通過、在 epoch 邊界卻會失敗",
@@ -171,7 +171,7 @@ func ValidateHeaderVrf(header types.Header, priorState *types.State, posteriorSt
  "id": "ch06-code-author-index-bound",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "§5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader",
  "difficulty": 3, "kind": "code", "tags": ["safrole", "validators", "code", "fuzzer", "delta-0.8.0"],
-  "stemZh": "在 fuzzer bug #825（計算 η′_0 時 panic「index out of range [65535] with length 6」）之後，團隊把這個檢查加進了在 UpdateSafrole **之前**執行的 ValidateNonVRFHeader。依 GP 0.8.0，哪個評估是對的？",
+  "stemZh": "在 fuzzer bug #825（計算 η′_0 時 panic「index out of range [65535] with length 6」）之後，團隊把這個檢查加進了在 UpdateSafrole 之前執行的 ValidateNonVRFHeader。依 GP 0.8.0，哪個評估是對的？",
   "optionsZh": [
    "這個檢查正是 GP 所規定的：eq. 5.10 以 |κ|（prior active set）為 H_I 的界限，這正是它可以在金鑰輪換之前驗證而不失一般性的原因，因此它在任何 validator 集合大小下都涵蓋了 fuzzer 的 65535 案例",
    "這個檢查是不必要的：超出範圍的 H_I 本來就會通不過 seal 簽章檢查並被回報為 VrfSealInvalid，所以 fuzzer 期望的拒絕無論如何都會產生；#825 真正的修法屬於 UpdateEtaPrime0 內部，也就是 panic 被引發的地方",
@@ -206,7 +206,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-skip-epochs-transition",
  "ch": "6", "section": "6.3–6.7 (epoch transition across skipped epochs)", "gpRef": "eq. 6.2, 6.14, 6.24, 6.25, 6.28–6.29, 6.35",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "epoch", "entropy", "fallback", "markers", "calc"],
-  "stemZh": "full 參數（E = 600、Y = 500）。前一塊 τ = 1195 且 accumulator 已飽和（|γ_A| = E）；下一塊 H_T = 1810（中間完全沒有出塊）。以 **prior** 值表示 posterior 值，哪個描述正確？",
+  "stemZh": "full 參數（E = 600、Y = 500）。前一塊 τ = 1195 且 accumulator 已飽和（|γ_A| = E）；下一塊 H_T = 1810（中間完全沒有出塊）。以 prior 值表示 posterior 值，哪個描述正確？",
   "optionsZh": [
    "輪換是每經過一個 epoch 就套用一次，所以這裡是兩次：κ′ = Φ(ι)、λ′ = γ_P、(η′_1, η′_2, η′_3) = (η′_0, η_0, η_1)；γ′_S = F(η_0, Φ(ι))；H_E 出現而 H_W 不出現",
    "輪換恰好發生一次：κ′ = γ_P、λ′ = κ、γ′_P = Φ(ι)、(η′_1, η′_2, η′_3) = (η_0, η_1, η_2)；儘管 m = 595 ≥ Y 且 γ_A 已滿，γ′_S 仍為 F(η_1, γ_P)；H_E 出現、H_W 不出現；而 γ′_A 只從這一塊的 E_T 重新建立",
@@ -290,9 +290,9 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-vrf-output-message-independence",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16, 6.24, 6.30, 6.32; §3.8.2 Signing Schemes; App. G eq. G.2/G.5",
  "difficulty": 3, "kind": "rationale", "tags": ["safrole", "vrf", "seal", "tickets", "rationale"],
-  "stemZh": "ticket 證明是以 context X_T ⌢ η′_2 ++ r 對**空訊息**所做的 ring-VRF 證明，而 seal H_S 是以 context X_T ⌢ η′_3 ++ i_e 對 E_U(H)（整個未簽署 header）所做的一般 Bandersnatch 簽章。既然如此，eq. 6.16 為什麼還能要求 i_y = Y(H_S)，也就是 seal 的 VRF 輸出等於 ticket id？",
+  "stemZh": "ticket 證明是以 context X_T ⌢ η′_2 ++ r 對空訊息所做的 ring-VRF 證明，而 seal H_S 是以 context X_T ⌢ η′_3 ++ i_e 對 E_U(H)（整個未簽署 header）所做的一般 Bandersnatch 簽章。既然如此，eq. 6.16 為什麼還能要求 i_y = Y(H_S)，也就是 seal 的 VRF 輸出等於 ticket id？",
   "optionsZh": [
-   "因為 VRF 的輸出只取決於私鑰與 context（「influenced by x but not by m」），而到了封印的時候，提交當時的熵已經從 η′_2 輪替成 η′_3、兩邊的 context 因此吻合：同一把金鑰在**任何訊息**之下都會重現同一個 ticket id——在 ring 證明中匿名、在 seal 中可歸屬",
+   "因為 VRF 的輸出只取決於私鑰與 context（「influenced by x but not by m」），而到了封印的時候，提交當時的熵已經從 η′_2 輪替成 η′_3、兩邊的 context 因此吻合：同一把金鑰在任何訊息之下都會重現同一個 ticket id——在 ring 證明中匿名、在 seal 中可歸屬",
    "因為 ticket id 被定義為證明位元組的 Blake2b 雜湊，而 eq. 6.16 要求 seal 內嵌一份原本 784 位元組 ring 證明的副本，好讓每個驗證者光憑 header 就能重算那個雜湊；E_U(H) 這個訊息只是把那份內嵌副本綁定到這個特定區塊上",
    "因為 ticket 證明與 seal 事實上都是對空訊息簽署的——E_U(H) 從頭到尾都只是 H_V 的訊息，而 H_V 的輸出餵給 η′_0——所以兩個 VRF 輸出理所當然相等；因此 i_y = Y(H_S) 這個同一性檢查是對照 H_V 而不是對照 seal 做的",
    "因為只要那些 ticket 是在與被封印區塊同一個 epoch 內提交的，就有 η′_2 = η′_3，所以出塊者只是重新簽了一個完全相同的 context；驗證者在處理 seal 時會忽略訊息、但在處理 ring 證明時不會，這正是 ticket 帶 [] 而 seal 帶 E_U(H) 的原因"
@@ -318,11 +318,11 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-why-m-ge-Y",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25, 6.29, 6.31, 6.35; §6.6–6.7 prose",
  "difficulty": 3, "kind": "rationale", "tags": ["safrole", "fallback", "markers", "rationale"],
-  "stemZh": "eq. 6.25 只在 e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E 時才把 accumulator 當成下一個 slot-sealer 序列。其中 m ≥ Y 這個關於**前一塊**的性質，實際上保證了什麼？GP 又為什麼把票券模式綁在它身上？",
+  "stemZh": "eq. 6.25 只在 e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E 時才把 accumulator 當成下一個 slot-sealer 序列。其中 m ≥ Y 這個關於前一塊的性質，實際上保證了什麼？GP 又為什麼把票券模式綁在它身上？",
   "optionsZh": [
    "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的時槽",
    "保證沒有任何在 tail 內提交的 ticket 被計入：在 m ≥ Y 之後抵達的 ticket 會是對照錯誤的 ring root 與熵證明的，因為屆時 γ′_Z 與 η′_2 已經指向再下一個 epoch",
-   "保證**即將結束的那個 epoch 有某一塊是在 tail 內出的**——而由於 γ_A 一旦 m′ ≥ Y 就凍結，這恰好就是「該 epoch 內曾公告 H_W = Z(γ_A)」的條件，所以只讀 header 的節點永遠不會被要求去驗證一個它從未見過之序列的 ticket seal",
+   "保證即將結束的那個 epoch 有某一塊是在 tail 內出的——而由於 γ_A 一旦 m′ ≥ Y 就凍結，這恰好就是「該 epoch 內曾公告 H_W = Z(γ_A)」的條件，所以只讀 header 的節點永遠不會被要求去驗證一個它從未見過之序列的 ticket seal",
    "保證前一塊的出塊者持有 ticket（T = 1），因為以 fallback 封印的區塊不被允許代表持票人結束一場競賽；這也正是 §19 best-chain 規則在偏好 ticket 化祖先時所計數的東西"
   ],
   "stem": "Eq. 6.25 uses the accumulator as the next slot-sealer sequence only when e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E. What does the conjunct m ≥ Y — a property of the PRIOR block — actually guarantee, and why does the GP tie the ticket regime to it?",

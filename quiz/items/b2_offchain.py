@@ -5,7 +5,7 @@ ITEMS = [
  "id": "arch-audit-initial-tranche",
  "ch": "ARCH", "section": "17.3 Selection of Reports", "gpRef": "eq. 17.2–17.4",
  "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves"],
-  "stemZh": "validator 如何挑出自己在**初始 tranche**（a_0）必須稽核的 work-report？",
+  "stemZh": "validator 如何挑出自己在初始 tranche（a_0）必須稽核的 work-report？",
   "optionsZh": [
    "它以 context X_U ⌢ Y(H_V) 對空訊息做一個 Bandersnatch VRF 簽章 s_0，再用 Y(s_0) 對每個 core 的序列 q 做 Fisher-Yates 洗牌，取前十個當中非空的那些",
    "它稽核本區塊中所有變成 available 的 report：q 每個作用中的 core 一筆，所以初始 tranche 就是它全部的非空項目，過程不涉及任何可驗證隨機性",
@@ -35,9 +35,9 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["auditing", "disputes"],
   "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。哪一組門檻與後果是正確的？",
   "optionsZh": [
-   "若仍有超過 2/3 的 validator 發出**正面**判定，發出負面判定的人可能因浪費時間而受罰；若有超過 1/3 發出**負面**判定，含有該 report 的區塊會被列入禁用名單，它與其所有後代都會被忽略",
-   "若有超過 1/2 的 validator 發出**負面**判定，該 report 會從它的 availability assignment 中被移除；若不足此數則什麼也不會發生——沒有任何 validator 會因為誤報而受罰，含有該 report 的區塊仍可繼續被建構",
-   "單一個**負面**判定就足夠：它使承載該 report 的區塊無效，並沒收該 core 三位 guarantor 的質押；不需要其他 validator 再判定，也不會有 verdict 進入 disputes extrinsic，2/3 的正面門檻完全不起作用",
+   "若仍有超過 2/3 的 validator 發出正面判定，發出負面判定的人可能因浪費時間而受罰；若有超過 1/3 發出負面判定，含有該 report 的區塊會被列入禁用名單，它與其所有後代都會被忽略",
+   "若有超過 1/2 的 validator 發出負面判定，該 report 會從它的 availability assignment 中被移除；若不足此數則什麼也不會發生——沒有任何 validator 會因為誤報而受罰，含有該 report 的區塊仍可繼續被建構",
+   "單一個負面判定就足夠：它使承載該 report 的區塊無效，並沒收該 core 三位 guarantor 的質押；不需要其他 validator 再判定，也不會有 verdict 進入 disputes extrinsic，2/3 的正面門檻完全不起作用",
    "負面判定本身沒有任何後果；只有 disputes extrinsic 才算數，那裡的 verdict 需要全體作用中 validator 的一致簽署，而懲罰集合 ψ_O 只會從 culprits 填入、永遠不會從 faults 填入"
   ],
   "stem": "GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?",

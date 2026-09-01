@@ -10,9 +10,9 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "types"],
   "stemZh": "eq. 8.1 把 authorizer pool 與 queue 定型為 α ∈ ⟦⟦H⟧_{:O}⟧_C 與 φ ∈ ⟦⟦H⟧_Q⟧_C，而 eq. 6.22 把熵定型為 η ∈ ⟦H⟧_4。依 GP §3.7 的序列集合記號，這些下標各是什麼意思？",
   "optionsZh": [
-   "⟦H⟧_{:O} 是長度**至多** O 的雜湊序列集合，⟦H⟧_Q 是長度**恰好** Q 的，⟦H⟧_4 是長度恰好 4 的；而外層的 ⟦·⟧_C 表示每個 core 恰好一個內層序列",
-   "⟦H⟧_{:O} 是長度**至少** O 的雜湊序列集合（pool 必須保持填滿），而 ⟦H⟧_Q 與 ⟦H⟧_4 則分別是長度至多 Q 與至多 4 的序列",
-   "⟦H⟧_{:O} 指的是某個雜湊序列的**前 O 個元素**（一個切片），所以 α 是每個 core 佇列的 O 元素前綴，而 ⟦H⟧_Q 指的是索引 Q 處的單一個元素",
+   "⟦H⟧_{:O} 是長度至多 O 的雜湊序列集合，⟦H⟧_Q 是長度恰好 Q 的，⟦H⟧_4 是長度恰好 4 的；而外層的 ⟦·⟧_C 表示每個 core 恰好一個內層序列",
+   "⟦H⟧_{:O} 是長度至少 O 的雜湊序列集合（pool 必須保持填滿），而 ⟦H⟧_Q 與 ⟦H⟧_4 則分別是長度至多 Q 與至多 4 的序列",
+   "⟦H⟧_{:O} 指的是某個雜湊序列的前 O 個元素（一個切片），所以 α 是每個 core 佇列的 O 元素前綴，而 ⟦H⟧_Q 指的是索引 Q 處的單一個元素",
    "三者都是長度恰好為那個數目的序列；⟦H⟧_{:O} 裡的冒號只是標記該 pool 是以循環方式索引的（H_T mod O）而不是從零開始索引"
   ],
   "stem": "Eq. 8.1 types the authorizer pool and queue as α ∈ ⟦⟦H⟧_{:O}⟧_C and φ ∈ ⟦⟦H⟧_Q⟧_C, and eq. 6.22 types the entropy as η ∈ ⟦H⟧_4. Using the sequence-set notation of GP §3.7, what do these subscripts say?",
@@ -38,7 +38,7 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "arrows"],
   "stemZh": "三條狀態轉移規則用到 GP §3.7.2 的箭號運算子：β_H′ ≡ ←(β_H† ⧺ e)^H（eq. 7.8）、α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O（eq. 8.2）、γ′_A ≡ →(依 ticket id 升冪排序的 n ∪ γ_A)^E（eq. 6.35）。哪一種讀法正確？",
   "optionsZh": [
-   "←^n 保留**前** n 個元素、→^n 保留**後** n 個：因此 β_H′ 與 α′[c] 在滿了之後會丟掉最新的條目，而 γ′_A 保留的是最大的 E 個 ticket id",
+   "←^n 保留前 n 個元素、→^n 保留後 n 個：因此 β_H′ 與 α′[c] 在滿了之後會丟掉最新的條目，而 γ′_A 保留的是最大的 E 個 ticket id",
    "→^n 保留前 n 個元素、←^n 保留後 n 個：因此 β_H′ 與 α′[c] 保留的是最近附加的 H = 8 與 O = 8 筆，而 γ′_A 保留的是最小的 E = 600 個 ticket id",
    "兩個箭號都是從前面算起保留 n 個元素；方向只記錄該序列是以 ⧺（右側附加）還是以 ⌢（左側插入）延伸的",
    "這兩個箭號是位移 n 個位置的循環旋轉，與 ⟲ 上標是同一個運算，所以 β_H′ 與 α′[c] 的行為就像最舊的槽會被就地覆寫的環狀緩衝區"
@@ -66,7 +66,7 @@ ITEMS = [
  "difficulty": 3, "kind": "code", "tags": ["notation", "bits", "merklization", "codec"],
   "stemZh": "GP §3.7.3 以 bits([160, 0]) = [1, 0, 1, 0, 0, …] 這個例子定義了 octet 序列 B 的 bits(B)，而 M_σ（eq. D.5）是以 31 位元組 state key 的 bits(k) 為 trie 的鍵。團隊的 trie 用下面這段程式碼在每個深度切分條目。它與 GP 一致嗎？",
   "optionsZh": [
-   "不一致：bits() 是**最低位在前**，與 codec 的位元序列編碼 E(b ∈ 𝕓)（把 b_i 放進 2^i）相符，所以遮罩必須是 1 << (depth mod 8)",
+   "不一致：bits() 是最低位在前，與 codec 的位元序列編碼 E(b ∈ 𝕓)（把 b_i 放進 2^i）相符，所以遮罩必須是 1 << (depth mod 8)",
    "不一致：bits() 是 MSB-first 沒錯，但 M_σ 是以 bits(H(k))——也就是 state key 的 Blake2b 雜湊——為 trie 的鍵，所以切分必須對 H(k) 而不是對原始 key 進行",
    "不一致：bits() 是 MSB-first 沒錯，但每個節點的第一個 bit 是 branch／leaf 判別子，所以 key 的路徑必須跳過 key[0] 的 bit 0，而遮罩應該從 1 << (6 − depth mod 8) 開始",
    "一致：160 = 0b10100000，所以 bits() 是先送出每個 octet 的最高位；用 1 << (7 − depth mod 8) 遮罩 key[depth/8] 正是照那個順序走訪路徑"
@@ -107,7 +107,7 @@ ITEMS = [
   "stemZh": "GP §3.8.2 把 Bandersnatch VRF 簽章寫成 Ṽ_k^m⟨x⟩ ⊂ B_96、VRF 輸出為 Y(·) ∈ H，而 eq. 6.16 要求 H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩。哪個敘述正確？",
   "optionsZh": [
    "角括號裝的是訊息、上標裝的是 context，所以 Y(H_S) 取決於 header 的序列化 E_U(H)；這正是讓 seal 的 VRF 輸出得以承諾區塊內容的機制",
-   "k = H_A 是簽署者的公鑰，上標 E_U(H) 是被簽的訊息，而角括號裡的項是 context；Y(H_S) 由金鑰與 context 決定，而**不由訊息**決定",
+   "k = H_A 是簽署者的公鑰，上標 E_U(H) 是被簽的訊息，而角括號裡的項是 context；Y(H_S) 由金鑰與 context 決定，而不由訊息決定",
    "Ṽ 是匿名的 Ring-VRF 形式：H_A 是對 validator 金鑰取的 ring root、簽署者無法被識別，而具識別性的形式 V̊ ⊂ B_784 才是 ticket 所使用的",
    "Y(H_S) 是一個 96 位元組的值；32 位元組的 ticket 識別碼 i_y 是取 H(Y(H_S)) 得到的，而 Ed25519 簽章 V̄_k⟨m⟩ 同樣定義了一個 VRF 輸出"
   ],
@@ -134,7 +134,7 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["notation", "hashing", "codec"],
   "stemZh": "依 GP §3.8.1，關於雜湊函數與帶下標的 codec 函數，哪個敘述正確？",
   "optionsZh": [
-   "H 是 Keccak-256（如 Yellow Paper）而 H_K 是 Blake2b-256；E 上的下標計的是**輸入**的 octet 數，所以 E_4 只接受已經屬於 B_4 的引數，而 E^{-1}_8 只接受小於 2^64 的自然數",
+   "H 是 Keccak-256（如 Yellow Paper）而 H_K 是 Blake2b-256；E 上的下標計的是輸入的 octet 數，所以 E_4 只接受已經屬於 B_4 的引數，而 E^{-1}_8 只接受小於 2^64 的自然數",
    "H 是 Blake2b-256 而 H_K 是 Keccak-256；除非明確寫成 H(E(…))，否則對元組取雜湊是未定義的，而 E_4 是上限為四個 octet 的通用變長自然數編碼",
    "H 是 Blake2b-256 而 H_K 是 Keccak-256，兩者都映到 H ≡ B_32；非 blob 的引數會被隱含地送過 E；E_4(x) 斷言 x ∈ N_2^32 並產出 B_4，而 E^{-1}_8(y) 斷言 y ∈ B_8 並產出 N_2^64",
    "H 是截斷成 32 個 octet 的 Blake2b-512 而 H_K 是 Keccak-256；H_0 表示 H([])，也就是空 blob 的雜湊，而 M_σ 也正是以它來標識空的子 trie"
@@ -162,10 +162,10 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["notation", "dictionaries", "calc"],
   "stemZh": "令 d = {1 ↦ a, 2 ↦ b} 與 e = {2 ↦ c, 3 ↦ a} 是 ⟨N → B⟩ 中的字典。套用 GP §3.5（eq. 3.7–3.11），哪個敘述正確？",
   "optionsZh": [
-   "d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a}，因為碰撞時**左**運算元勝出；V(d ∪ e) = [a, b, a] 會依插入順序保留重複值；而 d[3] = ∅ 在任何脈絡下都是一個普通且合法的查閱結果",
+   "d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a}，因為碰撞時左運算元勝出；V(d ∪ e) = [a, b, a] 會依插入順序保留重複值；而 d[3] = ∅ 在任何脈絡下都是一個普通且合法的查閱結果",
    "d ∪ e 是未定義的，因為 key 2 碰撞了——字典的聯集只有在 K(d) ⫰ K(e) 時才有定義，這正是為什麼 GP 總是明確寫成 (d ∖ K(e)) ∪ e 而不寫 d ∪ e",
-   "d ∖ {2} 移除的是**值**為 2 的配對，所以 d ∖ {2} = d；K(e) = {c, a}；而 d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時右運算元勝出",
-   "d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時**右**運算元勝出；V(d ∪ e) = {a, c}；而在規則中寫下 d[3] 就等於斷言 key 3 存在——一個倚賴它卻未處理 ∅ 的區塊是無效的"
+   "d ∖ {2} 移除的是值為 2 的配對，所以 d ∖ {2} = d；K(e) = {c, a}；而 d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時右運算元勝出",
+   "d ∪ e = {1 ↦ a, 2 ↦ c, 3 ↦ a}，因為碰撞時右運算元勝出；V(d ∪ e) = {a, c}；而在規則中寫下 d[3] 就等於斷言 key 3 存在——一個倚賴它卻未處理 ∅ 的區塊是無效的"
   ],
   "stem": "Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), which statement is correct?",
  "options": [
@@ -219,11 +219,11 @@ ITEMS = [
  "id": "ch04-extrinsic-dependency-inputs",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.11–4.20",
  "difficulty": 3, "kind": "concept", "tags": ["stf", "extrinsic", "ordering"],
-  "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），關於五個 extrinsic 成分在哪裡進入狀態轉移，哪個敘述為**真**？",
+  "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），關於五個 extrinsic 成分在哪裡進入狀態轉移，哪個敘述為真？",
   "optionsZh": [
    "preimages extrinsic E_P 是 accumulation 步驟（eq. 4.16）的輸入，所以某個 service 的 accumulate 程式碼可以讀到同一塊中被提供的 preimage",
    "assurances extrinsic E_A 是 ρ′ 的直接輸入，也就是 ρ′ ≺ (E_G, E_A, ρ†, κ, τ′)，因為 guarantee 與 assurance 是在對各 core 的同一遍走訪中一起處理的",
-   "guarantees extrinsic E_G 是 ρ′、β_H′、α′ 與 π′ 的輸入，但**不是** accumulation 步驟的輸入——後者唯一由 extrinsic 導出的輸入是 R*（由 E_A 與 ρ† 導出）",
+   "guarantees extrinsic E_G 是 ρ′、β_H′、α′ 與 π′ 的輸入，但不是 accumulation 步驟的輸入——後者唯一由 extrinsic 導出的輸入是 R*（由 E_A 與 ρ† 導出）",
    "disputes extrinsic E_D 是 π′ 的直接輸入，因為 validator 統計會記錄該區塊中哪些 validator 被回報為 offender"
   ],
   "stem": "Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, which statement about where the five extrinsic components enter the transition is TRUE?",

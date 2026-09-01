@@ -9,7 +9,7 @@ ITEMS = [
   "optionsZh": [
    "γ_P 是下個 epoch 的 pending validator 金鑰；γ_Z 是對 γ_P 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是供下個 epoch 用的 ticket accumulator（至多 E 張）",
    "γ_P 是上個 epoch 的 validator 金鑰（也就是 λ 集合）；γ_Z 是對 active set κ 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是供下個 epoch 用的 ticket accumulator（至多 E 張）",
-   "γ_P 是下個 epoch 的 pending validator 金鑰；γ_Z 是對 γ_P 取的 **Ed25519** ring root；γ_S 是供下個 epoch 用的 ticket accumulator（至多 E 張）；γ_A 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）",
+   "γ_P 是下個 epoch 的 pending validator 金鑰；γ_Z 是對 γ_P 取的 Ed25519 ring root；γ_S 是供下個 epoch 用的 ticket accumulator（至多 E 張）；γ_A 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）",
    "γ_P 是供下個 epoch 用的 ticket accumulator（至多 E 張）；γ_Z 是對 γ_P 取的 Bandersnatch ring root；γ_S 是本 epoch 的 slot-sealer 序列（E 張 ticket 或 E 把金鑰）；γ_A 是 pending validator 金鑰，並在每個 epoch 開始時重設為 ι"
   ],
   "stem": "The Safrole state γ ≡ (γ_P, γ_Z, γ_S, γ_A). Which description is correct?",
@@ -37,7 +37,7 @@ ITEMS = [
   "optionsZh": [
    "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)，其中 z 是對 γ′_P 的 Bandersnatch 金鑰取的 ring root，而 Φ 會把任何 Ed25519 金鑰落在 ψ′_O 裡的 validator 整組金鑰歸零",
    "(γ′_P, κ′, λ′, γ′_Z) = (ι, γ_P, κ, z)，其中 z 是對 γ′_P 的 Bandersnatch 金鑰取的 ring root，且不做任何 offender 過濾——offender 是之後在 guarantor 指派時才被跳過的",
-   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), ι, κ, z)，其中 z 是對 **κ′** 的 Bandersnatch 金鑰取的 ring root，而 Φ 歸零的是 **prior** 的 ψ_O 而非 posterior 集合裡的 offender",
+   "(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), ι, κ, z)，其中 z 是對 κ′ 的 Bandersnatch 金鑰取的 ring root，而 Φ 歸零的是 prior 的 ψ_O 而非 posterior 集合裡的 offender",
    "(γ′_P, κ′, λ′, γ′_Z) = (Φ(γ_P), κ, λ, γ_Z)，ring root 只在 ι 改變時才重算，而 Φ 歸零的是 ψ′_O 裡的 offender——這些序列每個區塊都前進一步"
   ],
   "stem": "On an epoch change (e′ > e), how are the validator key sets rotated per eq. 6.14?",
@@ -119,10 +119,10 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "entropy"],
   "stemZh": "熵累積器 η 在每個區塊、以及在 epoch 換屆時是怎麼更新的？",
   "optionsZh": [
-   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))，把熵 VRF 的**輸出**混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則 (η_1, η_2, η_3) 不變",
-   "每個區塊 η′_0 = H(η_0 ⌢ H_V)，雜湊的是整個 VRF **簽章**而不是它的 32 位元組輸出；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則不變",
-   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_S))，把 **seal** 的 VRF 輸出混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η′_0, η_1, η_2)，把 posterior 的累積器推進歷史",
-   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))；而歷史也**每個區塊**都輪替，所以 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2) 無條件成立，η_3 永遠是三個區塊以前的值"
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))，把熵 VRF 的輸出混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則 (η_1, η_2, η_3) 不變",
+   "每個區塊 η′_0 = H(η_0 ⌢ H_V)，雜湊的是整個 VRF 簽章而不是它的 32 位元組輸出；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)，否則不變",
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_S))，把 seal 的 VRF 輸出混進去；在 e′ > e 時另外做 (η′_1, η′_2, η′_3) = (η′_0, η_1, η_2)，把 posterior 的累積器推進歷史",
+   "每個區塊 η′_0 = H(η_0 ⌢ Y(H_V))；而歷史也每個區塊都輪替，所以 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2) 無條件成立，η_3 永遠是三個區塊以前的值"
   ],
   "stem": "How is the entropy accumulator η updated in each block, and on an epoch change?",
  "options": [
@@ -178,7 +178,7 @@ ITEMS = [
   "optionsZh": [
    "i_y = Y(H_S)；H_S 是由 H_A 對 context X_T ⌢ η′_3 ++ i_e、訊息為 E_U(H)（未含 seal 的 header）所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 1（ticketed）",
    "i_y = H(H_S)，也就是 seal 位元組的 Blake2b 雜湊；H_S 是對 γ′_Z 的 ring-VRF 證明，context 為 X_T ⌢ η′_3 ++ i_e、訊息為 E(H)（完整 header）；而且該區塊被標記為 T = 1（ticketed）",
-   "i_y = Y(H_S)；H_S 是由 H_A 對 context X_T ⌢ **η′_2** ++ i_e、訊息為 E_U(H)（未含 seal 的 header）所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 1（ticketed）",
+   "i_y = Y(H_S)；H_S 是由 H_A 對 context X_T ⌢ η′_2 ++ i_e、訊息為 E_U(H)（未含 seal 的 header）所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 1（ticketed）",
    "i = H_A（該 sealer 項目就是出塊者自己的 Bandersnatch 金鑰）；H_S 是由 H_A 對 context X_F ⌢ η′_3、訊息為 E_U(H) 所做的 Bandersnatch 簽章；而且該區塊被標記為 T = 0"
   ],
   "stem": "When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. Which set is exactly right?",
@@ -290,7 +290,7 @@ ITEMS = [
   "optionsZh": [
    "e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E——同一個 epoch 內、其 slot phase 首次跨越 tail 起點 Y 的那一塊，且 accumulator 已飽和；此時 H_W = Z(γ_A)",
    "e′ > e ∧ m ≥ Y ∧ |γ_A| = E——新 epoch 的第一塊，只要上個 epoch 的 tail 已經到達且 accumulator 已飽和；此時 H_W = Z(γ_A)",
-   "e′ = e ∧ Y ≤ m < m′ ∧ |γ_A| = E——ticket 投票已經關閉之後、該 epoch tail 期間的**每一塊**，只要 accumulator 已飽和；此時 H_W = Z(γ_A)",
+   "e′ = e ∧ Y ≤ m < m′ ∧ |γ_A| = E——ticket 投票已經關閉之後、該 epoch tail 期間的每一塊，只要 accumulator 已飽和；此時 H_W = Z(γ_A)",
    "e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| ≥ 1——同一個 epoch 內、其 slot phase 首次跨越 tail 起點 Y 的那一塊，且 accumulator 只要非空即可；此時 H_W = Z(γ_A)"
   ],
   "stem": "Under which exact condition is the winning-tickets marker H_W non-empty?",
@@ -342,7 +342,7 @@ ITEMS = [
  "id": "ch06-ticket-accumulator-rules",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.33–6.36",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
-  "stemZh": "關於新進的 ticket n 與 posterior 的 accumulator γ′_A，哪一個敘述是**錯的**？",
+  "stemZh": "關於新進的 ticket n 與 posterior 的 accumulator γ′_A，哪一個敘述是錯的？",
   "optionsZh": [
    "n 必須依 ticket id 升冪排序且不得重複，而且 n 裡的任何 id 都不得已經在 γ_A 裡",
    "γ′_A 是 n 與（γ_A，若 e′ > e 則為 ∅）的排序聯集當中最小的 E 筆",
@@ -428,7 +428,7 @@ ITEMS = [
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code"],
   "stemZh": "這是團隊對 γ′_S 的實作。關於它的哪一個說法是正確的？",
   "optionsZh": [
-   "`slotIndex` 是 m——**前一塊**的 slot phase（τ mod E）——而 `gammaA` 是 prior 的 accumulator；`etaPrime[2]` 與 `posteriorState.GetKappa()` 都是 posterior 值，與 F(η′_2, κ′) 相符",
+   "`slotIndex` 是 m——前一塊的 slot phase（τ mod E）——而 `gammaA` 是 prior 的 accumulator；`etaPrime[2]` 與 `posteriorState.GetKappa()` 都是 posterior 值，與 F(η′_2, κ′) 相符",
    "`slotIndex` 應該是 m′——正在匯入這一塊的 phase，也就是 H_T mod E——因為 eq. 6.25 問的是「到當前這一塊為止競賽是否已結束」；讀前一塊的 τ mod E 是差一錯誤",
    "fallback 分支應該把 prior 的 κ 與 prior 的 η_2 一起傳入，因為新進的 validator 要從該 epoch 的第二塊起才取得出塊權",
    "只要 |γ_A| = E 且 m ≥ Y，第一個分支在 ePrime ≥ e + 2 時也應該觸發，因為累積的 ticket 在被消耗之前一直有效；把它限制在 e + 1 是不必要地強迫走 fallback"
@@ -465,9 +465,9 @@ posteriorState.SetGammaS(newGammaS)"""},
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "fallback"],
   "stemZh": "讀團隊的 FallbackKeySequence。關於它是否符合 eq. 6.27，哪個敘述正確？",
   "optionsZh": [
-   "雜湊是對的——Blake2b 就是 GP 的 H，而且前 4 個 octet 是以 little-endian 解碼——但 eq. 6.27 的 cyclic 下標是對**傳入的金鑰序列長度**（也就是 |κ′|）取模，程式碼卻是對編譯期常數 ValidatorsCount 取模",
+   "雜湊是對的——Blake2b 就是 GP 的 H，而且前 4 個 octet 是以 little-endian 解碼——但 eq. 6.27 的 cyclic 下標是對傳入的金鑰序列長度（也就是 |κ′|）取模，程式碼卻是對編譯期常數 ValidatorsCount 取模",
    "雜湊是錯的——§3.8 把 H 保留給 Blake2b-256，但 eq. 6.27 要的是 H_K、也就是 Keccak-256，正如那段殘留的註解所說——而模數是對的，因為 cyclic 下標就是對 ValidatorsCount 所持的固定 validator 數取模",
-   "取的片段是錯的——eq. 6.27 的下標取的是 H(r ⌢ E_4(i)) 的**最後**四個 octet 並以 big-endian 解碼，所以 Blake2bHashPartial(·, 4) 讀錯了一端——而對 ValidatorsCount 取模則與該式的 cyclic 下標完全相符",
+   "取的片段是錯的——eq. 6.27 的下標取的是 H(r ⌢ E_4(i)) 的最後四個 octet 並以 big-endian 解碼，所以 Blake2bHashPartial(·, 4) 讀錯了一端——而對 ValidatorsCount 取模則與該式的 cyclic 下標完全相符",
    "那個取模是多餘的——四個 Blake2b octet 的 decode_4 本來就落在 N_E 之內，而 eq. 6.27 根本沒有任何模數，所以 `%= ValidatorsCount` 是憑空多出來的一步，可能把兩個不同的時槽映到同一位 validator、破壞「一槽一人」"
   ],
   "stem": "Read the team's FallbackKeySequence. Which statement is accurate about its conformance to eq. 6.27?",
@@ -500,9 +500,9 @@ posteriorState.SetGammaS(newGammaS)"""},
  "id": "ch06-code-entropy-order",
  "ch": "6", "section": "6.4 Sealing and Entropy", "gpRef": "eq. 6.23–6.24 — internal/safrole/sealing.go UpdateEntropy",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "entropy"],
-  "stemZh": "在團隊的 UpdateEntropy 中，為什麼 `eta[0]` 是在輪替迴圈**之後**才被 posterior 的 η′_0 覆寫？如果讓迴圈在 UpdateEtaPrime0 寫入同一個陣列之後才跑，會出什麼問題？",
+  "stemZh": "在團隊的 UpdateEntropy 中，為什麼 `eta[0]` 是在輪替迴圈之後才被 posterior 的 η′_0 覆寫？如果讓迴圈在 UpdateEtaPrime0 寫入同一個陣列之後才跑，會出什麼問題？",
   "optionsZh": [
-   "因為 eq. 6.24 輪替進 η′_1 的是 **prior** 的 η_0；若被輪替的是 η′_0（它已經混入本塊的 VRF 輸出），η′_1 就會錯誤地包含當前這一塊的熵",
+   "因為 eq. 6.24 輪替進 η′_1 的是 prior 的 η_0；若被輪替的是 η′_0（它已經混入本塊的 VRF 輸出），η′_1 就會錯誤地包含當前這一塊的熵",
    "因為 eq. 6.24 會在 epoch 換屆時為累積器重新播種：η′_0 必須在輪替之後重設，好讓新的 epoch 從一個乾淨的值開始，而最後才寫 eta[0] 正是達成這件事",
    "因為那個遞減的迴圈正是防止 η_0 被複製進全部三個歷史欄位的關鍵；對 eta[0] 的寫入與 eq. 6.24 無關，放在輪替之前執行也一樣可以",
    "因為 eq. 6.24 是以 posterior 值陳述的，(η′_1, η′_2, η′_3) = (η′_0, η′_1, η′_2)，所以 η′_0 必須先定案，而迴圈之後的那個賦值是對錯誤順序所做的補償性修正"

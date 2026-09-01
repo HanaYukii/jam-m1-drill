@@ -7,8 +7,8 @@ ITEMS = [
  "difficulty": 1, "kind": "concept", "tags": ["pvm"],
   "stemZh": "PVM 的呼叫 Ψ 會回傳一個退出理由 ε。哪一個是可能的退出理由的完整集合？",
   "optionsZh": [
-   "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取**頁**位址）、h̄ × id（host call，帶 host-call 識別碼）",
-   "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶被存取的**確切 octet 位址**）、h̄ × id（host call，帶 host-call 識別碼）",
+   "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取頁位址）、h̄ × id（host call，帶 host-call 識別碼）",
+   "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶被存取的確切 octet 位址）、h̄ × id（host call，帶 host-call 識別碼）",
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取頁位址）、⊘ divide-by-zero（當 div_u_64 收到 φ_B = 0 時引發）",
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、h̄ × id（host call，帶 host-call 識別碼）、⊗ stack-overflow（當 φ_1 落到堆疊最低頁之下時引發）"
   ],
@@ -38,7 +38,7 @@ ITEMS = [
    "p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ c ⌢ k：jump table 長度、jump table 每項的寬度 z、code 長度、jump table 本身（每項 z 個 octet）、指令資料 c，最後是 bitmask k（每個 code octet 一位，1 表示這個 octet 是 opcode）；|k| 必須等於 |c|",
    "p = E(|c|) ⌢ c ⌢ E(|k|) ⌢ k ⌢ E(|j|) ⌢ j：指令資料與它的 bitmask 排在最前，好讓 deblob 在還沒讀到表之前就能解碼指令，而每個 jump table 項目固定 4 個 octet 寬；k 是每個 code octet 一位，1 表示這個 octet 是 opcode",
    "p = magic ⌢ version ⌢ E_4(|c|) ⌢ c ⌢ relocations：一份精簡過的 RISC-V ELF 映像，由 header 給出 code 長度，完全沒有 bitmask——指令邊界由每個 opcode 固定 4 octet 的長度推得，動態跳躍目標則由 relocation 表補上",
-   "欄位順序同樣是 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ c ⌢ k，但 k 標記的是每條指令**之後**的那個 octet 而不是它的 opcode octet，所以 |k| = |c| + 1（多出來的那一位用來終止最後一條指令），而 skip(i) 是往回數到前一個被設起的位元"
+   "欄位順序同樣是 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ c ⌢ k，但 k 標記的是每條指令之後的那個 octet 而不是它的 opcode octet，所以 |k| = |c| + 1（多出來的那一位用來終止最後一條指令），而 skip(i) 是往回數到前一個被設起的位元"
   ],
   "stem": "What is the layout of a PVM program blob p, and what does the opcode bitmask k do?",
  "options": [
@@ -63,8 +63,8 @@ ITEMS = [
  "difficulty": 3, "kind": "delta", "tags": ["pvm", "gas", "delta-0.8.0"],
   "stemZh": "GP 0.8.0（PR #508）引入了新的 gas 模型。gas 是怎麼扣的？",
   "optionsZh": [
-   "以 **basic block** 為單位、**事先**扣款：在第一步、以及每當執行進入一個 basic block（或跳回它的起點）時，整個 block 的成本 ϱ^Δ 會被扣掉；若剩餘 gas 不足，機器以 ∞ 退出且計數器維持不變；ϱ^Δ = max(cycles − 3, 1)，來自一個模擬的亂序 CPU 模型",
-   "以指令為單位、**事後**扣款：每條執行過的指令花費 1 gas，計數器在該指令退休時遞減，與 0.7.x 完全相同；當扣款會讓計數器低於零時，機器以 ∞ 退出且該筆扣款仍然成立，所以回報的 gas 是負數",
+   "以 basic block 為單位、事先扣款：在第一步、以及每當執行進入一個 basic block（或跳回它的起點）時，整個 block 的成本 ϱ^Δ 會被扣掉；若剩餘 gas 不足，機器以 ∞ 退出且計數器維持不變；ϱ^Δ = max(cycles − 3, 1)，來自一個模擬的亂序 CPU 模型",
+   "以指令為單位、事後扣款：每條執行過的指令花費 1 gas，計數器在該指令退休時遞減，與 0.7.x 完全相同；當扣款會讓計數器低於零時，機器以 ∞ 退出且該筆扣款仍然成立，所以回報的 gas 是負數",
    "以指令為單位、事先扣款：每條指令執行前，依 §A.10 的表扣掉該 opcode 的固定價格（ecalli 100、div_u_64 60、unlikely 40、move_reg 0）；付不出價格就以 ∞ 退出且計數器不變，而 basic block 在 gas 計算中完全不起作用",
    "以 basic block 為單位、事後扣款：ϱ^Δ 要等該 block 的 terminator 執行完才扣，所以中途 panic 的 block 完全不花錢；ϱ^Δ 是該 block 的指令數，而讓計數器變成負值的扣款會以 ∞ 退出並帶著那個負值"
   ],
@@ -176,7 +176,7 @@ ITEMS = [
   "stemZh": "在 Ψ_H 中，當內層的 Ψ 以 h̄ × h（經由 `ecalli` 的 host call）退出時，接下來會發生什麼？",
   "optionsZh": [
    "context mutator f(h, ϱ, φ, μ, x) 會執行；若它回傳 ▸（continue），Ψ_H 會以推進到 ı′ + 1 + skip(ı′) 的指令計數器、以及新的 gas／暫存器／記憶體／context 繼續執行；若它回傳 ☇／∎／∞，那就成為最終的退出理由；page fault 不可能從 host call 本身冒出來",
-   "context mutator f(h, ϱ, φ, μ, x) 會執行；若它回傳 ▸（continue），Ψ_H 會在**不變的**計數器 ı′ 處繼續，好讓那條 ecalli 重新執行、使 host call 具冪等性；若它回傳 ☇／∎／∞，那就成為最終的退出理由；f 也可以回傳 F̄ 把 page fault 交回去",
+   "context mutator f(h, ϱ, φ, μ, x) 會執行；若它回傳 ▸（continue），Ψ_H 會在不變的計數器 ı′ 處繼續，好讓那條 ecalli 重新執行、使 host call 具冪等性；若它回傳 ☇／∎／∞，那就成為最終的退出理由；f 也可以回傳 F̄ 把 page fault 交回去",
    "Ψ_H 會停下內層機器，把 h̄ × h 連同暫存器檔一起上交給自己的呼叫者；由該呼叫者執行 host call、重建機器，再以全新的 gas 從 ı′ + 1 + skip(ı′) 重新進入 Ψ——這正是 h̄ 仍留在 Ψ_H 退出理由集合中的原因",
    "context mutator f(h, ϱ, φ, μ, x) 會執行；回傳 ▸ 時 Ψ_H 從 ı′ + 1 + skip(ı′) 繼續，但會先把 gas-charged 旗標重設為 ⊥，因此含有那條 ecalli 的 block 會被再扣一次 ϱ^Δ；f 回傳的 ☇／∎／∞ 則成為最終退出理由"
   ],

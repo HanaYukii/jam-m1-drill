@@ -10,7 +10,7 @@ ITEMS = [
  "difficulty": 3, "kind": "code", "tags": ["pvm", "branches", "basic-blocks", "delta-0.8.0"],
   "stemZh": "團隊 0.7.2 直譯器裡的每一條條件分支（170–175 的 instBranch 以及 branch_*_imm 處理常式）都經由這個輔助函數解析。依 GP 0.8.0 的 eq. A.21，關於分支規則的哪個敘述正確？",
   "optionsZh": [
-   "0.8.0 只要**任一個**目標不是 basic block 的起點就 panic——不論是被採取的目標 b、還是落空路徑 ı + 1 + skip(ı)——即使條件為假也一樣；而這個輔助函數只驗證 b、而且只在條件 C 成立時才驗，所以一個「未被採取但目標無效」的分支在這裡會繼續執行，在 0.8.0 卻必須 panic",
+   "0.8.0 只要任一個目標不是 basic block 的起點就 panic——不論是被採取的目標 b、還是落空路徑 ı + 1 + skip(ı)——即使條件為假也一樣；而這個輔助函數只驗證 b、而且只在條件 C 成立時才驗，所以一個「未被採取但目標無效」的分支在這裡會繼續執行，在 0.8.0 卻必須 panic",
    "這個輔助函數已經符合 0.8.0：eq. A.21 只在被採取的路徑上驗證 b，因為落空路徑 ı + 1 + skip(ı) 已經由 v_blob 證明過是被 bitmask 標記的合法 opcode、因此顯然是合法的續行點；額外那個 isOpcodeValid 子句只是無害的加強",
    "0.8.0 仍然只驗證被採取的目標，但現在另外要求它像動態跳躍一樣做 2 位元組對齊（b mod Z_A = 0，Z_A = 2）並且要出現在 jump table j 裡，而這兩點該輔助函數都沒檢查；落空路徑在 0.8.0 也一樣不受驗證",
    "0.8.0 完全移除了執行期的 panic：v_blob 現在會在 deblob 階段走訪每一條分支，除非它的兩個目標都落在 ϖ 裡否則拒絕該 blob，所以 deblob 會回傳 error、Ψ 在執行任何一條指令之前就 panic；因此對 b 的檢查與 isOpcodeValid 子句都是死碼"
@@ -58,7 +58,7 @@ ITEMS = [
   "stemZh": "GP 0.8.0 在 Ψ 中貫穿了一個布林的「gas charged」旗標。某個 basic block 的中間有一條 ecalli；該 host call 回傳 ▸，Ψ_H 從 ı″ = ı′ + 1 + skip(ı′) 繼續。關於這個情境下的 gas 計費，哪個敘述正確？",
   "optionsZh": [
    "只有該 block 的後段會被重新計費：每一種非 ▸ 的退出（包含 host call）都會把旗標清成 ⊥，接著 Ψ_1 只對 ı″ 到該 block terminator 之間的指令計價，所以被 n 次 host call 打斷的 block 花費是它的 ϱ^Δ 加上 n 次部分重計",
-   "在那次恢復時什麼都不會再被扣：ecalli 不是 terminator，所以 flag* 維持 ⊤ 而 Ψ_1 略過 ϱ^Δ 的扣款；旗標只有在 terminator 執行之後（或在 out-of-gas 退出時）才變成 ⊥；而一個全新的 Ψ_H——它總是以 ⊥ 起始——若從 block 中段的 ı 恢復，會扣掉**整個** block 的 ϱ^Δ(𝔏(ı)) 而不是只扣剩餘的後段",
+   "在那次恢復時什麼都不會再被扣：ecalli 不是 terminator，所以 flag* 維持 ⊤ 而 Ψ_1 略過 ϱ^Δ 的扣款；旗標只有在 terminator 執行之後（或在 out-of-gas 退出時）才變成 ⊥；而一個全新的 Ψ_H——它總是以 ⊥ 起始——若從 block 中段的 ı 恢復，會扣掉整個 block 的 ϱ^Δ(𝔏(ı)) 而不是只扣剩餘的後段",
    "每次 host call 恢復時都會把整個 block 的 ϱ^Δ(𝔏(ı″)) 再扣一次，因為 0.8.0 把 ecalli 加進了 terminator 集合 T，使 host call 總是結束一個 basic block；那個旗標的存在只是為了讓全新 Ψ_H 的第一個 block 不被重複計費兩次",
    "那個旗標只在 out-of-gas 的恢復時才有意義：在其他每一種退出上它都會被丟棄，而 Ψ_H 會在繼續之前無條件扣掉含有 ı″ 之 block 的 ϱ^Δ；在 ∞ 退出時它被設為 ⊤，好讓已扣的 gas 在補充 gas 之後不會再被扣一次；而且它只是 Ψ_H* 的參數，從不屬於 Ψ 本身"
   ],

@@ -93,7 +93,7 @@ ITEMS = [
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "header"],
   "alsoCh": ["N3"],
   "stem": "A JAM header carries the state root from before the block ran, not after. What does that make possible?",
-  "stemZh": "JAM 的 header 帶的是區塊執行**之前**的 state root，而不是執行之後的。這讓什麼事情變得可能？",
+  "stemZh": "JAM 的 header 帶的是區塊執行之前的 state root，而不是執行之後的。這讓什麼事情變得可能？",
   "options": [
    "The author can publish the block before finishing the slow Merklization of the new state, because that root is not needed until the next block is authored",
    "A verifier can check the block without holding any state at all, because the prior root is enough to confirm every field the block contains",

@@ -9,7 +9,7 @@ ITEMS = [
   "optionsZh": [
    "ψ_G、ψ_B、ψ_W 分別是被判定為正確、錯誤、無法判定的 work-report 雜湊集合；ψ_O 是被認定誤判過某份 report 的 validator 的 Ed25519 金鑰集合",
    "ψ_G、ψ_B、ψ_W 分別是擔保過、稽核過、對某份 report 提出爭議的 validator 索引集合；ψ_O 是已被判定為無效的 report 雜湊集合",
-   "ψ_G、ψ_B、ψ_W 分別是被判定為正確、錯誤、無法判定的 work-**package** 雜湊集合；ψ_O 是被認定誤判過某份 report 的 validator 的 Bandersnatch 金鑰集合",
+   "ψ_G、ψ_B、ψ_W 分別是被判定為正確、錯誤、無法判定的 work-package 雜湊集合；ψ_O 是被認定誤判過某份 report 的 validator 的 Bandersnatch 金鑰集合",
    "ψ_G 與 ψ_B 是被判定為正確與錯誤的 work-report 雜湊集合；ψ_W 是尚未達到 ⌊2|k|/3⌋+1 門檻的 verdict 佇列；ψ_O 則是從每位 offender 身上沒收的餘額"
   ],
   "stem": "The disputes state is ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O). What do the four components hold?",
@@ -35,8 +35,8 @@ ITEMS = [
  "difficulty": 2, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
   "stemZh": "依 GP 0.8.0，關於 disputes extrinsic 的 verdicts 成分 E_V，哪一個敘述正確？",
   "optionsZh": [
-   "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須**恰好**是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
-   "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須**至少**是 ⌊2|k|/3⌋+1，且可以從 κ ∪ λ 合併後的集合中取；每份 extrinsic 沒有 verdict 數量上限",
+   "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須恰好是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
+   "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須至少是 ⌊2|k|/3⌋+1，且可以從 κ ∪ λ 合併後的集合中取；每份 extrinsic 沒有 verdict 數量上限",
    "每個 verdict 是 (report 雜湊, 該爭議被提起的時槽, judgments)；judgment 的數量必須恰好是 ⌊|k|/3⌋+1，其中 k 永遠是 posterior 的 κ′；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, 一個對 report 雜湊的聚合 BLS 簽章)；簽署者必須是 k 當中的 ⌊2|k|/3⌋+1 位成員；每份 extrinsic 至多 N_V = 16 個 verdict"
   ],
@@ -91,8 +91,8 @@ ITEMS = [
  "difficulty": 3, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，關於 culprits（E_C）與 faults（E_F）的敘述哪一個正確？",
   "optionsZh": [
-   "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict **相牴觸**的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；一個 good verdict 仍需至少 1 個 fault",
-   "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict **一致**的 report（r ∈ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；bad verdict 需至少 2 個 culprit、good verdict 需至少 1 個 fault",
+   "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；一個 good verdict 仍需至少 1 個 fault",
+   "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 一致的 report（r ∈ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；bad verdict 需至少 2 個 culprit、good verdict 需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_G 的 report 加上該 guarantor 對 X_valid ⌢ r 的判定簽章；fault 指名一份位於 ψ′_W、其宣稱的有效性 v 與 verdict 相牴觸的 report；offender 的金鑰必須只落在 κ′ 的 Ed25519 金鑰裡；一個 good verdict 仍需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；已經在 ψ_O 裡的金鑰可以被再次提報以懲罰累犯；每一個 verdict——不論 good、bad 或 wonky——都需要至少 1 個 fault"
   ],
@@ -213,7 +213,7 @@ ITEMS = [
  "id": "ch10-rationale",
  "ch": "10", "section": "10 intro", "gpRef": "§10 intro paragraphs",
  "difficulty": 1, "kind": "rationale", "tags": ["disputes", "rationale"],
-  "stemZh": "下列哪一項**不是** GP 所陳述的 disputes 系統目的？",
+  "stemZh": "下列哪一項不是 GP 所陳述的 disputes 系統目的？",
   "optionsZh": [
    "把無效的 work-report 從處理管線中移除並封禁",
    "在對某些金鑰的失能已有共識時，把這些麻煩的金鑰從 validator 集合中移除",

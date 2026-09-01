@@ -8,7 +8,7 @@ ITEMS = [
  "difficulty": 2, "kind": "code", "tags": ["header", "codec", "seal", "code"],
   "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。關於 GP 0.8.0 的 E(H) 與 E_U(H)，哪個敘述既說明了這樣做為何成立、又正確描述了 E_U 的版面？",
   "optionsZh": [
-   "E_U(H) 省略了**兩個** Bandersnatch 簽章——熵來源 H_V 與 seal H_S——所以合規的實作必須從 E(H) 切掉 192 個 octet，而 seal 的訊息裡完全不含 VRF 材料，這正是阻止兩個簽章互相依賴的原因",
+   "E_U(H) 省略了兩個 Bandersnatch 簽章——熵來源 H_V 與 seal H_S——所以合規的實作必須從 E(H) 切掉 192 個 octet，而 seal 的訊息裡完全不含 VRF 材料，這正是阻止兩個簽章互相依賴的原因",
    "E(H) = E(E_U(H), H_S)：96 位元組的 seal 是最後一個定長欄位，所以從 E(H) 切掉 96 位元組恰好得到 seal 的訊息；E_U 內部的順序是 H_P、H_R、H_X、E_4(H_T)、H_E（0/1 判別子）、H_W（0/1 判別子）、E_2(H_I)、H_V、var(H_O)",
    "E_U(H) 是把 E(H) 的 seal 換成 96 個零位元組、保持 header 長度不變，好讓 H_P 能在封印之前算出來；因此單純截斷得到的訊息會短了 96 個 octet，實作必須改為以歸零的 seal 重新編碼",
    "序列化的欄位順序完全照 eq. 5.1（…、H_W、var(H_O)、E_2(H_I)、H_V、H_S），所以只有在 H_O 為空時截掉最後 96 個 octet 才正確，因為帶長度前綴的 offender 清單會位移它之後的每一個欄位，包括 seal"
@@ -91,7 +91,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
    "它是永久無效的；而且因為提前於時鐘出塊是一種違規，該出塊者的 Ed25519 金鑰必須在下一塊的 disputes extrinsic 中以 culprit 身分進入 ψ_O，所以節點應該丟棄該 header 而不是留著",
    "只要偏移小於一個時槽週期 P = 6 秒它就是有效的，GP 明確給了這個時鐘偏移容忍度，好讓在時槽最開頭出塊的誠實出塊者不會被時鐘略慢的對等節點拒絕",
    "它是有效的：只有排序規則 P(H)_t < H_T 屬於共識，而牆鐘的比較只是出塊時的指引——這正是為什麼 STF 測試向量裡完全沒有 T 這個概念，而匯入節點必須接受該區塊",
-   "它目前不滿足 eq. 5.8，但 GP 註明這類區塊「may become valid as T advances」——與 H_T ≤ P(H)_t 那種永遠不可能變有效的區塊不同，它只是**暫時**無效，日後可以重新評估"
+   "它目前不滿足 eq. 5.8，但 GP 註明這類區塊「may become valid as T advances」——與 H_T ≤ P(H)_t 那種永遠不可能變有效的區塊不同，它只是暫時無效，日後可以重新評估"
   ],
   "stem": "A node receives a block at wall-clock time T whose header has H_T · P > T, while P(H)_t < H_T holds (its parent is known and older). How does GP §5 classify this block?",
  "options": [
@@ -116,10 +116,10 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "difficulty": 3, "kind": "code", "tags": ["header", "validators", "delta-0.8.0", "fuzzer-bug", "code"],
   "stemZh": "在 fuzzer bug #825（一個 H_I = 65535 的 header 讓 UpdateEtaPrime0 以「index out of range [65535] with length 6」panic，因為該索引在被驗證之前就被使用）之後，團隊加了這個檢查。它用的界限是 GP 0.8.0 所規定的那一個嗎？",
   "optionsZh": [
-   "是：eq. 5.10 定義 H_I ∈ N_{|κ|}——出塊者必須屬於 **prior** 的 active set，因為該區塊建立在 prior 狀態上、而它的 seal 是在該 epoch 的金鑰輪換套用之前就被驗證的，所以 len(priorState.Kappa) 正是規格的界限，#825 需要的只是把這個測試移到 UpdateEtaPrime0 之前",
+   "是：eq. 5.10 定義 H_I ∈ N_{|κ|}——出塊者必須屬於 prior 的 active set，因為該區塊建立在 prior 狀態上、而它的 seal 是在該 epoch 的金鑰輪換套用之前就被驗證的，所以 len(priorState.Kappa) 正是規格的界限，#825 需要的只是把這個測試移到 UpdateEtaPrime0 之前",
    "不完全是：eq. 5.10 是以 |κ′|（posterior 的 active set，其金鑰同時也用來驗證 H_S 與 H_V）為 H_I 的界限；prior 的 κ 只有在 |κ| = |κ′| 時才等價，而這在今天成立只是因為團隊從不調整集合大小，但 0.8.0 允許 validator 集合大小跨 epoch 邊界改變（eq. 6.8）",
    "是：那個界限就是常數 V（full 1023／tiny 6）；κ 與 κ′ 在每一種設定下都恰好持有 V 項，所以用哪個長度都行、選哪個集合純粹是形式問題——#825 唯一實質的修正就是把範圍測試排到索引被解參考之前",
-   "不對：H_I 索引的是 pending set γ_P，因為一個 epoch 的第一塊是由**新進**的 validator 封印的；因此界限必須是從 prior 的 Safrole 狀態讀出的 |γ_P|，因為 κ′ 要等 seal 驗證完才被指派，用它來界定 H_I 會構成循環"
+   "不對：H_I 索引的是 pending set γ_P，因為一個 epoch 的第一塊是由新進的 validator 封印的；因此界限必須是從 prior 的 Safrole 狀態讀出的 |γ_P|，因為 κ′ 要等 seal 驗證完才被指派，用它來界定 H_I 會構成循環"
   ],
   "stem": "After fuzzer bug #825 (a header with H_I = 65535 panicked UpdateEtaPrime0 with 'index out of range [65535] with length 6' because the index was used before being validated), the team added this check. Is the bound it uses the one GP 0.8.0 specifies?",
  "code": {"lang": "go", "caption": "internal/stf/validate_header.go (ValidateNonVRFHeader, excerpt)", "src": """	// Validate author_index out of range.
@@ -221,12 +221,12 @@ func NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPac
  "id": "ch08-leftmost-removal-code",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.3 (F) & eq. 11.25, 11.32",
  "difficulty": 2, "kind": "code", "tags": ["authorization", "code", "fuzzer-bug"],
-  "stemZh": "在 PR #694（bug #692）之前，這段移除邏輯會刪掉被使用之 authorizer 雜湊的**每一個**出現、而且忽略該 report 的 core。哪個敘述正確描述了修正後程式碼所實作的 GP 規則、以及舊行為為何是錯的？",
+  "stemZh": "在 PR #694（bug #692）之前，這段移除邏輯會刪掉被使用之 authorizer 雜湊的每一個出現、而且忽略該 report 的 core。哪個敘述正確描述了修正後程式碼所實作的 GP 規則、以及舊行為為何是錯的？",
   "optionsZh": [
    "eq. 8.2：這次移除只是為了給本塊附加的佇列項目騰出位置，所以刪掉每一個重複是無害的——α[c] 是一個集合、同一個 authorizer 雜湊不可能出現兩次，而且 ←(…)^O 的截斷反正會在八個區塊內丟掉任何多餘的副本",
    "eq. 11.32：這次移除同時兼作 pool 成員檢查，而找不到相符者就必須拒絕該區塊——所以舊程式碼唯一的錯是沒在無匹配時回傳錯誤，這也是為什麼修正應該放在 guarantee 驗證器而不是授權的狀態轉移裡",
-   "eq. 8.3，但要編輯哪個 pool 必須靠把 guarantor 的 validator 索引拿到**當前 rotation** 的指派 G 裡查出來，而不是靠 work-report 內部記錄的 core 索引——所以一份在前一個 rotation 簽署的 guarantee 會去編輯那些 validator 現在所在的 core",
-   "eq. 8.3：F(c) = α[c] ⊖ {w_a} 是從**該 report 自己那個 core** 的 pool 中移除最左邊的一個實例；pool 是序列、可以持有同一個雜湊數次（例如某個佇列反覆排入同一個 authorizer），所以刪掉每一個副本會讓 pool 憑空縮水、並使測試向量對不上"
+   "eq. 8.3，但要編輯哪個 pool 必須靠把 guarantor 的 validator 索引拿到當前 rotation 的指派 G 裡查出來，而不是靠 work-report 內部記錄的 core 索引——所以一份在前一個 rotation 簽署的 guarantee 會去編輯那些 validator 現在所在的 core",
+   "eq. 8.3：F(c) = α[c] ⊖ {w_a} 是從該 report 自己那個 core 的 pool 中移除最左邊的一個實例；pool 是序列、可以持有同一個雜湊數次（例如某個佇列反覆排入同一個 authorizer），所以刪掉每一個副本會讓 pool 憑空縮水、並使測試向量對不上"
   ],
   "stem": "Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. Which statement correctly describes the GP rule the fixed code implements and why the old behaviour was wrong?",
  "code": {"lang": "go", "caption": "internal/authorization/authorization.go (updatePoolFromQueue) & internal/types/types.go (AuthPool.RemoveLeftMostPairedValue)", "src": """func updatePoolFromQueue(coreIndex types.CoreIndex, eg types.ReportGuarantee, alpha types.AuthPools) (types.AuthPools, error) {
@@ -278,8 +278,8 @@ func (a *AuthPool) RemoveLeftMostPairedValue(h OpaqueHash) {
   "stemZh": "在區塊 N 開始時，pool α[c] 並不含 authorizer x。在區塊 N 的 accumulation 期間，core c 的 assigner service 呼叫 `assign`，其佇列在索引 H_T mod Q 處的項目是 x，所以 x 會在這一塊被附加進 core c 的 pool。而區塊 N 的 E_G 也帶了一份指向 core c 的 guarantee，其 work-report 的 authorizer 正是 x。這份 guarantee 有效嗎？x 最快什麼時候可用？",
   "optionsZh": [
    "有效：α′ 之所以刻意排在 accumulation 之後計算，正是為了讓同一塊裡的 guarantee 已經能倚賴剛被指派的 authorizer，這也是 §8.2 把 pool 更新排在最後的原因",
-   "無效：eq. 11.32 要求 w_a ∈ α[w_c]，用的是 **prior** 的 pool，而 x 要到區塊 N 結束時才經由 eq. 8.2 進入 α′[c]——所以第一個可以帶著由 x 授權之 report 的區塊是 N+1",
-   "有效：authorizer 的檢查接受任何出現在 α[c] **或** φ′[c] 中的雜湊，因為佇列就是 pool 的來源，而 assigner 已經為該 core 核准了那個 authorizer",
+   "無效：eq. 11.32 要求 w_a ∈ α[w_c]，用的是 prior 的 pool，而 x 要到區塊 N 結束時才經由 eq. 8.2 進入 α′[c]——所以第一個可以帶著由 x 授權之 report 的區塊是 N+1",
+   "有效：authorizer 的檢查接受任何出現在 α[c] 或 φ′[c] 中的雜湊，因為佇列就是 pool 的來源，而 assigner 已經為該 core 核准了那個 authorizer",
    "無效，但理由不同：同一個區塊不得既透過 `assign` 改動某個 core 的佇列、又接受該 core 上的 guarantee，所以不論 x 是什麼，這份 guarantee 都會被拒絕"
   ],
   "stem": "At the start of block N the pool α[c] does not contain authorizer x. During block N's accumulation the assigner service of core c calls `assign` with a queue whose entry at index H_T mod Q is x, so x will be appended to core c's pool by this block. Block N's E_G also carries a guarantee for core c whose work-report has authorizer x. Is that guarantee valid, and when is x first usable?",

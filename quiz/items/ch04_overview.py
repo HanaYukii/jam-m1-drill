@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch04-stf-extrinsic",
  "ch": "4", "section": "4.1 The Block", "gpRef": "eq. 4.2–4.3 (block / extrinsic)",
  "difficulty": 1, "kind": "concept", "tags": ["block", "extrinsic"],
-  "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。下列哪一個**不是**其中之一？",
+  "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。下列哪一個不是其中之一？",
   "optionsZh": [
    "E_T——供 Safrole slot-sealer 競賽用的 ticket",
    "E_X——由外部帳戶簽署的使用者交易",
@@ -33,7 +33,7 @@ ITEMS = [
  "id": "ch04-state-components",
  "ch": "4", "section": "4.2 The State", "gpRef": "eq. 4.4 (state composition)",
  "difficulty": 2, "kind": "concept", "tags": ["state"],
-  "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。哪一組「符號 → 意義」的對應是**錯的**？",
+  "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。哪一組「符號 → 意義」的對應是錯的？",
   "optionsZh": [
    "ρ → 每個 core 目前的 availability assignment（已被擔保但尚未 available 的 work-report）",
    "ξ → 最近被 accumulate 的 work-package（一個 epoch 份的歷史）",
@@ -65,7 +65,7 @@ ITEMS = [
   "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
   "optionsZh": [
    "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的時槽 H_T 與先前的 pool α",
-   "α′ 必須在 accumulation **之後**才能算，因為 φ′（posterior 的 authorizer queue）要等 accumulate 跑完才知道（`assign` host call 可能改動它）",
+   "α′ 必須在 accumulation 之後才能算，因為 φ′（posterior 的 authorizer queue）要等 accumulate 跑完才知道（`assign` host call 可能改動它）",
    "α′ 必須在 guarantees extrinsic 被驗證之前算出來，因為 eq. 11.32 是拿每份 report 的 authorizer 去比對 posterior 的 pool α′[w_c]",
    "α′ 與 extrinsic 無關、可以和 Safrole 平行執行，因為 φ 只會透過 delegator χ_V 持有的 `designate` 特權改變"
   ],
@@ -146,7 +146,7 @@ ITEMS = [
  "id": "ch04-balance-timeslot-ranges",
  "ch": "4", "section": "4.6–4.7", "gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
  "difficulty": 1, "kind": "concept", "tags": ["types"],
-  "stemZh": "關於 JAM 所使用的數值域，下列哪一項為**真**？",
+  "stemZh": "關於 JAM 所使用的數值域，下列哪一項為真？",
   "optionsZh": [
    "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；時槽是 N_2^32，使協定的壽命延伸到 2840 年",
    "餘額是 N_2^128 以配合 Polkadot 的 10^10 面額；時槽是 N_2^64，所以槽索引永遠不會回繞、協定也沒有明訂的終止日",

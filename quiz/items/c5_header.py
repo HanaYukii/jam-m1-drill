@@ -8,8 +8,8 @@ ITEMS = [
  "tags": ["header", "parent-hash", "seal"],
   "stemZh": "H_P 被定義為父 header 某種編碼的 Blake2b 雜湊。被雜湊的是哪一種編碼？這個選擇帶來什麼後果？",
   "optionsZh": [
-   "**完整**編碼，含父區塊的 seal，所以子區塊承諾的是父區塊實際被發布出去的那串位元組；任何人都無法重簽一個 header——即使作者與內容都相同——而不讓所有已經建在其上的區塊脫鏈",
-   "**未簽署**的編碼，讓父區塊的 seal 留在承諾鏈之外；這使得 validator 可以替換遺失的 seal 而不干擾其後代，這正是無 seal 封存儲存得以成立的原因",
+   "完整編碼，含父區塊的 seal，所以子區塊承諾的是父區塊實際被發布出去的那串位元組；任何人都無法重簽一個 header——即使作者與內容都相同——而不讓所有已經建在其上的區塊脫鏈",
+   "未簽署的編碼，讓父區塊的 seal 留在承諾鏈之外；這使得 validator 可以替換遺失的 seal 而不干擾其後代，這正是無 seal 封存儲存得以成立的原因",
    "完整編碼，但把 marker 清成空的形式，好讓同一個父區塊不論是否開啟了一個 epoch 都得到同一個雜湊；這讓雜湊在 marker 較晚才加入的 epoch 邊界上保持穩定",
    "只雜湊父區塊的 state root 與時槽，因為這兩個欄位已經唯一決定了父區塊；雜湊整個 header 會讓這個承諾依賴於子區塊無法獨立重建的資料"
   ],
@@ -64,7 +64,7 @@ ITEMS = [
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "§5（genesis header 與 σ_g）", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "genesis", "trust"],
-  "stemZh": "GP 說對 genesis header 及其所代表狀態的共識是**預設**而非推導出來的。為什麼一個鏈的定義非得包含這樣一個假設不可？",
+  "stemZh": "GP 說對 genesis header 及其所代表狀態的共識是預設而非推導出來的。為什麼一個鏈的定義非得包含這樣一個假設不可？",
   "optionsZh": [
    "因為每個 header 的有效性都是相對於它的父區塊定義的，所以這條遞迴需要一個在鏈外達成共識的基底；沒有基底的話，任何自洽的鏈都會和其他鏈一樣有效，「這條」鏈也就沒有明確定義",
    "因為 genesis 狀態太大，無法用後續區塊所用的同一個函數來 Merklize，所以它的 root 必須另外公布並暫且信任，直到第一個真正的區塊建立起常規的不變式",
@@ -265,7 +265,7 @@ ITEMS = [
  "tags": ["header", "design", "comparison"],
   "stemZh": "Ethereum 的 header 承諾了執行後的狀態、一個 receipts root、以及消耗掉的 gas。JAM 的 header 三者皆無。這三個角色分別跑到哪裡去了？",
   "optionsZh": [
-   "執行後的狀態以下一個區塊的先前 state root 之姿出現；逐項的結果住在 report 內部的 work-digest 裡而不在 header；而資源用量是靠 core time 與 gas 上限**事先**設限，而不是事後回報",
+   "執行後的狀態以下一個區塊的先前 state root 之姿出現；逐項的結果住在 report 內部的 work-digest 裡而不在 header；而資源用量是靠 core time 與 gas 上限事先設限，而不是事後回報",
    "三者都被摺進 extrinsic 雜湊，它的五個成分裡包含一個 results 成分；JAM 只是把同樣的承諾重新組織到單一欄位底下，好讓輕客戶端只需跟隨一個 root 而不是三個",
    "執行後的狀態由 seal 承諾，因為它簽署了出塊者算出的 state root；receipt 被 header 裡的 accumulation output log 取代；而 gas 被省略是因為 JAM 是以時槽而非以 gas 計量 core time",
    "三者都被延後到 BEEFY 的承諾，這也是 JAM 的 header 比較小的原因：任何外部驗證者需要的東西都是對著 accumulation-output MMR 證明的，而不是對著 header 本身"

@@ -54,10 +54,10 @@ ITEMS = [
         "tags": ["recent-history", "guarantees", "anti-replay"],
   "stemZh": "當某個區塊的 guarantees extrinsic E_G 在 §11 被驗證時，哪些鏈上檢查實際上會讀取存放在 β_H 裡的 reported-package 映射？",
   "optionsZh": [
-   "有三項：進來的 package 雜湊不得已經是任何近期區塊之映射的 key（反重複）；每個 prerequisite 以及某份 report 之 segment-root lookup l 的每個 key 都必須是那樣的 key、或來自本塊自己的 guarantee；而且 l 必須是那些映射的**子字典**，因此每個 segment-root 都要與它的 package 雜湊相符",
+   "有三項：進來的 package 雜湊不得已經是任何近期區塊之映射的 key（反重複）；每個 prerequisite 以及某份 report 之 segment-root lookup l 的每個 key 都必須是那樣的 key、或來自本塊自己的 guarantee；而且 l 必須是那些映射的子字典，因此每個 segment-root 都要與它的 package 雜湊相符",
    "只有反重複那一項；prerequisite 與 segment-root lookup 改為對照 ξ（accumulation 歷史）與 ready queue ω 解析，而它們的依賴集合才是最終讓一份 report 得以進入 accumulation 的關鍵——所以 β_H 裡的映射在那裡是多餘的，純粹為了重複測試而存在",
    "只有 refinement-context 的 anchor 檢查：anchor 的 header 雜湊、state root、super-peak 與時槽全都是在 β† 的映射中查找的，而重複則留到 accumulation 階段才抓，屆時已經出現在 ξ 裡的 package 雜湊只會被從 ready queue 丟掉而不會讓區塊無效",
-   "一項都沒有：那些映射的存在是為了替第三方建立 BEEFY 的納入證明，而 §11 是靠從區塊儲存中解碼最近八塊的 E_G 來重新導出近期的 package 雜湊——這也是為什麼祖先集合 A 必須保留 L = 14,400 個**完整含 extrinsic** 的區塊而不只是 header"
+   "一項都沒有：那些映射的存在是為了替第三方建立 BEEFY 的納入證明，而 §11 是靠從區塊儲存中解碼最近八塊的 E_G 來重新導出近期的 package 雜湊——這也是為什麼祖先集合 A 必須保留 L = 14,400 個完整含 extrinsic 的區塊而不只是 header"
   ],
   "stem": "When a block's guarantees extrinsic E_G is validated in §11, which of the on-chain checks actually read the reported-package maps stored inside β_H?",
         "options": [
@@ -86,8 +86,8 @@ ITEMS = [
         "tags": ["recent-history", "mmr", "beefy", "keccak"],
   "stemZh": "追蹤一個區塊的 accumulation 產出最終如何進入 BEEFY 簽章。哪個描述符合 GP 0.8.0？",
   "optionsZh": [
-   "每個區塊把編碼後的 θ′ 以 Keccak Merklize 成一個 root 並把該 root 附加到 belt β_B；新的 β_H 項目只儲存 belt 的 Keccak **super-peak**；validator 接著對它們所定案的每個區塊，以 BLS 簽署最新項目之 super-peak 的 domain-separated 雜湊",
-   "每個區塊把 θ′ 以 Keccak Merklize 成一個 root、附加到 β_B，而 validator 以 BLS 簽署 β_B 的**整個編碼後 peak 序列**；super-peak 的存在只是為了讓 state key C(3) 有一個定長欄位，這也是為什麼 eq. 18.1 被簽的訊息是 E(mmrencode(β_B)) 而不是單一個雜湊",
+   "每個區塊把編碼後的 θ′ 以 Keccak Merklize 成一個 root 並把該 root 附加到 belt β_B；新的 β_H 項目只儲存 belt 的 Keccak super-peak；validator 接著對它們所定案的每個區塊，以 BLS 簽署最新項目之 super-peak 的 domain-separated 雜湊",
+   "每個區塊把 θ′ 以 Keccak Merklize 成一個 root、附加到 β_B，而 validator 以 BLS 簽署 β_B 的整個編碼後 peak 序列；super-peak 的存在只是為了讓 state key C(3) 有一個定長欄位，這也是為什麼 eq. 18.1 被簽的訊息是 E(mmrencode(β_B)) 而不是單一個雜湊",
    "區塊 header 在一個專屬的 marker 中攜帶 super-peak，而 validator 簽署的是 header 雜湊；β_B 只是 guarantor 端的簿記、從不進入序列化的狀態，所以橋接方永遠只需要 header 鏈、不必讀任何狀態證明",
    "belt 每個區塊都以 Blake2b 從 θ 重建，而 validator 只簽署當前區塊產出的 root，所以一個 BEEFY 簽章恰好佐證一個區塊的 accumulation 結果；想要較舊產出的驗證者則從該區塊自己的 C(16) 條目重新導出它的 root"
   ],
@@ -118,7 +118,7 @@ ITEMS = [
         "tags": ["recent-history", "pipelining", "ordering"],
   "stemZh": "某個實作者建構 β′_H 的方式是：先附加本塊的新項目（state root = H_0），然後才把 eq. 7.5 的父狀態根回填套用到「序列的最後一個元素」上。實際上會出什麼錯？",
   "optionsZh": [
-   "那次回填會落在本塊自己剛新增的項目上，於是每一筆條目最後帶的都是它**父區塊**的 posterior root 而不是自己的，而父區塊那一筆則從未收到原本要給它的修正；從此 eq. 11.36 的 state-root 比對會拒絕誠實的 refinement context，而 C(3) 的原像也會與其他每個節點分歧",
+   "那次回填會落在本塊自己剛新增的項目上，於是每一筆條目最後帶的都是它父區塊的 posterior root 而不是自己的，而父區塊那一筆則從未收到原本要給它的修正；從此 eq. 11.36 的 state-root 比對會拒絕誠實的 refinement context，而 C(3) 的原像也會與其他每個節點分歧",
    "沒有可觀察的問題：一旦該區塊完成，兩種順序下最後一個元素都是同一個項目，而且 eq. 7.5 的修正是冪等的，所以兩種順序產生相同的 C(3) 原像——這正是為什麼 GP 把 β† 表述成 β_H 的一個例外、而不是去規定運算順序，也是為什麼各家實作在此不同卻不會分歧",
    "只有 β_B 會壞掉：新項目的 super-peak 會取自一個未經修正的 belt，所以 BEEFY 的 root 會漂移，而近期歷史的條目與 state root 仍然正確，因為 eq. 7.7 會把父區塊回填後的 state root 摺進它所附加的葉子裡，而 eq. 11.36 從不看 b",
    "歷史窗口會提早一塊滑動，使 β_H 永久停在 H − 1 = 7 個條目，所以 eq. 11.36 會拒絕恰好八塊之前的任何 anchor，而其餘一切仍然相符，因為 ←(…)^H 的截斷屬於 eq. 7.5 而不屬於 eq. 7.8 的附加——症狀是 guarantee 被拒絕，絕不會是 state-root 不符"
@@ -150,7 +150,7 @@ ITEMS = [
         "tags": ["recent-history", "codec", "delta-0.8.0", "gotcha"],
   "stemZh": "這是團隊在 state key C(3) 之下、為單一筆 β_H 項目所寫的 GP 0.7.2 編碼器。有位審閱者反對，認為 GP 0.8.0 把該項目宣告為 ⟨h, s, b, t, p⟩——state root 排在 accumulation-output-log 的 super-peak 之前——所以這個編碼器一定把兩個欄位對調了。誰說得對？",
   "optionsZh": [
-   "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後時槽、最後是 reported 映射；第 7 章的那個元組只是在**命名**各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的時槽",
+   "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後時槽、最後是 reported 映射；第 7 章的那個元組只是在命名各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的時槽",
    "審閱者是對的：一個狀態分量永遠依它的定義式所列欄位順序序列化，所以 C(3) 需要的是 header 雜湊、state root、super-peak、時槽、reported 映射；附錄 D 只是重述第 7 章的元組、兩者不可能牴觸，所以照現況這個編碼器會產生錯誤的 C(3) 原像、因而產生錯誤的 state root",
    "兩者都錯：C(3) 只裝 β_B 編碼後的 peak 序列，而逐區塊的項目是透過 header 裡的一個 marker 承諾、其餘由各節點自行保存在鏈外，所以這個編碼器根本不該餵給狀態序列化，它用哪種順序都動不了 state root",
    "審閱者在順序與形狀上都對：0.8.0 把每個項目的 super-peak 換成了完整的 peak 序列，所以每一項都必須編碼整條 belt，而這段程式碼卻只寫了單一個 32 位元組的雜湊；eq. 11.36 也是拿 anchor 去對照那個序列而不是對照單一個承諾"
@@ -339,8 +339,8 @@ ITEMS = [
         "tags": ["authorization", "guarantees", "prior-posterior"],
   "stemZh": "這段 0.7.2 的程式碼實作的是 eq. 11.32 中 authorizer 的那一半。它有義務讀取哪一個 pool？而當成員測試失敗時，協定層級的後果是什麼？",
   "optionsZh": [
-   "**prior** 的 pool，因為 posterior 那個要等 accumulation 之後才會從 posterior 佇列形成；而失敗只是一個普通的區塊有效性失敗——該 guarantee 不可能成為有效區塊的一部分，所以根本沒有 report 可以拿來懲罰誰，disputes 狀態也不會被寫入任何東西",
-   "**posterior** 的 pool，因為該 report 正被納入這一塊、而 eq. 8.2 的輪替是在處理 guarantee 之前套用的；失敗則使該區塊無效，這也是為什麼依賴圖把 α′ 列在 ρ′ 的輸入之中而不是反過來",
+   "prior 的 pool，因為 posterior 那個要等 accumulation 之後才會從 posterior 佇列形成；而失敗只是一個普通的區塊有效性失敗——該 guarantee 不可能成為有效區塊的一部分，所以根本沒有 report 可以拿來懲罰誰，disputes 狀態也不會被寫入任何東西",
+   "posterior 的 pool，因為該 report 正被納入這一塊、而 eq. 8.2 的輪替是在處理 guarantee 之前套用的；失敗則使該區塊無效，這也是為什麼依賴圖把 α′ 列在 ρ′ 的輸入之中而不是反過來",
    "哪個 pool 都可以，因為輪替只移除該 report 自己消耗掉的那個 authorizer；失敗會把該 report 的 guarantor 記為 culprit 寫進 disputes 狀態，好讓下個 epoch 的懲罰集合沒收他們，而他們的 Ed25519 金鑰會經由這個 header 自己的 offenders marker 進入 ψ_O",
    "prior 的 pool，但該 report 仍然會以空的 authorizer trace 被收進 availability assignments，並在 accumulation 時被靜默丟棄——這也是為什麼缺席的 authorizer 對 guarantor 毫無代價，而 ρ‡ 會一直持有該條目直到 U = 5 個時槽的 assurance 逾時把它清掉"
   ],

@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch05-header-fields",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.1",
  "difficulty": 1, "kind": "concept", "tags": ["header"],
-  "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。哪一個欄位**不屬於** header？",
+  "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。哪一個欄位不屬於 header？",
   "optionsZh": [
    "H_R——先前的 state root，也就是父區塊執行後的 state root",
    "H_W——winning-tickets marker，攜帶下個 epoch 的 E = 600 張 ticket",
@@ -33,7 +33,7 @@ ITEMS = [
  "id": "ch05-prior-state-root",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.9 (H_r)",
  "difficulty": 1, "kind": "rationale", "tags": ["header", "pipelining"],
-  "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是**先前**的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
+  "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是先前的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
   "optionsZh": [
    "為了讓區塊運算——特別是 Merklization——能夠管線化：出塊者不必先把新狀態 Merklize 完才能發布區塊",
    "為了讓輕客戶端只靠 header 鏈就能驗證狀態，因為先前的 root 已經被父區塊簽署過，不需要再自行推導",
@@ -120,7 +120,7 @@ ITEMS = [
   "stemZh": "出塊者索引 H_I 指涉的是哪一個 validator 集合？出塊者的 Bandersnatch 金鑰 H_A 又是怎麼取得的？",
   "optionsZh": [
    "指涉 prior 的 active set κ；H_A = κ[H_I]_b，而且 H_A 會與 H_I 並列、序列化成 header 的第十一個欄位",
-   "指涉 posterior 的 active set κ′；H_A ≡ κ′[H_I]_b，而且 H_A **不會**被序列化——它只是一個等價式",
+   "指涉 posterior 的 active set κ′；H_A ≡ κ′[H_I]_b，而且 H_A 不會被序列化——它只是一個等價式",
    "指涉 pending set γ_k；H_A = γ_k[H_I]_b，這也是為什麼在一個 epoch 的第一塊裡 H_I 可能超過 |κ′|",
    "指涉 staging set ι；H_A = ι[H_I]_b，因為 ι 持有 delegator 為下一個 epoch 指定的金鑰"
   ],

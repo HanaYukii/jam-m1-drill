@@ -9,7 +9,7 @@ ITEMS = [
   "stemZh": "團隊為 availability specification（work-package spec）寫的編碼器還停在 GP 0.7.2。要讓它產出 §C.2 的 GP 0.8.0 線路格式 E(s)，必須改什麼？伴隨這個新欄位的鏈上規則又是什麼？",
   "optionsZh": [
    "在 ErasureRoot 與 ExportsRoot 之間插入一個 U16 的 erasure 碎片數 v，編碼為 E_2(v)；其餘寬度維持原樣（長度用 E_4、exports 計數用 E_2）；鏈上則要求每一份進來的 report 都必須帶 v = |κ′|",
-   "把 E_2(v) 附加在 ExportsCount **之後**，因為自 GP 0.7.0 起，結構新增的任何欄位都必須放到尾端以維持解碼器的串流友善性；鏈上則要求 v 必須等於 core 數 C",
+   "把 E_2(v) 附加在 ExportsCount 之後，因為自 GP 0.7.0 起，結構新增的任何欄位都必須放到尾端以維持解碼器的串流友善性；鏈上則要求 v 必須等於 core 數 C",
    "把定寬的 E_4 Length 換成緊湊的 E(l)，並在其後緊接著加上緊湊自然數 v；v 就是該 guarantor 實際分發出去的碎片數量，所以鏈上不做檢查",
    "線路上什麼都不用改：v 可以從 validator 數 V 推導出來，因此從不被序列化；只有 JSON 測試向量的 schema 為了可讀性多了一個 erasure_shards 欄位"
   ],
@@ -99,7 +99,7 @@ ITEMS = [
    "[40, 10, 30, 20]；忠實——GP 是把 s_{l−1} 寫進被挑中的位置並捨去最後一格，而「先交換再切掉尾端」是同一件事（副作用是呼叫者的 slice 被就地修改）",
    "[40, 10, 20, 30]；不忠實——GP 是把被挑中的元素移除並把其餘左移、保持相對順序，所以與 s[l-1] 的交換會靜默地打亂存活者的順序",
    "[20, 30, 10, 40]；不忠實——GP 的結果是所有交換套用完之後原地留下的那個陣列，而不是被依序挑出的元素序列，所以這個函數回傳的是 eq. F.1 所定義者的反序",
-   "[40, 30, 10, 20]；不忠實——GP 是對每個 r_i 取**原始長度** l 的模並索引原序列、完全不縮短它，只在最後才丟棄重複"
+   "[40, 30, 10, 20]；不忠實——GP 是對每個 r_i 取原始長度 l 的模並索引原序列、完全不縮短它，只在最後才丟棄重複"
   ],
   "stem": "This is the team's implementation of the shuffle F of eq. F.1. For s = [10, 20, 30, 40] and r = [3, 6, 4, 5], what does it return, and is the in-place swap faithful to the GP definition?",
  "code": {"lang": "go", "caption": "internal/utilities/shuffle/shuffle.go (FisherYatesShuffle)", "src": "func FisherYatesShuffle(s []types.U32, r []types.U32) []types.U32 {\n\tl := len(s)\n\n\t// If the sequence is empty, return an empty slice\n\tif l == 0 {\n\t\treturn make([]types.U32, 0)\n\t}\n\n\t// Calculate the index\n\tindex := r[0] % types.U32(l)\n\n\t// The selected element\n\tselected := s[index]\n\n\t// Swap elements\n\ts[index], s[l-1] = s[l-1], s[index]\n\n\t// Recursively shuffle the remaining elements\n\tshuffledRest := FisherYatesShuffle(s[:l-1], r[1:])\n\n\t// Return the shuffled sequence\n\treturn append([]types.U32{selected}, shuffledRest...)\n}"},
@@ -126,9 +126,9 @@ ITEMS = [
   "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。關於兩者各用在哪、大小如何、以及輸出函數 Y，哪個敘述正確？",
   "optionsZh": [
    "只有 E_T 裡的 ticket 證明是 784 位元組的 ring-VRF 證明（匿名，對照 144 位元組的 ring root 驗證）；seal H_S、熵 H_V 與稽核種子都是具名金鑰下 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是 VRF 輸出的前 32 個位元組，而且取決於 context 而非訊息",
-   "seal H_S 與 ticket 證明**兩者都是** 784 位元組的 ring-VRF 證明、對照 144 位元組的 γ′_Z 驗證——正是這點讓出塊者在該 epoch 結束前保持匿名；熵 H_V 與稽核種子則是 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是完整 64 位元組的 VRF 輸出，取決於 context 而非訊息",
-   "只有 ticket 證明是 784 位元組的 ring-VRF 證明；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；但兩者的 Y(·) 都是**整個簽章的 Blake2b 雜湊**，因此會隨被簽的訊息改變——這正是 ticket 要簽空訊息的原因",
-   "只有 ticket 證明是 784 位元組的 ring-VRF 證明，且是對照一個承諾於 **active set κ′**（而非 pending set）的 32 位元組 ring root 驗證；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；Y(·) 是 VRF 輸出的前 32 個位元組，而被 Φ 歸零的金鑰會被移出 ring，因此 ring 會隨 offender 數量而縮小"
+   "seal H_S 與 ticket 證明兩者都是 784 位元組的 ring-VRF 證明、對照 144 位元組的 γ′_Z 驗證——正是這點讓出塊者在該 epoch 結束前保持匿名；熵 H_V 與稽核種子則是 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是完整 64 位元組的 VRF 輸出，取決於 context 而非訊息",
+   "只有 ticket 證明是 784 位元組的 ring-VRF 證明；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；但兩者的 Y(·) 都是整個簽章的 Blake2b 雜湊，因此會隨被簽的訊息改變——這正是 ticket 要簽空訊息的原因",
+   "只有 ticket 證明是 784 位元組的 ring-VRF 證明，且是對照一個承諾於 active set κ′（而非 pending set）的 32 位元組 ring root 驗證；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；Y(·) 是 VRF 輸出的前 32 個位元組，而被 Φ 歸零的金鑰會被移出 ring，因此 ring 會隨 offender 數量而縮小"
   ],
   "stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?",
  "options": [
@@ -154,7 +154,7 @@ ITEMS = [
   "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。下列（context → 原語 → 用途）的敘述哪一個正確？",
   "optionsZh": [
    "X_T = $jam_ticket_seal 被用了兩次：一次用於 ring-VRF 的 ticket 證明（context 為 X_T ⌢ η′_2 ⌢ [e]、空訊息、root 為 γ′_Z），一次用於一般的 IETF-VRF seal（context 為 X_T ⌢ η′_3 ⌢ [i_e]、訊息為 E_U(H)）",
-   "X_E = $jam_entropy 是出塊者對未簽署 header E_U(H) 所做的 **Ed25519** 簽章；而餵給熵累積器 η′_0 的，是該簽章的 Blake2b 雜湊",
+   "X_E = $jam_entropy 是出塊者對未簽署 header E_U(H) 所做的 Ed25519 簽章；而餵給熵累積器 η′_0 的，是該簽章的 Blake2b 雜湊",
    "X_G = $jam_guarantee 是對 H(w) 的 Bandersnatch VRF context，而它的輸出 Y(·) 同時充當與 ρ 中 availability assignment 一起儲存的 guarantee 識別碼",
    "X_U = $jam_audit 是 validator 用來簽署那些出現在 disputes extrinsic E_D 之 verdict 中的 judgment 的 Ed25519 context，每份 report 雜湊一個簽章"
   ],

@@ -11,7 +11,7 @@ ITEMS = [
   "stemZh": "某個 epoch 中段（e′ = e）的區塊，其出塊者索引 H_I = 3。它的 extrinsic 含有：E_T 兩張 ticket、E_P 一份 500 個 octet 的 preimage、E_A 由 validator 1 與 2 簽署的 assurance、E_G 一份 guarantee 且其憑證帶有 validator 0 與 4 的簽章。相對於 π_V，π′_V 會顯示哪些逐 validator 的變動（計數器 b、t、p、d、g、a）？",
   "optionsZh": [
    "validator 3：b+1、t+2、p+1、d+500、g+1、a+2——出塊者納入的每一項 extrinsic 都記在出塊者頭上；其他 validator 都不變",
-   "validator 3：b+1、t+2、p+1、**d+1**；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1",
+   "validator 3：b+1、t+2、p+1、d+1；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1",
    "validator 3：b+1、t+2、p+1、d+500；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1；其餘紀錄不變",
    "validator 3：b+1、p+1、d+500；產生那兩張 ticket 的兩位 validator：各 t+1；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1"
   ],
@@ -66,8 +66,8 @@ ITEMS = [
  "difficulty": 2, "kind": "code", "tags": ["work-packages", "digest", "code"],
   "stemZh": "這是團隊的 item-to-digest 函數（GP 0.8.0 eq. 14.10，C）。關於它的哪個敘述正確？",
   "optionsZh": [
-   "唯一的缺陷是 payload 雜湊：eq. 14.10 要求 y = H(E(w))，也就是**整個編碼後 work-item** 的雜湊而不是只對 payload 取雜湊，所以 PayloadHash 必須改為對 E(item) 取；至於 accumulate gas 上限、import 計數以及三個負載計數器 x = |w_x|、z = extrinsic 長度總和、e = w_e 都指派正確",
-   "AccumulateGas 是唯一的缺陷：一個 digest 的 g 必須是 **refine** gas 上限 w_g，因為 accumulation 的 gas 是由鏈上的 Δ+ 決定而不是由該 package 決定；payload 雜湊 H(w_y)、import 計數 |w_i| 以及三個負載計數器都指派正確",
+   "唯一的缺陷是 payload 雜湊：eq. 14.10 要求 y = H(E(w))，也就是整個編碼後 work-item 的雜湊而不是只對 payload 取雜湊，所以 PayloadHash 必須改為對 E(item) 取；至於 accumulate gas 上限、import 計數以及三個負載計數器 x = |w_x|、z = extrinsic 長度總和、e = w_e 都指派正確",
+   "AccumulateGas 是唯一的缺陷：一個 digest 的 g 必須是 refine gas 上限 w_g，因為 accumulation 的 gas 是由鏈上的 Δ+ 決定而不是由該 package 決定；payload 雜湊 H(w_y)、import 計數 |w_i| 以及三個負載計數器都指派正確",
    "這段程式碼是對的：eq. 14.10 只釘死了 payload 雜湊、accumulate gas 上限、import 計數與已用 gas，把三個 manifest 計數器 x、z、e 留給 Ψ_R 實際做了什麼，所以只要 guarantor 對最終的 report 雜湊有共識，任何自洽的指派都可以接受",
    "三個負載計數器被輪換錯位了：eq. 14.10 設定 x = |w_x|（extrinsic 數）、z = extrinsic 長度總和、e = w_e（宣告的匯出數），但程式碼把 w_e 放進 ExtrinsicCount、把 |w_x| 放進 ExtrinsicSize、把長度總和放進 Exports——payload 雜湊、accumulate gas 上限、import 計數與已用 gas 都是對的"
   ],
@@ -169,8 +169,8 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
   "optionsZh": [
    "Ξ(p, c, l, v) 收下 package、core、一個 segment-root 字典 l（每個被 h⊞ import 引用到的 work-package 雜湊各一項）以及 assurer 集合大小 v；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob、或 keys(l) 與那組 h⊞ 雜湊不符時才產生 ∇——某個 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束並不會讓 Ξ 失敗",
    "Ξ(p, c) 一如 0.7.2 只收下 package 與 core；segment-root 字典是在計算期間從鏈上狀態 ρ 讀出的，而碎片數固定為 V = 1,023；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob 時才產生 ∇——某個 work-item 的 Refine 失敗並不會讓 Ξ 失敗",
-   "Ξ(p, c, l, v) 收下 package、core、segment-root 字典 l 與 assurer 集合大小 v；在 Is-Authorized 的結果不合格、keys(l) 不符、**或任何 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束**時都產生 ∇，如此 guarantor 就永遠不會為一份含有失敗項目的 report 簽名",
-   "Ξ(p, c, l, v) 收下 package、core、一個以 **work-item 索引**為 key、每個 import 一項的 segment-root 字典 l，以及 v，也就是該 report 上的 guarantor 簽章數（2 或 3）；只有在 Is-Authorized 的結果不合格、或編碼後的 report 超過 W_B = 13,791,360 個 octet 時才產生 ∇"
+   "Ξ(p, c, l, v) 收下 package、core、segment-root 字典 l 與 assurer 集合大小 v；在 Is-Authorized 的結果不合格、keys(l) 不符、或任何 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束時都產生 ∇，如此 guarantor 就永遠不會為一份含有失敗項目的 report 簽名",
+   "Ξ(p, c, l, v) 收下 package、core、一個以 work-item 索引為 key、每個 import 一項的 segment-root 字典 l，以及 v，也就是該 report 上的 guarantor 簽章數（2 或 3）；只有在 Is-Authorized 的結果不合格、或編碼後的 report 超過 W_B = 13,791,360 個 octet 時才產生 ∇"
   ],
   "stem": "GP 0.8.0 redefines the work-report computation function Ξ. Which statement about its arguments and its failure condition E is correct?",
  "options": [
@@ -196,7 +196,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
   "stemZh": "匯出的 segment 由 availability specification 的 segments-root e 承諾，並透過 paged proof 佐證。哪個敘述正確？",
   "optionsZh": [
    "e = M(s)，是對匯出 segment 所建之定深二元 Merkle 樹的 root，葉子加 '$leaf' 前綴並以零雜湊補到 2 的冪；P(s) 產生 ⌈|s|/64⌉ 個額外的 segment，每個都是「通往某個 64 葉子子樹的 Merkle 路徑 J_6(s, i)、加上該子樹那一頁的 64 個葉子雜湊 L_6(s, i)」的補零編碼；兩者都會被 erasure-code 進長期的 D³L",
-   "e = M_B(s)，是對**原始 segment** 取的 well-balanced 二元 Merkle root、不做補齊；P(s) 產生 ⌈|s|/64⌉ 個額外 segment，內容同上；但兩者都存放在可稽核 bundle 之內而不是 D³L 裡",
+   "e = M_B(s)，是對原始 segment 取的 well-balanced 二元 Merkle root、不做補齊；P(s) 產生 ⌈|s|/64⌉ 個額外 segment，內容同上；但兩者都存放在可稽核 bundle 之內而不是 D³L 裡",
    "e = M(s)，定深樹的 root；但 P(s) 是每 32 個匯出 segment 產生一個 4,104 octet 的 segment，各帶一頁 32 個葉子雜湊加上它的子樹路徑；而且它們只存在於短期的 Audit DA 裡，因為只有 auditor 會驗證 import",
    "e = M(s)，定深樹的 root；但 P(s) 是每一個匯出 segment 各產生一個額外 segment、各自持有該 segment 自己約 350 位元組的佐證，而且每位 validator 都保存全部，好讓任何節點不必取得碎片就能驗證任何 import"
   ],
@@ -224,9 +224,9 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
   "stemZh": "guarantor 會把可稽核的 work-bundle B(p, l) 做 erasure coding 放進 Audit DA。這個 bundle 裡究竟有什麼？它與放進 D³L 的東西又有何不同？",
   "optionsZh": [
    "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並在後面附上完成的 work-report，好讓 auditor 不必碰鏈上資料就能拿自己的結果與 guarantor 的比對；其中每一個序列都帶長度前綴；而 bundle 與「匯出 segment 加其 paged proof」都被保存在同一個儲存區裡 ≥ 28 天（672 個 epoch）",
-   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))：編碼後的 package、接著每一份 extrinsic blob、再來每一個**匯入**的 segment、最後是那些 import 的 Merkle 佐證——只有佐證路徑帶長度前綴；bundle 屬於短期的 Audit-DA 資料，而匯出 segment 加其 paged proof 則進入長期的 D³L（≥ 28 天 = 672 個 epoch）",
+   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))：編碼後的 package、接著每一份 extrinsic blob、再來每一個匯入的 segment、最後是那些 import 的 Merkle 佐證——只有佐證路徑帶長度前綴；bundle 屬於短期的 Audit-DA 資料，而匯出 segment 加其 paged proof 則進入長期的 D³L（≥ 28 天 = 672 個 epoch）",
    "B(p, l) 只有 E(p, X#(p_w))：編碼後的 package 與每一份 extrinsic blob，不含匯入的 segment 也不含佐證——auditor 會自己從 D³L 重新取得那些 segment 並檢查它們的 paged proof，就像 guarantor 當初做的那樣；bundle 屬於短期 Audit-DA 資料，匯出 segment 加 paged proof 則進入長期 D³L",
-   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並附上第五個成分，也就是這個 package 自己的**匯出**：編碼後的 package、每份 extrinsic blob、每個匯入 segment、它們的 Merkle 佐證，最後是這些匯出——只有佐證路徑帶長度前綴；而 bundle 進入長期 D³L（≥ 28 天），只有 paged proof 屬於短期 Audit-DA 資料"
+   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並附上第五個成分，也就是這個 package 自己的匯出：編碼後的 package、每份 extrinsic blob、每個匯入 segment、它們的 Merkle 佐證，最後是這些匯出——只有佐證路徑帶長度前綴；而 bundle 進入長期 D³L（≥ 28 天），只有 paged proof 屬於短期 Audit-DA 資料"
   ],
   "stem": "What exactly goes into the auditable work-bundle B(p, l) that guarantors erasure-code into the Audit DA, and how does that differ from what goes into the D³L?",
  "options": [

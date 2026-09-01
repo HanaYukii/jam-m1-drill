@@ -8,7 +8,7 @@ ITEMS = [
   "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。哪個敘述符合 GP 0.8.0？",
   "optionsZh": [
    "成功時 φ′_7 = 5000，也就是剛寫入之值的長度；若 a_t > a_b 則該值仍會被儲存、φ′_7 = FULL，而差額會在該 service 下次 accumulation 時從餘額扣除——所以這次修正需要改的只有暫存器的值，而不是 map 變動的順序",
-   "若寫入後 a_t ≤ a_b 則該值被儲存且 φ′_7 = 100，也就是**被取代**之值的長度；若 a_t > a_b 則 φ′_7 = FULL 且該帳戶原封交回（s′ = s）——而修正前的程式碼已經先變動了共用的 Go map，所以那次 FULL 的寫入外洩了（#979）",
+   "若寫入後 a_t ≤ a_b 則該值被儲存且 φ′_7 = 100，也就是被取代之值的長度；若 a_t > a_b 則 φ′_7 = FULL 且該帳戶原封交回（s′ = s）——而修正前的程式碼已經先變動了共用的 Go map，所以那次 FULL 的寫入外洩了（#979）",
    "成功時 φ′_7 = OK（0）；覆寫時不可能發生 a_t > a_b，因為 storage 押金（每項 B_I、每 octet B_L）只在 key 首次建立時收取、值的大小改變時從不收取，所以 Ω_W 在這條路徑上不需要門檻檢查",
    "若 a_t > a_b 則該 host call 以 ☇（panic）退出，使整個 accumulation 收斂到存檔過的 context y；否則 φ′_7 = 100（被取代之值的長度）且該值被儲存——而那個收斂正是讓修正前的 map 變動變得無害的原因"
   ],
@@ -120,7 +120,7 @@ ITEMS = [
   "optionsZh": [
    "φ′_7 = WHAT 且不論剩餘 gas 多少都在下一條指令繼續執行——因為什麼都沒被執行，所以一個未知或不可用的 host call 本身永遠不可能觸發 out-of-gas（這是 #992 之前的行為）",
    "機器 panic（☇）且不扣 gas：不在該 invocation 表中的 host-call id 被當成非法指令處理，而該次 accumulation 收斂到存檔過的 context y",
-   "F 的 default 分支會**先**扣 M_∅ = 1000：ϱ′ = 300 − 1000 < 0，所以該次 invocation 以 ∞ 退出、Ψ_A 收斂到存檔過的 context y；而在 0.7.2 一律扣 10 的計價下，同樣的呼叫會以 φ′_7 = WHAT 繼續執行",
+   "F 的 default 分支會先扣 M_∅ = 1000：ϱ′ = 300 − 1000 < 0，所以該次 invocation 以 ∞ 退出、Ψ_A 收斂到存檔過的 context y；而在 0.7.2 一律扣 10 的計價下，同樣的呼叫會以 φ′_7 = WHAT 繼續執行",
    "那條 `ecalli` 會以退出理由 h̄ × 9 浮現給 Ψ_A 的呼叫者：該次 accumulation 被中止、當成 host-call 錯誤處理，而該 service 這一塊的結果被記為 BAD"
   ],
   "stem": "During accumulation a service executes `ecalli 9` (`machine`, a refine-only call) with ϱ = 300 gas remaining. The team's dispatcher routes ids that are not in the invocation's table to hostCallException (below, after PR #992). What does GP 0.8.0 prescribe for this situation?",
@@ -170,7 +170,7 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
    "巢狀 host call：內層機器執行的 `ecalli` 必須經由 refine mutator F 派送（historical_lookup、export…）而不是中止內層執行，所以 Ω_K 必須呼叫 Ψ_H 而不是 Ψ，而外層 service 根本不該看到 HOST 這個結果碼",
    "恢復：在 HOST 退出時，被保存的指令計數器必須停在那條 `ecalli` 本身，好讓外層 service 在服務完該呼叫之後重新執行那條指令，就像 Ψ 處理 page fault 那樣；把它推進 i′ + skip(i′) + 1 會漏掉一條指令",
    "記憶體：那 112 個 octet 的區塊只需要可讀即可，因為在 0.8.0 中內層的 gas 與 13 個暫存器是透過 φ′_7…φ′_12 交回、而不是寫回該區塊，所以一個可讀但不可寫的視窗沒有問題，而節錄中的 OOB-then-panic 路徑應該改成單純的 WHO",
-   "gas：外層機器**事先**支付 g = M_K + g_R（若 ϱ < g 則 ∞；g_R 是從該區塊讀出的內層 gas），事後再拿回內層未用完的 g_R′，也就是 ϱ′ = ϱ − g + g_R′；而且內層機器也為它當前的 basic block 攜帶一個 gas-charged 旗標"
+   "gas：外層機器事先支付 g = M_K + g_R（若 ϱ < g 則 ∞；g_R 是從該區塊讀出的內層 gas），事後再拿回內層未用完的 g_R′，也就是 ϱ′ = ϱ − g + g_R′；而且內層機器也為它當前的 basic block 攜帶一個 gas-charged 旗標"
   ],
   "stem": "The excerpt is the team's 0.7.2 `invoke` (Ω_K): it reads a 112-octet block at φ_8, runs inner machine n = φ_7 and writes the block back. Apart from the id shift (12 → 13), which GP 0.8.0 rule is missing from it?",
  "code": {"lang": "go", "caption": "PVM/host_call_refine.go (invoke, 0.7.2 numbering)", "src": """	n, o := input.VM.Registers[7], input.VM.Registers[8]
@@ -222,7 +222,7 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
   "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。對照 GP 0.8.0，哪個敘述正確？",
   "optionsZh": [
    "這段程式碼是對的：Ω_Z 對每一個 r ∈ 0…4 都會把該範圍填零，差別只在最終的存取權（0 → 不可存取，1/3 → R，2/4 → W）；GP 從不區分「配置」與「改變模式」，這也是為什麼附錄 I 對每一個 r 都只訂一個基本成本加一個每頁費率",
-   "有兩處語意落差：當 r = 0 時 GP 會把該範圍填零並設為不可存取（程式碼卻完全不動它），而當 r ∈ {3, 4} 時 GP 會**保留頁面內容**、只把存取模式改成 R 或 W（程式碼卻改為重新配置填零的頁）",
+   "有兩處語意落差：當 r = 0 時 GP 會把該範圍填零並設為不可存取（程式碼卻完全不動它），而當 r ∈ {3, 4} 時 GP 會保留頁面內容、只把存取模式改成 R 或 W（程式碼卻改為重新配置填零的頁）",
    "唯一的落差是錯誤碼：當 r > 2 且該範圍中有某頁不可存取時，GP 會像 `peek` 與 `poke` 那樣回傳 OOB（inner-PVM 記憶體索引不可存取）而不是 HUH；頁面的變動本身是對的，而 r = 0 也確實應該讓那些 octet 保持原狀",
    "GP 會在查找 n 之前先驗證 r ∈ 0…4、p ≥ 16 且 p + c < 2^32/Z_P，所以一個指向不存在機器的無效請求應該得到 HUH 而程式碼卻給出 WHO；頁面的變動本身是對的，而無效的 r 是免費的，因為 GP 沒有為它定義任何 gas 常數"
   ],

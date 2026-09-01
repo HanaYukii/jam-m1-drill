@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch09-account-fields",
  "ch": "9", "section": "9 Service Accounts", "gpRef": "eq. 9.3",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "state"],
-  "stemZh": "在 GP 0.8.0（eq. 9.3）中，下列哪一個**不是** service account A 的欄位？",
+  "stemZh": "在 GP 0.8.0（eq. 9.3）中，下列哪一個不是 service account A 的欄位？",
   "optionsZh": [
    "a_f——gratis storage offset，一筆以餘額計價的押金抵扣額",
    "a_p——parent service index，也就是建立這個 service 的那個 service",
@@ -174,7 +174,7 @@ ITEMS = [
  "id": "ch09-preimage-vs-storage",
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2 intro",
  "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "rationale"],
-  "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。下列哪一項**不是**其中之一？",
+  "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。下列哪一項不是其中之一？",
   "optionsZh": [
    "preimage 的資料由外部提供（透過 E_P），而 storage 的資料源自該 service 自己的 accumulation",
    "preimage 是從一個雜湊映到它的原像，而 storage 是從任意 key 映到 value",

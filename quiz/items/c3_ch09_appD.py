@@ -14,7 +14,7 @@ ITEMS = [
   "optionsZh": [
    "19,200 個時槽恰好是 32 個 epoch，也正是 accumulation 歷史 ξ 保留 work-package 雜湊的時間長度，所以在某份 work-package 還可能被重新 accumulate 之前，它用到的 preimage 不得被丟棄；D 因此被定為 32·E",
    "這段期間必須比兩個 epoch 的稽核窗口（1,200 個時槽）長十六倍，好讓 erasure-code 過的 bundle 在爭議期間仍能從 1,023 位 validator 的碎片重建；D 是從那個保存期導出的，與任何 anchor 年齡無關",
-   "Ω_H 在**任何仍可能發生稽核的時刻**都必須回傳相同的答案；而 lookup anchor 本身可能比近期歷史再舊上 L = 14,400 個時槽，所以這段期間就是那個 anchor 年齡再加上 4,800 個時槽（八小時）的安全餘裕",
+   "Ω_H 在任何仍可能發生稽核的時刻都必須回傳相同的答案；而 lookup anchor 本身可能比近期歷史再舊上 L = 14,400 個時槽，所以這段期間就是那個 anchor 年齡再加上 4,800 個時槽（八小時）的安全餘裕",
    "每 octet 的押金 B_L 會在這段期間內線性退還，而 19,200 個時槽在每槽六秒之下正是 32 小時——這是選用性狀態的標準押金退還時程；B_L 會在那些時槽內等額分期退回 a_b"
   ],
   "stem": "§9.2 bounds the timeslot argument of the historical-lookup function Λ to the window (H_t − D … H_t), and the constants appendix fixes D = 19,200 timeslots. What is the GP's stated reason for that particular number?",
@@ -42,7 +42,7 @@ ITEMS = [
   "stemZh": "a_i（項數）、a_o（位元組數）與 a_t（門檻餘額）都是衍生值——§9.3 從 a_s 與 a_l 導出 a_i 與 a_o，再從那兩者加上儲存的 gratis 抵扣 a_f 導出 a_t，而三者都不是 eq. 9.3 元組的成員。它們之中哪些真的進入了被 Merklize 的狀態？與 `info` host call 交回的內容相比又如何？",
   "optionsZh": [
    "三者都同時進入兩種編碼，而且兩種編碼逐位元組相同——這正是為什麼實作可以放心地在 trie 葉子與 host call 之間共用同一個 codec，也是為什麼那片葉子可以直接遞給 guest 的緩衝區",
-   "service-info 的葉子帶有 a_i 與 a_o 但**沒有** a_t，而且它以版本位元組 0 開頭；`info` 沒有版本位元組但**有** a_t，其版面為 E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p))",
+   "service-info 的葉子帶有 a_i 與 a_o 但沒有 a_t，而且它以版本位元組 0 開頭；`info` 沒有版本位元組但有 a_t，其版面為 E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p))",
    "三者都沒有被序列化到任何地方：trie 只儲存 eq. 9.3 的元組欄位，而 a_i、a_o 與 a_t 是在每次 host call 需要時才從 a_s 與 a_l 重新算出來的",
    "trie 的葉子帶有 a_t 但沒有 a_i 與 a_o（那兩者按需重算），而 `info` 回傳 a_i 與 a_o 但沒有 a_t；兩種編碼都以版本位元組 0 開頭"
   ],
@@ -73,7 +73,7 @@ ITEMS = [
    "一筆 storage 條目對 a_i 計 1、對 a_o 計 32 + |v|——key 的長度從不計費，因為 JAM 在 trie 裡只存 storage key 的雜湊；而遇到 FULL 時該寫入仍然生效，差額則從餘額中扣除",
    "一筆 storage 條目對 a_i 計 2、對 a_o 計 81 + |v|，與 lookup-meta 條目完全相同，理由是兩者都恰好佔用 state trie 的一片葉子；而 FULL 只有在餘額本身歸零之後才可能產生，所以一個有償付能力的 service 永遠能完成寫入",
    "門檻是在 accumulation 結尾重算一次而不是每次 host call 都算，所以 `write` 根本不可能產生 FULL；過度承諾儲存的 service 會在事後被持有其 code-hash 墓碑的那個 service 修剪掉，押金退還給 parent",
-   "一筆 storage 條目對 a_i 計 1、對 a_o 計 34 + |k| + |v|——key 與 value **都**計費；當寫入後的門檻超過餘額時該呼叫產生 FULL，而且該帳戶必須被完全原封交回，這正是 map 的寫入要延到比較之後才進行的原因"
+   "一筆 storage 條目對 a_i 計 1、對 a_o 計 34 + |k| + |v|——key 與 value 都計費；當寫入後的門檻超過餘額時該呼叫產生 FULL，而且該帳戶必須被完全原封交回，這正是 map 的寫入要延到比較之後才進行的原因"
   ],
   "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?",
  "code": {
@@ -160,7 +160,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
    "索引是新帳戶 code hash 的 Blake2b 對 2^32 取模，好讓相同的程式碼永遠落在同一個位置、使重複部署變得便宜；完全沒有探測，而萬一該索引已被佔用，整個區塊就會被判為無效",
    "索引是 δ 中當前最大的 key 加一，所以索引在整條鏈上是嚴格循序發放的、依構造不可能相撞；registrar 只是在創世時保留了最前面的 2^16 個，並在鏈外發放它們",
    "context 的 next free id 起始於 check((E⁻¹_4(H(E(s, η′_0, H_t))) mod (2^32 − S − 2^8)) + S)，其中 S = 2^16，所以它只會落在公開範圍內；check 以 i ↦ (i − S + 1) mod (2^32 − 2^8 − S) + S 向前線性探測，直到落在 K(δ) 之外的索引；而只有 registrar 可以改為指名任何小於 S 的索引",
-   "索引是用 **prior** 的熵累積器從 H(E(s, η_0, H_t)) 導出的，然後**向下**探測直到出現空位；保留區塊是索引空間的最上面 2^16 個而不是最下面的，而且任何 service（不只 registrar）都可以認領那些保留位置之一"
+   "索引是用 prior 的熵累積器從 H(E(s, η_0, H_t)) 導出的，然後向下探測直到出現空位；保留區塊是索引空間的最上面 2^16 個而不是最下面的，而且任何 service（不只 registrar）都可以認領那些保留位置之一"
   ],
   "stem": "A service calls `new` during accumulation. How does GP 0.8.0 pick the index of the child account, and how is a clash with an existing service avoided?",
  "options": [
@@ -276,7 +276,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
   "stemZh": "你們 0.7.2 的編碼器把 T(σ) 的 C(10) 條目寫成：每個 core 一個「work-report 與回報時槽」的 optional 配對。GP 0.8.0 改成放什麼？",
   "optionsZh": [
    "與先前完全相同的「每個 core 一個 work-report 與時槽的 optional 配對」；0.8.0 只是把時槽收緊成定長的 E_4 編碼，酬載本身沒有更動",
-   "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是**整份 guarantee** G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
+   "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是整份 guarantee G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
    "當前區塊的 availability assurances extrinsic，好讓某位 assurer 的 bitfield 不必重放該區塊就能對照 state root 被證明",
    "只放每個 core 待處理 report 的 availability specification（package 雜湊、erasure root、segment root、bundle 長度），而 guarantee 本身由 guarantor 保存在鏈外直到稽核要求為止；這正是 0.8.0 所追求的體積縮減"
   ],

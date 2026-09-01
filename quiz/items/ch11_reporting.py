@@ -33,7 +33,7 @@ ITEMS = [
  "id": "ch11-workreport-fields",
  "ch": "11", "section": "11.1.1 Work Report", "gpRef": "eq. 11.2–11.3",
  "difficulty": 2, "kind": "concept", "tags": ["reports"],
-  "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。哪一個欄位描述是**錯的**？",
+  "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。哪一個欄位描述是錯的？",
   "optionsZh": [
    "s——availability specification（package 雜湊、bundle 長度、erasure root、shard 數、segment root、segment 數）",
    "l——segment-root lookup 字典（work-package 雜湊 → segment root），它與 context 的 prerequisites 合計上限為 J = 8 項",
@@ -66,7 +66,7 @@ ITEMS = [
    "anchor：header 雜湊 a、時槽 n、posterior state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t、posterior state root r；prerequisites p（一組 package 雜湊）——共 8 個欄位",
    "anchor：header 雜湊 a、posterior state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t；prerequisites p（一組 package 雜湊）——共 6 個欄位，與 0.7.2 相同未變",
    "anchor：header 雜湊 a、時槽 n、posterior state root s、BEEFY root b；lookup-anchor：header 雜湊 l、時槽 t、posterior state root r；core 索引 c 與 prerequisites p（一組 package 雜湊）——共 9 個欄位",
-   "anchor：header 雜湊 a、時槽 n、**prior** state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t、**prior** state root r；prerequisites p（一組 package 雜湊）——共 8 個欄位"
+   "anchor：header 雜湊 a、時槽 n、prior state root s、accumulation-output-log 的 super-peak b；lookup-anchor：header 雜湊 l、時槽 t、prior state root r；prerequisites p（一組 package 雜湊）——共 8 個欄位"
   ],
   "stem": "Which fields does the refinement context (eq. 11.4, of the set ℂ) contain in GP 0.8.0 (PR #526)?",
  "options": [
@@ -122,7 +122,7 @@ ITEMS = [
   "optionsZh": [
    "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 程式碼超過 W_C = 4,000,000",
    "∞ guarantor 偵測到無窮迴圈；☇ host-call 錯誤；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 該 bundle 超過 W_B",
-   "∞ out-of-gas；☇ PVM 的 page fault；BADEXPORTS **匯入** segment 的數量回報錯誤；OVERSIZE 該 bundle 會超過 W_B；BAD authorizer 拒絕了該 package；BIG work-item 超過 I = 16 個",
+   "∞ out-of-gas；☇ PVM 的 page fault；BADEXPORTS 匯入 segment 的數量回報錯誤；OVERSIZE 該 bundle 會超過 W_B；BAD authorizer 拒絕了該 package；BIG work-item 超過 I = 16 個",
    "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 程式碼可得但超過 W_C = 4,000,000；BIG 程式碼在 lookup-anchor 當時不可得"
   ],
   "stem": "A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). Which meaning is correct?",
@@ -177,9 +177,9 @@ ITEMS = [
   "stemZh": "哪一組規則適用於 assurances extrinsic E_A？",
   "optionsZh": [
    "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 v 嚴格排序（因此每位 validator 至多一份）；簽章由 κ[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
-   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於**正在建構那個區塊**的雜湊；assurance 依 v 嚴格排序；簽章由 κ′[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
-   "每份 assurance = (anchor a, bitfield f ∈ bits[|κ|], validator 索引 v, **Bandersnatch** 簽章)；a 必須等於 H_P；同一位 validator 可以送出數份 assurance，只要它們仍依 v 排序；簽章對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
-   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 **core 索引**排序；簽章由 κ[v]_e 對 X_A ⌢ 每份被背書 report 的 erasure root 做出；某一位只有在 ρ‡[c] ≠ ∅ 時才可被設起"
+   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於正在建構那個區塊的雜湊；assurance 依 v 嚴格排序；簽章由 κ′[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
+   "每份 assurance = (anchor a, bitfield f ∈ bits[|κ|], validator 索引 v, Bandersnatch 簽章)；a 必須等於 H_P；同一位 validator 可以送出數份 assurance，只要它們仍依 v 排序；簽章對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
+   "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 core 索引排序；簽章由 κ[v]_e 對 X_A ⌢ 每份被背書 report 的 erasure root 做出；某一位只有在 ρ‡[c] ≠ ∅ 時才可被設起"
   ],
   "stem": "Which set of rules applies to the assurances extrinsic E_A?",
  "options": [
@@ -263,7 +263,7 @@ ITEMS = [
    "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < |κ′|/3",
    "a 恰好有 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；t 必須等於 τ′；每個簽章都是直接對編碼後的 report E(w) 本身做出；w_c < |κ′|/3",
    "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；簽署者可以是 κ′ ∪ λ′ 的任何成員、不論他們被指派到哪個 core；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；可以使用任何小於 C = 341 的 core 索引",
-   "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 **M\\*** 之下被指派到 core w_c、否則在 **M** 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < C/3"
+   "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M\\* 之下被指派到 core w_c、否則在 M 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < C/3"
   ],
   "stem": "Which statement about a guarantee g = (w, t, a) in E_G is correct?",
  "options": [
@@ -288,10 +288,10 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["guarantees", "gas"],
   "stemZh": "在一份進來的 report w 被放進 ρ′ 之前，要通過哪些鏈上檢查？",
   "optionsZh": [
-   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]（authorizer 在 **prior** 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
-   "ρ[w_c] = ∅（該 core 在 prior 狀態下是空的）；w_a ∈ α′[w_c]（authorizer 在 **posterior** 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_T = 3,500,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
+   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]（authorizer 在 prior 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
+   "ρ[w_c] = ∅（該 core 在 prior 狀態下是空的）；w_a ∈ α′[w_c]（authorizer 在 posterior 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_T = 3,500,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
    "ρ‡[w_c] = ∅，而且該 core 還必須已經空置滿 U = 5 個時槽；w_a ∈ α[w_c]；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000 且沒有每個 service 的下限；erasure 碎片數等於 |κ′|",
-   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]；各 digest 用掉的 **refine** gas 總和 ≤ G_R = 5,000,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 prior 狀態下的 |κ|"
+   "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]；各 digest 用掉的 refine gas 總和 ≤ G_R = 5,000,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 prior 狀態下的 |κ|"
   ],
   "stem": "Which on-chain checks apply to each incoming report w before it is placed in ρ′?",
  "options": [
@@ -314,7 +314,7 @@ ITEMS = [
  "id": "ch11-contextual-validity",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.35–11.45",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "context"],
-  "stemZh": "下列哪一項**不是** E_G 中 report 的脈絡有效性要求？",
+  "stemZh": "下列哪一項不是 E_G 中 report 的脈絡有效性要求？",
   "optionsZh": [
    "該 extrinsic 中沒有任何兩份 report 共用同一個 work-package 雜湊，而且任何 package 雜湊都不得出現在 β 的 reported 集合、ξ（已 accumulate）、ready queue ω 或 ρ 的某個待處理 assignment 裡",
    "anchor 的 (a, n, s, b) 必須與 β† 的某一項相符；lookup-anchor 的時間必須 ≥ H_T − L，而 lookup-anchor 的 header 必須能在祖先集合 A 中找到",
@@ -372,7 +372,7 @@ ITEMS = [
  "difficulty": 2, "kind": "code", "tags": ["assurances", "code", "delta-0.8.0"],
   "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。哪個敘述正確？",
   "optionsZh": [
-   "只要 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 是從 κ 的**即時**大小導出的——tiny 是 6 取 5、full 是 1023 取 683——而不是來自編譯期常數，它就與 GP 嚴格的「> 2/3·|κ|」完全相符",
+   "只要 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 是從 κ 的即時大小導出的——tiny 是 6 取 5、full 是 1023 取 683——而不是來自編譯期常數，它就與 GP 嚴格的「> 2/3·|κ|」完全相符",
    "它是錯的：eq. 11.17 只要求 ≥ 2/3·|κ|，所以 tiny 下 6 取 4、full 下 1023 取 682 就夠了；比較的對象應該是 ⌈2|κ|/3⌉ 而不是一個超級多數常數",
    "它是錯的：eq. 11.17 是逐 core 計算「設起該 core 那一位的 assurer 數」，而這個迴圈必須先數出 E_A 中任何位置出現過的相異 validator，再拿那個數字去和超級多數比較",
    "它是錯的：rhoDagger 項為 nil 的 core 仍然必須貢獻它的 report，因為 eq. 11.18 是在本區塊的可得性計數已經完成之後才清空 ρ‡ 的"
