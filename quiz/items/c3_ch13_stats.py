@@ -21,7 +21,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "concept",
         "tags": ["statistics", "epoch", "rollover", "prior-vs-posterior", "delta-0.8.0"],
-        "stem": (
+  "stemZh": "GP 0.8.0 §13.1 以三個有序步驟導出 validator 活動紀錄——先 π_V†，再 (π_V‡, π′_L)，最後 π′_V——其中 e = ⌊τ/E⌋、e′ = ⌊τ′/E⌋。現在看一個新 epoch 的第一塊（因此 e′ ≠ e）：出塊者是 validator 7、它的 assurance extrinsic E_A 帶有 validator 4 與 9 的簽章、而 guarantee extrinsic E_G 記功給 validator 22。這一塊自身的增量最後落在哪裡？",
+  "optionsZh": [
+   "這一塊貢獻的一切全都落進剛歸零的累積器，因為 eq. 13.4 是把 assurance 那一輪套用在 π_V‡ 而不是 π_V 上；所以 validator 7 的出塊／ticket／preimage 計數與 validator 22 的 guarantee 記功，會和 validator 4、9 的 assurance 增量一起坐在當期紀錄裡，而封存則原封保留上一個 epoch 的總計",
+   "兩筆 assurance 增量落進上期封存，因為它們是先加到 prior 紀錄上、而在換屆時被搬過去的正是那份已經加過的紀錄；validator 7 的出塊／ticket／preimage 計數與 validator 22 的 guarantee 記功則從剛歸零的累積器起算，因此落在當期紀錄。這一塊是被刻意拆分到兩份紀錄裡的",
+   "這一塊貢獻的一切全都落進上期封存，因為 eq. 13.6 把其餘五個計數器也套用在 π_V† 上，而在換屆時被搬過去的是整輪的結果；所以 validator 7 的計數、validator 22 的 guarantee 記功與 validator 4、9 的 assurance 增量會一起進入 π′_L。當期紀錄要到新 epoch 的第二塊為止都維持全零序列",
+   "換屆是由 header 的 epoch marker H_E 觸發的，而不是比較 ⌊τ/E⌋ 與 ⌊τ′/E⌋；而且當 H_E ≠ ∅ 時兩份紀錄都被歸零，而不是其中一份覆蓋另一份；因此 validator 7 的計數、validator 22 的記功與 validator 4、9 的 assurance 增量全都是當期紀錄的首批項目，封存對這一塊毫無貢獻"
+  ],
+  "stem": (
             "GP 0.8.0 §13.1 derives the validator activity records in three ordered steps — π_V†, then "
             "(π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch "
             "(so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by "
@@ -68,7 +75,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["statistics", "guarantees", "reporters", "prior-vs-posterior"],
-        "stem": (
+  "stemZh": "GP 0.8.0 把 guarantee 計數器更新為 π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G)，其中 G 是 eq. 11.28 的 reporters 集合。假設某塊的 E_G 有兩份 guarantee：validator 12 在兩份裡都簽了憑證（一份依本 rotation 的指派、一份依前一個 rotation 的），validator 30 只在其中一份簽了，而該塊的出塊者是 validator 5。g 計數器會怎麼變動？",
+  "optionsZh": [
+   "validator 12 增加 1、validator 30 增加 1、出塊者不動——加上去的那一項是對該 validator 之 Ed25519 金鑰是否屬於某個金鑰集合的布林成員測試，所以同一塊裡簽兩份憑證仍然只前進一步，而索引 v 是透過 posterior 的 active set 解析的",
+   "validator 12 增加 2、validator 30 增加 1、出塊者不動——加上去的那一項計的是憑證簽章的數量而不是做成員測試，所以在同一塊的兩份 guarantee 中簽名的 validator 會前進兩步，而索引 v 是透過 posterior 的 active set 解析的",
+   "validator 12 增加 1、validator 30 增加 1，而出塊者另外增加 2——加上去的那一項是布林成員測試，所以每位 guarantor 只前進一步，出塊者則按該塊帶入的每份 report 各記一步，而索引 v 是透過 **prior** 的 active set κ 解析的",
+   "只有出塊者變動，而且增加 2——g 記錄的是出塊者帶上鏈的 report 數，每份一步；guarantor 則改由 assurance 計數器 a 記功，而因為那個計數器是對 prior 紀錄遞增的，只要該塊落在 epoch 邊界上，他們的增量就會落進封存"
+  ],
+  "stem": (
             "GP 0.8.0 updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the "
             "reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a "
             "credential in both of them (one report under this rotation's assignment, one under the previous "
@@ -110,7 +124,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["statistics", "core-stats", "types", "gas"],
-        "stem": (
+  "stemZh": "GP 0.8.0 把 core 統計定型為 π_C ∈ ⟦(d, p, i, x, z, e, l, u)⟧_C，而 service 統計是 π_S ∈ ⟨N_S → (…)⟩。隊友正在為單一筆 core 紀錄設計 Go struct，問你這八個成分裡哪些是 gas、哪些是計數、哪些是位元組量——以及這個容器需不需要在 epoch 邊界歸零。你會怎麼說？",
+  "optionsZh": [
+   "八個全都是普通自然數——gas 型別 N_G 只出現在 service 紀錄的 refinement 配對裡；DA 負載與 extrinsic 總大小是位元組量，但 bundle 總長度計的是 bundle 裡的 segment 數；popularity 計的是本 rotation 指派到該 core 的 guarantor 數，而 import、extrinsic、export 三個成分是普通計數。容器是每個 core 一項的定長序列，每塊從頭重建",
+   "DA 負載與 refine gas 兩者都是 gas 型別，因為 DA 佔用是記在 refine 預算上的；extrinsic 總大小是位元組量，而 bundle 總長度計的是 work-item 而非位元組；popularity 與 import、export 成分是普通計數。容器是一個字典，只列出該塊中有活動的 core",
+   "只有最後一個成分是 gas 型別（N_G，各 digest 的 refine gas 總和）；DA 負載、extrinsic 總大小與 bundle 總長度都是位元組量；popularity 與 import、extrinsic、export 成分是普通計數。容器是每個 core 一項的定長序列、每塊從頭重建，所以它根本不存在 epoch 邊界歸零這回事",
+   "只有最後一個成分是 gas 型別（N_G，各 digest 的 refine gas 總和）；DA 負載、extrinsic 總大小與 bundle 總長度都是位元組量；popularity 與 import、extrinsic、export 成分是普通計數。但這個序列會跨 epoch 累積、就像 validator 紀錄那樣，並在同一次換屆時歸零，這正是第一個成分被稱為「負載」而非「大小」的原因"
+  ],
+  "stem": (
             "GP 0.8.0 types the core statistics as π_C ∈ ⟦(d, p, i, x, z, e, l, u)⟧_C while the service "
             "statistics are π_S ∈ ⟨N_S → (…)⟩. A teammate is laying out the Go struct for one core record and "
             "asks which of the eight components are gas, which are counts and which are octet quantities — and "
@@ -186,7 +207,14 @@ func UpdateCurrentStatistics(extrinsic types.Extrinsic) {
 	cs.GetPosteriorStates().SetPiCurrent(statistics.ValsCurr)
 }""",
         },
-        "stem": (
+  "stemZh": "這是團隊 GP 0.7.2 的統計程式碼（已精簡）。對照 GP 0.8.0 的 eq. 13.4–13.6，它在哪些區塊上把某位 validator 的 assurance 增量放進了錯的紀錄？最小的修法又是什麼？",
+  "optionsZh": [
+   "只有在 ⌊τ/E⌋ ≠ ⌊τ′/E⌋ 的區塊上。eq. 13.4 是把 assurance 那一輪套用在 prior 紀錄上，而 eq. 13.5 接著把那份**已經加過**的紀錄搬進封存，所以在 epoch 邊界的區塊上，每位 assurer 的增量應該屬於封存，而不是這段程式碼寫進去的那個新配置的 slice。修法是在分支之前先跑 assurance 那一輪，再把已加過的紀錄交給 else 分支的封存賦值",
+   "每一塊都錯。eq. 13.4 是把每筆 assurance 記給**出塊者**而不是簽署它的 assurer，所以可得性那一輪在每一塊上都記錯了人，而不只是在邊界上；至於那筆記功落在兩份紀錄的哪一份，是另一個問題，而這段程式碼已經答對了。修法是像 ticket 與 preimage 那兩輪一樣，用 authorIndex 來索引該增量",
+   "只在 epoch 邊界的區塊上錯，但方向相反。eq. 13.6 是在 eq. 13.5 執行換屆之前就把全部六個計數器套用在 π_V† 上，所以在邊界區塊上，出塊者的出塊、ticket 與 preimage 增量也屬於封存，而那個新配置的 slice 必須維持全零序列直到新 epoch 的第二塊。修法是把整個 UpdateCurrentStatistics 提到 epoch 分支之上",
+   "沒有任何一塊出錯：assurance 增量的位置已經符合 0.8.0，因為 eq. 13.4 本身就是套用在 π_V‡ 上，而這段程式碼同樣是在 posterior 紀錄上跑可得性那一輪。這裡唯一真正的 0.8.0 落差是 eq. 13.3——它是以 |κ| 與 |λ| 而不是以常數 ValidatorsCount 來決定兩份紀錄的大小。修法是改用 len(kappa) 來配置那個重設的 slice"
+  ],
+  "stem": (
             "This is the team's GP 0.7.2 statistics code, condensed. Measured against GP 0.8.0 eq. 13.4–13.6, "
             "on which blocks does it place a validator's assurance increment in the wrong record, and what is "
             "the minimal fix?"
@@ -260,7 +288,14 @@ servicesStatistics[serviceID] = types.ServiceActivityRecord{
 	AccumulateGasUsed: accumulateGasUsed,
 }""",
         },
-        "stem": (
+  "stemZh": "團隊的 GP 0.7.2 程式碼把每筆 service 紀錄的 accumulation 條目建成如圖所示的配對。GP 0.8.0 重塑了那個條目。究竟改了什麼？它對「哪些 service 會出現在 π′_S」又有什麼可觀察的後果？",
+  "optionsZh": [
+   "該條目變成三元素值——為該 service accumulate 掉的 work-digest 數、送達它的 deferred transfer 數、以及 accumulation gas——取法是對該 service 在 S 中的條目做「若為空則替代」、預設值為全零三元組。由於 S 現在保留每個三元組不全為零的 service，一個只被進來的 transfer 觸及的 service 其中間那個元素非零，因而成為 S 的 key，也就加入了構成 π′_S 定義域的那個聯集",
+   "該條目維持兩個元素——為該 service accumulate 掉的 work-digest 數與 accumulation gas——但 gas 元素從 N_G 重新定型為普通自然數，而且改用裸的字典下標而不是「若為空則替代」的包裝來讀取。π′_S 的定義域不變，仍是「被回報的 service ∪ 收到 preimage 的 service ∪ accumulation 統計的 key」，所以只被 transfer 觸及的 service 永遠不會出現",
+   "0.8.0 恢復了獨立的 on-transfer PVM invocation Ψ_T，所以 accumulation 條目維持兩個元素，而該紀錄另外從第二個 on-transfer 統計字典取得 transfer 計數與 transfer gas 兩個新的頂層欄位。因此每個收到 transfer 的 service 都會帶著自己的 on-transfer gas 數字出現在 π′_S 裡，與被回報的、收到 preimage 的 service 並列",
+   "該條目變成三元素值——為該 service accumulate 掉的 work-digest 數、提供給它的 preimage 數、以及 accumulation gas——取法是對該 service 在 S 中的條目做「若為空則替代」、預設值為全零三元組。由於那個中間元素已經計了 provision，獨立的 provision 配對變得多餘，而 π′_S 的定義域也收窄成恰好是 accumulation 統計的 key"
+  ],
+  "stem": (
             "The team's GP 0.7.2 code builds each service record's accumulation entry as the pair shown. GP "
             "0.8.0 reshapes that entry. What exactly changes, and what observable consequence does it have for "
             "which services appear in π′_S?"
@@ -305,7 +340,14 @@ servicesStatistics[serviceID] = types.ServiceActivityRecord{
         "difficulty": 2,
         "kind": "rationale",
         "tags": ["statistics", "rationale", "state", "epoch", "staking"],
-        "stem": (
+  "stemZh": "面試官反問：「validator 計數器在我看來像遙測資料。為什麼它們要成為 σ 的一個分量、還被 Merklize 進 state trie？又為什麼要保留兩份 validator 紀錄而不是一個滾動的計數器？」以 GP 為根據的回答是什麼？",
+  "optionsZh": [
+   "這基本上是序列化上的便利：JIP-2 RPC 的統計端點與 conformance 向量想要一個形狀固定的紀錄，所以 π 只是搭順風車待在 σ 裡好給那些消費者一個穩定的版面；而且因為它被排除在附錄 D 的 state trie 建構之外，一個完全跳過這項更新的節點仍然會算出相同的 state root。那個配對的存在只是為了讓測試向量能一次比對整個 epoch 的總計",
+   "因為 Grandpa 會依 validator 的表現為 finality 投票加權，所以這些數字必須待在 finality gadget 讀得到的 σ 裡，而過期的累積器會讓某位 validator 以上個 epoch 的權重投票；這也是為什麼 §13.1 讓 validator 互相對彼此的稽核努力投票。那個配對的存在是為了讓 epoch 中途被移出 active set 的 validator 仍然能對照自己的歷史而非接替者的歷史被沒收",
+   "因為出塊者的獎勵是在同一塊內從該塊的 accumulation gas 預算支付的，所以這些計數器必須能從狀態轉移內部讀取，而不是從鏈外索引讀取。那個配對是一個回滾緩衝：當某個分叉被回退時，封存會被複製回累積器之上，而這正是兩半都必須被 Merklize 的原因",
+   "因為這些數字在每個節點上都必須逐位元相同、而且要能向鏈外的消費者證明：JAM 自己不發放獎勵，但必須把活動資料交給質押子系統，所以這份紀錄是一個有自己 trie key 的狀態分量，算法不同的節點會產出不同的 state root。那個配對的存在是因為結算是逐 epoch 的——封存在整個下一個 epoch 期間原封不動保存剛結束那個 epoch 的總計，讓人在累積器持續填入的同時仍有一份穩定的快照可讀"
+  ],
+  "stem": (
             "An interviewer pushes back: 'Validator counters look like telemetry to me. Why are they a "
             "component of σ and Merklized into the state trie at all, and why keep two validator records "
             "rather than one running counter?' What is the GP-grounded answer?"

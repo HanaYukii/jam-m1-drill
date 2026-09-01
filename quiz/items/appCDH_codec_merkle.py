@@ -5,7 +5,14 @@ ITEMS = [
  "id": "appC-discriminators",
  "ch": "C", "section": "C.1 Discriminator / Sequence / Dictionary encoding", "gpRef": "§C.1.3–C.1.5",
  "difficulty": 2, "kind": "concept", "tags": ["codec"],
- "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?",
+  "stemZh": "附錄 C 規定了：型別未隱含長度的值如何編碼、缺席的值如何與存在的值區分、字典如何排列、以及位元序列往哪個方向打包。關於這四項慣例，哪一個說法是對的？",
+  "optionsZh": [
+   "定長項目（雜湊、定長序列）照原樣編碼；變長項目 ↕x 前面掛 E(|x|)；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的 (key, value) 配對；而位元序列以「最低位在前」打包進位元組",
+   "定長項目（雜湊、定長序列）前面也掛 E(|x|)，好讓解碼器永遠不需要型別資訊；變長項目 ↕x 同樣如此；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的配對；而位元序列以最低位在前打包",
+   "定長項目照原樣編碼；變長項目 ↕x 前面掛 E(|x|)；optional 值 x? 在為 ∅ 時編成 [0xFF]、否則只編值本身；字典編成依**插入順序**排列的 (key, value) 配對；而位元序列以最低位在前打包",
+   "定長項目照原樣編碼；變長項目 ↕x 前面掛 E_4(|x|)，所以每個長度前綴寬度相同；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的配對；而位元序列以「最高位在前」打包"
+  ],
+  "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?",
  "options": [
   "Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
   "Fixed-length items (hashes, fixed sequences) are prefixed by E(|x|) too, so a decoder never needs type information; variable-length items ↕x are prefixed the same way; an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
@@ -26,7 +33,14 @@ ITEMS = [
  "id": "appC-fixed-vs-compact",
  "ch": "C", "section": "C.2–C.3 Block/state serialization", "gpRef": "§C.2 & appendix D note",
  "difficulty": 2, "kind": "concept", "tags": ["codec"],
- "stem": "Where does the GP use fixed-width integer encodings E_l versus the general compact encoding E?",
+  "stemZh": "GP 在哪些地方使用定寬整數編碼 E_l、又在哪些地方使用通用的緊湊編碼 E？",
+  "optionsZh": [
+   "狀態序列化（附錄 D）對所有非判別子的數值使用定長（例如 E_4(τ)、E_8(餘額)）；區塊／extrinsic 的編碼對時槽用 E_4、對 validator 索引用 E_2，而長度與判別子一律使用緊湊的 E；GP 在附錄 C 逐一明訂每個結構的編碼",
+   "狀態序列化（附錄 D）對所有非判別子的數值使用定長；區塊／extrinsic 的編碼對時槽用 **E_8**、對 validator 索引用 **E_4**，而長度與判別子一律使用緊湊的 E；附錄 C 把每個結構的欄位版面交由實作決定",
+   "狀態序列化（附錄 D）對每一個數值都使用緊湊的 E，包括 τ 與帳戶餘額；區塊／extrinsic 的編碼對時槽用 E_4、對 validator 索引用 E_2，而長度與判別子一律是定長 4 位元組的值；GP 在附錄 C 逐一明訂每個結構的編碼",
+   "狀態序列化（附錄 D）對所有非判別子的數值使用定長，但採 **big-endian** 而非 little-endian；區塊／extrinsic 的編碼對時槽用 E_4、對 validator 索引用 E_2，而長度與判別子一律使用緊湊的 E；service 索引全程都是 E_2，與 validator 索引同寬"
+  ],
+  "stem": "Where does the GP use fixed-width integer encodings E_l versus the general compact encoding E?",
  "options": [
   "State serialization (appendix D) uses fixed-length for all non-discriminator numerics (e.g. E_4(τ), E_8(balance)); block/extrinsic encodings use E_4 for timeslots and E_2 for validator indices, while lengths/discriminators always use the compact E; the GP defines each structure's encoding explicitly in appendix C",
   "State serialization (appendix D) uses fixed-length for all non-discriminator numerics (e.g. E_4(τ), E_8(balance)); block/extrinsic encodings use E_8 for timeslots and E_4 for validator indices, while lengths/discriminators always use the compact E; appendix C leaves each structure's field layout to the implementation",
@@ -47,7 +61,14 @@ ITEMS = [
  "id": "appD-state-key",
  "ch": "D", "section": "D.1 Serialization (state-key constructor C)", "gpRef": "§D.1 eq. C",
  "difficulty": 3, "kind": "concept", "tags": ["merklization", "state-keys"],
- "stem": "The state-key constructor C maps to 31-octet keys. Which forms are correct?",
+  "stemZh": "state-key 建構子 C 映到 31 位元組的 key。哪些形式是正確的？",
+  "optionsZh": [
+   "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 的位元組與雜湊的前 4 個位元組交錯，之後接雜湊的第 4 到 26 個位元組",
+   "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, n_1, n_2, n_3, 0, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 佔一段連續區間，只有雜湊位元組是交錯的",
+   "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_27]，其中 n = E_4(s)、a 是 **h 本身**——原始的 32 位元組 key 被交錯進去，結果長達 32 位元組",
+   "C(i) = [0, …, 0, i]，章節索引放在最後一個位元組；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, …, a_26]，其中 n = E_4(s)、a = H(h)，而對 storage 項目而言 h 是原始的 storage key"
+  ],
+  "stem": "The state-key constructor C maps to 31-octet keys. Which forms are correct?",
  "options": [
   "C(i) = [i, 0, 0, …]; C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …] with n = E_4(s); C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26] with n = E_4(s) and a = H(h) — service-id bytes interleaved with the first 4 hash bytes, then hash bytes 4..26",
   "C(i) = [i, 0, 0, …]; C(i, s) = [i, n_0, n_1, n_2, n_3, 0, 0, …] with n = E_4(s); C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26] with n = E_4(s) and a = H(h) — the service id sits in one contiguous run and only the hash bytes are interleaved",
@@ -68,7 +89,14 @@ ITEMS = [
  "id": "appD-trie-nodes",
  "ch": "D", "section": "D.2 Merklization (node encoding)", "gpRef": "§D.2.1 B and L functions, M",
  "difficulty": 2, "kind": "concept", "tags": ["merklization", "trie"],
- "stem": "How are nodes of the state Patricia Merkle trie encoded?",
+  "stemZh": "狀態 Patricia Merkle trie 的節點是怎麼編碼的？",
+  "optionsZh": [
+   "每個節點都是 512 位元。branch：bit 0 = 0，接著是左子節點雜湊的**後 255 位元**，再接右子節點雜湊的完整 256 位元。值 ≤ 32 位元組的 leaf：位元 10 加 6 位元的值長度、31 位元組的 key，然後是補零到 32 位元組的值本身。值更大的 leaf：位元 11000000、31 位元組的 key，然後是 H(值)。空（子）trie = 零雜湊；節點識別 = 對那 64 個位元組取 Blake2b",
+   "每個節點都是 512 位元。branch：bit 0 = 0，接著是左子節點雜湊的**完整 256 位元**，再接右子節點雜湊的後 255 位元。leaf 同上。空（子）trie = H([])；節點識別 = 對那 64 個位元組取 Blake2b",
+   "每個節點都是 512 位元。branch 同第一個選項。值 ≤ 32 位元組的 leaf：位元 10 加 6 位元的值長度、31 位元組的 key，然後是 **H(值)**。值更大的 leaf：位元 11000000、31 位元組的 key，然後是**值的前 32 個位元組**。空（子）trie = 零雜湊；節點識別 = 對那 64 個位元組取 **Keccak**",
+   "每個節點都是 512 位元。branch：bit 0 = **1**，接著是左子節點雜湊的後 255 位元，再接右子節點雜湊的完整 256 位元。值 ≤ 32 位元組的 leaf：位元 **00** 加 6 位元的值長度、31 位元組的 key，然後是補零到 32 位元組的值。值更大的 leaf：位元 **01000000**、31 位元組的 key，然後是 H(值)。空（子）trie = 零雜湊；節點識別 = 對那 64 個位元組取 Blake2b"
+  ],
+  "stem": "How are nodes of the state Patricia Merkle trie encoded?",
  "options": [
   "Every node is 512 bits. Branch: bit 0 = 0, then the last 255 bits of the left child's hash, then the full 256 bits of the right child's hash. Leaf with value ≤ 32 octets: bits 10 + 6-bit value length, the 31-octet key, then the value zero-padded to 32 octets. Leaf with larger value: bits 11000000, the 31-octet key, then H(value). Empty (sub)trie = zero hash; node identity = Blake2b of the 64 octets",
   "Every node is 512 bits. Branch: bit 0 = 0, then the full 256 bits of the left child's hash, then the last 255 bits of the right child's hash. Leaf with value ≤ 32 octets: bits 10 + 6-bit value length, the 31-octet key, then the value zero-padded to 32 octets. Leaf with larger value: bits 11000000, the 31-octet key, then H(value). Empty (sub)trie = H([]); node identity = Blake2b of the 64 octets",
@@ -89,7 +117,14 @@ ITEMS = [
  "id": "appE-merkle-functions",
  "ch": "E", "section": "E.1 Binary Merkle Trees & E.2 MMR", "gpRef": "eq. E.1–E.8",
  "difficulty": 2, "kind": "concept", "tags": ["merklization", "mmr"],
- "stem": "Which description of the general Merklization functions is correct?",
+  "stemZh": "關於通用 Merklization 函數的描述，哪一個是正確的？",
+  "optionsZh": [
+   "N（節點）：在 ⌈n/2⌉ 處切分序列，並雜湊 '$node' ⌢ 左 ⌢ 右（well-balanced）；M_B 是對**原始 blob** 取的 well-balanced root（它刻意不對每一項先做雜湊）；M（定深）先把每片葉子雜湊成 '$leaf' ⌢ v，再用零雜湊補到 2 的冪——用於 segment root 與 paged proof；MMR 的 append 函數 A 以二進位加法式的進位加上一個 peak，而 super-peak 則以 '$peak' 前綴把各 peak 摺疊起來",
+   "N：在 ⌊n/2⌋ 處切分序列所以右半較大，並雜湊 '$node' ⌢ 左 ⌢ 右；M_B 是對原始 blob 取的 well-balanced root；M（定深）先把每片葉子雜湊成 '$leaf' ⌢ v，再以**重複最後一片葉子**（而非零雜湊）補到 2 的冪；MMR 的 append 函數 A 為每片葉子直接開一個新 peak、完全不進位，而 super-peak 以 '$peak' 前綴摺疊",
+   "N：在 ⌈n/2⌉ 處切分，並雜湊 左 ⌢ 右、**不加任何 domain-separation 前綴**（前綴保留給葉子）；M_B 是補到 2 的冪的定深 root，而 M 才是對原始 blob 取的 well-balanced root——兩者是依葉子處理方式而非形狀命名的；MMR 的 append 像二進位加法一樣進位，而 super-peak 以 '$node' 前綴在 Blake2b 之下摺疊",
+   "N：在 ⌈n/2⌉ 處切分，並雜湊 '$node' ⌢ 左 ⌢ 右（well-balanced）；**M_B 會先把每一項雜湊成 '$leaf' ⌢ v** 再建樹，這正是它每項多花一次雜湊的原因；**M（定深）取的是原始 blob**，並用零雜湊補到 2 的冪；MMR 的 append 像二進位加法一樣進位，而 super-peak 以 '$peak' 前綴摺疊，但只在 peak 數為 2 的冪時才有定義"
+  ],
+  "stem": "Which description of the general Merklization functions is correct?",
  "options": [
   "N (node): splits the sequence at ⌈n/2⌉ and hashes '$node' ⌢ left ⌢ right (well-balanced); M_B is the well-balanced root taken over the RAW blobs (it deliberately avoids hashing each item); M (constant-depth) first hashes each leaf as '$leaf' ⌢ v and pads to a power of two with zero hashes — used for segment roots and paged proofs; the MMR append A adds a peak with binary-addition-style carrying and the super-peak folds the peaks with a '$peak' prefix",
   "N (node): splits the sequence at ⌊n/2⌋ so the right half is the larger one, and hashes '$node' ⌢ left ⌢ right; M_B is the well-balanced root taken over the RAW blobs; M (constant-depth) first hashes each leaf as '$leaf' ⌢ v and pads to a power of two by repeating the final leaf rather than with zero hashes; the MMR append A gives every leaf its own new peak without any carrying, and the super-peak folds the peaks with a '$peak' prefix",
@@ -110,7 +145,14 @@ ITEMS = [
  "id": "appH-chunking",
  "ch": "H", "section": "H Erasure Coding", "gpRef": "eq. H.5–H.6",
  "difficulty": 2, "kind": "concept", "tags": ["erasure-coding"],
- "stem": "How does the chunking function 𝒞^v_k turn a data blob into v chunks, and what makes the code 'systematic'?",
+  "stemZh": "分塊函數 𝒞^v_k 是怎麼把一份資料 blob 變成 v 個 chunk 的？又是什麼讓這個編碼是「systematic」的？",
+  "optionsZh": [
+   "該 blob（補齊到 2·d(v) 個 octet 的倍數）被切成 k 段、每段 d(v) 個 octet 對；每一段各自被 erasure-code 成 v 個 octet 對；結果經轉置，使 chunk i 持有每一段的第 i 個對（每個 chunk k 個對）；systematic 意謂前 d(v) 個 chunk 就是原始資料，所以只要它們都在，重建就只是串接",
+   "該 blob（補齊到 2·v 個 octet 的倍數）被切成 v 段、每段一個 octet 對；每一段各自被 erasure-code 成 d(v) 個 octet 對；結果是**串接而非轉置**，所以 chunk i 是編碼串流的一段連續切片；systematic 意謂同位對排在資料之後，因此任何 v − d(v) 個 chunk 就能重建",
+   "該 blob 被切成 k 段、每段 d(v) 個 octet 對；每一段各自被 erasure-code 成 v 個 octet 對；接著這些段會被**雜湊**，而被發出去當 chunk 的是那些雜湊而不是編碼後的對；systematic 意謂每個 chunk 都帶著自己索引的 Merkle 證明，所以不必重建任何東西就能檢查單一個 chunk",
+   "該 blob 被切成 k 段、每段 d(v) 個 octet 對；每一段各自在**標準多項式基底的 GF(2^8)** 上被 erasure-code 成 v 個 octet 對；結果經轉置使 chunk i 持有每一段的第 i 個對；systematic 意謂該編碼器是自身的反函數，所以對同一份 blob 編碼兩次會得回原 blob"
+  ],
+  "stem": "How does the chunking function 𝒞^v_k turn a data blob into v chunks, and what makes the code 'systematic'?",
  "options": [
   "The blob (padded to a multiple of 2·d(v) octets) is split into k pieces of d(v) octet-pairs; each piece is erasure-coded into v octet-pairs; the results are transposed so that chunk i holds the i-th pair of every piece (k pairs per chunk); systematic means the first d(v) chunks are the original data, so if they are all present reconstruction is mere concatenation",
   "The blob (padded to a multiple of 2·v octets) is split into v pieces of one octet-pair each; each piece is erasure-coded into d(v) octet-pairs; the results are concatenated rather than transposed, so chunk i is a contiguous slice of the coded stream; systematic means the parity pairs sit after the data, so any v − d(v) chunks reconstruct",

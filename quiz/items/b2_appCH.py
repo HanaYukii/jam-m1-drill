@@ -6,7 +6,14 @@ ITEMS = [
  "id": "appC-code-avspec-080",
  "ch": "C", "section": "C.2 Block Serialization (availability specification)", "gpRef": "§C.2 E(s ∈ availability spec); eq. 11.5; eq. 11.31",
  "difficulty": 2, "kind": "code", "tags": ["codec", "availability-spec", "delta-0.8.0"],
- "stem": "The team's encoder for the availability specification (work-package spec) is still on GP 0.7.2. What must change so that it produces the GP 0.8.0 wire form E(s) of §C.2, and which on-chain rule accompanies the new field?",
+  "stemZh": "團隊為 availability specification（work-package spec）寫的編碼器還停在 GP 0.7.2。要讓它產出 §C.2 的 GP 0.8.0 線路格式 E(s)，必須改什麼？伴隨這個新欄位的鏈上規則又是什麼？",
+  "optionsZh": [
+   "在 ErasureRoot 與 ExportsRoot 之間插入一個 U16 的 erasure 碎片數 v，編碼為 E_2(v)；其餘寬度維持原樣（長度用 E_4、exports 計數用 E_2）；鏈上則要求每一份進來的 report 都必須帶 v = |κ′|",
+   "把 E_2(v) 附加在 ExportsCount **之後**，因為自 GP 0.7.0 起，結構新增的任何欄位都必須放到尾端以維持解碼器的串流友善性；鏈上則要求 v 必須等於 core 數 C",
+   "把定寬的 E_4 Length 換成緊湊的 E(l)，並在其後緊接著加上緊湊自然數 v；v 就是該 guarantor 實際分發出去的碎片數量，所以鏈上不做檢查",
+   "線路上什麼都不用改：v 可以從 validator 數 V 推導出來，因此從不被序列化；只有 JSON 測試向量的 schema 為了可讀性多了一個 erasure_shards 欄位"
+  ],
+  "stem": "The team's encoder for the availability specification (work-package spec) is still on GP 0.7.2. What must change so that it produces the GP 0.8.0 wire form E(s) of §C.2, and which on-chain rule accompanies the new field?",
  "code": {"lang": "go", "caption": "internal/types/encode.go (WorkPackageSpec.Encode) — struct fields: Hash, Length U32, ErasureRoot, ExportsRoot, ExportsCount U16", "src": "func (w *WorkPackageSpec) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding WorkPackageSpec\")\n\n\t// Hash\n\tif err := w.Hash.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// Length\n\tif err := w.Length.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ErasureRoot\n\tif err := w.ErasureRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsRoot\n\tif err := w.ExportsRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsCount\n\tif err := w.ExportsCount.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\treturn nil\n}"
  },
  "options": [
@@ -29,7 +36,14 @@ ITEMS = [
  "id": "appC-code-operand-transfer-prefix",
  "ch": "C", "section": "C.2 Block Serialization (operand tuple and deferred transfer)", "gpRef": "§C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14",
  "difficulty": 2, "kind": "code", "tags": ["codec", "accumulation", "deferred-transfer", "fetch"],
- "stem": "The team prefixes each accumulate input item with a byte before its body. Which explanation of the two prefixes and of what actually consumes this encoding is correct per GP 0.8.0?",
+  "stemZh": "團隊在每個 accumulate 輸入項目的本體之前加了一個位元組作為前綴。依 GP 0.8.0，關於這兩種前綴、以及究竟是誰在消費這個編碼，哪一種解釋是正確的？",
+  "optionsZh": [
+   "這兩個前綴就是 GP 放在 E(運算元組)（0）與 E(deferred transfer)（1）之前的判別子；Ψ_A 收下的是單一個混合序列 i ∈ ⟦運算元 ∪ transfer⟧，而 service 透過 fetch（case 14／15）把它讀回來，所以每個項目都必須自我描述",
+   "這兩個前綴分隔的是 accumulate 記憶體映像的兩半：Ψ_M 的初始引數 E(t, s, |i|) 之後，先寫入每個運算元（前綴 0）、再寫入每筆 transfer（前綴 1）到 RAM 裡，所以 fetch 只需要服務 work-package 的資料，也沒有任何東西需要自我描述",
+   "那個前綴是 GP 0.7.1 引入的帳戶序列化版本位元組（0 = 舊版運算元版面、1 = 帶 128 位元組 memo 的 transfer 版面）；Ψ_A 收下的是兩個各自獨立的序列（一個運算元、一個 transfer），而 0.8.0 因為兩者不再共用序列而拿掉了那個位元組",
+   "這些前綴只是團隊為了 JSON 測試向量而定的慣例；線路上 GP 把所有 transfer 排在所有運算元之前，並以固定長度區分兩者（transfer 本體為 152 個 octet）；service 則從 Ψ_M 的初始引數得知這個分界，因為那個引數帶的是兩個計數而不是單一個總數"
+  ],
+  "stem": "The team prefixes each accumulate input item with a byte before its body. Which explanation of the two prefixes and of what actually consumes this encoding is correct per GP 0.8.0?",
  "code": {"lang": "go", "caption": "internal/types/encode.go (OperandOrDeferredTransfer.Encode)", "src": "func (o *OperandOrDeferredTransfer) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding OperandOrDeferredTransfer\")\n\n\t// if operand is nil, append 0 to the buffer, else append 1\n\tif o.Operand == nil && o.DeferredTransfer == nil {\n\t\treturn errors.New(\"Operand and DeferredTransfer are both nil\")\n\t}\n\t// ...\n\t// Operand\n\tif o.Operand != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{0})\n\n\t\tif err := o.Operand.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\t// DeferredTransfer\n\tif o.DeferredTransfer != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{1})\n\n\t\tif err := o.DeferredTransfer.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\treturn nil\n}"},
  "options": [
   "The prefixes are the discriminators GP puts in front of E(operand tuple) (0) and E(deferred transfer) (1); Ψ_A takes one mixed sequence i ∈ ⟦operand ∪ transfer⟧ and the service reads it back through fetch (cases 14/15), so each item must be self-describing",
@@ -51,7 +65,14 @@ ITEMS = [
  "id": "appD-code-service-info-key",
  "ch": "D", "section": "D.1 Serialization (state-key constructor C)", "gpRef": "§D.1 state-key constructor C (unlabelled first equation of appendix D)",
  "difficulty": 3, "kind": "code", "tags": ["merklization", "state-keys", "fuzzer-bug"],
- "stem": "Before PR #780 the team recognised a service-info key C(255, s) by testing only stateKey[0] == 0xFF, and fuzzer traces failed with 'failed to decode expected service info from state key 0xffff0017…: EOF'. Why was byte 0 alone ambiguous, and why is the current check sound?",
+  "stemZh": "在 PR #780 之前，團隊只靠測試 stateKey[0] == 0xFF 來辨認 service-info key C(255, s)，而 fuzzer 的 trace 以「failed to decode expected service info from state key 0xffff0017…: EOF」失敗。為什麼單看第 0 個位元組會有歧義？現在的檢查又為什麼是可靠的？",
+  "optionsZh": [
+   "C(s, h) 的 key 以 n_0（也就是 E_4(s) 的低位位元組）開頭，所以每一個 s mod 256 = 255 的 service，其 storage／preimage／request key 都會以 0xFF 開頭；新的檢查另外要求所有非 service-id 位置都為零，而一個由 Blake2b 導出的 key 要符合這點的機率可忽略不計",
+   "id 大於 2^24 的 service，其 C(255, s) key 會把第四個 id 位元組溢出到位置 9，所以單看第 0 個位元組無法把它們與章節 key C(9)…C(16) 分開；因此修法是跳過位置 1、3、5、7，並且也容忍位置 9",
+   "因為 C(s, h) 是把 service id 與 key 一起雜湊，所以這種 key 的每一個位元組（包括第一個）都是均勻隨機的，於是大約 1/256 的 key 會以 0xFF 開頭；修法是把整個 key 重新雜湊一次，讓 0xFF 前綴變得不可能出現",
+   "accumulation-output 分量 θ 的章節 key C(255) 與 C(255, s) 共用第一個位元組；修法是要求位置 1、3、5、7 帶非零的 service id、其餘位置全為零，以此區分兩者"
+  ],
+  "stem": "Before PR #780 the team recognised a service-info key C(255, s) by testing only stateKey[0] == 0xFF, and fuzzer traces failed with 'failed to decode expected service info from state key 0xffff0017…: EOF'. Why was byte 0 alone ambiguous, and why is the current check sound?",
  "code": {"lang": "go", "caption": "internal/utilities/merklization/parse_state_key_vals.go (IsServiceInfoKey) + state_key_constructor.go (ServiceWrapper.StateKeyConstruct)", "src": "func IsServiceInfoKey(stateKey types.StateKey) bool {\n\tif stateKey[0] != 0xFF {\n\t\treturn false\n\t}\n\tfor i := 1; i < len(stateKey); i++ {\n\t\tif i == 1 || i == 3 || i == 5 || i == 7 {\n\t\t\tcontinue\n\t\t}\n\t\tif stateKey[i] != 0 {\n\t\t\treturn false\n\t\t}\n\t}\n\treturn true\n}\n\n// [n_0, h_0, n_1, h_1, n_2, h_2, n_3, h_3, h_4, h_5,...,h_26] where n = encode_4(service_id)\nfunc (w ServiceWrapper) StateKeyConstruct() (output types.StateKey) {\n\tn := encodeServiceID(w.ServiceIndex)\n\ta := hash.Blake2bHashPartial(w.h[:], 27)\n\tfor i := 0; i <= 3; i++ {\n\t\toutput[2*i] = n[i]\n\t\toutput[2*i+1] = a[i]\n\t}\n\tfor i := 4; i <= 26; i++ {\n\t\toutput[i+4] = a[i]\n\t}\n\treturn output\n}"},
  "options": [
   "C(s, h) keys start with n_0, the low octet of E_4(s), so every service with s mod 256 = 255 yields storage/preimage/request keys beginning 0xFF; the new check also requires zeros in all non-service-id positions, which a Blake2b-derived key matches only with negligible probability",
@@ -73,7 +94,14 @@ ITEMS = [
  "id": "appF-code-shuffle",
  "ch": "F", "section": "F Shuffling (Fisher–Yates)", "gpRef": "eq. F.1 (shuffle), F.2 (Q_l), F.3 (hash form); eq. 11.20–11.22 (guarantor assignment R, P, M); eq. 17.3 and the tranche-0 selection that follows it",
  "difficulty": 2, "kind": "code", "tags": ["shuffle", "guarantor-assignment", "calc"],
- "stem": "This is the team's implementation of the shuffle F of eq. F.1. For s = [10, 20, 30, 40] and r = [3, 6, 4, 5], what does it return, and is the in-place swap faithful to the GP definition?",
+  "stemZh": "這是團隊對 eq. F.1 洗牌函數 F 的實作。對於 s = [10, 20, 30, 40] 與 r = [3, 6, 4, 5]，它會回傳什麼？那個就地交換忠於 GP 的定義嗎？",
+  "optionsZh": [
+   "[40, 10, 30, 20]；忠實——GP 是把 s_{l−1} 寫進被挑中的位置並捨去最後一格，而「先交換再切掉尾端」是同一件事（副作用是呼叫者的 slice 被就地修改）",
+   "[40, 10, 20, 30]；不忠實——GP 是把被挑中的元素移除並把其餘左移、保持相對順序，所以與 s[l-1] 的交換會靜默地打亂存活者的順序",
+   "[20, 30, 10, 40]；不忠實——GP 的結果是所有交換套用完之後原地留下的那個陣列，而不是被依序挑出的元素序列，所以這個函數回傳的是 eq. F.1 所定義者的反序",
+   "[40, 30, 10, 20]；不忠實——GP 是對每個 r_i 取**原始長度** l 的模並索引原序列、完全不縮短它，只在最後才丟棄重複"
+  ],
+  "stem": "This is the team's implementation of the shuffle F of eq. F.1. For s = [10, 20, 30, 40] and r = [3, 6, 4, 5], what does it return, and is the in-place swap faithful to the GP definition?",
  "code": {"lang": "go", "caption": "internal/utilities/shuffle/shuffle.go (FisherYatesShuffle)", "src": "func FisherYatesShuffle(s []types.U32, r []types.U32) []types.U32 {\n\tl := len(s)\n\n\t// If the sequence is empty, return an empty slice\n\tif l == 0 {\n\t\treturn make([]types.U32, 0)\n\t}\n\n\t// Calculate the index\n\tindex := r[0] % types.U32(l)\n\n\t// The selected element\n\tselected := s[index]\n\n\t// Swap elements\n\ts[index], s[l-1] = s[l-1], s[index]\n\n\t// Recursively shuffle the remaining elements\n\tshuffledRest := FisherYatesShuffle(s[:l-1], r[1:])\n\n\t// Return the shuffled sequence\n\treturn append([]types.U32{selected}, shuffledRest...)\n}"},
  "options": [
   "[40, 10, 30, 20]; faithful — GP writes s_{l−1} into the picked slot and drops the last position, and swapping then slicing off the tail is the same thing (the caller's slice is mutated as a side effect)",
@@ -95,7 +123,14 @@ ITEMS = [
  "id": "appG-ietf-vs-ring",
  "ch": "G", "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)", "gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
  "difficulty": 2, "kind": "concept", "tags": ["bandersnatch", "vrf", "ring-vrf", "safrole"],
- "stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?",
+  "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。關於兩者各用在哪、大小如何、以及輸出函數 Y，哪個敘述正確？",
+  "optionsZh": [
+   "只有 E_T 裡的 ticket 證明是 784 位元組的 ring-VRF 證明（匿名，對照 144 位元組的 ring root 驗證）；seal H_S、熵 H_V 與稽核種子都是具名金鑰下 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是 VRF 輸出的前 32 個位元組，而且取決於 context 而非訊息",
+   "seal H_S 與 ticket 證明**兩者都是** 784 位元組的 ring-VRF 證明、對照 144 位元組的 γ′_Z 驗證——正是這點讓出塊者在該 epoch 結束前保持匿名；熵 H_V 與稽核種子則是 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是完整 64 位元組的 VRF 輸出，取決於 context 而非訊息",
+   "只有 ticket 證明是 784 位元組的 ring-VRF 證明；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；但兩者的 Y(·) 都是**整個簽章的 Blake2b 雜湊**，因此會隨被簽的訊息改變——這正是 ticket 要簽空訊息的原因",
+   "只有 ticket 證明是 784 位元組的 ring-VRF 證明，且是對照一個承諾於 **active set κ′**（而非 pending set）的 32 位元組 ring root 驗證；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；Y(·) 是 VRF 輸出的前 32 個位元組，而被 Φ 歸零的金鑰會被移出 ring，因此 ring 會隨 offender 數量而縮小"
+  ],
+  "stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?",
  "options": [
   "Only ticket proofs in E_T are 784-octet ring-VRF proofs (anonymous, checked against a 144-octet ring root); the seal H_S, entropy H_V and audit seeds are 96-octet IETF VRF signatures under a named key; in both, Y(·) is the first 32 octets of the VRF output and depends on the context, not the message",
   "Both the seal H_S and the ticket proof are 784-octet ring-VRF proofs checked against the 144-octet γ′_Z — that is what keeps the block author anonymous until the epoch ends; the entropy H_V and the audit seeds are 96-octet IETF VRF signatures under a named key; in both, Y(·) is the full 64-octet VRF output and depends on the context, not the message",
@@ -116,7 +151,14 @@ ITEMS = [
  "id": "appG-signing-contexts",
  "ch": "G", "section": "Signing contexts X (definitions appendix) and their primitives", "gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
  "difficulty": 2, "kind": "concept", "tags": ["signing-contexts", "bandersnatch", "ed25519", "bls"],
- "stem": "Each JAM signature is domain-separated by a context string X. Which of the following (context → primitive → use) statements is correct?",
+  "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。下列（context → 原語 → 用途）的敘述哪一個正確？",
+  "optionsZh": [
+   "X_T = $jam_ticket_seal 被用了兩次：一次用於 ring-VRF 的 ticket 證明（context 為 X_T ⌢ η′_2 ⌢ [e]、空訊息、root 為 γ′_Z），一次用於一般的 IETF-VRF seal（context 為 X_T ⌢ η′_3 ⌢ [i_e]、訊息為 E_U(H)）",
+   "X_E = $jam_entropy 是出塊者對未簽署 header E_U(H) 所做的 **Ed25519** 簽章；而餵給熵累積器 η′_0 的，是該簽章的 Blake2b 雜湊",
+   "X_G = $jam_guarantee 是對 H(w) 的 Bandersnatch VRF context，而它的輸出 Y(·) 同時充當與 ρ 中 availability assignment 一起儲存的 guarantee 識別碼",
+   "X_U = $jam_audit 是 validator 用來簽署那些出現在 disputes extrinsic E_D 之 verdict 中的 judgment 的 Ed25519 context，每份 report 雜湊一個簽章"
+  ],
+  "stem": "Each JAM signature is domain-separated by a context string X. Which of the following (context → primitive → use) statements is correct?",
  "options": [
   "X_T = $jam_ticket_seal is used twice: for the ring-VRF ticket proof (context X_T ⌢ η′_2 ⌢ [e], empty message, root γ′_Z) and for the regular IETF-VRF seal (context X_T ⌢ η′_3 ⌢ [i_e], message E_U(H))",
   "X_E = $jam_entropy is an Ed25519 signature by the author over the unsigned header E_U(H); the Blake2b hash of that signature is what feeds the entropy accumulator η′_0 each block",
