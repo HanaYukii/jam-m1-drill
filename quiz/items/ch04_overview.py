@@ -5,14 +5,14 @@ ITEMS = [
  "id": "ch04-stf-extrinsic",
  "ch": "4", "section": "4.1 The Block", "gpRef": "eq. 4.2–4.3 (block / extrinsic)",
  "difficulty": 1, "kind": "concept", "tags": ["block", "extrinsic"],
-  "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。下列哪一個不是其中之一？",
+  "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。列出這五個——再說一個大家以為區塊本體裡會有、但 JAM 根本沒有位置放的東西。",
   "optionsZh": [
    "E_T——供 Safrole slot-sealer 競賽用的 ticket",
    "E_X——由外部帳戶簽署的使用者交易",
    "E_A——validator 提交的 availability assurance",
    "E_D——disputes（verdicts、culprits、faults）"
   ],
-  "stem": "Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Which of the following is NOT one of them?",
+  "stem": "Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Name them — and name the one thing people expect to find in a block body that JAM has no place for.",
  "options": [
   "E_T — tickets for the Safrole slot-sealer contest",
   "E_X — user transactions signed by external accounts",
@@ -33,14 +33,14 @@ ITEMS = [
  "id": "ch04-state-components",
  "ch": "4", "section": "4.2 The State", "gpRef": "eq. 4.4 (state composition)",
  "difficulty": 2, "kind": "concept", "tags": ["state"],
-  "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。哪一組「符號 → 意義」的對應是錯的？",
+  "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。ρ、ξ、ω 與 θ 各存什麼？四個裡面哪一個最常被貼錯標籤、錯成什麼？",
   "optionsZh": [
    "ρ → 每個 core 目前的 availability assignment（已被擔保但尚未 available 的 work-report）",
    "ξ → 最近被 accumulate 的 work-package（一個 epoch 份的歷史）",
    "ω → 用來補充每個 core 的 pool 的 authorizer queue",
    "θ → 最近一個區塊的 accumulation output log"
   ],
-  "stem": "GP eq. 4.4 partitions the state σ into 17 components. Which pairing of symbol → meaning is WRONG?",
+  "stem": "GP eq. 4.4 partitions the state σ into 17 components. What do ρ, ξ, ω and θ each hold — and which of the four is most often mislabeled, and as what?",
  "options": [
   "ρ → each core's current availability assignment (a guaranteed but not-yet-available work-report)",
   "ξ → work-packages recently accumulated (one epoch of history)",
@@ -118,14 +118,14 @@ ITEMS = [
  "id": "ch04-in-core-vs-on-chain",
  "ch": "4", "section": "4.8 The Core Model and Services", "gpRef": "§4.9.1–4.9.2",
  "difficulty": 1, "kind": "concept", "tags": ["architecture", "refine", "accumulate"],
-  "stemZh": "哪一個敘述正確地對比了 JAM 的 in-core 與 on-chain 兩種共識模型？",
+  "stemZh": "對比 JAM 的 in-core 與 on-chain 兩種共識模型：各由誰執行？各靠什麼保障？",
   "optionsZh": [
    "in-core 的運算（refine）由每一位 validator 執行，而 on-chain 的運算（accumulate）只由出塊者執行、其他人在出現爭議時才重放",
    "in-core 的運算（refine）由 validator 的一個子集執行，並由「擔保／背書／稽核／判定」這套機制保障；on-chain 的運算（accumulate）由全體 validator 執行",
    "in-core 的運算（refine）是有狀態的、可以在 service 之間轉移餘額；on-chain 的運算（accumulate）是無狀態的、可以接受任意大的輸入",
    "兩者都由全體 validator 執行，差別只在計價：in-core 的 gas 按 work-package 的每個位元組計費，on-chain 的 gas 按 PVM 指令計費"
   ],
-  "stem": "Which statement correctly contrasts JAM's in-core and on-chain consensus models?",
+  "stem": "Contrast JAM's in-core and on-chain consensus models: who executes each, and what secures each?",
  "options": [
   "In-core computation (refine) is executed by every validator, while on-chain computation (accumulate) is executed only by the block author and replayed by others on a dispute",
   "In-core computation (refine) is executed by a subset of validators and secured by the guarantee/assure/audit/judge game; on-chain computation (accumulate) is executed by all validators",
@@ -146,14 +146,14 @@ ITEMS = [
  "id": "ch04-balance-timeslot-ranges",
  "ch": "4", "section": "4.6–4.7", "gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
  "difficulty": 1, "kind": "concept", "tags": ["types"],
-  "stemZh": "關於 JAM 所使用的數值域，下列哪一項為真？",
+  "stemZh": "JAM 的餘額與 timeslot 各用什麼數值域？這些選擇隱含了什麼？",
   "optionsZh": [
    "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；時槽是 N_2^32，使協定的壽命延伸到 2840 年",
    "餘額是 N_2^128 以配合 Polkadot 的 10^10 面額；時槽是 N_2^64，所以槽索引永遠不會回繞、協定也沒有明訂的終止日",
    "餘額是 N_2^64、採用 Ethereum 的 10^18 面額；時槽是 N_2^32，套用該面額後總發行量上限約為 18 顆完整代幣",
    "餘額與時槽都是 N_2^64、採用 Kusama 的 10^12 面額，使協定的終止日遠在 2840 年之後"
   ],
-  "stem": "Which of the following is TRUE about the numeric domains used by JAM?",
+  "stem": "What numeric domains does JAM use for balances and timeslots, and what do those choices imply?",
  "options": [
   "Balances are N_2^64 (u64) with a standard denomination of 10^9 tokens; timeslots are N_2^32, giving the protocol a lifespan into the year 2840",
   "Balances are N_2^128 to match Polkadot's 10^10 denomination; timeslots are N_2^64, so the slot index can never wrap and the protocol has no dated end of life",
@@ -202,14 +202,14 @@ ITEMS = [
  "id": "ch04-pvm-summary",
  "ch": "4", "section": "4.5 The Virtual Machine and Gas", "gpRef": "§4.7 The Virtual Machine and Gas, eq. 4.22–4.27",
  "difficulty": 1, "kind": "concept", "tags": ["pvm"],
-  "stemZh": "關於 Overview 中所摘述的 PVM，哪一個描述是正確的？",
+  "stemZh": "Overview 怎麼摘述 PVM——它的基礎、暫存器、位元組序與記憶體？",
   "optionsZh": [
    "一台源自 WebAssembly 的堆疊機，32 位元字組、16 個暫存器，線性記憶體以 64 KiB 為單位成長且沒有不可存取的頁",
    "一台以 RISC-V（RV64EM）為基礎的暫存器機，13 個 64 位元暫存器、little-endian，位址空間為可分頁的 32 位元、每頁 4096 個 octet",
    "一台以 RISC-V（RV32IM）為基礎的暫存器機，16 個 32 位元暫存器、big-endian，位址空間是完全不分頁的平坦 64 位元空間",
    "一台相容 EVM 的機器，指令集裡保留了 Yellow Paper 的密碼學 precompile 與環境操作碼，字組為 256 位元"
   ],
-  "stem": "Which description of the PVM as summarized in the Overview is correct?",
+  "stem": "How does the Overview summarize the PVM — its basis, registers, endianness and memory?",
  "options": [
   "A stack machine derived from WebAssembly with 32-bit words, 16 registers and a linear memory that grows in 64 KiB pages with no inaccessible pages",
   "A RISC-V (RV64EM) based register machine with 13 64-bit registers, little-endian, and a pageable 32-bit address space in 4096-octet pages",

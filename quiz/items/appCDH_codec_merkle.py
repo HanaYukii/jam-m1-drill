@@ -5,14 +5,14 @@ ITEMS = [
  "id": "appC-discriminators",
  "ch": "C", "section": "C.1 Discriminator / Sequence / Dictionary encoding", "gpRef": "§C.1.3–C.1.5",
  "difficulty": 2, "kind": "concept", "tags": ["codec"],
-  "stemZh": "附錄 C 規定了：型別未隱含長度的值如何編碼、缺席的值如何與存在的值區分、字典如何排列、以及位元序列往哪個方向打包。關於這四項慣例，哪一個說法是對的？",
+  "stemZh": "附錄 C 規定了：型別未隱含長度的值如何編碼、缺席的值如何與存在的值區分、字典如何排列、以及位元序列往哪個方向打包。這四項慣例各是什麼？",
   "optionsZh": [
    "定長項目（雜湊、定長序列）照原樣編碼；變長項目 ↕x 前面掛 E(|x|)；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的 (key, value) 配對；而位元序列以「最低位在前」打包進位元組",
    "定長項目（雜湊、定長序列）前面也掛 E(|x|)，好讓解碼器永遠不需要型別資訊；變長項目 ↕x 同樣如此；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的配對；而位元序列以最低位在前打包",
    "定長項目照原樣編碼；變長項目 ↕x 前面掛 E(|x|)；optional 值 x? 在為 ∅ 時編成 [0xFF]、否則只編值本身；字典編成依插入順序排列的 (key, value) 配對；而位元序列以最低位在前打包",
    "定長項目照原樣編碼；變長項目 ↕x 前面掛 E_4(|x|)，所以每個長度前綴寬度相同；optional 值 x? 在為 ∅ 時編成 [0]、否則編成 [1] ⌢ E(x)；字典編成依 key 排序的配對；而位元序列以「最高位在前」打包"
   ],
-  "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?",
+  "stem": "Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. What are those four conventions?",
  "options": [
   "Fixed-length items (hashes, fixed sequences) encode as-is; variable-length items ↕x are prefixed by E(|x|); an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
   "Fixed-length items (hashes, fixed sequences) are prefixed by E(|x|) too, so a decoder never needs type information; variable-length items ↕x are prefixed the same way; an optional value x? encodes as [0] if ∅ else [1] ⌢ E(x); dictionaries encode as their (key, value) pairs ordered by key; and bit sequences pack bits into octets least-significant-first",
@@ -61,14 +61,14 @@ ITEMS = [
  "id": "appD-state-key",
  "ch": "D", "section": "D.1 Serialization (state-key constructor C)", "gpRef": "§D.1 eq. C",
  "difficulty": 3, "kind": "concept", "tags": ["merklization", "state-keys"],
-  "stemZh": "state-key 建構子 C 映到 31 位元組的 key。哪些形式是正確的？",
+  "stemZh": "state-key 建構子 C 映到 31 位元組的 key。它有哪三種形式？每種 key 的位元組怎麼排？",
   "optionsZh": [
    "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 的位元組與雜湊的前 4 個位元組交錯，之後接雜湊的第 4 到 26 個位元組",
    "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, n_1, n_2, n_3, 0, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 佔一段連續區間，只有雜湊位元組是交錯的",
    "C(i) = [i, 0, 0, …]；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_27]，其中 n = E_4(s)、a 是 h 本身——原始的 32 位元組 key 被交錯進去，結果長達 32 位元組",
    "C(i) = [0, …, 0, i]，章節索引放在最後一個位元組；C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …]，其中 n = E_4(s)；C(s, h) = [n_0, a_0, n_1, a_1, …, a_26]，其中 n = E_4(s)、a = H(h)，而對 storage 項目而言 h 是原始的 storage key"
   ],
-  "stem": "The state-key constructor C maps to 31-octet keys. Which forms are correct?",
+  "stem": "The state-key constructor C maps to 31-octet keys. What are its three forms, and how is each key laid out?",
  "options": [
   "C(i) = [i, 0, 0, …]; C(i, s) = [i, n_0, 0, n_1, 0, n_2, 0, n_3, 0, …] with n = E_4(s); C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26] with n = E_4(s) and a = H(h) — service-id bytes interleaved with the first 4 hash bytes, then hash bytes 4..26",
   "C(i) = [i, 0, 0, …]; C(i, s) = [i, n_0, n_1, n_2, n_3, 0, 0, …] with n = E_4(s); C(s, h) = [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, …, a_26] with n = E_4(s) and a = H(h) — the service id sits in one contiguous run and only the hash bytes are interleaved",
@@ -117,14 +117,14 @@ ITEMS = [
  "id": "appE-merkle-functions",
  "ch": "E", "section": "E.1 Binary Merkle Trees & E.2 MMR", "gpRef": "eq. E.1–E.8",
  "difficulty": 2, "kind": "concept", "tags": ["merklization", "mmr"],
-  "stemZh": "關於通用 Merklization 函數的描述，哪一個是正確的？",
+  "stemZh": "附錄 E 定義了通用的 Merklization 函數 N、M_B、M 與 MMR 的 append A。每一個各做什麼？各用在哪裡？",
   "optionsZh": [
    "N（節點）：在 ⌈n/2⌉ 處切分序列，並雜湊 '$node' ⌢ 左 ⌢ 右（well-balanced）；M_B 是對原始 blob 取的 well-balanced root（它刻意不對每一項先做雜湊）；M（定深）先把每片葉子雜湊成 '$leaf' ⌢ v，再用零雜湊補到 2 的冪——用於 segment root 與 paged proof；MMR 的 append 函數 A 以二進位加法式的進位加上一個 peak，而 super-peak 則以 '$peak' 前綴把各 peak 摺疊起來",
    "N：在 ⌊n/2⌋ 處切分序列所以右半較大，並雜湊 '$node' ⌢ 左 ⌢ 右；M_B 是對原始 blob 取的 well-balanced root；M（定深）先把每片葉子雜湊成 '$leaf' ⌢ v，再以重複最後一片葉子（而非零雜湊）補到 2 的冪；MMR 的 append 函數 A 為每片葉子直接開一個新 peak、完全不進位，而 super-peak 以 '$peak' 前綴摺疊",
    "N：在 ⌈n/2⌉ 處切分，並雜湊 左 ⌢ 右、不加任何 domain-separation 前綴（前綴保留給葉子）；M_B 是補到 2 的冪的定深 root，而 M 才是對原始 blob 取的 well-balanced root——兩者是依葉子處理方式而非形狀命名的；MMR 的 append 像二進位加法一樣進位，而 super-peak 以 '$node' 前綴在 Blake2b 之下摺疊",
    "N：在 ⌈n/2⌉ 處切分，並雜湊 '$node' ⌢ 左 ⌢ 右（well-balanced）；M_B 會先把每一項雜湊成 '$leaf' ⌢ v 再建樹，這正是它每項多花一次雜湊的原因；M（定深）取的是原始 blob，並用零雜湊補到 2 的冪；MMR 的 append 像二進位加法一樣進位，而 super-peak 以 '$peak' 前綴摺疊，但只在 peak 數為 2 的冪時才有定義"
   ],
-  "stem": "Which description of the general Merklization functions is correct?",
+  "stem": "Appendix E defines the general Merklization functions N, M_B, M and the MMR append A. What does each one do, and where does each get used?",
  "options": [
   "N (node): splits the sequence at ⌈n/2⌉ and hashes '$node' ⌢ left ⌢ right (well-balanced); M_B is the well-balanced root taken over the RAW blobs (it deliberately avoids hashing each item); M (constant-depth) first hashes each leaf as '$leaf' ⌢ v and pads to a power of two with zero hashes — used for segment roots and paged proofs; the MMR append A adds a peak with binary-addition-style carrying and the super-peak folds the peaks with a '$peak' prefix",
   "N (node): splits the sequence at ⌊n/2⌋ so the right half is the larger one, and hashes '$node' ⌢ left ⌢ right; M_B is the well-balanced root taken over the RAW blobs; M (constant-depth) first hashes each leaf as '$leaf' ⌢ v and pads to a power of two by repeating the final leaf rather than with zero hashes; the MMR append A gives every leaf its own new peak without any carrying, and the super-peak folds the peaks with a '$peak' prefix",

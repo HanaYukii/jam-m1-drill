@@ -5,14 +5,14 @@ ITEMS = [
  "id": "appA-exit-reasons",
  "ch": "A", "section": "A.1 Basic Definition", "gpRef": "eq. A.1 (Ψ) & §4.7",
  "difficulty": 1, "kind": "concept", "tags": ["pvm"],
-  "stemZh": "PVM 的呼叫 Ψ 會回傳一個退出理由 ε。哪一個是可能的退出理由的完整集合？",
+  "stemZh": "PVM 的呼叫 Ψ 會回傳一個退出理由 ε。有哪些可能的退出理由？各自帶什麼資料？",
   "optionsZh": [
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取頁位址）、h̄ × id（host call，帶 host-call 識別碼）",
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶被存取的確切 octet 位址）、h̄ × id（host call，帶 host-call 識別碼）",
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取頁位址）、⊘ divide-by-zero（當 div_u_64 收到 φ_B = 0 時引發）",
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、h̄ × id（host call，帶 host-call 識別碼）、⊗ stack-overflow（當 φ_1 落到堆疊最低頁之下時引發）"
   ],
-  "stem": "The PVM invocation Ψ returns an exit reason ε. Which is the complete set of possible exit reasons?",
+  "stem": "The PVM invocation Ψ returns an exit reason ε. What are the possible exit reasons, and what does each one carry?",
  "options": [
   "∎ halt (regular termination), ☇ panic, ∞ out-of-gas, F̄ × address (page fault, with the lowest inaccessible page address), h̄ × id (host call, with the host-call identifier)",
   "∎ halt (regular termination), ☇ panic, ∞ out-of-gas, F̄ × address (page fault, carrying the exact octet address that was accessed), h̄ × id (host call, with the host-call identifier)",
@@ -117,14 +117,14 @@ ITEMS = [
  "id": "appA-standard-init",
  "ch": "A", "section": "A.7 Standard Program Initialization", "gpRef": "eq. A.42–A.47",
  "difficulty": 3, "kind": "concept", "tags": ["pvm", "memory"],
-  "stemZh": "在標準程式初始化 Y(p, a) 之下，哪一組暫存器／記憶體配置是正確的？",
+  "stemZh": "在標準程式初始化 Y(p, a) 之下，暫存器各指向哪裡？記憶體怎麼配置？",
   "optionsZh": [
    "φ_0 = 2^32 − 2^16（返回位址，跳到那裡即 halt）、φ_1 = 2^32 − 2·Z_Z − Z_I（堆疊指標）、φ_7 = 2^32 − Z_Z − Z_I（引數指標）、φ_8 = |a|；唯讀資料放在 Z_Z = 2^16、可讀寫資料（heap）放在 2·Z_Z + Z(|o|)、堆疊止於 2^32 − 2·Z_Z − Z_I、引數放在 2^32 − Z_Z − Z_I；Z_I = 2^24",
    "φ_0 = 0、φ_1 = 2^32 − 1（堆疊指標位於 RAM 最頂端）、φ_7 = 2^32 − Z_Z − Z_I（引數指標）、φ_8 = |a|；唯讀資料放在位址 0、可讀寫資料（heap）緊接其後不留間隙、堆疊自 2^32 − 1 向下成長、引數放在 2^32 − Z_Z − Z_I；Z_I = 2^24",
    "φ_0 = 2^32 − 2^16（返回位址，跳到那裡即 halt）、φ_1 = 2^32 − 2·Z_Z − Z_I（堆疊指標）、φ_7 = |a|、φ_8 = 2^32 − Z_Z − Z_I（引數指標）；唯讀資料放在 Z_Z = 2^16、可讀寫資料（heap）放在 2·Z_Z + Z(|o|)、堆疊止於 2^32 − 2·Z_Z − Z_I、引數放在 2^32 − Z_Z − Z_I；Z_I = 2^24",
    "φ_0 = 2^32 − 2^16（返回位址，跳到那裡即 halt）、φ_1 = 2^32 − 2·Z_Z − Z_I（堆疊指標）、φ_7 = 2^32 − Z_Z − Z_I（引數指標）、φ_8 = |a|；唯讀資料放在 Z_Z = 2^16 但映射為 W 所以程式可以就地修改它、可讀寫資料（heap）放在 2·Z_Z + Z(|o|)、堆疊止於 2^32 − 2·Z_Z − Z_I、引數放在 2^32 − Z_Z − Z_I；Z_I = 2^16"
   ],
-  "stem": "Under standard program initialization Y(p, a), which register/memory layout is correct?",
+  "stem": "Under standard program initialization Y(p, a), where do the registers point and how is memory laid out?",
  "options": [
   "φ_0 = 2^32 − 2^16 (return address; jumping there halts), φ_1 = 2^32 − 2·Z_Z − Z_I (stack pointer), φ_7 = 2^32 − Z_Z − Z_I (argument pointer), φ_8 = |a|; RO data at Z_Z = 2^16, RW data (heap) at 2·Z_Z + Z(|o|), stack ends at 2^32 − 2·Z_Z − Z_I, args at 2^32 − Z_Z − Z_I; Z_I = 2^24",
   "φ_0 = 0, φ_1 = 2^32 − 1 (stack pointer at the very top of RAM), φ_7 = 2^32 − Z_Z − Z_I (argument pointer), φ_8 = |a|; RO data at address 0, RW data (heap) immediately after it with no gap, stack growing down from 2^32 − 1, args at 2^32 − Z_Z − Z_I; Z_I = 2^24",

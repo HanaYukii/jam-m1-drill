@@ -5,14 +5,14 @@ ITEMS = [
  "id": "ch05-header-fields",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.1",
  "difficulty": 1, "kind": "concept", "tags": ["header"],
-  "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。哪一個欄位不屬於 header？",
+  "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。列出十個欄位——再說一個大家以為 header 裡會有、JAM 卻刻意不放的東西。",
   "optionsZh": [
    "H_R——先前的 state root，也就是父區塊執行後的 state root",
    "H_W——winning-tickets marker，攜帶下個 epoch 的 E = 600 張 ticket",
    "H_B——BEEFY root，承諾本區塊自己的 accumulation 產出",
    "H_V——產生熵的 VRF 簽章，餵給累積器 η_0"
   ],
-  "stem": "GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?",
+  "stem": "GP eq. 5.1 defines the header H as a 10-tuple. List the ten fields — and name the one thing people expect in a block header that JAM deliberately leaves out.",
  "options": [
   "H_R — the prior state root, which is the parent block's posterior state root",
   "H_W — the winning-tickets marker, carrying the next epoch's E = 600 tickets",
@@ -174,14 +174,14 @@ ITEMS = [
  "id": "ch05-markers-types",
  "ch": "5", "section": "5.1 The Markers", "gpRef": "eq. 5.11 (markers)",
  "difficulty": 2, "kind": "concept", "tags": ["header", "markers"],
-  "stemZh": "依 eq. 5.11，關於三個 header marker（H_E、H_W、H_O）的敘述哪一個正確？",
+  "stemZh": "依 eq. 5.11，三個 header marker（H_E、H_W、H_O）的型別各是什麼？哪些是 optional？",
   "optionsZh": [
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]——offenders marker 是一個普通序列，可以為空但永遠不是 None",
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]?——三者都是 optional，而且在 epoch 第一塊之外三者都是 None",
    "H_E ∈ ([336 位元組 validator key]_V)?；H_W ∈ ([bandersnatch key]_E)?；H_O ∈ [ed25519 key]——epoch marker 帶的是完整金鑰，winners marker 帶的是 fallback 的封印者",
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [N_V]?——offenders marker 是 optional 的，而且裝的是 validator 索引而不是金鑰"
   ],
-  "stem": "Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?",
+  "stem": "Per eq. 5.11, what are the types of the three header markers H_E, H_W and H_O, and which of them are optional?",
  "options": [
   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)? ; H_W ∈ ([ticket]_E)? ; H_O ∈ [ed25519 key] — the offenders marker is a plain sequence that may be empty but is never None",
   "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)? ; H_W ∈ ([ticket]_E)? ; H_O ∈ [ed25519 key]? — all three are optional and all three are None outside an epoch's first block",

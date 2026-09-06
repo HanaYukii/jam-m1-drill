@@ -17,15 +17,14 @@ ITEMS = [
     "difficulty": 1,
     "kind": "delta",
     "tags": ["accumulation", "state", "notation", "delta-0.8.0"],
-  "stemZh": "σ 中由 accumulation 寫入的狀態項目包括 ω、ξ 與 θ。某個 GP 0.7.2 時期的 Go client 仍然把它的 ready-queue 欄位叫做 `Vartheta`。依 GP 0.8.0，哪一組「符號 → 意義」的對應是正確的？",
+  "stemZh": "σ 中由 accumulation 寫入的狀態項目包括 ω、ξ 與 θ。某個 GP 0.7.2 時期的 Go client 仍然把它的 ready-queue 欄位叫做 `Vartheta`。在 GP 0.8.0 中，ω、ξ 與 θ 各存什麼？哪個被改了名？",
   "optionsZh": [
    "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready（accumulation）佇列，裝著各自配上尚未滿足依賴集合的延後 report——GP 0.7.2 把它寫成 ϑ；ξ ∈ ⟦{H}⟧_E 是已被 accumulate 的 work-package 雜湊之一個 epoch 份歷史；θ ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log，也就是本塊的 (service, 承諾) 配對",
    "ω ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log、在 0.8.0 從 θ 更名而來；ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready 佇列；而 θ ∈ ⟦(N_S, N_G)⟧ 現在裝的是上一塊 Δ+ 回傳的逐 service gas 用量 u，也就是 accumulation 統計所讀取的東西",
    "ω ∈ ⟦{H}⟧_E 從 ξ 接手成為已 accumulate 之 work-package 雜湊的一個 epoch 份歷史；ready 佇列在 0.8.0 仍然拼作 ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E，而 θ ∈ ⟦(N_S, H)⟧ 沒有變，所以 0.7.2 的 client 只需要淘汰符號 ξ 並把持有它的 state key 重新指向",
    "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ 是 0.8.0 新增的狀態項目，裝著在 accumulation 各輪之間傳遞的 deferred transfer 好讓它們跨越區塊邊界存活；ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 仍是 ready 佇列，而 ξ ∈ ⟦{H}⟧_E 仍是已 accumulate 之 work-package 雜湊的一個 epoch 份歷史"
   ],
-  "stem": "Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client "
-            "still calls its ready-queue field `Vartheta`. Which mapping of symbol → meaning is right for GP 0.8.0?",
+  "stem": "Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. In GP 0.8.0, what do ω, ξ and θ each hold, and what was renamed?",
     "options": [
         "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E is the ready (accumulation) queue of deferred reports each paired with its outstanding "
         "dependency set — GP 0.7.2 wrote this as ϑ; ξ ∈ ⟦{H}⟧_E is the epoch-long history of already-accumulated "
@@ -65,15 +64,14 @@ ITEMS = [
     "difficulty": 1,
     "kind": "concept",
     "tags": ["accumulation", "operands", "work-digest"],
-  "stemZh": "Δ1 為 service s 的每一份 work-digest 各建一個運算元組來組成 i^U，取自該輪各 report 依序而來。s 的兩份 digest 分別落在不同的 report r₁ 與 r₂ 裡。依 GP 0.8.0，關於一個運算元組攜帶什麼，哪個描述正確？",
+  "stemZh": "Δ1 為 service s 的每一份 work-digest 各建一個運算元組來組成 i^U，取自該輪各 report 依序而來。s 的兩份 digest 分別落在不同的 report r₁ 與 r₂ 裡。依 GP 0.8.0，一個運算元組攜帶什麼？這兩個元組之間哪些欄位會不同？",
   "optionsZh": [
    "該集合是 U（而 deferred transfer 是 X，Ψ_A 收下 ⟦U ∪ X⟧）。每個元組混合了 digest 層級的欄位——y payload 雜湊、g accumulate gas 上限、l 結果（是一個 blob 或 work-error 集合 E 的成員）——以及從它自己所屬 report 提上來的欄位：p = (r_s)_p package 雜湊、e = (r_s)_e segment root、a = r_a authorizer 雜湊、t = r_t authorizer trace；因此那兩個元組在 report 層級的欄位上並不相同",
    "該集合是 U。一個運算元組就是 work-digest 的原樣，所以除了 y、g、l 之外它還帶 c code hash、d_u refine 期間實際用掉的 gas、以及餵給 core 統計的 import／extrinsic／export 計數；沒有任何東西從外圍的 report 提進來，所以那兩個元組只有 payload 雜湊不同",
    "該集合是 U。運算元組是每份 report 一個而不是每份 digest 一個：它的 l 欄位裝著該 report 各 digest 結果的串接、g 欄位裝著它們的 gas 上限總和，而 p、e、a、t 照常從 report 提上來，再由該 service 依 payload 雜湊自行分流結果——所以 s 在這裡收到的是一個元組而不是兩個",
    "該集合是 U。每個元組從 digest 取 y、g、l，並從它的 report 取 core 索引與 refinement-context 的 anchor 來取代 package 雜湊與 segment root，好讓 accumulate 能重新驗證可得性；而 l 落在 work-error 集合 E 中的 digest 會在 i^U 被組裝之前先被丟棄，所以那兩個元組只有在雙雙 refine 成功時才會留下"
   ],
-  "stem": "Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. "
-            "Two of s's digests sit in different reports r₁ and r₂. Which description of what an operand tuple carries is right for GP 0.8.0?",
+  "stem": "Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. What does an operand tuple carry in GP 0.8.0, and which of its fields differ between those two tuples?",
     "options": [
         "The set is U (and deferred transfers are X, Ψ_A taking ⟦U ∪ X⟧). Each tuple mixes digest-level fields — "
         "y payload hash, g accumulate gas-limit, l the result, which is a blob or a member of the work-error set E — "
@@ -214,15 +212,14 @@ ITEMS = [
     "difficulty": 2,
     "kind": "concept",
     "tags": ["accumulation", "gas", "service-accounts"],
-  "stemZh": "G_A = 10,000,000、G_T = 3,500,000,000，而每個 service 帳戶都帶有 a_g 與 a_m。哪個敘述正確地把每一個 accumulate gas 限制——上限與逐 service 的下限——放對了位置？",
+  "stemZh": "G_A = 10,000,000、G_T = 3,500,000,000，而每個 service 帳戶都帶有 a_g 與 a_m。每一個 accumulate gas 限制——上限與逐 service 的下限——各套用在哪裡？各在什麼時候檢查？",
   "optionsZh": [
    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_A、且每份 digest 的 d_g ≥ δ[d_s]_g（目的 service 的 a_g），兩者都在擔保時對照 prior 的 δ 檢查；逐區塊：eq. 12.24 把 Δ+ 的預算定為 g = max(G_T, G_A·C + Σ values(χ_Z))；而 `transfer` host call 除非該筆轉帳的 gas l ≥ δ[d]_m 否則以 LOW 拒絕，所以一筆 deferred transfer 抵達時也帶著足夠收款方 Accumulate 的 gas",
    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_A；逐 service：G_A 另外還是 Δ1 內部強制的每塊上限，這正是 eq. 12.23 把該 service 的 g 夾在 G_A 而不是把它的各來源加總的原因；而 a_g 是退款下限而非最低要求——service 未用完而低於 a_g 的部分會在 Δ+ 結尾退回它的餘額，a_m 對 deferred transfer 扮演同樣的角色",
    "兩個上限都是在 accumulation 時於 Δ+ 內部強制、而不是在擔保時：eq. 12.24 的預算涵蓋整個區塊，而 §11.4 的逐 report 總和會在那裡對照 posterior 的 δ 重新檢查，所以 a_g 超過 G_A 的 service 永遠無法被 accumulate——這正是 `new` host call 把 a_g ≤ G_A 維持成狀態不變式的原因，而 a_m 也以同樣方式被 G_T 所界",
    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_T，G_T 才是限制單一份 report 的數字；逐區塊：eq. 12.24 以 G_A（整塊上限）建構 Δ+ 的預算，這正是 G_T 是兩者中較大常數的原因；而兩個 service 層級的下限剛好相反——a_g 是每筆 deferred transfer 的最低 gas，a_m 是每個 work-item 的最低 gas"
   ],
-  "stem": "G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Which statement "
-            "correctly places each accumulate-gas limit — the ceilings and the per-service floors?",
+  "stem": "G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Where does each accumulate-gas limit apply — the ceilings and the per-service floors — and when is each one checked?",
     "options": [
         "Per report, §11.4 requires Σ over its digests of d_g ≤ G_A and every digest's d_g ≥ δ[d_s]_g (the destination "
         "service's a_g), both checked at guarantee time against the prior δ; per block, eq. 12.24 sets Δ+'s budget to "

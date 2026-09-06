@@ -33,14 +33,14 @@ ITEMS = [
  "id": "arch-audit-outcomes",
  "ch": "ARCH", "section": "17.1 Overview", "gpRef": "§17.1",
  "difficulty": 2, "kind": "concept", "tags": ["auditing", "disputes"],
-  "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。哪一組門檻與後果是正確的？",
+  "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。兩個門檻是什麼？各自導致什麼後果？",
   "optionsZh": [
    "若仍有超過 2/3 的 validator 發出正面判定，發出負面判定的人可能因浪費時間而受罰；若有超過 1/3 發出負面判定，含有該 report 的區塊會被列入禁用名單，它與其所有後代都會被忽略",
    "若有超過 1/2 的 validator 發出負面判定，該 report 會從它的 availability assignment 中被移除；若不足此數則什麼也不會發生——沒有任何 validator 會因為誤報而受罰，含有該 report 的區塊仍可繼續被建構",
    "單一個負面判定就足夠：它使承載該 report 的區塊無效，並沒收該 core 三位 guarantor 的質押；不需要其他 validator 再判定，也不會有 verdict 進入 disputes extrinsic，2/3 的正面門檻完全不起作用",
    "負面判定本身沒有任何後果；只有 disputes extrinsic 才算數，那裡的 verdict 需要全體作用中 validator 的一致簽署，而懲罰集合 ψ_O 只會從 culprits 填入、永遠不會從 faults 填入"
   ],
-  "stem": "GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?",
+  "stem": "GP §17.1 describes what happens when a negative judgment appears. What are the two thresholds, and what follows from each?",
  "options": [
   "If more than 2/3 of validators still issue POSITIVE judgments, those issuing negative judgments may be punished for time-wasting; if more than 1/3 issue NEGATIVE judgments, the block containing the report is ban-listed and it and all its descendants are disregarded",
   "If more than 1/2 of validators issue NEGATIVE judgments, the report is dropped from its availability assignment; if fewer do, nothing happens at all — no validator is ever punished for a false negative and the block containing the report stays buildable",

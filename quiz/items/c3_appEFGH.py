@@ -401,14 +401,14 @@ const (
         "difficulty": 2,
         "kind": "rationale",
         "tags": ["erasure-coding", "rationale", "gf65536", "threshold", "delta-0.8.0"],
-  "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。哪一種說法是對的？而這個編碼為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
+  "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。這三項是什麼？這個編碼又為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
   "optionsZh": [
    "重建必須能在將近三分之二的 validator 惡意或失能時仍然存活，這把資料碎片數壓在 v/3 + 1 附近、並與 2/3+1 的 assurance 超級多數彼此契合；欄位是 16 位元的，所以一個碼字就是一對 octet、而其取值點可以索引到多達 v 個相異的 validator；再者碎片數的兩倍必須整除 4,104 個 octet 的 segment 大小，好讓一個 segment 編碼時完全不需要填補——這正是碎片數取「最大的那個合格值」而不是恰好 v/3 + 1 的原因",
    "比率的選擇讓三分之二的 assurance 超級多數本身就是重建門檻，這把資料碎片數壓在 2v/3 附近；欄位是 16 位元純粹因為一個 segment 是 4,104 = 2 × 2,052 個 octet、碼字必須整齊地鋪滿它；而那個整除的附帶條件只是為了避免最後一個碎片需要長度前綴。在 1,023 位 validator 上這會給出 682 個資料碎片、每位 validator 每 segment 3 片",
    "資料碎片數對每一種合法的 validator 集合大小都恰好是 ⌊v/3⌋ + 1，所以那個整除的附帶條件從不生效、可以拿掉；選 GF(2¹⁶) 只是因為在現代硬體上 16 位元的乘加比逐位元組運算快；而 4,104 個 octet 的 segment 大小是由欄位推導出來而非反過來，4,104 只是碼字寬度最方便的最小倍數。在 1,002 位 validator 上這給出 335 個資料碎片且無需填補",
    "比率的設定讓恰好構成完整超級多數的那 683 位 validator 才能重建，這把可得性綁在 finality 上、並把碎片數固定在 2v/3 + 1 而不是最大的合格值；選 GF(2¹⁶) 是因為 Blake2b 送出 32 個 octet、也就是恰好 16 個碼字，所以碎片雜湊與碎片共用一種表示法；而碎片數的兩倍仍然整除 4,104 個 octet 的 segment 大小，因為 1,366 整除 4,104"
   ],
-  "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?",
+  "stem": "Appendix H says the coding rate 'is derived from' three separate considerations. What are the three, and why is the code built over GF(2¹⁶) rather than over single octets?",
         "options": [
             "Reconstruction must survive almost two-thirds of the validators being malicious or incapacitated, which puts the data-shard count near v/3 + 1 and dovetails with the 2/3+1 assurance super-majority; the field is 16-bit, so one code word is an octet pair and the evaluation points can index up to v distinct validators; and twice the shard count must divide the 4,104-octet segment size so that a segment codes with no padding at all, which is why the count is the largest such value rather than exactly v/3 + 1.",
             "The rate is chosen so that a two-thirds super-majority of assurances is itself the reconstruction threshold, which puts the data-shard count near 2v/3; the field is 16-bit purely because a segment is 4,104 = 2 × 2,052 octets and the code words must tile it evenly; and the divisibility side condition exists only to keep the last chunk from needing a length prefix, which is why the count is the largest admissible value rather than exactly 2v/3. On 1,023 validators that gives 682 data shards and 3 pieces per validator per segment.",

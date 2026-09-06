@@ -36,14 +36,14 @@ ITEMS = [
  "id": "appC-code-operand-transfer-prefix",
  "ch": "C", "section": "C.2 Block Serialization (operand tuple and deferred transfer)", "gpRef": "§C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14",
  "difficulty": 2, "kind": "code", "tags": ["codec", "accumulation", "deferred-transfer", "fetch"],
-  "stemZh": "團隊在每個 accumulate 輸入項目的本體之前加了一個位元組作為前綴。依 GP 0.8.0，關於這兩種前綴、以及究竟是誰在消費這個編碼，哪一種解釋是正確的？",
+  "stemZh": "團隊在每個 accumulate 輸入項目的本體之前加了一個位元組作為前綴。這兩種前綴是什麼？在 GP 0.8.0 裡究竟是誰在消費這個編碼？",
   "optionsZh": [
    "這兩個前綴就是 GP 放在 E(運算元組)（0）與 E(deferred transfer)（1）之前的判別子；Ψ_A 收下的是單一個混合序列 i ∈ ⟦運算元 ∪ transfer⟧，而 service 透過 fetch（case 14／15）把它讀回來，所以每個項目都必須自我描述",
    "這兩個前綴分隔的是 accumulate 記憶體映像的兩半：Ψ_M 的初始引數 E(t, s, |i|) 之後，先寫入每個運算元（前綴 0）、再寫入每筆 transfer（前綴 1）到 RAM 裡，所以 fetch 只需要服務 work-package 的資料，也沒有任何東西需要自我描述",
    "那個前綴是 GP 0.7.1 引入的帳戶序列化版本位元組（0 = 舊版運算元版面、1 = 帶 128 位元組 memo 的 transfer 版面）；Ψ_A 收下的是兩個各自獨立的序列（一個運算元、一個 transfer），而 0.8.0 因為兩者不再共用序列而拿掉了那個位元組",
    "這些前綴只是團隊為了 JSON 測試向量而定的慣例；線路上 GP 把所有 transfer 排在所有運算元之前，並以固定長度區分兩者（transfer 本體為 152 個 octet）；service 則從 Ψ_M 的初始引數得知這個分界，因為那個引數帶的是兩個計數而不是單一個總數"
   ],
-  "stem": "The team prefixes each accumulate input item with a byte before its body. Which explanation of the two prefixes and of what actually consumes this encoding is correct per GP 0.8.0?",
+  "stem": "The team prefixes each accumulate input item with a byte before its body. What are the two prefixes, and what actually consumes this encoding in GP 0.8.0?",
  "code": {"lang": "go", "caption": "internal/types/encode.go (OperandOrDeferredTransfer.Encode)", "src": "func (o *OperandOrDeferredTransfer) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding OperandOrDeferredTransfer\")\n\n\t// if operand is nil, append 0 to the buffer, else append 1\n\tif o.Operand == nil && o.DeferredTransfer == nil {\n\t\treturn errors.New(\"Operand and DeferredTransfer are both nil\")\n\t}\n\t// ...\n\t// Operand\n\tif o.Operand != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{0})\n\n\t\tif err := o.Operand.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\t// DeferredTransfer\n\tif o.DeferredTransfer != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{1})\n\n\t\tif err := o.DeferredTransfer.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\treturn nil\n}"},
  "options": [
   "The prefixes are the discriminators GP puts in front of E(operand tuple) (0) and E(deferred transfer) (1); Ψ_A takes one mixed sequence i ∈ ⟦operand ∪ transfer⟧ and the service reads it back through fetch (cases 14/15), so each item must be self-describing",
@@ -123,14 +123,14 @@ ITEMS = [
  "id": "appG-ietf-vs-ring",
  "ch": "G", "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)", "gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
  "difficulty": 2, "kind": "concept", "tags": ["bandersnatch", "vrf", "ring-vrf", "safrole"],
-  "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。關於兩者各用在哪、大小如何、以及輸出函數 Y，哪個敘述正確？",
+  "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。兩者各用在哪？各多大？輸出函數 Y 又取決於什麼？",
   "optionsZh": [
    "只有 E_T 裡的 ticket 證明是 784 位元組的 ring-VRF 證明（匿名，對照 144 位元組的 ring root 驗證）；seal H_S、熵 H_V 與稽核種子都是具名金鑰下 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是 VRF 輸出的前 32 個位元組，而且取決於 context 而非訊息",
    "seal H_S 與 ticket 證明兩者都是 784 位元組的 ring-VRF 證明、對照 144 位元組的 γ′_Z 驗證——正是這點讓出塊者在該 epoch 結束前保持匿名；熵 H_V 與稽核種子則是 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是完整 64 位元組的 VRF 輸出，取決於 context 而非訊息",
    "只有 ticket 證明是 784 位元組的 ring-VRF 證明；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；但兩者的 Y(·) 都是整個簽章的 Blake2b 雜湊，因此會隨被簽的訊息改變——這正是 ticket 要簽空訊息的原因",
    "只有 ticket 證明是 784 位元組的 ring-VRF 證明，且是對照一個承諾於 active set κ′（而非 pending set）的 32 位元組 ring root 驗證；seal、熵與稽核種子是 96 位元組的 IETF VRF 簽章；Y(·) 是 VRF 輸出的前 32 個位元組，而被 Φ 歸零的金鑰會被移出 ring，因此 ring 會隨 offender 數量而縮小"
   ],
-  "stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?",
+  "stem": "JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Where is each used, how big is each, and what does the output function Y depend on?",
  "options": [
   "Only ticket proofs in E_T are 784-octet ring-VRF proofs (anonymous, checked against a 144-octet ring root); the seal H_S, entropy H_V and audit seeds are 96-octet IETF VRF signatures under a named key; in both, Y(·) is the first 32 octets of the VRF output and depends on the context, not the message",
   "Both the seal H_S and the ticket proof are 784-octet ring-VRF proofs checked against the 144-octet γ′_Z — that is what keeps the block author anonymous until the epoch ends; the entropy H_V and the audit seeds are 96-octet IETF VRF signatures under a named key; in both, Y(·) is the full 64-octet VRF output and depends on the context, not the message",
@@ -151,14 +151,14 @@ ITEMS = [
  "id": "appG-signing-contexts",
  "ch": "G", "section": "Signing contexts X (definitions appendix) and their primitives", "gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
  "difficulty": 2, "kind": "concept", "tags": ["signing-contexts", "bandersnatch", "ed25519", "bls"],
-  "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。下列（context → 原語 → 用途）的敘述哪一個正確？",
+  "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。列出這些 context 與各自搭配的原語——並指出唯一一個被用了兩次、搭配兩種不同原語的 context。",
   "optionsZh": [
    "X_T = $jam_ticket_seal 被用了兩次：一次用於 ring-VRF 的 ticket 證明（context 為 X_T ⌢ η′_2 ⌢ [e]、空訊息、root 為 γ′_Z），一次用於一般的 IETF-VRF seal（context 為 X_T ⌢ η′_3 ⌢ [i_e]、訊息為 E_U(H)）",
    "X_E = $jam_entropy 是出塊者對未簽署 header E_U(H) 所做的 Ed25519 簽章；而餵給熵累積器 η′_0 的，是該簽章的 Blake2b 雜湊",
    "X_G = $jam_guarantee 是對 H(w) 的 Bandersnatch VRF context，而它的輸出 Y(·) 同時充當與 ρ 中 availability assignment 一起儲存的 guarantee 識別碼",
    "X_U = $jam_audit 是 validator 用來簽署那些出現在 disputes extrinsic E_D 之 verdict 中的 judgment 的 Ed25519 context，每份 report 雜湊一個簽章"
   ],
-  "stem": "Each JAM signature is domain-separated by a context string X. Which of the following (context → primitive → use) statements is correct?",
+  "stem": "Each JAM signature is domain-separated by a context string X. Name the contexts and the primitive each goes with — and point out the one context that is used twice, with two different primitives.",
  "options": [
   "X_T = $jam_ticket_seal is used twice: for the ring-VRF ticket proof (context X_T ⌢ η′_2 ⌢ [e], empty message, root γ′_Z) and for the regular IETF-VRF seal (context X_T ⌢ η′_3 ⌢ [i_e], message E_U(H))",
   "X_E = $jam_entropy is an Ed25519 signature by the author over the unsigned header E_U(H); the Blake2b hash of that signature is what feeds the entropy accumulator η′_0 each block",

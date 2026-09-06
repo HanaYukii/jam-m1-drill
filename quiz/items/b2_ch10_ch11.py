@@ -429,14 +429,14 @@ if len(ancestry) > 0 {
  "id": "ch11-inactive-core-set-shrink",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.18, 11.23, 11.28, 11.31",
  "difficulty": 3, "kind": "delta", "tags": ["guarantees", "assurances", "delta-0.8.0", "variable-validators"],
-  "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。哪個敘述正確？",
+  "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。這份 guarantee 有效嗎？逐一說明它通過或未通過的檢查。",
   "optionsZh": [
    "有效：M* 重現了前一個 rotation 的指派，在其之下 core 3 是啟用的、12 個 chunk 也是正確的分片數；eq. 11.28 的 core 界限是依 M* 所選中的集合來讀，而 ρ‡ 在 epoch 更替中原封不動",
    "有效，但 ρ′[3] 蓋的是該 guarantee 自己的 slot t = 595 而不是 τ′ = 600，於是 eq. 11.18 的 H_T ≥ t + U 在 slot 600 就已成立，該指派在建立它的那個區塊裡就被丟掉",
    "無效：即使在 M* 之下，eq. 11.28 仍以 |κ′|/3 = 3 為 w_c 的上界，所以 core 3 現在是未啟用的；eq. 11.31 要求 (w_s)_v = |κ′| = 9，而不是該 report 所帶的 12 個 chunk；而且 eq. 11.18 因 |κ| ≠ |κ′| 早已把 ρ‡ 清空",
    "無效的唯一理由是簽署者來自 λ′：eq. 11.23 只允許 assurance 讓 M* 退回前一個 epoch 的金鑰，所以 epoch 首個區塊裡的 guarantee 需要 κ′ 簽章，而 w_c 可以是任何小於 C/3 的 core"
   ],
-  "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?",
+  "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Is that guarantee valid? Walk through the checks it meets or fails.",
  "options": [
   "Valid: M* reproduces the previous rotation's assignment, under which core 3 was active and 12 chunks were the right shard count; eq. 11.28's core bound is read against whichever set M* selects, and ρ‡ survives an epoch change untouched",
   "Valid, but ρ′[3] is stamped with the guarantee's own slot t = 595 instead of τ′ = 600, so eq. 11.18's H_T ≥ t + U already holds at slot 600 and the assignment is dropped in the very block that created it",

@@ -1,7 +1,7 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 326 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-02
+Gray Paper **0.8.0** · 21 章速記 · 322 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-06
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
@@ -18,12 +18,12 @@ Gray Paper **0.8.0** · 21 章速記 · 326 題 · 92 條名詞解釋 · New-JAM
 - [§3 Notation](#ch-3) — 10 題
 - [§4 Overview](#ch-4) — 13 題
 - [§5 The Header](#ch-5) — 21 題
-- [§6 Safrole](#ch-6) — 29 題
+- [§6 Safrole](#ch-6) — 28 題
 - [§7 Recent History](#ch-7) — 12 題
 - [§8 Authorization](#ch-8) — 11 題
 - [§9 Service Accounts](#ch-9) — 13 題
 - [§10 Disputes](#ch-10) — 12 題
-- [§11 Reporting & Assurance](#ch-11) — 24 題
+- [§11 Reporting & Assurance](#ch-11) — 23 題
 - [§12 Accumulation](#ch-12) — 21 題
 - [§13 Statistics](#ch-13) — 11 題
 - [§14 Work Packages & Reports](#ch-14) — 7 題
@@ -35,7 +35,7 @@ Gray Paper **0.8.0** · 21 章速記 · 326 題 · 92 條名詞解釋 · New-JAM
 - [附錄 F · Shuffling](#ch-f) — 3 題
 - [附錄 G · Bandersnatch VRF](#ch-g) — 5 題
 - [附錄 H · Erasure Coding](#ch-h) — 4 題
-- [★ Architecture & Rationale](#ch-arch) — 23 題
+- [★ Architecture & Rationale](#ch-arch) — 21 題
 - [名詞解釋](#glossary)
 
 
@@ -1223,7 +1223,7 @@ core 是**同一條鏈上的一個平行運算位置**，不是另一條鏈、�
 
 ---
 
-### N1-7　The same validators take on several different jobs around one piece of work. Which description of guarantor, assurer and auditor is right?
+### N1-7　The same validators take on several different jobs around one piece of work. What do a guarantor, an assurer and an auditor each do?
 
 <sub>§1; §11; §17 — ●●○ · 概念 · §1, §11 & §17</sub>
 
@@ -1248,7 +1248,7 @@ core 是**同一條鏈上的一個平行運算位置**，不是另一條鏈、�
 
 ---
 
-### N1-8　You open the Gray Paper for the first time. Which description of how it is laid out will help you find things?
+### N1-8　You open the Gray Paper for the first time. How is it laid out, and where should you look for what?
 
 <sub>Gray Paper 全書結構 — ●○○ · 概念 · §3–§14 & App. A–H</sub>
 
@@ -2533,7 +2533,7 @@ GP §3.7：⟦T⟧ 是元素取自 T、長度任意的序列集合（定義一�
 
 ---
 
-### 3-2　Three state-transition rules use the arrow operators of GP §3.7.2: β_H′ ≡ ←(β_H† ⧺ e)^H (eq. 7.8), α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O (eq. 8.2) and γ′_A ≡ →(n ∪ γ_A sorted ascending by ticket id)^E (eq. 6.35). Which reading is correct?
+### 3-2　Three state-transition rules use the arrow operators of GP §3.7.2: β_H′ ≡ ←(β_H† ⧺ e)^H (eq. 7.8), α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O (eq. 8.2) and γ′_A ≡ →(n ∪ γ_A sorted ascending by ticket id)^E (eq. 6.35). How do you read the arrows — which end of the sequence does each keep — and what does that mean for each of the three rules?
 
 <sub>3.7.2 Editing — ●●○ · 概念 · §3.7.2 (⌢, ⧺, →s^n, ←s^n) and §3.7 (⟲); applied in eq. 7.8, eq. 8.2 and eq. 6.35</sub>
 
@@ -2599,7 +2599,7 @@ GP §3.7.3：bits(B) 是「the sequence of bits, ordered with the most significa
 
 ---
 
-### 3-4　GP §3.8.2 writes a Bandersnatch VRF signature as Ṽ_k^m⟨x⟩ ⊂ B_96 with VRF output Y(·) ∈ H, and eq. 6.16 requires H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩. Which statement is correct?
+### 3-4　GP §3.8.2 writes a Bandersnatch VRF signature as Ṽ_k^m⟨x⟩ ⊂ B_96 with VRF output Y(·) ∈ H, and eq. 6.16 requires H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩. Read that: what are the subscript, the superscript and the angle-bracketed term, and what does Y(H_S) depend on?
 
 <sub>3.8.2 Signing Schemes — ●●● · 概念 · §3.8.2; applied in eq. 6.16 (seal), eq. 6.18 (H_V), eq. 6.30 (ticket proof) and eq. 6.32 (ticket id = Y)</sub>
 
@@ -2624,7 +2624,7 @@ GP §3.8.2：Bandersnatch 簽名 Ṽ_k^m⟨x⟩ 的下標 k 是公鑰、上標 m
 
 ---
 
-### 3-5　Per GP §3.8.1, which statement about the hash functions and the subscripted codec functions is correct?
+### 3-5　Per GP §3.8.1, what are H and H_K, what happens when a non-blob is passed to a hash function, and what do the subscripts on E and E^{-1} mean?
 
 <sub>3.8.1 Hashing — ●●○ · 概念 · §3.8.1 (H, H_K, H_0, E_l and E^{-1}_l assertions); Keccak applied in eq. 7.7</sub>
 
@@ -2649,7 +2649,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ---
 
-### 3-6　Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), which statement is correct?
+### 3-6　Let d = {1 ↦ a, 2 ↦ b} and e = {2 ↦ c, 3 ↦ a} be dictionaries in ⟨N → B⟩. Applying GP §3.5 (eq. 3.7–3.11), what are d ∪ e and V(d ∪ e), and what does writing d[3] in a rule assert?
 
 <sub>3.5 Dictionaries — ●●○ · 概念 · eq. 3.7–3.11; 𝒰 in eq. 3.2; ∅ / A? / ∇ in §3.3</sub>
 
@@ -2674,7 +2674,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ---
 
-### 3-7　Almost every type in the Gray Paper is built from the vocabulary fixed in §3.4 and §3.7.4: N, N_n, Z, N_L, B, B_x and B_$. Which statement reads all of them the way the GP defines them?
+### 3-7　Almost every type in the Gray Paper is built from the vocabulary fixed in §3.4 and §3.7.4: N, N_n, Z, N_L, B, B_x and B_$. Read each of them the way the GP defines it.
 
 <sub>3.4 Numbers / 3.7.4 Octets and Blobs — ●○○ · 概念 · §3.4; §3.7.4; §3.8.1</sub>
 
@@ -2699,7 +2699,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ---
 
-### 3-8　§3.3 introduces ∅, ∇ and the optional constructor A?, and eq. 3.2 defines the substitute-if-nothing function 𝒰. §13.2 then writes a service's accumulation entry as 𝒰(S[s], (0, 0, 0)), where S is a dictionary from service index to a triple. Which reading is correct?
+### 3-8　§3.3 introduces ∅, ∇ and the optional constructor A?, and eq. 3.2 defines the substitute-if-nothing function 𝒰. §13.2 then writes a service's accumulation entry as 𝒰(S[s], (0, 0, 0)), where S is a dictionary from service index to a triple. Read that: what do ∅, ∇ and A? mean, and what does the 𝒰 expression evaluate to?
 
 <sub>3.3 Sets / 3.2 Functions and Operators — ●○○ · 概念 · §3.3; eq. 3.2 (substitute-if-nothing); applied at eq. 13.13</sub>
 
@@ -2724,7 +2724,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ---
 
-### 3-9　Let s = [10, 20, 30, 40, 50]. Applying the ellipsis conventions of GP §3.4 for integer sets and §3.7 for sequence slicing, which line is correct throughout?
+### 3-9　Let s = [10, 20, 30, 40, 50]. Applying the ellipsis conventions of GP §3.4 for integer sets and §3.7 for sequence slicing, evaluate s_{…3}, s_{1…+3}, Z_{1…3}, Z_{1…+3}, last(s) and s[7]^⟲.
 
 <sub>3.4 Numbers / 3.7 Sequences — ●●○ · 概念 · §3.4 (Z_{a…b}, Z_{a…+b}); §3.7 (slicing, s[i]^⟲, last)</sub>
 
@@ -2749,7 +2749,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ---
 
-### 3-10　Eq. 13.1–13.2 declare π ≡ (π_V, π_L, π_C, π_S) with (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧², and §13.1 then works through π_V†, π_V‡ and π′_V. An interviewer asks you to read that notation aloud. Which reading is right?
+### 3-10　Eq. 13.1–13.2 declare π ≡ (π_V, π_L, π_C, π_S) with (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧², and §13.1 then works through π_V†, π_V‡ and π′_V. An interviewer asks you to read that notation aloud. How do you read it — the ∈ versus the tricolon, the squared sequence-set, and the prime, dagger and double-dagger?
 
 <sub>3.6 Tuples / 3.7 Sequences — ●●● · 概念 · §3.6 (named tuple components); eq. 4.1 (σ′ ≡ Υ(σ, B)); §4 state-transition dependency graph; eq. 13.1–13.3</sub>
 
@@ -2779,7 +2779,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ## §4 Overview　<sub>13 題</sub>
 
-### 4-1　GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. Which description of what each one has just absorbed is correct?
+### 4-1　GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. What has each one just absorbed?
 
 <sub>4.2.1 State Transition Dependency Graph — ●●○ · 概念 · eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -2804,7 +2804,7 @@ eq. 4.6 β_H† ≺ (H, β_H)：eq. 7.5 把 β_H 最後一筆的 state root（�
 
 ---
 
-### 4-2　Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, which statement about where the five extrinsic components enter the transition is TRUE?
+### 4-2　Reading the 0.8.0 dependency graph (eq. 4.5–4.20) literally, where does each of the five extrinsic components enter the transition — and in particular, does anything from the extrinsic feed the accumulation step directly?
 
 <sub>4.2.1 State Transition Dependency Graph — ●●● · 概念 · eq. 4.11–4.20</sub>
 
@@ -2854,7 +2854,7 @@ GP §4.9.1：「In this model… only a subset of the network is responsible for
 
 ---
 
-### 4-4　GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. Which statement matches the GP?
+### 4-4　GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. What is the best block, when is it the right one to use, and what is the risk?
 
 <sub>4.6 Best block — ●●○ · 概念 · §4.6; §4.3 (head, finalized); §19 (best chain)</sub>
 
@@ -2879,7 +2879,7 @@ GP §4.6：「The simplest and least risky means… would be to inspect the Gran
 
 ---
 
-### 4-5　Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Which of the following is NOT one of them?
+### 4-5　Per GP 0.8.0, the extrinsic E of a JAM block is a tuple of exactly five components. Name them — and name the one thing people expect to find in a block body that JAM has no place for.
 
 <sub>4.1 The Block — ●○○ · 概念 · eq. 4.2–4.3 (block / extrinsic)</sub>
 
@@ -2904,7 +2904,7 @@ eq. 4.3：E ≡ (E_T, E_D, E_P, E_A, E_G)——五個成分，各有各的來源
 
 ---
 
-### 4-6　GP eq. 4.4 partitions the state σ into 17 components. Which pairing of symbol → meaning is WRONG?
+### 4-6　GP eq. 4.4 partitions the state σ into 17 components. What do ρ, ξ, ω and θ each hold — and which of the four is most often mislabeled, and as what?
 
 <sub>4.2 The State — ●●○ · 概念 · eq. 4.4 (state composition)</sub>
 
@@ -2979,7 +2979,7 @@ GP §4.4：「we define the time in terms of seconds passed since the beginning 
 
 ---
 
-### 4-9　Which statement correctly contrasts JAM's in-core and on-chain consensus models?
+### 4-9　Contrast JAM's in-core and on-chain consensus models: who executes each, and what secures each?
 
 <sub>4.8 The Core Model and Services — ●○○ · 概念 · §4.9.1–4.9.2</sub>
 
@@ -3004,7 +3004,7 @@ GP §4.9.1：in-core model 下「only a subset of the network is responsible for
 
 ---
 
-### 4-10　Which of the following is TRUE about the numeric domains used by JAM?
+### 4-10　What numeric domains does JAM use for balances and timeslots, and what do those choices imply?
 
 <sub>4.6–4.7 — ●○○ · 概念 · eq. 4.21 (balance), eq. 4.28 (timeslot)</sub>
 
@@ -3054,7 +3054,7 @@ GP §4.9.2：「In place of Ethereum's gas model for purchasing and measuring bl
 
 ---
 
-### 4-12　Which description of the PVM as summarized in the Overview is correct?
+### 4-12　How does the Overview summarize the PVM — its basis, registers, endianness and memory?
 
 <sub>4.5 The Virtual Machine and Gas — ●○○ · 概念 · §4.7 The Virtual Machine and Gas, eq. 4.22–4.27</sub>
 
@@ -3107,7 +3107,7 @@ GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) exten
 
 ## §5 The Header　<sub>21 題</sub>
 
-### 5-1　The team derives the unsigned header serialization by encoding the full header and truncating it. Which statement about GP 0.8.0's E(H) and E_U(H) explains why this is sound and describes E_U's layout correctly?
+### 5-1　The team derives the unsigned header serialization by encoding the full header and truncating it. Why is that sound under GP 0.8.0's E(H) and E_U(H), and what is E_U's field order?
 
 <sub>5 The Header (serialization, Appendix C.2) — ●●○ · 程式碼 · eq. 5.1 & §C.2 (E(H), E_U(H))</sub>
 
@@ -3482,7 +3482,7 @@ marker 不是出塊者可以自由填寫的註記欄位：H_E 與 H_W 的**內�
 
 ---
 
-### 5-15　GP eq. 5.1 defines the header H as a 10-tuple. Which field is NOT part of the header?
+### 5-15　GP eq. 5.1 defines the header H as a 10-tuple. List the ten fields — and name the one thing people expect in a block header that JAM deliberately leaves out.
 
 <sub>5 The Header — ●○○ · 概念 · eq. 5.1</sub>
 
@@ -3632,7 +3632,7 @@ eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），
 
 ---
 
-### 5-21　Which statement about the three header markers (H_E, H_W, H_O) is correct per eq. 5.11?
+### 5-21　Per eq. 5.11, what are the types of the three header markers H_E, H_W and H_O, and which of them are optional?
 
 <sub>5.1 The Markers — ●●○ · 概念 · eq. 5.11 (markers)</sub>
 
@@ -3660,7 +3660,7 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 <a id="ch-6"></a>
 
-## §6 Safrole　<sub>29 題</sub>
+## §6 Safrole　<sub>28 題</sub>
 
 ### 6-1　This is the tail of the team's CreateNewTicketAccumulator (identical on main and on the 0.8.0 branch), reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?
 
@@ -3719,7 +3719,7 @@ eq. 6.35：γ′_A ≡ 取 sort_by_id(n ∪ (∅ if e′ > e else γ_A)) 的最�
 
 ---
 
-### 6-2　This is VerifyTicketsAttempt on the team's 0.8.0 branch (PR #1025); on main (0.7.2) it compared Attempt against the constant TicketsPerValidator. Which statement about it is correct?
+### 6-2　This is VerifyTicketsAttempt on the team's 0.8.0 branch (PR #1025); on main (0.7.2) it compared Attempt against the constant TicketsPerValidator. What does the new check compute, from which set, and is the bound right?
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 程式碼 · eq. 6.30 (n = ⌈2E/|γ′_P|⌉) — internal/safrole/extrinsic_tickets.go VerifyTicketsAttempt (branch 1012-update-to-v080, PR #1025) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -3827,7 +3827,7 @@ eq. 6.16/6.17：i = γ′_S[H_T mod E]（posterior 序列），H_S 由 H_A 簽�
 
 ---
 
-### 6-4　After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Which assessment is right under GP 0.8.0?
+### 6-4　After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Is the bound it uses the one GP 0.8.0 specifies, and when would the difference show?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●● · 程式碼 · §5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader · ⚠ 0.7.2→0.8.0</sub>
 
@@ -3863,7 +3863,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
 
 ---
 
-### 6-5　Full parameters (E = 600, Y = 500). The prior block has τ = 1195 and a saturated accumulator (|γ_A| = E); the next block has H_T = 1810 (nothing was authored in between). Expressing posterior values in terms of PRIOR ones, which description of this transition is correct?
+### 6-5　Full parameters (E = 600, Y = 500). The prior block has τ = 1195 and a saturated accumulator (|γ_A| = E); the next block has H_T = 1810 (nothing was authored in between). Expressing posterior values in terms of PRIOR ones, describe the transition: how many rotations happen, what κ′, λ′, γ′_P and η′ become, which sealer sequence is used and why, and which markers appear.
 
 <sub>6.3–6.7 (epoch transition across skipped epochs) — ●●● · 概念 · eq. 6.2, 6.14, 6.24, 6.25, 6.28–6.29, 6.35</sub>
 
@@ -3888,7 +3888,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
 
 ---
 
-### 6-6　Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal 0.8.0 configuration (eq. 6.8). Consider the first block of epoch e + 1. Which statement is correct?
+### 6-6　Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal 0.8.0 configuration (eq. 6.8). Consider the first block of epoch e + 1. What does the ticket regime look like for the new epoch (entry-index bound, ring), what does H_E list, and who may seal that first block?
 
 <sub>6.3 Key Rotation / 6.7 The Extrinsic and Tickets — ●●● · 版本差異 · eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -3988,7 +3988,7 @@ eq. 6.31：m′ ≥ Y 時 |E_T| = 0，§6.7 末尾更指出此時 γ′_A = γ_A
 
 ---
 
-### 6-10　Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. Which mapping of key → protocol use is correct, and why has the epoch marker H_E carried the Ed25519 keys alongside the Bandersnatch keys since GP 0.6.4?
+### 6-10　Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. What is each key used for in the protocol, and why has the epoch marker H_E carried the Ed25519 keys alongside the Bandersnatch keys since GP 0.6.4?
 
 <sub>6.3 Key Rotation / 6.6 The Markers — ●●○ · 概念 · eq. 6.10–6.13, 6.15, 6.28; §5 eq. 5.11; eq. 11.14, 11.28, 17.7, 18.1</sub>
 
@@ -4038,7 +4038,7 @@ eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))
 
 ---
 
-### 6-12　The Safrole state γ ≡ (γ_P, γ_Z, γ_S, γ_A). Which description is correct?
+### 6-12　The Safrole state γ ≡ (γ_P, γ_Z, γ_S, γ_A). What does each component hold?
 
 <sub>6.2 Safrole Basic State — ●○○ · 概念 · eq. 6.3–6.6</sub>
 
@@ -4113,32 +4113,7 @@ eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 
 
 ---
 
-### 6-15　A validator key K is a 336-octet sequence. What is the layout?
-
-<sub>6.3 Key Rotation — ●○○ · 概念 · eq. 6.9–6.13</sub>
-
-**標準答案**　Bandersnatch 32 | Ed25519 32 | BLS 144 | metadata 128
-
-§6.3：驗證者金鑰集合 𝕂 ≡ B_336，也就是一段 336 位元組的 blob；GP 為了好指涉才把它切成四塊（eq. 6.9–6.13）：k_b = k[0…32) Bandersnatch、k_e = k[32…+32) Ed25519、k_l = k[64…+144) BLS、k_m = k[208…+128) metadata。32 + 32 + 144 + 128 = 336。**四把鑰匙各司其職**：Bandersnatch 用在出塊——seal H_S 與 ticket 的 ring-VRF proof 都是它；Ed25519 用在「表態」類簽章——guarantee、assurance、judgment 都是；BLS 用在 Beefy，是對外橋接時要驗的那把；metadata 則完全不參與密碼學，GP 說它是「an opaque octet sequence, but utilized to specify practical identifiers for the validator, not least a hardware address」，也就是放網路位址這類實務資訊。**為什麼要記得切點**：其一，epoch 的 ring root 只取每筆的前 32 位元組——eq. 6.14 的 where 子句定義 z = ringroot([k_b | k ∈ γ′_P])（z 本身沒有獨立編號），拿錯 offset 整個 root 就對不上。其二，offender 的處置是「就地歸零」而不是移除：eq. 6.15 的 Φ 把整筆 336 位元組換成全 0，所以 |κ| ≡ |λ| ≡ V 永遠成立，索引不會位移（H_I 才能一直當索引用）。相關名詞：ι staging（待命）、γ_P pending（下個 epoch 生效、決定 ring root）、κ active（現行）、λ previous（上一個 epoch）。
-
-**逐項辨析**
-
-1. ✅ Bandersnatch 32 | Ed25519 32 | BLS 144 | metadata 128  
-   eq. 6.9–6.13 的順序與長度：32 + 32 + 144 + 128 = 336。
-2. ❌ Ed25519 32 | Bandersnatch 32 | BLS 96 | metadata 176  
-   前兩把的順序對調了，且 BLS 是 144 octets 不是 96（metadata 固定 128）。
-3. ❌ Bandersnatch 32 | BLS 144 | Ed25519 32 | metadata 128  
-   Ed25519 必須緊接 Bandersnatch 落在 offset 32，BLS 要到 offset 64 才開始。
-4. ❌ Bandersnatch 33 | Ed25519 32 | BLS 143 | metadata 128  
-   Bandersnatch 公鑰是 32 octets、BLS 是 144；總長雖仍為 336，每個切點卻都偏了一格。
-
-> **陷阱**　BLS 144 octets（BLS12-381 上的 key 組合）。metadata 不參與任何密碼學運算。
-
-<sub>`ch06-validator-key-layout`</sub>
-
----
-
-### 6-16　How is the entropy accumulator η updated in each block, and on an epoch change?
+### 6-15　How is the entropy accumulator η updated in each block, and on an epoch change?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●○ · 概念 · eq. 6.22–6.24</sub>
 
@@ -4163,7 +4138,7 @@ eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 
 
 ---
 
-### 6-17　Each of η′_2 and η′_3 has specific uses in GP 0.8.0. Which assignment is correct?
+### 6-16　Each of η′_2 and η′_3 has specific uses in GP 0.8.0. What is each one used for?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●● · 概念 · eq. 6.16–6.18, 6.25, 6.30, 11.22</sub>
 
@@ -4188,7 +4163,7 @@ eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 
 
 ---
 
-### 6-18　When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. Which set is exactly right?
+### 6-17　When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. What are they?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●● · 概念 · eq. 6.16 (ticket seal)</sub>
 
@@ -4213,7 +4188,7 @@ eq. 6.16（票券模式，i = γ′_S[H_T mod E]）三個條件：**i_y = Y(H_S)
 
 ---
 
-### 6-19　The posterior slot-sealer sequence γ′_S has three cases. A block arrives with e′ = e + 1, the previous block was at slot phase m = 480 (< Y = 500) and γ_A holds 600 tickets. What is γ′_S?
+### 6-18　The posterior slot-sealer sequence γ′_S has three cases. A block arrives with e′ = e + 1, the previous block was at slot phase m = 480 (< Y = 500) and γ_A holds 600 tickets. What is γ′_S?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 概念 · eq. 6.25</sub>
 
@@ -4238,7 +4213,7 @@ eq. 6.25 三個分支：γ′_S ≡ Z(γ_A) 當 **e′ = e + 1 ∧ m ≥ Y ∧ |
 
 ---
 
-### 6-20　The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?
+### 6-19　The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 概念 · eq. 6.26 (Z)</sub>
 
@@ -4263,7 +4238,7 @@ eq. 6.26：Z(s) = [s_0, s_{|s|−1}, s_1, s_{|s|−2}, …]——從排序好的
 
 ---
 
-### 6-21　What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?
+### 6-20　What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?
 
 <sub>6.6 The Markers — ●●○ · 概念 · eq. 6.28</sub>
 
@@ -4288,7 +4263,7 @@ eq. 6.28：H_E ≡ (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P]) 當 e′ > e，否
 
 ---
 
-### 6-22　Under which exact condition is the winning-tickets marker H_W non-empty?
+### 6-21　Under which exact condition is the winning-tickets marker H_W non-empty?
 
 <sub>6.6 The Markers — ●●○ · 概念 · eq. 6.29</sub>
 
@@ -4313,7 +4288,7 @@ eq. 6.29：H_W ≡ Z(γ_A) 當 **e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E**，
 
 ---
 
-### 6-23　Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?
+### 6-22　Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 版本差異 · eq. 6.30–6.32 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -4338,7 +4313,7 @@ eq. 6.29：H_W ≡ Z(γ_A) 當 **e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E**，
 
 ---
 
-### 6-24　Which statement about the new tickets n and the posterior accumulator γ′_A is FALSE?
+### 6-23　State the rules for the new tickets n and the posterior accumulator γ′_A — and name the common misconception about which tickets survive.
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 概念 · eq. 6.33–6.36</sub>
 
@@ -4363,7 +4338,7 @@ eq. 6.33：n 依 id 排序且唯一；6.34：n 的 id 與 γ_A 不相交；6.35�
 
 ---
 
-### 6-25　A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?
+### 6-24　A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 概念 · eq. 6.30, 6.32</sub>
 
@@ -4388,7 +4363,7 @@ eq. 6.30：p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([])——四個要素缺�
 
 ---
 
-### 6-26　In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?
+### 6-25　In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?
 
 <sub>6.4 Sealing — ●●○ · 概念 · eq. 6.17–6.18</sub>
 
@@ -4413,7 +4388,7 @@ eq. 6.17（fallback 模式，γ′_S 每格直接是一把 Bandersnatch 公鑰�
 
 ---
 
-### 6-27　This is the team's implementation of γ′_S. Which claim about it is correct?
+### 6-26　This is the team's implementation of γ′_S. Which prior and which posterior values does it read, and does that match eq. 6.25?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 程式碼 · eq. 6.25 — internal/safrole/sealing.go UpdateSlotKeySequence</sub>
 
@@ -4451,7 +4426,7 @@ eq. 6.25 給 γ′_S 三種情形，這段程式要同時對上三處才算正�
 
 ---
 
-### 6-28　Read the team's FallbackKeySequence. Which statement is accurate about its conformance to eq. 6.27?
+### 6-27　Read the team's FallbackKeySequence. Does it conform to eq. 6.27? If not, where exactly does it diverge?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 程式碼 · eq. 6.27 — internal/safrole/slot_key_sequence.go</sub>
 
@@ -4489,7 +4464,7 @@ eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]�
 
 ---
 
-### 6-29　In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?
+### 6-28　In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?
 
 <sub>6.4 Sealing and Entropy — ●●○ · 程式碼 · eq. 6.23–6.24 — internal/safrole/sealing.go UpdateEntropy</sub>
 
@@ -4650,7 +4625,7 @@ eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 
 
 ---
 
-### 7-5　Trace how a block's accumulation outputs end up inside a BEEFY signature. Which description matches GP 0.8.0?
+### 7-5　Trace how a block's accumulation outputs end up inside a BEEFY signature in GP 0.8.0.
 
 <sub>7 Recent History — ●●○ · 概念 · eq. 7.7, 7.8; eq. E.8, E.10; §18 Beefy</sub>
 
@@ -4881,7 +4856,7 @@ eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本
 
 ## §8 Authorization　<sub>11 題</sub>
 
-### 8-1　Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. Which statement correctly describes the GP rule the fixed code implements and why the old behaviour was wrong?
+### 8-1　Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. What is the GP rule the fixed code implements, and why was the old behaviour wrong?
 
 <sub>8.2 Pool and Queue — ●●○ · 程式碼 · eq. 8.3 (F) & eq. 11.25, 11.32</sub>
 
@@ -5264,7 +5239,7 @@ GP 附錄 B（Refine Invocation）原文：「The historical-lookup host-call fu
 
 ---
 
-### 9-3　This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?
+### 9-3　This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Under GP 0.8.0, what does one storage entry cost against a_i and a_o, and what must happen when the post-write threshold exceeds the balance?
 
 <sub>9.3 Account Footprint and Threshold Balance — ●●○ · 程式碼 · eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)</sub>
 
@@ -5318,7 +5293,7 @@ eq. 9.8：a_i ≡ 2·|a_l| + |a_s|；a_o ≡ Σ_{(h,z)∈K(a_l)} (81 + z) + Σ_{
 
 ---
 
-### 9-4　A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, which set of transitions matches GP 0.8.0?
+### 9-4　A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, what does GP 0.8.0 do in each case?
 
 <sub>9.2.2 Semantics — ●●○ · 概念 · §9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200</sub>
 
@@ -5393,7 +5368,7 @@ GP 0.8.0（PR #519「Restrict bless to manager service」）在 Ω_B 加了一�
 
 ---
 
-### 9-7　Which of the following is NOT a field of a service account A in GP 0.8.0 (eq. 9.3)?
+### 9-7　What are the fields of a service account A in GP 0.8.0 (eq. 9.3) — and which field an Ethereum developer would expect is missing?
 
 <sub>9 Service Accounts — ●●○ · 概念 · eq. 9.3</sub>
 
@@ -5468,7 +5443,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 
 ---
 
-### 9-10　A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. Which statement about the historical lookup Λ(a, t, h) is correct?
+### 9-10　A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. For t = 120, 300 and 450, what does the historical lookup Λ(a, t, h) return?
 
 <sub>9.2 Preimage Lookups — ●●○ · 概念 · eq. 9.7 (Λ)</sub>
 
@@ -5518,7 +5493,7 @@ eq. 9.8 三條式子，數字都是 GP 直接給定的常數，不需要推導�
 
 ---
 
-### 9-12　The privileges state χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z). Which mapping of privilege → power is correct?
+### 9-12　The privileges state χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z). What power does each component grant?
 
 <sub>9.4 Service Privileges — ●●○ · 概念 · eq. 9.9–9.10</sub>
 
@@ -5543,7 +5518,7 @@ eq. 9.8 三條式子，數字都是 GP 直接給定的常數，不需要推導�
 
 ---
 
-### 9-13　The GP lists three differences between preimage lookups and general storage. Which is NOT one of them?
+### 9-13　The GP lists three differences between preimage lookups and general storage. What are they — and what plausible-sounding fourth 'difference' is actually false?
 
 <sub>9.2 Preimage Lookups — ●○○ · 設計理由 · §9.2 intro</sub>
 
@@ -5738,7 +5713,7 @@ eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。**前三個都是 work-report hash 
 
 ---
 
-### 10-6　Per GP 0.8.0, which statement about the verdicts component E_V of the disputes extrinsic is correct?
+### 10-6　Per GP 0.8.0, what is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?
 
 <sub>10.2 Extrinsic — ●●○ · 版本差異 · eq. 10.2–10.4 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -5763,7 +5738,7 @@ eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 
 
 ---
 
-### 10-7　A verdict's outcome depends on t, the number of positive judgments among the ⌊2|k|/3⌋+1 signatures. In the tiny config (|k| = 6), which (t → outcome) table is correct, and what happens for any other t?
+### 10-7　A verdict's outcome depends on t, the number of positive judgments among the ⌊2|k|/3⌋+1 signatures. In the tiny config (|k| = 6), what is the (t → outcome) table, and what happens for any other t?
 
 <sub>10.2 Extrinsic — ●●○ · 概念 · eq. 10.12 (V)</sub>
 
@@ -5788,7 +5763,7 @@ eq. 10.12 定義 V(a, j)：**⊤（good）當 t = ⌊2|k|/3⌋ + 1；⊥（bad�
 
 ---
 
-### 10-8　Which statement about culprits (E_C) and faults (E_F) is correct in GP 0.8.0?
+### 10-8　In GP 0.8.0, what does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?
 
 <sub>10.2 Extrinsic — ●●● · 版本差異 · eq. 10.6–10.7, 10.13 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -5904,7 +5879,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 ---
 
-### 10-12　Which of the following is NOT a purpose of the disputes system as stated in the GP?
+### 10-12　What are the stated purposes of the disputes system — and what does it pointedly NOT do itself?
 
 <sub>10 intro — ●○○ · 設計理由 · §10 intro paragraphs</sub>
 
@@ -5932,7 +5907,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 <a id="ch-11"></a>
 
-## §11 Reporting & Assurance　<sub>24 題</sub>
+## §11 Reporting & Assurance　<sub>23 題</sub>
 
 ### 11-1　Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?
 
@@ -6197,7 +6172,7 @@ eq. 11.42：∀w ∈ I, ∀p ∈ (w_x)_p ∪ keys(w_l)：p ∈ p ∪ {x | x ∈ 
 
 ---
 
-### 11-9　GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Which statement is correct?
+### 11-9　GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Is that guarantee valid? Walk through the checks it meets or fails.
 
 <sub>11.4 Work Report Guarantees — ●●● · 版本差異 · eq. 11.18, 11.23, 11.28, 11.31 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -6270,7 +6245,7 @@ eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可
 
 ---
 
-### 11-12　A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. Which field description is WRONG?
+### 11-12　A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. What does each field hold — and what is g commonly mistaken for?
 
 <sub>11.1.1 Work Report — ●●○ · 概念 · eq. 11.2–11.3</sub>
 
@@ -6345,7 +6320,7 @@ eq. 11.5：s ≡ (p, l, u, v, e, n)——p = work-package hash、l = bundle 長�
 
 ---
 
-### 11-15　A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). Which meaning is correct?
+### 11-15　A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). What does each error mean?
 
 <sub>11.1.4 Work Digest — ●●○ · 概念 · eq. 11.6–11.7</sub>
 
@@ -6370,32 +6345,7 @@ eq. 11.7（錯誤集合是 𝔼，注意 𝕁 在 0.8.0 是 segment 的集合）
 
 ---
 
-### 11-16　What is the on-chain limit on the variable-size content of a single work-report?
-
-<sub>11.1.4 Work Digest — ●○○ · 概念 · eq. 11.8</sub>
-
-**標準答案**　|authorizer trace t| + Σ over digests of |result blob| (errors count as 0) ≤ W_R = 48·2^10 = 49,152 octets
-
-eq. 11.8：∀w ∈ ℝ：|w_t| + Σ_i L(w_d[i]_r) ≤ W_R，其中 L(r) = |r| 若 r 是 blob（成功輸出），**若是錯誤值則計 0**。W_R = 48 · 2^10 = **49,152 位元組**。所以受限的是「authorizer trace 加上所有成功輸出」的總和——失敗的 item 不佔額度，這與 §14 的 OVERSIZE 累計規則是一致的（那裡也只累加結果為 blob 的前序項）。**GP 給的理由**：「In order to ensure fair use of a block's extrinsic space」——report 是要寫進區塊的，一份報告吃掉太多空間就排擠了其他 core 的工作。**最容易混淆的是 W_R 與 W_B**：W_R = 49,152 管的是**寫上鏈的 work-report**；W_B = 13,791,360（約 13 MB）管的是 **work-package bundle**（extrinsic 資料、import 的 segment 等，§14），那份東西根本不上鏈，是走 erasure coding 分發的。兩者差了近 300 倍，正好反映 JAM「in-core 處理大量資料、on-chain 只收小結果」的核心架構。你們 guarantor 端判 BIG／OVERSIZE 時是累加前面 item 的輸出一起算，符合這條式子的形狀。
-
-**逐項辨析**
-
-1. ✅ |authorizer trace t| + Σ over digests of |result blob| (errors count as 0) ≤ W_R = 48·2^10 = 49,152 octets  
-   eq. 11.8 的 L 對 r ∈ 𝔼 回 0，失敗的 digest 不佔 report 空間，out-of-gas 反而「便宜」。
-2. ❌ |authorizer trace t| + Σ over digests of |result blob| (errors count as their encoded length) ≤ W_B = 13,791,360 octets  
-   error 不按編碼長度計；而 W_B 套的是 §14 的 work-package bundle，不是 report 的 W_R。
-3. ❌ Σ over digests of |result blob| alone, the authorizer trace being unbounded, ≤ W_R = 48·2^10 = 49,152 octets  
-   |w_t| 是加總的第一項，否則 is-authorized 的 trace 可以無限撐大區塊。
-4. ❌ |authorizer trace t| ≤ 32 octets and each digest's result blob ≤ W_G = 4,104 octets, giving at most I = 16 blobs  
-   eq. 11.8 是單一總量上限、沒有逐項上限；W_G = 4,104 是 segment 大小，與 report 無關。
-
-> **陷阱**　48 KiB 是 report 級總量，且 auth trace 也算在內。
-
-<sub>`ch11-report-size-limit`</sub>
-
----
-
-### 11-17　Which set of rules applies to the assurances extrinsic E_A?
+### 11-16　What is an assurance in E_A made of, and what rules must the assurances extrinsic satisfy?
 
 <sub>11.2 Package Availability Assurances — ●●○ · 概念 · eq. 11.11–11.16</sub>
 
@@ -6420,7 +6370,7 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-18　When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?
+### 11-17　When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?
 
 <sub>11.2.2 Available Reports — ●●○ · 版本差異 · eq. 11.17–11.18 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -6445,7 +6395,7 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-19　How are validators assigned to cores for guaranteeing in GP 0.8.0?
+### 11-18　How are validators assigned to cores for guaranteeing in GP 0.8.0?
 
 <sub>11.3 Guarantor Assignments — ●●● · 概念 · eq. 11.19–11.23</sub>
 
@@ -6470,7 +6420,7 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-20　Which statement about a guarantee g = (w, t, a) in E_G is correct?
+### 11-19　For a guarantee g = (w, t, a) in E_G: what is in the credential a, who may sign, how is the slot t bounded, what is signed, and how is the core bounded?
 
 <sub>11.4 Work Report Guarantees — ●●● · 概念 · eq. 11.24–11.29</sub>
 
@@ -6495,7 +6445,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-21　Which on-chain checks apply to each incoming report w before it is placed in ρ′?
+### 11-20　Which on-chain checks apply to each incoming report w before it is placed in ρ′?
 
 <sub>11.4 Work Report Guarantees — ●●○ · 概念 · eq. 11.31–11.33</sub>
 
@@ -6520,7 +6470,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-22　Which of the following is NOT one of the contextual validity requirements for reports in E_G?
+### 11-21　What are the contextual validity requirements for reports in E_G — and what plausible-sounding requirement does the GP not actually impose?
 
 <sub>11.4.1 Contextual Validity of Reports — ●●● · 概念 · eq. 11.35–11.45</sub>
 
@@ -6545,7 +6495,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-23　After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?
+### 11-22　After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?
 
 <sub>11.5 Transitioning for Reports — ●○○ · 概念 · eq. 11.46</sub>
 
@@ -6568,7 +6518,7 @@ eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G 使得該 guarantee 的 
 
 ---
 
-### 11-24　The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Which statement is accurate?
+### 11-23　The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Is that the GP's threshold, and what does its correctness depend on?
 
 <sub>11.2.2 Available Reports — ●●○ · 程式碼 · eq. 11.17 — internal/extrinsic/assurance_controller.go · ⚠ 0.7.2→0.8.0</sub>
 
@@ -6611,7 +6561,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ## §12 Accumulation　<sub>21 題</sub>
 
-### 12-1　Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. Which mapping of symbol → meaning is right for GP 0.8.0?
+### 12-1　Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. In GP 0.8.0, what do ω, ξ and θ each hold, and what was renamed?
 
 <sub>12.1 History and Queuing — ●○○ · 版本差異 · eq. 12.1 & 12.3; eq. 7.4 (θ); §4.2 state σ · ⚠ 0.7.2→0.8.0</sub>
 
@@ -6636,7 +6586,7 @@ GP 0.8.0 的 preamble 明訂 ready = ω、accumulated = ξ、lastaccout = θ。e
 
 ---
 
-### 12-2　Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. Which description of what an operand tuple carries is right for GP 0.8.0?
+### 12-2　Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. What does an operand tuple carry in GP 0.8.0, and which of its fields differ between those two tuples?
 
 <sub>12.2 Execution — ●○○ · 概念 · eq. 12.13 (U), 12.14 (X), 12.23 (Δ1)</sub>
 
@@ -6711,7 +6661,7 @@ eq. 12.8 的 Q 只挑 dependency 集合為空的項目（g = [r | (r, ∅) ↕ r
 
 ---
 
-### 12-5　G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Which statement correctly places each accumulate-gas limit — the ceilings and the per-service floors?
+### 12-5　G_A = 10,000,000 and G_T = 3,500,000,000, while every service account carries a_g and a_m. Where does each accumulate-gas limit apply — the ceilings and the per-service floors — and when is each one checked?
 
 <sub>12.2 Execution — ●●○ · 概念 · §11.4 (report gas checks); eq. 12.23 (Δ1 g), 12.24 (block g); §9.1</sub>
 
@@ -7119,7 +7069,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-19　After Δ+ returns (n, e′, b, u, t), which statements about the final integration are correct?
+### 12-19　After Δ+ returns (n, e′, b, u, t), how is each of those integrated into the posterior state?
 
 <sub>12.3 Final State Integration — ●●○ · 概念 · eq. 12.24–12.33 (δ† → δ‡ → δ′)</sub>
 
@@ -7144,7 +7094,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-20　Which rule governs the preimages extrinsic E_P and its integration into δ′?
+### 12-20　What rule governs the preimages extrinsic E_P — what may be included, checked against which state — and how and when is it integrated into δ′?
 
 <sub>12.4 Preimage Integration — ●●○ · 概念 · eq. 12.34–12.37</sub>
 
@@ -7476,7 +7426,7 @@ eq. 13.8：π_S ∈ ⟨N_S → (p ∈ (N, N), r ∈ (N, N_G), i ∈ N, x ∈ N, 
 
 ---
 
-### 13-9　π ≡ (π_V, π_L, π_C, π_S). Which statement about the validator statistics is correct in GP 0.8.0?
+### 13-9　π ≡ (π_V, π_L, π_C, π_S). In GP 0.8.0, what does a validator record count, in what order are the assurance credits, the epoch rollover and the author's credits applied, and who gets the guarantee credit?
 
 <sub>13.1 Validator Activity — ●●○ · 版本差異 · eq. 13.1–13.6 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -7501,7 +7451,7 @@ eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|�
 
 ---
 
-### 13-10　Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?
+### 13-10　Core statistics π_C and service statistics π_S are per-block (not per-epoch). What do the core statistics record, and over which set of reports is each field summed?
 
 <sub>13.2 Cores and Services — ●●● · 概念 · eq. 13.7, 13.9–13.12</sub>
 
@@ -7556,7 +7506,7 @@ eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|�
 
 ## §14 Work Packages & Reports　<sub>7 題</sub>
 
-### 14-1　A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. Which description is correct?
+### 14-1　A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. What does each field hold?
 
 <sub>14.2 Work Packages — ●●○ · 概念 · eq. 14.2–14.3 (§14.3)</sub>
 
@@ -7581,7 +7531,7 @@ eq. 14.2：ℙ ≡ (j ∈ B token, h ∈ N_S auth service, u ∈ H auth code has
 
 ---
 
-### 14-2　This is the team's item-to-digest function (GP 0.8.0 eq. 14.10, C). Which statement about it is correct?
+### 14-2　This is the team's item-to-digest function (GP 0.8.0 eq. 14.10, C). Check it against eq. 14.10 field by field: what is right, and what is wrong?
 
 <sub>14.3 Packages and Items — ●●○ · 程式碼 · eq. 14.10 (item-to-digest C); eq. 11.6 (D); eq. 13.10/13.17 — internal/work_package/work_package.go C</sub>
 
@@ -7634,7 +7584,7 @@ eq. 14.10 C：((s, c, y, a, e, i, x), l, u) ↦ (s, c, y ↦ H(y), g ↦ w_a, l,
 
 ---
 
-### 14-3　Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Which statement is correct under GP 0.8.0 (eq. B.5)?
+### 14-3　Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Check it against GP 0.8.0 eq. B.5: which components match, and which one is wrong?
 
 <sub>14.4 Computation of Work-Report — ●●● · 程式碼 · eq. B.5 (Ψ_R argument a and gas w_g); eq. B.1 (Ψ_I uses E_2(c)); eq. 14.9 (G_R) — PVM/refine_invocation.go RefineInvoke</sub>
 
@@ -7684,7 +7634,7 @@ eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(�
 
 ---
 
-### 14-4　GP 0.8.0 redefines the work-report computation function Ξ. Which statement about its arguments and its failure condition E is correct?
+### 14-4　GP 0.8.0 redefines the work-report computation function Ξ. What are its arguments, and under exactly what conditions does it fail with E?
 
 <sub>14.4 Computation of Work-Report — ●●● · 版本差異 · eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -7709,7 +7659,7 @@ eq. 14.13：Ξ: (P, N_C, ⟨H → H⟩, N_V) → ℝ ∪ {∇}，(p, c, l, v) �
 
 ---
 
-### 14-5　Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. Which statement is correct?
+### 14-5　Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. How is e computed, what does a paged proof contain, and where do both end up?
 
 <sub>14.3.1 Exporting / 14.4.1 Availability Specifier — ●●○ · 概念 · eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12</sub>
 
@@ -7787,7 +7737,7 @@ eq. 14.16：B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))；eq. 14.15：X(w) = �
 
 ## 附錄 A · PVM　<sub>15 題</sub>
 
-### A-1　The PVM invocation Ψ returns an exit reason ε. Which is the complete set of possible exit reasons?
+### A-1　The PVM invocation Ψ returns an exit reason ε. What are the possible exit reasons, and what does each one carry?
 
 <sub>A.1 Basic Definition — ●○○ · 概念 · eq. A.1 (Ψ) & §4.7</sub>
 
@@ -7887,7 +7837,7 @@ eq. A.2 的 deblob 要求 p = E(|j|) ⌢ E_1(z) ⌢ E(|c|) ⌢ E_z(j) ⌢ E(c) �
 
 ---
 
-### A-5　Under standard program initialization Y(p, a), which register/memory layout is correct?
+### A-5　Under standard program initialization Y(p, a), where do the registers point and how is memory laid out?
 
 <sub>A.7 Standard Program Initialization — ●●● · 概念 · eq. A.42–A.47</sub>
 
@@ -7987,7 +7937,7 @@ eq. A.22 的 footnote：「The popular code generation backend LLVM requires and
 
 ---
 
-### A-9　Every conditional branch in the team's 0.7.2 interpreter (instBranch for 170–175 and the branch_*_imm handlers) resolves through this helper. Under GP 0.8.0 eq. A.21, which statement about the branch rule is correct?
+### A-9　Every conditional branch in the team's 0.7.2 interpreter (instBranch for 170–175 and the branch_*_imm handlers) resolves through this helper. What does GP 0.8.0 eq. A.21 require of a conditional branch's targets, and does this helper meet it?
 
 <sub>A.5 Single-Step State Transition (branch) — ●●● · 程式碼 · eq. A.21 (branch), A.5 (ϖ), A.2 (v_blob) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -8035,7 +7985,7 @@ eq. A.21：branch(b, C) ⟹ (ε, ı′) = (☇, ı) when b ∉ ϖ ∨ ı + 1 + s
 
 ---
 
-### A-10　GP 0.8.0 threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Which statement about gas charging in this situation is correct?
+### A-10　GP 0.8.0 threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Is gas charged again on that resume? Explain what the flag does here, and how it differs from a fresh Ψ_H that starts mid-block.
 
 <sub>A.5 Single-Step State Transition (gas charged flag) — ●●● · 概念 · eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine · ⚠ 0.7.2→0.8.0</sub>
 
@@ -8165,7 +8115,7 @@ eq. A.34 表列 load_imm_jump_ind：djump((φ_B + ν_Y) mod 2^32)，φ′_A = ν
 
 ---
 
-### A-13　GP 0.8.0's deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. Which set of conditions do these two validators actually enforce?
+### A-13　GP 0.8.0's deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. What conditions do these two validators actually enforce?
 
 <sub>A.1 Basic Definition (deblob validity v_blob / v_inst) — ●●○ · 版本差異 · eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -8243,7 +8193,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 ## 附錄 B · Host Calls　<sub>18 題</sub>
 
-### B-1　A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?
+### B-1　A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. What is that order, and what kind of error does each constant name?
 
 <sub>B.1 Result Constants; Omega_A (assign) — ●●○ · 概念 · §B.1; Ω_A</sub>
 
@@ -8268,7 +8218,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 ---
 
-### B-2　The PVM has three invocation types. Which statement about their host-call sets is correct in GP 0.8.0?
+### B-2　The PVM has three invocation types. In GP 0.8.0, which host calls does each one expose, and what happens when a service calls an id outside its invocation's set?
 
 <sub>B.2–B.4 Invocations — ●●○ · 概念 · eq. B.1–B.2, B.5–B.6, B.9–B.11</sub>
 
@@ -8293,7 +8243,7 @@ eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refin
 
 ---
 
-### B-3　Which statement about the accumulate invocation Ψ_A(e, t, s, g, i) is correct?
+### B-3　Describe the accumulate invocation Ψ_A(e, t, s, g, i) end to end: what happens if the service's code is missing, how the machine is set up, what the two contexts are for, and what becomes of the result.
 
 <sub>B.4 Accumulate Invocation — ●●● · 概念 · eq. B.7–B.14</sub>
 
@@ -8343,7 +8293,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-5　The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. Which order/meaning is correct?
+### B-5　The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. In what order are the checks made, what does each failure mean, and what happens on success?
 
 <sub>B.7 Accumulate Functions — transfer — ●●○ · 概念 · `transfer` = 21</sub>
 
@@ -8443,7 +8393,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-9　The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Which statement matches GP 0.8.0?
+### B-9　The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Under GP 0.8.0, what does the call return in φ′_7 on success, what happens if the write would push the threshold above the balance, and what did the pre-fix code get wrong?
 
 <sub>B.5 General Functions — write — ●●○ · 程式碼 · §B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)</sub>
 
@@ -8499,7 +8449,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-10　Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. Which statement is correct?
+### B-10　Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. What may the read do to B's account and what must it not do, and what went wrong before the guard?
 
 <sub>B.5 General Functions — read — ●●● · 程式碼 · §B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)</sub>
 
@@ -8661,7 +8611,7 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
 
 ---
 
-### B-13　The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Compared with GP 0.8.0, which statement is correct?
+### B-13　The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Where does this code diverge from GP 0.8.0's semantics for `pages`?
 
 <sub>B.6 Refine Functions — pages — ●●● · 程式碼 · §B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants</sub>
 
@@ -8744,7 +8694,7 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
 
 ---
 
-### B-15　A service executes `ecalli 100` (`log`). Which statement is correct?
+### B-15　A service executes `ecalli 100` (`log`). Where is `log` specified, what are its observable effects on the machine state, and how must an unreadable message range be handled?
 
 <sub>B.2–B.4 mutator default case & JIP-1 `log` — ●●○ · 概念 · eq. B.2, B.6, B.11 (default branch); JIP-1 (host call 100)</sub>
 
@@ -8843,7 +8793,7 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 ## 附錄 C · Codec　<sub>6 題</sub>
 
-### C-1　Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. Which account of those four conventions is right?
+### C-1　Appendix C fixes how a value whose length its type does not imply gets encoded, how an absent value is distinguished from a present one, how a dictionary is laid out, and in which direction a bit sequence is packed. What are those four conventions?
 
 <sub>C.1 Discriminator / Sequence / Dictionary encoding — ●●○ · 概念 · §C.1.3–C.1.5</sub>
 
@@ -8952,7 +8902,7 @@ GP 0.8.0 §C.2：E(s ∈ availability spec) ≡ E(p, E_4(l), u, E_2(v), e, E_2(n
 
 ---
 
-### C-4　The team prefixes each accumulate input item with a byte before its body. Which explanation of the two prefixes and of what actually consumes this encoding is correct per GP 0.8.0?
+### C-4　The team prefixes each accumulate input item with a byte before its body. What are the two prefixes, and what actually consumes this encoding in GP 0.8.0?
 
 <sub>C.2 Block Serialization (operand tuple and deferred transfer) — ●●○ · 程式碼 · §C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14</sub>
 
@@ -9064,7 +9014,7 @@ GP §C.2 明確定義 E(x ∈ deferred transfer) ≡ E(1, E_4(s), E_4(d), E_8(a)
 
 ## 附錄 D · State Merklization　<sub>8 題</sub>
 
-### D-1　The state-key constructor C maps to 31-octet keys. Which forms are correct?
+### D-1　The state-key constructor C maps to 31-octet keys. What are its three forms, and how is each key laid out?
 
 <sub>D.1 Serialization (state-key constructor C) — ●●● · 概念 · §D.1 eq. C</sub>
 
@@ -9333,7 +9283,7 @@ func merklizeWithCache(entries []types.StateKeyVal, depth int, cache LeafHashCac
 
 ## 附錄 E · General Merklization / MMR　<sub>4 題</sub>
 
-### E-1　Which description of the general Merklization functions is correct?
+### E-1　Appendix E defines the general Merklization functions N, M_B, M and the MMR append A. What does each one do, and where does each get used?
 
 <sub>E.1 Binary Merkle Trees & E.2 MMR — ●●○ · 概念 · eq. E.1–E.8</sub>
 
@@ -9574,7 +9524,7 @@ eq. F.2：Q_l(h) = [ 𝓔⁻¹_4( H(h ⌢ E_4(⌊i/8⌋))_{4i mod 32 …+4} ) | 
 
 ## 附錄 G · Bandersnatch VRF　<sub>5 題</sub>
 
-### G-1　JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Which statement about where each is used, its size and the output function Y is correct?
+### G-1　JAM uses two Bandersnatch constructions: singly-contextualized IETF VRF signatures and ring-VRF proofs. Where is each used, how big is each, and what does the output function Y depend on?
 
 <sub>G Bandersnatch VRF (IETF VRF vs Ring VRF) — ●●○ · 概念 · §G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)</sub>
 
@@ -9599,7 +9549,7 @@ eq. F.2：Q_l(h) = [ 𝓔⁻¹_4( H(h ⌢ E_4(⌊i/8⌋))_{4i mod 32 …+4} ) | 
 
 ---
 
-### G-2　Each JAM signature is domain-separated by a context string X. Which of the following (context → primitive → use) statements is correct?
+### G-2　Each JAM signature is domain-separated by a context string X. Name the contexts and the primitive each goes with — and point out the one context that is used twice, with two different primitives.
 
 <sub>Signing contexts X (definitions appendix) and their primitives — ●●○ · 概念 · definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules</sub>
 
@@ -9805,7 +9755,7 @@ GP 0.8.0 的 eq. H.1：𝒟(v ∈ 𝕍) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d
 
 ---
 
-### H-4　Appendix H says the coding rate 'is derived from' three separate considerations. Which account of them is right, and why is the code built over GF(2¹⁶) rather than over single octets?
+### H-4　Appendix H says the coding rate 'is derived from' three separate considerations. What are the three, and why is the code built over GF(2¹⁶) rather than over single octets?
 
 <sub>H Erasure Coding — ●●○ · 設計理由 · eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -9833,7 +9783,7 @@ GP 0.8.0 的 eq. H.1：𝒟(v ∈ 𝕍) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d
 
 <a id="ch-arch"></a>
 
-## ★ Architecture & Rationale　<sub>23 題</sub>
+## ★ Architecture & Rationale　<sub>21 題</sub>
 
 ### ARCH-1　Where does the name 'JAM' come from, and which stages of the original CoreJam model actually execute on-chain?
 
@@ -9860,7 +9810,7 @@ GP §1.1：「An early, unrefined, version of this protocol was first proposed i
 
 ---
 
-### ARCH-2　The GP names five driving factors and a principle called 'size-coherency antagonism'. Which statement is correct?
+### ARCH-2　The GP names five driving factors and a principle called 'size-coherency antagonism'. What are the five, what does the principle say, and how does JAM's design answer it?
 
 <sub>1.2–1.3 Driving Factors / Size-Coherency Antagonism — ●●○ · 設計理由 · §1.2–1.3</sub>
 
@@ -9985,32 +9935,7 @@ GP §1.1：「An early, unrefined, version of this protocol was first proposed i
 
 ---
 
-### ARCH-7　Which set of full-configuration constants is correct?
-
-<sub>Appendix I constants — ●●○ · 概念 · Appendix I & §20</sub>
-
-**標準答案**　C = 341 cores (|κ| = 3C = 1023 in the full configuration; V itself is no longer a protocol constant), E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2
-
-附錄 I 的常數表在 0.8.0 已**沒有 V**（validator 數改由 𝕍 ≡ {3c | c ∈ N_[2,C+1]} 決定、門檻一律取 |κ|）：C_corecount 341、epoch E 600、slot P 6 s、Y（epoch tail start）500、R（rotation）10、H（recent history）8、L（max lookup anchorage）14,400 = 24h、D（expunge）19,200 = L + 4,800、U（assurance timeout）5、K（max block tickets）16、O（auth pool）8、Q（auth queue）80、I（max package items）16、J（max report deps）8、N_V/N_O 16、S = 2^16、T（max package extrinsics）128、W_M/W_X（imports/exports）3,072、W_G segment 4,104、W_F 4,488、W_R 48·2^10、W_B 13,791,360、W_A 64,000、W_C 4,000,000、W_T memo 128、G_A 10^7、G_I 5·10^7、G_R 5·10^9、G_T 3.5·10^9、B_S/B_I/B_L = 100/10/1、A（tranche）8 s、F（audit bias）2、Z_P 2^12、Z_Z 2^16、Z_I 2^24、Z_A 2。full 配置下 |κ| = 1023 = 3·341（每個 active core 3 個 guarantor），但 #514 之後「所有配置都固定 1023」的說法已不成立。
-
-**逐項辨析**
-
-1. ✅ C = 341 cores (|κ| = 3C = 1023 in the full configuration; V itself is no longer a protocol constant), E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2  
-   整組與附錄 I 相符，關鍵在 0.8.0 已把 V 移出常數表、驗證者數改由 𝕍 決定而門檻一律取 |κ|。
-2. ❌ C = 1023 cores with V = 341 validators still fixed by the protocol, E = 3,600 slots/epoch, P = 6 s, Y = 600, R = 60, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2  
-   core 數與 validator 數對調了；E = 600（正好一小時）、Y 必須小於 E、rotation R = 10。
-3. ❌ C = 341 cores with |κ| = 3C = 1023 fixed for every configuration, E = 600 slots/epoch, P = 12 s, Y = 300, R = 10, H = 24, L = 600, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 6 s, F = 3  
-   GP 全文以 six-second timeslot 為前提；H = 8、L = 14,400、A = 8 s、F = 2，且 |κ| 已非固定。
-4. ❌ C = 341 cores (|κ| = 3C = 1023 in the full configuration), E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 14,400 (identical to L), U = 5, K = 3, O = 80, Q = 8, I = 8, J = 16, T = 16, W_G = 4,096, W_R = 12 MB, W_B = 48 KiB, W_C = 64,000, G_A = 5·10^9, G_R = 10^7, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2  
-   多組常數被對調或寫錯：D = L + 4,800、O = 8 / Q = 80、I = 16 / J = 8、W_G = 4,104、W_C = 4,000,000。
-
-> **陷阱**　tiny（test vectors）：V 6、C 2、E 12、Y 10、R 4、D 32、K 3→(0.8.0 由公式)、N ⌈2E/V⌉。
-
-<sub>`arch-constants`</sub>
-
----
-
-### ARCH-8　According to the GP's 'Previous Work' analysis, what are the main limitations of Polkadot 1.0 and of Ethereum-style rollups that JAM tries to overcome?
+### ARCH-7　According to the GP's 'Previous Work' analysis, what are the main limitations of Polkadot 1.0 and of Ethereum-style rollups that JAM tries to overcome?
 
 <sub>2 Previous Work — ●●○ · 設計理由 · §2</sub>
 
@@ -10035,7 +9960,7 @@ GP §1.1：「An early, unrefined, version of this protocol was first proposed i
 
 ---
 
-### ARCH-9　Your implementation targets GP 0.7.2 while the current GP is 0.8.0. Which list contains ONLY genuine 0.8.0 changes?
+### ARCH-8　Your implementation targets GP 0.7.2 while the current GP is 0.8.0. What are the main changes 0.8.0 made that such an implementation has to absorb?
 
 <sub>GP 0.7.2 → 0.8.0 changes — ●●○ · 版本差異 · graypaper releases v0.8.0 (June 3 2026) · ⚠ 0.7.2→0.8.0</sub>
 
@@ -10060,32 +9985,7 @@ GP §1.1：「An early, unrefined, version of this protocol was first proposed i
 
 ---
 
-### ARCH-10　Which values describe the 'tiny' test-vector configuration used by the W3F vectors and the conformance fuzzer?
-
-<sub>Test vectors tiny configuration — ●○○ · 概念 · w3f/jamtestvectors README & JIP-4</sub>
-
-**標準答案**　6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 10, rotation period 4, preimage expunge period 32, super-majority 5 of 6, verdict thresholds 5/0/2, ring size 6
-
-jamtestvectors README（tiny）：num_validators 6、num_cores 2、epoch_duration 12、contest_duration（Y）10、rotation_period 4、preimage_expunge_period 32、tickets_per_validator 3（0.7.x；0.8.0 由 ⌈2E/V⌉ = 4）、max_tickets_per_extrinsic 3、num_ec_pieces_per_segment 1026；其他常數同 GP。門檻一律從 |κ| 現算：super-majority ⌊2·6/3⌋+1 = 5、wonky 門檻 ⌊6/3⌋ = 2；assurance bitfield 1 byte；Bandersnatch ring 大小 6（Zcash SRS）。對照 full 配置則是 1023 validators / 341 cores / epoch 600、expunge 19,200、super-majority 683、wonky 341。JIP-4 chainspec 的 protocol_parameters 就是用 fetch(0) 的編碼傳遞這些參數；你們 chainspec.ApplyProtocolParameters 會驗證編譯期常數必須一致。
-
-**逐項辨析**
-
-1. ✅ 6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 10, rotation period 4, preimage expunge period 32, super-majority 5 of 6, verdict thresholds 5/0/2, ring size 6  
-   6/2/12、Y = 10、rotation 4、expunge 32、super-majority 5 of 6，全部對上 jamtestvectors 的 tiny。
-2. ❌ 6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 12, rotation period 4, preimage expunge period 32, super-majority 4 of 6, verdict thresholds 4/0/2, ring size 6  
-   Y 必須小於 E，tiny 是 Y = 10 < E = 12；super-majority 是 ⌊2·6/3⌋ + 1 = 5 不是 4，verdict 門檻也跟著錯。
-3. ❌ 12 validators, 4 cores, epoch 60 slots, ticket submission ends at slot 50, rotation period 10, preimage expunge period 64, super-majority 9 of 12, verdict thresholds 9/0/4, ring size 12  
-   雖然仍滿足 |κ| = 3C，但不是任何一份 W3F 設定的值——tiny 就是 6 個 validator、2 個 core。
-4. ❌ 1023 validators, 341 cores, epoch 600 slots, ticket submission ends at slot 500, rotation period 10, preimage expunge period 19,200, super-majority 683 of 1023, verdict thresholds 683/0/341, ring size 1023  
-   這其實是 full 配置的數字；tiny 改動的遠不只 gas limit，連 ring 大小與 assurance bitfield 寬度都不同。
-
-> **陷阱**　tiny 的 Y = 10 < E = 12，所以每個 epoch 只有 slot 10、11 兩個 tail slot。
-
-<sub>`arch-tiny-config`</sub>
-
----
-
-### ARCH-11　Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?
+### ARCH-9　Per the Beefy Distribution chapter, what does a validator sign, with which key, and when — and what is the signature for?
 
 <sub>18 Beefy Distribution (ch. 18) — ●●○ · 概念 · eq. 18.1–18.2; eq. 7.7–7.8; §19–20</sub>
 
@@ -10110,7 +10010,7 @@ jamtestvectors README（tiny）：num_validators 6、num_cores 2、epoch_duratio
 
 ---
 
-### ARCH-12　How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?
+### ARCH-10　How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?
 
 <sub>19 Grandpa and the Best Chain (ch. 19) — ●●○ · 概念 · eq. 19.1–19.4; §17 (ban-listing)</sub>
 
@@ -10135,7 +10035,7 @@ jamtestvectors README（tiny）：num_validators 6、num_cores 2、epoch_duratio
 
 ---
 
-### ARCH-13　In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?
+### ARCH-11　In the auditing protocol, how does a validator decide which newly-available work-reports it must audit, and how does that set grow over time?
 
 <sub>17 Auditing and Judging (ch. 17) — ●●● · 概念 · eq. 17.1–17.19 (PDF numbering); §20 (10 audits/validator/slot)</sub>
 
@@ -10160,7 +10060,7 @@ eq. 17.1–17.2：q 是長度 |κ|/3（active cores 數）的序列，core c 的
 
 ---
 
-### ARCH-14　Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?
+### ARCH-12　Describe the honest guarantor strategy from the Guaranteeing chapter: what is checked before refining, what gets signed and how, when a report may be forwarded, what is punished, and how much a guarantor should sign.
 
 <sub>15 Guaranteeing (ch. 15) — ●●○ · 概念 · §15; eq. 14.13 (Ξ); eq. 11.24, 11.28</sub>
 
@@ -10185,7 +10085,7 @@ eq. 17.1–17.2：q 是長度 |κ|/3（active cores 數）的序列，core c 的
 
 ---
 
-### ARCH-15　Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?
+### ARCH-13　Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?
 
 <sub>16 Availability Assurance (ch. 16) & 14 Exporting / Availability Specifier — ●●○ · 概念 · §16; §14 (Exporting, eq. 14.18); eq. 11.5, 11.11–11.18</sub>
 
@@ -10210,7 +10110,7 @@ eq. 17.1–17.2：q 是長度 |κ|/3（active cores 數）的序列，core c 的
 
 ---
 
-### ARCH-16　How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?
+### ARCH-14　How does the Discussion chapter characterise the 'virtual hardware' that a work-package gets on a JAM core, and what happens to its result afterwards?
 
 <sub>20.1 Technical Characteristics & 20.2 Illustrating Performance (ch. 20) — ●●○ · 概念 · §20 Discussion</sub>
 
@@ -10235,7 +10135,7 @@ eq. 17.1–17.2：q 是長度 |κ|/3（active cores 數）的序列，core c 的
 
 ---
 
-### ARCH-17　The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?
+### ARCH-15　The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. What is the sweet spot between, and what is left open?
 
 <sub>21 Conclusion / 21.1 Further Work (ch. 21) — ●●○ · 設計理由 · §21</sub>
 
@@ -10260,7 +10160,7 @@ eq. 17.1–17.2：q 是長度 |κ|/3（active cores 數）的序列，core c 的
 
 ---
 
-### ARCH-18　JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?
+### ARCH-16　JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. What changed in that blob between GP 0.7.2 and 0.8.0, and what does that mean for code that parses it?
 
 <sub>JIP-4 chainspec `protocol_parameters` = fetch(0) encoding (App. B), 0.7.2 → 0.8.0 — ●●● · 版本差異 · App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5 · ⚠ 0.7.2→0.8.0</sub>
 
@@ -10285,7 +10185,7 @@ JIP-4：chainspec JSON 有 id、bootnodes（`<name>@<ip>:<port>`，name 是 53 �
 
 ---
 
-### ARCH-19　Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?
+### ARCH-17　Describe the jam-conformance fuzz protocol the W3F used for the M1 audit: transport, encoding, handshake, the message sequence, and what is mandatory for M1.
 
 <sub>jam-conformance fuzz protocol & the M1 evaluation pipeline — ●●○ · 概念 · davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs</sub>
 
@@ -10310,7 +10210,7 @@ davxy/jam-conformance fuzz-proto README：「a synchronous request-response prot
 
 ---
 
-### ARCH-20　According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?
+### ARCH-18　According to the JAM Prize rules and the milestone-delivery terms, what is the purpose and standing of the post-submission interview?
 
 <sub>JAM Prize rules (rule 12) & milestone-delivery T&Cs — ●○○ · 概念 · jam.web3.foundation/rules #12; T&C 3.5 / 6.1 / 8.4; delivery template</sub>
 
@@ -10335,7 +10235,7 @@ jam.web3.foundation/rules 第 12 條原文：「An interview may be requested af
 
 ---
 
-### ARCH-21　How does a validator pick the work-reports it must audit in the INITIAL tranche (a_0)?
+### ARCH-19　How does a validator pick the work-reports it must audit in the INITIAL tranche (a_0)?
 
 <sub>17.3 Selection of Reports — ●●● · 概念 · eq. 17.2–17.4</sub>
 
@@ -10360,7 +10260,7 @@ eq. 17.2：s_0 ∈ F_{κ[v]_b}^{X_U ⌢ Y(H_V)}([])，X_U = $jam_audit——VRF 
 
 ---
 
-### ARCH-22　GP §17.1 describes what happens when a negative judgment appears. Which pair of thresholds and consequences is correct?
+### ARCH-20　GP §17.1 describes what happens when a negative judgment appears. What are the two thresholds, and what follows from each?
 
 <sub>17.1 Overview — ●●○ · 概念 · §17.1</sub>
 
@@ -10385,7 +10285,7 @@ eq. 17.2：s_0 ∈ F_{κ[v]_b}^{X_U ⌢ Y(H_V)}([])，X_U = $jam_audit——VRF 
 
 ---
 
-### ARCH-23　How does an auditor obtain the data it needs to re-run a work-report?
+### ARCH-21　How does an auditor obtain the data it needs to re-run a work-report?
 
 <sub>17.2 Data Fetching — ●●○ · 概念 · §17.2–17.3 & appendix H</sub>
 

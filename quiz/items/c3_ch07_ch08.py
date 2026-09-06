@@ -84,14 +84,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["recent-history", "mmr", "beefy", "keccak"],
-  "stemZh": "追蹤一個區塊的 accumulation 產出最終如何進入 BEEFY 簽章。哪個描述符合 GP 0.8.0？",
+  "stemZh": "追蹤在 GP 0.8.0 中，一個區塊的 accumulation 產出最終如何進入 BEEFY 簽章。",
   "optionsZh": [
    "每個區塊把編碼後的 θ′ 以 Keccak Merklize 成一個 root 並把該 root 附加到 belt β_B；新的 β_H 項目只儲存 belt 的 Keccak super-peak；validator 接著對它們所定案的每個區塊，以 BLS 簽署最新項目之 super-peak 的 domain-separated 雜湊",
    "每個區塊把 θ′ 以 Keccak Merklize 成一個 root、附加到 β_B，而 validator 以 BLS 簽署 β_B 的整個編碼後 peak 序列；super-peak 的存在只是為了讓 state key C(3) 有一個定長欄位，這也是為什麼 eq. 18.1 被簽的訊息是 E(mmrencode(β_B)) 而不是單一個雜湊",
    "區塊 header 在一個專屬的 marker 中攜帶 super-peak，而 validator 簽署的是 header 雜湊；β_B 只是 guarantor 端的簿記、從不進入序列化的狀態，所以橋接方永遠只需要 header 鏈、不必讀任何狀態證明",
    "belt 每個區塊都以 Blake2b 從 θ 重建，而 validator 只簽署當前區塊產出的 root，所以一個 BEEFY 簽章恰好佐證一個區塊的 accumulation 結果；想要較舊產出的驗證者則從該區塊自己的 C(16) 條目重新導出它的 root"
   ],
-  "stem": "Trace how a block's accumulation outputs end up inside a BEEFY signature. Which description matches GP 0.8.0?",
+  "stem": "Trace how a block's accumulation outputs end up inside a BEEFY signature in GP 0.8.0.",
         "options": [
             "Each block Keccak-Merklizes the encoded θ′ into one root and appends that root to the belt β_B; the new β_H item stores only the belt's Keccak super-peak; validators then BLS-sign the domain-separated hash of the newest item's super-peak for each block they finalize",
             "Each block Keccak-Merklizes θ′ into one root, appends it to β_B, and validators BLS-sign the whole encoded peak sequence of β_B; the super-peak exists only so that state key C(3) has one fixed-length field, which is why eq. 18.1's signed message is E(mmrencode(β_B)) rather than a single hash",

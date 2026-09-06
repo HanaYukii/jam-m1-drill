@@ -91,14 +91,14 @@ ITEMS = [
  "id": "arch-guaranteeing-procedure",
  "ch": "ARCH", "section": "15 Guaranteeing (ch. 15)", "gpRef": "§15; eq. 14.13 (Ξ); eq. 11.24, 11.28",
  "difficulty": 2, "kind": "concept", "tags": ["guaranteeing", "off-chain", "work-reports"],
-  "stemZh": "關於 Guaranteeing 一章所描述的誠實 guarantor 策略，哪個敘述正確？",
+  "stemZh": "描述 Guaranteeing 一章的誠實 guarantor 策略：refine 之前檢查什麼、簽什麼怎麼簽、何時可以把 report 往下送、什麼會被懲罰、以及一位 guarantor 該簽多少。",
   "optionsZh": [
    "在跑任何 refine 邏輯之前，先拿最新鏈狀態的 authorizer pool 檢查該 package 的授權（連同其他鏈上收納條件）；算出 r = Ξ(p, c, l, v) 之後，以 Ed25519 簽 $jam_guarantee ⌢ H(E(r))；兩個簽章就足以把 report 送給下一位出塊者；一份無法被收納的 report 只是損失獎勵，而謊報 Ξ 結果則會受重罰；平均每個 timeslot 至多簽兩份 report",
    "先跑完每個 work-item 的 refine、之後才檢查授權，因為 pool 反正會在鏈上重新驗證、而 refine 才是成本大宗；必須集齊全部三位 guarantor 的簽章才能把 report 送給出塊者；出塊者拒絕收納的任何 report 都算違規、會像無效 report 一樣被罰沒；一位 guarantor 每個 rotation 至多簽一份 report",
    "pool 檢查要用該 report 的 lookup-anchor 當時的鏈狀態、而不是當前鏈頭，好讓該 core 的所有 guarantor 對同一份視圖取得共識；單一個簽章就足以散播，因為出塊者會自行收集其餘 credential；因此 credential 清單可以未排序地抵達，而 GP 對一位 guarantor 每個 slot 能簽幾份 report 沒有給出指引",
    "以 Bandersnatch 金鑰在 $jam_guarantee context 下簽署該 report，好讓 ring 證明隱藏是該 core 的哪位 guarantor 簽的，所以鏈上 credential 不帶 validator 索引；兩個簽章足以散播；guarantor 每個 epoch 絕不該簽超過一份 report，否則出塊者的反垃圾過濾器會在該 epoch 剩下的時間裡無視他們"
   ],
-  "stem": "Which statement about the honest guarantor strategy described in the Guaranteeing chapter is correct?",
+  "stem": "Describe the honest guarantor strategy from the Guaranteeing chapter: what is checked before refining, what gets signed and how, when a report may be forwarded, what is punished, and how much a guarantor should sign.",
  "options": [
   "Check the package's authorization against the authorizer pool of the most recent chain state (plus the other on-chain inclusion conditions) before running any refine logic; after r = Ξ(p, c, l, v), Ed25519-sign $jam_guarantee ⌢ H(E(r)); two signatures suffice to send the report to the next block author; an unincludable report only forfeits reward, a misrepresented Ξ result is punished severely; sign on average at most two reports per timeslot",
   "Run every work-item's refine first and check authorization only afterwards, since the pool is re-verified on-chain anyway and refine dominates the cost; all three guarantors' signatures must be collected before the report may be sent to the block author; any report the block author declines to include counts as an offence and is slashed exactly like an invalid report; a guarantor may sign at most one report per rotation",
@@ -175,14 +175,14 @@ ITEMS = [
  "id": "arch-sweet-spot-further-work",
  "ch": "ARCH", "section": "21 Conclusion / 21.1 Further Work (ch. 21)", "gpRef": "§21",
  "difficulty": 2, "kind": "rationale", "tags": ["rationale", "future-work", "architecture"],
-  "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。哪個摘要正確？",
+  "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。這個甜蜜點落在什麼與什麼之間？留白的又是哪些？",
   "optionsZh": [
    "甜蜜點＝在接受 Solana 級硬體需求的前提下，達到與完全同步鏈相當的連貫性；未決事項：一旦證明成本降到原生的 50,000 倍以下就以 SNARK 證明取代 ELVES 稽核、把 D³L 保存期從 28 天縮短為 24 小時、把 refine 的匯入 segment 移進區塊本體、以及把 coretime 銷售與質押寫進後續章節而非委由系統 service；網路協定已在附錄中定案",
    "甜蜜點＝341 個 core 恰好塞滿一條 0.5 GbE 連線的那個點；考慮中：refine 期間 service 之間的同步呼叫、完全移除 `transfer` host call、解除每區塊的 accumulate gas 上限 G_T、以及在 state trie 中引入 Merklization 好讓授權無需完整下載即可判定；網路協定已在附錄完整規範，而 validator 獎勵已在鏈上追蹤",
    "甜蜜點＝像 Cosmos 那樣完全碎片化但共用同一個 validator 集合的設計；考慮中：捨棄 Beefy 改採純 Grandpa 證明、讓鏈上治理能原地升級 service、加入原生的簽署交易（因為 transfer 模型顯示只靠 refine 的轉帳受限於 I/O）、以及提高 48 kB 的 work-result 上限好讓 accumulate 看到更多資料；coretime 銷售與質押已在附錄規範",
    "甜蜜點＝在安全、有韌性的共識之下進行大量運算（不同於完全同步的模型），同時對一台單體狀態機提供嚴格的時序與整合保證（不同於持續碎片化的模型）；考慮中：accumulate 中的同步 service 呼叫、為了平行 accumulation 而限制 `transfer`、在特定條件下保留額外的 accumulate 運算、以及把 work-package 格式 Merkle 化好讓授權無需完整下載；網路層與代幣／coretime／質押層則留白"
   ],
-  "stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. Which summary is accurate?",
+  "stem": "The Conclusion calls JAM a 'sweet spot' and then lists what the paper deliberately leaves open. What is the sweet spot between, and what is left open?",
  "options": [
   "Sweet spot = as coherent as a fully synchronous chain while accepting Solana-class hardware requirements; open items: replacing ELVES auditing with SNARK proofs once proving cost falls under 50,000× native, shortening D³L retention from 28 days to 24 hours, moving refine's imported segments into the block body, and writing coretime sales and staking into a later chapter rather than delegating them to system services; the networking protocol is already fixed in an appendix",
   "Sweet spot = the point where 341 cores exactly saturate a 0.5 GbE link; under consideration: synchronous calls between services during refine, removing the `transfer` host call entirely, lifting the per-block accumulate gas limit G_T, and introducing Merklization into the state trie so authorization can be judged without a full download; the networking protocol is fully specified in an appendix and validator rewards are already tracked on-chain",
@@ -203,14 +203,14 @@ ITEMS = [
  "id": "arch-jip4-protocol-parameters-080",
  "ch": "ARCH", "section": "JIP-4 chainspec `protocol_parameters` = fetch(0) encoding (App. B), 0.7.2 → 0.8.0", "gpRef": "App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5",
  "difficulty": 3, "kind": "delta", "tags": ["jip", "chainspec", "fetch", "delta-0.8.0", "code-gap"],
-  "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。比較 GP 0.7.2 與 0.8.0，哪個敘述正確？",
+  "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。這個 blob 從 GP 0.7.2 到 0.8.0 改了什麼？對解析它的程式碼意味著什麼？",
   "optionsZh": [
    "這個 blob 在 0.7.2 與 0.8.0 之間沒有變（33 個定寬小端欄位、134 位元組）；0.8.0 反而把 V 與 N 移進創世 header 的 epoch marker H_E，所以 chainspec 必須在那裡重複 validator 數量，而節點從它匯入的第一個 epoch marker 讀取 ticket 數；因此既有解碼器除了也要解析 H_E 之外不需改動",
    "0.8.0 拿掉四個欄位——N（每位 validator 的 ticket 數，現為 ⌈2E/|γ′_P|⌉）、V（validator 數量，現由創世狀態中的 validator 集合隱含）、W_E 與 W_P（erasure 編碼大小，現由 validator 數量導出）——使該 blob 從 33 欄／134 位元組縮為 29 欄／122 位元組；解析器、以及任何仍從中覆寫「每 validator ticket 數／validator 數量／EC 大小」的『套用參數』程式碼都必須修改",
    "0.8.0 為新的 gas 模型常數（C_gasunknown 與各 host call 的基本成本）以及稽核常數 F 與 A 新增欄位，好讓 service 能透過 fetch(0) 讀取；V 留在 blob 裡，因為 validator 集合現在可變，而 service 必須知道集合大小才能為它的匯出計算 erasure 編碼參數，所以該 blob 從 33 欄／134 位元組成長為 41 欄／168 位元組",
    "0.8.0 保留全部 33 個欄位，但把它們從定寬小端整數改為通用的緊湊編碼 E(x)，所以 blob 長度現在取決於數值（例如 1,023 與 6 位 validator 的差別）；JIP-4 同時把 `genesis_state` 的 key 從 31 位元組加寬為 32 位元組，好讓 state trie 無需重新雜湊即可載入，而一份 tiny chainspec 現在編碼後遠小於 122 位元組"
   ],
-  "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. Comparing GP 0.7.2 with 0.8.0, which statement is correct?",
+  "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. What changed in that blob between GP 0.7.2 and 0.8.0, and what does that mean for code that parses it?",
  "options": [
   "The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports; existing decoders therefore need no change beyond also parsing H_E",
   "0.8.0 drops four fields — N (tickets per validator, now ⌈2E/|γ′_P|⌉), V (validator count, now implied by the validator sets in the genesis state), W_E and W_P (erasure-coding sizes, now derived from the validator count) — shrinking the blob from 33 fields / 134 bytes to 29 fields / 122 bytes; parsers and any 'apply parameters' code that still overwrites tickets-per-validator, validator count or EC sizes from it must change",
@@ -231,14 +231,14 @@ ITEMS = [
  "id": "arch-fuzz-protocol-m1",
  "ch": "ARCH", "section": "jam-conformance fuzz protocol & the M1 evaluation pipeline", "gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
  "difficulty": 2, "kind": "concept", "tags": ["conformance", "fuzzer", "history", "m1"],
-  "stemZh": "關於 W3F 用於 M1 稽核的 jam-conformance fuzz 協定，哪個描述正確？",
+  "stemZh": "描述 W3F 用於 M1 稽核的 jam-conformance fuzz 協定：傳輸層、編碼、握手、訊息順序、以及 M1 的必備項目。",
   "optionsZh": [
    "一個架在 WebSocket（連接埠 19800）之上的 JSON-RPC 2.0 會話，由 fuzzer 監聽、目標端撥接；區塊以十六進位字串傳輸，每次 importBlock 呼叫回覆的是 header 雜湊而不是 state root；區塊被拒會關閉連線，ancestry 由 fuzzer 從 finalizedBlock 訂閱重建而非由外部提供，而且從不產生分叉，因為 Safrole 排除了 equivocation",
    "一條 TCP 串流，由目標端撥接 fuzzer 並送出第一個握手訊息；區塊以 SCALE 編碼、前綴一個 u16 大端長度；fuzzer 在每個區塊後比對完整狀態傾印而非 root，無效區塊是靠乾脆不回應來表示，而 ancestry 功能對 M1 是選用的，因為 lookup-anchor 檢查約束的是出塊者而不是匯入者",
    "一個基於檔案的協定：fuzzer 把編號的區塊 .bin 檔寫進共享目錄，目標端在旁邊寫出 post-state JSON；握手是一個版本檔而不是 PeerInfo 交換，所以沒有功能協商、ancestry 與分叉一律開啟；第一次 state root 不符就中止該次執行、不產生報告，且該 GP 版本的送審視為失敗",
    "一個架在「由目標端監聽的 Unix domain socket」之上的同步請求／回應協定；訊息以 JAM codec 編碼、前綴一個 u32 小端長度；在 PeerInfo 握手（features = 雙方的位元 AND）之後，fuzzer 送出 Initialize（header、狀態鍵值、祖先清單），接著送 ImportBlock 請求，每個都以 posterior state root 或 Error（狀態不變）回覆；root 不符會觸發 GetState；ancestry 與分叉對 M1 是必備的"
   ],
-  "stem": "Which description of the jam-conformance fuzz protocol that the W3F used for the M1 audit is correct?",
+  "stem": "Describe the jam-conformance fuzz protocol the W3F used for the M1 audit: transport, encoding, handshake, the message sequence, and what is mandatory for M1.",
  "options": [
   "A JSON-RPC 2.0 session over WebSockets (port 19800) that the fuzzer binds and the target dials; blocks travel as hex strings and each importBlock call is answered with the header hash rather than a state root; a rejected block closes the connection, ancestry is reconstructed by the fuzzer from a finalizedBlock subscription instead of being supplied, and forks are never generated because Safrole precludes equivocation",
   "A TCP stream on which the target dials the fuzzer and sends the first handshake message; blocks are SCALE-encoded behind a u16 big-endian length prefix; the fuzzer diffs a full state dump after every block rather than a root, an invalid block is signalled by simply omitting the response, and the ancestry feature is optional for M1 because lookup-anchor checks bind block authors rather than importers",

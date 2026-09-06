@@ -6,14 +6,14 @@ ITEMS = [
  "id": "ch05-unsigned-header-serialization",
  "ch": "5", "section": "5 The Header (serialization, Appendix C.2)", "gpRef": "eq. 5.1 & §C.2 (E(H), E_U(H))",
  "difficulty": 2, "kind": "code", "tags": ["header", "codec", "seal", "code"],
-  "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。關於 GP 0.8.0 的 E(H) 與 E_U(H)，哪個敘述既說明了這樣做為何成立、又正確描述了 E_U 的版面？",
+  "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。在 GP 0.8.0 的 E(H) 與 E_U(H) 之下這為什麼成立？E_U 的欄位順序是什麼？",
   "optionsZh": [
    "E_U(H) 省略了兩個 Bandersnatch 簽章——熵來源 H_V 與 seal H_S——所以合規的實作必須從 E(H) 切掉 192 個 octet，而 seal 的訊息裡完全不含 VRF 材料，這正是阻止兩個簽章互相依賴的原因",
    "E(H) = E(E_U(H), H_S)：96 位元組的 seal 是最後一個定長欄位，所以從 E(H) 切掉 96 位元組恰好得到 seal 的訊息；E_U 內部的順序是 H_P、H_R、H_X、E_4(H_T)、H_E（0/1 判別子）、H_W（0/1 判別子）、E_2(H_I)、H_V、var(H_O)",
    "E_U(H) 是把 E(H) 的 seal 換成 96 個零位元組、保持 header 長度不變，好讓 H_P 能在封印之前算出來；因此單純截斷得到的訊息會短了 96 個 octet，實作必須改為以歸零的 seal 重新編碼",
    "序列化的欄位順序完全照 eq. 5.1（…、H_W、var(H_O)、E_2(H_I)、H_V、H_S），所以只有在 H_O 為空時截掉最後 96 個 octet 才正確，因為帶長度前綴的 offender 清單會位移它之後的每一個欄位，包括 seal"
   ],
-  "stem": "The team derives the unsigned header serialization by encoding the full header and truncating it. Which statement about GP 0.8.0's E(H) and E_U(H) explains why this is sound and describes E_U's layout correctly?",
+  "stem": "The team derives the unsigned header serialization by encoding the full header and truncating it. Why is that sound under GP 0.8.0's E(H) and E_U(H), and what is E_U's field order?",
  "code": {"lang": "go", "caption": "internal/utilities/block_serialization.go (HeaderUSerialization) + field order of Header.Encode in internal/types/encode.go", "src": """// (C.23)
 // This function encodes the header's properties without the seal
 // I still use header encoding function, but remove the length of the encoded seal
@@ -221,14 +221,14 @@ func NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPac
  "id": "ch08-leftmost-removal-code",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.3 (F) & eq. 11.25, 11.32",
  "difficulty": 2, "kind": "code", "tags": ["authorization", "code", "fuzzer-bug"],
-  "stemZh": "在 PR #694（bug #692）之前，這段移除邏輯會刪掉被使用之 authorizer 雜湊的每一個出現、而且忽略該 report 的 core。哪個敘述正確描述了修正後程式碼所實作的 GP 規則、以及舊行為為何是錯的？",
+  "stemZh": "在 PR #694（bug #692）之前，這段移除邏輯會刪掉被使用之 authorizer 雜湊的每一個出現、而且忽略該 report 的 core。修正後的程式碼實作的是哪條 GP 規則？舊行為為什麼是錯的？",
   "optionsZh": [
    "eq. 8.2：這次移除只是為了給本塊附加的佇列項目騰出位置，所以刪掉每一個重複是無害的——α[c] 是一個集合、同一個 authorizer 雜湊不可能出現兩次，而且 ←(…)^O 的截斷反正會在八個區塊內丟掉任何多餘的副本",
    "eq. 11.32：這次移除同時兼作 pool 成員檢查，而找不到相符者就必須拒絕該區塊——所以舊程式碼唯一的錯是沒在無匹配時回傳錯誤，這也是為什麼修正應該放在 guarantee 驗證器而不是授權的狀態轉移裡",
    "eq. 8.3，但要編輯哪個 pool 必須靠把 guarantor 的 validator 索引拿到當前 rotation 的指派 G 裡查出來，而不是靠 work-report 內部記錄的 core 索引——所以一份在前一個 rotation 簽署的 guarantee 會去編輯那些 validator 現在所在的 core",
    "eq. 8.3：F(c) = α[c] ⊖ {w_a} 是從該 report 自己那個 core 的 pool 中移除最左邊的一個實例；pool 是序列、可以持有同一個雜湊數次（例如某個佇列反覆排入同一個 authorizer），所以刪掉每一個副本會讓 pool 憑空縮水、並使測試向量對不上"
   ],
-  "stem": "Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. Which statement correctly describes the GP rule the fixed code implements and why the old behaviour was wrong?",
+  "stem": "Before PR #694 (bug #692) this removal deleted every occurrence of the used authorizer hash and ignored the report's core. What is the GP rule the fixed code implements, and why was the old behaviour wrong?",
  "code": {"lang": "go", "caption": "internal/authorization/authorization.go (updatePoolFromQueue) & internal/types/types.go (AuthPool.RemoveLeftMostPairedValue)", "src": """func updatePoolFromQueue(coreIndex types.CoreIndex, eg types.ReportGuarantee, alpha types.AuthPools) (types.AuthPools, error) {
 	pool := alpha[coreIndex]
 	if pool == nil {

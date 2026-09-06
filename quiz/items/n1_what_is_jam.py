@@ -177,8 +177,8 @@ ITEMS = [
   "ch": "N1", "section": "§1; §11; §17", "gpRef": "§1, §11 & §17",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "roles"],
   "alsoCh": ["N6"],
-  "stem": "The same validators take on several different jobs around one piece of work. Which description of guarantor, assurer and auditor is right?",
-  "stemZh": "同一批 validator 會圍繞同一份工作扮演幾種不同的角色。關於 guarantor、assurer、auditor 的描述，哪一個是對的？",
+  "stem": "The same validators take on several different jobs around one piece of work. What do a guarantor, an assurer and an auditor each do?",
+  "stemZh": "同一批 validator 會圍繞同一份工作扮演幾種不同的角色。guarantor、assurer、auditor 各做什麼？",
   "options": [
    "A guarantor runs the work and signs for its result; an assurer states that it holds a piece of the data needed to re-run it; an auditor re-runs the work and publicly judges whether the result was right",
    "A guarantor proposes the work, an assurer executes it and signs the result, and an auditor stores the data long enough for anyone else to repeat the execution later if they wish",
@@ -205,8 +205,8 @@ ITEMS = [
   "id": "n1-gp-structure",
   "ch": "N1", "section": "Gray Paper 全書結構", "gpRef": "§3–§14 & App. A–H",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "reading-guide"],
-  "stem": "You open the Gray Paper for the first time. Which description of how it is laid out will help you find things?",
-  "stemZh": "你第一次打開 Gray Paper。關於它的編排方式，哪一個描述能幫你找到東西？",
+  "stem": "You open the Gray Paper for the first time. How is it laid out, and where should you look for what?",
+  "stemZh": "你第一次打開 Gray Paper。它是怎麼編排的？該去哪裡找什麼？",
   "options": [
    "Chapters 3 to 13 walk the state transition component by component, chapter 14 onward covers what happens off-chain, and the appendices hold the machinery the chapters lean on",
    "The chapters are ordered by how a block is processed from start to finish, so reading them in order traces one block through the node exactly once, with the appendices covering the same ground in more detail",

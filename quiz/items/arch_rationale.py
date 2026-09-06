@@ -33,14 +33,14 @@ ITEMS = [
  "id": "arch-driving-factors",
  "ch": "ARCH", "section": "1.2–1.3 Driving Factors / Size-Coherency Antagonism", "gpRef": "§1.2–1.3",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
-  "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。哪個敘述正確？",
+  "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。五個因素是什麼？這條原則說了什麼？JAM 的設計又怎麼回應它？",
   "optionsZh": [
    "因素為：Resilience、Generality、Performance、Coherency、Accessibility；performance 與 coherency 互相對立，因為因果關係受訊號速度所限，所以狀態空間越大就越不連貫——JAM 的回應是把一個高度可擴展、大致連貫的元件（in-core）管線化進一個同步、完全連貫的元件（on-chain），以「cache affinity」取代粗暴的分割",
    "因素同上；但對立發生在 resilience 與 accessibility 之間，因為每多一位 validator 就多一次共識往返、而便宜的取用因此迫使集合變小——JAM 的回應是把 validator 集合釘在 1,023 並把後續成長全推給非同步結算的鏈下 roll-up",
    "因素同上；performance 與 coherency 互相對立，因為簽章驗證無法平行化，所以吞吐必須用較弱的可組合性換來——JAM 的回應是把狀態切成 341 個因果獨立的分片、每片小到足以保持連貫，再以非同步訊息佇列橋接",
    "因素為：Speed、Cost、Security、Decentralization、Simplicity；對立發生在 decentralization 與 performance 之間，因為硬體需求是進入 validator 集合的門檻——JAM 的回應是把 validator 硬體固定在 16 核／64 GB／8 TB，並用 SNARK 壓縮工作量，使連貫性完全不需要任何管線就能維持"
   ],
-  "stem": "The GP names five driving factors and a principle called 'size-coherency antagonism'. Which statement is correct?",
+  "stem": "The GP names five driving factors and a principle called 'size-coherency antagonism'. What are the five, what does the principle say, and how does JAM's design answer it?",
  "options": [
   "Factors: Resilience, Generality, Performance, Coherency, Accessibility; performance and coherency are antagonistic because causality is bounded by signal speed, so larger state-spaces become less coherent — JAM answers by pipelining a highly scalable, mostly-coherent element (in-core) into a synchronous, fully-coherent element (on-chain), replacing crude partitioning with 'cache affinity'",
   "Factors: Resilience, Generality, Performance, Coherency, Accessibility; the antagonism is between resilience and accessibility, since every additional validator adds a consensus round-trip and cheap access therefore forces a small set — JAM answers by pinning the validator set at 1,023 and pushing all further growth into off-chain roll-ups that settle asynchronously against the chain",
@@ -171,34 +171,6 @@ ITEMS = [
  "trap": "面試官若問「為什麼 JAM 不可升級」：協定固定、可多實作、把演進放在 service 層。"
 },
 {
- "id": "arch-constants",
- "ch": "ARCH", "section": "Appendix I constants", "gpRef": "Appendix I & §20",
- "difficulty": 2, "kind": "concept", "tags": ["constants"],
-  "stemZh": "哪一組 full 設定的常數是正確的？",
-  "optionsZh": [
-   "C = 341 個 core（full 設定下 |κ| = 3C = 1023；V 本身不再是協定常數）、E = 600 槽／epoch、P = 6 秒、Y = 500、R = 10、H = 8、L = 14,400、D = 19,200、U = 5、K = 16、O = 8、Q = 80、I = 16、J = 8、T = 128、W_G = 4,104、W_R = 48 KiB、W_B = 13,791,360、W_C = 4,000,000、G_A = 10^7、G_R = 5·10^9、G_T = 3.5·10^9、G_I = 5·10^7、A = 8 秒、F = 2",
-   "C = 1023 個 core 而 V = 341 位 validator 仍由協定固定、E = 3,600 槽／epoch、P = 6 秒、Y = 600、R = 60，其餘同上",
-   "C = 341 個 core 而 |κ| = 3C = 1023 在每一種設定下都固定、E = 600 槽／epoch、P = 12 秒、Y = 300、R = 10、H = 24、L = 600、D = 19,200、U = 5…、A = 6 秒、F = 3",
-   "C = 341 個 core（full 下 |κ| = 1023）、E = 600、P = 6 秒、Y = 500、R = 10、H = 8、L = 14,400、D = 14,400（與 L 相同）、U = 5、K = 3、O = 80、Q = 8、I = 8、J = 16、T = 16、W_G = 4,096、W_R = 12 MB、W_B = 48 KiB、W_C = 64,000、G_A = 5·10^9、G_R = 10^7、G_T = 3.5·10^9、G_I = 5·10^7、A = 8 秒、F = 2"
-  ],
-  "stem": "Which set of full-configuration constants is correct?",
- "options": [
-  "C = 341 cores (|κ| = 3C = 1023 in the full configuration; V itself is no longer a protocol constant), E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2",
-  "C = 1023 cores with V = 341 validators still fixed by the protocol, E = 3,600 slots/epoch, P = 6 s, Y = 600, R = 60, H = 8, L = 14,400, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2",
-  "C = 341 cores with |κ| = 3C = 1023 fixed for every configuration, E = 600 slots/epoch, P = 12 s, Y = 300, R = 10, H = 24, L = 600, D = 19,200, U = 5, K = 16, O = 8, Q = 80, I = 16, J = 8, T = 128, W_G = 4,104, W_R = 48 KiB, W_B = 13,791,360, W_C = 4,000,000, G_A = 10^7, G_R = 5·10^9, G_T = 3.5·10^9, G_I = 5·10^7, A = 6 s, F = 3",
-  "C = 341 cores (|κ| = 3C = 1023 in the full configuration), E = 600 slots/epoch, P = 6 s, Y = 500, R = 10, H = 8, L = 14,400, D = 14,400 (identical to L), U = 5, K = 3, O = 80, Q = 8, I = 8, J = 16, T = 16, W_G = 4,096, W_R = 12 MB, W_B = 48 KiB, W_C = 64,000, G_A = 5·10^9, G_R = 10^7, G_T = 3.5·10^9, G_I = 5·10^7, A = 8 s, F = 2"
- ],
- "answer": 0,
- "optNotes": [
-   "整組與附錄 I 相符，關鍵在 0.8.0 已把 V 移出常數表、驗證者數改由 𝕍 決定而門檻一律取 |κ|。",
-   "core 數與 validator 數對調了；E = 600（正好一小時）、Y 必須小於 E、rotation R = 10。",
-   "GP 全文以 six-second timeslot 為前提；H = 8、L = 14,400、A = 8 s、F = 2，且 |κ| 已非固定。",
-   "多組常數被對調或寫錯：D = L + 4,800、O = 8 / Q = 80、I = 16 / J = 8、W_G = 4,104、W_C = 4,000,000。",
- ],
- "explanation": "附錄 I 的常數表在 0.8.0 已**沒有 V**（validator 數改由 𝕍 ≡ {3c | c ∈ N_[2,C+1]} 決定、門檻一律取 |κ|）：C_corecount 341、epoch E 600、slot P 6 s、Y（epoch tail start）500、R（rotation）10、H（recent history）8、L（max lookup anchorage）14,400 = 24h、D（expunge）19,200 = L + 4,800、U（assurance timeout）5、K（max block tickets）16、O（auth pool）8、Q（auth queue）80、I（max package items）16、J（max report deps）8、N_V/N_O 16、S = 2^16、T（max package extrinsics）128、W_M/W_X（imports/exports）3,072、W_G segment 4,104、W_F 4,488、W_R 48·2^10、W_B 13,791,360、W_A 64,000、W_C 4,000,000、W_T memo 128、G_A 10^7、G_I 5·10^7、G_R 5·10^9、G_T 3.5·10^9、B_S/B_I/B_L = 100/10/1、A（tranche）8 s、F（audit bias）2、Z_P 2^12、Z_Z 2^16、Z_I 2^24、Z_A 2。full 配置下 |κ| = 1023 = 3·341（每個 active core 3 個 guarantor），但 #514 之後「所有配置都固定 1023」的說法已不成立。",
- "trap": "tiny（test vectors）：V 6、C 2、E 12、Y 10、R 4、D 32、K 3→(0.8.0 由公式)、N ⌈2E/V⌉。"
-},
-{
  "id": "arch-jam-vs-polkadot-eth",
  "ch": "ARCH", "section": "2 Previous Work", "gpRef": "§2",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
@@ -230,14 +202,14 @@ ITEMS = [
  "id": "ch14-work-package",
  "ch": "14", "section": "14.2 Work Packages", "gpRef": "eq. 14.2–14.3 (§14.3)",
  "difficulty": 2, "kind": "concept", "tags": ["work-packages"],
-  "stemZh": "一份 work-package（eq. 14.2，屬於集合 ℙ）是 ⟨j, h, u, f, c, w⟩。哪個描述正確？",
+  "stemZh": "一份 work-package（eq. 14.2，屬於集合 ℙ）是 ⟨j, h, u, f, c, w⟩。六個欄位各裝什麼？",
   "optionsZh": [
    "j 授權 token；h auth-service 索引（承載 authorizer 程式碼的那個 service）；u authorizer code hash；f 設定 blob（參數化）；c refinement context；w 是 1 到 I = 16 個 work-item，每個帶 service、code hash、payload、refine 與 accumulate 的 gas 上限、imports（segment root／雜湊 + 索引）、extrinsic 的 (雜湊, 長度) 配對、以及匯出計數",
    "j 是 guarantor 對該 package 的簽章；h 是該 package 自身的雜湊；u 是其 refine 程式碼將被執行的那個 service 的索引；f 是所有項目共用的 gas 上限；c 是 availability specification；w 是 1 到 I = 16 個 work-item，每個帶自己的授權 token",
    "j 授權 token；h 將 accumulate 這些結果的 service 索引；u 第一個 work-item 的 refine code hash；f 設定 blob；c availability context（erasure-root 加碎片索引）；w 是 1 到 T = 128 個 work-item，每個帶單一個合併的 gas 上限、匯入 segment 的雜湊、以及內嵌的匯出 segment",
    "j 授權 token（一個不透明的 blob）；h 該 package 所指向的 core 索引；u authorizer code hash；f 設定 blob；c refinement context；w 是 1 到 I = 16 個 work-item，每個帶 service、code hash、payload、兩個 gas 上限、內嵌的匯入 segment 資料、extrinsic 配對、以及匯出 segment 的雜湊"
   ],
-  "stem": "A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. Which description is correct?",
+  "stem": "A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. What does each field hold?",
  "options": [
   "j authorization token; h auth-service index (the service hosting the authorizer code); u authorizer code hash; f configuration blob (parameterization); c refinement context; w work-items (1..I = 16) each with service, code hash, payload, refine & accumulate gas limits, imports (segment root/hash + index), extrinsic (hash, length) pairs, and export count",
   "j the guarantors' signatures over the package; h the hash of the package itself; u the index of the service whose refine code runs; f the gas limit shared by every item; c the availability specification (erasure-root, segment-root, length); w work-items (1..I = 16) each with service, payload, extrinsic hashes and an authorization token of its own",
@@ -258,14 +230,14 @@ ITEMS = [
  "id": "delta-summary-080",
  "ch": "ARCH", "section": "GP 0.7.2 → 0.8.0 changes", "gpRef": "graypaper releases v0.8.0 (June 3 2026)",
  "difficulty": 2, "kind": "delta", "tags": ["delta-0.8.0"],
-  "stemZh": "你們的實作以 GP 0.7.2 為目標，而當前的 GP 是 0.8.0。哪一份清單只包含真正屬於 0.8.0 的變動？",
+  "stemZh": "你們的實作以 GP 0.7.2 為目標，而當前的 GP 是 0.8.0。0.8.0 做了哪些這樣的實作必須跟進的主要變動？",
   "optionsZh": [
    "可變的 validator 集合大小（3 的倍數、6…1023，門檻由 |κ| 導出）；ρ 中保留完整的 guarantee；verdict／culprit／fault 各 16 的硬上限，且 bad verdict 不再要求必須有 culprit；bless 限縮給 manager service；authorizer = H(auth code hash ⌢ config)；refinement context 新增 anchor slot 與 lookup-anchor 的 posterior root；以 basic block 為單位的 gas 模型、並以 grow_heap 取代 sbrk；每位 validator 的 ticket 數 = ⌈2E/|γ′_P|⌉",
    "把每個變長項目移到其編碼末端的「Macrofication Marathon」；定長的 validator 索引序列化；讓 W* 依賴 ρ†；accumulate 吸收 on_transfer 使 service 只剩一個鏈上入口；把 core 索引加入 refine 的引數並從 guarantee 的酬載移除；小型 service ID；帳戶序列化前綴版本位元組；χ 的「Owned Privileges」",
    "以 fetch 取代 import host call；記憶體存取例外的形式化與功能凍結宣告；以 prior validator 集合檢查 assurance；epoch marker 中加入 Ed25519 金鑰並附上活動統計；provide host call、以及 import 與 export 的分離；「super-fetch」、gratis storage 與帳戶 metadata；最大程式碼大小與過大 report 的處理；更嚴格的 opcode 與跳躍有效性",
    "全面的 64 位元 PVM 暫存器與 64 位元定址；guarantor 指派攜帶完整的 validator 金鑰；erasure-coding 公式修正；info host call 新增暫存器 9 與 10；明確的逐 invocation out-of-gas 檢查；transfer 的 gas 計費修正與 work-package 大小上限修正；preimage 整合的簡化；posterior state root 定案；程式碼 blob 的 metadata 前綴"
   ],
-  "stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. Which list contains ONLY genuine 0.8.0 changes?",
+  "stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. What are the main changes 0.8.0 made that such an implementation has to absorb?",
  "options": [
   "Variable validator-set sizes (multiples of 3, 6…1023, thresholds derived from |κ|); full guarantees kept in ρ; hard caps of 16 verdicts/culprits/faults, with culprits no longer required behind a bad verdict; bless restricted to the manager service; authorizer = H(auth code hash ⌢ config); refinement context gains anchor slot + lookup-anchor posterior root; per-basic-block gas model with grow_heap replacing sbrk; tickets per validator = ⌈2E/|γ′_P|⌉",
   "The 'Macrofication Marathon' moving every variable-length item to the end of its encoding; fixed-length validator-index serialization; W* made to depend on ρ†; accumulate absorbing on_transfer so a service has one on-chain entry point; the core index added to refine's arguments and removed from the guarantee payload; small service IDs; a version byte prefixing account serialization; 'Owned Privileges' for χ",
@@ -281,33 +253,5 @@ ITEMS = [
  ],
  "explanation": "0.8.0（2026-06-03）的實際變更清單：#514 support smaller validator sets（𝕍 ≡ {3c}，門檻一律由 |κ| 導出）、#494 keep full guarantees in ρ、#525 dispute extrinsic 硬上限 16 且移除 culprits 必要性、#519 restrict bless to manager service、#522 update authorizer identification（authorizer = H(auth code hash ⌢ config)，對齊 ch. 8 與 ch. 14）、#526 expose lookup anchor posterior root and anchor slot、#508 新 gas cost model（per-basic-block，模擬 ROB/execution units）與 sbrk → grow_heap、#517 host function gas costs、#527 ticket 常數改為 ⌈2E/|γ′_P|⌉、#524 extrinsic hash、#502 processed transfer count、#497 illegal memory access 收費、#520/#521/#528。0.7.2 與 0.8.0 之間沒有任何 release，所以判準就是上面這份 PR 清單：凡不在其中的條目，都屬於更早的 release。你們 issue #1012（Update to v0.8.0）與其子 issue #1013–#1022 就是這張清單的實作追蹤。",
  "trap": "面試官依「最新 GP」出題（T&C 3.5：conformance assessed against the latest release），所以 0.8.0 差異必須熟。"
-},
-{
- "id": "arch-tiny-config",
- "ch": "ARCH", "section": "Test vectors tiny configuration", "gpRef": "w3f/jamtestvectors README & JIP-4",
- "difficulty": 1, "kind": "concept", "tags": ["tiny", "test-vectors"],
-  "stemZh": "哪一組數值描述的是 W3F 向量與 conformance fuzzer 所使用的「tiny」測試向量設定？",
-  "optionsZh": [
-   "6 位 validator、2 個 core、epoch 12 槽、ticket 提交止於第 10 槽、rotation 週期 4、preimage expunge 期 32、超級多數 6 取 5、verdict 門檻 5/0/2、ring 大小 6",
-   "6 位 validator、2 個 core、epoch 12 槽、ticket 提交止於第 12 槽、rotation 週期 4、preimage expunge 期 32、超級多數 6 取 4、verdict 門檻 4/0/2、ring 大小 6",
-   "12 位 validator、4 個 core、epoch 60 槽、ticket 提交止於第 50 槽、rotation 週期 10、preimage expunge 期 64、超級多數 12 取 9、verdict 門檻 9/0/4、ring 大小 12",
-   "1023 位 validator、341 個 core、epoch 600 槽、ticket 提交止於第 500 槽、rotation 週期 10、preimage expunge 期 19,200、超級多數 1023 取 683、verdict 門檻 683/0/341、ring 大小 1023"
-  ],
-  "stem": "Which values describe the 'tiny' test-vector configuration used by the W3F vectors and the conformance fuzzer?",
- "options": [
-  "6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 10, rotation period 4, preimage expunge period 32, super-majority 5 of 6, verdict thresholds 5/0/2, ring size 6",
-  "6 validators, 2 cores, epoch 12 slots, ticket submission ends at slot 12, rotation period 4, preimage expunge period 32, super-majority 4 of 6, verdict thresholds 4/0/2, ring size 6",
-  "12 validators, 4 cores, epoch 60 slots, ticket submission ends at slot 50, rotation period 10, preimage expunge period 64, super-majority 9 of 12, verdict thresholds 9/0/4, ring size 12",
-  "1023 validators, 341 cores, epoch 600 slots, ticket submission ends at slot 500, rotation period 10, preimage expunge period 19,200, super-majority 683 of 1023, verdict thresholds 683/0/341, ring size 1023"
- ],
- "answer": 0,
- "optNotes": [
-   "6/2/12、Y = 10、rotation 4、expunge 32、super-majority 5 of 6，全部對上 jamtestvectors 的 tiny。",
-   "Y 必須小於 E，tiny 是 Y = 10 < E = 12；super-majority 是 ⌊2·6/3⌋ + 1 = 5 不是 4，verdict 門檻也跟著錯。",
-   "雖然仍滿足 |κ| = 3C，但不是任何一份 W3F 設定的值——tiny 就是 6 個 validator、2 個 core。",
-   "這其實是 full 配置的數字；tiny 改動的遠不只 gas limit，連 ring 大小與 assurance bitfield 寬度都不同。",
- ],
- "explanation": "jamtestvectors README（tiny）：num_validators 6、num_cores 2、epoch_duration 12、contest_duration（Y）10、rotation_period 4、preimage_expunge_period 32、tickets_per_validator 3（0.7.x；0.8.0 由 ⌈2E/V⌉ = 4）、max_tickets_per_extrinsic 3、num_ec_pieces_per_segment 1026；其他常數同 GP。門檻一律從 |κ| 現算：super-majority ⌊2·6/3⌋+1 = 5、wonky 門檻 ⌊6/3⌋ = 2；assurance bitfield 1 byte；Bandersnatch ring 大小 6（Zcash SRS）。對照 full 配置則是 1023 validators / 341 cores / epoch 600、expunge 19,200、super-majority 683、wonky 341。JIP-4 chainspec 的 protocol_parameters 就是用 fetch(0) 的編碼傳遞這些參數；你們 chainspec.ApplyProtocolParameters 會驗證編譯期常數必須一致。",
- "trap": "tiny 的 Y = 10 < E = 12，所以每個 epoch 只有 slot 10、11 兩個 tail slot。"
 },
 ]

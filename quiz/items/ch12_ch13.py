@@ -173,14 +173,14 @@ ITEMS = [
  "id": "ch12-outputs",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24–12.33 (δ† → δ‡ → δ′)",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "state"],
-  "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，關於最終整合的哪些敘述是正確的？",
+  "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，每一項各怎麼併入 posterior 狀態？",
   "optionsZh": [
    "θ′ = b 中的 (service, 雜湊) 配對（那些 yield 出 32 位元組雜湊的 service）；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（accumulate 掉的項數 N、處理掉的 transfer 數 T、用掉的 gas G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
    "θ′ = H(E(δ†))，一個對整份 posterior service 狀態的單一承諾；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*)，也就是整個可 accumulate 序列",
    "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（項數 N、用掉的 gas G），transfer 計數已被移除；δ‡ 把 keys(δ†) 中每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
    "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])，而 ω′ 會被完全清空，因此排隊中的 report 永遠無法跨越一個區塊存活"
   ],
-  "stem": "After Δ+ returns (n, e′, b, u, t), which statements about the final integration are correct?",
+  "stem": "After Δ+ returns (n, e′, b, u, t), how is each of those integrated into the posterior state?",
  "options": [
   "θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])",
   "θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence",
@@ -201,14 +201,14 @@ ITEMS = [
  "id": "ch12-preimage-integration",
  "ch": "12", "section": "12.4 Preimage Integration", "gpRef": "eq. 12.34–12.37",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "preimages"],
-  "stemZh": "哪一條規則管轄 preimages extrinsic E_P 以及它併入 δ′ 的方式？",
+  "stemZh": "preimages extrinsic E_P 受什麼規則管轄——什麼可以收、對哪個狀態檢查——又是怎麼、在什麼時候併入 δ′？",
   "optionsZh": [
    "E_P ∈ [(s, d)] 依序且唯一；每一組 (s, d) 都必須在 prior 的 δ 上為 providable——該 service 存在，且 δ[s]_l[(H(d), |d|)] = []（已請求、尚未提供）；整合發生在 accumulation 之後：δ′ = I(δ‡, E_P)，把 a_l[(H(d),|d|)] 設為 [τ′] 並寫入 a_p[H(d)] = d，任何已不再有用的 preimage 會被靜默丟棄",
    "E_P ∈ [(s, d)] 依序且唯一；每一組 (s, d) 都必須在 posterior 的 δ‡ 上為 providable——該 service 在那裡必須仍然存在且 δ‡[s]_l[(H(d), |d|)] = []——所以同一塊內被 accumulation 撤掉的 request 會讓整個區塊無效；接著整合為 δ′ = I(δ‡, E_P)，設定 a_l 與 a_p",
    "E_P ∈ [(s, d)] 依序且唯一；任何 preimage 都可以被納入，不論該 service 是否請求過，因為 I 會保存交給它的每一組；整合發生在 accumulation 之前，δ† = I(δ, E_P)，好讓 service 的 Accumulate 能讀到同一塊內提供的 preimage，並設定 a_l 與 a_p",
    "E_P ∈ [(s, d)] 只需沒有重複，排序不受限制；每一組 (s, d) 都必須在 prior 的 δ 上為 providable，而且還必須由該 service 的 manager 簽署；整合發生在 accumulation 之後：δ′ = I(δ‡, E_P)，設定 a_l 與 a_p，任何已不再有用的 preimage 會被靜默丟棄"
   ],
-  "stem": "Which rule governs the preimages extrinsic E_P and its integration into δ′?",
+  "stem": "What rule governs the preimages extrinsic E_P — what may be included, checked against which state — and how and when is it integrated into δ′?",
  "options": [
   "E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the PRIOR δ — the service exists and δ[s]_l[(H(d), |d|)] = [] (requested, not yet provided); integration happens after accumulation: δ′ = I(δ‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d, silently dropping any preimage that is no longer useful",
   "E_P ∈ [(s, d)] ordered & unique; each (s, d) must be providable in the POSTERIOR δ‡ — the service must still exist there and δ‡[s]_l[(H(d), |d|)] = [] — so a request that accumulation dropped in the same block makes the whole block invalid; integration is then δ′ = I(δ‡, E_P), setting a_l[(H(d),|d|)] = [τ′] and a_p[H(d)] = d",
@@ -272,14 +272,14 @@ n := len(t) + i + len(f)"""},
  "id": "ch13-validator-stats",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "eq. 13.1–13.6",
  "difficulty": 2, "kind": "delta", "tags": ["statistics", "delta-0.8.0"],
-  "stemZh": "π ≡ (π_V, π_L, π_C, π_S)。在 GP 0.8.0 中，關於 validator 統計的哪個敘述正確？",
+  "stemZh": "π ≡ (π_V, π_L, π_C, π_S)。在 GP 0.8.0 中，一筆 validator 紀錄計數哪些東西？assurance 的計入、epoch 換檔與作者的計入依什麼順序套用？guarantee 的計數又記給誰？",
   "optionsZh": [
    "每位 validator 的紀錄有六個計數器（出塊 b、ticket t、preimage 數 p、preimage 大小 d、guarantee g、assurance a）；本塊的 assurance 在 epoch 換屆判斷之前就記進 π_V†；當 e′ ≠ e 時 π_L ← π_V† 且 π_V 重設；接著 b/t/p/d 記給出塊者 H_I，而 g 記給 reporters 集合 G 裡的每一位",
    "每位 validator 的紀錄有五個計數器（b、t、p、d、g），assurance 改為逐 core 記在 π_C 裡；當 e′ ≠ e 時 π_V 與 π_L 都被歸零，好讓新 epoch 從零開始；接著 b/t/p/d 記給出塊者 H_I，而 g 記給 reporters 集合 G",
    "每位 validator 的紀錄有六個計數器；本塊的 assurance 在 epoch 換屆判斷之後才記，所以當 e′ ≠ e 時它們會落進全新的 π′_V 而不是 π′_L；π_L 取的則是 π_V 而不是 π_V†；b/t/p/d 給出塊者 H_I、g 給 reporters 集合 G",
    "每位 validator 的紀錄有六個計數器；本塊的 assurance 在 epoch 換屆判斷之前就記進 π_V†；當 e′ ≠ e 時 π_L ← π_V† 且 π_V 重設；接著 b/t/p/d 記給每一位其簽章出現在對應 extrinsic 中的 validator，而 g 記給出塊者 H_I"
   ],
-  "stem": "π ≡ (π_V, π_L, π_C, π_S). Which statement about the validator statistics is correct in GP 0.8.0?",
+  "stem": "π ≡ (π_V, π_L, π_C, π_S). In GP 0.8.0, what does a validator record count, in what order are the assurance credits, the epoch rollover and the author's credits applied, and who gets the guarantee credit?",
  "options": [
   "Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G",
   "Each validator record has five counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g), assurances being tracked per core in π_C instead; on e′ ≠ e both π_V and π_L are zeroed so that the new epoch starts from nothing; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G",
@@ -301,14 +301,14 @@ n := len(t) + i + len(f)"""},
   "alsoCh": ["11"],
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.7, 13.9–13.12",
  "difficulty": 3, "kind": "concept", "tags": ["statistics"],
-  "stemZh": "core 統計 π_C 與 service 統計 π_S 都是逐區塊（而非逐 epoch）的。關於 core 統計的哪個描述正確？",
+  "stemZh": "core 統計 π_C 與 service 統計 π_S 都是逐區塊（而非逐 epoch）的。core 統計記錄什麼？每個欄位各是對哪一組 report 加總？",
   "optionsZh": [
    "逐 core：d（DA 負載）= 對本塊變為 available 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= bitfield 設起該 core 的 assurance 數量；i、x、z、e、u、l 則是對本塊被擔保的那些 report（集合 I）中屬於該 core 者加總",
    "逐 core：d（DA 負載）= 對本塊被擔保的那些 report（集合 I）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= 在該 core 上被擔保的 report 數量；i、x、z、e、u、l 也同樣對 I 加總，所以 π′_C 的每個欄位都出自同一個來源",
    "逐 core：d（DA 負載）= 對本塊變為 available 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·segment 數，不計 paged proof；p（popularity）= bitfield 設起該 core 的 assurance 數量；i、x、z、e、u、l 也同樣對 R 加總，所以八個欄位全都跟隨可得性",
    "逐 core：d（DA 負載）= 對本塊變為 available 的那些 report（集合 R）中屬於該 core 者，加總 bundle 長度 + W_G·⌈65·segment 數/64⌉；p（popularity）= 支持該 core 各 report 的 guarantor 簽章數量；i、x、z、e、u 對本塊被擔保的那些 report（集合 I）加總，但 l 是該 core 上最大的 bundle 長度而不是它們的總和"
   ],
-  "stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). Which description of the core statistics is correct?",
+  "stem": "Core statistics π_C and service statistics π_S are per-block (not per-epoch). What do the core statistics record, and over which set of reports is each field summed?",
  "options": [
   "Per core: d (DA load) = Σ over the reports that became AVAILABLE this block (the set R) on that core of bundle length + W_G·⌈65·segment_count/64⌉; p (popularity) = the number of assurances whose bitfield has that core set; i, x, z, e, u and l are summed over the reports GUARANTEED this block (the set I) on that core",
   "Per core: d (DA load) = Σ over the reports GUARANTEED this block (the set I) on that core of bundle length + W_G·⌈65·segment_count/64⌉; p (popularity) = the number of reports guaranteed on that core; i, x, z, e, u and l are summed over I as well, so every field of π′_C comes from one and the same source",

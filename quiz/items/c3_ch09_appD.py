@@ -68,14 +68,14 @@ ITEMS = [
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
  "difficulty": 2, "kind": "code", "tags": ["accounts", "balance", "host-calls", "fuzzer-bug"],
-  "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。哪個敘述符合 GP 0.8.0？",
+  "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。依 GP 0.8.0，一筆 storage 條目對 a_i 與 a_o 各計多少？寫入後門檻超過餘額時必須怎麼處理？",
   "optionsZh": [
    "一筆 storage 條目對 a_i 計 1、對 a_o 計 32 + |v|——key 的長度從不計費，因為 JAM 在 trie 裡只存 storage key 的雜湊；而遇到 FULL 時該寫入仍然生效，差額則從餘額中扣除",
    "一筆 storage 條目對 a_i 計 2、對 a_o 計 81 + |v|，與 lookup-meta 條目完全相同，理由是兩者都恰好佔用 state trie 的一片葉子；而 FULL 只有在餘額本身歸零之後才可能產生，所以一個有償付能力的 service 永遠能完成寫入",
    "門檻是在 accumulation 結尾重算一次而不是每次 host call 都算，所以 `write` 根本不可能產生 FULL；過度承諾儲存的 service 會在事後被持有其 code-hash 墓碑的那個 service 修剪掉，押金退還給 parent",
    "一筆 storage 條目對 a_i 計 1、對 a_o 計 34 + |k| + |v|——key 與 value 都計費；當寫入後的門檻超過餘額時該呼叫產生 FULL，而且該帳戶必須被完全原封交回，這正是 map 的寫入要延到比較之後才進行的原因"
   ],
-  "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Which statement matches GP 0.8.0?",
+  "stem": "This is the team's Ω_W after the fix for the 'write mutates StorageDict before the balance check' bug. Under GP 0.8.0, what does one storage entry cost against a_i and a_o, and what must happen when the post-write threshold exceeds the balance?",
  "code": {
   "lang": "go",
   "caption": "PVM/host_call_general.go (write) + internal/service_account/service_account.go:207 (CalcStorageItemfootprint)",
@@ -126,14 +126,14 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "ch": "9", "section": "9.2.2 Semantics",
  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "host-calls"],
-  "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，哪一組轉換符合 GP 0.8.0？",
+  "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，GP 0.8.0 在每種情況下各做什麼？",
   "optionsZh": [
    "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 該 request 條目與 a_p[h] 兩者都被清除，但只有在 y < t − D 時；[x, y, w] → [w, t]，同樣只有在 y < t − D 時；其餘每一種情況都回傳 HUH",
    "[] → HUH，沒有東西可忘；[x] → 該 request 條目與 a_p[h] 兩者立即被丟棄；[x, y] → [x, y, t]；[x, y, w] → [w, t] 且不附帶任何年齡條件；其餘每一種情況都回傳 HUH",
    "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 只要 y < t 就立刻清除該條目與 a_p[h]，不必等 D 個時槽；[x, y, w] → 直接丟棄而不是改寫；其餘每一種情況都回傳 HUH",
    "[] → 丟棄；[x] → 連同 a_p[h] 一起丟棄；[x, y] → 連同 a_p[h] 一起丟棄；[x, y, w] → 連同 a_p[h] 一起丟棄；每一種形狀都立刻塌陷，而那個 D 個時槽的延遲只管 `eject`"
   ],
-  "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, which set of transitions matches GP 0.8.0?",
+  "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, what does GP 0.8.0 do in each case?",
  "options": [
   "[] → the request entry is dropped; [x] → [x, t]; [x, y] → the request entry and a_p[h] are both expunged, but only once y < t − D; [x, y, w] → [w, t], again only once y < t − D; every other case returns HUH.",
   "[] → HUH, there is nothing to forget; [x] → the request entry and a_p[h] are both dropped at once; [x, y] → [x, y, t]; [x, y, w] → [w, t] with no age condition attached; every other case returns HUH.",

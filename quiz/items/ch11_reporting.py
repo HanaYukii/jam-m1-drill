@@ -33,14 +33,14 @@ ITEMS = [
  "id": "ch11-workreport-fields",
  "ch": "11", "section": "11.1.1 Work Report", "gpRef": "eq. 11.2–11.3",
  "difficulty": 2, "kind": "concept", "tags": ["reports"],
-  "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。哪一個欄位描述是錯的？",
+  "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。每個欄位各裝什麼？g 又常被誤認成什麼？",
   "optionsZh": [
    "s——availability specification（package 雜湊、bundle 長度、erasure root、shard 數、segment root、segment 數）",
    "l——segment-root lookup 字典（work-package 雜湊 → segment root），它與 context 的 prerequisites 合計上限為 J = 8 項",
    "g——該 package 中所有 refine 呼叫所用掉的 gas 總量",
    "d——work-digest，數量在 1 到 I = 16 之間"
   ],
-  "stem": "A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. Which field description is WRONG?",
+  "stem": "A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. What does each field hold — and what is g commonly mistaken for?",
  "options": [
   "s — the availability specification (package hash, bundle length, erasure root, shard count, segment root, segment count)",
   "l — the segment-root lookup dictionary (work-package hash → segment root), which together with the context's prerequisites is limited to J = 8 entries",
@@ -118,14 +118,14 @@ ITEMS = [
  "id": "ch11-work-errors",
  "ch": "11", "section": "11.1.4 Work Digest", "gpRef": "eq. 11.6–11.7",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "errors"],
-  "stemZh": "一個 work-digest 的結果不是 blob 就是錯誤集合 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG}（eq. 11.7）的成員。哪一組意義是正確的？",
+  "stemZh": "一個 work-digest 的結果不是 blob 就是錯誤集合 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG}（eq. 11.7）的成員。每個錯誤各是什麼意思？",
   "optionsZh": [
    "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 程式碼超過 W_C = 4,000,000",
    "∞ guarantor 偵測到無窮迴圈；☇ host-call 錯誤；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 該 service 的程式碼在 lookup-anchor 當時不可得；BIG 該 bundle 超過 W_B",
    "∞ out-of-gas；☇ PVM 的 page fault；BADEXPORTS 匯入 segment 的數量回報錯誤；OVERSIZE 該 bundle 會超過 W_B；BAD authorizer 拒絕了該 package；BIG work-item 超過 I = 16 個",
    "∞ out-of-gas；☇ panic；BADEXPORTS 匯出數量回報錯誤；OVERSIZE refine 的輸出會超過大小上限；BAD 程式碼可得但超過 W_C = 4,000,000；BIG 程式碼在 lookup-anchor 當時不可得"
   ],
-  "stem": "A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). Which meaning is correct?",
+  "stem": "A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). What does each error mean?",
  "options": [
   "∞ out-of-gas; ☇ panic; BADEXPORTS the number of exports was misreported; OVERSIZE the refine output would exceed the size limit; BAD service code unavailable at the lookup-anchor; BIG code exceeds W_C = 4,000,000",
   "∞ an infinite loop was detected by the guarantor; ☇ a host-call fault; BADEXPORTS the number of exports was misreported; OVERSIZE the refine output would exceed the size limit; BAD service code unavailable at the lookup-anchor; BIG the bundle exceeds W_B",
@@ -143,45 +143,17 @@ ITEMS = [
  "trap": "錯誤結果仍會被 accumulate（operand 的 r 是 error），只是沒有 output blob。"
 },
 {
- "id": "ch11-report-size-limit",
- "ch": "11", "section": "11.1.4 Work Digest", "gpRef": "eq. 11.8",
- "difficulty": 1, "kind": "concept", "tags": ["reports", "limits"],
-  "stemZh": "單一份 work-report 中可變大小內容的鏈上上限是什麼？",
-  "optionsZh": [
-   "|authorizer trace t| + 各 digest 的 |結果 blob| 總和（錯誤計為 0）≤ W_R = 48·2^10 = 49,152 個 octet",
-   "|authorizer trace t| + 各 digest 的 |結果 blob| 總和（錯誤依其編碼長度計算）≤ W_B = 13,791,360 個 octet",
-   "只計各 digest 的 |結果 blob| 總和、authorizer trace 不受限，≤ W_R = 48·2^10 = 49,152 個 octet",
-   "|authorizer trace t| ≤ 32 個 octet，且每個 digest 的結果 blob ≤ W_G = 4,104 個 octet，最多 I = 16 個 blob"
-  ],
-  "stem": "What is the on-chain limit on the variable-size content of a single work-report?",
- "options": [
-  "|authorizer trace t| + Σ over digests of |result blob| (errors count as 0) ≤ W_R = 48·2^10 = 49,152 octets",
-  "|authorizer trace t| + Σ over digests of |result blob| (errors count as their encoded length) ≤ W_B = 13,791,360 octets",
-  "Σ over digests of |result blob| alone, the authorizer trace being unbounded, ≤ W_R = 48·2^10 = 49,152 octets",
-  "|authorizer trace t| ≤ 32 octets and each digest's result blob ≤ W_G = 4,104 octets, giving at most I = 16 blobs"
- ],
- "answer": 0,
- "optNotes": [
-  "eq. 11.8 的 L 對 r ∈ 𝔼 回 0，失敗的 digest 不佔 report 空間，out-of-gas 反而「便宜」。",
-  "error 不按編碼長度計；而 W_B 套的是 §14 的 work-package bundle，不是 report 的 W_R。",
-  "|w_t| 是加總的第一項，否則 is-authorized 的 trace 可以無限撐大區塊。",
-  "eq. 11.8 是單一總量上限、沒有逐項上限；W_G = 4,104 是 segment 大小，與 report 無關。",
- ],
- "explanation": "eq. 11.8：∀w ∈ ℝ：|w_t| + Σ_i L(w_d[i]_r) ≤ W_R，其中 L(r) = |r| 若 r 是 blob（成功輸出），**若是錯誤值則計 0**。W_R = 48 · 2^10 = **49,152 位元組**。所以受限的是「authorizer trace 加上所有成功輸出」的總和——失敗的 item 不佔額度，這與 §14 的 OVERSIZE 累計規則是一致的（那裡也只累加結果為 blob 的前序項）。**GP 給的理由**：「In order to ensure fair use of a block's extrinsic space」——report 是要寫進區塊的，一份報告吃掉太多空間就排擠了其他 core 的工作。**最容易混淆的是 W_R 與 W_B**：W_R = 49,152 管的是**寫上鏈的 work-report**；W_B = 13,791,360（約 13 MB）管的是 **work-package bundle**（extrinsic 資料、import 的 segment 等，§14），那份東西根本不上鏈，是走 erasure coding 分發的。兩者差了近 300 倍，正好反映 JAM「in-core 處理大量資料、on-chain 只收小結果」的核心架構。你們 guarantor 端判 BIG／OVERSIZE 時是累加前面 item 的輸出一起算，符合這條式子的形狀。",
- "trap": "48 KiB 是 report 級總量，且 auth trace 也算在內。"
-},
-{
  "id": "ch11-assurance-rules",
  "ch": "11", "section": "11.2 Package Availability Assurances", "gpRef": "eq. 11.11–11.16",
  "difficulty": 2, "kind": "concept", "tags": ["assurances"],
-  "stemZh": "哪一組規則適用於 assurances extrinsic E_A？",
+  "stemZh": "E_A 裡的一份 assurance 由什麼組成？assurances extrinsic 必須滿足哪些規則？",
   "optionsZh": [
    "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 v 嚴格排序（因此每位 validator 至多一份）；簽章由 κ[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
    "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於正在建構那個區塊的雜湊；assurance 依 v 嚴格排序；簽章由 κ′[v]_e 對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
    "每份 assurance = (anchor a, bitfield f ∈ bits[|κ|], validator 索引 v, Bandersnatch 簽章)；a 必須等於 H_P；同一位 validator 可以送出數份 assurance，只要它們仍依 v 排序；簽章對 X_A ⌢ H(E(H_P, f)) 做出；某一位只有在 ρ†[c] ≠ ∅ 時才可被設起",
    "每份 assurance = (anchor a, bitfield f ∈ bits[C], validator 索引 v, Ed25519 簽章)；a 必須等於 H_P；assurance 依 core 索引排序；簽章由 κ[v]_e 對 X_A ⌢ 每份被背書 report 的 erasure root 做出；某一位只有在 ρ‡[c] ≠ ∅ 時才可被設起"
   ],
-  "stem": "Which set of rules applies to the assurances extrinsic E_A?",
+  "stem": "What is an assurance in E_A made of, and what rules must the assurances extrinsic satisfy?",
  "options": [
   "Each assurance = (anchor a, bitfield f ∈ bits[C], validator index v, Ed25519 sig); a must equal H_P; assurances strictly ordered by v (so at most one per validator); the signature by κ[v]_e is over X_A ⌢ H(E(H_P, f)); a bit may be set only if ρ†[c] ≠ ∅",
   "Each assurance = (anchor a, bitfield f ∈ bits[C], validator index v, Ed25519 sig); a must equal the hash of the block being built; assurances strictly ordered by v; the signature by κ′[v]_e is over X_A ⌢ H(E(H_P, f)); a bit may be set only if ρ†[c] ≠ ∅",
@@ -258,14 +230,14 @@ ITEMS = [
  "id": "ch11-guarantee-validity",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.24–11.29",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees"],
-  "stemZh": "關於 E_G 裡的一份 guarantee g = (w, t, a)，哪個敘述正確？",
+  "stemZh": "對 E_G 裡的一份 guarantee g = (w, t, a)：credential a 裡有什麼？誰能簽？slot t 的範圍怎麼限？簽的是什麼？core 又怎麼限？",
   "optionsZh": [
    "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < |κ′|/3",
    "a 恰好有 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M 之下被指派到 core w_c、否則在 M* 之下；t 必須等於 τ′；每個簽章都是直接對編碼後的 report E(w) 本身做出；w_c < |κ′|/3",
    "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；簽署者可以是 κ′ ∪ λ′ 的任何成員、不論他們被指派到哪個 core；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；可以使用任何小於 C = 341 的 core 索引",
    "a 有 2 或 3 組（validator 索引, Ed25519 簽章）並依索引排序；當 t 落在當前 rotation 時每位簽署者都必須在 M\\* 之下被指派到 core w_c、否則在 M 之下；R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′；每個簽章都是對 X_G ⌢ H(E(w)) 做出；w_c < C/3"
   ],
-  "stem": "Which statement about a guarantee g = (w, t, a) in E_G is correct?",
+  "stem": "For a guarantee g = (w, t, a) in E_G: what is in the credential a, who may sign, how is the slot t bounded, what is signed, and how is the core bounded?",
  "options": [
   "a has 2 or 3 (validator index, Ed25519 sig) pairs ordered by index; every signer must be assigned to core w_c under M when t is in the current rotation and under M* otherwise; R·(⌊τ′/R⌋ − 1) ≤ t ≤ τ′; each signature is over X_G ⌢ H(E(w)); w_c < |κ′|/3",
   "a has exactly 3 (validator index, Ed25519 sig) pairs ordered by index; every signer must be assigned to core w_c under M when t is in the current rotation and under M* otherwise; t must equal τ′; each signature is over the encoded report E(w) itself; w_c < |κ′|/3",
@@ -314,14 +286,14 @@ ITEMS = [
  "id": "ch11-contextual-validity",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.35–11.45",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "context"],
-  "stemZh": "下列哪一項不是 E_G 中 report 的脈絡有效性要求？",
+  "stemZh": "E_G 中 report 的脈絡有效性要求有哪些？又有哪一條聽起來合理、GP 其實沒有要求的規則？",
   "optionsZh": [
    "該 extrinsic 中沒有任何兩份 report 共用同一個 work-package 雜湊，而且任何 package 雜湊都不得出現在 β 的 reported 集合、ξ（已 accumulate）、ready queue ω 或 ρ 的某個待處理 assignment 裡",
    "anchor 的 (a, n, s, b) 必須與 β† 的某一項相符；lookup-anchor 的時間必須 ≥ H_T − L，而 lookup-anchor 的 header 必須能在祖先集合 A 中找到",
    "每個 prerequisite 以及每個 segment-root-lookup 的 key 都必須出現在這份 extrinsic 或 β 的 reported 集合裡，而被查到的 segment root 必須與那些紀錄相符",
    "每個 digest 的 service 都必須在最近一個 epoch E 之內至少被 accumulate 過一次，閒置更久的 service 必須先重新註冊才能再被回報"
   ],
-  "stem": "Which of the following is NOT one of the contextual validity requirements for reports in E_G?",
+  "stem": "What are the contextual validity requirements for reports in E_G — and what plausible-sounding requirement does the GP not actually impose?",
  "options": [
   "No two reports in the extrinsic share a work-package hash, and no package hash may appear in β's reported sets, in ξ (accumulated), in the ready queue ω or in a pending assignment of ρ",
   "The anchor's (a, n, s, b) must match an entry of β†; the lookup-anchor time must be ≥ H_T − L, and the lookup-anchor header must be found in the ancestor set A",
@@ -370,14 +342,14 @@ ITEMS = [
  "id": "ch11-code-availability",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17 — internal/extrinsic/assurance_controller.go",
  "difficulty": 2, "kind": "code", "tags": ["assurances", "code", "delta-0.8.0"],
-  "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。哪個敘述正確？",
+  "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。這是 GP 的門檻嗎？它的正確性取決於什麼？",
   "optionsZh": [
    "只要 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 是從 κ 的即時大小導出的——tiny 是 6 取 5、full 是 1023 取 683——而不是來自編譯期常數，它就與 GP 嚴格的「> 2/3·|κ|」完全相符",
    "它是錯的：eq. 11.17 只要求 ≥ 2/3·|κ|，所以 tiny 下 6 取 4、full 下 1023 取 682 就夠了；比較的對象應該是 ⌈2|κ|/3⌉ 而不是一個超級多數常數",
    "它是錯的：eq. 11.17 是逐 core 計算「設起該 core 那一位的 assurer 數」，而這個迴圈必須先數出 E_A 中任何位置出現過的相異 validator，再拿那個數字去和超級多數比較",
    "它是錯的：rhoDagger 項為 nil 的 core 仍然必須貢獻它的 report，因為 eq. 11.18 是在本區塊的可得性計數已經完成之後才清空 ρ‡ 的"
   ],
-  "stem": "The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Which statement is accurate?",
+  "stem": "The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Is that the GP's threshold, and what does its correctness depend on?",
  "code": {"lang": "go", "caption": "internal/extrinsic/assurance_controller.go (UpdateNewlyAvailableWorkReports)", "src": """for i := 0; i < types.CoresCount; i++ {
     // If the votes for this core are greater than the available number, add the work report
     if totalAvailable[i] >= types.ValidatorsSuperMajority {

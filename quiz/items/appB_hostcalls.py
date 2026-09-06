@@ -5,14 +5,14 @@ ITEMS = [
  "id": "appB-result-constants",
  "ch": "B", "section": "B.1 Result Constants; Omega_A (assign)", "gpRef": "§B.1; Ω_A",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "privileges"],
-  "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。哪一道階梯是對的？又是什麼區分了這些常數？",
+  "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。順序是什麼？每個常數各指名哪一種錯？",
   "optionsZh": [
    "要寫進佇列的那段記憶體讀不到就 panic；core 索引大於等於 C 得到 CORE；呼叫者不是該 core 目前的 assigner 得到 HUH；被指名的新 assigner 不在 service-id 集合內得到 WHO。每個常數指名的是「哪一種東西壞了」：越界的索引、缺少的權限、解析不出的身分。",
    "要寫進佇列的那段記憶體讀不到就 panic；core 索引大於等於 C 得到 CORE；被指名的新 assigner 不在 service-id 集合內得到 WHO；呼叫者不是該 core 目前的 assigner 得到 HUH。權限擺在最後，好讓結構本身就壞掉的呼叫不會僅僅因為「是誰送來的」而被打回。",
    "要寫進佇列的那段記憶體讀不到就 panic；呼叫者不是該 core 目前的 assigner 得到 WHO；core 索引大於等於 C 得到 CORE；被指名的新 assigner 不在 service-id 集合內得到 WHAT。WHO 指的是發出呼叫的那一方，WHAT 指的是宿主無法解析成任何東西的引數。",
    "要寫進佇列的那段記憶體讀不到得到 OOB；core 索引大於等於 C 得到 CORE；呼叫者不是該 core 目前的 assigner 得到 HUH；被指名的新 assigner 不在 service-id 集合內得到 WHO。記憶體錯誤在此是被回報而非致命的，所以 accumulation 會繼續，呼叫者可以重試。"
   ],
-  "stem": "A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. Which ladder is right, and what separates one constant from the next?",
+  "stem": "A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. What is that order, and what kind of error does each constant name?",
  "options": [
   "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a caller that is not that core's current assigner gives HUH; a nominated assigner outside the service-id set gives WHO. Each constant names what kind of thing is wrong: the out-of-range index, the absent privilege, the unresolvable identity.",
   "A queue that cannot be read out of memory panics; a core index at or beyond C gives CORE; a nominated assigner outside the service-id set gives WHO; a caller that is not that core's current assigner gives HUH. Privilege comes last so that a structurally broken call is never turned away merely for who happened to submit it.",
@@ -33,14 +33,14 @@ ITEMS = [
  "id": "appB-three-invocations",
  "ch": "B", "section": "B.2–B.4 Invocations", "gpRef": "eq. B.1–B.2, B.5–B.6, B.9–B.11",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "pvm"],
-  "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，關於它們各自的 host call 集合，哪個敘述正確？",
+  "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，每一種各暴露哪些 host call？service 呼叫到不在自己 invocation 集合內的 id 會怎樣？",
   "optionsZh": [
    "Ψ_I（is-authorized，無狀態）：只有 gas、grow_heap、fetch；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、lookup、read、write、info、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
    "Ψ_I（is-authorized，無狀態）：只有 gas、grow_heap、fetch；Ψ_R（refine）：gas、grow_heap、fetch、lookup、read、write、info、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、historical_lookup、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
    "Ψ_I（is-authorized）：gas、grow_heap、fetch、historical_lookup；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、lookup、read、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、write、info、export、machine、peek、poke、pages、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
    "Ψ_I（is-authorized，無狀態）：只有 gas、fetch；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、fetch、lookup、read、write、info、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；grow_heap 只限 refine，因為只有 in-core 的執行才可以調整 RAM 大小，而其他任何 id 都會 panic（☇）且不扣 gas"
   ],
-  "stem": "The PVM has three invocation types. Which statement about their host-call sets is correct in GP 0.8.0?",
+  "stem": "The PVM has three invocation types. In GP 0.8.0, which host calls does each one expose, and what happens when a service calls an id outside its invocation's set?",
  "options": [
   "Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, lookup, read, write, info, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT",
   "Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, lookup, read, write, info, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, historical_lookup, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT",
@@ -61,14 +61,14 @@ ITEMS = [
  "id": "appB-accumulate-invocation",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.7–B.14",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "accumulate"],
-  "stemZh": "關於 accumulate 的 invocation Ψ_A(e, t, s, g, i)，哪個敘述正確？",
+  "stemZh": "從頭到尾描述 accumulate 的 invocation Ψ_A(e, t, s, g, i)：service 的程式碼不可得時會怎樣、機器怎麼設定、兩個 context 各做什麼、結果又如何處置。",
   "optionsZh": [
    "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 5, g, E(t, s, |i|), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 y；32 位元組的回傳 blob 會成為 yield 的雜湊；輸入透過 `fetch` 讀取",
    "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 1, g, E(t, s, |i|) ⌢ E(i), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 x，所以出錯前做過的一切都會保留；32 位元組的回傳 blob 會成為 yield 的雜湊",
    "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 0, g, E(t, s, |i|), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 y；而 i 當中的 deferred transfer 改由另一個獨立的 Ψ_T on-transfer invocation 送達",
    "若該 service 的程式碼不可得或大於 W_C，它會以 work error BAD 或 BIG 停止，與 Ψ_I 和 Ψ_R 完全相同；否則由 guarantor 在 core 內執行 Ψ_M(code, 進入點 5, g, E(c, i, s, payload, H(p)), F, I(s, s)^2)，而出塊者只記下產生的雜湊；系統仍保有 regular context x 與 exceptional context y（只有 `checkpoint` 會把 x 複製到 y），遇到 ☇ 或 ∞ 時結果收斂到 y"
   ],
-  "stem": "Which statement about the accumulate invocation Ψ_A(e, t, s, g, i) is correct?",
+  "stem": "Describe the accumulate invocation Ψ_A(e, t, s, g, i) end to end: what happens if the service's code is missing, how the machine is set up, what the two contexts are for, and what becomes of the result.",
  "options": [
   "If the service's code is unavailable or > W_C it returns the state with incoming transfer amounts already credited and no other effect; otherwise it runs Ψ_M(code, entry 5, g, E(t, s, |i|), F, I(s, s)^2) with a regular context x and an exceptional context y (only `checkpoint` copies x into y); on ☇ or ∞ the result collapses to y; a 32-octet return blob becomes the yield hash; inputs are read via `fetch`",
   "If the service's code is unavailable or > W_C it returns the state with incoming transfer amounts already credited and no other effect; otherwise it runs Ψ_M(code, entry 1, g, E(t, s, |i|) ⌢ E(i), F, I(s, s)^2) with a regular context x and an exceptional context y (only `checkpoint` copies x into y); on ☇ or ∞ the result collapses to x, so everything done before the fault is kept; a 32-octet return blob becomes the yield hash",
@@ -117,14 +117,14 @@ ITEMS = [
  "id": "appB-transfer-rules",
  "ch": "B", "section": "B.7 Accumulate Functions — transfer", "gpRef": "`transfer` = 21",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "transfers"],
-  "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。哪一組順序與意義是正確的？",
+  "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。這些檢查依什麼順序進行？每種失敗各是什麼意思？成功時又發生什麼？",
   "optionsZh": [
    "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ LOW；餘額 − a < 自身門檻 a_t → CASH；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並扣 gas g = M_T + l",
    "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ CASH；餘額 − a < 自身門檻 a_t → LOW；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並扣 gas g = M_T + l",
    "memo 讀不到 → HUH；d ∉ keys(δ) → WHO；l < 發送方自己的 minmemogas a_m → LOW；餘額 − a < 0 → CASH；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並只扣 gas g = M_T",
    "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ LOW；餘額 − a < 自身門檻 a_t → CASH；其餘為 OK：a 在這次 host call 內就被移入 δ[d] 的餘額，收款方也立即被以那 128 位元組的 memo 進入執行，並扣 gas g = M_T + l"
   ],
-  "stem": "The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. Which order/meaning is correct?",
+  "stem": "The `transfer` host call (φ_7 = d, φ_8 = a, φ_9 = l gas, φ_10 = o memo ptr) can fail in several ways. In what order are the checks made, what does each failure mean, and what happens on success?",
  "options": [
   "Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → LOW; balance − a < own threshold a_t → CASH; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged",
   "Memo unreadable → panic; d ∉ keys(δ) → WHO; l < δ[d]_m (recipient's minmemogas) → CASH; balance − a < own threshold a_t → LOW; otherwise OK: the transfer is appended to the context's transfer list, the sender's balance is reduced by a, and gas g = M_T + l is charged",

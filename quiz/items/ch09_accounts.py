@@ -5,14 +5,14 @@ ITEMS = [
  "id": "ch09-account-fields",
  "ch": "9", "section": "9 Service Accounts", "gpRef": "eq. 9.3",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "state"],
-  "stemZh": "在 GP 0.8.0（eq. 9.3）中，下列哪一個不是 service account A 的欄位？",
+  "stemZh": "GP 0.8.0（eq. 9.3）的 service account A 有哪些欄位？一個 Ethereum 開發者會預期存在、卻沒有的欄位是哪個？",
   "optionsZh": [
    "a_f——gratis storage offset，一筆以餘額計價的押金抵扣額",
    "a_p——parent service index，也就是建立這個 service 的那個 service",
    "a_n——一個 nonce，每次該 service 被 accumulate 時遞增一次",
    "a_m——每筆 deferred transfer 所需的最低 gas（minmemogas）"
   ],
-  "stem": "Which of the following is NOT a field of a service account A in GP 0.8.0 (eq. 9.3)?",
+  "stem": "What are the fields of a service account A in GP 0.8.0 (eq. 9.3) — and which field an Ethereum developer would expect is missing?",
  "options": [
   "a_f — the gratis storage offset, a balance-denominated deposit credit",
   "a_p — the parent service index, i.e. the service that created this one",
@@ -90,14 +90,14 @@ ITEMS = [
  "id": "ch09-historical-lookup-calc",
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "eq. 9.7 (Λ)",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "calc"],
-  "stemZh": "某個 service 有一份 preimage p（雜湊 h、長度 40），其 a_l[(h, 40)] = [100, 250, 400]。關於歷史查詢 Λ(a, t, h) 的敘述哪一個正確？",
+  "stemZh": "某個 service 有一份 preimage p（雜湊 h、長度 40），其 a_l[(h, 40)] = [100, 250, 400]。當 t = 120、300、450 時，歷史查詢 Λ(a, t, h) 各回傳什麼？",
   "optionsZh": [
    "Λ 在 t = 120 與 t = 450 時回傳 p，但在 t = 300 時回傳 ∅",
    "Λ 只在 t = 300 時回傳 p",
    "只要 t ≥ 100，Λ 都回傳 p",
    "Λ 在 t = 120 時回傳 p，但在 t = 450 時回傳 ∅，因為最後那一項標記的是第二次撤除"
   ],
-  "stem": "A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. Which statement about the historical lookup Λ(a, t, h) is correct?",
+  "stem": "A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. For t = 120, 300 and 450, what does the historical lookup Λ(a, t, h) return?",
  "options": [
   "Λ returns p for t = 120 and t = 450, but ∅ for t = 300",
   "Λ returns p for t = 300 only",
@@ -146,14 +146,14 @@ ITEMS = [
  "id": "ch09-privileges",
  "ch": "9", "section": "9.4 Service Privileges", "gpRef": "eq. 9.9–9.10",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "privileges"],
-  "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。哪一組「特權 → 權力」的對應是正確的？",
+  "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。每個分量各授予什麼權力？",
   "optionsZh": [
    "χ_M manager：可更動 χ（bless）並授予 gratis storage；χ_V delegator：可設定 ι（designate）；χ_R registrar：可建立索引小於 S = 2^16 的 service；χ_A assigners（每個 core 一個）：可設定 φ[c]（assign）；χ_Z：每個區塊都會被 accumulate、並帶固定 gas 額度的 service",
    "χ_M manager：可設定 ι（designate）；χ_V delegator：可更動 χ（bless）；χ_R registrar：可設定 φ[c]（assign）；χ_A assigners（每個 core 一個）：可建立索引小於 S = 2^16 的 service；χ_Z：在 accumulate 期間免於 gas 計量的 service",
    "χ_M：替其他所有 service 支付 accumulation gas 的那個 service；χ_V：當前作用中的 validator 集合 κ；χ_R：代其他人登記 preimage 的那個 service；χ_A：每個 tranche 重新抽出的 auditor；χ_Z：獲准持有零餘額的 service",
    "χ_M manager：可更動 χ（bless）並授予 gratis storage；χ_V delegator：可直接設定 κ；χ_R registrar：可在任意索引建立 service；χ_A：一個全域的 assigner，為所有 core 設定 φ；χ_Z：每個 epoch 被 accumulate 一次的 service"
   ],
-  "stem": "The privileges state χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z). Which mapping of privilege → power is correct?",
+  "stem": "The privileges state χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z). What power does each component grant?",
  "options": [
   "χ_M manager: may alter χ (bless) and grant gratis storage; χ_V delegator: may set ι (designate); χ_R registrar: may create services with indices below S = 2^16; χ_A assigners (one per core): may set φ[c] (assign); χ_Z: services that accumulate every block with a fixed gas allowance",
   "χ_M manager: may set ι (designate); χ_V delegator: may alter χ (bless); χ_R registrar: may set φ[c] (assign); χ_A assigners (one per core): may create services with indices below S = 2^16; χ_Z: services exempt from gas metering while they accumulate",
@@ -174,14 +174,14 @@ ITEMS = [
  "id": "ch09-preimage-vs-storage",
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2 intro",
  "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "rationale"],
-  "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。下列哪一項不是其中之一？",
+  "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。是哪三項？又有哪一個聽起來合理、其實是錯的「第四項差異」？",
   "optionsZh": [
    "preimage 的資料由外部提供（透過 E_P），而 storage 的資料源自該 service 自己的 accumulation",
    "preimage 是從一個雜湊映到它的原像，而 storage 是從任意 key 映到 value",
    "preimage 可以被 service 立即移除，而 storage 條目則會被保留 28 天",
    "preimage 資料一旦被提供，必須先經過一段「不可用」期間才能被移除，好讓它的歷史可用性得以保留"
   ],
-  "stem": "The GP lists three differences between preimage lookups and general storage. Which is NOT one of them?",
+  "stem": "The GP lists three differences between preimage lookups and general storage. What are they — and what plausible-sounding fourth 'difference' is actually false?",
  "options": [
   "Preimage data is supplied extrinsically (via E_P), whereas storage data originates from the service's own accumulation",
   "Preimages map a hash to its preimage, whereas storage maps arbitrary keys to values",

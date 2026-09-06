@@ -33,14 +33,14 @@ ITEMS = [
  "id": "ch10-verdict-structure",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.4",
  "difficulty": 2, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
-  "stemZh": "依 GP 0.8.0，關於 disputes extrinsic 的 verdicts 成分 E_V，哪一個敘述正確？",
+  "stemZh": "依 GP 0.8.0，E_V 裡的一個 verdict 由什麼組成？必須帶幾個判定、對哪一組金鑰？一個 extrinsic 最多能放幾個 verdict？",
   "optionsZh": [
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須恰好是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須至少是 ⌊2|k|/3⌋+1，且可以從 κ ∪ λ 合併後的集合中取；每份 extrinsic 沒有 verdict 數量上限",
    "每個 verdict 是 (report 雜湊, 該爭議被提起的時槽, judgments)；judgment 的數量必須恰好是 ⌊|k|/3⌋+1，其中 k 永遠是 posterior 的 κ′；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, 一個對 report 雜湊的聚合 BLS 簽章)；簽署者必須是 k 當中的 ⌊2|k|/3⌋+1 位成員；每份 extrinsic 至多 N_V = 16 個 verdict"
   ],
-  "stem": "Per GP 0.8.0, which statement about the verdicts component E_V of the disputes extrinsic is correct?",
+  "stem": "Per GP 0.8.0, what is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?",
  "options": [
   "Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic",
   "Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number at least ⌊2|k|/3⌋+1 and may be drawn from κ ∪ λ combined; there is no per-extrinsic cap on verdicts",
@@ -61,14 +61,14 @@ ITEMS = [
  "id": "ch10-verdict-thresholds",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 (V)",
  "difficulty": 2, "kind": "concept", "tags": ["disputes", "calc", "tiny"],
-  "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，哪一組（t → 結果）對照表是正確的？其他的 t 又會如何？",
+  "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，（t → 結果）的對照表是什麼？其他的 t 又會如何？",
   "optionsZh": [
    "t = 5 → good（⊤）；t = 0 → bad（⊥）；t = 2 → wonky（∅）；其他任何 t 都會讓區塊無效",
    "t ≥ 4 → good（⊤）；t ≤ 1 → bad（⊥）；t ∈ {2, 3} → wonky（∅）；不可能出現其他的 t",
    "t = 5 → good（⊤）；t = 0 → bad（⊥）；t = 3 → wonky（∅）；其他任何 t 都會讓區塊無效",
    "t = 6 → good（⊤）；t = 1 → bad（⊥）；t = 2 → wonky（∅）；其他任何 t 都會被靜默忽略"
   ],
-  "stem": "A verdict's outcome depends on t, the number of positive judgments among the ⌊2|k|/3⌋+1 signatures. In the tiny config (|k| = 6), which (t → outcome) table is correct, and what happens for any other t?",
+  "stem": "A verdict's outcome depends on t, the number of positive judgments among the ⌊2|k|/3⌋+1 signatures. In the tiny config (|k| = 6), what is the (t → outcome) table, and what happens for any other t?",
  "options": [
   "t = 5 → good (⊤); t = 0 → bad (⊥); t = 2 → wonky (∅); any other t makes the block invalid",
   "t ≥ 4 → good (⊤); t ≤ 1 → bad (⊥); t ∈ {2, 3} → wonky (∅); no other t can occur",
@@ -89,14 +89,14 @@ ITEMS = [
  "id": "ch10-culprits-faults",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.6–10.7, 10.13",
  "difficulty": 3, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
-  "stemZh": "在 GP 0.8.0 中，關於 culprits（E_C）與 faults（E_F）的敘述哪一個正確？",
+  "stemZh": "在 GP 0.8.0 中，culprit（E_C）由什麼組成？fault（E_F）由什麼組成？誰的金鑰可以出現在 offender 裡？一個 good verdict 又需要什麼？",
   "optionsZh": [
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；一個 good verdict 仍需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 一致的 report（r ∈ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；bad verdict 需至少 2 個 culprit、good verdict 需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_G 的 report 加上該 guarantor 對 X_valid ⌢ r 的判定簽章；fault 指名一份位於 ψ′_W、其宣稱的有效性 v 與 verdict 相牴觸的 report；offender 的金鑰必須只落在 κ′ 的 Ed25519 金鑰裡；一個 good verdict 仍需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；已經在 ψ_O 裡的金鑰可以被再次提報以懲罰累犯；每一個 verdict——不論 good、bad 或 wonky——都需要至少 1 個 fault"
   ],
-  "stem": "Which statement about culprits (E_C) and faults (E_F) is correct in GP 0.8.0?",
+  "stem": "In GP 0.8.0, what does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?",
  "options": [
   "A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a good verdict still needs ≥ 1 fault",
   "A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v agrees with the verdict (r ∈ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a bad verdict needs ≥ 2 culprits and a good one ≥ 1 fault",
@@ -213,14 +213,14 @@ ITEMS = [
  "id": "ch10-rationale",
  "ch": "10", "section": "10 intro", "gpRef": "§10 intro paragraphs",
  "difficulty": 1, "kind": "rationale", "tags": ["disputes", "rationale"],
-  "stemZh": "下列哪一項不是 GP 所陳述的 disputes 系統目的？",
+  "stemZh": "GP 陳述的 disputes 系統目的有哪些？它刻意不自己做的又是什麼？",
   "optionsZh": [
    "把無效的 work-report 從處理管線中移除並封禁",
    "在對某些金鑰的失能已有共識時，把這些麻煩的金鑰從 validator 集合中移除",
    "協調各節點回滾含有無效 work-report 的鏈延伸，並彙整 offender 交由更高層的系統懲罰（例如在 staking parachain 上沒收質押）",
    "直接在 JAM 的狀態內沒收犯規 validator 的餘額"
   ],
-  "stem": "Which of the following is NOT a purpose of the disputes system as stated in the GP?",
+  "stem": "What are the stated purposes of the disputes system — and what does it pointedly NOT do itself?",
  "options": [
   "Removing and banning invalid work-reports from the processing pipeline",
   "Removing troublesome keys from the validator set where there is consensus over their malfunction",

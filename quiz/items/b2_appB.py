@@ -5,14 +5,14 @@ ITEMS = [
  "id": "b2-appB-write-prev-length-full",
  "ch": "B", "section": "B.5 General Functions — write", "gpRef": "§B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)",
  "difficulty": 2, "kind": "code", "tags": ["host-calls", "write", "storage", "fuzz-bug"],
-  "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。哪個敘述符合 GP 0.8.0？",
+  "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。依 GP 0.8.0，成功時 φ′_7 回傳什麼？若這次寫入會讓門檻超過餘額會怎樣？修正前的程式碼錯在哪？",
   "optionsZh": [
    "成功時 φ′_7 = 5000，也就是剛寫入之值的長度；若 a_t > a_b 則該值仍會被儲存、φ′_7 = FULL，而差額會在該 service 下次 accumulation 時從餘額扣除——所以這次修正需要改的只有暫存器的值，而不是 map 變動的順序",
    "若寫入後 a_t ≤ a_b 則該值被儲存且 φ′_7 = 100，也就是被取代之值的長度；若 a_t > a_b 則 φ′_7 = FULL 且該帳戶原封交回（s′ = s）——而修正前的程式碼已經先變動了共用的 Go map，所以那次 FULL 的寫入外洩了（#979）",
    "成功時 φ′_7 = OK（0）；覆寫時不可能發生 a_t > a_b，因為 storage 押金（每項 B_I、每 octet B_L）只在 key 首次建立時收取、值的大小改變時從不收取，所以 Ω_W 在這條路徑上不需要門檻檢查",
    "若 a_t > a_b 則該 host call 以 ☇（panic）退出，使整個 accumulation 收斂到存檔過的 context y；否則 φ′_7 = 100（被取代之值的長度）且該值被儲存——而那個收斂正是讓修正前的 map 變動變得無害的原因"
   ],
-  "stem": "The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Which statement matches GP 0.8.0?",
+  "stem": "The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Under GP 0.8.0, what does the call return in φ′_7 on success, what happens if the write would push the threshold above the balance, and what did the pre-fix code get wrong?",
  "code": {"lang": "go", "caption": "PVM/host_call_general.go (write, after PR #980)", "src": """	value, storageRawKeyExists := a.StorageDict[string(storageRawKey)]
 	// ...
 	if storageRawKeyExists {
@@ -60,14 +60,14 @@ ITEMS = [
  "id": "b2-appB-read-cross-service-pure",
  "ch": "B", "section": "B.5 General Functions — read", "gpRef": "§B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)",
  "difficulty": 3, "kind": "code", "tags": ["host-calls", "read", "storage", "fuzz-bug", "accumulation"],
-  "stemZh": "這段節錄來自團隊在修正 #938 之後的 Ω_R（`read`），該修正加上了 `callerServiceID == serviceID` 的守衛（s* = φ_7，或當 φ_7 = 2^64−1 時為呼叫者自己）。正在 accumulate 的 service A 讀取 service B 的某個 storage key，而 B 在本塊並未 accumulate。哪個敘述正確？",
+  "stemZh": "這段節錄來自團隊在修正 #938 之後的 Ω_R（`read`），該修正加上了 `callerServiceID == serviceID` 的守衛（s* = φ_7，或當 φ_7 = 2^64−1 時為呼叫者自己）。正在 accumulate 的 service A 讀取 service B 的某個 storage key，而 B 在本塊並未 accumulate。這次讀取對 B 的帳戶可以做什麼、不可以做什麼？加守衛之前出了什麼問題？",
   "optionsZh": [
    "Ω_R(ϱ, ω, μ, s, s, d) 可以查閱 d 中的任何帳戶，但交回的只有呼叫者自己的帳戶 s（由 G 鏡射進 x）；讀取 B 是一次純粹的查閱、必須讓 B 保持不動——在加上守衛之前，B 的 key-val 被從未匹配池中逐出，B 的條目也就從合併後的 δ′ 中消失，state root 因而分歧",
    "Ω_R 並不允許讀取其他 service 的 storage：當 s* ≠ s 時該呼叫必須回傳 WHO、不得碰觸記憶體或 key-val 池，所以在符合規格的實作中那條抵達 B 帳戶的分支根本不可達，這個守衛只是防禦性的——跨 service 的檢視是 `info` 與 `historical_lookup` 的職責",
    "這次讀取必須觀察到本塊正在建構中的 posterior 狀態——包括同一輪中較早被 accumulate 的 service 所做的寫入——所以快取的值必須在每次讀取時從 accumulation context 重新整理、而不是從池中移除；而這個守衛本身就是一個 bug，因為它對每個 s* ≠ s 都抑制了那次重新整理",
    "這次讀取必須像 `historical_lookup` 那樣從 lookup-anchor 的快照取得，所以變動當前狀態的快取只是效能上的顧慮、永遠不可能改變 δ′；那個守衛只是避免把 B 的 key-val 解碼兩次，而 state root 的分歧純粹來自合併規則"
   ],
-  "stem": "Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. Which statement is correct?",
+  "stem": "Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. What may the read do to B's account and what must it not do, and what went wrong before the guard?",
  "code": {"lang": "go", "caption": "PVM/host_call_general.go (read, after PR #938)", "src": """	var a types.ServiceAccount
 	callerServiceID := serviceID
 	if sStar == uint64(serviceID) {
@@ -219,14 +219,14 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
  "id": "b2-appB-pages-access-modes",
  "ch": "B", "section": "B.6 Refine Functions — pages", "gpRef": "§B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants",
  "difficulty": 3, "kind": "code", "tags": ["host-calls", "refine", "inner-pvm", "memory"],
-  "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。對照 GP 0.8.0，哪個敘述正確？",
+  "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。這段程式碼在哪些地方偏離了 GP 0.8.0 對 `pages` 的語意？",
   "optionsZh": [
    "這段程式碼是對的：Ω_Z 對每一個 r ∈ 0…4 都會把該範圍填零，差別只在最終的存取權（0 → 不可存取，1/3 → R，2/4 → W）；GP 從不區分「配置」與「改變模式」，這也是為什麼附錄 I 對每一個 r 都只訂一個基本成本加一個每頁費率",
    "有兩處語意落差：當 r = 0 時 GP 會把該範圍填零並設為不可存取（程式碼卻完全不動它），而當 r ∈ {3, 4} 時 GP 會保留頁面內容、只把存取模式改成 R 或 W（程式碼卻改為重新配置填零的頁）",
    "唯一的落差是錯誤碼：當 r > 2 且該範圍中有某頁不可存取時，GP 會像 `peek` 與 `poke` 那樣回傳 OOB（inner-PVM 記憶體索引不可存取）而不是 HUH；頁面的變動本身是對的，而 r = 0 也確實應該讓那些 octet 保持原狀",
    "GP 會在查找 n 之前先驗證 r ∈ 0…4、p ≥ 16 且 p + c < 2^32/Z_P，所以一個指向不存在機器的無效請求應該得到 HUH 而程式碼卻給出 WHO；頁面的變動本身是對的，而無效的 r 是免費的，因為 GP 沒有為它定義任何 gas 常數"
   ],
-  "stem": "The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Compared with GP 0.8.0, which statement is correct?",
+  "stem": "The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Where does this code diverge from GP 0.8.0's semantics for `pages`?",
  "code": {"lang": "go", "caption": "PVM/host_call_refine.go (pages, 0.7.2 numbering)", "src": """	if r > 4 || p < 16 || p+c >= (1<<32)/ZP {
 		input.VM.Registers[7] = HUH
 		return OmegaOutput{ExitReason: ExitContinue, Addition: input.Addition}
@@ -304,14 +304,14 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
  "id": "b2-appB-log-jip1",
  "ch": "B", "section": "B.2–B.4 mutator default case & JIP-1 `log`", "gpRef": "eq. B.2, B.6, B.11 (default branch); JIP-1 (host call 100)",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "jip", "log", "fuzz-bug"],
-  "stemZh": "某個 service 執行 `ecalli 100`（`log`）。哪個敘述正確？",
+  "stemZh": "某個 service 執行 `ecalli 100`（`log`）。`log` 是在哪裡被規範的？它對機器狀態可觀察的效果是什麼？訊息範圍讀不到時該怎麼處理？",
   "optionsZh": [
    "`log` 是 GP 附錄 B 的第 100 號 host call，三種 invocation 都可用：它回傳 OK、花費 M_∅ = 1000，而且與每一個會讀取記憶體的 host call 一樣，當訊息範圍不可讀時會 panic（☇）——省略那個檢查只是把一個規格明訂的 panic 變成當機",
    "`log` 是共識關鍵的：格式化後的訊息會被雜湊進該 service 的 accumulation 產出 θ、進而進入 BEEFY root β_B，所以每個節點都必須實作逐位元組相同的 level／target／message 格式化，而不可讀的範圍必須 panic（☇）",
    "`log` 是由 JIP-1 而不是 Gray Paper 規定的：它可觀察到的效果與一個未實作的索引相同——φ′_7 = WHAT 加上壞索引呼叫的 gas——而不可讀的訊息／target 範圍必須毫無副作用（不 panic）；節點只是把訊息印出來",
    "`log` 只存在於 Ψ_R 中，作為 guarantor 的診斷工具，在那裡它回傳 OK 並收取 M_∅；而在 accumulate 與 is-authorized 中，`ecalli 100` 會落到 mutator 的 WHAT 預設分支，所以同一支程式在不同 invocation 下會看到 OK 或 WHAT"
   ],
-  "stem": "A service executes `ecalli 100` (`log`). Which statement is correct?",
+  "stem": "A service executes `ecalli 100` (`log`). Where is `log` specified, what are its observable effects on the machine state, and how must an unreadable message range be handled?",
  "options": [
   "`log` is host call 100 of GP App. B, available in all three invocations: it returns OK, costs M_∅ = 1000 and, like every other host call that reads memory, panics (☇) when the message range is not readable — omitting that check merely turns a specified panic into a crash",
   "`log` is consensus-critical: the formatted message is hashed into the service's accumulation output θ and hence into the BEEFY root β_B, so every node must implement byte-identical level/target/message formatting, and an unreadable range must panic (☇)",
