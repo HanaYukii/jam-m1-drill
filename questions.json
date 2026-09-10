@@ -145,7 +145,7 @@
     "group": "Interview extras"
    }
   ],
-  "count": 334,
+  "count": 318,
   "glossaryCats": {
    "state": "狀態與區塊",
    "block": "狀態與區塊",
@@ -1213,40 +1213,6 @@
    "trap": "auth code 是從 δ[h] 的 preimage 以 lookup-anchor 時間做 historical lookup 取得（eq. 14.4 附近）。"
   },
   {
-   "id": "delta-summary-080",
-   "ch": "ARCH",
-   "section": "GP 0.7.2 → 0.8.0 changes",
-   "gpRef": "graypaper releases v0.8.0 (June 3 2026)",
-   "difficulty": 2,
-   "kind": "delta",
-   "tags": [
-    "delta-0.8.0"
-   ],
-   "stemZh": "你們的實作以 GP 0.7.2 為目標，而當前的 GP 是 0.8.0。0.8.0 做了哪些這樣的實作必須跟進的主要變動？",
-   "optionsZh": [
-    "以 fetch 取代 import host call；記憶體存取例外的形式化與功能凍結宣告；以 prior validator 集合檢查 assurance；epoch marker 中加入 Ed25519 金鑰並附上活動統計；provide host call、以及 import 與 export 的分離；「super-fetch」、gratis storage 與帳戶 metadata；最大程式碼大小與過大 report 的處理；更嚴格的 opcode 與跳躍有效性",
-    "把每個變長項目移到其編碼末端的「Macrofication Marathon」；定長的 validator 索引序列化；讓 W* 依賴 ρ†；accumulate 吸收 on_transfer 使 service 只剩一個鏈上入口；把 core 索引加入 refine 的引數並從 guarantee 的酬載移除；小型 service ID；帳戶序列化前綴版本位元組；χ 的「Owned Privileges」",
-    "可變的 validator 集合大小（3 的倍數、6…1023，門檻由 |κ| 導出）；ρ 中保留完整的 guarantee；verdict／culprit／fault 各 16 的硬上限，且 bad verdict 不再要求必須有 culprit；bless 限縮給 manager service；authorizer = H(auth code hash ⌢ config)；refinement context 新增 anchor slot 與 lookup-anchor 的 posterior root；以 basic block 為單位的 gas 模型、並以 grow_heap 取代 sbrk；每位 validator 的 ticket 數 = ⌈2E/|γ′_P|⌉",
-    "全面的 64 位元 PVM 暫存器與 64 位元定址；guarantor 指派攜帶完整的 validator 金鑰；erasure-coding 公式修正；info host call 新增暫存器 9 與 10；明確的逐 invocation out-of-gas 檢查；transfer 的 gas 計費修正與 work-package 大小上限修正；preimage 整合的簡化；posterior state root 定案；程式碼 blob 的 metadata 前綴"
-   ],
-   "stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. What are the main changes 0.8.0 made that such an implementation has to absorb?",
-   "options": [
-    "fetch replacing the import host call; memory-access exceptions formalized and a feature freeze declared; assurances checked with the prior validator set; Ed25519 keys in the epoch marker alongside activity statistics; the provide host call, with imports separated from exports; 'super-fetch', gratis storage and account metadata; maximum code sizes with oversize reports handled; stricter opcode and jump validity",
-    "The 'Macrofication Marathon' moving every variable-length item to the end of its encoding; fixed-length validator-index serialization; W* made to depend on ρ†; accumulate absorbing on_transfer so a service has one on-chain entry point; the core index added to refine's arguments and removed from the guarantee payload; small service IDs; a version byte prefixing account serialization; 'Owned Privileges' for χ",
-    "Variable validator-set sizes (multiples of 3, 6…1023, thresholds derived from |κ|); full guarantees kept in ρ; hard caps of 16 verdicts/culprits/faults, with culprits no longer required behind a bad verdict; bless restricted to the manager service; authorizer = H(auth code hash ⌢ config); refinement context gains anchor slot + lookup-anchor posterior root; per-basic-block gas model with grow_heap replacing sbrk; tickets per validator = ⌈2E/|γ′_P|⌉",
-    "64-bit PVM registers and 64-bit addressing throughout; guarantor assignments carrying full validator keys; erasure-coding equation fixes; the info host call gaining registers 9 and 10; explicit per-invocation out-of-gas checks; the transfer gas-charge fix and the work-package size-limit fix; preimage-integration simplification; the posterior state root finalised; a metadata prefix for code blobs"
-   ],
-   "answer": 2,
-   "optNotes": [
-    "fetch 取代 import 與 feature freeze 屬 0.6.0，其餘散落在 0.6.4、0.6.5、0.6.6、0.6.7。",
-    "Macrofication Marathon、變長欄位後移、W* 依賴 ρ† 屬 0.7.0；on_transfer 併入與 small service IDs 屬 0.7.1。",
-    "整份清單都能對回 0.8.0 的 PR：#514、#494、#525、#519、#522、#526、#508、#527。",
-    "64-bit registers 屬 0.5.0；info 的 register 9/10、transfer gas fix 等屬 0.7.2，正是你們現在的版本。"
-   ],
-   "explanation": "0.8.0（2026-06-03）的實際變更清單：#514 support smaller validator sets（𝕍 ≡ {3c}，門檻一律由 |κ| 導出）、#494 keep full guarantees in ρ、#525 dispute extrinsic 硬上限 16 且移除 culprits 必要性、#519 restrict bless to manager service、#522 update authorizer identification（authorizer = H(auth code hash ⌢ config)，對齊 ch. 8 與 ch. 14）、#526 expose lookup anchor posterior root and anchor slot、#508 新 gas cost model（per-basic-block，模擬 ROB/execution units）與 sbrk → grow_heap、#517 host function gas costs、#527 ticket 常數改為 ⌈2E/|γ′_P|⌉、#524 extrinsic hash、#502 processed transfer count、#497 illegal memory access 收費、#520/#521/#528。0.7.2 與 0.8.0 之間沒有任何 release，所以判準就是上面這份 PR 清單：凡不在其中的條目，都屬於更早的 release。你們 issue #1012（Update to v0.8.0）與其子 issue #1013–#1022 就是這張清單的實作追蹤。",
-   "trap": "面試官依「最新 GP」出題（T&C 3.5：conformance assessed against the latest release），所以 0.8.0 差異必須熟。"
-  },
-  {
    "id": "b2-appA-branch-both-targets",
    "ch": "A",
    "section": "A.5 Single-Step State Transition (branch)",
@@ -1324,48 +1290,6 @@
    ],
    "explanation": "eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − ϱ^Δ(c, k, 𝔏(ı)), ⊤) otherwhen ϱ ≥ ϱ^Δ(c, k, 𝔏(ı))；(∞, ϱ, ⊥) otherwise。eq. A.11：flag* = ⊥ when flag′ = ⊥ ∨ (c_ı ∈ T ∧ ε* ∈ {▸} ∪ {h̄} × N_R)，否則 ⊤。T（§A.3）= trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*；ecalli（10）不在 T 裡，所以 ecalli 造成 h̄ exit 時 flag* = ⊤，Ψ（eq. A.1）把這個 flag′ 回傳，Ψ_H*（eq. A.38）以同一個 flag′ 續跑 → 不重複收費。flag 何時變 ⊥：執行了 terminator 且 ε* = ▸（下一步進新 block、或「jumps back to the beginning of the current basic block」都重新收費），以及 OOG（此時 ϱ 不變、ı* = ı）。𝔏（eq. A.6）= max(j ∈ ϖ : j ≤ ı) 是「含 ı 的 block 起點」，所以 flag = ⊥ 而 ı 在 block 中間時，扣的是整個 block 的 ϱ^Δ；Ψ_H ≡ Ψ_H*(…, ⊥, …)（eq. A.39）——每次新的 Ψ_H 都從 ⊥ 開始。App. B 也配合：machine 建立內層 PVM 時 flag 初始為 ⊥，invoke 把 Ψ 回傳的 flag′ 存回 m*[n]，內層 host call 後再 invoke 不會重扣；內層 OOG 後補 gas 再 invoke 才會重扣。這正是 #1046 review 的修正：「mid-block resume must charge the full containing block cost L(i) first — not just the suffix」。你們 0.7.2 沒有這個 flag（每指令 1 gas，SingleStepInvokeDecodedBlocks 逐條扣）。",
    "trap": "flag 只被「執行完的 terminator」與「OOG」清成 ⊥；ecalli 不是 terminator，host call 續跑不重扣。"
-  },
-  {
-   "id": "b2-appA-recompiler-block-gas-stub",
-   "ch": "A",
-   "section": "A.5 Single-Step State Transition (gas charging) — x86-64 recompiler",
-   "gpRef": "eq. A.8 (ε^ϱ, ϱ* unchanged on ∞), A.10 (ı* = ı), A.54 (ϱ^Δ)",
-   "difficulty": 3,
-   "kind": "code",
-   "tags": [
-    "pvm",
-    "gas",
-    "recompiler",
-    "delta-0.8.0"
-   ],
-   "stemZh": "重編譯器裡有一段為 GP 0.8.0 準備好但尚未啟用的 block 層級 gas 路徑（與目前 0.7.2 的逐指令 landing pad 一併列出）。對照 eq. A.8，那條準備好的路徑還有什麼問題？",
-   "optionsZh": [
-    "方向錯了：0.8.0 是在 block 的 terminator 執行完之後才對它計費，所以 SubMemImm32 應該放在 terminator 之後、而且符號檢查要反過來；在 block 進入時扣款會對一個中途 panic 的 block 收費，而 eq. A.8 正是靠延後扣款來避免這件事",
-    "沒有問題：在 0.8.0 中每條指令仍然花費 1 gas、只是改成逐 block 彙總，所以在 block 進入時減掉指令數就恰好是 ϱ^Δ；而在 out-of-gas 路徑上讓計數器維持負值也是刻意的，因為 Ψ_M 的 R 函數本來就把用量回報為 u = ϱ − max(ϱ′, 0) 並自行夾住",
-    "有兩件事：扣掉的金額必須是來自 A.9 管線模擬的該 block 之 ϱ^Δ（max(cycles − 3, 1)），而不是它的指令數；而且在 out-of-gas 路徑上那筆扣款必須被復原，因為 A.8 在 ϱ < ϱ^Δ 時讓 ϱ 維持不變——逐指令的 pad 有復原它的扣款，block 的 pad 卻沒有",
-    "只有退出的 PC 錯了：在 block 進入時的 out-of-gas 退出上，eq. A.10 要求 ı* 指向該 block 的 terminating 指令——也就是那筆扣款本來會付到的最後一條——而不是 block 的起點；扣款金額與「gas 不動」的規則這段程式碼都已經處理正確了"
-   ],
-   "stem": "The recompiler contains a prepared-but-disabled block-level gas path for GP 0.8.0 (shown together with the current 0.7.2 per-instruction landing pad). Measured against eq. A.8, what is still wrong with the prepared path?",
-   "code": {
-    "lang": "go",
-    "caption": "PVM/recompiler/gas.go (emitOutOfGasExit, emitBlockGasCheck, emitBlockOutOfGasExit)",
-    "src": "// emitOutOfGasExit emits the temporary GP v0.7.2 per-instruction OOG landing pad.\nfunc emitOutOfGasExit(a *asm.Assembler, oog asm.Label, instrPC PVM.ProgramCounter) {\n\t_ = a.BindLabel(oog)\n\t// Undo the fused charge: on OOG the interpreter leaves gas unchanged.\n\ta.SubMemImm32(RegGuestBase, -int32(OffsetGas), -1)\n\ta.MovMemImm32_32(RegGuestBase, -int32(OffsetExitPC), int32(instrPC))\n\ta.MovImm64ToReg(RegScratch, uint64(PVM.ExitOOG))\n\ta.MovRegToMem(RegGuestBase, -int32(OffsetExitReason), RegScratch)\n\ta.Jmp(a.ExitTrampoline())\n}\n\n// emitBlockGasCheck is the prepared block-based gas charging path for GP v0.8.0.\nfunc (c *Compiler) emitBlockGasCheck(a *asm.Assembler, blockOOG asm.Label, instrCount int64) {\n\ta.SubMemImm32(RegGuestBase, -int32(OffsetGas), int32(instrCount))\n\ta.Jcc(asm.CondS, blockOOG)\n}\n\n// emitBlockOutOfGasExit is the prepared block-entry OOG landing pad for GP v0.8.0.\nfunc emitBlockOutOfGasExit(a *asm.Assembler, blockOOG asm.Label, blockStartPC PVM.ProgramCounter) {\n\t_ = a.BindLabel(blockOOG)\n\ta.MovMemImm32_32(RegGuestBase, -int32(OffsetExitPC), int32(blockStartPC))\n\ta.MovImm64ToReg(RegScratch, uint64(PVM.ExitOOG))\n\ta.MovRegToMem(RegGuestBase, -int32(OffsetExitReason), RegScratch)\n\ta.Jmp(a.ExitTrampoline())\n}"
-   },
-   "options": [
-    "The direction: 0.8.0 charges a block only once its terminator has executed, so the SubMemImm32 belongs after the terminator with the sign check reversed; charging at block entry would bill a block that panics half-way through, which eq. A.8 avoids precisely by deferring the deduction",
-    "Nothing: in 0.8.0 each instruction still costs 1 gas and is merely aggregated per block, so subtracting the instruction count at block entry is exactly ϱ^Δ; and leaving the counter negative on the out-of-gas path is intended, because Ψ_M's R function reports consumption as u = ϱ − max(ϱ′, 0) and clamps it anyway",
-    "Two things: the amount deducted must be the block's ϱ^Δ from the A.9 pipeline simulation (max(cycles − 3, 1)), not its instruction count; and on the out-of-gas path the deduction must be undone, because A.8 leaves ϱ unchanged when ϱ < ϱ^Δ — the per-instruction pad restores its charge, the block pad does not",
-    "Only the exit PC: on a block-entry out-of-gas exit eq. A.10 requires ı* to point at the block's terminating instruction — the last one the charge would have paid for — rather than at the block start; the amount deducted and the untouched-gas rule are both already handled correctly by this code"
-   ],
-   "answer": 2,
-   "optNotes": [
-    "事後收費等於讓 panic 的 block 免費，正是 GP 要求「預先扣款」所要防的事。",
-    "0.8.0 的 ϱ^Δ 來自 §A.9 管線模擬，與指令數沒有固定比例；u 的 clamp 也救不了寫回外層的負 counter。",
-    "金額要換成 eq. A.54 的 max(cycles − 3, 1)，且 A.8 的 ϱ* = ϱ 要求 landing pad 把預扣的錢加回去。",
-    "eq. A.10 在 ε^ϱ ≠ ▸ 時 ı* = ı（嘗試收費的那條指令）；而金額與不扣款兩點正是真正的缺陷所在。"
-   ],
-   "explanation": "eq. A.8：ϱ ≥ ϱ^Δ(c, k, 𝔏(ı)) 才扣（ϱ* = ϱ − ϱ^Δ），否則 (∞, ϱ, ⊥)——「the execution is interrupted and the gas counter remains unchanged」；§A.5 也明說「No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance」。emitBlockGasCheck 用「先 sub 再看 SF」的技巧，判斷方向沒錯（post-charge < 0 ⟺ pre-charge < 金額），但 (1) 金額是 instrCount——那是 0.7.2 的 GasCost = InstrCount（block_info.go），0.8.0 要用 eq. A.54 的 ϱ^Δ = max(cycles − 3, 1)，由 A.9 的 ROB 模擬與 A.10 表算出（#1046 之後 interpreter 與 recompiler 共用 GasCostForBlock）；(2) 走到 emitBlockOutOfGasExit 時記憶體裡的 gas 已經是「負的」，沒有像 emitOutOfGasExit 那樣 `SubMemImm32(…, -1)` 把錢加回去，違反 ϱ* = ϱ；後果可觀察：R（eq. A.48）算 u = ϱ − max(ϱ′, 0) 會變成「全部 gas 用光」，invoke host call 也會把負的 g′_R 寫回記憶體。至於 ExitPC = blockStartPC：eq. A.10 在 ε^ϱ ≠ ▸ 時 ı* = ı，也就是「嘗試收費的那條指令」，正常進入 block 時就是 block 起點，這部分沒錯（唯一例外是 flag = ⊥ 且從 block 中間恢復，此時 ı* 是恢復點，扣的仍是整個 block）。",
-   "trap": "OOG 時 ϱ 不變（A.8）——「先扣再判斷」的 JIT 寫法一定要在 landing pad 把錢加回去，而且扣的是 ϱ^Δ 不是指令數。"
   },
   {
    "id": "b2-appA-load-imm-jump-ind-reg-write",
@@ -1574,49 +1498,6 @@
    "trap": "未知 host call「先扣費再回 WHAT」，扣費本身就能觸發 ∞；0.8.0 的 M_∅ = 1000 不是 10。"
   },
   {
-   "id": "b2-appB-invoke-gas-refund",
-   "ch": "B",
-   "section": "B.6 Refine Functions — invoke",
-   "gpRef": "§B.6 `invoke` = 13 (Ω_K); eq. B.4 (inner PVM tuple); §B.1 inner result codes",
-   "difficulty": 3,
-   "kind": "code",
-   "tags": [
-    "host-calls",
-    "refine",
-    "inner-pvm",
-    "gas",
-    "delta-0.8.0"
-   ],
-   "stemZh": "這段節錄是團隊 0.7.2 的 `invoke`（Ω_K）：它讀取 φ_8 處 112 個 octet 的區塊、執行內層機器 n = φ_7，再把該區塊寫回。除了 id 位移（12 → 13）之外，它還缺了哪一條 GP 0.8.0 的規則？",
-   "optionsZh": [
-    "恢復：在 HOST 退出時，被保存的指令計數器必須停在那條 `ecalli` 本身，好讓外層 service 在服務完該呼叫之後重新執行那條指令，就像 Ψ 處理 page fault 那樣；把它推進 i′ + skip(i′) + 1 會漏掉一條指令",
-    "巢狀 host call：內層機器執行的 `ecalli` 必須經由 refine mutator F 派送（historical_lookup、export…）而不是中止內層執行，所以 Ω_K 必須呼叫 Ψ_H 而不是 Ψ，而外層 service 根本不該看到 HOST 這個結果碼",
-    "記憶體：那 112 個 octet 的區塊只需要可讀即可，因為在 0.8.0 中內層的 gas 與 13 個暫存器是透過 φ′_7…φ′_12 交回、而不是寫回該區塊，所以一個可讀但不可寫的視窗沒有問題，而節錄中的 OOB-then-panic 路徑應該改成單純的 WHO",
-    "gas：外層機器事先支付 g = M_K + g_R（若 ϱ < g 則 ∞；g_R 是從該區塊讀出的內層 gas），事後再拿回內層未用完的 g_R′，也就是 ϱ′ = ϱ − g + g_R′；而且內層機器也為它當前的 basic block 攜帶一個 gas-charged 旗標"
-   ],
-   "stem": "The excerpt is the team's 0.7.2 `invoke` (Ω_K): it reads a 112-octet block at φ_8, runs inner machine n = φ_7 and writes the block back. Apart from the id shift (12 → 13), which GP 0.8.0 rule is missing from it?",
-   "code": {
-    "lang": "go",
-    "caption": "PVM/host_call_refine.go (invoke, 0.7.2 numbering)",
-    "src": "\tn, o := input.VM.Registers[7], input.VM.Registers[8]\n\n\toffset := uint64(112)\n\t// g = panic\n\tif !input.VM.Mem.IsWriteable(o, offset) {\n\t\tinput.VM.Registers[7] = OOB\n\t\treturn OmegaOutput{ExitReason: ExitPanic, Addition: input.Addition}\n\t}\n\t// ... (WHO if n is not a known machine; decode g and w[0..13] from the 112 octets)\n\t// wrap m[n]_p (program), w (registers), m[n]_u (memory), g (gas)\n\ttempInterp := NewInterpreter(&tmpProgram, w, &tempMemory, Gas(g))\n\t// ...\n\tc, pcPrime = tempInterp.SingleStepInvoke(input.Addition.IntegratedPVMMap[n].PC)\n\t// ... (re-encode gas' and registers')\n\t// write data into memory (mu)\n\tinput.VM.Mem.Write(o, data)\n\n\t// m* = m\n\ttmp := input.Addition.IntegratedPVMMap[n]\n\ttmp.Memory = *tempInterp.Memory\n\tif c.GetReasonType() == HOST_CALL {\n\t\ttmp.PC = pcPrime + 1 + ProgramCounter(skip(int(pcPrime), input.Addition.Program.Bitmasks))\n\t} else {\n\t\ttmp.PC = pcPrime\n\t}\n\tinput.Addition.IntegratedPVMMap[n] = tmp"
-   },
-   "options": [
-    "Resumption: on a HOST exit the saved instruction counter must stay on the `ecalli` itself, so that the outer service can re-execute that instruction after servicing the call, exactly as Ψ does for a page fault; advancing it by i′ + skip(i′) + 1 drops an instruction",
-    "Nested host calls: an `ecalli` executed by the inner machine must be dispatched through the refine mutator F (historical_lookup, export, …) instead of stopping the inner run, so Ω_K has to invoke Ψ_H rather than Ψ and the outer service should never see the HOST result code at all",
-    "Memory: the 112-octet block need only be readable, because in 0.8.0 the inner gas and the 13 registers are handed back through φ′_7…φ′_12 rather than written back into the block, so a readable-but-unwritable window is fine and the excerpt's OOB-and-panic path should be a plain WHO instead",
-    "Gas: the outer machine pays g = M_K + g_R up front (∞ if ϱ < g; g_R is the inner gas read from the block) and afterwards gets the inner's unspent g_R′ back, ϱ′ = ϱ − g + g_R′; the inner machine also carries a gas-charged flag for its current basic block"
-   ],
-   "answer": 3,
-   "optNotes": [
-    "m*[n]_i = i′ + skip(i′) + 1 正是要跳過那條 ecalli；停在原地會讓 resume 後無限重複同一個 ecalli。",
-    "inner PVM 刻意沒有 host call 能力，Ω_K 明寫呼叫 Ψ，ecalli 一律以 (HOST, h) 停機交外層處理。",
-    "GP 要求 N_{o..+112} ⊆ writable(μ)，因為 g_R′ 與 w′ 要原地寫回同一塊，不可寫就 ⟨0, error⟩ → ☇。",
-    "0.7.2 只扣 10 且 inner gas 完全獨立；0.8.0 要外層預付 M_K + g_R 並退還未用完的 g_R′。"
-   ],
-   "explanation": "Ω_K（invoke = 13）：[n, o] = φ_7,8；⟨g_R, w⟩ 滿足 E_8(g_R) ⌢ E_8(w) = μ[o..+112]（8 octets gas + 13 個 8-octet 暫存器），且 N_{o..+112} 必須 ⊆ writable(μ)，否則 ⟨0, error⟩ → ☇（因為結果要寫回同一塊）；(c, i′, g_R′, f′, w′, u′) = Ψ(m[n]_p, m[n]_i, g_R, m[n]_f, w, m[n]_u)——是 Ψ 不是 Ψ_H，inner 沒有 host call，遇到 ecalli 就以 c = h̄ × h 停下；μ* 寫回 E_8(g_R′) ⌢ E_8(w′)；m*[n]_i = i′ + skip(i′) + 1 當 c ∈ {h̄} × N_R（跳過那條 ecalli，讓外層 service 代為服務後 resume），否則 i′；m*[n]_f = f′（eq. B.4 的 inner PVM tuple ⟨p, u, i, f⟩，f 是「本 basic block 的 gas 已扣」旗標，因為 0.8.0 gas 以 basic block 為單位預扣，mid-block resume 時不能再扣一次——#1046 review 也提到 A.4 的 L(i)）。gas：g = M_K + g_R（M_K = 968）；ϱ′ = ϱ − g 當 w = error ∨ n ∉ keys(m) ∨ ϱ < g，否則 ϱ − g + g_R′——也就是外層先付全部 inner gas，剩下的退回；ϱ < g 依 B.18/B.19 直接 ∞。回傳：(HOST, h)、(FAULT, x 位址)、OOG、PANIC、HALT 進 φ′_7/φ′_8（非 HOST/FAULT 時 φ′_8 不變）；n 不存在 → WHO。你們的 0.7.2 版本只扣 10 gas，inner 的 g 完全獨立、也不退還——這正是 #1046 的「invoke gas refund」項目；同一 PR 也加了 machine 的 63 台上限（GP PR #521，|m| ≥ 63 → FULL，且排在 ☇ 之前）。另外值得複查：excerpt 的 skip 用的是 input.Addition.Program.Bitmasks（外層程式的 bitmask），GP 的 skip(i′) 應以 inner 程式 m[n]_p 的 bitmask 計算。",
-   "trap": "invoke 的 112 octets 必須「可寫」；inner 無 host call（ecalli → HOST）；0.8.0 外層預付 g_R 並退還 g_R′。"
-  },
-  {
    "id": "b2-appB-pages-access-modes",
    "ch": "B",
    "section": "B.6 Refine Functions — pages",
@@ -1731,47 +1612,6 @@
    ],
    "explanation": "GP 附錄 B 沒有 index 100；純 GP 節點對 ecalli 100 走 F 的 default（eq. B.2/B.6/B.11）：扣 M_∅、φ′_7 = WHAT、繼續（gas 不足則 ∞）。JIP-1「Debug message host call」原文：Index 100、Name log、Gas usage 10「(same as host-call with bad index)」；輸入 φ_7 = level（0 fatal … 4 pedantic）、target = ∅ 若 φ_8 = 0 ∧ φ_9 = 0 否則 μ[φ_8..+φ_9]、message = μ[φ_10..+φ_11]；輸出 φ′_7 = WHAT——「WHAT is always returned so that authorizer/service behaviour is the same whether or not this JIP is implemented」；「No side-effects if memory access is invalid」。換言之 log 對共識刻意「透明」：不進 θ/β、不改狀態、不 panic，回傳值與 gas 都與未實作時一致（注意 JIP 的「10」是 0.7.x 時代的 bad-index 費用；0.8.0 的 M_∅ = 1000，實作時要跟目前 GP 版本對齊，否則 gas 統計會分歧）。它不是 refine 專屬：你們 host_call_invocation.go 的三張表都註冊了 [100] = logHostCall。你們的 #975（fuzz seed 309584898、tiny spec）：logHostCall 讀 (r10, r11)/(r8, r9) 前沒做 isReadable，直接解參考未配置的頁 → target 程序崩潰（「IO error: early eof」）；PR #976 改成不可讀就 continue、無副作用。另外值得核對：現行 logHostCall 沒有設 φ′_7 = WHAT（註解寫「none modified per spec」），與現在的 JIP-1 文字不符——若 service 在 log 後讀 φ_7，會與依 JIP-1 或純 GP 的節點不一致。",
    "trap": "log 不在 GP 裡；合規做法 = 印訊息、φ′_7 = WHAT、bad-index 費用、記憶體無效時零副作用（不能 panic、更不能 crash）。"
-  },
-  {
-   "id": "appC-code-avspec-080",
-   "ch": "C",
-   "section": "C.2 Block Serialization (availability specification)",
-   "gpRef": "§C.2 E(s ∈ availability spec); eq. 11.5; eq. 11.31",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "codec",
-    "availability-spec",
-    "delta-0.8.0"
-   ],
-   "stemZh": "團隊為 availability specification（work-package spec）寫的編碼器還停在 GP 0.7.2。要讓它產出 §C.2 的 GP 0.8.0 線路格式 E(s)，必須改什麼？伴隨這個新欄位的鏈上規則又是什麼？",
-   "optionsZh": [
-    "把定寬的 E_4 Length 換成緊湊的 E(l)，並在其後緊接著加上緊湊自然數 v；v 就是該 guarantor 實際分發出去的碎片數量，所以鏈上不做檢查",
-    "把 E_2(v) 附加在 ExportsCount 之後，因為自 GP 0.7.0 起，結構新增的任何欄位都必須放到尾端以維持解碼器的串流友善性；鏈上則要求 v 必須等於 core 數 C",
-    "線路上什麼都不用改：v 可以從 validator 數 V 推導出來，因此從不被序列化；只有 JSON 測試向量的 schema 為了可讀性多了一個 erasure_shards 欄位",
-    "在 ErasureRoot 與 ExportsRoot 之間插入一個 U16 的 erasure 碎片數 v，編碼為 E_2(v)；其餘寬度維持原樣（長度用 E_4、exports 計數用 E_2）；鏈上則要求每一份進來的 report 都必須帶 v = |κ′|"
-   ],
-   "stem": "The team's encoder for the availability specification (work-package spec) is still on GP 0.7.2. What must change so that it produces the GP 0.8.0 wire form E(s) of §C.2, and which on-chain rule accompanies the new field?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/types/encode.go (WorkPackageSpec.Encode) — struct fields: Hash, Length U32, ErasureRoot, ExportsRoot, ExportsCount U16",
-    "src": "func (w *WorkPackageSpec) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding WorkPackageSpec\")\n\n\t// Hash\n\tif err := w.Hash.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// Length\n\tif err := w.Length.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ErasureRoot\n\tif err := w.ErasureRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsRoot\n\tif err := w.ExportsRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsCount\n\tif err := w.ExportsCount.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\treturn nil\n}"
-   },
-   "options": [
-    "Replace the fixed E_4 Length with a compact E(l) and add v as a compact natural right after it; v is whatever number of chunks the guarantor actually distributed, so it is not checked on-chain",
-    "Append E_2(v) after ExportsCount, because since GP 0.7.0 any newly added field of a structure must go to its end to keep decoders streaming-friendly; on-chain v must equal the number of cores C",
-    "Nothing on the wire: v is derivable from the validator count V and is therefore never serialized; only the JSON test-vector schema gains an erasure_shards field for readability",
-    "Insert a U16 erasure-shard count v, encoded E_2(v), between ErasureRoot and ExportsRoot; the other widths stay as they are (E_4 length, E_2 exports count); on-chain every incoming report must carry v = |κ′|"
-   ],
-   "answer": 3,
-   "optNotes": [
-    "長度 l 仍是 E_4 而非 compact，v 也不是 guarantor 自由決定的——eq. 11.31 在鏈上檢查它。",
-    "「新欄位排最後」只針對變長（↕）欄位；v 是固定 2 octets、位置由 GP 明定，而且 v 不是 C。",
-    "v 必須進 wire，否則另一個 validator-set 大小的 assurer 無從驗證這份 report。",
-    "§C.2 把 E_2(v) 排在 u 與 e 之間，且 eq. 11.31 要求 (w_s)_v = |κ′|——每個 assurer 恰一個 chunk。"
-   ],
-   "explanation": "GP 0.8.0 §C.2：E(s ∈ availability spec) ≡ E(p, E_4(l), u, E_2(v), e, E_2(n))——依序是 package hash p、bundle 長度 l（E_4）、erasure root u、erasure-shard 數 v（E_2）、segment root e、segment 數 n（E_2）。eq. 11.5 把 v ∈ N_V（validator count 型別）放在 u 與 e 之間；eq. 11.31：∀w ∈ 進來的 reports：(w_s)_v = |κ′|，因為「one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」。0.8.0 的 erasure coding 以 v 為參數（§14.4.1 的 A(p, b, s, v) 用 z = 2·d(v)），所以規格本身要記錄 v；GP 也註明對兩個不同大小的 validator set 派發時要做兩次 erasure coding、產生兩份不同的 work-report。你們的 PR #1026 就是在 ErasureRoot 與 ExportsRoot 之間加 `ErasureShards U16`（producer 設為 TotalShards），這會改變每一個 on-chain WorkReport 的位元組佈局（進而影響 report hash、guarantee 簽名、ρ 內容）。",
-   "trap": "0.7.2 五欄位 (p, l, u, e, n) → 0.8.0 六欄位 (p, l, u, v, e, n)；v 是 E_2 且必須等於 |κ′|。"
   },
   {
    "id": "appC-code-operand-transfer-prefix",
@@ -2227,44 +2067,6 @@
    ],
    "explanation": "§21：「We argue that the model of JAM provides a novel 'sweet spot', allowing for massive amounts of computation to be done in secure, resilient consensus compared to fully-synchronous models, and yet still have strict guarantees about both timing and integration of the computation into some singleton state machine unlike persistently fragmented models.」——兩個對照組分別是 fully-synchronous（Solana）與 persistently fragmented（Polkadot 1.0／Cosmos／rollups）。Further Work 明列四項可能修改：(1)「Synchronous calls between services in accumulate」；(2)「Restrictions on the transfer function in order to allow for substantial parallelism over accumulation」；(3)「The possibility of reserving substantial additional computation capacity during accumulate under certain conditions」；(4)「Introducing Merklization into the Work Package format in order to obviate the need to have the whole package downloaded in order to evaluate its authorization」。另外：「The networking protocol is also left intentionally undefined at this stage」（JAMNP-S 只在 docs.jamcha.in，且「will most likely not be formalized in the Graypaper」）；「we have also intentionally omitted details of higher-level protocol elements including cryptocurrency, coretime sales, staking and regular smart-contract functionality」；還需要更多實證效能研究、成本比較，以及 PVM 計量下 parachain-validation service 的吞吐原型。注意：§21 最後還寫「Validator performance is not presently tracked on-chain. We do expect this to be tracked on-chain in the final revision」——這段與 §13 的 π（0.6.4 起的 activity statistics）看起來不一致，疑似未更新的舊句，面試被問到時可指出。與 ch. 12 的呼應：Δ_seq／Δ_par 的張力正是「限制 transfer 以換取平行化」的動機。",
    "trap": "「sweet spot」對比的兩端：fully-synchronous（Solana）與 persistently fragmented（Polkadot 1.0 / Cosmos / rollups）。"
-  },
-  {
-   "id": "arch-jip4-protocol-parameters-080",
-   "ch": "ARCH",
-   "section": "JIP-4 chainspec `protocol_parameters` = fetch(0) encoding (App. B), 0.7.2 → 0.8.0",
-   "gpRef": "App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5",
-   "difficulty": 3,
-   "kind": "delta",
-   "tags": [
-    "jip",
-    "chainspec",
-    "fetch",
-    "delta-0.8.0",
-    "code-gap"
-   ],
-   "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。這個 blob 從 GP 0.7.2 到 0.8.0 改了什麼？對解析它的程式碼意味著什麼？",
-   "optionsZh": [
-    "這個 blob 在 0.7.2 與 0.8.0 之間沒有變（33 個定寬小端欄位、134 位元組）；0.8.0 反而把 V 與 N 移進創世 header 的 epoch marker H_E，所以 chainspec 必須在那裡重複 validator 數量，而節點從它匯入的第一個 epoch marker 讀取 ticket 數；因此既有解碼器除了也要解析 H_E 之外不需改動",
-    "0.8.0 拿掉四個欄位——N（每位 validator 的 ticket 數，現為 ⌈2E/|γ′_P|⌉）、V（validator 數量，現由創世狀態中的 validator 集合隱含）、W_E 與 W_P（erasure 編碼大小，現由 validator 數量導出）——使該 blob 從 33 欄／134 位元組縮為 29 欄／122 位元組；解析器、以及任何仍從中覆寫「每 validator ticket 數／validator 數量／EC 大小」的『套用參數』程式碼都必須修改",
-    "0.8.0 為新的 gas 模型常數（C_gasunknown 與各 host call 的基本成本）以及稽核常數 F 與 A 新增欄位，好讓 service 能透過 fetch(0) 讀取；V 留在 blob 裡，因為 validator 集合現在可變，而 service 必須知道集合大小才能為它的匯出計算 erasure 編碼參數，所以該 blob 從 33 欄／134 位元組成長為 41 欄／168 位元組",
-    "0.8.0 保留全部 33 個欄位，但把它們從定寬小端整數改為通用的緊湊編碼 E(x)，所以 blob 長度現在取決於數值（例如 1,023 與 6 位 validator 的差別）；JIP-4 同時把 `genesis_state` 的 key 從 31 位元組加寬為 32 位元組，好讓 state trie 無需重新雜湊即可載入，而一份 tiny chainspec 現在編碼後遠小於 122 位元組"
-   ],
-   "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. What changed in that blob between GP 0.7.2 and 0.8.0, and what does that mean for code that parses it?",
-   "options": [
-    "The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports; existing decoders therefore need no change beyond also parsing H_E",
-    "0.8.0 drops four fields — N (tickets per validator, now ⌈2E/|γ′_P|⌉), V (validator count, now implied by the validator sets in the genesis state), W_E and W_P (erasure-coding sizes, now derived from the validator count) — shrinking the blob from 33 fields / 134 bytes to 29 fields / 122 bytes; parsers and any 'apply parameters' code that still overwrites tickets-per-validator, validator count or EC sizes from it must change",
-    "0.8.0 adds fields for the new gas-model constants (C_gasunknown and the host-call base costs) and for the audit constants F and A so that services can read them via fetch(0); V stays in the blob because validator sets may now vary and a service must know the set size to compute erasure-coding parameters for its exports, so the blob grows from 33 fields / 134 bytes to 41 fields / 168 bytes",
-    "0.8.0 keeps all 33 fields but switches them from fixed-width little-endian integers to the general compact encoding E(x), so the blob length now depends on the values (e.g. 1,023 versus 6 validators); JIP-4 widened the `genesis_state` keys from 31 to 32 bytes at the same time so that the state trie can be loaded without re-hashing, and a tiny chainspec now encodes to well under 122 bytes"
-   ],
-   "answer": 1,
-   "optNotes": [
-    "epoch marker H_E 只帶 entropy 與下一 epoch 的金鑰，不放 V／N；blob 本身確實從 33 欄縮成 29 欄。",
-    "N、V、W_E、W_P 四欄消失，122 bytes = 7×8 + 11×2 + 11×4；照舊覆寫這四項的程式都得改。",
-    "審計常數與 gas／PVM 常數本來就不在 Ω_Y 裡，0.8.0 也沒有把驗證者數留在 blob 內。",
-    "編碼仍是固定寬度 little-endian，所以 tiny 與 full 一樣都是 122 bytes；JIP-4 的 state key 也仍是 31 bytes。"
-   ],
-   "explanation": "JIP-4：chainspec JSON 有 id、bootnodes（`<name>@<ip>:<port>`，name 是 53 字元 DNS 名：'e' ＋ base-32 Ed25519 公鑰）、genesis_header（JAM-serialized header 的 hex）、genesis_state（「Each key is a 62-character hex string defining the 31-byte state key」，值為任意長度 hex）、protocol_parameters（「A hex string containing JAM-serialized protocol parameters. Encoding matches protocol parameters returned by the fetch host call」）。0.7.2 的 fetch(0)（App. B Ω_Y，φ_10 = 0）依序為 E_8(B_I, B_L, B_S)、E_2(C)、E_4(D, E)、E_8(G_A, G_I, G_R, G_T)、E_2(H, I, J, K)、E_4(L)、E_2(N)、E_2(O, P, Q, R, T, U)、E_2(V)、E_4(R_A, W_B, W_C)、E_4(R_E)、E_4(R_M)、E_4(R_P)、E_4(R_R, W_T, W_X, Y)——33 欄、134 bytes。0.8.0 的 Ω_Y 只剩 29 欄：B_I, B_L, B_S, C, D, E, G_A, G_I, G_R, G_T, H, I, J, K, L, O, P, Q, R, T, U, W_A, W_B, W_C, W_M, W_R, W_T, W_X, Y，共 7×8 + 11×2 + 11×4 = 122 bytes。原因：#527 把每人票數 N 改為公式 ⌈2E/|γ′_P|⌉（tiny 4、full 2）；#514 允許可變驗證者集合（|κ| ∈ {3c | c ∈ [2, C+1]}，來自 genesis state 的 ι/κ/λ，不再是常數）；App. H 的 erasure coding 改以 d(v) = max{d ∈ N_{v/3+2} | W_G mod 2d = 0} 由 v 推導，所以 W_E／W_P 消失（W_G = 4104 仍是常數但本來就不在 blob 裡）。仍不在 blob 內的還有審計常數、C_gasunknown 等 gas 常數與 Z_*（PVM）；編碼也仍是固定寬度 little-endian，31-byte state key 未變。團隊程式：types.ProtocolParameters（types.go:1683）仍是 0.7.2 的 33 欄（含 N、V、WE、WP）；ApplyProtocolParameters（protocol_parameters.go）先斷言不可變常數（B_I, B_L, B_S, P, H, O, Q, I, J, U, G_A, G_I, W_A, W_B, W_C, W_R, W_T, W_M, W_X, T）再覆寫 C, D, E, G_R, G_T, K, L, N, R, V, W_E, W_P, Y——升到 0.8.0 時解碼順序要拿掉 N/V/W_E/W_P，V 改由 genesis state 取得，N 改用公式；#1035/#1022 已示範過 erasure 參數與驗證者數不一致會悄悄改變 erasure root。同一份 blob 也是 service 透過 fetch(0) 看到的（appB-fetch）。JIP-5 補充：dev 驗證者金鑰由 blake2b('jam_val_key_ed25519' ++ seed)／blake2b('jam_val_key_bandersnatch' ++ seed) 推導，trivial_seed(i) = 8 × E_4(i)，不含 BLS（internal/keystore/jip5_key_derivation.go）。",
-   "trap": "0.8.0 的 chainspec 不再告訴你 V——驗證者數量要數 genesis state 裡的 κ/ι；tiny 的 N 也不再是 3 而是 ⌈2·12/6⌉ = 4。"
   },
   {
    "id": "arch-fuzz-protocol-m1",
@@ -2866,48 +2668,6 @@
    "trap": "H_I 對 κ′ 取 index，bound 也是 |κ′|；0.8.0 之後不要再把 V 當常數用。"
   },
   {
-   "id": "ch07-beta-entry-timeslot-080",
-   "ch": "7",
-   "section": "7 Recent History",
-   "gpRef": "eq. 7.2, 7.8 & eq. 11.36; §D.1 C(3)",
-   "difficulty": 2,
-   "kind": "delta",
-   "tags": [
-    "recent-history",
-    "delta-0.8.0",
-    "codec",
-    "anchor"
-   ],
-   "stemZh": "這段 0.7.2 的程式碼建構的是在區塊結尾附加到 β_H 的那一筆條目。為了 GP 0.8.0 必須改什麼？又是哪一項鏈上檢查促成了這個改動？",
-   "optionsZh": [
-    "用完整的 accumulation-output 序列 θ′ 取代 super-peak b，因為 eq. 11.36 現在是逐項比對 anchor 的 accumulation log 而不是比對單一個承諾，這也是 0.8.0 把 belt 從 C(3) 移到它自己的 state key 的原因",
-    "加上該區塊中每份被擔保 report 的 lookup-anchor posterior state root，因為 0.8.0 把那個欄位加進了 refinement context，而 β_H 是鏈上唯一能記錄該值的地方——祖先集合 A 存的是 header，不是它們之後的 root",
-    "加上該區塊的時槽 t = H_T 作為第五個欄位（在 state key C(3) 之下、s 與 p 之間放 E_4(t)）：refinement context 現在會攜帶 anchor 的時槽，而 eq. 11.36 要求它必須等於相符的那筆 β† 條目的 t（GP PR #526；團隊 PR #1031 把 H_T 串進 NewItem）",
-    "把那個零 state root 換成執行後的 root M_σ(σ′)，因為 0.8.0 的 header 現在承諾的是 posterior 而非 prior 狀態；因此 eq. 7.5 的 β† 修正就消失了，而 eq. 11.36 可以把 anchor 的 state root 拿去和產生它的那個區塊直接比對"
-   ],
-   "stem": "This 0.7.2 code builds the entry appended to β_H at the end of a block. What must change for GP 0.8.0, and which on-chain check motivates the change?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/recent_history/recent_history_controller.go (NewItem) — GP 0.7.2 checkout",
-    "src": "// pack item $n$ (7.8) GP 0.6.7\n/*\n\titem $n$ = (header hash $h$, accumulation-result mmr $b$, state root $s$, WorkReportHash $\\mathbf{p}$)\n*/\nfunc NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPackage, accumulationResultMmr types.OpaqueHash) (item types.BlockInfo) {\n\tzeroHash := types.StateRoot{}\n\titem = types.BlockInfo{\n\t\tHeaderHash: headerHash,\n\t\tBeefyRoot:  accumulationResultMmr,\n\t\tStateRoot:  zeroHash,\n\t\tReported:   workReportHash,\n\t}\n\treturn item\n}"
-   },
-   "options": [
-    "Store the whole accumulation-output sequence θ′ in place of the super-peak b, because eq. 11.36 now compares the anchor's accumulation log entry by entry rather than against one commitment, which is also why 0.8.0 moved the belt out of C(3) and into its own state key",
-    "Add the lookup-anchor posterior state root of every report guaranteed in the block, because 0.8.0 added that field to the refinement context and β_H is the only on-chain place where the value can be recorded — the ancestor set A holds headers, not the roots that follow them",
-    "Add the block's timeslot t = H_T as a fifth field (E_4(t) between s and p under state key C(3)): refinement contexts now carry the anchor's timeslot and eq. 11.36 requires it to equal the t of the matching β† entry (GP PR #526; team PR #1031 threads H_T into NewItem)",
-    "Replace the zero state root with the posterior root M_σ(σ′), because 0.8.0 headers now commit to the posterior state rather than the prior one; eq. 7.5's β† correction therefore disappears and eq. 11.36 can compare an anchor's state root against the very block that produced it"
-   ],
-   "answer": 2,
-   "optNotes": [
-    "β 存的是 belt 的 super-peak 而不是整個 θ′；C(3) 至今仍同時裝 item 與 mmrencode(β_B)。",
-    "lookup-anchor 的 posterior root 用 ancestor set 裡下一個 header 的 H_R 驗（eq. 11.38），不經過 β。",
-    "#526 讓 refinement context 帶上 anchor slot，鏈上要驗它，β 的每一筆就必須存 t。",
-    "0.8.0 的 header 仍只帶 prior state root，state root 照舊填零、由下一塊的 β† 補正（eq. 7.5）。"
-   ],
-   "explanation": "eq. 7.2（0.8.0）：β_H ∈ [(h, s, b, t ∈ N_T, p)]_{:H}——多了 timeslot；eq. 7.8 的新 entry 是 (H(H), H_0, M_R(β′_B), H_T, p)。動機：0.8.0 PR #526 在 refinement context（eq. 11.4）加入 anchor slot 與 lookup-anchor posterior state root，讓 refine 端能得知 anchor 的時間；鏈上要驗它，eq. 11.36 就變成：∃y ∈ β†：anchor hash = y_h ∧ anchor posterior state = y_s ∧ anchor accumulation log = y_b ∧ anchor time = y_t——其中 accumulation log 只比一個 32-byte super-peak，不是逐筆比對。狀態序列化（§D.1 的 C(3)）順序是 (h, b, s, E_4(t), var(p))——注意 b 在 s 之前，與 eq. 7.2 的 tuple 順序 (h, s, b, t, p) 不同；你們 BlockInfo 的欄位 HeaderHash, BeefyRoot, StateRoot, Reported 正是照序列化順序排，PR #1031 把 4-byte timeslot 插在 state_root 與 reported 之間。",
-   "trap": "0.8.0 β_H 一項 = 5 欄；序列化順序 h, b, s, t, p（b 在 s 前）；anchor 的四個欄位全部要對上 β† 的同一筆。"
-  },
-  {
    "id": "ch07-belt-empty-output",
    "ch": "7",
    "section": "7 Recent History",
@@ -3061,48 +2821,6 @@
    ],
    "explanation": "eq. 6.35：γ′_A ≡ 取 sort_by_id(n ∪ (∅ if e′ > e else γ_A)) 的最低 E 筆；eq. 6.36 緊接著要求 n ⊆ γ′_A：「It is invalid to include useless tickets in the extrinsic, so all submitted tickets must exist in their posterior ticket accumulator」。這段程式（main 與 1012-update-to-v080 分支相同）沒有任何「截斷後確認 newTickets 仍在 accumulator 內」的步驟，SafroleErrorCode 也沒有對應的 code；w3f 的 safrole vectors 沒有 useless-ticket 失敗案例（fail cases 只有 bad attempt / already recorded / bad order / bad proof / lottery over），所以一直沒被抓到，但 fuzzer 若產生這種區塊，reference 會拒絕、你們會接受，state 立刻分岔。對照 vector publish_tickets_with_mark-3：「Publish some tickets with a full accumulator. Some old ticket are removed to make space for new ones」——滿載的 accumulator 本來就還能收更好的票。修法：截斷後確認 newTickets 的最大 id ≤ γ′_A 的最後一筆（或逐一 Contains），失敗就回傳錯誤。",
    "trap": "口訣：進不了前 E 名的 ticket 不是被丟掉，而是讓整個區塊作廢（6.36）。"
-  },
-  {
-   "id": "ch06-code-attempt-cap-v080",
-   "ch": "6",
-   "section": "6.7 The Extrinsic and Tickets",
-   "gpRef": "eq. 6.30 (n = ⌈2E/|γ′_P|⌉) — internal/safrole/extrinsic_tickets.go VerifyTicketsAttempt (branch 1012-update-to-v080, PR #1025)",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "safrole",
-    "tickets",
-    "code",
-    "delta-0.8.0"
-   ],
-   "stemZh": "這是團隊 0.8.0 分支上的 VerifyTicketsAttempt（PR #1025）；在 main（0.7.2）上它是拿 Attempt 與常數 TicketsPerValidator 比較。新的檢查算的是什麼、從哪個集合算、界限對不對？",
-   "optionsZh": [
-    "它用錯了集合：n 必須從 |κ′|（active set）導出，因為 ticket 是由現在正在出塊的 validator 提交的；取 GetGammaK 會讓這個界限在任何集合大小會變動的鏈上提早一個 epoch 改變",
-    "它實作的是 n = ⌈2E/|γ′_P|⌉，用的是 posterior 的 pending set（團隊的 GammaK），也就是這些 ticket 據以證明的那個 ring；(2E + |γ′_P| − 1) / |γ′_P| 是整數的上取整，而界限是排他的，因為 N_n = {0, …, n−1}",
-    "它只是重構：因為 offender 是就地歸零而非移除，|γ′_P| 永遠等於 V，所以 0.7.2 的常數 TicketsPerValidator（tiny 3／full 2）本來就產生完全相同的界限，沒有任何測試向量的行為改變",
-    "它有差一錯誤：eq. 6.30 把 entry index 放在 N_n 裡，而依 §3.4，N_n 包含 n 本身，所以 Attempt == n 必須被接受、比較應該用 > n 而不是 >= n；在 tiny 模式（E = 12、|γ′_P| = 6）下這會錯誤地拒絕 entry index 4"
-   ],
-   "stem": "This is VerifyTicketsAttempt on the team's 0.8.0 branch (PR #1025); on main (0.7.2) it compared Attempt against the constant TicketsPerValidator. What does the new check compute, from which set, and is the bound right?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/safrole/extrinsic_tickets.go (VerifyTicketsAttempt, branch 1012-update-to-v080)",
-    "src": "func VerifyTicketsAttempt(tickets types.TicketsExtrinsic) *types.ErrorCode {\n    numV := len(blockchain.GetInstance().GetPosteriorStates().GetGammaK())\n    if numV == 0 {\n        ...\n        if len(tickets) > 0 {\n            err := SafroleErrorCode.BadTicketAttempt\n            return &err\n        }\n        return nil\n    }\n    // n = ceil(2E / numV) via integer arithmetic.\n    n := (2*types.EpochLength + numV - 1) / numV\n\n    for _, ticket := range tickets {\n        // ticket.Attempt is an entry index (0-based); reject Attempt >= n.\n        if ticket.Attempt >= types.TicketAttempt(n) {\n            err := SafroleErrorCode.BadTicketAttempt\n            return &err\n        }\n    }\n\n    return nil\n}"
-   },
-   "options": [
-    "It uses the wrong set: n must be derived from |κ′|, the active set, because tickets are submitted by the validators authoring blocks right now; taking GetGammaK makes the bound change one epoch too early on any chain whose set size varies",
-    "It implements n = ⌈2E/|γ′_P|⌉ with the posterior pending set (the team's GammaK), i.e. the ring the tickets are proven against; (2E + |γ′_P| − 1) / |γ′_P| is the integer ceiling and the bound is exclusive because N_n = {0, …, n−1}",
-    "It is only a refactor: because offenders are zeroed in place rather than removed, |γ′_P| always equals V, so 0.7.2's constant TicketsPerValidator (3 tiny / 2 full) already produced exactly the same bound and no test vector changes behaviour",
-    "It has an off-by-one: eq. 6.30 puts the entry index in N_n, which by §3.4 includes n itself, so Attempt == n must be accepted and the comparison should be > n rather than >= n; in tiny mode (E = 12, |γ′_P| = 6) this wrongly rejects entry index 4"
-   ],
-   "answer": 1,
-   "optNotes": [
-    "分母必須與 ticket 所證明的 ring 是同一個集合——ring 由 γ′_P 的 Bandersnatch key 建成。",
-    "分母取 posterior 的 γ′_P，(2E + |γ′_P| − 1) / |γ′_P| 是整數 ceiling，上界 exclusive 也正確。",
-    "與 PR #1025 的事實相反：tiny 的 bound 從 3 變成 4，舊 vector 才被標成 IsV080IncompatibleVector。",
-    "誤讀 §3.4：N_n = {x | x < n} 是嚴格小於，tiny 下合法的 entry index 是 0…3 而非 0…4。"
-   ],
-   "explanation": "eq. 6.30：E_T ∈ [(r ∈ N_n, p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([]))]，n = ⌈2E/|γ′_P|⌉——分母是 **posterior pending set** γ′_P（你們命名為 GammaK），因為 ticket 是對 γ′_Z（由 γ′_P 的 Bandersnatch key 建 ring）做 ring proof，是「下個 epoch 的 validator」在投票，與本 epoch 出塊的 κ′ 無關。§3.4：N_n = {x ∈ N, x < n}。算例：tiny E = 12、|γ′_P| = 6 → (24+5)/6 = 4；full E = 600、1023 → (1200+1022)/1023 = 2。0.7.2 main 用常數 TicketsPerValidator（tiny 3 / full 2），tiny 下 entry index 3 在 0.8.0 變成合法（PR #1025 因此把舊 vector publish-tickets-no-mark-1「bad ticket attempt number」標成 IsV080IncompatibleVector 跳過）；同一個 PR 也把 VerifyEpochTail 的上限從 ValidatorsCount 改成 MaxTicketsPerBlock（K，eq. 6.31）。GP 的理由：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」（每個 slot 期望約 2 張 ticket）。",
-   "trap": "n 的分母是 |γ′_P| 不是 |κ′|；上界是 exclusive（r < n）；tiny 的 n 從 3 變 4。"
   },
   {
    "id": "ch06-code-header-checks-posterior",
@@ -3684,90 +3402,6 @@
    ],
    "explanation": "先看視窗：R(⌊603/10⌋ − 1) = 590 ≤ 595 ≤ 603 ✓。再看 rotation：⌊603/10⌋ = 60 ≠ ⌊595/10⌋ = 59 → 用 M*（eq. 11.28 的 otherwise）。eq. 11.23：(k, e) = (κ′, η′_2) 當 ⌊(τ′ − R)/E⌋ = ⌊τ′/E⌋，否則 (λ′, η′_3)。為什麼這樣才對：epoch 換屆時 λ′ = κ（eq. 6.14）、η′_3 = η_2（eq. 6.24），正好是上個 epoch 期間算 M 所用的 (κ′, η′_2)，所以 M* 精確重現 rotation 59 的分配；換屆後 η′_2 已是新 epoch 的 entropy，拿它配 λ′ 或 κ′ 都算不出當時的分配。注意 0.8.0 額外要求：即使用 M*，w_c 仍須 < |κ′|/3（posterior set）——「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」；且 Φ 用的是 ψ′_O，本塊新抓到的 offender 在 λ′ 裡也會被 null 掉。你們 GStarFunc：`(tau − R)/E == tau/E` 選 (η′_2, κ′) 否則 (η′_3, λ′)，再以 tau − R 呼叫 NewGuranatorAssignments——一致。",
    "trap": "M* 的 entropy/set 由 τ′ − R 落在哪個 epoch 決定；(λ′, η′_3) 這組合只在 epoch 開頭的第一個 rotation 出現。"
-  },
-  {
-   "id": "ch11-code-permute-080",
-   "ch": "11",
-   "section": "11.3 Guarantor Assignments",
-   "gpRef": "eq. 11.20–11.22 — internal/extrinsic/guarantor_assignments.go permute",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "guarantees",
-    "shuffle",
-    "code",
-    "delta-0.8.0"
-   ],
-   "stemZh": "這是團隊的 P（GP 0.7.2）。在一條 C = 341 個 core、validator 序列 |κ′| = 9 的鏈上，依 GP 0.8.0（eq. 11.20–11.21）會有什麼改變？",
-   "optionsZh": [
-    "0.8.0 建的基底是 [⌊i/3⌋ | i ∈ N_9] = [0,0,0,1,1,1,2,2,2]，並對 |κ′|/3 = 3 取模旋轉；而這段程式碼建的是 ⌊341·i/9⌋ = [0, 37, 75, …, 303] 並對 341 取模旋轉，把 guarantor 撒到了未啟用的 core 上",
-    "沒有可觀察的差別：對 eq. 6.8 允許的每一種 validator 數量，⌊C·i/V⌋ 與 ⌊i/3⌋ 都一致，且基於同樣理由 mod C 等於 mod V/3，所以兩版之間只有常數名稱不同",
-    "0.8.0 保留 ⌊C·i/V⌋ = [0, 37, 75, …, 303] 當基底，但把旋轉的模數從 C 改成 E/R = 60，也就是每 epoch 的 rotation 數，於是洗牌輸出每個 epoch 循環一次",
-    "0.8.0 以對單位指派 [0, 1, 2, …, 8] 的單純旋轉（模 |κ′|/3）取代 Fisher–Yates 洗牌，移除了對 η′_2 的依賴，使指派提前整整一個 epoch 就已知"
-   ],
-   "stem": "This is the team's P (GP 0.7.2). Under GP 0.8.0 (eq. 11.20–11.21), what changes when the validator sequence has |κ′| = 9 in a chain with C = 341 cores?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/extrinsic/guarantor_assignments.go (rotateCores, permute)",
-    "src": "// (11.19) R(c, n) = [(x + n) mod C | x ∈ c]\nfunc rotateCores(in []types.U32, n types.U32) []types.U32 {\n    out := make([]types.U32, len(in))\n    for i, x := range in {\n        out[i] = (x + n) % types.U32(types.CoresCount)\n    }\n    return out\n}\n\n// (11.20)\nfunc permute(e types.Entropy, currentSlot types.TimeSlot) []types.CoreIndex {\n    base := make([]types.U32, types.ValidatorsCount)\n    for i := 0; i < types.ValidatorsCount; i++ {\n        c := (types.CoresCount * i) / types.ValidatorsCount\n        base[i] = types.U32(c)\n    }\n\n    shuffled := shuffle.Shuffle(base, types.OpaqueHash(e))\n\n    subEpoch := (int(currentSlot) % types.EpochLength) / types.RotationPeriod\n\n    // R(...) call\n    rotatedU32 := rotateCores(shuffled, types.U32(subEpoch))\n    ..."
-   },
-   "options": [
-    "0.8.0 builds the base [⌊i/3⌋ | i ∈ N_9] = [0,0,0,1,1,1,2,2,2] and rotates modulo |κ′|/3 = 3; this code builds ⌊341·i/9⌋ = [0, 37, 75, …, 303] and rotates modulo 341, scattering guarantors over inactive cores",
-    "Nothing observable: ⌊C·i/V⌋ and ⌊i/3⌋ coincide for every validator count permitted by eq. 6.8, and mod C equals mod V/3 for the same reason, so only the constant names differ between the versions",
-    "0.8.0 keeps ⌊C·i/V⌋ = [0, 37, 75, …, 303] as the base but changes the rotation modulus from C to E/R = 60, the number of rotations per epoch, so the shuffle output cycles once per epoch",
-    "0.8.0 replaces the Fisher–Yates shuffle by a plain rotation of the identity assignment [0, 1, 2, …, 8] modulo |κ′|/3, removing the dependence on η′_2 so that assignments are known a whole epoch ahead"
-   ],
-   "answer": 0,
-   "optNotes": [
-    "0.8.0 的 base 是 ⌊i/3⌋、modulus 是 |κ′|/3；⌊C·i/9⌋ 會把 guarantor 撒到 inactive core。",
-    "只有 V = 3C 時兩式才重合；eq. 6.8 允許的其他 |κ| 一出現就分歧。",
-    "E/R = 60 是每個 epoch 的 rotation 次數，跟 rotation 的 modulus（core 數）是兩回事。",
-    "F 與 η′_2 都還在：用 η′_2 而非 η′_1 正是為了避免 fork magnification。"
-   ],
-   "explanation": "eq. 11.21：P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)；eq. 11.20：R(c, n) = [(x + n) mod (|c|/3) | x ∈ c]。0.8.0 的邏輯是「每個 core 3 個 guarantor，所以只有前 |κ′|/3 個 core 是 active」（§11.3）；|κ′| = 9 → base = [0,0,0,1,1,1,2,2,2]，用 η′_2 做 Fisher–Yates 後 rotation 取 mod 3。你們 permute 是 0.7.2 的 ⌊C·i/V⌋ 加 `% CoresCount`：i = 0..8 → ⌊341·i/9⌋ = [0, 37, 75, 113, 151, 189, 227, 265, 303]，再 mod 341——把 guarantor 分到 inactive core，且每個 core 只有 1 人，永遠湊不到 2 個簽章。為什麼現在 test vectors 都過？因為 tiny (6, 2) 與 full (1023, 341) 都滿足 V = 3C：⌊2i/6⌋ = ⌊341i/1023⌋ = ⌊i/3⌋，且 mod C = mod V/3，兩式完全重合；一旦 0.8.0 eq. 6.8 允許的其他 |κ| ∈ {3c} 出現就分歧（issue #1037「support variable validator-set size」）。",
-   "trap": "0.8.0 的 base 與 modulus 都只看 |κ′|（⌊i/3⌋、mod |κ′|/3），C 只在 ρ 的長度出現。"
-  },
-  {
-   "id": "ch11-code-anchor-checks-080",
-   "ch": "11",
-   "section": "11.4.1 Contextual Validity of Reports",
-   "gpRef": "eq. 11.36, 11.38 — internal/extrinsic/guarantee_controller.go ValidateContexts",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "guarantees",
-    "context",
-    "code",
-    "delta-0.8.0"
-   ],
-   "stemZh": "這是團隊的 refinement-context 驗證（GP 0.7.2）。GP 0.8.0 eq. 11.36（anchor）與 eq. 11.38（lookup anchor）所要求、而它缺少的條件是哪些？",
-   "optionsZh": [
-    "除了把 BeefyRoot 改名為 accumulation 輸出的 super-peak b 之外沒別的，新的 BlockInfo timeslot 只是參考用；兩個 anchor 元組在其餘方面都與 0.7.2 相同",
-    "Anchor：拿掉 state-root 比對，因為 0.8.0 的 anchor 帶的是 timeslot 而不是 state root；lookup anchor：只檢查 l_t ≥ H_T − L，因為 ancestor 集合的要求在 0.8.0 已被移除",
-    "Anchor：context 的 anchor timeslot 還必須等於該 β† 條目的 timeslot（x_t = y_t）；lookup anchor：子 header h′（h′_p = H(h)）必須帶有 h′_r = l_s，用以驗證 lookup anchor 的 posterior state root",
-    "Anchor：改成對 β 而不是 β† 比對，因為 0.8.0 不再把父區塊的 state root 補寫進 recent history；lookup anchor：不變，因為 ancestor 集合本來就存了 (slot, 雜湊) 配對"
-   ],
-   "stem": "This is the team's refinement-context validation (GP 0.7.2). Which conditions required by GP 0.8.0 eq. 11.36 (anchor) and eq. 11.38 (lookup anchor) are missing from it?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/extrinsic/guarantee_controller.go (GuaranteeController.ValidateContexts)",
-    "src": "for _, context := range contexts {\n    recentAnchorMatch := false\n    stateRootMatch := false\n    beefyRootMatch := false\n    for _, blockInfo := range betaDagger {\n        // xa = yh\n        if context.Anchor == blockInfo.HeaderHash {\n            recentAnchorMatch = true\n            // xs = ys\n            stateRootMatch = (context.StateRoot == blockInfo.StateRoot)\n            // xb = yb\n            beefyRootMatch = context.BeefyRoot == types.BeefyRoot(blockInfo.BeefyRoot)\n            break\n        }\n    }\n    ...\n}\n// 11.35   ancestors currently not maintained\nancestry := blockchain.GetInstance().GetAncestry()\nif len(ancestry) > 0 {\n    for _, context := range contexts {\n        anchorHashCondition := false\n        for _, item := range ancestry {\n            cond1 := item.Slot == context.LookupAnchorSlot\n            cond2 := item.HeaderHash == context.LookupAnchor\n            if cond1 && cond2 {\n                anchorHashCondition = true\n                break\n            }\n        }\n        ..."
-   },
-   "options": [
-    "Nothing beyond renaming BeefyRoot to the accumulation-output super-peak b, with the new BlockInfo timeslot being informational only; both anchor tuples are otherwise identical to 0.7.2",
-    "Anchor: drop the state-root comparison because 0.8.0 anchors carry a timeslot instead of a state root; lookup anchor: check only l_t ≥ H_T − L, since the ancestor-set requirement was removed in 0.8.0",
-    "Anchor: the context's anchor timeslot must also equal the β† entry's timeslot (x_t = y_t); lookup anchor: the child header h′ (h′_p = H(h)) must carry h′_r = l_s, verifying the lookup anchor's posterior state root",
-    "Anchor: compare against β instead of β†, since 0.8.0 no longer patches the parent's state root into recent history; lookup anchor: unchanged, since the ancestor set already stores (slot, hash) pairs"
-   ],
-   "answer": 2,
-   "optNotes": [
-    "「只是改名」忽略了 0.8.0 新增的兩個欄位：anchor slot 與 lookup-anchor posterior root。",
-    "state root 的比對並沒有被拿掉，祖先集合的要求也還在，eq. 11.38 仍是硬性條件。",
-    "缺的正是 eq. 11.36 的第四個等式 x_t = y_t，以及 eq. 11.38 的 h′_r = l_s。",
-    "β† 仍然必要：它把父塊 entry 的 state root 換成本塊的 H_R（eq. 7.5），否則沒有正確的 root 可比。"
-   ],
-   "explanation": "eq. 11.36（0.8.0）：∀x ∈ x：∃y ∈ β†：x_a = y_h ∧ x_s = y_s ∧ x_b = y_b ∧ x_t = y_t——四個等式，第四個 timeslot 是 #526 新增（β 的每筆 entry 在 0.8.0 也多了 timeslot，eq. 7.2/7.8；你們 #1031 加了 BlockInfo.timeslot）。eq. 11.38（0.8.0）：∃h, h′ ∈ A：h_t = l_t ∧ H(h) = l ∧ h′_p = H(h) ∧ h′_r = l_s——lookup anchor 的 posterior state root l_s 沒辦法從 h 自己讀到（header 只帶 prior state root H_R），所以透過它的子塊 h′ 的 H_R 來驗。這段 Go 只比對 Anchor/StateRoot/BeefyRoot（三項）以及 ancestry 的 (slot, hash)（兩項）；#1027 加了 anchor_slot 與 lookup_anchor_state_root 兩個欄位，驗證邏輯也要跟上。",
-   "trap": "0.8.0 的 anchor 比四項（hash、state root、super-peak、slot）；lookup anchor 比三項，其中 l_s 要靠子塊的 H_R。"
   },
   {
    "id": "ch11-lookup-anchor-ancestry",
@@ -4587,48 +4221,6 @@
    "trap": "先分清楚兩個東西：signature／proof 是「可丟的憑證」，Y(·) 的 VRF output 才是「進 state 的身分」。output 綁 key＋context，不綁 message。"
   },
   {
-   "id": "c3-appH-code-shardcount-080",
-   "ch": "H",
-   "section": "H Erasure Coding",
-   "gpRef": "eq. H.1 (𝒟); eq. 6.8 (𝕍); eq. 11.5 (a_v), eq. 11.31 (∀r ∈ I: (r_s)_v = |κ′|); §14 availability specifier",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "erasure-coding",
-    "delta-0.8.0",
-    "constants",
-    "tiny-vs-full"
-   ],
-   "stemZh": "團隊的 Go 樹停在 GP 0.7.2、把 erasure-coding 的比率寫死如圖。GP 0.8.0 把固定比率換成函數 𝒟(v)。最小的正確遷移是什麼？它對 6 位 validator 的 tiny 設定又有什麼影響？",
-   "optionsZh": [
-    "這些數字每一個都變成 report 自己攜帶之 assuring-set 大小的函數：總數就是那個大小（鏈上規則把它釘在 |κ′|）、資料碎片數是使 2d 整除 W_G 且 d 不大於 v/3 + 1 的最大 d、而填補寬度是它的兩倍。在 tiny 上這給出 6 取 3 個資料碎片、填補寬度 6、每 segment 684 片，所以舊的 4 / 1026 那一組必須拿掉",
-    "只有總數需要跟隨 report 自己攜帶的 assuring-set 大小；資料碎片數僅由 segment 大小決定，因為 𝒟 是使 2d 整除 W_G 的最大 d，而填補寬度就是它的兩倍。因此 tiny 維持它的 4 與每 segment 1026 片，只有總數變成可變的，而 buildBCloud 除了讀取 report 的碎片數欄位之外不需要任何更動",
-    "把資料碎片數無條件設為 v/3 + 1、總數設為 report 攜帶的 assuring-set 大小、填補寬度設為碎片數的兩倍。因為合法的 validator 集合大小只含 3 的倍數，「碎片數的兩倍要整除 segment 大小」這個附帶條件自動滿足、可以拿掉；tiny 變成 6 取 3、每 segment 684 片，而 full 維持 1023 取 342",
-    "這個檔案裡除了 segment 常數之外什麼都不用改。𝒟(v) 只管 Import-DA 的 segment 路徑，所以 audit-DA 的 bundle 維持它的 342:1023 比率與 684 位元組填補寬度，只有 segment 路徑改用 report 自己的碎片數；那個不對稱正是 availability spec 新增碎片數欄位的原因，也是 tiny 那一組維持 4 / 1026 而非 3 / 684 的原因"
-   ],
-   "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/types/const.go (mode setters + package constants) and internal/work_package/work_package.go (buildBCloud)",
-    "src": "// SetTinyMode()                     // SetFullMode()\n\tECPiecesPerSegment = 1026         //   ECPiecesPerSegment = 6      // W_P\n\tECBasicSize        = 4            //   ECBasicSize        = 684    // W_E\n\n// erasure coding constants\n// 342:1023 (Appendix H)\nconst (\n\tDataShards  = 342\n\tTotalShards = 1023\n)\n\n// buildBCloud\n\tpadded := PadToMultiple(bundle, types.ECBasicSize)\n\n\tshards, err := erasurecoding.EncodeDataShards(padded, types.DataShards, types.TotalShards-types.DataShards)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\thashedShards := make([]types.OpaqueHash, len(shards))\n\tfor i, shard := range shards {\n\t\thashedShards[i] = hash.Blake2bHash(types.ByteSequence(shard))\n\t}"
-   },
-   "options": [
-    "Every one of these numbers becomes a function of the assuring-set size that the report itself carries: the total is that size (which the on-chain rule pins to |κ′|), the data-shard count is the largest d with 2d dividing W_G and d no greater than v/3 + 1, and the pad width is twice that. On tiny that gives 3 data shards out of 6, a pad width of 6 and 684 pieces per segment, so the old 4 / 1026 pair must go.",
-    "Only the total needs to follow the assuring-set size that the report itself carries; the data-shard count is fixed by the segment size alone, since 𝒟 is the largest d with 2d dividing W_G, and the pad width is twice that. Tiny therefore keeps its 4 and its 1026 pieces per segment while only the total becomes variable, and buildBCloud needs no change beyond reading the report's shard-count field.",
-    "Set the data-shard count to v/3 + 1 unconditionally, the total to the assuring-set size the report carries, and the pad width to twice the count. Because the set of legal validator-set sizes contains only multiples of three, the side condition that twice the count divide the segment size is automatically satisfied and can be dropped; tiny becomes 3 out of 6 with 684 pieces per segment and full stays 342 out of 1023.",
-    "Nothing in this file changes beyond the segment constants. 𝒟(v) governs only the Import-DA segment path, so the audit-DA bundle keeps its 342:1023 rate and its 684-octet pad width, while the segment path alone switches to the report's own shard count; that asymmetry is exactly why the availability spec gained a shard-count field, and why the tiny pair stays 4 / 1026 rather than 3 / 684."
-   ],
-   "answer": 0,
-   "optNotes": [
-    "三個數都成為 a_v 的函數：total = a_v、d = 𝒟(a_v)、pad 寬 2d，tiny 因此是 3/6 與 684 pieces。",
-    "丟掉了 eq. H.1 的候選集合 N_{v/3+2}：沒有 v/3+1 這個上界，最大的 d 會變成 2,052。",
-    "數值恰好對，錯在理由與通用性：v = 1002 時 335 不整除 2,052，真正的 𝒟(1002) = 228。",
-    "§14 的 b♣ = H#(C^{a_v}_{⌈|b|/z⌉}(𝒫_z(b)))，bundle 路徑一樣吃 a_v 與 z = 2·𝒟(a_v)。"
-   ],
-   "explanation": "GP 0.8.0 的 eq. H.1：𝒟(v ∈ 𝕍) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})，也就是「不超過 v/3+1 且 2d 能整除 W_G = 4,104 的最大 d」；配合 eq. 6.8 的 𝕍 ≡ {3c | c ∈ N_{2…C+1}}（§6 原文：「always a multiple of 3 between 6 and 3C」），rate 不再是常數而是每份 report 自帶的參數。eq. 11.5 讓 availability spec 多了 a_v ∈ 𝕍，緊接著 eq. 11.31 規定 ∀r ∈ I：(r_s)_v = |κ′|，§14 的 availability specifier 又把 z = 2·𝒟(a_v) 當成 bundle 補零與每段切片的寬度。代進 tiny：v = 6 → v/3+1 = 3，2·3 = 6 整除 4,104，所以 𝒟(6) = 3、z = 6、W_G/z = 684 pieces per segment；程式裡 tiny 的 4 / 1026 是 0.7.x 時代的值（等於 𝒟 = 2），必須換掉，否則 padded 長度與 encoder 期望的 2·DataShards 根本不一致。整除側條件不是裝飾：v = 1002 ∈ 𝕍 時 v/3+1 = 335，但 2d | 4104 要求 d 整除 2,052，335 不合，真正的 𝒟(1002) = 228，GP 也特別提醒「the rate is least efficient when v is slightly below one of these values」。團隊的 PR #1026／#1035（original_shards(v)）與 issue #1037（|κ| ≠ V）就是這條遷移。",
-   "trap": "0.8.0 的 shard 數不是常數而是 report 欄位：先讀 a_v，再算 𝒟(a_v)，最後才 pad。tiny 從 2:6 變 3:6，每段 pieces 從 1026 變 684。"
-  },
-  {
    "id": "c3-appH-what-gets-coded",
    "ch": "H",
    "section": "H Erasure Coding",
@@ -5411,43 +5003,6 @@
    "trap": "η′_0（posterior）不是 η_0；並且 `new` 只在 accumulate 內可用，refine 沒有 δ。"
   },
   {
-   "id": "c3-ch09-privilege-mutation",
-   "ch": "9",
-   "section": "9.4 Service Privileges",
-   "gpRef": "eq. 9.9–9.10 (χ); App. B `bless` (Ω_B), `assign` (Ω_A), `new` (Ω_N)",
-   "difficulty": 3,
-   "kind": "delta",
-   "tags": [
-    "accounts",
-    "privileges",
-    "gratis",
-    "delta-0.8.0"
-   ],
-   "stemZh": "你們的 Go 節點停在 GP 0.7.2，那裡的「Owned Privileges」模型讓每個具特權的 service 各自改寫自己在 χ 中的位置。GP 0.8.0 改了什麼？又是誰可以給一個全新帳戶非零的 gratis storage 抵扣 a_f？",
-   "optionsZh": [
-    "Ω_B 是唯一整批改寫 (χ_M, χ_A, χ_V, χ_R, χ_Z) 的 host call，而它現在除非呼叫者本身就是 χ_M、否則產生 HUH，因此沒有任何 service 能把自己升格為 manager；某個 core 的 assigner 仍可透過 `assign` 交出自己的 χ_A[c]，而 `new` 在 f ≠ 0 且呼叫者不是 manager 時產生 HUH",
-    "Ω_B 對任何自身索引低於 S = 2^16 的 service 開放，因為佔據保留範圍本身就是特權的來源；χ_A[c] 之後就只有 manager 能移動，而 service 是透過 `upgrade` 提高自己的 a_f",
-    "Ω_B 仍然可以被五個具特權 service 中的任何一個呼叫，各自只改寫自己擁有的那一格；manager 的特別之處僅在於它可以授予儲存押金額度，而 `new` 接受來自 manager 或 registrar 的 f ≠ 0",
-    "在 0.8.0 中 χ 已經完全不能被 host call 變動；它只能由列在 χ_Z 中的 service 在每個區塊自動獲得的 accumulation 裡改寫，而 a_f 對每個帳戶在創世時就固定、之後任何人（包括 manager）都無法提高"
-   ],
-   "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
-   "options": [
-    "Ω_B is the one host call that rewrites (χ_M, χ_A, χ_V, χ_R, χ_Z) wholesale, and it now yields HUH unless the caller is χ_M itself, so no service can promote itself to manager; a core's assigner may still hand over its own χ_A[c] through `assign`, and `new` yields HUH whenever f ≠ 0 and the caller is not the manager.",
-    "Ω_B is open to any service whose own index sits below S = 2^16, since occupying the protected range is what confers privilege in the first place; χ_A[c] may then only be moved by the manager, and a service raises its own a_f through `upgrade`.",
-    "Ω_B may still be invoked by any of the five privileged services, each rewriting only the slot it owns; the manager is special solely in that it may grant storage deposit credits, and `new` accepts f ≠ 0 from either the manager or the registrar.",
-    "χ is no longer mutable by host calls at all in 0.8.0; it may only be rewritten by the services listed in χ_Z as part of the automatic accumulation they receive in every block, and a_f is fixed for every account at genesis and can never be raised afterwards by anyone, manager included."
-   ],
-   "answer": 0,
-   "optNotes": [
-    "#519 在 Ω_B 加上 x_s ≠ (x_e)_m → HUH，而 Ω_N 的 gratis 守衛是 f ≠ 0 ∧ x_s ≠ (x_e)_m。",
-    "低 index 只是 registrar 能指定的保留區、與特權無關；Ω_U 只能改 a_c/a_g/a_m，碰不到 a_f。",
-    "這是 0.7.1 的 Owned Privileges；0.8.0 的 Ω_B 已限定呼叫者必須是 χ_M，gratis 也只認 manager。",
-    "χ_Z 只是「每個區塊自動 accumulate 並配基本 gas」的字典，沒有任何寫 χ 的能力。"
-   ],
-   "explanation": "GP 0.8.0（PR #519「Restrict bless to manager service」）在 Ω_B 加了一條守衛：「⟨continue, HUH, …⟩ otherwhen x_s ≠ (x_e)_m」（x_s 是呼叫者的 service index，x_e 是 invocation context 裡的 partial state）——也就是呼叫者不是 χ_M 就整組 HUH。§9.4 原文也改成 χ_M「is the service able to effect an alteration of χ from block to block as well as bestow services with storage deposit credits」。0.7.1 的 Owned Privileges（#475）讓每個特權服務改自己那格，攻擊面是：某服務先 bless 自己成 manager，再用 `new` 配 gratis storage、或把自己設成 registrar 去搶 < S 的低位 index。要留意 0.8.0 並沒有把「自有權」全部收回：Ω_A（`assign`）仍然要求 x_s = (x_e)_a[c] 才能寫 φ[c]，而且它同時寫回 χ_A[c]，所以 assigner 依然能把自己那一核的權限交棒；Ω_D（`designate`）則只要求 x_s = (x_e)_v，能改 ι 但改不了 χ_V。gratis 的守衛則在 Ω_N：「⟨continue, HUH, …⟩ otherwhen f ≠ 0 ∧ x_s ≠ (x_e)_m」。",
-   "trap": "0.7.2 → 0.8.0 的一句話：bless 只剩 manager 能叫；但 assign 仍保留 per-core 的自有權。"
-  },
-  {
    "id": "c3-appD-key-31-octets",
    "ch": "D",
    "section": "D.2.1 Node Encoding and Trie Identification",
@@ -5520,43 +5075,6 @@
    "trap": "GP 明說 storage key「not required to be known by implementations」——只要存得下 Merklisation-ready 的雜湊即可，原始 key 可以不落盤。"
   },
   {
-   "id": "c3-appD-rho-guarantee",
-   "ch": "D",
-   "section": "D.1 Serialization",
-   "gpRef": "§D.1 T(σ) row C(10); eq. 11.1 (ρ spec)",
-   "difficulty": 3,
-   "kind": "delta",
-   "tags": [
-    "merklization",
-    "state-keys",
-    "rho",
-    "delta-0.8.0"
-   ],
-   "stemZh": "你們 0.7.2 的編碼器把 T(σ) 的 C(10) 條目寫成：每個 core 一個「work-report 與回報時槽」的 optional 配對。GP 0.8.0 改成放什麼？",
-   "optionsZh": [
-    "與先前完全相同的「每個 core 一個 work-report 與時槽的 optional 配對」；0.8.0 只是把時槽收緊成定長的 E_4 編碼，酬載本身沒有更動",
-    "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是整份 guarantee G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
-    "當前區塊的 availability assurances extrinsic，好讓某位 assurer 的 bitfield 不必重放該區塊就能對照 state root 被證明",
-    "只放每個 core 待處理 report 的 availability specification（package 雜湊、erasure root、segment root、bundle 長度），而 guarantee 本身由 guarantor 保存在鏈外直到稽核要求為止；這正是 0.8.0 所追求的體積縮減"
-   ],
-   "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
-   "options": [
-    "Per core an optional pair of work-report and timeslot exactly as before; 0.8.0 only tightened the timeslot to a fixed-length E_4 encoding and left the payload alone.",
-    "Per core an optional pair ⟨a_g, E_4(a_t)⟩ written with the ? option discriminator, where a_g is the entire guarantee G ≡ (r work-report, t timeslot, a credential of 2–3 (validator index, Ed25519 signature) pairs) — so the guarantors' signatures are now part of committed state.",
-    "The availability assurances extrinsic of the current block, so that an assurer's bitfield can be proven against the state root without replaying the block.",
-    "Only the availability specification (package hash, erasure root, segment root, bundle length) of each core's pending report, the guarantee itself being retained off-chain by the guarantors until an audit demands it; that is precisely the size reduction 0.8.0 was aiming for."
-   ],
-   "answer": 1,
-   "optNotes": [
-    "0.8.0 換掉的是 payload 本身：ρ 現在存整個 guarantee，連 guarantor 的 credential 都在內。",
-    "#494 把 eq. 11.1 改成 ρ ∈ ⟦(g ∈ G, t ∈ N_T)?⟧_C，guarantor 簽章因此進入 committed state。",
-    "extrinsic 從不進 trie，這是把 extrinsic 與 state 兩件事搞混了。",
-    "availability specification 是 work-report 內部的欄位而非 ρ 的內容，0.8.0 也是加大而非縮小這一格。"
-   ],
-   "explanation": "GP 0.8.0（PR #494「Keep full guarantees in availability assignments state (rho)」）把 eq. 11.1 改成 ρ ∈ ⟦(g ∈ G, t ∈ N_T)?⟧_C，而 G ≡ (r ∈ R, t ∈ N_T, a ∈ ⟦(N, V̄)⟧_{2:3})（eq. 11.24；0.8.0 的 R 是 work-report 集合、W 是 work-item 集合、V̄ 是 Ed25519 簽章集合），也就是 work-report 加上 guarantor 的 credential。附錄 D 的 T(σ) 因此寫成 C(10) ↦ E([ ⟨a_g, E_4(a_t)⟩? for ⟨a_g, a_t⟩ ∈ ρ ])——外層是 optional discriminator（∅ → 0；否則 1 ⌢ …），內層 timeslot 用固定 4 byte。0.7.2 只存 work-report、signature 不進 state；升上 0.8.0 若沒改，C(10) 的 leaf 會短一大截、state root 直接對不上。注意 guarantee 自己帶一個 t（guarantee 的 timeslot），availability assignment 又帶一個 t（reported 的時間，用於 eq. 11.18 的 U 逾時清除），兩者不是同一個欄位。",
-   "trap": "0.8.0 之後 ρ[c] 有兩個 timeslot：guarantee 內的 g_t，以及 assignment 的 a_t。序列化時別漏掉前者。"
-  },
-  {
    "id": "c3-appD-merklize-bitorder",
    "ch": "D",
    "section": "D.2 Merklization",
@@ -5597,43 +5115,6 @@
    ],
    "explanation": "§3（notation）定義得很明確：「We use the function bits(B) ∈ b to denote the sequence of bits, ordered with the most significant first … thus bits([160, 0]) = [1, 0, 1, 0, 0, …]」，所以 depth d 要取 octet ⌊d/8⌋ 的第 7 − (d mod 8) 個 bit——正是程式裡的 `byte(1 << (7 - depth%8))`。§D.2 的 M 收的是 dictionary D⟨b → (B_31, B)⟩，遞迴條件是 ⟨b ↦ p⟩ ∈ d ⇔ ⟨b[1:] ↦ p⟩ ∈ l（當 b_0 = 0）或 r（當 b_0 = 1）：樹形**只**由 key 的 bit prefix 決定，跟輸入順序無關。這正是 incremental／cached 計算的前提：leaf hash 可以用 (key, H(value)) 當快取鍵（你們的 `LeafHashCache` 與 `key_level_cache.go` 就是這樣做），一個 block 只改動幾百個 key 時，只需要重算那幾條從 leaf 到 root 的路徑，而不是整棵 trie——否則每個 block 都要重雜湊整個 state，pipelining（header 帶 prior state root）就完全沒有意義了。順帶把幾種 Merkle 結構分清楚：M_B 用在 accumulation-output log 每區塊的 root（β_B′ ≡ A(β_B, M_B(s, keccak), keccak)）與 work-package 的 erasure root；segment root 用定深的 constant-depth merklization；M_R 是 MMR super-peak；而 0.8.0 的 extrinsic hash 根本不是 Merkle 樹：H_X ≡ H(E(H^#(a)))（PR #524）。",
    "trap": "同一份 GP 裡有兩種 bit 順序：trie 導航 bits(·) 是 MSB-first，codec 的 bitstring 打包是 LSB-first。"
-  },
-  {
-   "id": "c3-ch12-omega-xi-theta-naming",
-   "ch": "12",
-   "section": "12.1 History and Queuing",
-   "gpRef": "eq. 12.1 & 12.3; eq. 7.4 (θ); §4.2 state σ",
-   "difficulty": 1,
-   "kind": "delta",
-   "tags": [
-    "accumulation",
-    "state",
-    "notation",
-    "delta-0.8.0"
-   ],
-   "stemZh": "σ 中由 accumulation 寫入的狀態項目包括 ω、ξ 與 θ。某個 GP 0.7.2 時期的 Go client 仍然把它的 ready-queue 欄位叫做 `Vartheta`。在 GP 0.8.0 中，ω、ξ 與 θ 各存什麼？哪個被改了名？",
-   "optionsZh": [
-    "ω ∈ ⟦{H}⟧_E 從 ξ 接手成為已 accumulate 之 work-package 雜湊的一個 epoch 份歷史；ready 佇列在 0.8.0 仍然拼作 ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E，而 θ ∈ ⟦(N_S, H)⟧ 沒有變，所以 0.7.2 的 client 只需要淘汰符號 ξ 並把持有它的 state key 重新指向",
-    "ω ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log、在 0.8.0 從 θ 更名而來；ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready 佇列；而 θ ∈ ⟦(N_S, N_G)⟧ 現在裝的是上一塊 Δ+ 回傳的逐 service gas 用量 u，也就是 accumulation 統計所讀取的東西",
-    "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready（accumulation）佇列，裝著各自配上尚未滿足依賴集合的延後 report——GP 0.7.2 把它寫成 ϑ；ξ ∈ ⟦{H}⟧_E 是已被 accumulate 的 work-package 雜湊之一個 epoch 份歷史；θ ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log，也就是本塊的 (service, 承諾) 配對",
-    "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ 是 0.8.0 新增的狀態項目，裝著在 accumulation 各輪之間傳遞的 deferred transfer 好讓它們跨越區塊邊界存活；ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 仍是 ready 佇列，而 ξ ∈ ⟦{H}⟧_E 仍是已 accumulate 之 work-package 雜湊的一個 epoch 份歷史"
-   ],
-   "stem": "Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. In GP 0.8.0, what do ω, ξ and θ each hold, and what was renamed?",
-   "options": [
-    "ω ∈ ⟦{H}⟧_E took over from ξ as the epoch-long history of already-accumulated work-package hashes; the ready queue is still spelled ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E in 0.8.0 and θ ∈ ⟦(N_S, H)⟧ is unchanged, so a 0.7.2 client only has to retire the symbol ξ and repoint the state key that held it",
-    "ω ∈ ⟦(N_S, H)⟧ is the Accumulation Output Log, renamed from θ in 0.8.0; ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E is the ready queue of deferred reports each paired with its outstanding dependency set; θ ∈ ⟦(N_S, N_G)⟧ now holds the per-service gas usage u that the last block's Δ+ returned, which is what the accumulation statistics read",
-    "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E is the ready (accumulation) queue of deferred reports each paired with its outstanding dependency set — GP 0.7.2 wrote this as ϑ; ξ ∈ ⟦{H}⟧_E is the epoch-long history of already-accumulated work-package hashes; θ ∈ ⟦(N_S, H)⟧ is the Accumulation Output Log, this block's (service, commitment) pairs",
-    "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ is a new 0.8.0 state item holding the deferred transfers carried between accumulation rounds so that they survive a block boundary; ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E remains the ready queue and ξ ∈ ⟦{H}⟧_E the epoch-long history of accumulated work-package hashes"
-   ],
-   "answer": 2,
-   "optNotes": [
-    "ξ 在 0.8.0 完全沒有改名或改義，「只要把 ξ 退休掉」的遷移會把 accumulated 歷史整個弄丟。",
-    "per-service gas usage u 是 eq. 12.17 的回傳分量，餵完 eq. 12.28 的 G(s) 就消失，進不了 σ。",
-    "0.8.0 preamble 把 ready 定為 ω、accumulated 定為 ξ、lastaccout 定為 θ，三個型別也全對。",
-    "deferred transfers 從不進 σ，只在 Δ+ 遞迴內部傳遞；eq. 12.14 只是 Ψ_A 的輸入型別。"
-   ],
-   "explanation": "GP 0.8.0 的 preamble 明訂 ready = ω、accumulated = ξ、lastaccout = θ。eq. 12.3 給出 ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E（ℝ 是 0.8.0 的 work-report 集合，0.7.2 記作 W；每個 slot 一串「report + 尚未滿足的 dependency 集合」），eq. 12.1 給出 ξ ∈ ⟦{H}⟧_E（一個 epoch 份量的已 accumulate work-package hash），eq. 7.4 / 12.25 給出 θ ∈ ⟦(N_S, H)⟧ 亦即本區塊的 accumulation output log。0.7.2 的 ready queue 符號是 ϑ（團隊 Go 欄位 `Vartheta`、state key C(14)），0.8.0 改成 ω（GP 與 0.8.0 release notes 都沒有說明改名理由，別在口試時把「為了避開 ϑ/θ 混淆」講成 GP 的說法）；state key 不變：C(14)=ω、C(15)=ξ、C(16)=θ。",
-   "trap": "面試常考：0.7.2→0.8.0 ready queue 是 ϑ→ω 的更名，state key C(14) 與型別結構都沒動；同章的 W!/W_Q/W* 也一併改成 R!/R^Q/R*；別把 ω 和 θ（output log）搞混。"
   },
   {
    "id": "c3-ch12-operand-tuple-fields",
@@ -5850,48 +5331,6 @@
    ],
    "explanation": "eq. 12.18 的 e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p)：`provide` host call 產生的 provisions Δ(s)_p 是在 Δ* 這一層、而且是在新建服務 n 併入、被刪服務 m 移除「之後」才整合，所以同一輪被 eject 掉的服務收不到 blob（否則 n 與 m 還沒算出來，就無法判斷目標 service 是否還存在）。eq. 12.37 的 δ′ = I(δ‡, E_P) 是第二次，處理 preimage extrinsic。eq. 12.21 的 Y(d, s, i) 只在 s ∈ K(d) 且 d[s]_l[(H(i), |i|)] = ⟦⟧ 時為真，GP 原文也明說「Preimage provisions into services which no longer exist or whose relevant request is dropped are disregarded」——是靜默略過，不是讓區塊無效。",
    "trap": "I 出現兩次：Δ* 裡收 `provide`、區塊尾端收 E_P；兩次的丟棄都是「without prejudice」，不會讓區塊無效。"
-  },
-  {
-   "id": "c3-ch12-code-accumulation-statistics",
-   "ch": "12",
-   "section": "12.3 Final State Integration",
-   "gpRef": "eq. 12.27–12.28; eq. 12.17 (Δ+ output)",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "accumulation",
-    "statistics",
-    "code",
-    "delta-0.8.0"
-   ],
-   "stemZh": "這是團隊 GP 0.7.2 的 accumulation 統計建構器 S。對照 GP 0.8.0，必須補上哪個落差？",
-   "optionsZh": [
-    "N(s) 必須計算完整的 work-report 而不是 digest：eq. 12.28 走訪 r ↕ R*[..n]，並為擁有該 report 的 service 各計一次，而這段程式碼是每個相符的 digest 各計一項，所以一份為同一個 service 帶兩份 digest 的 report 會被重複計算",
-    "0.8.0 把 S ∈ ⟨N_S → (N, N, N_G)⟩ 變成三元組 S(s) = (N(s), T(s), G(s))；缺少的中間元素 T(s) 計的是目的地為 s 的已處理 deferred transfer 數，而這迫使 Δ+ 回傳第五個成分——已處理的 transfer 序列 t ⌢ t†——而納入的篩選條件也從加總測試變成 S(s) ≠ (0, 0, 0)",
-    "G(s) 必須是被配置的 gas——該 service 各 digest 的 Σ d_g，也就是 §11.4 拿去對照 G_A 檢查的那個數字——而不是實際用掉的 gas，否則一個把 gas 用光的 service 在餵給 π_S 的統計中會被低估；兩元素的形狀與以加總為基礎的納入篩選對 0.8.0 而言都已經正確",
-    "S 必須為 δ 中的每一個 service 都放一項、未被觸及者放全零三元組，好讓該字典的 key 集合逐塊穩定、使 π_S 的序列化長度固定；形狀在 0.8.0 確實變成三元組，但新元素是排在最後的 transfer 計數，而且回傳它所建構之已處理 transfer 序列的是 Δ* 而不是 Δ+"
-   ],
-   "stem": "This is the team's GP 0.7.2 accumulation-statistics builder S. Which gap against GP 0.8.0 must be closed?",
-   "code": {
-    "lang": "go",
-    "caption": "internal/accumulation/deferred_transfers.go (calculateAccumulationStatistics), 0.7.2 main",
-    "src": "// (12.28–12.29) S ≡ {(s ↦ (G(s), N(s))) | G(s)+N(s) ≠ 0}\nfunc calculateAccumulationStatistics(serviceGasUsedList types.ServiceGasUsedList,\n\tn types.U64) types.AccumulationStatistics {\n\tG := map[types.ServiceID]types.Gas{} // G(s)\n\tfor _, serviceGasUsed := range serviceGasUsedList {\n\t\tG[serviceGasUsed.ServiceID] += serviceGasUsed.Gas\n\t}\n\n\tS := types.AccumulationStatistics{}\n\tfor s, Gs := range G {\n\t\tNs := types.U64(len(getWorkResultByService(s, n)))\n\n\t\tif types.U64(Gs)+Ns == 0 {\n\t\t\tcontinue // skip, N(S) = []\n\t\t}\n\n\t\tS[s] = types.GasAndNumAccumulatedReports{\n\t\t\tGas:                   Gs,\n\t\t\tNumAccumulatedReports: Ns,\n\t\t}\n\t}\n\treturn S\n}"
-   },
-   "options": [
-    "N(s) must count whole work-*reports*, not digests: eq. 12.28 iterates r ↕ R*[..n] and counts each report once for the service that owns it, whereas this code counts one entry per matching digest, so a report carrying two digests for the same service is double-counted",
-    "0.8.0 makes S ∈ ⟨N_S → (N, N, N_G)⟩ a three-tuple S(s) = (N(s), T(s), G(s)); the missing middle element T(s) counts the processed deferred transfers whose destination is s, which forces Δ+ to return a fifth component — the processed-transfer sequence t ⌢ t† — and the inclusion filter becomes S(s) ≠ (0, 0, 0) rather than a sum test",
-    "G(s) must be the gas *allotted* — Σ d_g over the service's digests, the very figure §11.4 checks against G_A — rather than the gas actually used, otherwise a service that runs out of gas is under-charged in the statistics that feed π_S; the two-element shape and the sum-based inclusion filter are both already right for 0.8.0",
-    "S must carry an entry for every service in δ, with the all-zero triple for untouched services, so that the dictionary's key set is stable from block to block and π_S's serialization keeps a fixed length; the shape does become a triple in 0.8.0, but the new element is the transfer count sitting *last*, and it is Δ*, not Δ+, that returns the processed-transfer sequence it is built from"
-   ],
-   "answer": 1,
-   "optNotes": [
-    "eq. 12.28 的 N(s) 明確是 d ↕ r_d 逐個 digest 數，不是逐 report 數。",
-    "eq. 12.27–12.28 的三元組與 S(s) ≠ (0,0,0) 篩選，逼得 eq. 12.17 的 Δ+ 多回傳 t ⌢ t†。",
-    "G(s) ≡ Σ_{(s, u) ∈ u}(u) 就是實際用掉的 gas，不是 §11.4 檢查的宣告上限。",
-    "S 只收非零項（δ‡ 才只對 K(S) 蓋 a_a）；T(s) 在三元組中間，且 t ⌢ t† 由 Δ+ 而非 Δ* 回傳。"
-   ],
-   "explanation": "GP 0.8.0 eq. 12.27 寫的是 S ∈ ⟨N_S → (N, N, N_G)⟩，eq. 12.28 是 S ≡ {(s ↦ S(s)) | S(s) ≠ (0, 0, 0)}，其中 S(s) ≡ (N(s), T(s), G(s))，T(s) ≡ |[t | t ↕ t, t_d = s]| 就是「送到 s 的已處理 deferred transfer 筆數」（GP PR #502 “Add back processed transfer count to service statistics”）。要算得出 T(s)，eq. 12.17 的 Δ+ 必須多回傳一個 processed-transfer 序列（回傳值是 ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩），而這份 0.7.2 程式的 OuterAccumulationOutput 只有四個欄位、型別也只是 (Gas, NumAccumulatedReports) 兩元組，篩選條件寫成 Gs + Ns == 0 也不等價於三元組全零。S 只收非零項，正是為了讓 δ‡ 只對真的被 accumulate 的服務蓋上 a_a = τ′，而 S 又是 π_S 的來源之一（eq. 13.14 的 K(S)）。",
-   "trap": "0.8.0 的 accumulation statistics 是三元組 (N, T, G)；漏掉 T 會連帶讓 Δ+ 的回傳值少一個分量。"
   },
   {
    "id": "c3-ch12-why-R-star-is-a-sequence",
@@ -6155,91 +5594,6 @@
    ],
    "explanation": "eq. 13.7：π_C ∈ ⟦(d ∈ N, p ∈ N, i ∈ N, x ∈ N, z ∈ N, e ∈ N, l ∈ N, u ∈ N_G)⟧_C——八個欄位裡**只有 u 是 N_G**（gas），其餘都是 N；語意上 d（DA load）、z（extrinsic size）、l（bundle length）是 octet 數量，p、i、x、e 是計數。eq. 13.9：p = Σ_{a ∈ E_A} a_f[c]，是本塊 assurance 裡把該 core 打勾的**張數**；l = L(c) = Σ_{w ∈ I, w_c = c} (w_s)_l 明確是 avspec 的 bundle **長度**（segment 數是 avspec 的 n，只在 eq. 13.12 的 D(c) 裡以 W_G⌈65n/64⌉ 換算成 octet）。§13.2 開宗明義：「These are tracked only on a per-block basis unlike the validator statistics which are tracked over the whole epoch.」——所以 π_C 每塊整個重算。容器型別也別搞混：π_C 是 ⟦…⟧_C 的**定長序列**（341 個 core 全都有一筆，即使全零），eq. 13.8 的 π_S 才是 dictionary，只放有活動的 service。",
    "trap": "π_C 定長、每塊重算；π_S 是 dictionary、每塊重算；只有 π_V/π_L 才有 epoch rollover。"
-  },
-  {
-   "id": "c3-ch13-rollover-code",
-   "ch": "13",
-   "section": "13.1 Validator Activity",
-   "gpRef": "eq. 13.4–13.6",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "statistics",
-    "rollover",
-    "delta-0.8.0",
-    "go"
-   ],
-   "code": {
-    "lang": "go",
-    "caption": "internal/statistics/statistics.go:109-133, 460-504 (UpdateValidatorActivityStatistics / UpdateCurrentStatistics, GP 0.7.2, condensed)",
-    "src": "// (13.3)  π ≡ (πV , πL, πC , πS);  (πV, πL) => (current, last)\nfunc UpdateValidatorActivityStatistics() {\n\tcs := blockchain.GetInstance()\n\tpreEpochIndex := GetEpochIndex(cs.GetPriorStates().GetTau())\n\tpostEpochIndex := GetEpochIndex(cs.GetPosteriorStates().GetTau())\n\tpreStatistics := cs.GetPriorStates().GetPi()\n\tif preEpochIndex == postEpochIndex {\n\t\tcs.GetPosteriorStates().SetPiCurrent(preStatistics.ValsCurr)\n\t\tcs.GetPosteriorStates().SetPiLast(preStatistics.ValsLast)\n\t} else { // reset\n\t\tvalsCurrent := make(types.ValidatorsStatistics, types.ValidatorsCount)\n\t\tcs.GetPosteriorStates().SetPiCurrent(valsCurrent)\n\t\tcs.GetPosteriorStates().SetPiLast(preStatistics.ValsCurr)\n\t}\n\tUpdateCurrentStatistics(cs.GetLatestBlock().Extrinsic) // ... plus core & service stats\n}\n\nfunc UpdateCurrentStatistics(extrinsic types.Extrinsic) {\n\tstatistics := cs.GetPosteriorStates().GetPi()\n\tUpdateBlockStatistics(&statistics, authorIndex)\n\tUpdateTicketStatistics(&statistics, authorIndex, extrinsic.Tickets)\n\tUpdatePreimageStatistics(&statistics, authorIndex, extrinsic.Preimages)\n\tUpdateReportStatistics(&statistics, extrinsic.Guarantees, tau, kappa)\n\tUpdateAvailabilityStatistics(&statistics, authorIndex, extrinsic.Assurances)\n\tcs.GetPosteriorStates().SetPiCurrent(statistics.ValsCurr)\n}"
-   },
-   "stemZh": "這是團隊 GP 0.7.2 的統計程式碼（已精簡）。對照 GP 0.8.0 的 eq. 13.4–13.6，它在哪些區塊上把某位 validator 的 assurance 增量放進了錯的紀錄？最小的修法又是什麼？",
-   "optionsZh": [
-    "只有在 ⌊τ/E⌋ ≠ ⌊τ′/E⌋ 的區塊上。eq. 13.4 是把 assurance 那一輪套用在 prior 紀錄上，而 eq. 13.5 接著把那份已經加過的紀錄搬進封存，所以在 epoch 邊界的區塊上，每位 assurer 的增量應該屬於封存，而不是這段程式碼寫進去的那個新配置的 slice。修法是在分支之前先跑 assurance 那一輪，再把已加過的紀錄交給 else 分支的封存賦值",
-    "沒有任何一塊出錯：assurance 增量的位置已經符合 0.8.0，因為 eq. 13.4 本身就是套用在 π_V‡ 上，而這段程式碼同樣是在 posterior 紀錄上跑可得性那一輪。這裡唯一真正的 0.8.0 落差是 eq. 13.3——它是以 |κ| 與 |λ| 而不是以常數 ValidatorsCount 來決定兩份紀錄的大小。修法是改用 len(kappa) 來配置那個重設的 slice",
-    "只在 epoch 邊界的區塊上錯，但方向相反。eq. 13.6 是在 eq. 13.5 執行換屆之前就把全部六個計數器套用在 π_V† 上，所以在邊界區塊上，出塊者的出塊、ticket 與 preimage 增量也屬於封存，而那個新配置的 slice 必須維持全零序列直到新 epoch 的第二塊。修法是把整個 UpdateCurrentStatistics 提到 epoch 分支之上",
-    "每一塊都錯。eq. 13.4 是把每筆 assurance 記給出塊者而不是簽署它的 assurer，所以可得性那一輪在每一塊上都記錯了人，而不只是在邊界上；至於那筆記功落在兩份紀錄的哪一份，是另一個問題，而這段程式碼已經答對了。修法是像 ticket 與 preimage 那兩輪一樣，用 authorIndex 來索引該增量"
-   ],
-   "stem": "This is the team's GP 0.7.2 statistics code, condensed. Measured against GP 0.8.0 eq. 13.4–13.6, on which blocks does it place a validator's assurance increment in the wrong record, and what is the minimal fix?",
-   "options": [
-    "Only on blocks where ⌊τ/E⌋ ≠ ⌊τ′/E⌋. eq. 13.4 applies the assurance pass to the prior record, and eq. 13.5 then moves that already-incremented record into the archive, so on an epoch-boundary block each assurer's step belongs in the archive rather than in the newly allocated slice this code writes it into. The fix is to run the assurance pass on the prior record before the branch and to hand the incremented record to the else-branch's archive assignment.",
-    "On no block at all: the placement of the assurance increment already matches 0.8.0, because eq. 13.4 is itself applied to π_V‡ and this code likewise runs its availability pass on the posterior record. The only genuine 0.8.0 gap visible here is eq. 13.3, which sizes the two records from |κ| and |λ| rather than from the constant ValidatorsCount. The fix is to allocate the reset slice with len(kappa) instead.",
-    "Only on epoch-boundary blocks, but in the opposite direction. eq. 13.6 applies all six counters to π_V† before eq. 13.5 performs the rollover, so on a boundary block the author's block, ticket and preimage steps belong in the archive too, and the newly allocated slice must stay an all-zero sequence until the second block of the new epoch. The fix is to hoist the whole of UpdateCurrentStatistics above the epoch branch, so that every counter is credited before the reset rather than only the assurance pass.",
-    "On every block. eq. 13.4 attributes each assurance to the block author rather than to the assurer who signed it, so the availability pass credits the wrong validator on every block and not merely at the boundary; which of the two records receives that credit is a separate question this code already answers correctly. The fix is to index the increment by authorIndex exactly as the ticket and preimage passes already do."
-   ],
-   "answer": 0,
-   "optNotes": [
-    "非邊界塊 π_V‡ = π_V†，兩種寫法同值；只有 ⌊τ/E⌋ ≠ ⌊τ′/E⌋ 的那一塊才會顯現差異。",
-    "|κ|/|λ| 確實是另一個缺口，但這說法把 eq. 13.4 的起點誤讀成 π_V‡，與式子本身矛盾。",
-    "eq. 13.6 的 b/t/p/d/g 全部以 π_V‡ 為起點，提前做等於讓新 epoch 的第一塊完全不計分。",
-    "與 UpdateAvailabilityStatistics 目前用 assurance.ValidatorIndex 的作法相反，也違反 §13.1 對 a 的定義。"
-   ],
-   "explanation": "0.7.2 → 0.8.0 的差異就在 assurance 的時機。0.8.0 eq. 13.4：π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——作用在 **prior** π_V 上；eq. 13.5 才 rollover：e′ ≠ e 時 (π_V‡, π′_L) = ([(0, …), …], π_V†)。上面這段 Go 先分支歸零、把 π_V 搬進 ValsLast，然後 UpdateCurrentStatistics 從 **posterior** 取 π 再跑 UpdateAvailabilityStatistics，等於把 assurance 記進了新 epoch 的累加器。這正是 team issue #1021 / PR #1034「assurances credited before epoch rollover」要修的東西。另外 eq. 13.3 以 |κ|/|λ| 決定兩份 record 的長度（程式碼仍用常數 ValidatorsCount）也還沒補，是 team issue #1037，但那是獨立的一件事，不影響 assurance 落在哪一份 record。",
-   "trap": "非 epoch 邊界的 fuzz trace 全綠不代表對——這個 bug 只在 600 塊裡的那 1 塊現形。"
-  },
-  {
-   "id": "c3-ch13-accum-triple-code",
-   "ch": "13",
-   "section": "13.2 Cores and Services",
-   "gpRef": "eq. 13.8, 13.13–13.14; eq. 12.27–12.28",
-   "difficulty": 2,
-   "kind": "code",
-   "tags": [
-    "statistics",
-    "service-stats",
-    "accumulation",
-    "delta-0.8.0",
-    "go"
-   ],
-   "code": {
-    "lang": "go",
-    "caption": "internal/statistics/statistics.go:386-450 (CalculateAccumulationStatistics + record assembly, GP 0.7.2)",
-    "src": "// v0.7.1\n// (13.12) a\n// AccumulateCount, AccumulateGasUsed\nfunc CalculateAccumulationStatistics(serviceID types.ServiceID,\n\taccumulationStatistics types.AccumulationStatistics,\n) (accumulateCount types.U32, accumulateGasUsed types.Gas) {\n\tvalue, ok := accumulationStatistics[serviceID]\n\tif ok {\n\t\taccumulateCount = types.U32(value.NumAccumulatedReports)\n\t\taccumulateGasUsed = value.Gas\n\t}\n\t// else, the service id is not found, count and gas are 0\n\treturn accumulateCount, accumulateGasUsed\n}\n\n// ... inside UpdateServiceActivityStatistics, for each serviceID in s:\nservicesStatistics[serviceID] = types.ServiceActivityRecord{\n\tProvidedCount:     ps.count,\n\tProvidedSize:      ps.size,\n\tRefinementCount:   R.n,\n\tRefinementGasUsed: R.GasUsed,\n\tAccumulateCount:   accumulateCount,\n\tAccumulateGasUsed: accumulateGasUsed,\n}"
-   },
-   "stemZh": "團隊的 GP 0.7.2 程式碼把每筆 service 紀錄的 accumulation 條目建成如圖所示的配對。GP 0.8.0 重塑了那個條目。究竟改了什麼？它對「哪些 service 會出現在 π′_S」又有什麼可觀察的後果？",
-   "optionsZh": [
-    "該條目變成三元素值——為該 service accumulate 掉的 work-digest 數、送達它的 deferred transfer 數、以及 accumulation gas——取法是對該 service 在 S 中的條目做「若為空則替代」、預設值為全零三元組。由於 S 現在保留每個三元組不全為零的 service，一個只被進來的 transfer 觸及的 service 其中間那個元素非零，因而成為 S 的 key，也就加入了構成 π′_S 定義域的那個聯集",
-    "0.8.0 恢復了獨立的 on-transfer PVM invocation Ψ_T，所以 accumulation 條目維持兩個元素，而該紀錄另外從第二個 on-transfer 統計字典取得 transfer 計數與 transfer gas 兩個新的頂層欄位。因此每個收到 transfer 的 service 都會帶著自己的 on-transfer gas 數字出現在 π′_S 裡，與被回報的、收到 preimage 的 service 並列",
-    "該條目維持兩個元素——為該 service accumulate 掉的 work-digest 數與 accumulation gas——但 gas 元素從 N_G 重新定型為普通自然數，而且改用裸的字典下標而不是「若為空則替代」的包裝來讀取。π′_S 的定義域不變，仍是「被回報的 service ∪ 收到 preimage 的 service ∪ accumulation 統計的 key」，所以只被 transfer 觸及的 service 永遠不會出現",
-    "該條目變成三元素值——為該 service accumulate 掉的 work-digest 數、提供給它的 preimage 數、以及 accumulation gas——取法是對該 service 在 S 中的條目做「若為空則替代」、預設值為全零三元組。由於那個中間元素已經計了 provision，獨立的 provision 配對變得多餘，而 π′_S 的定義域也收窄成恰好是 accumulation 統計的 key"
-   ],
-   "stem": "The team's GP 0.7.2 code builds each service record's accumulation entry as the pair shown. GP 0.8.0 reshapes that entry. What exactly changes, and what observable consequence does it have for which services appear in π′_S?",
-   "options": [
-    "The entry becomes a three-element value — work-digests accumulated for the service, deferred transfers delivered to it, and accumulation gas — obtained as the substitute-if-nothing of the service's entry in S against an all-zero triple. Since S now keeps every service whose triple is not all-zero, a service touched only by incoming transfers has a non-zero middle element, becomes a key of S, and therefore joins the union that forms π′_S's domain.",
-    "0.8.0 restores the separate on-transfer PVM invocation Ψ_T, so the accumulation entry keeps its two elements and the record regains a transfer count and a transfer gas figure as two further top-level fields beside it, drawn from a second dictionary of on-transfer statistics. Every service that received a transfer therefore appears in π′_S carrying its own on-transfer gas figure, beside the reported and preimage-provided services.",
-    "The entry keeps its two elements — work-digests accumulated for the service and accumulation gas — but the gas element is re-typed from N_G to a plain natural, and it is now read out with a bare dictionary subscript rather than through the substitute-if-nothing wrapper. The domain of π′_S is unchanged, still the union of reported services, preimage-provided services and the keys of the accumulation statistics, so a service touched only by a transfer never appears.",
-    "The entry becomes a three-element value — work-digests accumulated for the service, preimages provided to it, and accumulation gas — obtained as the substitute-if-nothing of the service's entry in S against an all-zero triple. Since that middle element already counts provisions the separate provision pair becomes redundant, and the domain of π′_S narrows to exactly the services which appear as keys of the accumulation statistics."
-   ],
-   "answer": 0,
-   "optNotes": [
-    "eq. 13.13 的 a = 𝒰(S[s], (0,0,0))；T(s) > 0 讓純收款的 service 經 K(S) 進入 domain。",
-    "accumulation.tex 全篇沒有 Ψ_T；#502 只放回 transfer 筆數，沒有第二本 on-transfer 統計字典。",
-    "eq. 13.8 的 a 第三個元素仍是 N_G，且用的是 𝒰 包裝——裸下標查不到會得 ∅，型別不合。",
-    "eq. 12.28 的 T(s) 數的是 transfer 筆數而非 preimage；eq. 13.14 的三方聯集也沒動過。"
-   ],
-   "explanation": "eq. 13.8：π_S ∈ ⟨N_S → (p ∈ (N, N), r ∈ (N, N_G), i ∈ N, x ∈ N, z ∈ N, e ∈ N, a ∈ (N, N, N_G))⟩——a 在 0.8.0 是**三元組**。eq. 13.13：a = 𝒰(S[s], (0, 0, 0))，𝒰 是 §3.2 / eq. 3.2 的 substitute-if-nothing。S 的定義在 eq. 12.27–12.28：S ∈ ⟨N_S → (N, N, N_G)⟩、S ≡ {s ↦ S(s) | S(s) ≠ (0, 0, 0)}，其中 S(s) = (N(s), T(s), G(s))：N(s) 是本塊被 accumulate 的 work-digest 數、T(s) ≡ |[t | t ↕ t, t_d = s]| 是 destination 為 s 的 processed deferred transfer 數、G(s) 是 accumulation 用掉的 gas。eq. 13.14：s = s^R ∪ s^P ∪ K(S)。歷史脈絡：0.7.1（team #656）因為 Ψ_T 被移除而把 OnTransfersCount / OnTransfersGasUsed 從 ServiceActivityRecord 刪掉，0.8.0（GP #502「Add back processed transfer count to service statistics」）只把 transfer **筆數**放回三元組中間，並沒有復活 on-transfer 的 gas 欄位，也沒有復活 Ψ_T——轉帳的 gas 是在 eq. 12.23 的 g 裡與 work-digest 的 gas 加總後一次進 Ψ_A。另一個要留意的編輯瑕疵：eq. 13.13 的 p = Σ_{(s, d) ∈ E_P}(1, |d|)，comprehension 綁定的 s 字面上**遮蔽**了外層的 ∀s ∈ s，照字面讀會退化成與 service 無關的全域總和；實際意思（也是所有實作的作法）是「E_P 中 service index 等於該 s 的那些 preimage 的 (筆數, 總 octet 數)」，同樣的遮蔽寫法也見於 eq. 12.28 的 G(s)。",
-   "trap": "0.8.0 加回來的是 transfer 的「筆數」，不是 on-transfer 的 gas；Ψ_T 沒有回來。"
   },
   {
    "id": "c3-ch13-consensus-state-rationale",

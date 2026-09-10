@@ -226,32 +226,4 @@ ITEMS = [
  "explanation": "eq. 14.2：ℙ ≡ (j ∈ B token, h ∈ N_S auth service, u ∈ H auth code hash, f ∈ B config, c ∈ ℂ context, w ∈ [𝕀]_{1:I} items)；eq. 14.3：work-item = (s service, c code hash, y payload, g refine gas limit, a accumulate gas limit, i imports [(H ∪ hash⊞, N)], x extrinsics [(H, N)], e export count)。authorizer a = H(u ⌢ f)（0.8.0 #522）；h 是「hosts the authorization code」的 service，c 是 refinement context（anchor hash/state root/beefy root、lookup anchor hash 與 slot、prerequisites），不要跟 work-report 的 availability specification 混。限制（eq. 14.5–14.9）：總 extrinsics ≤ T = 128、imports/exports ≤ W_M/W_X = 3,072、bundle ≤ W_B = 13,791,360。§14.2 的設計原則是「Rather than having much data inline, they instead reference data through commitments」——import 用 (Merkle root, index) 承諾，export「we do not require any particular commitment to them in the work-package beyond knowing how many」。§14 之後（15 guaranteeing、16 assurance、17 auditing）是 M2 範圍，但 M1 面試仍可能問 refine 的輸入輸出概念。",
  "trap": "auth code 是從 δ[h] 的 preimage 以 lookup-anchor 時間做 historical lookup 取得（eq. 14.4 附近）。"
 },
-{
- "id": "delta-summary-080",
- "ch": "ARCH", "section": "GP 0.7.2 → 0.8.0 changes", "gpRef": "graypaper releases v0.8.0 (June 3 2026)",
- "difficulty": 2, "kind": "delta", "tags": ["delta-0.8.0"],
-  "stemZh": "你們的實作以 GP 0.7.2 為目標，而當前的 GP 是 0.8.0。0.8.0 做了哪些這樣的實作必須跟進的主要變動？",
-  "optionsZh": [
-   "可變的 validator 集合大小（3 的倍數、6…1023，門檻由 |κ| 導出）；ρ 中保留完整的 guarantee；verdict／culprit／fault 各 16 的硬上限，且 bad verdict 不再要求必須有 culprit；bless 限縮給 manager service；authorizer = H(auth code hash ⌢ config)；refinement context 新增 anchor slot 與 lookup-anchor 的 posterior root；以 basic block 為單位的 gas 模型、並以 grow_heap 取代 sbrk；每位 validator 的 ticket 數 = ⌈2E/|γ′_P|⌉",
-   "把每個變長項目移到其編碼末端的「Macrofication Marathon」；定長的 validator 索引序列化；讓 W* 依賴 ρ†；accumulate 吸收 on_transfer 使 service 只剩一個鏈上入口；把 core 索引加入 refine 的引數並從 guarantee 的酬載移除；小型 service ID；帳戶序列化前綴版本位元組；χ 的「Owned Privileges」",
-   "以 fetch 取代 import host call；記憶體存取例外的形式化與功能凍結宣告；以 prior validator 集合檢查 assurance；epoch marker 中加入 Ed25519 金鑰並附上活動統計；provide host call、以及 import 與 export 的分離；「super-fetch」、gratis storage 與帳戶 metadata；最大程式碼大小與過大 report 的處理；更嚴格的 opcode 與跳躍有效性",
-   "全面的 64 位元 PVM 暫存器與 64 位元定址；guarantor 指派攜帶完整的 validator 金鑰；erasure-coding 公式修正；info host call 新增暫存器 9 與 10；明確的逐 invocation out-of-gas 檢查；transfer 的 gas 計費修正與 work-package 大小上限修正；preimage 整合的簡化；posterior state root 定案；程式碼 blob 的 metadata 前綴"
-  ],
-  "stem": "Your implementation targets GP 0.7.2 while the current GP is 0.8.0. What are the main changes 0.8.0 made that such an implementation has to absorb?",
- "options": [
-  "Variable validator-set sizes (multiples of 3, 6…1023, thresholds derived from |κ|); full guarantees kept in ρ; hard caps of 16 verdicts/culprits/faults, with culprits no longer required behind a bad verdict; bless restricted to the manager service; authorizer = H(auth code hash ⌢ config); refinement context gains anchor slot + lookup-anchor posterior root; per-basic-block gas model with grow_heap replacing sbrk; tickets per validator = ⌈2E/|γ′_P|⌉",
-  "The 'Macrofication Marathon' moving every variable-length item to the end of its encoding; fixed-length validator-index serialization; W* made to depend on ρ†; accumulate absorbing on_transfer so a service has one on-chain entry point; the core index added to refine's arguments and removed from the guarantee payload; small service IDs; a version byte prefixing account serialization; 'Owned Privileges' for χ",
-  "fetch replacing the import host call; memory-access exceptions formalized and a feature freeze declared; assurances checked with the prior validator set; Ed25519 keys in the epoch marker alongside activity statistics; the provide host call, with imports separated from exports; 'super-fetch', gratis storage and account metadata; maximum code sizes with oversize reports handled; stricter opcode and jump validity",
-  "64-bit PVM registers and 64-bit addressing throughout; guarantor assignments carrying full validator keys; erasure-coding equation fixes; the info host call gaining registers 9 and 10; explicit per-invocation out-of-gas checks; the transfer gas-charge fix and the work-package size-limit fix; preimage-integration simplification; the posterior state root finalised; a metadata prefix for code blobs"
- ],
- "answer": 0,
- "optNotes": [
-   "整份清單都能對回 0.8.0 的 PR：#514、#494、#525、#519、#522、#526、#508、#527。",
-   "Macrofication Marathon、變長欄位後移、W* 依賴 ρ† 屬 0.7.0；on_transfer 併入與 small service IDs 屬 0.7.1。",
-   "fetch 取代 import 與 feature freeze 屬 0.6.0，其餘散落在 0.6.4、0.6.5、0.6.6、0.6.7。",
-   "64-bit registers 屬 0.5.0；info 的 register 9/10、transfer gas fix 等屬 0.7.2，正是你們現在的版本。",
- ],
- "explanation": "0.8.0（2026-06-03）的實際變更清單：#514 support smaller validator sets（𝕍 ≡ {3c}，門檻一律由 |κ| 導出）、#494 keep full guarantees in ρ、#525 dispute extrinsic 硬上限 16 且移除 culprits 必要性、#519 restrict bless to manager service、#522 update authorizer identification（authorizer = H(auth code hash ⌢ config)，對齊 ch. 8 與 ch. 14）、#526 expose lookup anchor posterior root and anchor slot、#508 新 gas cost model（per-basic-block，模擬 ROB/execution units）與 sbrk → grow_heap、#517 host function gas costs、#527 ticket 常數改為 ⌈2E/|γ′_P|⌉、#524 extrinsic hash、#502 processed transfer count、#497 illegal memory access 收費、#520/#521/#528。0.7.2 與 0.8.0 之間沒有任何 release，所以判準就是上面這份 PR 清單：凡不在其中的條目，都屬於更早的 release。你們 issue #1012（Update to v0.8.0）與其子 issue #1013–#1022 就是這張清單的實作追蹤。",
- "trap": "面試官依「最新 GP」出題（T&C 3.5：conformance assessed against the latest release），所以 0.8.0 差異必須熟。"
-},
 ]

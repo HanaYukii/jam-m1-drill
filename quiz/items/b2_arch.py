@@ -200,34 +200,6 @@ ITEMS = [
  "trap": "「sweet spot」對比的兩端：fully-synchronous（Solana）與 persistently fragmented（Polkadot 1.0 / Cosmos / rollups）。"
 },
 {
- "id": "arch-jip4-protocol-parameters-080",
- "ch": "ARCH", "section": "JIP-4 chainspec `protocol_parameters` = fetch(0) encoding (App. B), 0.7.2 → 0.8.0", "gpRef": "App. B fetch selector 0 (0.8.0 vs 0.7.2); JIP-4; JIP-5",
- "difficulty": 3, "kind": "delta", "tags": ["jip", "chainspec", "fetch", "delta-0.8.0", "code-gap"],
-  "stemZh": "JIP-4 把 chainspec 的 `protocol_parameters` 定義為以 `fetch` 選擇子 0 的編碼所序列化的參數 blob。這個 blob 從 GP 0.7.2 到 0.8.0 改了什麼？對解析它的程式碼意味著什麼？",
-  "optionsZh": [
-   "這個 blob 在 0.7.2 與 0.8.0 之間沒有變（33 個定寬小端欄位、134 位元組）；0.8.0 反而把 V 與 N 移進創世 header 的 epoch marker H_E，所以 chainspec 必須在那裡重複 validator 數量，而節點從它匯入的第一個 epoch marker 讀取 ticket 數；因此既有解碼器除了也要解析 H_E 之外不需改動",
-   "0.8.0 拿掉四個欄位——N（每位 validator 的 ticket 數，現為 ⌈2E/|γ′_P|⌉）、V（validator 數量，現由創世狀態中的 validator 集合隱含）、W_E 與 W_P（erasure 編碼大小，現由 validator 數量導出）——使該 blob 從 33 欄／134 位元組縮為 29 欄／122 位元組；解析器、以及任何仍從中覆寫「每 validator ticket 數／validator 數量／EC 大小」的『套用參數』程式碼都必須修改",
-   "0.8.0 為新的 gas 模型常數（C_gasunknown 與各 host call 的基本成本）以及稽核常數 F 與 A 新增欄位，好讓 service 能透過 fetch(0) 讀取；V 留在 blob 裡，因為 validator 集合現在可變，而 service 必須知道集合大小才能為它的匯出計算 erasure 編碼參數，所以該 blob 從 33 欄／134 位元組成長為 41 欄／168 位元組",
-   "0.8.0 保留全部 33 個欄位，但把它們從定寬小端整數改為通用的緊湊編碼 E(x)，所以 blob 長度現在取決於數值（例如 1,023 與 6 位 validator 的差別）；JIP-4 同時把 `genesis_state` 的 key 從 31 位元組加寬為 32 位元組，好讓 state trie 無需重新雜湊即可載入，而一份 tiny chainspec 現在編碼後遠小於 122 位元組"
-  ],
-  "stem": "JIP-4 defines a chainspec's `protocol_parameters` as the JAM-serialized parameter blob in the encoding of `fetch` selector 0. What changed in that blob between GP 0.7.2 and 0.8.0, and what does that mean for code that parses it?",
- "options": [
-  "The blob is unchanged between 0.7.2 and 0.8.0 (33 fixed-width little-endian fields, 134 bytes); 0.8.0 instead moved V and N into the genesis header's epoch marker H_E, so a chainspec must repeat the validator count there and a node reads the ticket count from the first epoch marker it imports; existing decoders therefore need no change beyond also parsing H_E",
-  "0.8.0 drops four fields — N (tickets per validator, now ⌈2E/|γ′_P|⌉), V (validator count, now implied by the validator sets in the genesis state), W_E and W_P (erasure-coding sizes, now derived from the validator count) — shrinking the blob from 33 fields / 134 bytes to 29 fields / 122 bytes; parsers and any 'apply parameters' code that still overwrites tickets-per-validator, validator count or EC sizes from it must change",
-  "0.8.0 adds fields for the new gas-model constants (C_gasunknown and the host-call base costs) and for the audit constants F and A so that services can read them via fetch(0); V stays in the blob because validator sets may now vary and a service must know the set size to compute erasure-coding parameters for its exports, so the blob grows from 33 fields / 134 bytes to 41 fields / 168 bytes",
-  "0.8.0 keeps all 33 fields but switches them from fixed-width little-endian integers to the general compact encoding E(x), so the blob length now depends on the values (e.g. 1,023 versus 6 validators); JIP-4 widened the `genesis_state` keys from 31 to 32 bytes at the same time so that the state trie can be loaded without re-hashing, and a tiny chainspec now encodes to well under 122 bytes"
- ],
- "answer": 1,
- "optNotes": [
-   "epoch marker H_E 只帶 entropy 與下一 epoch 的金鑰，不放 V／N；blob 本身確實從 33 欄縮成 29 欄。",
-   "N、V、W_E、W_P 四欄消失，122 bytes = 7×8 + 11×2 + 11×4；照舊覆寫這四項的程式都得改。",
-   "審計常數與 gas／PVM 常數本來就不在 Ω_Y 裡，0.8.0 也沒有把驗證者數留在 blob 內。",
-   "編碼仍是固定寬度 little-endian，所以 tiny 與 full 一樣都是 122 bytes；JIP-4 的 state key 也仍是 31 bytes。",
- ],
- "explanation": "JIP-4：chainspec JSON 有 id、bootnodes（`<name>@<ip>:<port>`，name 是 53 字元 DNS 名：'e' ＋ base-32 Ed25519 公鑰）、genesis_header（JAM-serialized header 的 hex）、genesis_state（「Each key is a 62-character hex string defining the 31-byte state key」，值為任意長度 hex）、protocol_parameters（「A hex string containing JAM-serialized protocol parameters. Encoding matches protocol parameters returned by the fetch host call」）。0.7.2 的 fetch(0)（App. B Ω_Y，φ_10 = 0）依序為 E_8(B_I, B_L, B_S)、E_2(C)、E_4(D, E)、E_8(G_A, G_I, G_R, G_T)、E_2(H, I, J, K)、E_4(L)、E_2(N)、E_2(O, P, Q, R, T, U)、E_2(V)、E_4(R_A, W_B, W_C)、E_4(R_E)、E_4(R_M)、E_4(R_P)、E_4(R_R, W_T, W_X, Y)——33 欄、134 bytes。0.8.0 的 Ω_Y 只剩 29 欄：B_I, B_L, B_S, C, D, E, G_A, G_I, G_R, G_T, H, I, J, K, L, O, P, Q, R, T, U, W_A, W_B, W_C, W_M, W_R, W_T, W_X, Y，共 7×8 + 11×2 + 11×4 = 122 bytes。原因：#527 把每人票數 N 改為公式 ⌈2E/|γ′_P|⌉（tiny 4、full 2）；#514 允許可變驗證者集合（|κ| ∈ {3c | c ∈ [2, C+1]}，來自 genesis state 的 ι/κ/λ，不再是常數）；App. H 的 erasure coding 改以 d(v) = max{d ∈ N_{v/3+2} | W_G mod 2d = 0} 由 v 推導，所以 W_E／W_P 消失（W_G = 4104 仍是常數但本來就不在 blob 裡）。仍不在 blob 內的還有審計常數、C_gasunknown 等 gas 常數與 Z_*（PVM）；編碼也仍是固定寬度 little-endian，31-byte state key 未變。團隊程式：types.ProtocolParameters（types.go:1683）仍是 0.7.2 的 33 欄（含 N、V、WE、WP）；ApplyProtocolParameters（protocol_parameters.go）先斷言不可變常數（B_I, B_L, B_S, P, H, O, Q, I, J, U, G_A, G_I, W_A, W_B, W_C, W_R, W_T, W_M, W_X, T）再覆寫 C, D, E, G_R, G_T, K, L, N, R, V, W_E, W_P, Y——升到 0.8.0 時解碼順序要拿掉 N/V/W_E/W_P，V 改由 genesis state 取得，N 改用公式；#1035/#1022 已示範過 erasure 參數與驗證者數不一致會悄悄改變 erasure root。同一份 blob 也是 service 透過 fetch(0) 看到的（appB-fetch）。JIP-5 補充：dev 驗證者金鑰由 blake2b('jam_val_key_ed25519' ++ seed)／blake2b('jam_val_key_bandersnatch' ++ seed) 推導，trivial_seed(i) = 8 × E_4(i)，不含 BLS（internal/keystore/jip5_key_derivation.go）。",
- "trap": "0.8.0 的 chainspec 不再告訴你 V——驗證者數量要數 genesis state 裡的 κ/ι；tiny 的 N 也不再是 3 而是 ⌈2·12/6⌉ = 4。"
-},
-{
  "id": "arch-fuzz-protocol-m1",
  "ch": "ARCH", "section": "jam-conformance fuzz protocol & the M1 evaluation pipeline", "gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
  "difficulty": 2, "kind": "concept", "tags": ["conformance", "fuzzer", "history", "m1"],

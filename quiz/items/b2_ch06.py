@@ -62,57 +62,6 @@ return nil"""},
  "trap": "口訣：進不了前 E 名的 ticket 不是被丟掉，而是讓整個區塊作廢（6.36）。"
 },
 {
- "id": "ch06-code-attempt-cap-v080",
- "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30 (n = ⌈2E/|γ′_P|⌉) — internal/safrole/extrinsic_tickets.go VerifyTicketsAttempt (branch 1012-update-to-v080, PR #1025)",
- "difficulty": 2, "kind": "code", "tags": ["safrole", "tickets", "code", "delta-0.8.0"],
-  "stemZh": "這是團隊 0.8.0 分支上的 VerifyTicketsAttempt（PR #1025）；在 main（0.7.2）上它是拿 Attempt 與常數 TicketsPerValidator 比較。新的檢查算的是什麼、從哪個集合算、界限對不對？",
-  "optionsZh": [
-   "它有差一錯誤：eq. 6.30 把 entry index 放在 N_n 裡，而依 §3.4，N_n 包含 n 本身，所以 Attempt == n 必須被接受、比較應該用 > n 而不是 >= n；在 tiny 模式（E = 12、|γ′_P| = 6）下這會錯誤地拒絕 entry index 4",
-   "它用錯了集合：n 必須從 |κ′|（active set）導出，因為 ticket 是由現在正在出塊的 validator 提交的；取 GetGammaK 會讓這個界限在任何集合大小會變動的鏈上提早一個 epoch 改變",
-   "它只是重構：因為 offender 是就地歸零而非移除，|γ′_P| 永遠等於 V，所以 0.7.2 的常數 TicketsPerValidator（tiny 3／full 2）本來就產生完全相同的界限，沒有任何測試向量的行為改變",
-   "它實作的是 n = ⌈2E/|γ′_P|⌉，用的是 posterior 的 pending set（團隊的 GammaK），也就是這些 ticket 據以證明的那個 ring；(2E + |γ′_P| − 1) / |γ′_P| 是整數的上取整，而界限是排他的，因為 N_n = {0, …, n−1}"
-  ],
-  "stem": "This is VerifyTicketsAttempt on the team's 0.8.0 branch (PR #1025); on main (0.7.2) it compared Attempt against the constant TicketsPerValidator. What does the new check compute, from which set, and is the bound right?",
- "code": {"lang": "go", "caption": "internal/safrole/extrinsic_tickets.go (VerifyTicketsAttempt, branch 1012-update-to-v080)", "src": """func VerifyTicketsAttempt(tickets types.TicketsExtrinsic) *types.ErrorCode {
-    numV := len(blockchain.GetInstance().GetPosteriorStates().GetGammaK())
-    if numV == 0 {
-        ...
-        if len(tickets) > 0 {
-            err := SafroleErrorCode.BadTicketAttempt
-            return &err
-        }
-        return nil
-    }
-    // n = ceil(2E / numV) via integer arithmetic.
-    n := (2*types.EpochLength + numV - 1) / numV
-
-    for _, ticket := range tickets {
-        // ticket.Attempt is an entry index (0-based); reject Attempt >= n.
-        if ticket.Attempt >= types.TicketAttempt(n) {
-            err := SafroleErrorCode.BadTicketAttempt
-            return &err
-        }
-    }
-
-    return nil
-}"""},
- "options": [
-  "It has an off-by-one: eq. 6.30 puts the entry index in N_n, which by §3.4 includes n itself, so Attempt == n must be accepted and the comparison should be > n rather than >= n; in tiny mode (E = 12, |γ′_P| = 6) this wrongly rejects entry index 4",
-  "It uses the wrong set: n must be derived from |κ′|, the active set, because tickets are submitted by the validators authoring blocks right now; taking GetGammaK makes the bound change one epoch too early on any chain whose set size varies",
-  "It is only a refactor: because offenders are zeroed in place rather than removed, |γ′_P| always equals V, so 0.7.2's constant TicketsPerValidator (3 tiny / 2 full) already produced exactly the same bound and no test vector changes behaviour",
-  "It implements n = ⌈2E/|γ′_P|⌉ with the posterior pending set (the team's GammaK), i.e. the ring the tickets are proven against; (2E + |γ′_P| − 1) / |γ′_P| is the integer ceiling and the bound is exclusive because N_n = {0, …, n−1}"
- ],
- "answer": 3,
- "optNotes": [
-  "誤讀 §3.4：N_n = {x | x < n} 是嚴格小於，tiny 下合法的 entry index 是 0…3 而非 0…4。",
-  "分母必須與 ticket 所證明的 ring 是同一個集合——ring 由 γ′_P 的 Bandersnatch key 建成。",
-  "與 PR #1025 的事實相反：tiny 的 bound 從 3 變成 4，舊 vector 才被標成 IsV080IncompatibleVector。",
-  "分母取 posterior 的 γ′_P，(2E + |γ′_P| − 1) / |γ′_P| 是整數 ceiling，上界 exclusive 也正確。",
- ],
- "explanation": "eq. 6.30：E_T ∈ [(r ∈ N_n, p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([]))]，n = ⌈2E/|γ′_P|⌉——分母是 **posterior pending set** γ′_P（你們命名為 GammaK），因為 ticket 是對 γ′_Z（由 γ′_P 的 Bandersnatch key 建 ring）做 ring proof，是「下個 epoch 的 validator」在投票，與本 epoch 出塊的 κ′ 無關。§3.4：N_n = {x ∈ N, x < n}。算例：tiny E = 12、|γ′_P| = 6 → (24+5)/6 = 4；full E = 600、1023 → (1200+1022)/1023 = 2。0.7.2 main 用常數 TicketsPerValidator（tiny 3 / full 2），tiny 下 entry index 3 在 0.8.0 變成合法（PR #1025 因此把舊 vector publish-tickets-no-mark-1「bad ticket attempt number」標成 IsV080IncompatibleVector 跳過）；同一個 PR 也把 VerifyEpochTail 的上限從 ValidatorsCount 改成 MaxTicketsPerBlock（K，eq. 6.31）。GP 的理由：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」（每個 slot 期望約 2 張 ticket）。",
- "trap": "n 的分母是 |γ′_P| 不是 |κ′|；上界是 exclusive（r < n）；tiny 的 n 從 3 變 4。"
-},
-{
  "id": "ch06-code-header-checks-posterior",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.28; §5 eq. 5.10 — internal/stf/sft.go RunSTF, validate_header.go ValidateHeaderVrf",
  "difficulty": 3, "kind": "code", "tags": ["safrole", "seal", "markers", "code", "fuzzer", "epoch"],

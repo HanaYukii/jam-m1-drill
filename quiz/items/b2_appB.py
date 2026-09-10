@@ -162,60 +162,6 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
  "trap": "未知 host call「先扣費再回 WHAT」，扣費本身就能觸發 ∞；0.8.0 的 M_∅ = 1000 不是 10。"
 },
 {
- "id": "b2-appB-invoke-gas-refund",
- "ch": "B", "section": "B.6 Refine Functions — invoke", "gpRef": "§B.6 `invoke` = 13 (Ω_K); eq. B.4 (inner PVM tuple); §B.1 inner result codes",
- "difficulty": 3, "kind": "code", "tags": ["host-calls", "refine", "inner-pvm", "gas", "delta-0.8.0"],
-  "stemZh": "這段節錄是團隊 0.7.2 的 `invoke`（Ω_K）：它讀取 φ_8 處 112 個 octet 的區塊、執行內層機器 n = φ_7，再把該區塊寫回。除了 id 位移（12 → 13）之外，它還缺了哪一條 GP 0.8.0 的規則？",
-  "optionsZh": [
-   "巢狀 host call：內層機器執行的 `ecalli` 必須經由 refine mutator F 派送（historical_lookup、export…）而不是中止內層執行，所以 Ω_K 必須呼叫 Ψ_H 而不是 Ψ，而外層 service 根本不該看到 HOST 這個結果碼",
-   "恢復：在 HOST 退出時，被保存的指令計數器必須停在那條 `ecalli` 本身，好讓外層 service 在服務完該呼叫之後重新執行那條指令，就像 Ψ 處理 page fault 那樣；把它推進 i′ + skip(i′) + 1 會漏掉一條指令",
-   "記憶體：那 112 個 octet 的區塊只需要可讀即可，因為在 0.8.0 中內層的 gas 與 13 個暫存器是透過 φ′_7…φ′_12 交回、而不是寫回該區塊，所以一個可讀但不可寫的視窗沒有問題，而節錄中的 OOB-then-panic 路徑應該改成單純的 WHO",
-   "gas：外層機器事先支付 g = M_K + g_R（若 ϱ < g 則 ∞；g_R 是從該區塊讀出的內層 gas），事後再拿回內層未用完的 g_R′，也就是 ϱ′ = ϱ − g + g_R′；而且內層機器也為它當前的 basic block 攜帶一個 gas-charged 旗標"
-  ],
-  "stem": "The excerpt is the team's 0.7.2 `invoke` (Ω_K): it reads a 112-octet block at φ_8, runs inner machine n = φ_7 and writes the block back. Apart from the id shift (12 → 13), which GP 0.8.0 rule is missing from it?",
- "code": {"lang": "go", "caption": "PVM/host_call_refine.go (invoke, 0.7.2 numbering)", "src": """	n, o := input.VM.Registers[7], input.VM.Registers[8]
-
-	offset := uint64(112)
-	// g = panic
-	if !input.VM.Mem.IsWriteable(o, offset) {
-		input.VM.Registers[7] = OOB
-		return OmegaOutput{ExitReason: ExitPanic, Addition: input.Addition}
-	}
-	// ... (WHO if n is not a known machine; decode g and w[0..13] from the 112 octets)
-	// wrap m[n]_p (program), w (registers), m[n]_u (memory), g (gas)
-	tempInterp := NewInterpreter(&tmpProgram, w, &tempMemory, Gas(g))
-	// ...
-	c, pcPrime = tempInterp.SingleStepInvoke(input.Addition.IntegratedPVMMap[n].PC)
-	// ... (re-encode gas' and registers')
-	// write data into memory (mu)
-	input.VM.Mem.Write(o, data)
-
-	// m* = m
-	tmp := input.Addition.IntegratedPVMMap[n]
-	tmp.Memory = *tempInterp.Memory
-	if c.GetReasonType() == HOST_CALL {
-		tmp.PC = pcPrime + 1 + ProgramCounter(skip(int(pcPrime), input.Addition.Program.Bitmasks))
-	} else {
-		tmp.PC = pcPrime
-	}
-	input.Addition.IntegratedPVMMap[n] = tmp"""},
- "options": [
-  "Nested host calls: an `ecalli` executed by the inner machine must be dispatched through the refine mutator F (historical_lookup, export, …) instead of stopping the inner run, so Ω_K has to invoke Ψ_H rather than Ψ and the outer service should never see the HOST result code at all",
-  "Resumption: on a HOST exit the saved instruction counter must stay on the `ecalli` itself, so that the outer service can re-execute that instruction after servicing the call, exactly as Ψ does for a page fault; advancing it by i′ + skip(i′) + 1 drops an instruction",
-  "Memory: the 112-octet block need only be readable, because in 0.8.0 the inner gas and the 13 registers are handed back through φ′_7…φ′_12 rather than written back into the block, so a readable-but-unwritable window is fine and the excerpt's OOB-and-panic path should be a plain WHO instead",
-  "Gas: the outer machine pays g = M_K + g_R up front (∞ if ϱ < g; g_R is the inner gas read from the block) and afterwards gets the inner's unspent g_R′ back, ϱ′ = ϱ − g + g_R′; the inner machine also carries a gas-charged flag for its current basic block"
- ],
- "answer": 3,
- "optNotes": [
-   "inner PVM 刻意沒有 host call 能力，Ω_K 明寫呼叫 Ψ，ecalli 一律以 (HOST, h) 停機交外層處理。",
-   "m*[n]_i = i′ + skip(i′) + 1 正是要跳過那條 ecalli；停在原地會讓 resume 後無限重複同一個 ecalli。",
-   "GP 要求 N_{o..+112} ⊆ writable(μ)，因為 g_R′ 與 w′ 要原地寫回同一塊，不可寫就 ⟨0, error⟩ → ☇。",
-   "0.7.2 只扣 10 且 inner gas 完全獨立；0.8.0 要外層預付 M_K + g_R 並退還未用完的 g_R′。",
- ],
- "explanation": "Ω_K（invoke = 13）：[n, o] = φ_7,8；⟨g_R, w⟩ 滿足 E_8(g_R) ⌢ E_8(w) = μ[o..+112]（8 octets gas + 13 個 8-octet 暫存器），且 N_{o..+112} 必須 ⊆ writable(μ)，否則 ⟨0, error⟩ → ☇（因為結果要寫回同一塊）；(c, i′, g_R′, f′, w′, u′) = Ψ(m[n]_p, m[n]_i, g_R, m[n]_f, w, m[n]_u)——是 Ψ 不是 Ψ_H，inner 沒有 host call，遇到 ecalli 就以 c = h̄ × h 停下；μ* 寫回 E_8(g_R′) ⌢ E_8(w′)；m*[n]_i = i′ + skip(i′) + 1 當 c ∈ {h̄} × N_R（跳過那條 ecalli，讓外層 service 代為服務後 resume），否則 i′；m*[n]_f = f′（eq. B.4 的 inner PVM tuple ⟨p, u, i, f⟩，f 是「本 basic block 的 gas 已扣」旗標，因為 0.8.0 gas 以 basic block 為單位預扣，mid-block resume 時不能再扣一次——#1046 review 也提到 A.4 的 L(i)）。gas：g = M_K + g_R（M_K = 968）；ϱ′ = ϱ − g 當 w = error ∨ n ∉ keys(m) ∨ ϱ < g，否則 ϱ − g + g_R′——也就是外層先付全部 inner gas，剩下的退回；ϱ < g 依 B.18/B.19 直接 ∞。回傳：(HOST, h)、(FAULT, x 位址)、OOG、PANIC、HALT 進 φ′_7/φ′_8（非 HOST/FAULT 時 φ′_8 不變）；n 不存在 → WHO。你們的 0.7.2 版本只扣 10 gas，inner 的 g 完全獨立、也不退還——這正是 #1046 的「invoke gas refund」項目；同一 PR 也加了 machine 的 63 台上限（GP PR #521，|m| ≥ 63 → FULL，且排在 ☇ 之前）。另外值得複查：excerpt 的 skip 用的是 input.Addition.Program.Bitmasks（外層程式的 bitmask），GP 的 skip(i′) 應以 inner 程式 m[n]_p 的 bitmask 計算。",
- "trap": "invoke 的 112 octets 必須「可寫」；inner 無 host call（ecalli → HOST）；0.8.0 外層預付 g_R 並退還 g_R′。"
-},
-{
  "id": "b2-appB-pages-access-modes",
  "ch": "B", "section": "B.6 Refine Functions — pages", "gpRef": "§B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants",
  "difficulty": 3, "kind": "code", "tags": ["host-calls", "refine", "inner-pvm", "memory"],

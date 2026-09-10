@@ -179,35 +179,6 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "explanation": "附錄 B 的 initializer I：a（next free id）= check((E⁻¹_4(H(E(s, η′_0, H_t))) mod (2^32 − S − 2^8)) + S)，用的是**posterior** entropy accumulator η′_0 與本區塊的 H_t；模數刻意扣掉 S = C_minpublicindex = 2^16（registrar 專屬的 protected range）與最高的 2^8，所以隨機落點一定在 public range。eq. B.14 的 check(i) = i 若 i ∉ K(δ)，否則 check((i − S + 1) mod (2^32 − 2^8 − S) + S)——就是往前線性探測到第一個空位。成功 `new` 之後 context 的下一個 id 再跳 42：i* = check(S + (a − S + 42) mod (2^32 − S − 2^8))。registrar 路徑另走一條：當 caller = χ_R 且要求的 id < S，直接用該 id（已被占用則 FULL）。GP 也補了一句保險：萬一同一個 index 真的被兩個 service 取走，「the block is considered invalid」，但「Since no service can predict the identifier sequence ahead of time, they cannot intentionally disadvantage the block author.」——不可預測性正是這個設計要守住的性質。",
  "trap": "η′_0（posterior）不是 η_0；並且 `new` 只在 accumulate 內可用，refine 沒有 δ。"
 },
-{
- "id": "c3-ch09-privilege-mutation",
- "ch": "9", "section": "9.4 Service Privileges",
- "gpRef": "eq. 9.9–9.10 (χ); App. B `bless` (Ω_B), `assign` (Ω_A), `new` (Ω_N)",
- "difficulty": 3, "kind": "delta", "tags": ["accounts", "privileges", "gratis", "delta-0.8.0"],
-  "stemZh": "你們的 Go 節點停在 GP 0.7.2，那裡的「Owned Privileges」模型讓每個具特權的 service 各自改寫自己在 χ 中的位置。GP 0.8.0 改了什麼？又是誰可以給一個全新帳戶非零的 gratis storage 抵扣 a_f？",
-  "optionsZh": [
-   "Ω_B 仍然可以被五個具特權 service 中的任何一個呼叫，各自只改寫自己擁有的那一格；manager 的特別之處僅在於它可以授予儲存押金額度，而 `new` 接受來自 manager 或 registrar 的 f ≠ 0",
-   "Ω_B 對任何自身索引低於 S = 2^16 的 service 開放，因為佔據保留範圍本身就是特權的來源；χ_A[c] 之後就只有 manager 能移動，而 service 是透過 `upgrade` 提高自己的 a_f",
-   "在 0.8.0 中 χ 已經完全不能被 host call 變動；它只能由列在 χ_Z 中的 service 在每個區塊自動獲得的 accumulation 裡改寫，而 a_f 對每個帳戶在創世時就固定、之後任何人（包括 manager）都無法提高",
-   "Ω_B 是唯一整批改寫 (χ_M, χ_A, χ_V, χ_R, χ_Z) 的 host call，而它現在除非呼叫者本身就是 χ_M、否則產生 HUH，因此沒有任何 service 能把自己升格為 manager；某個 core 的 assigner 仍可透過 `assign` 交出自己的 χ_A[c]，而 `new` 在 f ≠ 0 且呼叫者不是 manager 時產生 HUH"
-  ],
-  "stem": "Your Go node is on GP 0.7.2, where the 'Owned Privileges' model let each privileged service rewrite its own slot of χ. What does GP 0.8.0 change, and who may hand a brand-new account a non-zero gratis storage offset a_f?",
- "options": [
-  "Ω_B may still be invoked by any of the five privileged services, each rewriting only the slot it owns; the manager is special solely in that it may grant storage deposit credits, and `new` accepts f ≠ 0 from either the manager or the registrar.",
-  "Ω_B is open to any service whose own index sits below S = 2^16, since occupying the protected range is what confers privilege in the first place; χ_A[c] may then only be moved by the manager, and a service raises its own a_f through `upgrade`.",
-  "χ is no longer mutable by host calls at all in 0.8.0; it may only be rewritten by the services listed in χ_Z as part of the automatic accumulation they receive in every block, and a_f is fixed for every account at genesis and can never be raised afterwards by anyone, manager included.",
-  "Ω_B is the one host call that rewrites (χ_M, χ_A, χ_V, χ_R, χ_Z) wholesale, and it now yields HUH unless the caller is χ_M itself, so no service can promote itself to manager; a core's assigner may still hand over its own χ_A[c] through `assign`, and `new` yields HUH whenever f ≠ 0 and the caller is not the manager."
- ],
- "answer": 3,
- "optNotes": [
-   "這是 0.7.1 的 Owned Privileges；0.8.0 的 Ω_B 已限定呼叫者必須是 χ_M，gratis 也只認 manager。",
-   "低 index 只是 registrar 能指定的保留區、與特權無關；Ω_U 只能改 a_c/a_g/a_m，碰不到 a_f。",
-   "χ_Z 只是「每個區塊自動 accumulate 並配基本 gas」的字典，沒有任何寫 χ 的能力。",
-   "#519 在 Ω_B 加上 x_s ≠ (x_e)_m → HUH，而 Ω_N 的 gratis 守衛是 f ≠ 0 ∧ x_s ≠ (x_e)_m。",
- ],
- "explanation": "GP 0.8.0（PR #519「Restrict bless to manager service」）在 Ω_B 加了一條守衛：「⟨continue, HUH, …⟩ otherwhen x_s ≠ (x_e)_m」（x_s 是呼叫者的 service index，x_e 是 invocation context 裡的 partial state）——也就是呼叫者不是 χ_M 就整組 HUH。§9.4 原文也改成 χ_M「is the service able to effect an alteration of χ from block to block as well as bestow services with storage deposit credits」。0.7.1 的 Owned Privileges（#475）讓每個特權服務改自己那格，攻擊面是：某服務先 bless 自己成 manager，再用 `new` 配 gratis storage、或把自己設成 registrar 去搶 < S 的低位 index。要留意 0.8.0 並沒有把「自有權」全部收回：Ω_A（`assign`）仍然要求 x_s = (x_e)_a[c] 才能寫 φ[c]，而且它同時寫回 χ_A[c]，所以 assigner 依然能把自己那一核的權限交棒；Ω_D（`designate`）則只要求 x_s = (x_e)_v，能改 ι 但改不了 χ_V。gratis 的守衛則在 Ω_N：「⟨continue, HUH, …⟩ otherwhen f ≠ 0 ∧ x_s ≠ (x_e)_m」。",
- "trap": "0.7.2 → 0.8.0 的一句話：bless 只剩 manager 能叫；但 assign 仍保留 per-core 的自有權。"
-},
 
 # ---------------------------------------------------------------- app. D ----
 {
@@ -267,35 +238,6 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  ],
  "explanation": "§D.1 的 T(σ) 最後三列逐字寫著：∀⟨s ↦ a⟩ ∈ δ, ⟨k ↦ v⟩ ∈ a_s：C(s, E_4(2^32−1) ⌢ k) ↦ v；∀⟨h ↦ p⟩ ∈ a_p：C(s, E_4(2^32−2) ⌢ h) ↦ p；∀⟨(h, l) ↦ t⟩ ∈ a_l：C(s, E_4(l) ⌢ h) ↦ E(↕[E_4(x) for x ∈ t])。而第三形式的 C 本身是 (s, h) ↦ [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, a_5, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 的四個 byte 與雜湊的前四個 byte 交錯，之後接雜湊的第 4…26 byte，共 8 + 23 = 31 bytes。GP 接著保證：「Cryptographic hashing ensures that there will be no duplicate state-keys given that there are no duplicate inputs to C.」——不重複性靠的是 C 的**輸入**互斥，marker 就是把三個命名空間分開的手段；也因此 2^32−1 與 2^32−2 這兩個長度值等於被保留掉：只有當某個 service 同時存在一筆長度剛好是 2^32−1 的 lookup 請求、且其 hash 與某個 32-byte storage key 相同時才會撞上，而 0.8.0（PR #520）已把 preimage 長度收進 N_L ≡ N_{2^32}（注意這個型別**仍然包含** 2^32−1 與 2^32−2 兩個保留值，形式上並未排除碰撞，靠的是實務尺寸），實務上 preimage 遠小於 4 GiB，所以安全。",
  "trap": "GP 明說 storage key「not required to be known by implementations」——只要存得下 Merklisation-ready 的雜湊即可，原始 key 可以不落盤。"
-},
-{
- "id": "c3-appD-rho-guarantee",
- "ch": "D", "section": "D.1 Serialization",
- "gpRef": "§D.1 T(σ) row C(10); eq. 11.1 (ρ spec)",
- "difficulty": 3, "kind": "delta", "tags": ["merklization", "state-keys", "rho", "delta-0.8.0"],
-  "stemZh": "你們 0.7.2 的編碼器把 T(σ) 的 C(10) 條目寫成：每個 core 一個「work-report 與回報時槽」的 optional 配對。GP 0.8.0 改成放什麼？",
-  "optionsZh": [
-   "與先前完全相同的「每個 core 一個 work-report 與時槽的 optional 配對」；0.8.0 只是把時槽收緊成定長的 E_4 編碼，酬載本身沒有更動",
-   "每個 core 一個以 ? 選項判別子寫出的 optional 配對 ⟨a_g, E_4(a_t)⟩，其中 a_g 是整份 guarantee G ≡ (r work-report, t 時槽, a 由 2–3 組 (validator 索引, Ed25519 簽章) 構成的憑證)——因此 guarantor 的簽章現在成為被承諾狀態的一部分",
-   "當前區塊的 availability assurances extrinsic，好讓某位 assurer 的 bitfield 不必重放該區塊就能對照 state root 被證明",
-   "只放每個 core 待處理 report 的 availability specification（package 雜湊、erasure root、segment root、bundle 長度），而 guarantee 本身由 guarantor 保存在鏈外直到稽核要求為止；這正是 0.8.0 所追求的體積縮減"
-  ],
-  "stem": "Your 0.7.2 encoder writes the C(10) entry of T(σ) as, per core, an optional pair of work-report and reporting timeslot. What does GP 0.8.0 put there instead?",
- "options": [
-  "Per core an optional pair of work-report and timeslot exactly as before; 0.8.0 only tightened the timeslot to a fixed-length E_4 encoding and left the payload alone.",
-  "Per core an optional pair ⟨a_g, E_4(a_t)⟩ written with the ? option discriminator, where a_g is the entire guarantee G ≡ (r work-report, t timeslot, a credential of 2–3 (validator index, Ed25519 signature) pairs) — so the guarantors' signatures are now part of committed state.",
-  "The availability assurances extrinsic of the current block, so that an assurer's bitfield can be proven against the state root without replaying the block.",
-  "Only the availability specification (package hash, erasure root, segment root, bundle length) of each core's pending report, the guarantee itself being retained off-chain by the guarantors until an audit demands it; that is precisely the size reduction 0.8.0 was aiming for."
- ],
- "answer": 1,
- "optNotes": [
-   "0.8.0 換掉的是 payload 本身：ρ 現在存整個 guarantee，連 guarantor 的 credential 都在內。",
-   "#494 把 eq. 11.1 改成 ρ ∈ ⟦(g ∈ G, t ∈ N_T)?⟧_C，guarantor 簽章因此進入 committed state。",
-   "extrinsic 從不進 trie，這是把 extrinsic 與 state 兩件事搞混了。",
-   "availability specification 是 work-report 內部的欄位而非 ρ 的內容，0.8.0 也是加大而非縮小這一格。",
- ],
- "explanation": "GP 0.8.0（PR #494「Keep full guarantees in availability assignments state (rho)」）把 eq. 11.1 改成 ρ ∈ ⟦(g ∈ G, t ∈ N_T)?⟧_C，而 G ≡ (r ∈ R, t ∈ N_T, a ∈ ⟦(N, V̄)⟧_{2:3})（eq. 11.24；0.8.0 的 R 是 work-report 集合、W 是 work-item 集合、V̄ 是 Ed25519 簽章集合），也就是 work-report 加上 guarantor 的 credential。附錄 D 的 T(σ) 因此寫成 C(10) ↦ E([ ⟨a_g, E_4(a_t)⟩? for ⟨a_g, a_t⟩ ∈ ρ ])——外層是 optional discriminator（∅ → 0；否則 1 ⌢ …），內層 timeslot 用固定 4 byte。0.7.2 只存 work-report、signature 不進 state；升上 0.8.0 若沒改，C(10) 的 leaf 會短一大截、state root 直接對不上。注意 guarantee 自己帶一個 t（guarantee 的 timeslot），availability assignment 又帶一個 t（reported 的時間，用於 eq. 11.18 的 U 逾時清除），兩者不是同一個欄位。",
- "trap": "0.8.0 之後 ρ[c] 有兩個 timeslot：guarantee 內的 g_t，以及 assignment 的 a_t。序列化時別漏掉前者。"
 },
 {
  "id": "c3-appD-merklize-bitorder",

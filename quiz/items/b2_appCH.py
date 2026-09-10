@@ -3,36 +3,6 @@
 # F (Shuffling), G (Bandersnatch VRF / signing contexts), H (Erasure Coding) — GP 0.8.0
 ITEMS = [
 {
- "id": "appC-code-avspec-080",
- "ch": "C", "section": "C.2 Block Serialization (availability specification)", "gpRef": "§C.2 E(s ∈ availability spec); eq. 11.5; eq. 11.31",
- "difficulty": 2, "kind": "code", "tags": ["codec", "availability-spec", "delta-0.8.0"],
-  "stemZh": "團隊為 availability specification（work-package spec）寫的編碼器還停在 GP 0.7.2。要讓它產出 §C.2 的 GP 0.8.0 線路格式 E(s)，必須改什麼？伴隨這個新欄位的鏈上規則又是什麼？",
-  "optionsZh": [
-   "在 ErasureRoot 與 ExportsRoot 之間插入一個 U16 的 erasure 碎片數 v，編碼為 E_2(v)；其餘寬度維持原樣（長度用 E_4、exports 計數用 E_2）；鏈上則要求每一份進來的 report 都必須帶 v = |κ′|",
-   "把 E_2(v) 附加在 ExportsCount 之後，因為自 GP 0.7.0 起，結構新增的任何欄位都必須放到尾端以維持解碼器的串流友善性；鏈上則要求 v 必須等於 core 數 C",
-   "把定寬的 E_4 Length 換成緊湊的 E(l)，並在其後緊接著加上緊湊自然數 v；v 就是該 guarantor 實際分發出去的碎片數量，所以鏈上不做檢查",
-   "線路上什麼都不用改：v 可以從 validator 數 V 推導出來，因此從不被序列化；只有 JSON 測試向量的 schema 為了可讀性多了一個 erasure_shards 欄位"
-  ],
-  "stem": "The team's encoder for the availability specification (work-package spec) is still on GP 0.7.2. What must change so that it produces the GP 0.8.0 wire form E(s) of §C.2, and which on-chain rule accompanies the new field?",
- "code": {"lang": "go", "caption": "internal/types/encode.go (WorkPackageSpec.Encode) — struct fields: Hash, Length U32, ErasureRoot, ExportsRoot, ExportsCount U16", "src": "func (w *WorkPackageSpec) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding WorkPackageSpec\")\n\n\t// Hash\n\tif err := w.Hash.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// Length\n\tif err := w.Length.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ErasureRoot\n\tif err := w.ErasureRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsRoot\n\tif err := w.ExportsRoot.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\t// ExportsCount\n\tif err := w.ExportsCount.Encode(e); err != nil {\n\t\treturn err\n\t}\n\n\treturn nil\n}"
- },
- "options": [
-  "Insert a U16 erasure-shard count v, encoded E_2(v), between ErasureRoot and ExportsRoot; the other widths stay as they are (E_4 length, E_2 exports count); on-chain every incoming report must carry v = |κ′|",
-  "Append E_2(v) after ExportsCount, because since GP 0.7.0 any newly added field of a structure must go to its end to keep decoders streaming-friendly; on-chain v must equal the number of cores C",
-  "Replace the fixed E_4 Length with a compact E(l) and add v as a compact natural right after it; v is whatever number of chunks the guarantor actually distributed, so it is not checked on-chain",
-  "Nothing on the wire: v is derivable from the validator count V and is therefore never serialized; only the JSON test-vector schema gains an erasure_shards field for readability"
- ],
- "answer": 0,
- "optNotes": [
-   "§C.2 把 E_2(v) 排在 u 與 e 之間，且 eq. 11.31 要求 (w_s)_v = |κ′|——每個 assurer 恰一個 chunk。",
-   "「新欄位排最後」只針對變長（↕）欄位；v 是固定 2 octets、位置由 GP 明定，而且 v 不是 C。",
-   "長度 l 仍是 E_4 而非 compact，v 也不是 guarantor 自由決定的——eq. 11.31 在鏈上檢查它。",
-   "v 必須進 wire，否則另一個 validator-set 大小的 assurer 無從驗證這份 report。",
- ],
- "explanation": "GP 0.8.0 §C.2：E(s ∈ availability spec) ≡ E(p, E_4(l), u, E_2(v), e, E_2(n))——依序是 package hash p、bundle 長度 l（E_4）、erasure root u、erasure-shard 數 v（E_2）、segment root e、segment 數 n（E_2）。eq. 11.5 把 v ∈ N_V（validator count 型別）放在 u 與 e 之間；eq. 11.31：∀w ∈ 進來的 reports：(w_s)_v = |κ′|，因為「one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」。0.8.0 的 erasure coding 以 v 為參數（§14.4.1 的 A(p, b, s, v) 用 z = 2·d(v)），所以規格本身要記錄 v；GP 也註明對兩個不同大小的 validator set 派發時要做兩次 erasure coding、產生兩份不同的 work-report。你們的 PR #1026 就是在 ErasureRoot 與 ExportsRoot 之間加 `ErasureShards U16`（producer 設為 TotalShards），這會改變每一個 on-chain WorkReport 的位元組佈局（進而影響 report hash、guarantee 簽名、ρ 內容）。",
- "trap": "0.7.2 五欄位 (p, l, u, e, n) → 0.8.0 六欄位 (p, l, u, v, e, n)；v 是 E_2 且必須等於 |κ′|。"
-},
-{
  "id": "appC-code-operand-transfer-prefix",
  "ch": "C", "section": "C.2 Block Serialization (operand tuple and deferred transfer)", "gpRef": "§C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14",
  "difficulty": 2, "kind": "code", "tags": ["codec", "accumulation", "deferred-transfer", "fetch"],

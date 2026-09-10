@@ -148,48 +148,6 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "trap": "H_I 對 κ′ 取 index，bound 也是 |κ′|；0.8.0 之後不要再把 V 當常數用。"
 },
 {
- "id": "ch07-beta-entry-timeslot-080",
- "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.2, 7.8 & eq. 11.36; §D.1 C(3)",
- "difficulty": 2, "kind": "delta", "tags": ["recent-history", "delta-0.8.0", "codec", "anchor"],
-  "stemZh": "這段 0.7.2 的程式碼建構的是在區塊結尾附加到 β_H 的那一筆條目。為了 GP 0.8.0 必須改什麼？又是哪一項鏈上檢查促成了這個改動？",
-  "optionsZh": [
-   "加上該區塊的時槽 t = H_T 作為第五個欄位（在 state key C(3) 之下、s 與 p 之間放 E_4(t)）：refinement context 現在會攜帶 anchor 的時槽，而 eq. 11.36 要求它必須等於相符的那筆 β† 條目的 t（GP PR #526；團隊 PR #1031 把 H_T 串進 NewItem）",
-   "把那個零 state root 換成執行後的 root M_σ(σ′)，因為 0.8.0 的 header 現在承諾的是 posterior 而非 prior 狀態；因此 eq. 7.5 的 β† 修正就消失了，而 eq. 11.36 可以把 anchor 的 state root 拿去和產生它的那個區塊直接比對",
-   "用完整的 accumulation-output 序列 θ′ 取代 super-peak b，因為 eq. 11.36 現在是逐項比對 anchor 的 accumulation log 而不是比對單一個承諾，這也是 0.8.0 把 belt 從 C(3) 移到它自己的 state key 的原因",
-   "加上該區塊中每份被擔保 report 的 lookup-anchor posterior state root，因為 0.8.0 把那個欄位加進了 refinement context，而 β_H 是鏈上唯一能記錄該值的地方——祖先集合 A 存的是 header，不是它們之後的 root"
-  ],
-  "stem": "This 0.7.2 code builds the entry appended to β_H at the end of a block. What must change for GP 0.8.0, and which on-chain check motivates the change?",
- "code": {"lang": "go", "caption": "internal/recent_history/recent_history_controller.go (NewItem) — GP 0.7.2 checkout", "src": """// pack item $n$ (7.8) GP 0.6.7
-/*
-	item $n$ = (header hash $h$, accumulation-result mmr $b$, state root $s$, WorkReportHash $\\mathbf{p}$)
-*/
-func NewItem(headerHash types.HeaderHash, workReportHash []types.ReportedWorkPackage, accumulationResultMmr types.OpaqueHash) (item types.BlockInfo) {
-	zeroHash := types.StateRoot{}
-	item = types.BlockInfo{
-		HeaderHash: headerHash,
-		BeefyRoot:  accumulationResultMmr,
-		StateRoot:  zeroHash,
-		Reported:   workReportHash,
-	}
-	return item
-}"""},
- "options": [
-  "Add the block's timeslot t = H_T as a fifth field (E_4(t) between s and p under state key C(3)): refinement contexts now carry the anchor's timeslot and eq. 11.36 requires it to equal the t of the matching β† entry (GP PR #526; team PR #1031 threads H_T into NewItem)",
-  "Replace the zero state root with the posterior root M_σ(σ′), because 0.8.0 headers now commit to the posterior state rather than the prior one; eq. 7.5's β† correction therefore disappears and eq. 11.36 can compare an anchor's state root against the very block that produced it",
-  "Store the whole accumulation-output sequence θ′ in place of the super-peak b, because eq. 11.36 now compares the anchor's accumulation log entry by entry rather than against one commitment, which is also why 0.8.0 moved the belt out of C(3) and into its own state key",
-  "Add the lookup-anchor posterior state root of every report guaranteed in the block, because 0.8.0 added that field to the refinement context and β_H is the only on-chain place where the value can be recorded — the ancestor set A holds headers, not the roots that follow them"
- ],
- "answer": 0,
- "optNotes": [
-  "#526 讓 refinement context 帶上 anchor slot，鏈上要驗它，β 的每一筆就必須存 t。",
-  "0.8.0 的 header 仍只帶 prior state root，state root 照舊填零、由下一塊的 β† 補正（eq. 7.5）。",
-  "β 存的是 belt 的 super-peak 而不是整個 θ′；C(3) 至今仍同時裝 item 與 mmrencode(β_B)。",
-  "lookup-anchor 的 posterior root 用 ancestor set 裡下一個 header 的 H_R 驗（eq. 11.38），不經過 β。",
- ],
- "explanation": "eq. 7.2（0.8.0）：β_H ∈ [(h, s, b, t ∈ N_T, p)]_{:H}——多了 timeslot；eq. 7.8 的新 entry 是 (H(H), H_0, M_R(β′_B), H_T, p)。動機：0.8.0 PR #526 在 refinement context（eq. 11.4）加入 anchor slot 與 lookup-anchor posterior state root，讓 refine 端能得知 anchor 的時間；鏈上要驗它，eq. 11.36 就變成：∃y ∈ β†：anchor hash = y_h ∧ anchor posterior state = y_s ∧ anchor accumulation log = y_b ∧ anchor time = y_t——其中 accumulation log 只比一個 32-byte super-peak，不是逐筆比對。狀態序列化（§D.1 的 C(3)）順序是 (h, b, s, E_4(t), var(p))——注意 b 在 s 之前，與 eq. 7.2 的 tuple 順序 (h, s, b, t, p) 不同；你們 BlockInfo 的欄位 HeaderHash, BeefyRoot, StateRoot, Reported 正是照序列化順序排，PR #1031 把 4-byte timeslot 插在 state_root 與 reported 之間。",
- "trap": "0.8.0 β_H 一項 = 5 欄；序列化順序 h, b, s, t, p（b 在 s 前）；anchor 的四個欄位全部要對上 β† 的同一筆。"
-},
-{
  "id": "ch07-belt-empty-output",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7 & eq. E.1, E.3",
  "difficulty": 3, "kind": "concept", "tags": ["recent-history", "mmr", "edge-case"],

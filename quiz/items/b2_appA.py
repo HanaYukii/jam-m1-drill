@@ -80,59 +80,6 @@ ITEMS = [
  "trap": "flag 只被「執行完的 terminator」與「OOG」清成 ⊥；ecalli 不是 terminator，host call 續跑不重扣。"
 },
 {
- "id": "b2-appA-recompiler-block-gas-stub",
- "ch": "A", "section": "A.5 Single-Step State Transition (gas charging) — x86-64 recompiler", "gpRef": "eq. A.8 (ε^ϱ, ϱ* unchanged on ∞), A.10 (ı* = ı), A.54 (ϱ^Δ)",
- "difficulty": 3, "kind": "code", "tags": ["pvm", "gas", "recompiler", "delta-0.8.0"],
-  "stemZh": "重編譯器裡有一段為 GP 0.8.0 準備好但尚未啟用的 block 層級 gas 路徑（與目前 0.7.2 的逐指令 landing pad 一併列出）。對照 eq. A.8，那條準備好的路徑還有什麼問題？",
-  "optionsZh": [
-   "沒有問題：在 0.8.0 中每條指令仍然花費 1 gas、只是改成逐 block 彙總，所以在 block 進入時減掉指令數就恰好是 ϱ^Δ；而在 out-of-gas 路徑上讓計數器維持負值也是刻意的，因為 Ψ_M 的 R 函數本來就把用量回報為 u = ϱ − max(ϱ′, 0) 並自行夾住",
-   "只有退出的 PC 錯了：在 block 進入時的 out-of-gas 退出上，eq. A.10 要求 ı* 指向該 block 的 terminating 指令——也就是那筆扣款本來會付到的最後一條——而不是 block 的起點；扣款金額與「gas 不動」的規則這段程式碼都已經處理正確了",
-   "有兩件事：扣掉的金額必須是來自 A.9 管線模擬的該 block 之 ϱ^Δ（max(cycles − 3, 1)），而不是它的指令數；而且在 out-of-gas 路徑上那筆扣款必須被復原，因為 A.8 在 ϱ < ϱ^Δ 時讓 ϱ 維持不變——逐指令的 pad 有復原它的扣款，block 的 pad 卻沒有",
-   "方向錯了：0.8.0 是在 block 的 terminator 執行完之後才對它計費，所以 SubMemImm32 應該放在 terminator 之後、而且符號檢查要反過來；在 block 進入時扣款會對一個中途 panic 的 block 收費，而 eq. A.8 正是靠延後扣款來避免這件事"
-  ],
-  "stem": "The recompiler contains a prepared-but-disabled block-level gas path for GP 0.8.0 (shown together with the current 0.7.2 per-instruction landing pad). Measured against eq. A.8, what is still wrong with the prepared path?",
- "code": {"lang": "go", "caption": "PVM/recompiler/gas.go (emitOutOfGasExit, emitBlockGasCheck, emitBlockOutOfGasExit)", "src": """// emitOutOfGasExit emits the temporary GP v0.7.2 per-instruction OOG landing pad.
-func emitOutOfGasExit(a *asm.Assembler, oog asm.Label, instrPC PVM.ProgramCounter) {
-	_ = a.BindLabel(oog)
-	// Undo the fused charge: on OOG the interpreter leaves gas unchanged.
-	a.SubMemImm32(RegGuestBase, -int32(OffsetGas), -1)
-	a.MovMemImm32_32(RegGuestBase, -int32(OffsetExitPC), int32(instrPC))
-	a.MovImm64ToReg(RegScratch, uint64(PVM.ExitOOG))
-	a.MovRegToMem(RegGuestBase, -int32(OffsetExitReason), RegScratch)
-	a.Jmp(a.ExitTrampoline())
-}
-
-// emitBlockGasCheck is the prepared block-based gas charging path for GP v0.8.0.
-func (c *Compiler) emitBlockGasCheck(a *asm.Assembler, blockOOG asm.Label, instrCount int64) {
-	a.SubMemImm32(RegGuestBase, -int32(OffsetGas), int32(instrCount))
-	a.Jcc(asm.CondS, blockOOG)
-}
-
-// emitBlockOutOfGasExit is the prepared block-entry OOG landing pad for GP v0.8.0.
-func emitBlockOutOfGasExit(a *asm.Assembler, blockOOG asm.Label, blockStartPC PVM.ProgramCounter) {
-	_ = a.BindLabel(blockOOG)
-	a.MovMemImm32_32(RegGuestBase, -int32(OffsetExitPC), int32(blockStartPC))
-	a.MovImm64ToReg(RegScratch, uint64(PVM.ExitOOG))
-	a.MovRegToMem(RegGuestBase, -int32(OffsetExitReason), RegScratch)
-	a.Jmp(a.ExitTrampoline())
-}"""},
- "options": [
-  "Nothing: in 0.8.0 each instruction still costs 1 gas and is merely aggregated per block, so subtracting the instruction count at block entry is exactly ϱ^Δ; and leaving the counter negative on the out-of-gas path is intended, because Ψ_M's R function reports consumption as u = ϱ − max(ϱ′, 0) and clamps it anyway",
-  "Only the exit PC: on a block-entry out-of-gas exit eq. A.10 requires ı* to point at the block's terminating instruction — the last one the charge would have paid for — rather than at the block start; the amount deducted and the untouched-gas rule are both already handled correctly by this code",
-  "Two things: the amount deducted must be the block's ϱ^Δ from the A.9 pipeline simulation (max(cycles − 3, 1)), not its instruction count; and on the out-of-gas path the deduction must be undone, because A.8 leaves ϱ unchanged when ϱ < ϱ^Δ — the per-instruction pad restores its charge, the block pad does not",
-  "The direction: 0.8.0 charges a block only once its terminator has executed, so the SubMemImm32 belongs after the terminator with the sign check reversed; charging at block entry would bill a block that panics half-way through, which eq. A.8 avoids precisely by deferring the deduction"
- ],
- "answer": 2,
- "optNotes": [
-   "0.8.0 的 ϱ^Δ 來自 §A.9 管線模擬，與指令數沒有固定比例；u 的 clamp 也救不了寫回外層的負 counter。",
-   "eq. A.10 在 ε^ϱ ≠ ▸ 時 ı* = ı（嘗試收費的那條指令）；而金額與不扣款兩點正是真正的缺陷所在。",
-   "金額要換成 eq. A.54 的 max(cycles − 3, 1)，且 A.8 的 ϱ* = ϱ 要求 landing pad 把預扣的錢加回去。",
-   "事後收費等於讓 panic 的 block 免費，正是 GP 要求「預先扣款」所要防的事。",
- ],
- "explanation": "eq. A.8：ϱ ≥ ϱ^Δ(c, k, 𝔏(ı)) 才扣（ϱ* = ϱ − ϱ^Δ），否則 (∞, ϱ, ⊥)——「the execution is interrupted and the gas counter remains unchanged」；§A.5 也明說「No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance」。emitBlockGasCheck 用「先 sub 再看 SF」的技巧，判斷方向沒錯（post-charge < 0 ⟺ pre-charge < 金額），但 (1) 金額是 instrCount——那是 0.7.2 的 GasCost = InstrCount（block_info.go），0.8.0 要用 eq. A.54 的 ϱ^Δ = max(cycles − 3, 1)，由 A.9 的 ROB 模擬與 A.10 表算出（#1046 之後 interpreter 與 recompiler 共用 GasCostForBlock）；(2) 走到 emitBlockOutOfGasExit 時記憶體裡的 gas 已經是「負的」，沒有像 emitOutOfGasExit 那樣 `SubMemImm32(…, -1)` 把錢加回去，違反 ϱ* = ϱ；後果可觀察：R（eq. A.48）算 u = ϱ − max(ϱ′, 0) 會變成「全部 gas 用光」，invoke host call 也會把負的 g′_R 寫回記憶體。至於 ExitPC = blockStartPC：eq. A.10 在 ε^ϱ ≠ ▸ 時 ı* = ı，也就是「嘗試收費的那條指令」，正常進入 block 時就是 block 起點，這部分沒錯（唯一例外是 flag = ⊥ 且從 block 中間恢復，此時 ı* 是恢復點，扣的仍是整個 block）。",
- "trap": "OOG 時 ϱ 不變（A.8）——「先扣再判斷」的 JIT 寫法一定要在 landing pad 把錢加回去，而且扣的是 ϱ^Δ 不是指令數。"
-},
-{
  "id": "b2-appA-load-imm-jump-ind-reg-write",
  "ch": "A", "section": "A.5.1 Instruction Tables (load_imm_jump_ind) & A.1 (Ψ on panic)", "gpRef": "eq. A.34 table (opcode 180), A.22 (djump), A.1 (Ψ returns φ′ on ☇/∎), A.10; §B invoke",
  "difficulty": 3, "kind": "code", "tags": ["pvm", "jumps", "edge-case", "test-vectors"],

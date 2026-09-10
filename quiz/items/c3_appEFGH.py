@@ -301,64 +301,6 @@ ITEMS = [
     },
 
     # ---------------------------------------------------------------- appendix H
-    {
-        "id": "c3-appH-code-shardcount-080",
-        "ch": "H",
-        "section": "H Erasure Coding",
-        "gpRef": "eq. H.1 (𝒟); eq. 6.8 (𝕍); eq. 11.5 (a_v), eq. 11.31 (∀r ∈ I: (r_s)_v = |κ′|); §14 availability specifier",
-        "difficulty": 2,
-        "kind": "code",
-        "tags": ["erasure-coding", "delta-0.8.0", "constants", "tiny-vs-full"],
-  "stemZh": "團隊的 Go 樹停在 GP 0.7.2、把 erasure-coding 的比率寫死如圖。GP 0.8.0 把固定比率換成函數 𝒟(v)。最小的正確遷移是什麼？它對 6 位 validator 的 tiny 設定又有什麼影響？",
-  "optionsZh": [
-   "只有總數需要跟隨 report 自己攜帶的 assuring-set 大小；資料碎片數僅由 segment 大小決定，因為 𝒟 是使 2d 整除 W_G 的最大 d，而填補寬度就是它的兩倍。因此 tiny 維持它的 4 與每 segment 1026 片，只有總數變成可變的，而 buildBCloud 除了讀取 report 的碎片數欄位之外不需要任何更動",
-   "這些數字每一個都變成 report 自己攜帶之 assuring-set 大小的函數：總數就是那個大小（鏈上規則把它釘在 |κ′|）、資料碎片數是使 2d 整除 W_G 且 d 不大於 v/3 + 1 的最大 d、而填補寬度是它的兩倍。在 tiny 上這給出 6 取 3 個資料碎片、填補寬度 6、每 segment 684 片，所以舊的 4 / 1026 那一組必須拿掉",
-   "把資料碎片數無條件設為 v/3 + 1、總數設為 report 攜帶的 assuring-set 大小、填補寬度設為碎片數的兩倍。因為合法的 validator 集合大小只含 3 的倍數，「碎片數的兩倍要整除 segment 大小」這個附帶條件自動滿足、可以拿掉；tiny 變成 6 取 3、每 segment 684 片，而 full 維持 1023 取 342",
-   "這個檔案裡除了 segment 常數之外什麼都不用改。𝒟(v) 只管 Import-DA 的 segment 路徑，所以 audit-DA 的 bundle 維持它的 342:1023 比率與 684 位元組填補寬度，只有 segment 路徑改用 report 自己的碎片數；那個不對稱正是 availability spec 新增碎片數欄位的原因，也是 tiny 那一組維持 4 / 1026 而非 3 / 684 的原因"
-  ],
-  "stem": "The team's Go tree is on GP 0.7.2 and pins the erasure-coding rate as shown. GP 0.8.0 replaces the fixed rate with the function 𝒟(v). What is the minimal correct migration, and what does it do to the 6-validator tiny configuration?",
-        "code": {
-            "lang": "go",
-            "caption": "internal/types/const.go (mode setters + package constants) and internal/work_package/work_package.go (buildBCloud)",
-            "src": """// SetTinyMode()                     // SetFullMode()
-	ECPiecesPerSegment = 1026         //   ECPiecesPerSegment = 6      // W_P
-	ECBasicSize        = 4            //   ECBasicSize        = 684    // W_E
-
-// erasure coding constants
-// 342:1023 (Appendix H)
-const (
-	DataShards  = 342
-	TotalShards = 1023
-)
-
-// buildBCloud
-	padded := PadToMultiple(bundle, types.ECBasicSize)
-
-	shards, err := erasurecoding.EncodeDataShards(padded, types.DataShards, types.TotalShards-types.DataShards)
-	if err != nil {
-		return nil, err
-	}
-	hashedShards := make([]types.OpaqueHash, len(shards))
-	for i, shard := range shards {
-		hashedShards[i] = hash.Blake2bHash(types.ByteSequence(shard))
-	}""",
-        },
-        "options": [
-            "Only the total needs to follow the assuring-set size that the report itself carries; the data-shard count is fixed by the segment size alone, since 𝒟 is the largest d with 2d dividing W_G, and the pad width is twice that. Tiny therefore keeps its 4 and its 1026 pieces per segment while only the total becomes variable, and buildBCloud needs no change beyond reading the report's shard-count field.",
-            "Every one of these numbers becomes a function of the assuring-set size that the report itself carries: the total is that size (which the on-chain rule pins to |κ′|), the data-shard count is the largest d with 2d dividing W_G and d no greater than v/3 + 1, and the pad width is twice that. On tiny that gives 3 data shards out of 6, a pad width of 6 and 684 pieces per segment, so the old 4 / 1026 pair must go.",
-            "Set the data-shard count to v/3 + 1 unconditionally, the total to the assuring-set size the report carries, and the pad width to twice the count. Because the set of legal validator-set sizes contains only multiples of three, the side condition that twice the count divide the segment size is automatically satisfied and can be dropped; tiny becomes 3 out of 6 with 684 pieces per segment and full stays 342 out of 1023.",
-            "Nothing in this file changes beyond the segment constants. 𝒟(v) governs only the Import-DA segment path, so the audit-DA bundle keeps its 342:1023 rate and its 684-octet pad width, while the segment path alone switches to the report's own shard count; that asymmetry is exactly why the availability spec gained a shard-count field, and why the tiny pair stays 4 / 1026 rather than 3 / 684.",
-        ],
-        "answer": 1,
-        "optNotes": [
-          "丟掉了 eq. H.1 的候選集合 N_{v/3+2}：沒有 v/3+1 這個上界，最大的 d 會變成 2,052。",
-          "三個數都成為 a_v 的函數：total = a_v、d = 𝒟(a_v)、pad 寬 2d，tiny 因此是 3/6 與 684 pieces。",
-          "數值恰好對，錯在理由與通用性：v = 1002 時 335 不整除 2,052，真正的 𝒟(1002) = 228。",
-          "§14 的 b♣ = H#(C^{a_v}_{⌈|b|/z⌉}(𝒫_z(b)))，bundle 路徑一樣吃 a_v 與 z = 2·𝒟(a_v)。",
-        ],
-        "explanation": "GP 0.8.0 的 eq. H.1：𝒟(v ∈ 𝕍) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})，也就是「不超過 v/3+1 且 2d 能整除 W_G = 4,104 的最大 d」；配合 eq. 6.8 的 𝕍 ≡ {3c | c ∈ N_{2…C+1}}（§6 原文：「always a multiple of 3 between 6 and 3C」），rate 不再是常數而是每份 report 自帶的參數。eq. 11.5 讓 availability spec 多了 a_v ∈ 𝕍，緊接著 eq. 11.31 規定 ∀r ∈ I：(r_s)_v = |κ′|，§14 的 availability specifier 又把 z = 2·𝒟(a_v) 當成 bundle 補零與每段切片的寬度。代進 tiny：v = 6 → v/3+1 = 3，2·3 = 6 整除 4,104，所以 𝒟(6) = 3、z = 6、W_G/z = 684 pieces per segment；程式裡 tiny 的 4 / 1026 是 0.7.x 時代的值（等於 𝒟 = 2），必須換掉，否則 padded 長度與 encoder 期望的 2·DataShards 根本不一致。整除側條件不是裝飾：v = 1002 ∈ 𝕍 時 v/3+1 = 335，但 2d | 4104 要求 d 整除 2,052，335 不合，真正的 𝒟(1002) = 228，GP 也特別提醒「the rate is least efficient when v is slightly below one of these values」。團隊的 PR #1026／#1035（original_shards(v)）與 issue #1037（|κ| ≠ V）就是這條遷移。",
-        "trap": "0.8.0 的 shard 數不是常數而是 report 欄位：先讀 a_v，再算 𝒟(a_v)，最後才 pad。tiny 從 2:6 變 3:6，每段 pieces 從 1026 變 684。",
-    },
 
     {
         "id": "c3-appH-what-gets-coded",

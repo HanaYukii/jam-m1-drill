@@ -9,51 +9,6 @@ with scripts/eqref.py and /root/work/jam/gp-layout.txt (the typeset PDF).
 ITEMS = [
 
 # ─────────────────────────────────────────────────────────── 1 · L1 · delta
-{
-    "id": "c3-ch12-omega-xi-theta-naming",
-    "ch": "12",
-    "section": "12.1 History and Queuing",
-    "gpRef": "eq. 12.1 & 12.3; eq. 7.4 (θ); §4.2 state σ",
-    "difficulty": 1,
-    "kind": "delta",
-    "tags": ["accumulation", "state", "notation", "delta-0.8.0"],
-  "stemZh": "σ 中由 accumulation 寫入的狀態項目包括 ω、ξ 與 θ。某個 GP 0.7.2 時期的 Go client 仍然把它的 ready-queue 欄位叫做 `Vartheta`。在 GP 0.8.0 中，ω、ξ 與 θ 各存什麼？哪個被改了名？",
-  "optionsZh": [
-   "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready（accumulation）佇列，裝著各自配上尚未滿足依賴集合的延後 report——GP 0.7.2 把它寫成 ϑ；ξ ∈ ⟦{H}⟧_E 是已被 accumulate 的 work-package 雜湊之一個 epoch 份歷史；θ ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log，也就是本塊的 (service, 承諾) 配對",
-   "ω ∈ ⟦(N_S, H)⟧ 是 Accumulation Output Log、在 0.8.0 從 θ 更名而來；ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是 ready 佇列；而 θ ∈ ⟦(N_S, N_G)⟧ 現在裝的是上一塊 Δ+ 回傳的逐 service gas 用量 u，也就是 accumulation 統計所讀取的東西",
-   "ω ∈ ⟦{H}⟧_E 從 ξ 接手成為已 accumulate 之 work-package 雜湊的一個 epoch 份歷史；ready 佇列在 0.8.0 仍然拼作 ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E，而 θ ∈ ⟦(N_S, H)⟧ 沒有變，所以 0.7.2 的 client 只需要淘汰符號 ξ 並把持有它的 state key 重新指向",
-   "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ 是 0.8.0 新增的狀態項目，裝著在 accumulation 各輪之間傳遞的 deferred transfer 好讓它們跨越區塊邊界存活；ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E 仍是 ready 佇列，而 ξ ∈ ⟦{H}⟧_E 仍是已 accumulate 之 work-package 雜湊的一個 epoch 份歷史"
-  ],
-  "stem": "Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. In GP 0.8.0, what do ω, ξ and θ each hold, and what was renamed?",
-    "options": [
-        "ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E is the ready (accumulation) queue of deferred reports each paired with its outstanding "
-        "dependency set — GP 0.7.2 wrote this as ϑ; ξ ∈ ⟦{H}⟧_E is the epoch-long history of already-accumulated "
-        "work-package hashes; θ ∈ ⟦(N_S, H)⟧ is the Accumulation Output Log, this block's (service, commitment) pairs",
-
-        "ω ∈ ⟦(N_S, H)⟧ is the Accumulation Output Log, renamed from θ in 0.8.0; ξ ∈ ⟦⟦(ℝ, {H})⟧⟧_E is the "
-        "ready queue of deferred reports each paired with its outstanding dependency set; θ ∈ ⟦(N_S, N_G)⟧ now "
-        "holds the per-service gas usage u that the last block's Δ+ returned, which is what the accumulation "
-        "statistics read",
-
-        "ω ∈ ⟦{H}⟧_E took over from ξ as the epoch-long history of already-accumulated work-package hashes; the "
-        "ready queue is still spelled ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E in 0.8.0 and θ ∈ ⟦(N_S, H)⟧ is unchanged, so a 0.7.2 "
-        "client only has to retire the symbol ξ and repoint the state key that held it",
-
-        "ω ∈ ⟦(N_S, N_S, N_B, B_128, N_G)⟧ is a new 0.8.0 state item holding the deferred transfers carried "
-        "between accumulation rounds so that they survive a block boundary; ϑ ∈ ⟦⟦(ℝ, {H})⟧⟧_E remains the ready "
-        "queue and ξ ∈ ⟦{H}⟧_E the epoch-long history of accumulated work-package hashes",
-    ],
-    "answer": 0,
-    "optNotes": [
-        "0.8.0 preamble 把 ready 定為 ω、accumulated 定為 ξ、lastaccout 定為 θ，三個型別也全對。",
-        "per-service gas usage u 是 eq. 12.17 的回傳分量，餵完 eq. 12.28 的 G(s) 就消失，進不了 σ。",
-        "ξ 在 0.8.0 完全沒有改名或改義，「只要把 ξ 退休掉」的遷移會把 accumulated 歷史整個弄丟。",
-        "deferred transfers 從不進 σ，只在 Δ+ 遞迴內部傳遞；eq. 12.14 只是 Ψ_A 的輸入型別。",
-    ],
-    "explanation": "GP 0.8.0 的 preamble 明訂 ready = ω、accumulated = ξ、lastaccout = θ。eq. 12.3 給出 ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E（ℝ 是 0.8.0 的 work-report 集合，0.7.2 記作 W；每個 slot 一串「report + 尚未滿足的 dependency 集合」），eq. 12.1 給出 ξ ∈ ⟦{H}⟧_E（一個 epoch 份量的已 accumulate work-package hash），eq. 7.4 / 12.25 給出 θ ∈ ⟦(N_S, H)⟧ 亦即本區塊的 accumulation output log。0.7.2 的 ready queue 符號是 ϑ（團隊 Go 欄位 `Vartheta`、state key C(14)），0.8.0 改成 ω（GP 與 0.8.0 release notes 都沒有說明改名理由，別在口試時把「為了避開 ϑ/θ 混淆」講成 GP 的說法）；state key 不變：C(14)=ω、C(15)=ξ、C(16)=θ。",
-    "trap": "面試常考：0.7.2→0.8.0 ready queue 是 ϑ→ω 的更名，state key C(14) 與型別結構都沒動；同章的 W!/W_Q/W* "
-            "也一併改成 R!/R^Q/R*；別把 ω 和 θ（output log）搞混。",
-},
 
 # ─────────────────────────────────────────────────────────── 2 · L1 · concept
 {
@@ -352,78 +307,6 @@ ITEMS = [
 },
 
 # ─────────────────────────────────────────────────────────── 8 · L2 · code · delta
-{
-    "id": "c3-ch12-code-accumulation-statistics",
-    "ch": "12",
-    "section": "12.3 Final State Integration",
-    "gpRef": "eq. 12.27–12.28; eq. 12.17 (Δ+ output)",
-    "difficulty": 2,
-    "kind": "code",
-    "tags": ["accumulation", "statistics", "code", "delta-0.8.0"],
-  "stemZh": "這是團隊 GP 0.7.2 的 accumulation 統計建構器 S。對照 GP 0.8.0，必須補上哪個落差？",
-  "optionsZh": [
-   "N(s) 必須計算完整的 work-report 而不是 digest：eq. 12.28 走訪 r ↕ R*[..n]，並為擁有該 report 的 service 各計一次，而這段程式碼是每個相符的 digest 各計一項，所以一份為同一個 service 帶兩份 digest 的 report 會被重複計算",
-   "0.8.0 把 S ∈ ⟨N_S → (N, N, N_G)⟩ 變成三元組 S(s) = (N(s), T(s), G(s))；缺少的中間元素 T(s) 計的是目的地為 s 的已處理 deferred transfer 數，而這迫使 Δ+ 回傳第五個成分——已處理的 transfer 序列 t ⌢ t†——而納入的篩選條件也從加總測試變成 S(s) ≠ (0, 0, 0)",
-   "G(s) 必須是被配置的 gas——該 service 各 digest 的 Σ d_g，也就是 §11.4 拿去對照 G_A 檢查的那個數字——而不是實際用掉的 gas，否則一個把 gas 用光的 service 在餵給 π_S 的統計中會被低估；兩元素的形狀與以加總為基礎的納入篩選對 0.8.0 而言都已經正確",
-   "S 必須為 δ 中的每一個 service 都放一項、未被觸及者放全零三元組，好讓該字典的 key 集合逐塊穩定、使 π_S 的序列化長度固定；形狀在 0.8.0 確實變成三元組，但新元素是排在最後的 transfer 計數，而且回傳它所建構之已處理 transfer 序列的是 Δ* 而不是 Δ+"
-  ],
-  "stem": "This is the team's GP 0.7.2 accumulation-statistics builder S. Which gap against GP 0.8.0 must be closed?",
-    "code": {
-        "lang": "go",
-        "caption": "internal/accumulation/deferred_transfers.go (calculateAccumulationStatistics), 0.7.2 main",
-        "src": """// (12.28–12.29) S ≡ {(s ↦ (G(s), N(s))) | G(s)+N(s) ≠ 0}
-func calculateAccumulationStatistics(serviceGasUsedList types.ServiceGasUsedList,
-	n types.U64) types.AccumulationStatistics {
-	G := map[types.ServiceID]types.Gas{} // G(s)
-	for _, serviceGasUsed := range serviceGasUsedList {
-		G[serviceGasUsed.ServiceID] += serviceGasUsed.Gas
-	}
-
-	S := types.AccumulationStatistics{}
-	for s, Gs := range G {
-		Ns := types.U64(len(getWorkResultByService(s, n)))
-
-		if types.U64(Gs)+Ns == 0 {
-			continue // skip, N(S) = []
-		}
-
-		S[s] = types.GasAndNumAccumulatedReports{
-			Gas:                   Gs,
-			NumAccumulatedReports: Ns,
-		}
-	}
-	return S
-}""",
-    },
-    "options": [
-        "N(s) must count whole work-*reports*, not digests: eq. 12.28 iterates r ↕ R*[..n] and counts each report "
-        "once for the service that owns it, whereas this code counts one entry per matching digest, so a report "
-        "carrying two digests for the same service is double-counted",
-
-        "0.8.0 makes S ∈ ⟨N_S → (N, N, N_G)⟩ a three-tuple S(s) = (N(s), T(s), G(s)); the missing middle element T(s) "
-        "counts the processed deferred transfers whose destination is s, which forces Δ+ to return a fifth component — "
-        "the processed-transfer sequence t ⌢ t† — and the inclusion filter becomes S(s) ≠ (0, 0, 0) rather than a sum test",
-
-        "G(s) must be the gas *allotted* — Σ d_g over the service's digests, the very figure §11.4 checks against "
-        "G_A — rather than the gas actually used, otherwise a service that runs out of gas is under-charged in the "
-        "statistics that feed π_S; the two-element shape and the sum-based inclusion filter are both already "
-        "right for 0.8.0",
-
-        "S must carry an entry for every service in δ, with the all-zero triple for untouched services, so that "
-        "the dictionary's key set is stable from block to block and π_S's serialization keeps a fixed length; the "
-        "shape does become a triple in 0.8.0, but the new element is the transfer count sitting *last*, and it is "
-        "Δ*, not Δ+, that returns the processed-transfer sequence it is built from",
-    ],
-    "answer": 1,
-    "optNotes": [
-        "eq. 12.28 的 N(s) 明確是 d ↕ r_d 逐個 digest 數，不是逐 report 數。",
-        "eq. 12.27–12.28 的三元組與 S(s) ≠ (0,0,0) 篩選，逼得 eq. 12.17 的 Δ+ 多回傳 t ⌢ t†。",
-        "G(s) ≡ Σ_{(s, u) ∈ u}(u) 就是實際用掉的 gas，不是 §11.4 檢查的宣告上限。",
-        "S 只收非零項（δ‡ 才只對 K(S) 蓋 a_a）；T(s) 在三元組中間，且 t ⌢ t† 由 Δ+ 而非 Δ* 回傳。",
-    ],
-    "explanation": "GP 0.8.0 eq. 12.27 寫的是 S ∈ ⟨N_S → (N, N, N_G)⟩，eq. 12.28 是 S ≡ {(s ↦ S(s)) | S(s) ≠ (0, 0, 0)}，其中 S(s) ≡ (N(s), T(s), G(s))，T(s) ≡ |[t | t ↕ t, t_d = s]| 就是「送到 s 的已處理 deferred transfer 筆數」（GP PR #502 “Add back processed transfer count to service statistics”）。要算得出 T(s)，eq. 12.17 的 Δ+ 必須多回傳一個 processed-transfer 序列（回傳值是 ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩），而這份 0.7.2 程式的 OuterAccumulationOutput 只有四個欄位、型別也只是 (Gas, NumAccumulatedReports) 兩元組，篩選條件寫成 Gs + Ns == 0 也不等價於三元組全零。S 只收非零項，正是為了讓 δ‡ 只對真的被 accumulate 的服務蓋上 a_a = τ′，而 S 又是 π_S 的來源之一（eq. 13.14 的 K(S)）。",
-    "trap": "0.8.0 的 accumulation statistics 是三元組 (N, T, G)；漏掉 T 會連帶讓 Δ+ 的回傳值少一個分量。",
-},
 
 # ─────────────────────────────────────────────────────────── 9 · L2 · rationale
 {
