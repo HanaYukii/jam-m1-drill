@@ -1,7 +1,7 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 322 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-06
+Gray Paper **0.8.0** · 21 章速記 · 334 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-10
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
@@ -17,25 +17,25 @@ Gray Paper **0.8.0** · 21 章速記 · 322 題 · 92 條名詞解釋 · New-JAM
 - [附錄 N7 · PVM 與 gas](#ch-n7) — 8 題
 - [§3 Notation](#ch-3) — 10 題
 - [§4 Overview](#ch-4) — 13 題
-- [§5 The Header](#ch-5) — 21 題
-- [§6 Safrole](#ch-6) — 28 題
+- [§5 The Header](#ch-5) — 22 題
+- [§6 Safrole](#ch-6) — 30 題
 - [§7 Recent History](#ch-7) — 12 題
 - [§8 Authorization](#ch-8) — 11 題
 - [§9 Service Accounts](#ch-9) — 13 題
 - [§10 Disputes](#ch-10) — 12 題
-- [§11 Reporting & Assurance](#ch-11) — 23 題
-- [§12 Accumulation](#ch-12) — 21 題
+- [§11 Reporting & Assurance](#ch-11) — 24 題
+- [§12 Accumulation](#ch-12) — 24 題
 - [§13 Statistics](#ch-13) — 11 題
 - [§14 Work Packages & Reports](#ch-14) — 7 題
 - [附錄 A · PVM](#ch-a) — 15 題
-- [附錄 B · Host Calls](#ch-b) — 18 題
+- [附錄 B · Host Calls](#ch-b) — 19 題
 - [附錄 C · Codec](#ch-c) — 6 題
 - [附錄 D · State Merklization](#ch-d) — 8 題
 - [附錄 E · General Merklization / MMR](#ch-e) — 4 題
 - [附錄 F · Shuffling](#ch-f) — 3 題
 - [附錄 G · Bandersnatch VRF](#ch-g) — 5 題
 - [附錄 H · Erasure Coding](#ch-h) — 4 題
-- [★ Architecture & Rationale](#ch-arch) — 21 題
+- [★ Architecture & Rationale](#ch-arch) — 25 題
 - [名詞解釋](#glossary)
 
 
@@ -3105,7 +3105,7 @@ GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) exten
 
 <a id="ch-5"></a>
 
-## §5 The Header　<sub>21 題</sub>
+## §5 The Header　<sub>22 題</sub>
 
 ### 5-1　The team derives the unsigned header serialization by encoding the full header and truncating it. Why is that sound under GP 0.8.0's E(H) and E_U(H), and what is E_U's field order?
 
@@ -3657,10 +3657,35 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 ---
 
+### 5-22　The results of accumulate (δ‡, θ′ and so on) are never placed in the block. Since they are not in the block, how does the whole network reach consensus on what the state looks like after a report is accumulated, and at which step is a node that computed accumulate wrongly caught?
+
+<sub>4.1; 5.1 header; 12 — ●●○ · 概念 · eq. 4.1 (σ′ = Υ(σ, B)), eq. 5.1 (H_R), §12</sub>
+
+**標準答案**　A block carries only the extrinsic; the state is computed by every node itself as σ′ = Υ(σ, B). Consensus comes from the next block's header: its H_R must equal the parent's posterior state root. A node that computed wrongly finds its own root disagreeing with H_R, rejects the next block as invalid and cannot follow the chain — it has effectively forked itself off
+
+把三個層次分開：(1) block B = (H, E)，E 只有五個 extrinsic，沒有任何 accumulate 的輸出；(2) state σ 是每個 node 本地持有的，eq. 4.1 σ′ = Υ(σ, B) 說它是「算出來的」，不是「收到的」；(3) 共識的載體是 header 的 H_R。eq. 5.1 定義 H_R 為 prior state root，也就是父 block 執行完之後的 root。所以 block N 的 accumulate 結果，是在 block N+1 的 header 被承諾的：所有 node 匯入 N+1 時檢查 H_R = M_σ(σ_N′)，自己算的 σ_N′ 若不同，這個檢查就失敗，N+1 對它而言是無效 block，它從此接不上主鏈。這就是「算錯的 node 被抓到」的方式：不是被別人指控，而是它自己再也無法驗證後續 block。這個設計（prior root 而非 posterior）讓 block 作者不必等自己的 state Merklize 完就能發 block（§5、§20 的 pipelining 理由），代價是錯誤晚一個 block 才顯現。跟 report 的「上鏈」對照：report 在 guarantee 時就進了 block（E_G），但它的效果要到下一個 header 才被共識承諾。
+
+**逐項辨析**
+
+1. ✅ A block carries only the extrinsic; the state is computed by every node itself as σ′ = Υ(σ, B). Consensus comes from the next block's header: its H_R must equal the parent's posterior state root. A node that computed wrongly finds its own root disagreeing with H_R, rejects the next block as invalid and cannot follow the chain — it has effectively forked itself off  
+   對：eq. 5.1 的 H_R 是 prior state root（父 block 的 posterior）；eq. 4.1 說 state 是由 Υ 導出的；block 本體只有 E。
+2. ❌ The block's header carries the posterior state root H_R, so the block itself commits to the result of its own round of accumulate; on import a node first runs Υ to obtain σ′, then compares M_σ(σ′) with H_R and rejects the block on mismatch. So a wrong node is caught within the same block, without waiting for the next block to appear  
+   H_R 是 prior 不是 posterior，這正是 ch05-prior-state-root 那題的重點；同一個 block 抓不到，要等下一個。
+3. ❌ The accumulate results are placed in the block as θ′ (each service's yield hash) appended to E_G and signed by the author and 2/3 of validators; consensus comes from those signatures, and a node that computed a different θ′ signs inconsistent content, is recorded in the offenders marker H_O and is ejected at the next epoch  
+   θ′ 是 state 項目不是 extrinsic；E_G 裝的是 guarantee；沒有對 θ′ 簽名的機制。
+4. ❌ Consensus is via BEEFY: every block's accumulation output is BLS-aggregate-signed by all validators, the aggregate goes into the next block's H_O marker and anyone can verify it against γ_Z; a node whose output differs cannot join the correct aggregate signature and its share is excluded from the 2/3 threshold  
+   BEEFY 簽的是 β_B 的 super-peak、目的是給 bridge 用，且簽名不進 header；H_O 是 offenders marker。
+
+> **陷阱**　block 裡沒有結果，只有輸入；結果的共識靠「下一個」header 的 H_R。
+
+<sub>`d1-block-vs-derived-state`</sub>
+
+---
+
 
 <a id="ch-6"></a>
 
-## §6 Safrole　<sub>28 題</sub>
+## §6 Safrole　<sub>30 題</sub>
 
 ### 6-1　This is the tail of the team's CreateNewTicketAccumulator (identical on main and on the 0.8.0 branch), reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?
 
@@ -4499,6 +4524,56 @@ cs.GetPosteriorStates().SetEta(eta)
 > **陷阱**　所有 Safrole 式子都要先問：右邊是 prior 還是 posterior？
 
 <sub>`ch06-code-entropy-order`</sub>
+
+---
+
+### 6-29　The state keeps three validator sets: ι (next), κ (current) and λ (previous). κ is obviously needed. Why is λ kept in state at all, and which checks read it?
+
+<sub>6.2 validator sets; 10.3; 11.3 — ●●○ · 設計理由 · eq. 6.14, eq. 10.4, eq. 11.23</sub>
+
+**標準答案**　Because some signatures are made by last epoch's validators but only reach a block in this epoch: a verdict may carry epoch index e−1, so its judgments verify against λ; a guarantee near an epoch boundary that belongs to the previous rotation is checked with M*, recomputed from λ′; and culprit and fault offender keys may come from κ ∪ λ
+
+λ 存在的理由是「簽章時間」和「上鏈時間」可以跨 epoch。三個地方會讀它：(1) eq. 10.2–10.4：verdict 帶 epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}，a 是上個 epoch 時 K(a) = λ，判定簽章對 λ 的 Ed25519 key 驗；(2) eq. 11.23：guarantee 的 slot t 落在上一個 rotation、而那個 rotation 又屬於上個 epoch 時，指派 M* 要用 (P(|λ′|, η′_3, …), Φ(λ′)) 重算，否則 epoch 第一個 block 裡的合法 guarantee 全會被拒；(3) eq. 10.6–10.7：culprit 與 fault 的 offender key 只要在 κ ∪ λ 的 Ed25519 key 裡且不在 ψ_O 就合法。這也解釋了為什麼 η 要留到 η_3：M* 重算需要上個 epoch 的 entropy。口試追問：「如果不留 λ，最直接壞掉的是什麼？」答：epoch 換檔那一刻，所有指向上個 epoch 的 verdict 與跨 rotation 的 guarantee 都無法驗證。
+
+**逐項辨析**
+
+1. ✅ Because some signatures are made by last epoch's validators but only reach a block in this epoch: a verdict may carry epoch index e−1, so its judgments verify against λ; a guarantee near an epoch boundary that belongs to the previous rotation is checked with M*, recomputed from λ′; and culprit and fault offender keys may come from κ ∪ λ  
+   三個讀者都對：eq. 10.4 的 K(a) 在 a = e−1 時取 λ；eq. 11.23 的 M* 跨 epoch 時用 λ′；eq. 10.6–10.7 的 offender key 取自 κ ∪ λ。
+2. ❌ λ exists only for statistics: π_L records each validator's block, ticket, preimage, guarantee and assurance counts for the previous epoch and needs the matching key sequence to turn indices back into keys for rewards; disputes, guarantees and seals all verify against κ′ alone, so no validation step reads λ  
+   π_L 只存計數器不存 key，GP 也沒有 reward 結算；而 disputes 與 guarantee 的驗證確實會讀 λ。
+3. ❌ λ lets an ejected validator collect its final epoch's reward: an offender's key is dropped from κ′ when Φ filters it, but it stays in λ for one epoch so that next epoch's reward settlement can still find its Ed25519 and BLS keys; only when λ shifts once more does the validator truly leave the state  
+   GP 沒有 reward 計算；offender 是被 Φ 在輪替時歸零，不是靠 λ 留一期。
+4. ❌ λ serves the fallback: when tickets run short and γ′_S falls back to F(η′_2, ·), the slot-sealer sequence is generated from λ rather than κ′, on the grounds that λ was fixed an epoch ago and can no longer be manipulated, so an attacker cannot influence next epoch's authors by altering ι during this epoch  
+   fallback 序列 F(η′_2, κ′) 用的是 κ′，不是 λ。
+
+> **陷阱**　λ 不是紀念品，是三個跨 epoch 驗證的金鑰來源。
+
+<sub>`d1-lambda-who-reads-it`</sub>
+
+---
+
+### 6-30　A ticket submitted during epoch e is proven with ring-VRF context η′_2, yet when that ticket seals a block in epoch e+1 the seal's context uses η′_3. Why do the subscripts differ, and what does the design guarantee?
+
+<sub>6.4 entropy; 6.6 tickets; 6.7 seal — ●●● · 設計理由 · eq. 6.22–6.24, eq. 6.16, eq. 6.30</sub>
+
+**標準答案**　Different subscript, same value: at the epoch change η is shifted one place, so what was η′_2 during e is η′_3 during e+1. Ticket and seal are therefore bound to one and the same entropy snapshot, and that snapshot was fixed before ticket submission opened, so nobody can move it mid-contest
+
+§6.4：η 是四元組，η_0 是累加器，η_1、η_2、η_3 是「最近三個結束的 epoch」結束時的快照；eq. 6.23 在 e′ > e 時做 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2)。ticket 的 ring-VRF context 是 X_T ⌢ η′_2 ⧺ r（eq. 6.30），seal 的 context 是 X_T ⌢ η′_3 ⧺ i_e（eq. 6.16），而 eq. 6.16 要求 i_y = Y(H_S)：seal 的 VRF 輸出必須等於 ticket id。VRF 輸出由 key 與 context 決定，所以兩者必須用同一個 entropy 值，下標差一正好抵掉一次輪替。GP 對 η_2 的說明是「utilized to help ensure future entropy is unbiased… and seed the fallback」，對 η_3 是「used to regenerate this randomness when verifying the seal」。設計上的保證：比賽用的隨機數在 ticket 提交前就已凍結，提交期間的任何 block 都改不了它；而且 fallback 序列 F(η′_2, κ′) 也用同一個值，ticket 模式與 fallback 模式對「誰能出塊」的隨機來源是一致的。
+
+**逐項辨析**
+
+1. ✅ Different subscript, same value: at the epoch change η is shifted one place, so what was η′_2 during e is η′_3 during e+1. Ticket and seal are therefore bound to one and the same entropy snapshot, and that snapshot was fixed before ticket submission opened, so nobody can move it mid-contest  
+   正確：eq. 6.23 的輪替 (η′_1, η′_2, η′_3) = (η_0, η_1, η_2) 讓同一個值換了下標；ticket 與 seal 對同一個 context 產生同一個 VRF 輸出，i_y = Y(H_S) 才成立。
+2. ❌ They are deliberately different values: the ticket uses the older η′_2 so submitters cannot predict it, while the seal mixes in the freshest epoch's randomness through η′_3; eq. 6.16's Y(H_S) = i_y relies on the Bandersnatch VRF output being linear in the context, which relates the two outputs made under different contexts  
+   VRF 輸出對不同 context 是完全獨立的，沒有線性性質可用；若 context 不同，i_y = Y(H_S) 不可能成立。
+3. ❌ η′_2 and η′_3 are two spellings of the same state item: one appears in the tickets section and the other in the seal section, purely so that each equation matches the notation of its own chapter; an implementation stores it once and UpdateEntropy need not keep a separate slot for each  
+   它們是 η 這個四元組的兩個不同欄位，同一時刻的值通常不同，只是跨 epoch 後前者的值移到後者。
+4. ❌ The seal needs entropy one epoch newer than the ticket to prevent grinding: if authors already knew at submission time which value the seal would use, they could generate tickets repeatedly and keep the one that lands them on the slot they want; revealing it an epoch later leaves nothing to select against  
+   反了：seal 用「更新」的值反而會讓 ticket id 與 seal 輸出對不上；防 grinding 靠的是 entropy 在比賽開始前定死。
+
+> **陷阱**　看到 η′_2 與 η′_3 同時出現，先想「差一次輪替、同一個值」。
+
+<sub>`d1-entropy-lag-ticket-and-seal`</sub>
 
 ---
 
@@ -5907,7 +5982,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 <a id="ch-11"></a>
 
-## §11 Reporting & Assurance　<sub>23 題</sub>
+## §11 Reporting & Assurance　<sub>24 題</sub>
 
 ### 11-1　Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?
 
@@ -6556,10 +6631,35 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
+### 11-24　ρ is updated three times within one block: ρ† (after E_D), ρ‡ (after E_A) and ρ′ (after E_G). Why that order, and what would break if E_G were processed before E_A?
+
+<sub>4.1 dependency graph; 10.4; 11.3 — ●●○ · 設計理由 · eq. 4.x (ρ† ρ‡ ρ′), eq. 10.14, eq. 11.18</sub>
+
+**標準答案**　Disputes first, so a report judged bad is cleared before it can become available in the same block; assurances then free every core whose report became available or timed out; a guarantee may only land on a core with ρ‡[c] = ∅. With E_G before E_A, a core freed by this block's assurances would still look occupied, and a new guarantee for it would wait a block
+
+§4 的依賴圖把 ρ 的三段寫死：ρ† ≺ (E_D, ρ)、ρ‡ ≺ (E_A, ρ†)、ρ′ ≺ (E_G, ρ‡, κ, τ′)。每一段各做一件事：eq. 10.14 把 report hash 落在 ψ′_B 的 core 清空（bad 的東西不能再往下走）；eq. 11.18 把「超過 2/3 assurance 變 available」「H_T ≥ t + U 逾時」「|κ| ≠ |κ′| 集合大小改變」三種情況的 core 清空；接著 E_G 的 guarantee 只能落在 ρ‡[c] = ∅ 的 core。這個順序讓一個 core 可以在同一個 block 裡「舊 report 變 available → 新 guarantee 進來」，吞吐量才是每 core 每 slot 一份。反過來先處理 E_G，剛被釋放的 core 對這個 block 來說還是滿的，新 guarantee 會被 core_engaged 拒絕，平白浪費一個 slot。口試常見追問：「為什麼 R（剛 available 的 report）是從 ρ† 而不是 ρ 讀？」因為要先排除被 dispute 清掉的。
+
+**逐項辨析**
+
+1. ✅ Disputes first, so a report judged bad is cleared before it can become available in the same block; assurances then free every core whose report became available or timed out; a guarantee may only land on a core with ρ‡[c] = ∅. With E_G before E_A, a core freed by this block's assurances would still look occupied, and a new guarantee for it would wait a block  
+   抓到了三個順序的因果：bad 先清、available/timeout 再清、guarantee 只填空位；也說出交換後的具體代價。
+2. ❌ The order is only a presentational choice: the three extrinsics touch different fields of ρ — disputes the report hash, assurances the bitfield count, guarantees the timeslot — and none depends on another, so every ordering yields the same ρ′ and only the † and ‡ labels on the intermediate values would swap places  
+   三者不是獨立的：11.18 讀 ρ†、guarantee 的 core_engaged 檢查讀 ρ‡，順序改變會改變哪些 guarantee 有效，state root 就不同。
+3. ❌ Guarantees must come first so that there is something for assurances to attest, so the real order is E_G → E_A → E_D and a guarantee can be assured within the very block that carries it; the GP lists E_D first only because verdict signatures are the most expensive to verify and a bad block should be rejected early  
+   方向反了：assurance 背書的是「上個或更早 block」已經在 ρ 裡的 report，同一個 block 的 guarantee 還沒有 shard 可背書。
+4. ❌ Assurances must precede disputes because a verdict can only concern a report that is already available, since auditors cannot fetch the data of an unavailable one; listing E_D first is a 0.8.0 slip, and an implementation may swap the two without changing the state root  
+   verdict 針對的是 report hash，不需要它 available；而且依賴圖是規格的一部分，不是可交換的實作選擇。
+
+> **陷阱**　記口訣：清壞的 → 清完成的 → 填新的。三段各對應一個 extrinsic。
+
+<sub>`d1-rho-three-stages-order`</sub>
+
+---
+
 
 <a id="ch-12"></a>
 
-## §12 Accumulation　<sub>21 題</sub>
+## §12 Accumulation　<sub>24 題</sub>
 
 ### 12-1　Among the state items in σ written by accumulation are ω, ξ and θ. A GP 0.7.2-era Go client still calls its ready-queue field `Vartheta`. In GP 0.8.0, what do ω, ξ and θ each hold, and what was renamed?
 
@@ -7160,6 +7260,81 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 > **陷阱**　你們 issue digest 提到：eq:accseq budget now includes transfer gas + free allowances。
 
 <sub>`ch12-code-outer-accumulation`</sub>
+
+---
+
+### 12-22　The GP splits accumulation into two layers: Δ+ recurses over reports in order, and inside it Δ* aggregates everything belonging to one service into a single PVM invocation. §12.2 says this reconciles 'two slightly antagonistic factors'. What are they, and why does one sequential layer plus one parallel layer satisfy both?
+
+<sub>12.2 Execution — ●●○ · 設計理由 · §12.2 prose; eq. 12.17 (Δ+), eq. 12.18 (Δ*)</sub>
+
+**標準答案**　Gas: each work-item has only an advertised limit; real usage is known only after it runs, and only then can the unspent part fund later reports — that forces sequential execution. PVM setup cost: amortizing it means packing one service's items into one invocation — that forces aggregation. Δ+ takes a gas-bounded prefix in order and Δ* groups it by service, so each layer serves one factor
+
+§12.2 原文把問題講得很直白：一個 block 的 accumulate gas 有上限，不一定做得完 R*。第一個因素：「while we have a well-known gas-limit for each work-item to be accumulated, accumulation may still result in a lower amount of gas used. Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit. This implies a sequential execution pattern.」第二個因素：「since PVM setup cannot be expected to be zero-cost, we wish to amortize this cost over as many work-items as possible… aggregating work-items associated with the same service into the same PVM invocation. This implies a non-sequential execution pattern.」解法就是兩層：Δ+（eq. 12.17）用 gas 上限的總和挑出最長前綴 i、順序處理，跑完把 g* = g + 新 transfer 的 gas − 實際用量 傳給下一輪遞迴；Δ*（eq. 12.18）在一段裡面把 report 拆開、按 service 分組，每個 service 只呼叫一次 Ψ_A。順序給了「用剩的 gas 能流到後面」，聚合給了「一個 service 一次啟動」。這也是為什麼 operand tuple 要帶 report-level 的欄位：同一個 service 的 digest 來自不同 report，併進一次呼叫後仍得分得出來源。
+
+**逐項辨析**
+
+1. ✅ Gas: each work-item has only an advertised limit; real usage is known only after it runs, and only then can the unspent part fund later reports — that forces sequential execution. PVM setup cost: amortizing it means packing one service's items into one invocation — that forces aggregation. Δ+ takes a gas-bounded prefix in order and Δ* groups it by service, so each layer serves one factor  
+   正是 §12.2 的兩段：「Only after a work-item is accumulated can it be known if it uses less gas… This implies a sequential execution pattern」與「PVM setup cannot be expected to be zero-cost… aggregating work-items associated with the same service… implies a non-sequential execution pattern」。
+2. ❌ Safety: services must not affect one another, a panic in one must not wipe out another's changes, so reports are isolated and run one at a time with each fully settled before the next; performance: the PVM itself can run in parallel and the items inside one report are independent, so they are run concurrently. Δ+ provides the isolation and Δ* the parallelism  
+   Δ* 的並行單位是 service，不是 report 內的 item；而 service 之間的隔離靠的是各自只能改自己的 account，不是靠順序。
+3. ❌ Determinism: every node must reach the same state root, so the outer layer must follow R* strictly rather than let timing decide the order; latency: accumulate has only 10⁷ gas per report, and running everything sequentially would overrun the six-second slot, so the inner layer parallelizes to cut wall-clock time. Δ+ secures the former and Δ* the latter  
+   確定性由規格固定的順序保證，與 Δ+ 為何遞迴無關；GP 沒有拿牆鐘延遲當設計理由。
+4. ❌ Dependencies: a report with prerequisites must wait until the earlier reports have run and their results are visible, hence the outer order; transfers: the recipient must be handled in the same round or the books would not balance, so the inner layer executes sender and recipient together in one invocation. Δ+ resolves dependencies and Δ* resolves transfers  
+   依賴在 §12.1 的 Q 就已經解掉、排進 R*；transfer 是刻意「延遲」到下一輪，不是同一輪併處理。
+
+> **陷阱**　面試官問「為什麼不乾脆一個 report 一次呼叫」時，答 PVM 啟動成本那段。
+
+<sub>`d1-delta-plus-two-antagonistic-factors`</sub>
+
+---
+
+### 12-23　When service A calls transfer to service B inside accumulate, B does not receive it during the same execution; the transfer is 'deferred' to the next round. Why not make it a synchronous call, and after the deferral how does B get woken up and whose gas pays for handling it?
+
+<sub>12.2 Execution; 20 Conclusion — ●●○ · 設計理由 · §12.2 prose, eq. 12.14 (𝕏), eq. 12.17, §20 Further Work</sub>
+
+**標準答案**　Because Δ* executes services independently and none sees the others' changes from the same round; a synchronous call would break that independence. The transfer is merely recorded in this round's output; the next Δ+ recursion takes those transfers as input, adds B to the set of services to accumulate, and B receives the gas declared inside the transfer. The GP lists synchronous calls inside accumulate as a possible future change
+
+設計核心是 Δ*（eq. 12.18）的並行模型：每個 service 各自拿一份 state-context 執行，只能改自己的 account，結束後再合併。這個模型下，A 執行到一半「叫 B 現在處理一筆轉帳」是做不到的，因為 B 的執行與 A 平行、甚至可能還沒開始。於是 transfer 只是把 𝕏 = (s, d, a, m, g) 記進輸出（eq. 12.14）。§12.2 明說：「In all but the first invocation of Δ+, we also integrate the effects of any deferred-transfers implied by the previous round of accumulation」。機制上：Δ+ 遞迴時把上一輪的 t* 當輸入，n = i + |t| + |f| 的終止條件讓「report 做完但還有 transfer」時仍會再跑一輪；Δ* 的 service 集合 s 含 {t_d | t ∈ t}，所以 B 被加進來；Δ1 算 B 的 gas 時 g 含 Σ_{t_d = s} t_g，也就是 A 在 transfer 裡預付的 gas（transfer host call 會檢查 l ≥ δ[d]_m，不夠就 LOW）。這正是 0.7.1 之後「on_transfer 併進 accumulate」的樣子：B 跑同一支 accumulate，只是這次 i^T 有東西、i^U 是空的。§20 結論列的第一項 further work 就是「Synchronous calls between services in accumulate」，說明目前的延遲是刻意的取捨，不是永久限制。
+
+**逐項辨析**
+
+1. ✅ Because Δ* executes services independently and none sees the others' changes from the same round; a synchronous call would break that independence. The transfer is merely recorded in this round's output; the next Δ+ recursion takes those transfers as input, adds B to the set of services to accumulate, and B receives the gas declared inside the transfer. The GP lists synchronous calls inside accumulate as a possible future change  
+   對：§12.2「In all but the first invocation of Δ+, we also integrate the effects of any deferred-transfers implied by the previous round」，Δ* 的 service 集合含 {t_d | t ∈ t}，Δ1 的 g 含 Σ t_g；§20 把 synchronous calls 列為 further work。
+2. ❌ Because a synchronous call would make gas accounting indeterminate: at call time A cannot know how much B will use, so Δ+'s prefix selection could no longer be estimated from limits up front. The transfer is therefore postponed to the next block, where B appears in R* as a special digest-less work-report and the gas for handling it is deducted from B's own balance a_b, dropping the transfer if that would breach the threshold  
+   不是下一個 block，是同一個 block 內 Δ+ 的下一輪遞迴；gas 來自 transfer 帶的 t_g，不是 B 的餘額。
+3. ❌ Because B's accumulate code may not be present in δ yet (code hash set, preimage not yet provided); deferring by one round gives this block's preimage integration a chance to supply it, after which B is accumulated in the next round under the χ_Z always-accumulate privilege, using the fixed gas allowance registered in the χ_Z table  
+   preimage integration 在整個 accumulation 之後才做，不可能在兩輪 Δ+ 之間插入；χ_Z 是 always-accumulate 名單，與收款無關。
+4. ❌ Because no cross-service interaction is allowed on-chain at all and every data flow between services must go in-core: a transfer is really written during refine as an exported segment into the D³L, accumulate only debits A's side, and B must import that segment in a later work-package of its own and credit it in its own accumulate before it counts as received  
+   segment 是 refine 之間傳資料的管道，transfer 是 accumulate 的 host call，兩者是不同層。
+
+> **陷阱**　「延遲」是延到下一輪 Δ+，不是下一個 block；gas 是發款方預付的。
+
+<sub>`d1-deferred-transfer-why-deferred`</sub>
+
+---
+
+### 12-24　A report is accumulated as soon as it becomes available, usually before its audit has completed — so the on-chain state has already been changed by a result nobody has verified yet. What makes that safe, and what happens to the state if the report later turns out to be bad?
+
+<sub>17 Auditing; 19 Best Chain; 10 Disputes — ●●○ · 設計理由 · §17 prose, §19 (audited ∈ best-chain conditions), §10</sub>
+
+**標準答案**　'Compute first, finalize later': a node treats only an audited block as a best block it may finalize and build on; if more than 1/3 of validators judge negatively, the block containing the report is ban-listed and it and all its descendants are disregarded. The bad state changes are not undone in place; the whole branch is abandoned and the chain regrows from before it
+
+這題考的是 JAM 分層的本質：state transition（§4–13）只認 availability，不認 audit；audit（§17）與 best-chain 選擇（§19）是 off-chain 的誠實策略。§17 原文：「Once all of any given block's newly available work-reports are audited, then we consider the block to be audited. One prerequisite of a node finalizing a block is for it to view the block as audited.」§19 的 best block 條件之一就是「Is considered audited」。負面判定的後果也在 §17：「If greater than 1/3 of the validators issue negative judgments, then the block which includes the work-report is ban-listed. It and all its descendants are disregarded and may not be built on.」所以「未驗證的結果改了 state」是被允許的，代價由兩件事兜住：GRANDPA 不會 finalize 未 audited 的 block（所以壞結果不會變成不可逆），而一旦判定為壞，整條分支被放棄、由 disputes extrinsic 把 verdict 與 offender 記上鏈。state 從來不做「逐項撤銷」，撤銷的單位是 block。這也是 JAM 敢把 accumulate 放在 audit 之前的原因：audit 需要重跑 refine，太慢，若等它做完才 accumulate，pipeline 的延遲會從幾個 slot 變成幾十個。
+
+**逐項辨析**
+
+1. ✅ 'Compute first, finalize later': a node treats only an audited block as a best block it may finalize and build on; if more than 1/3 of validators judge negatively, the block containing the report is ban-listed and it and all its descendants are disregarded. The bad state changes are not undone in place; the whole branch is abandoned and the chain regrows from before it  
+   對：§17「One prerequisite of a node finalizing a block is for it to view the block as audited」與「the block which includes the work-report is ban-listed. It and all its descendants are disregarded and may not be built on」；§19 把 audited 列為 best block 條件。
+2. ❌ Atomicity in accumulate: before running, Ψ_A looks up the report's audit status, and an unaudited report is only parked in ω and kept out of Δ+ until enough positive judgments have accrued on-chain; so the state never contains an unverified result, and there is no such thing as discovering afterwards that a report was bad  
+   Ψ_A 與 ω 都不知道 audit 的存在；audit 是 off-chain 的，state transition 只看 availability。
+3. ❌ A rollback instruction in disputes: when the verdict is bad, E_D carries, besides the verdict, an auditor-signed reverse diff listing which storage keys and balances the report's accumulate touched; the next block's accumulate first applies that diff, restoring every change item by item, and only then processes new reports  
+   GP 沒有反向 diff；state 是一整棵 Merkle trie，撤銷靠的是換分支。
+4. ❌ The guarantors' stake: the three guarantors of a bad report are slashed by an amount scaled to the report's gas usage, enough to compensate the affected services; the state itself is left alone because in JAM's model an in-core error is absorbed economically, and undoing state would break the prior state roots of later blocks  
+   slash 存在但不是保護 state 的機制；壞結果若留在 canonical chain 上，賠償也救不回被污染的 state。
+
+> **陷阱**　撤銷的單位是 block（換分支），不是 report；finality 才是真正的閘門。
+
+<sub>`d1-accumulate-before-audit`</sub>
 
 ---
 
@@ -8191,7 +8366,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 <a id="ch-b"></a>
 
-## 附錄 B · Host Calls　<sub>18 題</sub>
+## 附錄 B · Host Calls　<sub>19 題</sub>
 
 ### B-1　A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. What is that order, and what kind of error does each constant name?
 
@@ -8785,6 +8960,31 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
    暫存器數量不是限制：每個來源本來就只需要 selector 加上輸出緩衝的位址與長度。
 
 <sub>`appB-fetch-purpose`</sub>
+
+---
+
+### B-19　Ψ_A's context is a pair (x, y): x is the regular dimension, y the exceptional one. A service, during accumulate, does in order: write storage → checkpoint → transfer to another service → write storage again → panic. What does the invocation return, and what is y for?
+
+<sub>B.4 Accumulate Invocation — ●●○ · 概念 · §B.4 prose (regular vs exceptional dimension), collapse function C, Ω_C</sub>
+
+**標準答案**　It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; with no checkpoint, y is the pre-invocation state, so a panic is a full rollback
+
+§B.4 原文：「our invocation context to be a pair of these contexts… one dimension being the regular dimension and generally named x and the other being the exceptional dimension and being named y. The only function which actually alters this second dimension is checkpoint, Ω_C」，以及「we… collapse the result of the invocation to one or the other depending on whether the termination was regular or exceptional (i.e. out-of-gas or panic)」。所以 Ψ_A 的回傳值（poststate、defxfers、yield、provisions）在 regular halt 時全部取自 x，在 panic 或 ∞ 時全部取自 y。走一遍題目的序列：呼叫開始 y = x = 初始 context；第一次 write 改 x；checkpoint 把 x 複製到 y（此時 y 含第一次 write）；transfer 與第二次 write 只改 x；panic → collapse 取 y → 第一次 write 留下、transfer 沒有發出、第二次 write 消失。設計意義：service 作者可以用 checkpoint 把「已經確認要生效的部分」鎖住，後面再做風險較高的事，失敗時不必從零重來；同時 transfer 也跟著 y 走，不會出現「錢轉出去了但帳沒記」的半套狀態。
+
+**逐項辨析**
+
+1. ✅ It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; with no checkpoint, y is the pre-invocation state, so a panic is a full rollback  
+   對：§B.4 說 collapse function C 依終止是 regular 還是 exceptional（out-of-gas 或 panic）選 x 或 y；y 只被 Ω_C（checkpoint）改寫，初始值等於呼叫前的 context。
+2. ❌ It returns x as it stood the instant before the panic: both storage writes and the transfer survive, and only the instructions not yet executed after the panic have no effect, since a panic is merely an early stop rather than an error. y is used solely for out-of-gas: when gas runs out the machine cannot vouch for x's consistency, so only then does it fall back to the y taken at checkpoint  
+   panic 是 exceptional 終止，結果取 y 不取 x；y 對 panic 與 out-of-gas 一視同仁。
+3. ❌ It returns the pre-invocation state with every change discarded, because any exceptional termination signals a bug in the service logic: checkpoint only resets where gas accounting starts and how ϱ is refunded, never the state; y is a copy the GP introduces so that the collapse function formally always has something to select, and an implementation need not store it  
+   checkpoint 就是把 x 複製進 y，直接改變回傳的 state；沒有 checkpoint 才會退到呼叫前。
+4. ❌ It returns a merge of x and y: storage writes are taken from x (newer, so both count), transfers from y (safer, so that transfer is not sent), and the panic only clears the yield to ∅ and empties the provisions; that way a service never loses all its progress to one bug and never sends a transfer it did not get to confirm  
+   GP 沒有任何合併規則：整個結果 (state, transfers, yield, provisions) 一律從同一個維度取。
+
+> **陷阱**　panic 與 out-of-gas 對 y 一視同仁；沒 checkpoint 就是整次作廢。
+
+<sub>`d1-checkpoint-collapse-walkthrough`</sub>
 
 ---
 
@@ -9783,7 +9983,7 @@ GP 0.8.0 的 eq. H.1：𝒟(v ∈ 𝕍) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d
 
 <a id="ch-arch"></a>
 
-## ★ Architecture & Rationale　<sub>21 題</sub>
+## ★ Architecture & Rationale　<sub>25 題</sub>
 
 ### ARCH-1　Where does the name 'JAM' come from, and which stages of the original CoreJam model actually execute on-chain?
 
@@ -10307,6 +10507,106 @@ eq. 17.2：s_0 ∈ F_{κ[v]_b}^{X_U ⌢ Y(H_V)}([])，X_U = $jam_audit——VRF 
 > **陷阱**　審計 = 重跑 computereport 並比對整個 report；解不出 bundle 本身就代表 report 無效。
 
 <sub>`arch-audit-reconstruction`</sub>
+
+---
+
+### ARCH-22　The Discussion chapter gives three numbers: 1,023 validators, three validators per core, and a mean of ten audits per validator per timeslot. How do those yield '341 cores' and '30 audits per work-report', and which figure changes when the validator set shrinks?
+
+<sub>20 Discussion – Technical Characteristics — ●●○ · 概念 · §20.1 prose, §11.3 (three validators per core), eq. 6.8</sub>
+
+**標準答案**　Cores = validators ÷ validators per core = 1023 ÷ 3 = 341; audits per report = audits per validator per slot × validators ÷ reports = 10 × 1023 ÷ 341 = 30. When the set shrinks the number of active cores becomes |κ| ÷ 3, while the 30 audits per report stay as they are
+
+§20.1 原文一句話把三個數綁在一起：「In total, with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of trustlessly processing and integrating 341 work-packages per timeslot.」算法：每個 core 需要 3 位 guarantor，1023 人剛好分成 341 組，所以 C = 341 不是任意常數，是 1023 = 3 × 341 推出來的；audit 是「每人每 slot 平均 10 份」，全網每 slot 共 10 × 1023 次 audit，分攤到每 slot 最多 341 份 report，每份約 30 次。0.8.0 把 validator set 改成可變（eq. 6.8：3 的倍數、6 到 1023）之後，「每 core 3 人」不變，所以啟用的 core 數變成 |κ|/3：tiny config 6 人就是 2 個 core；而 eq. 11.28 也用 |κ′|/3 當 core index 的上界。每份 report 30 次 audit 這個目標值則來自 audit 的抽樣參數（§17 的 tranche 與 F = 2），不隨 set 大小縮放。口試若問「為什麼是 341」，答「1023 除以 3」就夠。
+
+**逐項辨析**
+
+1. ✅ Cores = validators ÷ validators per core = 1023 ÷ 3 = 341; audits per report = audits per validator per slot × validators ÷ reports = 10 × 1023 ÷ 341 = 30. When the set shrinks the number of active cores becomes |κ| ÷ 3, while the 30 audits per report stay as they are  
+   對：§20.1「with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of… 341 work-packages per timeslot」；0.8.0 啟用 core 數 = |κ|/3。
+2. ❌ The core count is the protocol constant C = 341, fixed in §I independently of the validator count; 30 = 10 × 3 because each of a report's three guarantors recruits ten auditors of its own. When the set shrinks the core count is unchanged and every core keeps three guarantors, only the audits per report scale down to 10 × |κ| ÷ 1023  
+   C = 341 是「最大」core 數，啟用數隨 |κ|/3 變；30 是總 audit 量 ÷ report 數，與 guarantor 招人無關。
+3. ❌ 341 = 1023 ÷ 3 because a report needs three independent audit judgments to count as audited, so 1023 validators can audit at most 341 reports at once; 30 = 3 × 10 is three guarantors times ten tranches each. When the set shrinks the tranches needed per report drop while the core count stays at 341  
+   三位是 guarantor 不是 auditor；audited 的條件是 tranche 內所有應 audit 者都給正面判定，不是固定三次。
+4. ❌ Both 341 and 30 are hardware ceilings derived from the 0.5 GbE link and the 16-core CPU assumption and bear no arithmetic relation to the validator count. When the set shrinks neither changes; instead the guarantors per core drop from three to one so that all 341 cores remain active  
+   0.5 GbE 是硬體假設，不是這兩個數字的來源；每 core 永遠 3 位 guarantor，變的是 core 數。
+
+> **陷阱**　341 是算出來的，不是選出來的：1023 ÷ 3。
+
+<sub>`d1-three-thirty-341`</sub>
+
+---
+
+### ARCH-23　§1.3 says JAM does not avoid asynchrony but 'bounds it to the length of the pipeline'. Which concrete limits in the protocol realise that sentence, and how long can one piece of work take from in-core execution to affecting the state?
+
+<sub>1.3 Scaling under Size-Coherency Antagonism; 11; 12 — ●●● · 設計理由 · §1.3 prose, eq. 11.18 (U), ω ∈ ⟦…⟧_E, eq. 11.38 (L)</sub>
+
+**標準答案**　Three limits: a guarantee sitting in ρ is cleared unless its report becomes available within U = 5 slots; a report with dependencies waits in ω at most one epoch and is then dropped; the lookup-anchor refine reads may be at most L = 14,400 slots old. So a report is either accumulated within a handful of slots or discarded; there is no 'pending indefinitely' state
+
+§1.3 原文：「Asynchrony is not avoided, but we bound it to the length of the pipeline」。這句的具體實現分布在三章：(1) eq. 11.18：ρ‡[c] = ∅ 的條件之一是 H_T ≥ t + U，U = 5，也就是 guarantee 上鏈後 5 個 slot 內若 assurance 沒過 2/3，這個 core 就被清空、report 作廢，必須重新 guarantee；(2) §12.1：ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 是一個 E 格的環，report 進 ω 之後若依賴一直沒滿足，一個 epoch 後那一格被覆寫，report 消失；(3) eq. 11.38：refinement context 的 lookup-anchor 時間必須 ≥ H_T − L，L = 14,400 slot（24 小時），所以 refine 看到的「舊 state」有年齡上限，audit 重跑時也才找得到同樣的 preimage（D = L + 4,800 就是為此留的安全邊際）。把三者合起來：正常路徑是 guarantee → 幾個 slot 內 available → 同一個 block accumulate；異常路徑是 5 個 slot 內出局或一個 epoch 內出局。這就是「mostly coherent」的量化版本：in-core 與 on-chain 的落差是有上限的、可計算的，不像跨鏈訊息那樣沒有期限。
+
+**逐項辨析**
+
+1. ✅ Three limits: a guarantee sitting in ρ is cleared unless its report becomes available within U = 5 slots; a report with dependencies waits in ω at most one epoch and is then dropped; the lookup-anchor refine reads may be at most L = 14,400 slots old. So a report is either accumulated within a handful of slots or discarded; there is no 'pending indefinitely' state  
+   對：eq. 11.18 的 H_T ≥ t + U 清 ρ‡；ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 只有 E 格、逾期出局；eq. 11.38 要求 lookup-anchor 時間 ≥ H_T − L。
+2. ❌ A single limit: GRANDPA finality. A report may wait indefinitely until the block carrying it is finalized — ρ never clears it and ω never drops it — and the first block after finalization accumulates it. So the pipeline's length is the finality delay: a couple of slots normally, unbounded under a network partition  
+   accumulate 與 finality 無關；state transition 只看 availability，finality 是 off-chain 決定「哪條分支不可逆」。
+3. ❌ The limit is the epoch: every report guaranteed in epoch e must be accumulated before epoch e ends, otherwise ρ and ω are both emptied at the epoch change, the epoch's unfinished reports are voided and builders must resubmit them. U and L are only implementation hints the GP offers, not part of the state-transition rules  
+   沒有「整個 epoch 作廢」的規則；U 與 L 都是 §I 的協定常數，寫在 eq. 11.18 與 11.38 裡。
+4. ❌ There is no hard limit: asynchrony converges naturally through the audit tranches, a report stays in ρ until its audit completes and enough positive judgments arrive, and only then is it accumulated; 'pipeline length' refers to the expected number of audit rounds, about three to four tranches or 24 to 32 seconds with F = 2  
+   ρ 的清空條件是 available、timeout、set 大小改變，與 audit 進度無關；audit 是 off-chain。
+
+> **陷阱**　答三個常數：U = 5 slot、ω 一個 epoch、L = 24 小時。
+
+<sub>`d1-bounded-asynchrony-concrete`</sub>
+
+---
+
+### ARCH-24　The GP calls in-core 'mostly coherent' and on-chain 'fully coherent'. Applied to refine, what does 'mostly' concretely mean — how much chain state can refine see, and through what mechanism?
+
+<sub>1.3; 4.9.1; 11.2 — ●●○ · 設計理由 · §1.3, §4.9.1 prose, eq. 11.4 (context), eq. 11.38, §B.2 (historical_lookup)</sub>
+
+**標準答案**　Refine cannot see the current state; it can only see, through the lookup-anchor, the preimages as they stood at a recent finalized block: the refinement context names the anchor and historical_lookup queries that point in time. So refine sees an age-bounded old snapshot — coherent, but lagging the head by a bounded distance — whereas accumulate sees the exact current state
+
+§1.3 的措辭：「pipelines a highly scalable, mostly coherent element to a synchronous, fully coherent element」。§4.9.1 給了 in-core 的設計原則：「Execution done in-core is therefore designed to be as stateless as possible. The requirements for doing it include only the refinement code of the service, the code of the authorizer and any preimage lookups it carried out during its execution.」以及「a specific block known as the lookup-anchor is identified. Correct behavior requires that this must be in the finalized chain and reasonably recent」。§B.2 對 Ψ_R 的描述更直接：「It has no general access to the state of the JAM chain, with the slight exception being the ability to make a historical lookup.」所以 refine 唯一的 state 視窗是 Ω_H（historical_lookup），對著 refinement context（eq. 11.4）裡的 lookup-anchor 查 preimage，且 eq. 11.38 要求那個 anchor 不超過 L 個 slot 舊。「mostly coherent」就是：in-core 的運算跟鏈是有因果關係的（它看得到不久前的鏈上事實），但這個關係有時間差、且時間差有上限。accumulate 相反，它在 Δ* 裡拿到的是這個 block 當下的 δ、χ、ι、φ，所以是 fully coherent。這也是為什麼 refine 要 stateless：任何 auditor 在幾個 epoch 後重跑，看到的 lookup-anchor 快照必須一模一樣，否則 audit 無法判定對錯。
+
+**逐項辨析**
+
+1. ✅ Refine cannot see the current state; it can only see, through the lookup-anchor, the preimages as they stood at a recent finalized block: the refinement context names the anchor and historical_lookup queries that point in time. So refine sees an age-bounded old snapshot — coherent, but lagging the head by a bounded distance — whereas accumulate sees the exact current state  
+   對：§B.2「It has no general access to the state of the JAM chain, with the slight exception being the ability to make a historical lookup」；§4.9.1 說 lookup-anchor「must be in the finalized chain and reasonably recent」。
+2. ❌ 'Mostly' means refine may read but not write: through the read and lookup host calls it sees state as fresh as accumulate does, including other services' storage and balances, but any write is discarded when the report is produced and never reaches the state; 'fully' means accumulate may both read and write, and its writes are Merklized into the state root  
+   read 與 lookup 是 Ψ_A 的 host call，Ψ_R 沒有；refine 也沒有「寫了再丟」這回事。
+3. ❌ 'Mostly' is probabilistic: a refine result counts as coherent with the chain only once more than 2/3 of validators have assured it, before which it is merely three guarantors' claim, and the remaining 1/3 represents the chance it is never accepted; on-chain accumulate is 100% coherent with no probabilistic element because every node re-executes it  
+   2/3 是 availability 門檻，管的是資料拿不拿得回來，跟 coherency 的定義無關。
+4. ❌ 'Mostly' means refine sees only its own service's state and not other services': through fetch it reads a snapshot of its own storage as of the anchor, so it is coherent with itself but not with the whole chain; 'fully' means accumulate can read every service's state through read and info and is coherent with the entire chain  
+   refine 連自己 service 的 storage 都看不到；fetch 讀的是 work-package 與常數，不是 state。
+
+> **陷阱**　refine 的 state 視窗只有一扇：historical_lookup 對 lookup-anchor。
+
+<sub>`d1-mostly-coherent-lookup-anchor`</sub>
+
+---
+
+### ARCH-25　In Polkadot 1.0 a core is bound to one parachain: it only ever validates that chain's blocks. The GP says JAM cores are un-opinionated. So in JAM, what decides 'which work this core accepts right now', and what replaces the auctioned slot?
+
+<sub>2.1 Polkadot; 4.9; 8 Authorization — ●●○ · 設計理由 · §2.1 prose, §8 prose, eq. 8.2, §B (assign)</sub>
+
+**標準答案**　Each core's authorizer pool α[c]: a work-package is accepted by the core's guarantors only if its authorizer is in the pool, and the service named inside the package decides which refine actually runs. The pool is refilled from the queue φ[c], and φ[c] can be rewritten only by that core's assigner via assign. Auctions are replaced by coretime: whoever buys coretime has the assigner schedule their authorizer into φ[c]
+
+§2.1 對 Polkadot 的批評是「clients able to utilize its service [are] those who… raise a sufficient deposit to win an auction for a long-term slot」。JAM 把「誰能用 core」拆成兩層。第一層是 §8 的 authorization system：「a means of disentangling the intention of usage for some coretime from the specification and submission of a particular workload」。每個 core 有 pool α[c]（eq. 8.1，最多 O = 8 個 authorizer hash）與 queue φ[c]（Q = 80 格），eq. 8.2 每個 block 從 φ[c][H_T mod Q] 移一個進 pool、並移掉這個 block 用掉的那個。guarantor 只做「authorizer 在 α[c] 裡」的 package，而 authorizer 的 is-authorized 程式在 in-core 執行、決定放不放行（§8：「happens entirely in-core」）。第二層是誰能寫 φ[c]：§8 註明「may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service」，也就是 χ_A[c] 指定的 assigner service 呼叫 assign。coretime 的買賣本身 GP 留白（§4.9：「Its procurement is out of scope」），預期由一個 system service 處理，買到的人把 authorizer 交給 assigner 排進 φ。所以 core 對「跑什麼」完全沒有意見：它只認 pool 裡的 authorizer，package 裡的 service index 才決定跑哪支 refine。parachain 在這個框架下只是「authorizer 放行 parachain block、service 是 parachains service」的特例。
+
+**逐項辨析**
+
+1. ✅ Each core's authorizer pool α[c]: a work-package is accepted by the core's guarantors only if its authorizer is in the pool, and the service named inside the package decides which refine actually runs. The pool is refilled from the queue φ[c], and φ[c] can be rewritten only by that core's assigner via assign. Auctions are replaced by coretime: whoever buys coretime has the assigner schedule their authorizer into φ[c]  
+   對：§8「the set of authorizers allowable for a particular core c as the authorizer pool α[c]」、「φ may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service」；§4.9 說 coretime 取代 Ethereum 的 gas 購買與 Polkadot 的 slot。
+2. ❌ The service's registration: when a service is created with new it supplies, besides its code hash and initial balance, the list of cores it will use, and the registrar marks those cores' ρ entries as belonging to it; from then on those cores' guarantors accept only that service's packages and reject all others with core_unauthorized. The auction is replaced by the one-off creation fee and deposit paid to new  
+   new 只建立 account，不綁 core；ρ 裝的是 guarantee 不是歸屬標記；service 與 core 之間沒有靜態關係。
+3. ❌ The guarantors themselves: at the start of each rotation the three guarantors assigned to a core confer and vote on which service's packages their R = 10 slots will serve first, recording the vote in the guarantee's credential so the chain can see it; the auction is replaced by a market among validators in which a service pays guarantors directly for priority  
+   guarantor 只檢查 α[c]，沒有投票權；指派是被 entropy 洗牌決定的，credential 裡只有簽章。
+4. ❌ The refinement context: the builder declares the intended core index in the package's context, guarantors only process packages that name their core, and on-chain logic merely checks that no two reports in one block use the same core and that the index is below |κ′|/3; the auction is replaced by first-come-first-served — whoever's package reaches the guarantors first gets the slot  
+   core index 是 report 的欄位，但「能不能用這個 core」由 α[c] 決定，不是先到先得。
+
+> **陷阱**　兩把鑰匙：α[c] 決定「哪些 package 能上」，package 的 service 決定「跑什麼」。
+
+<sub>`d1-core-unopinionated-what-binds`</sub>
 
 ---
 
