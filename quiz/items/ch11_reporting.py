@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch11-rho-state",
+ "lens": "設計",
  "ch": "11", "section": "11.1 State", "gpRef": "eq. 11.1 (ρ)",
  "difficulty": 2, "kind": "delta", "tags": ["reports", "state", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，ρ（availability assignments）的每一項裝什麼？PR #494 又為什麼要改它？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch11-workreport-fields",
+ "lens": "設計",
  "ch": "11", "section": "11.1.1 Work Report", "gpRef": "eq. 11.2–11.3",
  "difficulty": 2, "kind": "concept", "tags": ["reports"],
   "stemZh": "一份 work-report（eq. 11.2，屬於集合 ℝ）是一個元組 (s, c, c, a, t, l, d, g)——粗體 c 是 refinement context、細體 c 是 core 索引。每個欄位各裝什麼？g 又常被誤認成什麼？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch11-refinement-context",
+ "lens": "機制",
  "ch": "11", "section": "11.1.2 Refinement Context", "gpRef": "eq. 11.4",
  "difficulty": 2, "kind": "delta", "tags": ["reports", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0（PR #526）中，refinement context（eq. 11.4，屬於集合 ℂ）包含哪些欄位？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "ch11-avspec",
+ "lens": "演算法",
   "alsoCh": ["14", "H"],
  "ch": "11", "section": "11.1.3 Availability", "gpRef": "eq. 11.5, 11.31",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "availability"],
@@ -116,6 +120,7 @@ ITEMS = [
 },
 {
  "id": "ch11-work-errors",
+ "lens": "演算法",
  "ch": "11", "section": "11.1.4 Work Digest", "gpRef": "eq. 11.6–11.7",
  "difficulty": 2, "kind": "concept", "tags": ["reports", "errors"],
   "stemZh": "一個 work-digest 的結果不是 blob 就是錯誤集合 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG}（eq. 11.7）的成員。每個錯誤各是什麼意思？",
@@ -144,6 +149,7 @@ ITEMS = [
 },
 {
  "id": "ch11-assurance-rules",
+ "lens": "演算法",
  "ch": "11", "section": "11.2 Package Availability Assurances", "gpRef": "eq. 11.11–11.16",
  "difficulty": 2, "kind": "concept", "tags": ["assurances"],
   "stemZh": "E_A 裡的一份 assurance 由什麼組成？assurances extrinsic 必須滿足哪些規則？",
@@ -172,6 +178,7 @@ ITEMS = [
 },
 {
  "id": "ch11-availability-threshold",
+ "lens": "時機",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17–11.18",
  "difficulty": 2, "kind": "delta", "tags": ["assurances", "delta-0.8.0", "tiny"],
   "stemZh": "在 GP 0.8.0 中，一份 report 什麼時候變成 available（R）？待處理的 assignment 又在什麼時候從 ρ‡ 被清除？",
@@ -200,6 +207,7 @@ ITEMS = [
 },
 {
  "id": "ch11-guarantor-assignment",
+ "lens": "演算法",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.19–11.23",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "shuffle"],
   "stemZh": "在 GP 0.8.0 中，validator 是怎麼被指派到 core 上去做擔保的？",
@@ -228,6 +236,7 @@ ITEMS = [
 },
 {
  "id": "ch11-guarantee-validity",
+ "lens": "演算法",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.24–11.29",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees"],
   "stemZh": "對 E_G 裡的一份 guarantee g = (w, t, a)：credential a 裡有什麼？誰能簽？slot t 的範圍怎麼限？簽的是什麼？core 又怎麼限？",
@@ -256,6 +265,7 @@ ITEMS = [
 },
 {
  "id": "ch11-report-checks-state",
+ "lens": "時機",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.31–11.33",
  "difficulty": 2, "kind": "concept", "tags": ["guarantees", "gas"],
   "stemZh": "在一份進來的 report w 被放進 ρ′ 之前，要通過哪些鏈上檢查？",
@@ -284,6 +294,7 @@ ITEMS = [
 },
 {
  "id": "ch11-contextual-validity",
+ "lens": "演算法",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.35–11.45",
  "difficulty": 3, "kind": "concept", "tags": ["guarantees", "context"],
   "stemZh": "E_G 中 report 的脈絡有效性要求有哪些？又有哪一條聽起來合理、GP 其實沒有要求的規則？",
@@ -312,6 +323,7 @@ ITEMS = [
 },
 {
  "id": "ch11-rho-prime",
+ "lens": "時機",
  "ch": "11", "section": "11.5 Transitioning for Reports", "gpRef": "eq. 11.46",
  "difficulty": 1, "kind": "concept", "tags": ["guarantees", "state"],
   "stemZh": "處理完 E_G 之後，對於收到一份新 guarantee g 的 core，ρ′[c] 裝的是什麼？",
@@ -340,6 +352,7 @@ ITEMS = [
 },
 {
  "id": "ch11-code-availability",
+ "lens": "演算法",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17 — internal/extrinsic/assurance_controller.go",
  "difficulty": 2, "kind": "code", "tags": ["assurances", "code", "delta-0.8.0"],
   "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。這是 GP 的門檻嗎？它的正確性取決於什麼？",

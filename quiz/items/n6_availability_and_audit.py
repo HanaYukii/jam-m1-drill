@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n6-why-erasure-coding",
+ "lens": "設計",
   "ch": "N6", "section": "§11.2; App. H", "gpRef": "§11 & App. H",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "availability"],
   "stem": "Why does JAM erasure-code a work-package instead of simply asking every validator to keep a full copy?",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n6-what-auditing-does",
+ "lens": "設計",
   "ch": "N6", "section": "§17 Auditing", "gpRef": "§17",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "audit"],
   "alsoCh": ["N1"],
@@ -61,6 +63,7 @@ ITEMS = [
  },
  {
   "id": "n6-why-random-auditors",
+ "lens": "設計",
   "ch": "N6", "section": "§17", "gpRef": "§17",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "audit"],
   "stem": "Auditors are picked by a verifiable random function rather than volunteering or being appointed. Why does that matter?",
@@ -89,6 +92,7 @@ ITEMS = [
  },
  {
   "id": "n6-disputes-three-outcomes",
+ "lens": "設計",
   "ch": "N6", "section": "§10 Disputes", "gpRef": "§10",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "disputes"],
   "stem": "A dispute over one report ends in one of three verdicts. What are they, and what is the third one for?",
@@ -117,6 +121,7 @@ ITEMS = [
  },
  {
   "id": "n6-offender-consequence",
+ "lens": "設計",
   "ch": "N6", "section": "§10; §6.3", "gpRef": "§10 & §6",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "disputes"],
   "alsoCh": ["N3"],
@@ -146,6 +151,7 @@ ITEMS = [
  },
  {
   "id": "n6-why-two-thirds",
+ "lens": "設計",
   "ch": "N6", "section": "§11.2; §17", "gpRef": "§11 & §17",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "thresholds"],
   "stem": "The availability threshold is set above two thirds of validators. Why not a simple majority?",
@@ -174,6 +180,7 @@ ITEMS = [
  },
  {
   "id": "n6-chain-of-guarantees",
+ "lens": "設計",
   "ch": "N6", "section": "§11; §17; §10", "gpRef": "§11, §17 & §10",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "security"],
   "alsoCh": ["N5"],
@@ -203,6 +210,7 @@ ITEMS = [
  },
  {
   "id": "n6-two-da-basic",
+ "lens": "對比",
   "ch": "N6", "section": "§11.2; §14", "gpRef": "§11 & §14",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "availability"],
   "stem": "JAM keeps two different kinds of data available, with different lifetimes. What are they for?",

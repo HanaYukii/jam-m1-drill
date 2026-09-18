@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch05-header-fields",
+ "lens": "機制",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.1",
  "difficulty": 1, "kind": "concept", "tags": ["header"],
   "stemZh": "GP eq. 5.1 把 header H 定義為一個十元組。列出十個欄位——再說一個大家以為 header 裡會有、JAM 卻刻意不放的東西。",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch05-prior-state-root",
+ "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.9 (H_r)",
  "difficulty": 1, "kind": "rationale", "tags": ["header", "pipelining"],
   "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是先前的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch05-extrinsic-hash-080",
+ "lens": "演算法",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7 (H_x)",
  "difficulty": 3, "kind": "delta", "tags": ["header", "delta-0.8.0", "codec"],
   "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "ch05-timeslot-validity",
+ "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8",
  "difficulty": 1, "kind": "concept", "tags": ["header", "time"],
   "stemZh": "一個區塊的時槽 H_T 必須滿足什麼條件，現在才算有效？",
@@ -115,6 +119,7 @@ ITEMS = [
 },
 {
  "id": "ch05-author-index",
+ "lens": "機制",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 (H_i, H_a)",
  "difficulty": 2, "kind": "concept", "tags": ["header", "validators"],
   "stemZh": "出塊者索引 H_I 指涉的是哪一個 validator 集合？出塊者的 Bandersnatch 金鑰 H_A 又是怎麼取得的？",
@@ -143,6 +148,7 @@ ITEMS = [
 },
 {
  "id": "ch05-ancestors-lookup-anchor",
+ "lens": "機制",
   "alsoCh": ["11"],
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
  "difficulty": 2, "kind": "concept", "tags": ["header", "ancestry"],
@@ -172,6 +178,7 @@ ITEMS = [
 },
 {
  "id": "ch05-markers-types",
+ "lens": "機制",
  "ch": "5", "section": "5.1 The Markers", "gpRef": "eq. 5.11 (markers)",
  "difficulty": 2, "kind": "concept", "tags": ["header", "markers"],
   "stemZh": "依 eq. 5.11，三個 header marker（H_E、H_W、H_O）的型別各是什麼？哪些是 optional？",

@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch12-history-queue-state",
+ "lens": "演算法",
  "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.1–12.3",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "state"],
   "stemZh": "ξ（accumulated）與 ω（ready）是什麼？它們各有多大？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch12-W-partition",
+ "lens": "時機",
  "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.4–12.12 (W!, W^Q, E, Q, W*)",
  "difficulty": 3, "kind": "concept", "tags": ["accumulation", "dependencies"],
   "stemZh": "可被 accumulate 的 report 序列 R* 是怎麼從新變為 available 的 report R 建構出來的？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch12-gas-budget",
+ "lens": "演算法",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24 (g) & 12.17 (Δ+)",
  "difficulty": 3, "kind": "delta", "tags": ["accumulation", "gas", "delta-0.8.0"],
   "stemZh": "一個區塊交給外層 accumulation Δ+ 的總 gas 預算 g 是多少？Δ+ 又是怎麼決定一輪要 accumulate 幾份 report 的？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "ch12-delta-star",
+ "lens": "時機",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.18–12.19 (Δ*, R)",
  "difficulty": 3, "kind": "concept", "tags": ["accumulation", "privileges"],
   "stemZh": "在 Δ*（平行 accumulation）中，哪些 service 會被 accumulate？當 manager 與某個具特權的 service 同時寫入同一個特權索引——assigners、delegator 或 registrar——時，哪一次寫入會存活？",
@@ -115,6 +119,7 @@ ITEMS = [
 },
 {
  "id": "ch12-delta-one-gas",
+ "lens": "演算法",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.23 (Δ1)",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "gas"],
   "stemZh": "對單一個 service s，Δ1 會呼叫 Ψ_A(e, τ′, s, g, i^T ⌢ i^U)。gas g 是怎麼算出來的？輸入又是什麼？",
@@ -143,6 +148,7 @@ ITEMS = [
 },
 {
  "id": "ch12-deferred-transfer",
+ "lens": "時機",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.14 & B.transfer",
  "difficulty": 1, "kind": "concept", "tags": ["accumulation", "transfers"],
   "stemZh": "一筆 deferred transfer T = (s, d, a, m, g)。這些欄位是什麼？餘額又是在什麼時候移動的？",
@@ -171,6 +177,7 @@ ITEMS = [
 },
 {
  "id": "ch12-outputs",
+ "lens": "時機",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24–12.33 (δ† → δ‡ → δ′)",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "state"],
   "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，每一項各怎麼併入 posterior 狀態？",
@@ -199,6 +206,7 @@ ITEMS = [
 },
 {
  "id": "ch12-preimage-integration",
+ "lens": "時機",
  "ch": "12", "section": "12.4 Preimage Integration", "gpRef": "eq. 12.34–12.37",
  "difficulty": 2, "kind": "concept", "tags": ["accumulation", "preimages"],
   "stemZh": "preimages extrinsic E_P 受什麼規則管轄——什麼可以收、對哪個狀態檢查——又是怎麼、在什麼時候併入 δ′？",
@@ -227,6 +235,7 @@ ITEMS = [
 },
 {
  "id": "ch12-code-outer-accumulation",
+ "lens": "對比",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.17 — internal/accumulation/accumulation.go OuterAccumulation",
  "difficulty": 3, "kind": "code", "tags": ["accumulation", "code", "delta-0.8.0"],
   "stemZh": "這是團隊在 Δ+ 中的前綴選取程式碼。對照 GP 0.8.0 的 eq. 12.17，還缺了什麼？",
@@ -270,6 +279,7 @@ n := len(t) + i + len(f)"""},
 },
 {
  "id": "ch13-validator-stats",
+ "lens": "時機",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "eq. 13.1–13.6",
  "difficulty": 2, "kind": "delta", "tags": ["statistics", "delta-0.8.0"],
   "stemZh": "π ≡ (π_V, π_L, π_C, π_S)。在 GP 0.8.0 中，一筆 validator 紀錄計數哪些東西？assurance 的計入、epoch 換檔與作者的計入依什麼順序套用？guarantee 的計數又記給誰？",
@@ -298,6 +308,7 @@ n := len(t) + i + len(f)"""},
 },
 {
  "id": "ch13-core-service-stats",
+ "lens": "演算法",
   "alsoCh": ["11"],
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.7, 13.9–13.12",
  "difficulty": 3, "kind": "concept", "tags": ["statistics"],
@@ -327,6 +338,7 @@ n := len(t) + i + len(f)"""},
 },
 {
  "id": "ch13-service-stats",
+ "lens": "演算法",
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.8, 13.13–13.17",
  "difficulty": 2, "kind": "concept", "tags": ["statistics"],
   "stemZh": "一個區塊的 π′_S 裡會出現哪些 service？accumulation 那一項又裝什麼？",

@@ -7,6 +7,7 @@ ITEMS = [
     # ---------------------------------------------------------------- appendix E
     {
         "id": "c3-appE-wb-vs-constant-depth",
+ "lens": "對比",
         "ch": "E",
         "section": "E.1 Binary Merkle Trees & E.2 MMR",
         "gpRef": "eq. E.1 (N), E.3 (M_B), E.4 (M), E.7 (C); eq. 11.5 (segment-root a_e); §14 availability specifier (erasure-root a_u)",
@@ -40,6 +41,7 @@ ITEMS = [
 
     {
         "id": "c3-appE-code-trace-split",
+ "lens": "演算法",
         "ch": "E",
         "section": "E.1 Binary Merkle Trees & E.2 MMR",
         "gpRef": "eq. E.1 (N), E.2 (trace T), E.5–E.6 (J_x, L_x), E.7 (C); eq. 14.12 (paged proofs)",
@@ -102,6 +104,7 @@ ITEMS = [
 
     {
         "id": "c3-appE-mmb-peaks-superpeak",
+ "lens": "設計",
         "ch": "E",
         "section": "E.1 Binary Merkle Trees & E.2 MMR",
         "gpRef": "eq. E.8 (A), E.9 (E_M), E.10 (M_R); eq. 7.3, 7.7–7.8; §18 Beefy Distribution",
@@ -136,6 +139,7 @@ ITEMS = [
     # ---------------------------------------------------------------- appendix F
     {
         "id": "c3-appF-shuffle-is-consensus",
+ "lens": "設計",
         "ch": "F",
         "section": "F Shuffling (Fisher–Yates)",
         "gpRef": "eq. F.1 (F); eq. 11.21 (guarantor permute P); §17 tranche-0 audit selection",
@@ -169,6 +173,7 @@ ITEMS = [
 
     {
         "id": "c3-appF-seq-from-hash-vs-fallback",
+ "lens": "對比",
         "ch": "F",
         "section": "F Shuffling (Fisher–Yates)",
         "gpRef": "eq. F.2 (Q_l), F.3 (F from a hash); eq. 6.27 (fallback key sequence)",
@@ -203,6 +208,7 @@ ITEMS = [
     # ---------------------------------------------------------------- appendix G
     {
         "id": "c3-appG-why-ring-not-plain-vrf",
+ "lens": "對比",
         "ch": "G",
         "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
         "gpRef": "§G; §3 signing schemes; eq. 6.30 (tickets extrinsic), eq. 6.16 (ticket seal)",
@@ -236,6 +242,7 @@ ITEMS = [
 
     {
         "id": "c3-appG-ring-root-commitment",
+ "lens": "演算法",
         "ch": "G",
         "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
         "gpRef": "§G (ring root O, padding point); eq. 6.14–6.15 (key rotation and Φ); eq. 6.4 (γ_Z)",
@@ -269,6 +276,7 @@ ITEMS = [
 
     {
         "id": "c3-appG-output-vs-signature",
+ "lens": "演算法",
         "ch": "G",
         "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)",
         "gpRef": "§G (Y as output(·)‥32); §3 signing schemes; eq. 6.6 (ticket), 6.16 (ticket seal), 6.30 (tickets extrinsic)",
@@ -302,41 +310,10 @@ ITEMS = [
 
     # ---------------------------------------------------------------- appendix H
 
-    {
-        "id": "c3-appH-what-gets-coded",
-        "ch": "H",
-        "section": "H Erasure Coding",
-        "gpRef": "§14 availability specifier (b♣, s♣, a_u); eq. 14.12 (paged proofs); eq. 11.5; eq. H.5–H.6",
-        "difficulty": 1,
-        "kind": "concept",
-        "tags": ["erasure-coding", "availability", "audit-da", "d3l"],
-  "stemZh": "對於一份 work-report，guarantor 會把哪些資料做 erasure coding 並發出去？單一位 validator 最後又持有什麼？",
-  "optionsZh": [
-   "一份資料集：work-report 本身，補零到資料碎片數兩倍的倍數後編碼成每位 validator 一個碎片，每個產生的碎片再被雜湊；erasure-root 就是對那些碎片雜湊所取的 well-balanced Merkle root。work-package bundle 與匯出 segment 留在 guarantor 手上、稽核時依請求提供，所以一位 validator 持有一個 32 位元組的碎片雜湊、別無其他",
-   "一份資料集：只有匯出 segment 連同它們的 paged-proof segment 會被編碼、再經轉置讓每個 segment 的一個碎片落在同一位 validator 身上，因為只有它們必須在長期資料湖中存活。可稽核的 bundle 則是整份複製給每位 validator，這正是為什麼它可以在區塊定案後不久就被丟棄，而一位 validator 的 erasure-root 葉子就只是它自己那一欄 segment 的 root",
-   "兩份資料集：可稽核的 bundle——補零到資料碎片數兩倍的倍數後編碼，每個產生的碎片再被雜湊；以及匯出 segment 連同它們的 paged-proof segment——各自編碼後再轉置，使每個 segment 的一個碎片落在同一位 validator 身上。一位 validator 持有 erasure-root 的一片葉子：它的 bundle 碎片雜湊串接它自己那一欄 segment 的 root",
-   "一份資料集：只有 work-package bundle，補零到資料碎片數兩倍的倍數後編碼成與 assurer 數量相同的碎片，每個碎片被雜湊成 erasure-root 的一片葉子。匯出 segment 改由 segment-root 承諾、並在需要時靠重跑 refine 重建，這正是 segment-root 與 erasure-root 分屬不同欄位的原因，所以一位 validator 持有單一個 32 位元組的 bundle 碎片雜湊"
-  ],
-  "stem": "For one work-report, which data does a guarantor erasure-code and hand out, and what does an individual validator end up holding?",
-        "options": [
-            "One data set: the work-report itself, zero-padded up to a multiple of twice the data-shard count and then coded into one chunk per validator, with each resulting chunk hashed; the erasure-root is the well-balanced Merkle root over those chunk hashes. The work-package bundle and the exported segments stay with the guarantors, who serve them on request during an audit, so a validator holds one 32-octet chunk hash and nothing more.",
-            "One data set: only the exported segments, together with their paged-proof segments, are coded and then transposed so that one chunk of every segment lands on the same validator, because only they must survive in the long-term data lake. The auditable bundle is replicated whole to every validator, which is precisely why it may be discarded soon after the block is finalized, and a validator's erasure-root leaf is just the root over its own segment column.",
-            "Two data sets: the auditable bundle, zero-padded up to a multiple of twice the data-shard count and then coded, with each resulting chunk hashed; and the exported segments together with their paged-proof segments, each coded and then transposed so that one chunk of every segment lands on the same validator. A validator holds one leaf of the erasure-root: its bundle-chunk hash concatenated with the root over its own segment column.",
-            "One data set: only the work-package bundle, zero-padded up to a multiple of twice the data-shard count and then coded into as many chunks as there are assurers, with each chunk hashed into a leaf of the erasure-root. The exported segments are committed to by the segment-root instead and are reconstructed on demand by re-running refine, which is why the segment-root and the erasure-root are separate fields, so a validator holds a single 32-octet bundle-chunk hash.",
-        ],
-        "answer": 2,
-        "optNotes": [
-          "work-report 只有幾 KB 而且本來就上鏈；a_u 的每片 leaf 也是 64 octets 而非單一 chunk hash。",
-          "把 bundle 全量複製 1023 份正是 audit DA 要避免的事；它短命是因為只需撐到該區塊 final。",
-          "§14 明寫 guarantor 要編碼並分發「two data sets」，validator 的 leaf 是 bundle chunk hash 接自己那欄的 M_B root。",
-          "refine 的輸入（imported segments）本身就得先能取回，這正是長期 D³L 存在的理由。",
-        ],
-        "explanation": "§14 講得很直接：「Guarantors are required to erasure-code and distribute two data sets: one blob, the auditable bundle containing the encoded work-package, extrinsic data and self-justifying imported segments which is placed in the short-term Audit DA store; and a second set of exported-segments data together with the Paged-Proofs metadata.」availability specifier 的定義式把兩條路寫成 b♣ = H#(C^{a_v}_{⌈|b|/z⌉}(𝒫_z(b)))（先用 𝒫_z 補零到 z = 2·𝒟(a_v) 的倍數，再切片編碼，每片 chunk 各做一次 Blake2b）與 s♣ = M_B#(ᵀ C^{a_v}#_{W_G/z}(s ⌢ P(s)))（每個 segment 各自編碼、轉置後每個 validator 拿到自己那一欄，再對該欄取 M_B root）；最後 a_u = M_B([⌢x | x ∈ ᵀ[b♣, s♣]])，所以每個 validator 對應到 erasure-root 的一片 leaf＝「它的 bundle chunk hash ⌢ 它的 segment 欄 root」，共 64 octets。eq. 11.5 的說明也印證：「the root of a binary Merkle tree whose leaves are the a_v chunks produced by erasure-coding the work-package bundle and exported segments. As one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set.」segment-root 與 erasure-root 之所以是兩個欄位，是因為前者承諾 segment 內容、後者承諾分片配置。",
-        "trap": "兩條線分開記：bundle 先 𝒫_z 補零→編碼→每片各做一次 Blake2b；segments 是 s ⌢ P(s) 一起編碼→轉置→每欄取 M_B root。erasure-root 的一片 leaf ＝同一個 validator 在這兩條線上的結果接起來。",
-    },
 
     {
         "id": "c3-appH-rate-and-field-rationale",
+ "lens": "設計",
         "ch": "H",
         "section": "H Erasure Coding",
         "gpRef": "eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority)",

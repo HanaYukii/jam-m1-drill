@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n7-what-is-pvm",
+ "lens": "對比",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "pvm"],
   "stem": "What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n7-why-riscv",
+ "lens": "對比",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm"],
   "stem": "The PVM is based on RISC-V rather than on a bespoke instruction set. What does that buy?",
@@ -60,6 +62,7 @@ ITEMS = [
  },
  {
   "id": "n7-what-gas-is-for",
+ "lens": "機制",
   "ch": "N7", "section": "§4.7", "gpRef": "§4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "gas"],
   "stem": "What is gas actually protecting in JAM?",
@@ -88,6 +91,7 @@ ITEMS = [
  },
  {
   "id": "n7-determinism-requirement",
+ "lens": "設計",
   "ch": "N7", "section": "App. A; §17", "gpRef": "App. A & §17",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm", "audit"],
   "alsoCh": ["N6"],
@@ -117,6 +121,7 @@ ITEMS = [
  },
  {
   "id": "n7-host-calls-basic",
+ "lens": "設計",
   "ch": "N7", "section": "App. B", "gpRef": "App. B",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "host-calls"],
   "stem": "If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?",
@@ -145,6 +150,7 @@ ITEMS = [
  },
  {
   "id": "n7-no-crypto-instructions",
+ "lens": "設計",
   "ch": "N7", "section": "§4.7; App. B", "gpRef": "§4 & App. B",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm"],
   "stem": "The PVM deliberately omits instructions for cryptographic operations. Does that mean a service cannot hash anything?",
@@ -173,6 +179,7 @@ ITEMS = [
  },
  {
   "id": "n7-memory-basic",
+ "lens": "設計",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "pvm", "memory"],
   "stem": "The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?",
@@ -201,6 +208,7 @@ ITEMS = [
  },
  {
   "id": "n7-two-gas-budgets",
+ "lens": "對比",
   "ch": "N7", "section": "§11.3; §12; §14", "gpRef": "§11, §12 & §14",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "gas"],
   "alsoCh": ["N5"],

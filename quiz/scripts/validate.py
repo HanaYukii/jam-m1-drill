@@ -19,7 +19,8 @@ CHAPTERS = {
 }
 KINDS = {"concept", "code", "calc", "delta", "rationale"}
 REQUIRED = ["id", "ch", "section", "gpRef", "difficulty", "kind", "tags", "stem", "options", "answer", "explanation"]
-OPTIONAL = ["code", "trap", "optNotes", "alsoCh", "stemZh", "optionsZh"]
+OPTIONAL = ["code", "trap", "optNotes", "alsoCh", "stemZh", "optionsZh", "lens"]
+LENSES = {"設計", "時機", "對比", "演算法", "機制"}
 
 
 GLOSS_DIR = os.path.join(ROOT, "glossary")
@@ -106,6 +107,8 @@ def validate(items, srcs):
         for k in REQUIRED:
             if k not in it:
                 errors.append(f"{where}: missing field {k}")
+        if "lens" in it and it["lens"] not in LENSES:
+            err(f"{fn}:{it.get('id')}: unknown lens {it['lens']!r}")
         extra = set(it.keys()) - set(REQUIRED) - set(OPTIONAL)
         if extra:
             errors.append(f"{where}: unknown fields {sorted(extra)}")

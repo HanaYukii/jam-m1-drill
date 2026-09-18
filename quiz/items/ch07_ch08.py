@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch07-beta-structure",
+ "lens": "機制",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.1–7.4",
  "difficulty": 2, "kind": "concept", "tags": ["recent-history", "state"],
   "stemZh": "在 GP 0.8.0 中，recent-history 狀態是 β ≡ (β_H, β_B)。β_H 的每一筆近期區塊條目裝什麼？β_B 又是什麼？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch07-beta-dagger",
+ "lens": "時機",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.5 & 7.8",
  "difficulty": 2, "kind": "concept", "tags": ["recent-history", "pipelining"],
   "stemZh": "為什麼區塊 N 結束時，β_H 最新的那筆條目其 state root s = H_0（零雜湊）？它又是怎麼被補正的？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch07-belt-keccak",
+ "lens": "設計",
   "alsoCh": ["E"],
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7",
  "difficulty": 2, "kind": "rationale", "tags": ["recent-history", "mmr", "beefy"],
@@ -88,6 +91,7 @@ ITEMS = [
 },
 {
  "id": "ch07-purpose",
+ "lens": "設計",
   "alsoCh": ["11"],
  "ch": "7", "section": "7 Recent History", "gpRef": "§7 & eq. 11.36, 11.41–11.44",
  "difficulty": 1, "kind": "concept", "tags": ["recent-history"],
@@ -117,6 +121,7 @@ ITEMS = [
 },
 {
  "id": "ch08-pool-queue-sizes",
+ "lens": "機制",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.1",
  "difficulty": 1, "kind": "concept", "tags": ["authorization", "state"],
   "stemZh": "authorizer pool α 與 authorizer queue φ 的形狀各是什麼？",
@@ -144,35 +149,8 @@ ITEMS = [
  "trap": "O = 8、Q = 80；pool 是 :O（可少於 8），queue 是固定長度 Q。"
 },
 {
- "id": "ch08-pool-update",
- "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.2–8.3",
- "difficulty": 3, "kind": "concept", "tags": ["authorization", "calc"],
-  "stemZh": "core c 的 pool 為 α[c] = [a, b, a, d]（左邊最舊），而 E_G 中有一份指向 core c 的 guarantee，其 report 的 authorizer 是 a。已知 φ′[c][H_T mod Q] = x 且 O = 8，α′[c] 是什麼？",
-  "optionsZh": [
-   "[b, a, d, x]——最左邊那個 a 被移除，接著附加 x，最後保留最後 O 筆",
-   "[b, d, x]——兩個 a 都在附加 x 之前被移除，因為一個 pool 絕不會同時持有兩個相同的 authorizer",
-   "[a, b, a, d, x]——附加 x 而不移除任何東西，因為 F(c) 只有在 pool 已經持有 O = 8 筆時才會修剪",
-   "[x, a, b, a, d]——佇列項目被插在最前面，而被使用掉的 authorizer 只有在 pool 將超過 O = 8 時才會被丟棄"
-  ],
-  "stem": "Core c has pool α[c] = [a, b, a, d] (left = oldest) and a guarantee in E_G for core c whose report has authorizer a. With φ′[c][H_T mod Q] = x and O = 8, what is α′[c]?",
- "options": [
-  "[b, a, d, x] — the leftmost occurrence of a is removed, then x is appended, and the last O entries are kept",
-  "[b, d, x] — both copies of a are removed before x is appended, because a pool never holds the same authorizer twice",
-  "[a, b, a, d, x] — x is appended and nothing is removed, since F(c) only trims the pool once it already holds O = 8 entries",
-  "[x, a, b, a, d] — the queue entry is prepended at the head and the used authorizer is dropped only once the pool would exceed O = 8"
- ],
- "answer": 0,
- "optNotes": [
-  "⊖ 是 seqminusl（只砍最左一個）、x 接在尾端、長度 4 未達 O 不截斷，三步全對。",
-  "把兩個 a 都刪掉正是 bug #692：⊖ 是 seqminusl，pool 是序列、允許重複。",
-  "eq. 8.3 的條件是「E_G 裡存在 core c 的 guarantee」，與長度無關；長度只決定截斷。",
-  "方向相反：eq. 8.2 把新項接在右邊，←(…)^O 丟掉的是最左邊（最舊）那個。",
- ],
- "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c][H_T mod Q])^O；eq. 8.3：F(c) = α[c] ⊖ {w_a} 當 E_G 裡有 core c 的 guarantee，否則就是 α[c] 原封不動。三步驟依序做：**① 移除**——⊖ 是「只移除**最左邊那一個**符合的元素」（sequence-minus-leftmost），不是移除全部。[a, b, a, d] 移掉最左的 a 得 [b, a, d]，**第二個 a 留著**。**② 補一個**——把 φ′[c][H_T mod Q] 接到尾端，得 [b, a, d, x]。注意這一步**每塊每個 core 都做，即使該 core 這塊沒有 guarantee**——所以 pool 會自然汰換。**③ 截斷**——←(…)^O 保留**最後** O = 8 個（丟最舊的）。本題長度只有 4，不需截斷。**為什麼是「移除最左邊一個」而不是全部**：同一個 authorizer 可以合法地在 pool 裡出現多次（φ 排程裡重複排入即可），代表它有多個可用額度；一次用掉一個才符合語意。你們的 issue #692/#694 就是這個 bug——原本刪掉了所有出現，等於一次消耗掉全部額度。**另一個 0.8.0 的變動**：pool 更新在 accumulation **之後**才做，用的是 posterior 的 φ′（issue #1020），因為 accumulate 期間的 `assign` 可能剛改過佇列。",
- "trap": "H_T mod Q 用的是本塊 timeslot 對 80 取餘；用 posterior φ′。"
-},
-{
  "id": "ch08-authorizer-identity",
+ "lens": "機制",
  "ch": "8", "section": "8.1 Authorizers and Authorizations", "gpRef": "§8.1 & eq. 14.11 (§14.3; delta #522)",
  "difficulty": 2, "kind": "delta", "tags": ["authorization", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，一個 authorizer 是怎麼被識別的？授權的判定實際上在哪裡進行？",
@@ -201,6 +179,7 @@ ITEMS = [
 },
 {
  "id": "ch08-why-authorization",
+ "lens": "設計",
  "ch": "8", "section": "8 Authorization", "gpRef": "§8 intro",
  "difficulty": 1, "kind": "rationale", "tags": ["authorization", "rationale"],
   "stemZh": "GP 為授權系統給出的動機是什麼？",

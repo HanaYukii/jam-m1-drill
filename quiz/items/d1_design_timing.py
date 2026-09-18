@@ -4,6 +4,7 @@
 ITEMS = [
 {
  "id": "d1-rho-three-stages-order",
+ "lens": "時機",
  "alsoCh": ["10"],
  "ch": "11", "section": "4.1 dependency graph; 10.4; 11.3", "gpRef": "eq. 4.x (ρ† ρ‡ ρ′), eq. 10.14, eq. 11.18",
  "difficulty": 2, "kind": "rationale", "tags": ["rho", "ordering", "design"],
@@ -33,6 +34,7 @@ ITEMS = [
 },
 {
  "id": "d1-lambda-who-reads-it",
+ "lens": "時機",
  "alsoCh": ["10", "11"],
  "ch": "6", "section": "6.2 validator sets; 10.3; 11.3", "gpRef": "eq. 6.14, eq. 10.4, eq. 11.23",
  "difficulty": 2, "kind": "rationale", "tags": ["validator-sets", "lambda", "design"],
@@ -62,6 +64,7 @@ ITEMS = [
 },
 {
  "id": "d1-entropy-lag-ticket-and-seal",
+ "lens": "時機",
  "ch": "6", "section": "6.4 entropy; 6.6 tickets; 6.7 seal", "gpRef": "eq. 6.22–6.24, eq. 6.16, eq. 6.30",
  "difficulty": 3, "kind": "rationale", "tags": ["entropy", "tickets", "seal", "design"],
   "stemZh": "ticket 在 epoch e 提交時，ring-VRF 的 context 用 η′_2；到了 epoch e+1 用這張 ticket 封 block 時，seal 的 context 卻用 η′_3。為什麼兩邊用的下標不同？這個設計在保證什麼？",
@@ -90,6 +93,7 @@ ITEMS = [
 },
 {
  "id": "d1-delta-plus-two-antagonistic-factors",
+ "lens": "設計",
  "ch": "12", "section": "12.2 Execution", "gpRef": "§12.2 prose; eq. 12.17 (Δ+), eq. 12.18 (Δ*)",
  "difficulty": 2, "kind": "rationale", "tags": ["accumulation", "gas", "design"],
   "stemZh": "GP 把 accumulation 拆成兩層：Δ+ 逐 report 順序遞迴，裡面再呼叫 Δ* 把同一個 service 的東西併成一次 PVM 呼叫。§12.2 說這是為了調和「兩個略微對立的因素」。是哪兩個？為什麼一層順序、一層並行可以同時滿足？",
@@ -118,6 +122,7 @@ ITEMS = [
 },
 {
  "id": "d1-deferred-transfer-why-deferred",
+ "lens": "設計",
  "alsoCh": ["B"],
  "ch": "12", "section": "12.2 Execution; 20 Conclusion", "gpRef": "§12.2 prose, eq. 12.14 (𝕏), eq. 12.17, §20 Further Work",
  "difficulty": 2, "kind": "rationale", "tags": ["transfer", "accumulation", "design"],
@@ -147,6 +152,7 @@ ITEMS = [
 },
 {
  "id": "d1-checkpoint-collapse-walkthrough",
+ "lens": "時機",
  "alsoCh": ["12"],
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "§B.4 prose (regular vs exceptional dimension), collapse function C, Ω_C",
  "difficulty": 2, "kind": "concept", "tags": ["accumulate", "checkpoint", "context"],
@@ -176,6 +182,7 @@ ITEMS = [
 },
 {
  "id": "d1-accumulate-before-audit",
+ "lens": "時機",
  "alsoCh": ["10", "ARCH"],
  "ch": "12", "section": "17 Auditing; 19 Best Chain; 10 Disputes", "gpRef": "§17 prose, §19 (audited ∈ best-chain conditions), §10",
  "difficulty": 2, "kind": "rationale", "tags": ["audit", "finality", "design"],
@@ -205,6 +212,7 @@ ITEMS = [
 },
 {
  "id": "d1-three-thirty-341",
+ "lens": "演算法",
  "alsoCh": ["11"],
  "ch": "ARCH", "section": "20 Discussion – Technical Characteristics", "gpRef": "§20.1 prose, §11.3 (three validators per core), eq. 6.8",
  "difficulty": 2, "kind": "concept", "tags": ["cores", "audits", "throughput", "design"],
@@ -234,6 +242,7 @@ ITEMS = [
 },
 {
  "id": "d1-bounded-asynchrony-concrete",
+ "lens": "設計",
  "alsoCh": ["11", "12"],
  "ch": "ARCH", "section": "1.3 Scaling under Size-Coherency Antagonism; 11; 12", "gpRef": "§1.3 prose, eq. 11.18 (U), ω ∈ ⟦…⟧_E, eq. 11.38 (L)",
  "difficulty": 3, "kind": "rationale", "tags": ["pipeline", "asynchrony", "design"],
@@ -263,6 +272,7 @@ ITEMS = [
 },
 {
  "id": "d1-mostly-coherent-lookup-anchor",
+ "lens": "對比",
  "alsoCh": ["14", "11"],
  "ch": "ARCH", "section": "1.3; 4.9.1; 11.2", "gpRef": "§1.3, §4.9.1 prose, eq. 11.4 (context), eq. 11.38, §B.2 (historical_lookup)",
  "difficulty": 2, "kind": "rationale", "tags": ["coherency", "lookup-anchor", "design"],
@@ -292,6 +302,7 @@ ITEMS = [
 },
 {
  "id": "d1-block-vs-derived-state",
+ "lens": "時機",
  "alsoCh": ["12"],
  "ch": "5", "section": "4.1; 5.1 header; 12", "gpRef": "eq. 4.1 (σ′ = Υ(σ, B)), eq. 5.1 (H_R), §12",
  "difficulty": 2, "kind": "concept", "tags": ["state-root", "consensus", "design"],
@@ -321,6 +332,7 @@ ITEMS = [
 },
 {
  "id": "d1-core-unopinionated-what-binds",
+ "lens": "對比",
  "alsoCh": ["8"],
  "ch": "ARCH", "section": "2.1 Polkadot; 4.9; 8 Authorization", "gpRef": "§2.1 prose, §8 prose, eq. 8.2, §B (assign)",
  "difficulty": 2, "kind": "rationale", "tags": ["cores", "authorization", "polkadot", "design"],

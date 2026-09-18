@@ -15,6 +15,7 @@ Equation numbering for §13 (17 numbered equations, only eq:activityspec is labe
 ITEMS = [
     {
         "id": "c3-ch13-epoch-boundary-split",
+ "lens": "時機",
         "ch": "13",
         "section": "13.1 Validator Activity",
         "gpRef": "eq. 13.4–13.6",
@@ -69,6 +70,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch13-guarantee-credit-set",
+ "lens": "時機",
         "ch": "13",
         "section": "13.1 Validator Activity",
         "gpRef": "eq. 13.6 (g counter); eq. 11.28 (reporters set G)",
@@ -117,60 +119,8 @@ ITEMS = [
         "trap": "GP 字面寫 κ′[v] ∈ G，但 κ′[v] ∈ K 是四欄位金鑰 tuple 而 G ⊂ H；實作一律讀成 (κ′[v])_e ∈ G。",
     },
     {
-        "id": "c3-ch13-core-record-fields",
-        "ch": "13",
-        "section": "13.2 Cores and Services",
-        "gpRef": "eq. 13.7–13.9; §13.2",
-        "difficulty": 2,
-        "kind": "concept",
-        "tags": ["statistics", "core-stats", "types", "gas"],
-  "stemZh": "GP 0.8.0 把 core 統計定型為 π_C ∈ ⟦(d, p, i, x, z, e, l, u)⟧_C，而 service 統計是 π_S ∈ ⟨N_S → (…)⟩。隊友正在為單一筆 core 紀錄設計 Go struct，問你這八個成分裡哪些是 gas、哪些是計數、哪些是位元組量——以及這個容器需不需要在 epoch 邊界歸零。你會怎麼說？",
-  "optionsZh": [
-   "八個全都是普通自然數——gas 型別 N_G 只出現在 service 紀錄的 refinement 配對裡；DA 負載與 extrinsic 總大小是位元組量，但 bundle 總長度計的是 bundle 裡的 segment 數；popularity 計的是本 rotation 指派到該 core 的 guarantor 數，而 import、extrinsic、export 三個成分是普通計數。容器是每個 core 一項的定長序列，每塊從頭重建",
-   "DA 負載與 refine gas 兩者都是 gas 型別，因為 DA 佔用是記在 refine 預算上的；extrinsic 總大小是位元組量，而 bundle 總長度計的是 work-item 而非位元組；popularity 與 import、export 成分是普通計數。容器是一個字典，只列出該塊中有活動的 core",
-   "只有最後一個成分是 gas 型別（N_G，各 digest 的 refine gas 總和）；DA 負載、extrinsic 總大小與 bundle 總長度都是位元組量；popularity 與 import、extrinsic、export 成分是普通計數。容器是每個 core 一項的定長序列、每塊從頭重建，所以它根本不存在 epoch 邊界歸零這回事",
-   "只有最後一個成分是 gas 型別（N_G，各 digest 的 refine gas 總和）；DA 負載、extrinsic 總大小與 bundle 總長度都是位元組量；popularity 與 import、extrinsic、export 成分是普通計數。但這個序列會跨 epoch 累積、就像 validator 紀錄那樣，並在同一次換屆時歸零，這正是第一個成分被稱為「負載」而非「大小」的原因"
-  ],
-  "stem": (
-            "GP 0.8.0 types the core statistics as π_C ∈ ⟦(d, p, i, x, z, e, l, u)⟧_C while the service "
-            "statistics are π_S ∈ ⟨N_S → (…)⟩. A teammate is laying out the Go struct for one core record and "
-            "asks which of the eight components are gas, which are counts and which are octet quantities — and "
-            "whether the container needs zeroing at the epoch boundary. What do you tell them?"
-        ),
-        "options": [
-            "All eight are plain naturals — the gas type N_G appears only in the service record's refinement "
-            "pair; the DA load and the total extrinsic size are octet quantities but the total bundle length "
-            "counts the segments in the bundle; the popularity figure counts the guarantors assigned to that "
-            "core in this rotation, and the import, extrinsic and export components are plain counts. The "
-            "container is a fixed-length sequence with one entry per core, rebuilt from scratch every block.",
-            "The DA load and the refine gas are both gas-typed, because DA occupancy is charged against the "
-            "refine budget; the total extrinsic size is an octet quantity while the total bundle length "
-            "counts work-items rather than octets; the popularity figure and the import and export "
-            "components are plain counts. The container is a dictionary that lists only the cores which saw "
-            "activity in the block.",
-            "Only the last component is gas-typed (N_G, the refine gas summed over the digests); the DA load, "
-            "the total extrinsic size and the total bundle length are octet quantities; the popularity figure "
-            "and the import, extrinsic and export components are plain counts. The container is a fixed-length "
-            "sequence with one entry per core, rebuilt from scratch on every block, so no epoch-boundary "
-            "zeroing exists for it.",
-            "Only the last component is gas-typed (N_G, the refine gas summed over the digests); the DA "
-            "load, the total extrinsic size and the total bundle length are octet quantities; the popularity "
-            "figure and the import, extrinsic and export components are plain counts. But the sequence "
-            "accumulates over the epoch just like the validator records and is zeroed at the same rollover, "
-            "which is why the first component is called a load rather than a size.",
-        ],
-        "answer": 2,
-        "optNotes": [
-            "eq. 13.7 的 u ∈ N_G 確實是 gas；l = Σ (w_s)_l 是 octet 長度，p 是 assurance 打勾的張數。",
-            "eq. 13.7 裡只有 u ∈ N_G，DA 佔用從不從 refine 預算扣；π_C 是定長序列，dictionary 的是 π_S。",
-            "只有 u ∈ N_G、d/z/l 是 octet、其餘為計數，且 π_C 定長每塊重算——三件事都符合 eq. 13.7 與 §13.2。",
-            "§13.2 第一句就否定跨塊累加；d 叫 load 是因為它衡量 DA 佔用量（含 65/64 放大），與累加無關。",
-        ],
-        "explanation": "eq. 13.7：π_C ∈ ⟦(d ∈ N, p ∈ N, i ∈ N, x ∈ N, z ∈ N, e ∈ N, l ∈ N, u ∈ N_G)⟧_C——八個欄位裡**只有 u 是 N_G**（gas），其餘都是 N；語意上 d（DA load）、z（extrinsic size）、l（bundle length）是 octet 數量，p、i、x、e 是計數。eq. 13.9：p = Σ_{a ∈ E_A} a_f[c]，是本塊 assurance 裡把該 core 打勾的**張數**；l = L(c) = Σ_{w ∈ I, w_c = c} (w_s)_l 明確是 avspec 的 bundle **長度**（segment 數是 avspec 的 n，只在 eq. 13.12 的 D(c) 裡以 W_G⌈65n/64⌉ 換算成 octet）。§13.2 開宗明義：「These are tracked only on a per-block basis unlike the validator statistics which are tracked over the whole epoch.」——所以 π_C 每塊整個重算。容器型別也別搞混：π_C 是 ⟦…⟧_C 的**定長序列**（341 個 core 全都有一筆，即使全零），eq. 13.8 的 π_S 才是 dictionary，只放有活動的 service。",
-        "trap": "π_C 定長、每塊重算；π_S 是 dictionary、每塊重算；只有 π_V/π_L 才有 epoch rollover。",
-    },
-    {
         "id": "c3-ch13-consensus-state-rationale",
+ "lens": "設計",
         "ch": "13",
         "section": "13.1 Validator Activity",
         "gpRef": "§13.1; eq. 4.4 (state composition); eq. 13.1–13.3; App. D key C(13)",

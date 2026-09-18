@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "arch-audit-initial-tranche",
+ "lens": "演算法",
  "ch": "ARCH", "section": "17.3 Selection of Reports", "gpRef": "eq. 17.2–17.4",
  "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves"],
   "stemZh": "validator 如何挑出自己在初始 tranche（a_0）必須稽核的 work-report？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "arch-audit-outcomes",
+ "lens": "演算法",
  "ch": "ARCH", "section": "17.1 Overview", "gpRef": "§17.1",
  "difficulty": 2, "kind": "concept", "tags": ["auditing", "disputes"],
   "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。兩個門檻是什麼？各自導致什麼後果？",
@@ -56,33 +58,5 @@ ITEMS = [
  ],
  "explanation": "§17.1：「if greater than 2/3 of the validators still issue positive judgments, then validators issuing negative judgments may receive a punishment for time-wasting. If greater than 1/3 of the validators issue negative judgments, then the block which includes the work-report is ban-listed. It and all its descendants are disregarded and may not be built on.」兩個門檻方向相反：2/3 正面是用來懲罰亂投反對票的人（讓惡意負面判決有代價），1/3 負面則丟掉整條分支。最後由 block author 把足夠的票組成 verdict 放進 disputes extrinsic（§10）——「once there are enough votes, a verdict can be constructed by a block author and placed in a disputes extrinsic」；§10 eq. 10.12 的正面票數只接受 ⌊2/3·|k|⌋ + 1（good）、0（bad）、⌊1/3·|k|⌋（wonky）三個值，而 punish-set ψ_O 同時收 culprits（保證了無效 report 的 guarantor）與 faults（判決與 verdict 相牴觸的簽署者）。另外：一個 report 的所有宣告都被正面判決匹配時即為 audited；一個區塊的所有新 available report 都 audited 時該區塊為 audited——這是 finalize 的前提之一（§19）。",
  "trap": "「1/3 負面 → 整條鏈分支被丟棄」是 best-chain 的 disregard 規則；2/3 正面 → 反對者被罰。"
-},
-{
- "id": "arch-audit-reconstruction",
- "ch": "ARCH", "section": "17.2 Data Fetching", "gpRef": "§17.2–17.3 & appendix H",
- "difficulty": 2, "kind": "concept", "tags": ["auditing", "erasure-coding"],
-  "stemZh": "auditor 要怎麼取得重跑一份 work-report 所需的資料？",
-  "optionsZh": [
-   "它從大約三分之一的 validator 取得 erasure-coded 的碎片來重建 bundle，並對照 erasure-root 驗證；匯出的 segment 則靠重跑 refine 重新算出來",
-   "它向出塊者下載整份 bundle——GP 要求出塊者保存它 28 天；匯出的 segment 會一併送達，所以完全不需要重跑 refine 的邏輯",
-   "它直接從鏈上狀態讀取匯入與匯出的 segment：兩者都放在該 reporting service 的 preimage 底下，直到該 report 被 accumulate 之後才過期",
-   "它請該 core 另外兩位 guarantor 重新簽署這份 report，並以一對相符的 Ed25519 簽章作為結果正確的證明；不會取得任何 bundle，也從不重跑 refine"
-  ],
-  "stem": "How does an auditor obtain the data it needs to re-run a work-report?",
- "options": [
-  "It reconstructs the bundle from erasure-coded chunks fetched from about one-third of the validators, verified against the erasure-root; exported segments are recomputed by re-running refine",
-  "It downloads the whole bundle from the block author, who is required by the GP to retain it for 28 days; the exported segments arrive with it, so the refine logic never has to be re-run",
-  "It reads both the imported and the exported segments straight from on-chain state, where they sit under the reporting service's preimages until the report is accumulated and then expire",
-  "It asks the core's other two guarantors to re-sign the report and takes a matching pair of Ed25519 signatures as proof of correctness; no bundle is fetched and refine is never re-run"
- ],
- "answer": 0,
- "optNotes": [
-   "chunk 取自約三分之一 validator、以 erasure-root 驗證，exported segments 則靠重跑 refine 產生。",
-   "持有 chunk 的是 assurer 不是出塊者；28 天是 exported-segment 的 D³L 期限，不是 audit DA store。",
-   "segment 從不進 state，鏈上只有 erasure-root、segment-root 等 hash；preimage 是 §9.2 另一套設施。",
-   "guarantor 的簽名正是審計要檢驗的對象，再收一次同一批人的背書是循環論證。",
- ],
- "explanation": "§17.3：「This may be done through requesting erasure-coded chunks from one-third of the validators, verified through the erasure coding's Merkle root, and reconstructing the bundles as per the recovery function」（附錄 H：任意 d(v) ≈ v/3 + 1 個 chunk 即可還原）。§17.2：bundle 內含 work-package、extrinsic data、imported segments 與其 justification；「Exported segments need not be reconstructed in the same way, but rather should be determined… through the execution of the Refine logic」——重跑 refine 正是審計的核心動作，M(w, p) 要求 w = Ξ(p, w_c, w_l, …) 逐欄位相符，光有資料而不重算根本沒有審到。§17.3 確實允許直接向 guarantor 要完整 bundle 當捷徑，但「If this data cannot be decoded or verified however, we must fall back to reconstruction from erasure-coded chunks」，而且拿到之後一樣要重跑 refine，把 work-package specification 的每個欄位重算並比對——「essentially retracing the guarantors steps」。",
- "trap": "審計 = 重跑 computereport 並比對整個 report；解不出 bundle 本身就代表 report 無效。"
 },
 ]

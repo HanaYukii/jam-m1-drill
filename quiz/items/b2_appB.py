@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "b2-appB-write-prev-length-full",
+ "lens": "演算法",
  "ch": "B", "section": "B.5 General Functions — write", "gpRef": "§B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)",
  "difficulty": 2, "kind": "code", "tags": ["host-calls", "write", "storage", "fuzz-bug"],
   "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。依 GP 0.8.0，成功時 φ′_7 回傳什麼？若這次寫入會讓門檻超過餘額會怎樣？修正前的程式碼錯在哪？",
@@ -58,6 +59,7 @@ ITEMS = [
 },
 {
  "id": "b2-appB-read-cross-service-pure",
+ "lens": "演算法",
  "ch": "B", "section": "B.5 General Functions — read", "gpRef": "§B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)",
  "difficulty": 3, "kind": "code", "tags": ["host-calls", "read", "storage", "fuzz-bug", "accumulation"],
   "stemZh": "這段節錄來自團隊在修正 #938 之後的 Ω_R（`read`），該修正加上了 `callerServiceID == serviceID` 的守衛（s* = φ_7，或當 φ_7 = 2^64−1 時為呼叫者自己）。正在 accumulate 的 service A 讀取 service B 的某個 storage key，而 B 在本塊並未 accumulate。這次讀取對 B 的帳戶可以做什麼、不可以做什麼？加守衛之前出了什麼問題？",
@@ -113,56 +115,8 @@ ITEMS = [
  "trap": "read/lookup/info 找不到回 NONE（2^64−1）；跨 service 讀取是唯讀快照，只有自己的帳戶會經 G 寫回 x。"
 },
 {
- "id": "b2-appB-unknown-hostcall-oog",
- "ch": "B", "section": "B.2/B.3/B.4 — context mutator F, default case", "gpRef": "eq. B.2, B.6, B.11 (default case); eq. B.13 (C); M_∅ in App. I",
- "difficulty": 2, "kind": "code", "tags": ["host-calls", "gas", "fuzz-bug", "delta-0.8.0"],
-  "stemZh": "在 accumulation 期間，某個 service 在剩餘 ϱ = 300 gas 的情況下執行 `ecalli 9`（`machine`，一個只限 refine 的呼叫）。團隊的派送器會把不在該 invocation 表中的 id 導向 hostCallException（見下，PR #992 之後）。GP 0.8.0 對這個情況規定什麼？",
-  "optionsZh": [
-   "φ′_7 = WHAT 且不論剩餘 gas 多少都在下一條指令繼續執行——因為什麼都沒被執行，所以一個未知或不可用的 host call 本身永遠不可能觸發 out-of-gas（這是 #992 之前的行為）",
-   "機器 panic（☇）且不扣 gas：不在該 invocation 表中的 host-call id 被當成非法指令處理，而該次 accumulation 收斂到存檔過的 context y",
-   "F 的 default 分支會先扣 M_∅ = 1000：ϱ′ = 300 − 1000 < 0，所以該次 invocation 以 ∞ 退出、Ψ_A 收斂到存檔過的 context y；而在 0.7.2 一律扣 10 的計價下，同樣的呼叫會以 φ′_7 = WHAT 繼續執行",
-   "那條 `ecalli` 會以退出理由 h̄ × 9 浮現給 Ψ_A 的呼叫者：該次 accumulation 被中止、當成 host-call 錯誤處理，而該 service 這一塊的結果被記為 BAD"
-  ],
-  "stem": "During accumulation a service executes `ecalli 9` (`machine`, a refine-only call) with ϱ = 300 gas remaining. The team's dispatcher routes ids that are not in the invocation's table to hostCallException (below, after PR #992). What does GP 0.8.0 prescribe for this situation?",
- "code": {"lang": "go", "caption": "PVM/host_call_general.go (hostCallException / chargeGasAndCheck, after PR #992)", "src": """func hostCallException(input OmegaInput) (output OmegaOutput) {
-	if result := chargeGasAndCheck(&input); result != nil {
-		return *result
-	}
-	input.VM.Registers[7] = WHAT
-	return OmegaOutput{
-		ExitReason: ExitContinue,
-		Addition:   input.Addition,
-	}
-}
-
-func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
-	*input.VM.Gas -= 10
-	if *input.VM.Gas < 0 {
-		return &OmegaOutput{
-			ExitReason: ExitOOG,
-			Addition:   input.Addition,
-		}
-	}
-	return nil
-}"""},
- "options": [
-  "φ′_7 = WHAT and execution continues at the next instruction regardless of the remaining gas — nothing was executed, so an unknown or unavailable host call can never by itself trigger out-of-gas (the pre-#992 behaviour)",
-  "The machine panics (☇) with no gas charged: a host-call id outside the invocation's table is treated like an invalid instruction, and the accumulation collapses to the checkpointed context y",
-  "The default branch of F charges M_∅ = 1000 first: ϱ′ = 300 − 1000 < 0, so the invocation exits ∞ and Ψ_A collapses to the checkpointed context y; under the 0.7.2 flat charge of 10 the same call would have continued with φ′_7 = WHAT",
-  "The `ecalli` surfaces to the caller of Ψ_A as the exit h̄ × 9: the accumulation is aborted, treated as a host-call fault, and the service's result for this block is recorded as BAD"
- ],
- "answer": 2,
- "optNotes": [
-   "F 的 default 是「先扣 M_∅ 再回 WHAT」，扣費本身就可能把 ϱ′ 壓到負值而 ∞。",
-   "ecalli 對任何立即數都是合法指令，未知 id 只是走 default 分支，不是無效指令。",
-   "0.8.0 的 M_∅ = 1000 > 300，ϱ′ < 0 使 invocation ∞，collapse 因而取 checkpoint 過的 y。",
-   "§A.6 的 Ψ_H 把每個 host id 都交給 F 處理，最上層永遠看不到 h̄；BAD 也不在 Ψ_A 的值域裡。",
- ],
- "explanation": "三個 invocation 的 mutator F（eq. B.2、B.6、B.11）最後兩行完全相同：ω′ = ω 但 φ′_7 = WHAT，ϱ′ = ϱ − M_∅；若 ϱ′ < 0 → (∞, ϱ′, ω′, μ)，否則 (▸, ϱ′, ω′, μ)。M_∅（Gas cost charged for an unknown host-call）在 0.8.0 是 1000（0.7.2 是 10，你們 chargeGasAndCheck 裡的 10 就是 0.7.2 值）。所以 ϱ = 300 時：300 − 1000 = −700 < 0 → ∞；Ψ_M 的 u = ϱ − max(ϱ′, 0) = 300（全部耗盡）；collapse C（eq. B.13）在 o ∈ {∞, ☇} 時採用 exceptional context Y（最後一次 checkpoint 的狀態，沒 checkpoint 就是初始 I(s, s)）。只有 refine 用 invoke 驅動的 inner machine 才會把 ecalli 以 (HOST, h) 回報給外層。你們的 #993：hostCallException 扣 10 gas 後沒檢查 gas 是否為負（fuzzer session 8f50823b… step 175662，service 0x6707fa2e 在 accumulate 呼叫了無效 host function）；參考實作 polkajam 停機（∞）、你們繼續執行 → θ（LastAccOut）、β（BEEFY root）與 state root 分歧；PR #992 補上 chargeGasAndCheck 的 OOG 檢查（GP 0.7.2 gavofyork/graypaper#482「explicit OOG check for each invocation mutator default case」）。升 0.8.0 時要把 10 換成 M_∅ = 1000（連同其他 host call 的 base + per-KiB 費用，見 App. I）。",
- "trap": "未知 host call「先扣費再回 WHAT」，扣費本身就能觸發 ∞；0.8.0 的 M_∅ = 1000 不是 10。"
-},
-{
  "id": "b2-appB-pages-access-modes",
+ "lens": "演算法",
  "ch": "B", "section": "B.6 Refine Functions — pages", "gpRef": "§B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants",
  "difficulty": 3, "kind": "code", "tags": ["host-calls", "refine", "inner-pvm", "memory"],
   "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。這段程式碼在哪些地方偏離了 GP 0.8.0 對 `pages` 的語意？",
@@ -217,61 +171,5 @@ func chargeGasAndCheck(input *OmegaInput) *OmegaOutput {
  ],
  "explanation": "Ω_Z（pages = 12）：[n, p, c, r] = φ_7…φ_10；u = m[n]_u（n ∉ keys(m) → error）；u′ = u 但 value[p·Z_P..+c·Z_P] = [0, 0, …] 當 r < 3、否則保留原值；access[p..+c] = [∅…] 當 r = 0、[R…] 當 r ∈ {1, 3}、[W…] 當 r ∈ {2, 4}；(φ′_7, m′) = (WHO, m) 當 u = error；(HUH, m) 當 r > 4 ∨ p < 16 ∨ p + c ≥ 2^32/Z_P（= 2^20 頁；p < 16 保護最低的 64 KiB）；(HUH, m) 當 r > 2 ∧ access[p..+c] ∋ ∅（改權限只能對已配置的頁）；(OK, m′) 否則。語意上 r = 0 是「釋放」（歸零 + 不可存取）、1/2 是「配置」（歸零 + R/W）、3/4 是「改權限」（內容保留）；把內容留著等於把舊資料留在一個之後可能被重新配置的頁裡。0.8.0 的 gas 也依此分類：free M_Z,f,c + c·M_Z,f,p = 212 + 118/頁、alloc 275 + 121/頁、setmode 130 + 29/頁、無效 r 固定 M_Z,i = 80——三組常數正是因為三種操作成本不同。對照你們的程式：r = 0 什麼都沒做（GP 要歸零並設為不可存取）；r ≥ 3 先配置歸零頁再設 R/W（GP 要保留內容）——code-map 3.12.9 也標出這個分歧；而 WHO 先於 HUH 的順序與 GP 一致。額外注意：r > 2 的檢查把「頁索引 p、頁數 c」丟給 isReadable(start, offset, m)，而該函式（argument_invocation.go）以位元組位址計算 startPage = start / Z_P，所以檢查的是錯的頁——這條路徑沒有 conformance vectors 覆蓋，遷移 0.8.0 時值得補測。",
  "trap": "pages 的 r：0 釋放、1/2 配置（歸零）、3/4 只改權限（保留內容）；錯誤碼是 WHO/HUH，沒有 OOB、沒有 panic。"
-},
-{
- "id": "b2-appB-eject-conditions",
- "ch": "B", "section": "B.7 Accumulate Functions — eject", "gpRef": "§B.7 `eject` = 22 (Ω_J); eq. 9.8 (a_i, a_o); eq. B.3 (D)",
- "difficulty": 3, "kind": "concept", "tags": ["host-calls", "eject", "preimages", "accounts"],
-  "stemZh": "正在 accumulate 的 service 7 以 φ_7 = 9、φ_8 = o 呼叫 `eject`（索引 22），其中 μ[o..+32] = h。依 GP 0.8.0，這個呼叫在什麼情況下回傳 OK？回傳之後又會發生什麼？",
-  "optionsZh": [
-   "service 9 存在、不是呼叫者本身，而且它的 code hash 等於 service 7 的 code hash 且其 parent 欄位 a_p = 7；它的 footprint 恰好是 a_i = 2 且 l = max(81, a_o) − 81（一筆 request (h, l)、沒有 storage）；a_l[(h, l)] = [x, y] 且 y < t − D；接著 9 被刪除、它的餘額被銷毀",
-   "service 9 存在、不是呼叫者本身，而且它的 code hash 等於 E_32(7)；它的 footprint 恰好是 a_i = 2 且 l = max(81, a_o) − 81；a_l[(h, l)] = [x, y] 且 y < t − D；接著 9 被刪除、它的全部餘額加給 service 7",
-   "service 9 存在、不是呼叫者本身，而且它的 code hash 等於 E_32(7)；它的 footprint 恰好是 a_i = 2 且 l = max(81, a_o) − 81；a_l[(h, l)] = [] 也就是仍未被提供；接著 9 被刪除、它的全部餘額入帳給 registrar χ_R",
-   "service 9 存在、不是呼叫者本身，而且它的 code hash 等於 E_32(7)；它的 footprint 恰好是 a_i = 2 且 l = max(81, a_o) − 81；a_l[(h, l)] = [x, y, w] 且 w < t − D；接著 9 被刪除、它的全部餘額加給 service 7"
-  ],
-  "stem": "Service 7 (accumulating) calls `eject` (index 22) with φ_7 = 9 and φ_8 = o, where μ[o..+32] = h. Under GP 0.8.0, when does the call return OK, and what happens then?",
- "options": [
-  "Service 9 exists, is not the caller, and its code hash equals the code hash of service 7 with its parent field a_p = 7; its footprint is exactly a_i = 2 with l = max(81, a_o) − 81 (one request (h, l), no storage); a_l[(h, l)] = [x, y] with y < t − D; then 9 is deleted and its balance is burned",
-  "Service 9 exists, is not the caller, and its code hash equals E_32(7); its footprint is exactly a_i = 2 with l = max(81, a_o) − 81 (one request (h, l), no storage); a_l[(h, l)] = [x, y] with y < t − D; then 9 is deleted and its entire balance is added to service 7",
-  "Service 9 exists, is not the caller, and its code hash equals E_32(7); its footprint is exactly a_i = 2 with l = max(81, a_o) − 81 (one request (h, l), no storage); a_l[(h, l)] = [], still unprovided; then 9 is deleted and its entire balance is credited to the registrar χ_R",
-  "Service 9 exists, is not the caller, and its code hash equals E_32(7); its footprint is exactly a_i = 2 with l = max(81, a_o) − 81 (one request (h, l), no storage); a_l[(h, l)] = [x, y, w] with w < t − D; then 9 is deleted and its entire balance is added to service 7"
- ],
- "answer": 1,
- "optNotes": [
-   "Ω_J 比對的是 d_c = E_32(呼叫者索引)；兩個 service 共用同一份 code 是正常狀態，a_p 也從未被讀。",
-   "code hash = E_32(呼叫者) 是自我停用標記，狀態須為 [x, y] 且 y < t − D，餘額歸呼叫者。",
-   "[] 表示「已請求、從未提供」，不保證沒有 refine 還需要它；χ_R 也與 eject 的資金流向無關。",
-   "三元素狀態只有 forget 會處理，Ω_J 的 OK 分支只匹配長度為 2 的 [x, y]，且過期看的是中間的 y。",
- ],
- "explanation": "Ω_J（eject = 22，g = M_J = 458）：[d, o] = φ_7,8；h = μ[o..+32]（不可讀 → ☇）；d = accounts[d] 只在 d ≠ x_id ∧ d ∈ keys(accounts) 時成立，否則 error → WHO；d_c ≠ E_32(x_id) → WHO；l = max(81, d_o) − 81；d_i ≠ 2 ∨ (h, l) ∉ keys(d_l) → HUH；d_l[(h, l)] = [x, y] ∧ y < t − D → OK：accounts \\ {d} ∪ {x_id ↦ s′}，s′_b = x_self_b + d_b；其他情況（[]、[x]、[x, y, w]、或 y 尚未過期）→ HUH。81 從哪來：eq. 9.8 定義 a_i = 2·|a_l| + |a_s|、a_o = Σ_{(h,z)∈a_l}(81 + z) + Σ_{a_s}(34 + |k| + |v|)；「恰一個 request、沒有 storage」等價於 a_i = 2 且 a_o = 81 + z，因此 l = a_o − 81 就把那個唯一 request 的長度 z 還原出來（通常是被 eject 的 service 自己舊 code 的 preimage）。設計意圖：一個 service 把自己的 code hash 設成 E_32(某個 service 索引)（不可能是合法 code 的值，等於自我停用）就等於指名「由那個 service 回收我」；等最後一個 preimage 已 forget 且過了 D = L + 4,800 = 19,200 slots（eq. B.3，確保 refine 的 historical lookup 不再需要它），parent 才能回收餘額並刪帳戶。你們的 eject()（host_call_accumulate.go）：SerializeFixedLength(callerID, 32)、max(81, Bytes) − 81、Items != 2、lookupDataLength == 2 && lookupData[1] < timeslot − D，與 GP 相符。",
- "trap": "eject 的三把鎖：code hash = E_32(呼叫者)、a_i = 2（唯一 request）、該 request 狀態 [x, y] 且 y < t − D；餘額歸呼叫者。"
-},
-{
- "id": "b2-appB-log-jip1",
- "ch": "B", "section": "B.2–B.4 mutator default case & JIP-1 `log`", "gpRef": "eq. B.2, B.6, B.11 (default branch); JIP-1 (host call 100)",
- "difficulty": 2, "kind": "concept", "tags": ["host-calls", "jip", "log", "fuzz-bug"],
-  "stemZh": "某個 service 執行 `ecalli 100`（`log`）。`log` 是在哪裡被規範的？它對機器狀態可觀察的效果是什麼？訊息範圍讀不到時該怎麼處理？",
-  "optionsZh": [
-   "`log` 是 GP 附錄 B 的第 100 號 host call，三種 invocation 都可用：它回傳 OK、花費 M_∅ = 1000，而且與每一個會讀取記憶體的 host call 一樣，當訊息範圍不可讀時會 panic（☇）——省略那個檢查只是把一個規格明訂的 panic 變成當機",
-   "`log` 是共識關鍵的：格式化後的訊息會被雜湊進該 service 的 accumulation 產出 θ、進而進入 BEEFY root β_B，所以每個節點都必須實作逐位元組相同的 level／target／message 格式化，而不可讀的範圍必須 panic（☇）",
-   "`log` 是由 JIP-1 而不是 Gray Paper 規定的：它可觀察到的效果與一個未實作的索引相同——φ′_7 = WHAT 加上壞索引呼叫的 gas——而不可讀的訊息／target 範圍必須毫無副作用（不 panic）；節點只是把訊息印出來",
-   "`log` 只存在於 Ψ_R 中，作為 guarantor 的診斷工具，在那裡它回傳 OK 並收取 M_∅；而在 accumulate 與 is-authorized 中，`ecalli 100` 會落到 mutator 的 WHAT 預設分支，所以同一支程式在不同 invocation 下會看到 OK 或 WHAT"
-  ],
-  "stem": "A service executes `ecalli 100` (`log`). Where is `log` specified, what are its observable effects on the machine state, and how must an unreadable message range be handled?",
- "options": [
-  "`log` is host call 100 of GP App. B, available in all three invocations: it returns OK, costs M_∅ = 1000 and, like every other host call that reads memory, panics (☇) when the message range is not readable — omitting that check merely turns a specified panic into a crash",
-  "`log` is consensus-critical: the formatted message is hashed into the service's accumulation output θ and hence into the BEEFY root β_B, so every node must implement byte-identical level/target/message formatting, and an unreadable range must panic (☇)",
-  "`log` is specified by JIP-1, not by the Gray Paper: its observable effects match an unimplemented index — φ′_7 = WHAT and the gas of a bad-index call — and an unreadable message/target range must have no side-effects (no panic); the node merely prints the message",
-  "`log` exists only in Ψ_R as a guarantor diagnostic, where it returns OK and charges M_∅; during accumulate and is-authorized `ecalli 100` instead falls through to the mutator's WHAT default, so the same program sees OK in one invocation and WHAT in another"
- ],
- "answer": 2,
- "optNotes": [
-   "JIP-1 明寫「No side-effects if memory access is invalid」，☇ 會讓實作與未實作的節點分岔。",
-   "yield（26）才是唯一把 32-octet hash 送進 x_y → θ′ → BEEFY 的管道，log 不改任何 context 欄位。",
-   "JIP-1 刻意讓 log 對共識透明：回傳值與 gas 都與「未實作的壞 index」完全一致。",
-   "三張表都註冊了 [100]；JIP-1 的重點正是不論實作與否、不論哪個 invocation 都看到同樣結果。",
- ],
- "explanation": "GP 附錄 B 沒有 index 100；純 GP 節點對 ecalli 100 走 F 的 default（eq. B.2/B.6/B.11）：扣 M_∅、φ′_7 = WHAT、繼續（gas 不足則 ∞）。JIP-1「Debug message host call」原文：Index 100、Name log、Gas usage 10「(same as host-call with bad index)」；輸入 φ_7 = level（0 fatal … 4 pedantic）、target = ∅ 若 φ_8 = 0 ∧ φ_9 = 0 否則 μ[φ_8..+φ_9]、message = μ[φ_10..+φ_11]；輸出 φ′_7 = WHAT——「WHAT is always returned so that authorizer/service behaviour is the same whether or not this JIP is implemented」；「No side-effects if memory access is invalid」。換言之 log 對共識刻意「透明」：不進 θ/β、不改狀態、不 panic，回傳值與 gas 都與未實作時一致（注意 JIP 的「10」是 0.7.x 時代的 bad-index 費用；0.8.0 的 M_∅ = 1000，實作時要跟目前 GP 版本對齊，否則 gas 統計會分歧）。它不是 refine 專屬：你們 host_call_invocation.go 的三張表都註冊了 [100] = logHostCall。你們的 #975（fuzz seed 309584898、tiny spec）：logHostCall 讀 (r10, r11)/(r8, r9) 前沒做 isReadable，直接解參考未配置的頁 → target 程序崩潰（「IO error: early eof」）；PR #976 改成不可讀就 continue、無副作用。另外值得核對：現行 logHostCall 沒有設 φ′_7 = WHAT（註解寫「none modified per spec」），與現在的 JIP-1 文字不符——若 service 在 log 後讀 φ_7，會與依 JIP-1 或純 GP 的節點不一致。",
- "trap": "log 不在 GP 裡；合規做法 = 印訊息、φ′_7 = WHAT、bad-index 費用、記憶體無效時零副作用（不能 panic、更不能 crash）。"
 },
 ]

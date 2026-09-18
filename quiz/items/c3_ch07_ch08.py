@@ -13,6 +13,7 @@ ITEMS = [
     # ------------------------------------------------------------------ §7
     {
         "id": "c3-ch07-reported-map-shape",
+ "lens": "機制",
         "ch": "7",
         "section": "7 Recent History",
         "gpRef": "eq. 7.2 & 7.8; §7",
@@ -45,6 +46,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch07-reported-map-downstream",
+ "lens": "時機",
   "alsoCh": ["11"],
         "ch": "7",
         "section": "7 Recent History",
@@ -78,6 +80,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch07-superpeak-to-beefy",
+ "lens": "演算法",
         "ch": "7",
         "section": "7 Recent History",
         "gpRef": "eq. 7.7, 7.8; eq. E.8, E.10; §18 Beefy",
@@ -110,6 +113,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch07-dagger-before-append",
+ "lens": "時機",
         "ch": "7",
         "section": "7 Recent History",
         "gpRef": "eq. 7.5, 7.8 & eq. 11.36",
@@ -142,6 +146,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch07-c3-field-order",
+ "lens": "演算法",
         "ch": "7",
         "section": "7 Recent History",
         "gpRef": "eq. 7.2 & §D.1 state key C(3)",
@@ -203,6 +208,7 @@ ITEMS = [
     # ------------------------------------------------------------------ §8
     {
         "id": "c3-ch08-queue-writer",
+ "lens": "機制",
         "ch": "8",
         "section": "8.2 Pool and Queue",
         "gpRef": "§8.2 (note under eq. 8.1); assign host call (index 16)",
@@ -235,6 +241,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch08-rotation-index-cyclic",
+ "lens": "演算法",
         "ch": "8",
         "section": "8.2 Pool and Queue",
         "gpRef": "eq. 8.1–8.2",
@@ -267,6 +274,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch08-psi-i-visibility",
+ "lens": "機制",
         "ch": "8",
         "section": "8.1 Authorizers and Authorizations",
         "gpRef": "eq. B.1–B.2; §8.1",
@@ -299,6 +307,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch08-authcode-lookup-anchor",
+ "lens": "設計",
         "ch": "8",
         "section": "8.1 Authorizers and Authorizations",
         "gpRef": "eq. 14.11; §8.1",
@@ -331,6 +340,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch08-unauthorized-report-outcome",
+ "lens": "時機",
         "ch": "8",
         "section": "8.2 Pool and Queue",
         "gpRef": "eq. 11.32 & eq. 8.2",

@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n3-slots-and-epochs",
+ "lens": "機制",
   "ch": "N3", "section": "§4.8 Epochs and Slots", "gpRef": "§4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "time"],
   "stem": "How is time organised in JAM?",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n3-what-safrole-does",
+ "lens": "設計",
   "ch": "N3", "section": "§6 Safrole", "gpRef": "§6",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "safrole"],
   "stem": "What is Safrole for, in one sentence?",
@@ -60,6 +62,7 @@ ITEMS = [
  },
  {
   "id": "n3-why-anonymous",
+ "lens": "設計",
   "ch": "N3", "section": "§6 Safrole", "gpRef": "§6",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "safrole", "security"],
   "stem": "Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?",
@@ -88,6 +91,7 @@ ITEMS = [
  },
  {
   "id": "n3-fallback-basic",
+ "lens": "機制",
   "ch": "N3", "section": "§6.5", "gpRef": "§6",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "safrole", "fallback"],
   "stem": "If too few tickets are collected during an epoch, JAM does not stall. What does it do instead, and what is given up?",
@@ -116,6 +120,7 @@ ITEMS = [
  },
  {
   "id": "n3-safrole-vs-grandpa",
+ "lens": "對比",
   "ch": "N3", "section": "§4.3; §19", "gpRef": "§4 & §19",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "finality"],
   "alsoCh": ["N1"],
@@ -145,6 +150,7 @@ ITEMS = [
  },
  {
   "id": "n3-two-signatures",
+ "lens": "設計",
   "ch": "N3", "section": "§5.1; §6.4", "gpRef": "§5 & §6",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "header", "entropy"],
   "stem": "Every header carries two Bandersnatch signatures, not one. What is the second one for?",
@@ -173,6 +179,7 @@ ITEMS = [
  },
  {
   "id": "n3-entropy-basic",
+ "lens": "設計",
   "ch": "N3", "section": "§6.4 Entropy", "gpRef": "§6",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "entropy"],
   "stem": "The chain needs randomness for the ticket lottery and for assigning validators to cores. Why can it not simply hash the latest block?",
@@ -201,6 +208,7 @@ ITEMS = [
  },
  {
   "id": "n3-block-too-new",
+ "lens": "時機",
   "ch": "N3", "section": "§5.1", "gpRef": "§5",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "validity"],
   "alsoCh": ["N2"],

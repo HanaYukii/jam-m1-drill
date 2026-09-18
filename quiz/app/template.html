@@ -131,6 +131,7 @@ code,pre,.mono{font-family:var(--mono)}
 .tag.chtag{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
 .tag.delta{background:var(--amber-soft);border-color:var(--amber);color:var(--ink)}
 .tag.kind{text-transform:uppercase;letter-spacing:.04em}
+.tag.lens{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
 .dots{display:inline-flex;gap:3px;vertical-align:middle}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--line-2);display:inline-block}
 .dots i.on{background:var(--ink-2)}
@@ -280,6 +281,13 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           <button class="chip" data-diff="2" aria-pressed="false">進階 ●●</button>
           <button class="chip" data-diff="3" aria-pressed="false">困難 ●●●</button>
         </div>
+        <div class="chips" id="lensChips" title="題目在問什麼：設計理由 / 時間點與 state 版本 / 與舊 Polkadot 或 Ethereum 對比 / 演算法怎麼實現 formula / 機制本身">
+          <button class="chip" data-lens="設計" aria-pressed="false">設計</button>
+          <button class="chip" data-lens="時機" aria-pressed="false">時機</button>
+          <button class="chip" data-lens="對比" aria-pressed="false">對比</button>
+          <button class="chip" data-lens="演算法" aria-pressed="false">演算法</button>
+          <button class="chip" data-lens="機制" aria-pressed="false">機制</button>
+        </div>
         <div class="chips" id="kindChips">
           <button class="chip" data-kind="concept" aria-pressed="false">concept</button>
           <button class="chip" data-kind="code" aria-pressed="false">code</button>
@@ -346,7 +354,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   const state = {
     mode: 'practice',
     chapter: null,          // null = all
-    diffs: new Set(), kinds: new Set(), query: '',
+    diffs: new Set(), kinds: new Set(), lenses: new Set(), query: '',
     unseenFirst: true, shuffle: true,
     qaOpen: false, qaSeen: new Set(),
     queue: [], idx: 0, answered: null,   // practice
@@ -359,6 +367,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       if (state.chapter && it.ch !== state.chapter
           && !(it.alsoCh || []).includes(state.chapter)) return false;
       if (state.diffs.size && !state.diffs.has(it.difficulty)) return false;
+      if (state.lenses.size && !state.lenses.has(it.lens || '機制')) return false;
       if (state.kinds.size){
         const isDelta = it.tags.includes('delta-0.8.0') || it.kind === 'delta';
         const hit = (state.kinds.has('delta') && isDelta) || state.kinds.has(it.kind);
@@ -431,6 +440,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       + ((it.alsoCh||[]).length ? '<span class="tag xch" title="'+esc('也涵蓋：'+it.alsoCh.map(chName).join('、'))+'">跨章節</span>' : '')
       + '<span class="sect">'+esc(it.section)+'</span>'
       + dots(it.difficulty)
+      + '<span class="tag lens">'+esc(it.lens || '機制')+'</span>'
       + '<span class="tag kind">'+esc(it.kind)+'</span>'
       + (isDelta ? '<span class="tag delta">0.7.2 → 0.8.0</span>' : '')
       + '</div>';
@@ -914,6 +924,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   });
   $$('.modes button').forEach(b=> b.onclick = ()=> setMode(b.dataset.mode));
   $$('#diffChips .chip').forEach(b=> b.onclick = ()=>{ const d=+b.dataset.diff; if (state.diffs.has(d)) state.diffs.delete(d); else state.diffs.add(d); b.setAttribute('aria-pressed', state.diffs.has(d)); refilter(); });
+  $$('#lensChips .chip').forEach(b=> b.onclick = ()=>{ const l=b.dataset.lens; if (state.lenses.has(l)) state.lenses.delete(l); else state.lenses.add(l); b.setAttribute('aria-pressed', state.lenses.has(l)); refilter(); });
   $$('#kindChips .chip').forEach(b=> b.onclick = ()=>{ const k=b.dataset.kind; if (state.kinds.has(k)) state.kinds.delete(k); else state.kinds.add(k); b.setAttribute('aria-pressed', state.kinds.has(k)); refilter(); });
   $('#unseenFirst').onclick = (e)=>{ state.unseenFirst = !state.unseenFirst; e.currentTarget.setAttribute('aria-pressed', state.unseenFirst); refilter(); };
   $('#shuffleQ').onclick = (e)=>{ state.shuffle = !state.shuffle; e.currentTarget.setAttribute('aria-pressed', state.shuffle); refilter(); };

@@ -6,6 +6,7 @@
 ITEMS = [
 {
  "id": "b2-appA-branch-both-targets",
+ "lens": "演算法",
  "ch": "A", "section": "A.5 Single-Step State Transition (branch)", "gpRef": "eq. A.21 (branch), A.5 (ϖ), A.2 (v_blob)",
  "difficulty": 3, "kind": "code", "tags": ["pvm", "branches", "basic-blocks", "delta-0.8.0"],
   "stemZh": "團隊 0.7.2 直譯器裡的每一條條件分支（170–175 的 instBranch 以及 branch_*_imm 處理常式）都經由這個輔助函數解析。GP 0.8.0 的 eq. A.21 對條件分支的目標要求什麼？這個輔助函數符合嗎？",
@@ -53,6 +54,7 @@ ITEMS = [
 },
 {
  "id": "b2-appA-gas-charged-flag",
+ "lens": "演算法",
  "ch": "A", "section": "A.5 Single-Step State Transition (gas charged flag)", "gpRef": "eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine",
  "difficulty": 3, "kind": "concept", "tags": ["pvm", "gas", "host-calls", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 在 Ψ 中貫穿了一個布林的「gas charged」旗標。某個 basic block 的中間有一條 ecalli；該 host call 回傳 ▸，Ψ_H 從 ı″ = ı′ + 1 + skip(ı′) 繼續。這次繼續會再扣一次 gas 嗎？說明旗標在這裡的作用，以及它與一個從 block 中間起跑的全新 Ψ_H 有何不同。",
@@ -81,6 +83,7 @@ ITEMS = [
 },
 {
  "id": "b2-appA-load-imm-jump-ind-reg-write",
+ "lens": "演算法",
  "ch": "A", "section": "A.5.1 Instruction Tables (load_imm_jump_ind) & A.1 (Ψ on panic)", "gpRef": "eq. A.34 table (opcode 180), A.22 (djump), A.1 (Ψ returns φ′ on ☇/∎), A.10; §B invoke",
  "difficulty": 3, "kind": "code", "tags": ["pvm", "jumps", "edge-case", "test-vectors"],
   "stemZh": "在這份 load_imm_jump_ind 的實作中，即使動態跳躍 panic，暫存器寫入 φ_A = ν_X 仍然會發生。這是 GP 0.8.0 所規定的嗎？這個差異有可能被觀察到嗎？",
@@ -131,6 +134,7 @@ func instLoadImmJumpInd(interp *Interpreter, pc ProgramCounter, skipLength Progr
 },
 {
  "id": "b2-appA-vblob-terminator",
+ "lens": "演算法",
  "ch": "A", "section": "A.1 Basic Definition (deblob validity v_blob / v_inst)", "gpRef": "eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ)",
  "difficulty": 2, "kind": "delta", "tags": ["pvm", "validation", "codec", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 的 deblob(p, ı) 會回傳 error——而 Ψ 隨即在未執行任何指令的情況下 panic——除非 v_blob(c, k, 0) 與 v_inst(c, k, ı) 同時成立。這兩個驗證器實際上強制了哪些條件？",

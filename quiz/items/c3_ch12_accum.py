@@ -13,6 +13,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 2 · L1 · concept
 {
     "id": "c3-ch12-operand-tuple-fields",
+ "lens": "演算法",
     "ch": "12",
     "section": "12.2 Execution",
     "gpRef": "eq. 12.13 (U), 12.14 (X), 12.23 (Δ1)",
@@ -63,6 +64,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 3 · L2 · rationale
 {
     "id": "c3-ch12-E-removes-entries-too",
+ "lens": "設計",
     "ch": "12",
     "section": "12.1 History and Queuing",
     "gpRef": "eq. 12.7 (E), 12.8 (Q), 12.12, 12.33 (ω′)",
@@ -113,6 +115,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 4 · L2 · concept
 {
     "id": "c3-ch12-starved-dependency-fate",
+ "lens": "時機",
     "ch": "12",
     "section": "12.1 History and Queuing",
     "gpRef": "eq. 12.8 (Q), 12.31–12.33; §12.1",
@@ -161,6 +164,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 5 · L2 · concept
 {
     "id": "c3-ch12-gas-floor-vs-ceiling",
+ "lens": "演算法",
     "ch": "12",
     "section": "12.2 Execution",
     "gpRef": "§11.4 (report gas checks); eq. 12.23 (Δ1 g), 12.24 (block g); §9.1",
@@ -210,6 +214,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 6 · L2 · concept
 {
     "id": "c3-ch12-theta-from-yield",
+ "lens": "演算法",
     "ch": "12",
     "section": "12.3 Final State Integration",
     "gpRef": "eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B)",
@@ -259,6 +264,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 7 · L2 · concept
 {
     "id": "c3-ch12-provide-two-places",
+ "lens": "時機",
     "ch": "12",
     "section": "12.2 Execution / 12.4 Preimage Integration",
     "gpRef": "eq. 12.18 (d′), 12.20 (I), 12.21 (Y), 12.37",
@@ -311,6 +317,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 9 · L2 · rationale
 {
     "id": "c3-ch12-why-R-star-is-a-sequence",
+ "lens": "設計",
     "ch": "12",
     "section": "12.1 History and Queuing",
     "gpRef": "eq. 11.17 (R), 12.4, 12.11 (R*), 12.17, 12.31",
@@ -361,6 +368,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 10 · L3 · delta
 {
     "id": "c3-ch12-accseq-n-with-transfers",
+ "lens": "時機",
     "ch": "12",
     "section": "12.2 Execution",
     "gpRef": "eq. 12.17 (Δ+), 12.24, 12.28",
@@ -413,6 +421,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 11 · L3 · concept
 {
     "id": "c3-ch12-prior-privileged-index-reads",
+ "lens": "時機",
     "ch": "12",
     "section": "12.2 Execution",
     "gpRef": "eq. 12.18 (Δ*), 12.19 (R)",
@@ -461,6 +470,7 @@ ITEMS = [
 # ─────────────────────────────────────────────────────────── 12 · L3 · code
 {
     "id": "c3-ch12-code-delta-star-map-order",
+ "lens": "演算法",
     "ch": "12",
     "section": "12.2 Execution",
     "gpRef": "eq. 12.18 (u, t′)",

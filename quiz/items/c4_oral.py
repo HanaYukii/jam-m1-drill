@@ -5,6 +5,7 @@
 ITEMS = [
 {
  "id": "appC-natural-encoding-shape",
+ "lens": "設計",
  "ch": "C", "section": "C.1 General Natural Number Serialization",
  "gpRef": "§C.1", "difficulty": 2, "kind": "concept",
  "tags": ["codec", "encoding", "bijection"],
@@ -34,6 +35,7 @@ ITEMS = [
 },
 {
  "id": "appD-node-discrimination",
+ "lens": "演算法",
   "alsoCh": ["C"],
  "ch": "D", "section": "D.2.1 Trie Node Encoding",
  "gpRef": "§D.2.1", "difficulty": 2, "kind": "concept",
@@ -63,6 +65,7 @@ ITEMS = [
 },
 {
  "id": "ch07-belt-mmr-shape",
+ "lens": "設計",
  "ch": "7", "section": "7.4 The Accumulation Output Belt",
  "gpRef": "§7.4; §E.3", "difficulty": 2, "kind": "concept",
  "tags": ["mmr", "beefy", "recent-history"],
@@ -91,6 +94,7 @@ ITEMS = [
 },
 {
  "id": "ch11-assurance-signature",
+ "lens": "設計",
  "ch": "11", "section": "11.2 Assurances",
  "gpRef": "§11.2", "difficulty": 2, "kind": "concept",
  "tags": ["assurance", "availability", "signature"],
@@ -119,6 +123,7 @@ ITEMS = [
 },
 {
  "id": "ch14-oversize-rule",
+ "lens": "設計",
   "alsoCh": ["11"],
  "ch": "14", "section": "14.4 Work Result Size",
  "gpRef": "§14; eq. 11.x (W_R)", "difficulty": 2, "kind": "concept",
@@ -148,6 +153,7 @@ ITEMS = [
 },
 {
  "id": "appA-fault-address-rule",
+ "lens": "設計",
  "ch": "A", "section": "A.4 Memory & Page Faults",
  "gpRef": "eq. A.9", "difficulty": 2, "kind": "concept",
  "tags": ["pvm", "page-fault", "memory"],
@@ -176,6 +182,7 @@ ITEMS = [
 },
 {
  "id": "appA-jump-semantics",
+ "lens": "設計",
  "ch": "A", "section": "A.3 Basic Blocks & Control Transfer",
  "gpRef": "§A.3; §A.5", "difficulty": 2, "kind": "concept",
  "tags": ["pvm", "control-flow", "gas"],
@@ -205,6 +212,7 @@ ITEMS = [
 },
 {
  "id": "appB-gas-model",
+ "lens": "演算法",
  "ch": "B", "section": "B.1 Host Call Gas",
  "gpRef": "§B（PR #517）", "difficulty": 2, "kind": "delta",
  "tags": ["host-call", "gas", "delta-0.8.0"],
@@ -233,6 +241,7 @@ ITEMS = [
 },
 {
  "id": "appB-grow-heap-semantics",
+ "lens": "設計",
  "ch": "B", "section": "B.2 grow_heap",
  "gpRef": "§B（PR #508 / #517）", "difficulty": 2, "kind": "delta",
  "tags": ["host-call", "memory", "delta-0.8.0"],
@@ -261,6 +270,7 @@ ITEMS = [
 },
 {
  "id": "appB-fetch-purpose",
+ "lens": "設計",
  "ch": "B", "section": "B.2 fetch",
  "gpRef": "§B", "difficulty": 2, "kind": "concept",
  "tags": ["host-call", "refine", "design"],
@@ -289,6 +299,7 @@ ITEMS = [
 },
 {
  "id": "appC-digest-error-encoding",
+ "lens": "設計",
  "ch": "C", "section": "C.x Work Digest",
  "gpRef": "§C；eq. 11.7（𝔼）", "difficulty": 2, "kind": "concept",
  "tags": ["codec", "work-digest", "errors"],
@@ -317,6 +328,7 @@ ITEMS = [
 },
 {
  "id": "ch06-fallback-purpose",
+ "lens": "設計",
  "ch": "6", "section": "6.5 The Slot Key Sequence",
  "gpRef": "eq. 6.25, 6.27 (F)", "difficulty": 2, "kind": "concept",
  "tags": ["safrole", "fallback", "anonymity"],

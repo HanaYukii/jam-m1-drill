@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch10-state",
+ "lens": "機制",
  "ch": "10", "section": "10.1 The State", "gpRef": "eq. 10.1",
  "difficulty": 1, "kind": "concept", "tags": ["disputes", "state"],
   "stemZh": "disputes 狀態是 ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。這四個分量各裝什麼？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch10-verdict-structure",
+ "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.4",
  "difficulty": 2, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
   "stemZh": "依 GP 0.8.0，E_V 裡的一個 verdict 由什麼組成？必須帶幾個判定、對哪一組金鑰？一個 extrinsic 最多能放幾個 verdict？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch10-verdict-thresholds",
+ "lens": "設計",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 (V)",
  "difficulty": 2, "kind": "concept", "tags": ["disputes", "calc", "tiny"],
   "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，（t → 結果）的對照表是什麼？其他的 t 又會如何？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "ch10-culprits-faults",
+ "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.6–10.7, 10.13",
  "difficulty": 3, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，culprit（E_C）由什麼組成？fault（E_F）由什麼組成？誰的金鑰可以出現在 offender 裡？一個 good verdict 又需要什麼？",
@@ -115,6 +119,7 @@ ITEMS = [
 },
 {
  "id": "ch10-ordering",
+ "lens": "時機",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.8–10.11",
  "difficulty": 2, "kind": "concept", "tags": ["disputes", "ordering"],
   "stemZh": "disputes extrinsic 施加了哪些排序與唯一性的約束？",
@@ -143,6 +148,7 @@ ITEMS = [
 },
 {
  "id": "ch10-effects",
+ "lens": "時機",
  "ch": "10", "section": "10.2–10.3", "gpRef": "eq. 10.14–10.19",
  "difficulty": 2, "kind": "concept", "tags": ["disputes", "state"],
   "stemZh": "處理 E_D 會對狀態產生哪些效果？header 的 offenders marker H_O 又必須包含什麼？",
@@ -171,6 +177,7 @@ ITEMS = [
 },
 {
  "id": "ch10-code-thresholds",
+ "lens": "演算法",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi",
  "difficulty": 2, "kind": "code", "tags": ["disputes", "code", "delta-0.8.0"],
   "stemZh": "這是團隊的 verdict 分類程式碼。要符合 GP 0.8.0，必須改什麼？",
@@ -211,6 +218,7 @@ ITEMS = [
 },
 {
  "id": "ch10-rationale",
+ "lens": "設計",
  "ch": "10", "section": "10 intro", "gpRef": "§10 intro paragraphs",
  "difficulty": 1, "kind": "rationale", "tags": ["disputes", "rationale"],
   "stemZh": "GP 陳述的 disputes 系統目的有哪些？它刻意不自己做的又是什麼？",

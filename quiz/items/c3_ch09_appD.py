@@ -7,6 +7,7 @@ ITEMS = [
 # ---------------------------------------------------------------- ch. 9 ----
 {
  "id": "c3-ch09-expunge-delay",
+ "lens": "設計",
  "ch": "9", "section": "9.2 Preimage Lookups",
  "gpRef": "§9.2 (domain of Λ); App. B Refine Invocation (D ≡ L + 4,800 = 19,200)",
  "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "constants"],
@@ -35,36 +36,8 @@ ITEMS = [
  "trap": "D 只是「forget 之後多久才能真的刪」；真正把 preimage 從 state 移除的動作在 `forget`（自家，Ω_F = 25）與 `eject`（別家，Ω_J = 22）兩個 accumulate host call 裡——注意別跟 0.8.0 的 `expunge`（Ω_X = 14）混淆，那是 refine-only 的 inner-PVM 拆除呼叫，與 preimage 無關。preimage 生命週期的狀態機本身在 §9.2.2。"
 },
 {
- "id": "c3-ch09-service-info-leaf",
- "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
- "gpRef": "eq. 9.3, eq. 9.8; §D.1 T(σ) row C(255, s); App. B `info` (Ω_I)",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "state", "merklization"],
-  "stemZh": "a_i（項數）、a_o（位元組數）與 a_t（門檻餘額）都是衍生值——§9.3 從 a_s 與 a_l 導出 a_i 與 a_o，再從那兩者加上儲存的 gratis 抵扣 a_f 導出 a_t，而三者都不是 eq. 9.3 元組的成員。它們之中哪些真的進入了被 Merklize 的狀態？與 `info` host call 交回的內容相比又如何？",
-  "optionsZh": [
-   "三者都同時進入兩種編碼，而且兩種編碼逐位元組相同——這正是為什麼實作可以放心地在 trie 葉子與 host call 之間共用同一個 codec，也是為什麼那片葉子可以直接遞給 guest 的緩衝區",
-   "service-info 的葉子帶有 a_i 與 a_o 但沒有 a_t，而且它以版本位元組 0 開頭；`info` 沒有版本位元組但有 a_t，其版面為 E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p))",
-   "三者都沒有被序列化到任何地方：trie 只儲存 eq. 9.3 的元組欄位，而 a_i、a_o 與 a_t 是在每次 host call 需要時才從 a_s 與 a_l 重新算出來的",
-   "trie 的葉子帶有 a_t 但沒有 a_i 與 a_o（那兩者按需重算），而 `info` 回傳 a_i 與 a_o 但沒有 a_t；兩種編碼都以版本位元組 0 開頭"
-  ],
-  "stem": "a_i (items), a_o (octets) and a_t (threshold balance) are dependent values — §9.3 derives a_i and a_o from a_s and a_l, and a_t from those two plus the stored gratis offset a_f, and none of them is a member of the eq. 9.3 tuple. Which of them actually reach the Merklized state, and how does that compare with what the `info` host call hands back?",
- "options": [
-  "All three reach both encodings, and the two encodings are byte-for-byte identical — which is exactly why an implementation is free to reuse a single codec for the trie leaf and for the host call, and why the leaf can be handed straight to the guest's buffer.",
-  "The service-info leaf carries a_i and a_o but not a_t, and it opens with a version octet 0; `info` has no version octet but does include a_t, laid out as E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p)).",
-  "None of the three is serialized anywhere: the trie stores only the eq. 9.3 tuple fields, and a_i, a_o and a_t are recomputed from a_s and a_l each time a host call needs them.",
-  "The trie leaf carries a_t but neither a_i nor a_o (those are recomputed on demand), while `info` returns a_i and a_o but not a_t; both encodings begin with the version octet 0."
- ],
- "answer": 1,
- "optNotes": [
-   "兩個排列並不相同（version octet、a_t 的有無、a_f 的位置），共用一份 codec 正是最常見的實作坑。",
-   "leaf 有 version octet 0、沒有 a_t；`info` 沒有 version octet、有 a_t，兩者 a_f 的位置也不同。",
-   "§9.3 明說 a_i、a_o「are expected to be found explicitly within the Merklized state data」，不是臨時重算。",
-   "剛好顛倒：leaf 存的是 a_i／a_o 而非 a_t，多寫 a_t 會讓 leaf 多 8 bytes、整棵 trie 的 root 對不上。",
- ],
- "explanation": "§9.3 說得很清楚：a_i、a_o 是 dependent values，「as we will see in the account serialization function … these are expected to be found explicitly within the Merklized state data. Because of this we make explicit their set.」——所以 a_i ∈ N_{2^32}、a_o ∈ N_{2^64} 被寫死進 trie。附錄 D 的 T(σ)：C(255, s) ↦ E(0, a_c, E_8(a_b, a_g, a_m, a_o, a_f), E_4(a_i, a_r, a_a, a_p))，開頭那個 0 就是 0.7.1 起加入的 service-info version octet，而 a_t 不在裡面（它是 max(0, B_S + B_I·a_i + B_L·a_o − a_f)，隨時可重算）。附錄 B 的 Ω_I（`info`）則是另一個排列：E(a_c, E_8(a_b, a_t, a_g, a_m, a_o), E_4(a_i), E_8(a_f), E_4(a_r, a_a, a_p))——有 a_t、沒有 version octet、a_f 的位置也不同。兩份編碼的欄位集合與順序都不一樣，這是 trie 與 host call 之間最容易共用錯 struct 的地方。",
- "trap": "leaf 有 version octet、沒有 a_t；`info` 沒有 version octet、有 a_t。兩個排列不同，別共用 struct。"
-},
-{
  "id": "c3-ch09-write-threshold-go",
+ "lens": "時機",
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
  "difficulty": 2, "kind": "code", "tags": ["accounts", "balance", "host-calls", "fuzzer-bug"],
@@ -123,6 +96,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
 },
 {
  "id": "c3-ch09-forget-lifecycle",
+ "lens": "時機",
  "ch": "9", "section": "9.2.2 Semantics",
  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "host-calls"],
@@ -152,6 +126,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
 },
 {
  "id": "c3-ch09-new-service-index",
+ "lens": "演算法",
  "ch": "9", "section": "9 Service Accounts",
  "gpRef": "§9 eq. 9.1 (N_S ≡ N_{2^32}); eq. B.14 (check); S = 2^16",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "service-id", "accumulation"],
@@ -183,6 +158,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
 # ---------------------------------------------------------------- app. D ----
 {
  "id": "c3-appD-key-31-octets",
+ "lens": "設計",
  "ch": "D", "section": "D.2.1 Node Encoding and Trie Identification",
  "gpRef": "§D.1 (C → B_31); §D.2.1 (nodes fixed at 512 bit)",
  "difficulty": 1, "kind": "rationale", "tags": ["merklization", "trie", "state-keys"],
@@ -212,6 +188,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
 },
 {
  "id": "c3-appD-service-subkeys",
+ "lens": "演算法",
  "ch": "D", "section": "D.1 Serialization",
  "gpRef": "§D.1 (state-key constructor C; the final four rows of T(σ))",
  "difficulty": 2, "kind": "concept", "tags": ["merklization", "state-keys", "accounts"],
@@ -241,6 +218,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
 },
 {
  "id": "c3-appD-merklize-bitorder",
+ "lens": "演算法",
  "ch": "D", "section": "D.2 Merklization",
  "gpRef": "§D.2 (M over D⟨b → (B_31, B)⟩); §3 notation (bits(·) is most-significant-first)",
  "difficulty": 3, "kind": "code", "tags": ["merklization", "trie", "state-root", "incremental"],

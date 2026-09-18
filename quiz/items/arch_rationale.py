@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "arch-corejam-name",
+ "lens": "對比",
  "ch": "ARCH", "section": "1.1 Nomenclature / RFC-31", "gpRef": "§1.1 & RFC-31 CoreJam",
  "difficulty": 1, "kind": "rationale", "tags": ["architecture", "history"],
   "stemZh": "JAM 這個名字從何而來？原始 CoreJam 模型的哪些階段真的在鏈上執行？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "arch-driving-factors",
+ "lens": "對比",
  "ch": "ARCH", "section": "1.2–1.3 Driving Factors / Size-Coherency Antagonism", "gpRef": "§1.2–1.3",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
   "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。五個因素是什麼？這條原則說了什麼？JAM 的設計又怎麼回應它？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "arch-why-safrole",
+ "lens": "對比",
  "ch": "ARCH", "section": "6 Safrole rationale", "gpRef": "§6 intro & §19",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "safrole", "rationale"],
   "stemZh": "JAM 為什麼採用 Safrole（票券式、匿名、ring-VRF）而不是類似 BABE 的 VRF 抽籤？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "arch-availability-auditing",
+ "lens": "設計",
   "alsoCh": ["11"],
  "ch": "ARCH", "section": "4.8.1, 11, 16, 17 rationale", "gpRef": "§4.9.1, §16–17, ELVES paper",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale", "elves"],
@@ -116,6 +120,7 @@ ITEMS = [
 },
 {
  "id": "arch-why-prior-root-and-pipelining",
+ "lens": "設計",
  "ch": "ARCH", "section": "5 & 20 (pipelining)", "gpRef": "§5, §20 Discussion",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "pipelining"],
   "stemZh": "JAM 的設計讓一個區塊的大部分工作能在該區塊傳播的同時進行。是哪些設計特徵讓這件事成為可能？",
@@ -144,6 +149,7 @@ ITEMS = [
 },
 {
  "id": "arch-services-vs-accounts",
+ "lens": "對比",
  "ch": "ARCH", "section": "4.8.2 services", "gpRef": "§4.9.2, §9",
  "difficulty": 1, "kind": "rationale", "tags": ["architecture", "services"],
   "stemZh": "JAM 的 service 與 Ethereum 的帳戶模型有何不同？外部資料又是怎麼進入狀態的？",
@@ -172,6 +178,7 @@ ITEMS = [
 },
 {
  "id": "arch-jam-vs-polkadot-eth",
+ "lens": "對比",
  "ch": "ARCH", "section": "2 Previous Work", "gpRef": "§2",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
   "stemZh": "依 GP 的「Previous Work」分析，Polkadot 1.0 與 Ethereum 式 rollup 的主要侷限是什麼？JAM 想克服的又是什麼？",
@@ -200,6 +207,7 @@ ITEMS = [
 },
 {
  "id": "ch14-work-package",
+ "lens": "機制",
  "ch": "14", "section": "14.2 Work Packages", "gpRef": "eq. 14.2–14.3 (§14.3)",
  "difficulty": 2, "kind": "concept", "tags": ["work-packages"],
   "stemZh": "一份 work-package（eq. 14.2，屬於集合 ℙ）是 ⟨j, h, u, f, c, w⟩。六個欄位各裝什麼？",

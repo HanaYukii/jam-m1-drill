@@ -5,35 +5,8 @@
 #          issues digest #710, #869, #1015, #1021, #1026, #1034.
 ITEMS = [
 {
- "id": "ch13-counter-deltas-calc",
- "ch": "13", "section": "13.1 Validator Activity", "gpRef": "eq. 13.4–13.6 (π_V†, π_V‡, π′_V); eq. 11.28 (reporters set G)",
- "difficulty": 2, "kind": "concept", "tags": ["statistics", "validator-stats", "calc"],
-  "stemZh": "某個 epoch 中段（e′ = e）的區塊，其出塊者索引 H_I = 3。它的 extrinsic 含有：E_T 兩張 ticket、E_P 一份 500 個 octet 的 preimage、E_A 由 validator 1 與 2 簽署的 assurance、E_G 一份 guarantee 且其憑證帶有 validator 0 與 4 的簽章。相對於 π_V，π′_V 會顯示哪些逐 validator 的變動（計數器 b、t、p、d、g、a）？",
-  "optionsZh": [
-   "validator 3：b+1、t+2、p+1、d+500、g+1、a+2——出塊者納入的每一項 extrinsic 都記在出塊者頭上；其他 validator 都不變",
-   "validator 3：b+1、t+2、p+1、d+1；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1",
-   "validator 3：b+1、t+2、p+1、d+500；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1；其餘紀錄不變",
-   "validator 3：b+1、p+1、d+500；產生那兩張 ticket 的兩位 validator：各 t+1；validator 1 與 2：各 a+1；validator 0 與 4：各 g+1"
-  ],
-  "stem": "A block in the middle of an epoch (e′ = e) has author index H_I = 3. Its extrinsic contains E_T with 2 tickets, E_P with one preimage of 500 octets, E_A with assurances signed by validators 1 and 2, and E_G with one guarantee whose credential carries the signatures of validators 0 and 4. Which per-validator changes does π′_V show relative to π_V (counters b, t, p, d, g, a)?",
- "options": [
-  "Validator 3: b+1, t+2, p+1, d+500, g+1, a+2 — every extrinsic the author includes is credited to the author; no other validator changes",
-  "Validator 3: b+1, t+2, p+1, d+1; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each",
-  "Validator 3: b+1, t+2, p+1, d+500; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each; all other records unchanged",
-  "Validator 3: b+1, p+1, d+500; the two validators who generated the tickets: t+1 each; validators 1 and 2: a+1 each; validators 0 and 4: g+1 each"
- ],
- "answer": 2,
- "optNotes": [
-  "g 與 a 依簽章歸屬，author 只是把 extrinsic 打包進區塊，不會因此連 g、a 一起拿到。",
-  "d 是 preimage 的 octet 總數（500），p 才是筆數，兩者記在不同 counter 不可混。",
-  "b/t/p/d 記給 H_I、a 記給 assurance 簽署者、g 記給 eq. 11.28 的 reporters，三種歸屬都對。",
-  "ticket 是匿名的 ring-VRF 證明，鏈上不知道誰產生，eq. 13.6 因此把 |E_T| 記給 H_I。",
- ],
- "explanation": "eq. 13.4：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——assurance 記在**簽署者**身上（存在性判斷，每人每塊最多 +1）。eq. 13.5：e′ = e（不在 epoch 邊界）所以 π_V‡ = π_V†、π_L 不變。eq. 13.6：b += (v = H_I)、t += |E_T|、p += |E_P|、d += Σ_{d∈E_P}|d| 都**只給 author**；g += (κ′[v] ∈ G)，G 是 eq. 11.28 的 reporters set——credential 裡有簽名的 validator 的 Ed25519 key。結果：v0: g+1；v1、v2: a+1；v3: b+1, t+2, p+1, d+500；v4: g+1。你們 statistics.go：UpdateTicketStatistics / UpdatePreimageStatistics / UpdatePreimageOctetStatistics 只更新 authorIndex；UpdateReportStatistics 用 reporters set；UpdateAvailabilityStatistics 用 assurance.ValidatorIndex。issue #710（0.7.0）修的就是「每個 validator 只算一次」，#869 修 guarantee 計數。",
- "trap": "b/t/p/d 看 H_I；g/a 看簽章；每塊每人 g、a 最多各 +1（布林值，不是數量）。"
-},
-{
  "id": "ch13-why-statistics",
+ "lens": "設計",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "§13.1 (intro paragraphs); §14.1 honest behavior; C(13) in App. D",
  "difficulty": 1, "kind": "rationale", "tags": ["statistics", "rationale", "staking"],
   "stemZh": "JAM 這條鏈為什麼要保留 validator 的活動統計？GP 對那些無法在鏈上直接量測的活動又怎麼說？",
@@ -62,6 +35,7 @@ ITEMS = [
 },
 {
  "id": "ch14-code-digest-mapping",
+ "lens": "演算法",
  "ch": "14", "section": "14.3 Packages and Items", "gpRef": "eq. 14.10 (item-to-digest C); eq. 11.6 (D); eq. 13.10/13.17 — internal/work_package/work_package.go C",
  "difficulty": 2, "kind": "code", "tags": ["work-packages", "digest", "code"],
   "stemZh": "這是團隊的 item-to-digest 函數（GP 0.8.0 eq. 14.10，C）。逐欄對照 eq. 14.10：哪些對、哪些錯？",
@@ -114,6 +88,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
 },
 {
  "id": "ch14-code-refine-args",
+ "lens": "演算法",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. B.5 (Ψ_R argument a and gas w_g); eq. B.1 (Ψ_I uses E_2(c)); eq. 14.9 (G_R) — PVM/refine_invocation.go RefineInvoke",
  "difficulty": 3, "kind": "code", "tags": ["work-packages", "refine", "pvm-invocation", "code"],
   "stemZh": "以下是團隊的 Ψ_R 建構交給 Ψ_M 之引數 blob a 的方式。對照 GP 0.8.0 的 eq. B.5：哪些成分正確？哪一個錯了？",
@@ -163,6 +138,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
 },
 {
  "id": "ch14-compute-report-signature",
+ "lens": "演算法",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31",
  "difficulty": 3, "kind": "delta", "tags": ["work-packages", "compute-report", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 重新定義了 work-report 的計算函數 Ξ。它的引數是什麼？在什麼條件下它才會以 E 失敗？",
@@ -191,6 +167,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
 },
 {
  "id": "ch14-paged-proofs",
+ "lens": "演算法",
  "ch": "14", "section": "14.3.1 Exporting / 14.4.1 Availability Specifier", "gpRef": "eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12",
  "difficulty": 2, "kind": "concept", "tags": ["work-packages", "segments", "paged-proofs", "merkle"],
   "stemZh": "匯出的 segment 由 availability specification 的 segments-root e 承諾，並透過 paged proof 佐證。e 怎麼算？一份 paged proof 裝什麼？兩者最後放到哪裡？",
@@ -216,33 +193,5 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  ],
  "explanation": "§14.3.1：segments-root「is formed as the root of a constant-depth binary Merkle tree as defined in equation E.4」，即 A 的 e = M(s)（eq. 14.18）；E.4/E.7：M 先把每個 leaf 做 H($leaf ⌢ v) 再零填到 2 的冪——固定深度讓 import 證明的大小固定（eq. 14.7 的 32·⌈log₂ W_X⌉）。eq. 14.12：P(s) = [P_{W_G}(E(↕J_6(s, i), ↕L_6(s, i))) | i < ⌈|s|/64⌉]——每頁一個 segment，內容是 root 到該 64-leaf 子樹的路徑 J_6（E.5）加上這 64 個 leaf hash 的頁 L_6（E.6），零填到 4,104；§14.4.1：「exactly ⌈1/64⌉ paged-proof segments as the number of yielded segments, each composed of a page of 64 hashes of segments, together with a Merkle proof from the root to the subtree-root which includes those 64 segments」。它們與 exported segments 串接後（s ⌢ P(s)）一起被 C_v 切片、轉置後做成 s♣ → erasure root（eq. 14.18），存在長期的 D³L；importer「each justification can be derived through a single paged-proof」，最壞每個 import 多抓一個 segment，連續 import 共用一頁。這也是 eq. 13.12 DA-load 65/64 的由來。你們 work_package.go PagedProofs：Jx(6,…)、Lx(6,…)、PadToMultiple(SegmentSize)；A 用 merkle_tree.M 算 exportsRoot。",
  "trap": "segment root = M（constant depth，$leaf 前綴 + 零填）；paged proof 每 64 個 segment 一頁、存 D³L；65/64。"
-},
-{
- "id": "ch14-makebundle",
- "ch": "14", "section": "14.4 Computation of Work-Report / 14.2.2 Data Collection and Justification", "gpRef": "eq. 14.15–14.17 (X, L_l, S_l, J_l, B, s = A(H(p), B(p, l), e, v)); §14.3.1 (Audit DA vs D³L lifetimes)",
- "difficulty": 2, "kind": "concept", "tags": ["work-packages", "bundle", "audit-da", "d3l"],
-  "stemZh": "guarantor 會把可稽核的 work-bundle B(p, l) 做 erasure coding 放進 Audit DA。這個 bundle 裡究竟有什麼？它與放進 D³L 的東西又有何不同？",
-  "optionsZh": [
-   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並在後面附上完成的 work-report，好讓 auditor 不必碰鏈上資料就能拿自己的結果與 guarantor 的比對；其中每一個序列都帶長度前綴；而 bundle 與「匯出 segment 加其 paged proof」都被保存在同一個儲存區裡 ≥ 28 天（672 個 epoch）",
-   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))：編碼後的 package、接著每一份 extrinsic blob、再來每一個匯入的 segment、最後是那些 import 的 Merkle 佐證——只有佐證路徑帶長度前綴；bundle 屬於短期的 Audit-DA 資料，而匯出 segment 加其 paged proof 則進入長期的 D³L（≥ 28 天 = 672 個 epoch）",
-   "B(p, l) 只有 E(p, X#(p_w))：編碼後的 package 與每一份 extrinsic blob，不含匯入的 segment 也不含佐證——auditor 會自己從 D³L 重新取得那些 segment 並檢查它們的 paged proof，就像 guarantor 當初做的那樣；bundle 屬於短期 Audit-DA 資料，匯出 segment 加 paged proof 則進入長期 D³L",
-   "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) 並附上第五個成分，也就是這個 package 自己的匯出：編碼後的 package、每份 extrinsic blob、每個匯入 segment、它們的 Merkle 佐證，最後是這些匯出——只有佐證路徑帶長度前綴；而 bundle 進入長期 D³L（≥ 28 天），只有 paged proof 屬於短期 Audit-DA 資料"
-  ],
-  "stem": "What exactly goes into the auditable work-bundle B(p, l) that guarantors erasure-code into the Audit DA, and how does that differ from what goes into the D³L?",
- "options": [
-  "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) with the finished work-report appended, so that auditors can compare their own result against the guarantors' without touching on-chain data; every one of the sequences carries a length prefix; both the bundle and the exported segments with their paged proofs are kept for ≥ 28 days (672 epochs) in the same store",
-  "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)): the encoded package, then every extrinsic blob, then every imported segment and finally the Merkle justifications of those imports — only the justification paths carry length prefixes; the bundle is short-lived Audit-DA data, whereas exported segments plus their paged proofs go to the long-lived D³L (≥ 28 days = 672 epochs)",
-  "B(p, l) = E(p, X#(p_w)) only: the encoded package and every extrinsic blob, with no imported segments and no justifications — auditors re-fetch the segments from the D³L and check their paged proofs themselves, exactly as the guarantors did; the bundle is short-lived Audit-DA data, whereas exported segments plus their paged proofs go to the long-lived D³L (≥ 28 days = 672 epochs)",
-  "B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w)) with the exported segments appended as a fifth component: the encoded package, every extrinsic blob, every imported segment, their Merkle justifications and finally this package's own exports — only the justification paths carry length prefixes; the bundle goes to the long-lived D³L (≥ 28 days = 672 epochs) while the paged proofs alone are short-lived Audit-DA data"
- ],
- "answer": 1,
- "optNotes": [
-  "bundle 只有四個元件、不含 report；GP 也明說只有 justification 的 Merkle path 帶長度前綴。",
-  "eq. 14.16 的四段順序與「只有 justification path 有長度前綴」都吻合，且 bundle 屬短期 Audit DA。",
-  "正好把 §14.2.2 要避免的成本加回去：auditing 每包平均 30 次、guaranteeing 只有 2–3 次。",
-  "export 走的是 A 的第三個參數（s ⌢ P(s) 進 D³L）；bundle 只留到 availability 那塊 finalize 為止。",
- ],
- "explanation": "eq. 14.16：B(p, l) = E(p, X#(p_w), S_l#(p_w), J_l#(p_w))；eq. 14.15：X(w) = 依 w_x 順序的 extrinsic 原始 blob（H(d) 與 |d| 必須吻合）；L_l 把 h⊞ 透過 l 換成 segment root；S_l(w) = 每個 (r, n) ∈ w_i 對應的 segment b[n]（M(b) = L_l(r)）；J_l(w) = ↕J_0(b, n)，每個 import 的 Merkle 路徑。「Note the lack of length prefixes: only the Merkle paths for the justifications have a length prefix. All other sequence lengths are determinable through the work package itself」（extrinsic 長度在 w_x、segment 固定 4,104、import 數量在 w_i）。這個 bundle 就是 A 的第二個參數：s = A(H(p), B(p, l), ē, v)，(w_s)_l = |B(p, l)|（eq. 14.17–14.18），被 C_v 切成 v 個 chunk 進**短期** Audit DA——§14.3.1：「assurers are expected to keep them only until finality of the block in which the availability of the work-result's work-package is assured」；exported segments + P(s) 則進**長期** D³L，「kept for a minimum of 28 days (672 complete epochs)」。理由（§14.2.2）：guarantor 已用 justification 驗過 import，但「We do not force auditors to go through the same process」——寧可在 D³L 與 Audit DA 之間重複資料以降低 auditor 成本。你們 work_package.go BuildWorkPackageBundle：WorkPackageBundle{Package, Extrinsics, ImportSegments, ImportProofs}。0.8.0 才把它命名為 B 並明確以 (p, l) 為參數（issue #1015「explicit make-bundle / compute-report semantics」）。",
- "trap": "bundle = package ⌢ extrinsics ⌢ import segments ⌢ justifications（只有 justification path 有長度前綴）；短期 Audit DA vs 長期 D³L（672 epochs）。"
 },
 ]

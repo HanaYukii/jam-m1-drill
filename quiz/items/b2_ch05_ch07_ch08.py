@@ -4,6 +4,7 @@
 ITEMS = [
 {
  "id": "ch05-unsigned-header-serialization",
+ "lens": "演算法",
  "ch": "5", "section": "5 The Header (serialization, Appendix C.2)", "gpRef": "eq. 5.1 & §C.2 (E(H), E_U(H))",
  "difficulty": 2, "kind": "code", "tags": ["header", "codec", "seal", "code"],
   "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。在 GP 0.8.0 的 E(H) 與 E_U(H) 之下這為什麼成立？E_U 的欄位順序是什麼？",
@@ -56,6 +57,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 },
 {
  "id": "ch05-extrinsic-hash-inclusion-proof",
+ "lens": "設計",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7",
  "difficulty": 3, "kind": "concept", "tags": ["header", "extrinsic-hash", "light-client", "delta-0.8.0"],
   "stemZh": "某個輕客戶端只持有一個已驗證的 header H，想確認 service s 的 preimage blob d 有被納入該區塊的 E_P。已知 H_X = H(E(H#(a)))、a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]（eq. 5.4–5.7），它需要的最小見證是什麼？檢查的形狀又是什麼？",
@@ -84,6 +86,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 },
 {
  "id": "ch05-future-slot-temporarily-invalid",
+ "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8 & §5 text",
  "difficulty": 2, "kind": "concept", "tags": ["header", "time", "validation"],
   "stemZh": "某個節點在牆鐘時間 T 收到一個區塊，其 header 滿足 H_T · P > T，同時 P(H)_t < H_T 也成立（父區塊已知且較舊）。GP §5 如何歸類這個區塊？",
@@ -112,6 +115,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 },
 {
  "id": "ch05-author-index-bound-set",
+ "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 & eq. 6.8 (valcount)",
  "difficulty": 3, "kind": "code", "tags": ["header", "validators", "delta-0.8.0", "fuzzer-bug", "code"],
   "stemZh": "在 fuzzer bug #825（一個 H_I = 65535 的 header 讓 UpdateEtaPrime0 以「index out of range [65535] with length 6」panic，因為該索引在被驗證之前就被使用）之後，團隊加了這個檢查。它用的界限是 GP 0.8.0 所規定的那一個嗎？",
@@ -149,6 +153,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 },
 {
  "id": "ch07-belt-empty-output",
+ "lens": "時機",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7 & eq. E.1, E.3",
  "difficulty": 3, "kind": "concept", "tags": ["recent-history", "mmr", "edge-case"],
   "stemZh": "區塊 N 沒有 accumulate 出任何產出，所以 θ′ = []。accumulation-output belt β_B 以及寫進區塊 N 之 β_H 條目的 super-peak b 會怎麼樣？",
@@ -177,6 +182,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 },
 {
  "id": "ch08-leftmost-removal-code",
+ "lens": "演算法",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.3 (F) & eq. 11.25, 11.32",
  "difficulty": 2, "kind": "code", "tags": ["authorization", "code", "fuzzer-bug"],
   "stemZh": "在 PR #694（bug #692）之前，這段移除邏輯會刪掉被使用之 authorizer 雜湊的每一個出現、而且忽略該 report 的 core。修正後的程式碼實作的是哪條 GP 規則？舊行為為什麼是錯的？",
@@ -231,6 +237,7 @@ func (a *AuthPool) RemoveLeftMostPairedValue(h OpaqueHash) {
 },
 {
  "id": "ch08-new-authorizer-availability-timing",
+ "lens": "時機",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.2, eq. 4.19 & eq. 11.32",
  "difficulty": 3, "kind": "concept", "tags": ["authorization", "guarantees", "ordering"],
   "stemZh": "在區塊 N 開始時，pool α[c] 並不含 authorizer x。在區塊 N 的 accumulation 期間，core c 的 assigner service 呼叫 `assign`，其佇列在索引 H_T mod Q 處的項目是 x，所以 x 會在這一塊被附加進 core c 的 pool。而區塊 N 的 E_G 也帶了一份指向 core c 的 guarantee，其 work-report 的 authorizer 正是 x。這份 guarantee 有效嗎？x 最快什麼時候可用？",

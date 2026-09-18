@@ -12,6 +12,7 @@ constraint · 3.5–3.6 key/value pairs · 3.7 d[k] · 3.8 d ∖ s · 3.9 K(d) �
 ITEMS = [
     {
         "id": "c3-ch03-bounded-numeric-blob-types",
+ "lens": "機制",
         "ch": "3",
         "section": "3.4 Numbers / 3.7.4 Octets and Blobs",
         "gpRef": "§3.4; §3.7.4; §3.8.1",
@@ -57,6 +58,7 @@ ITEMS = [
     },
     {
         "id": "c3-ch03-optional-none-error",
+ "lens": "機制",
         "ch": "3",
         "section": "3.3 Sets / 3.2 Functions and Operators",
         "gpRef": "§3.3; eq. 3.2 (substitute-if-nothing); applied at eq. 13.13",
@@ -103,43 +105,8 @@ ITEMS = [
         "trap": "∅ = 合法的「沒有值」；∇ = 錯誤。dictionary miss 給 ∅，不是 ∇；𝒰 取第一個非 ∅。",
     },
     {
-        "id": "c3-ch03-ellipsis-ranges",
-        "ch": "3",
-        "section": "3.4 Numbers / 3.7 Sequences",
-        "gpRef": "§3.4 (Z_{a…b}, Z_{a…+b}); §3.7 (slicing, s[i]^⟲, last)",
-        "difficulty": 2,
-        "kind": "concept",
-        "tags": ["notation", "sequences", "slicing", "ranges"],
-  "stemZh": "令 s = [10, 20, 30, 40, 50]。套用 GP §3.4 對整數集合、以及 §3.7 對序列切片的省略號慣例，求 s_{…3}、s_{1…+3}、Z_{1…3}、Z_{1…+3}、last(s) 與 s[7]^⟲。",
-  "optionsZh": [
-   "s_{…3} = [10, 20]、s_{1…+3} = [20, 30, 40, 50]、Z_{1…3} = {1, 2, 3}、Z_{1…+3} = {1, 2, 3, 4}、last(s) = 50、s[7]^⟲ = 20",
-   "s_{…3} = [10, 20, 30]、s_{1…+3} = [20, 30, 40]、Z_{1…3} = {1, 2}、Z_{1…+3} = {1, 2, 3}、last(s) = 50、s[7]^⟲ = 30",
-   "s_{…3} = [30, 40, 50]、s_{1…+3} = [10, 20, 30]、Z_{1…3} = {1, 2}、Z_{1…+3} = {1, 2, 3}、last(s) = 10、s[7]^⟲ = 40",
-   "s_{…3} = [10, 20, 30]、s_{1…+3} = [20, 30]、Z_{1…3} = {1, 2, 3}、Z_{1…+3} = {2, 3, 4}、last(s) = 50、s[7]^⟲ = 30"
-  ],
-  "stem": "Let s = [10, 20, 30, 40, 50]. Applying the ellipsis conventions of GP §3.4 for integer sets and §3.7 for sequence slicing, evaluate s_{…3}, s_{1…+3}, Z_{1…3}, Z_{1…+3}, last(s) and s[7]^⟲.",
-        "options": [
-            "s_{…3} = [10, 20], s_{1…+3} = [20, 30, 40, 50], Z_{1…3} = {1, 2, 3}, Z_{1…+3} = {1, 2, 3, 4}, "
-            "last(s) = 50, s[7]^⟲ = 20",
-            "s_{…3} = [10, 20, 30], s_{1…+3} = [20, 30, 40], Z_{1…3} = {1, 2}, Z_{1…+3} = {1, 2, 3}, "
-            "last(s) = 50, s[7]^⟲ = 30",
-            "s_{…3} = [30, 40, 50], s_{1…+3} = [10, 20, 30], Z_{1…3} = {1, 2}, Z_{1…+3} = {1, 2, 3}, "
-            "last(s) = 10, s[7]^⟲ = 40",
-            "s_{…3} = [10, 20, 30], s_{1…+3} = [20, 30], Z_{1…3} = {1, 2, 3}, Z_{1…+3} = {2, 3, 4}, "
-            "last(s) = 50, s[7]^⟲ = 30",
-        ],
-        "answer": 1,
-        "optNotes": [
-            "把整數區間讀成閉區間、切片又少取一格；7 mod 5 = 2 應得 s[2] = 30 而非 s[1]。",
-            "半開區間與 offset/length 逐項對上，前綴切片與 7 mod 5 = 2 也都算對。",
-            "把前綴切片讀成後綴、把 …+ 當成從頭取，last(s) 取的更是第一個元素而非最後。",
-            "Z_{1…3} 是半開的 {1, 2}；…+3 是從 index 1 起算三個，Z_{1…+3} 也不從 2 起跳。",
-        ],
-        "explanation": "§3.4：「Z_{a…b} = {x | x ∈ Z, a ≤ x < b}. E.g. Z_{2…5} = {2, 3, 4}」——**半開**區間；「We denote the offset/length form of this set as Z_{a…+b}, a short form of Z_{a…a+b}」。§3.7 對序列用同一套省略號：「A range may be denoted using an ellipsis for example: [0, 1, 2, 3]_{…2} = [0, 1] and [0, 1, 2, 3]_{1…+2} = [1, 2]」——下標只有結尾時是「取前 n 個」（等價於 index < n），有 …+ 時是 offset/length。同節另有兩個記號：「We denote modulo subscription as s[i]^⟲ ≡ s[i mod |s|]」與「We denote the final element x of a sequence s = [..., x] through the function last(s) ≡ x」。GP 全篇沒有任何「a 到 b 皆含」的閉區間記法——從 PDF 抄公式時最常見的錯誤就是把它讀成閉區間。另外會在正文遇到 §3 從未定義的 N_{a…b}（preamble 的 \\Nclamp，例如 eq. 6.8 的 𝕍 ≡ {3c | c ∈ N_{2…C+1}}）：它沿用同一套半開讀法，C = 341 時 c 的上界是 341（c < 342），𝕍 的最大值才會剛好是 3 · 341 = 1023。",
-        "trap": "GP 只有兩種形式：半開的 a…b，與 offset/length 的 a…+b；序列切片沿用同一套，沒有閉區間。",
-    },
-    {
         "id": "c3-ch03-prime-dagger-record",
+ "lens": "時機",
         "ch": "3",
         "section": "3.6 Tuples / 3.7 Sequences",
         "gpRef": "§3.6 (named tuple components); eq. 4.1 (σ′ ≡ Υ(σ, B)); §4 state-transition dependency graph; eq. 13.1–13.3",

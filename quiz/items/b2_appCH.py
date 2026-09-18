@@ -3,36 +3,8 @@
 # F (Shuffling), G (Bandersnatch VRF / signing contexts), H (Erasure Coding) — GP 0.8.0
 ITEMS = [
 {
- "id": "appC-code-operand-transfer-prefix",
- "ch": "C", "section": "C.2 Block Serialization (operand tuple and deferred transfer)", "gpRef": "§C.2 E(deferred transfer), E(operand tuple); eq. B.9; §B.4 fetch cases 14–15; eq. 12.13–12.14",
- "difficulty": 2, "kind": "code", "tags": ["codec", "accumulation", "deferred-transfer", "fetch"],
-  "stemZh": "團隊在每個 accumulate 輸入項目的本體之前加了一個位元組作為前綴。這兩種前綴是什麼？在 GP 0.8.0 裡究竟是誰在消費這個編碼？",
-  "optionsZh": [
-   "這兩個前綴就是 GP 放在 E(運算元組)（0）與 E(deferred transfer)（1）之前的判別子；Ψ_A 收下的是單一個混合序列 i ∈ ⟦運算元 ∪ transfer⟧，而 service 透過 fetch（case 14／15）把它讀回來，所以每個項目都必須自我描述",
-   "這兩個前綴分隔的是 accumulate 記憶體映像的兩半：Ψ_M 的初始引數 E(t, s, |i|) 之後，先寫入每個運算元（前綴 0）、再寫入每筆 transfer（前綴 1）到 RAM 裡，所以 fetch 只需要服務 work-package 的資料，也沒有任何東西需要自我描述",
-   "那個前綴是 GP 0.7.1 引入的帳戶序列化版本位元組（0 = 舊版運算元版面、1 = 帶 128 位元組 memo 的 transfer 版面）；Ψ_A 收下的是兩個各自獨立的序列（一個運算元、一個 transfer），而 0.8.0 因為兩者不再共用序列而拿掉了那個位元組",
-   "這些前綴只是團隊為了 JSON 測試向量而定的慣例；線路上 GP 把所有 transfer 排在所有運算元之前，並以固定長度區分兩者（transfer 本體為 152 個 octet）；service 則從 Ψ_M 的初始引數得知這個分界，因為那個引數帶的是兩個計數而不是單一個總數"
-  ],
-  "stem": "The team prefixes each accumulate input item with a byte before its body. What are the two prefixes, and what actually consumes this encoding in GP 0.8.0?",
- "code": {"lang": "go", "caption": "internal/types/encode.go (OperandOrDeferredTransfer.Encode)", "src": "func (o *OperandOrDeferredTransfer) Encode(e *Encoder) error {\n\tcLog(Cyan, \"Encoding OperandOrDeferredTransfer\")\n\n\t// if operand is nil, append 0 to the buffer, else append 1\n\tif o.Operand == nil && o.DeferredTransfer == nil {\n\t\treturn errors.New(\"Operand and DeferredTransfer are both nil\")\n\t}\n\t// ...\n\t// Operand\n\tif o.Operand != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{0})\n\n\t\tif err := o.Operand.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\t// DeferredTransfer\n\tif o.DeferredTransfer != nil {\n\t\t// prefix\n\t\te.buf.Write([]byte{1})\n\n\t\tif err := o.DeferredTransfer.Encode(e); err != nil {\n\t\t\treturn err\n\t\t}\n\t}\n\n\treturn nil\n}"},
- "options": [
-  "The prefixes are the discriminators GP puts in front of E(operand tuple) (0) and E(deferred transfer) (1); Ψ_A takes one mixed sequence i ∈ ⟦operand ∪ transfer⟧ and the service reads it back through fetch (cases 14/15), so each item must be self-describing",
-  "The prefixes separate the two halves of the accumulate memory image: Ψ_M's initial argument E(t, s, |i|) is followed by every operand (prefix 0) and then every transfer (prefix 1) written into RAM at start-up, so fetch only ever has to serve work-package data and nothing needs to be self-describing",
-  "The prefix is the account-serialization version byte introduced in GP 0.7.1 (0 = legacy operand layout, 1 = transfer layout with the 128-octet memo); Ψ_A takes two separate sequences, one of operands and one of transfers, and 0.8.0 drops the byte because the two never share a sequence",
-  "The prefixes are a team convention for the JSON test vectors only; on the wire GP orders all transfers before all operands and tells them apart by fixed length, a transfer body being 152 octets; the service learns the split from Ψ_M's initial argument, which carries both counts rather than one total"
- ],
- "answer": 0,
- "optNotes": [
-   "Ψ_M 的初始參數只有 E(t, s, |i|)，項目靠 fetch 14/15 讀回，所以每一項必須自我描述。",
-   "初始記憶體只含數量不含 i 的內容；§B.4 的 φ_10 = 14／15 回的正是 E(↕i) 與 E(i[φ_11])。",
-   "0.7.1 的 version byte 是 C(255, s) 值的開頭；eq. B.9 收的仍是 operand ∪ transfer 的混合序列。",
-   "GP 沒有「transfer 在前、靠固定長度分辨」的規則——operand 的 ↕t 與 O(l) 本來就是變長。",
- ],
- "explanation": "GP §C.2 明確定義 E(x ∈ deferred transfer) ≡ E(1, E_4(s), E_4(d), E_8(a), m, E_8(g))（memo m 固定 128 octets、不加長度前綴）以及 E(x ∈ operand tuple) ≡ E(0, p, e, a, y, g, O(l), ↕t)——開頭的 1/0 就是 discriminator。為什麼需要：eq. B.9 的 Ψ_A 接收的是 i ∈ ⟦operand tuple ∪ deferred transfer⟧ 這種『混合序列』（eq. 12.13–12.14，accumulation.tex：「the union of the two characterizes inputs to the Accumulation invocation function」）；Ψ_M 的初始參數只有 E(t, s, |i|)，項目本身是服務透過 fetch host call 讀回：§B.4 的 fetch 在 φ_10 = 14 時回傳 E(↕i)、15 時回傳 E(i[φ_11])。沒有 discriminator，服務無法分辨讀到的是 operand 還是 transfer。你們的實作正好對應：operand 用 0、transfer 用 1，Operand.Encode 的 GasLimit 走 EncodeInteger（compact，與 GP 的 g 一致），AuthOutput 帶長度前綴。",
- "trap": "1 = transfer、0 = operand；memo 128 octets 無前綴；fetch 14/15 把整段 E(↕i) 或單一 E(i[k]) 交給服務。"
-},
-{
  "id": "appD-code-service-info-key",
+ "lens": "演算法",
  "ch": "D", "section": "D.1 Serialization (state-key constructor C)", "gpRef": "§D.1 state-key constructor C (unlabelled first equation of appendix D)",
  "difficulty": 3, "kind": "code", "tags": ["merklization", "state-keys", "fuzzer-bug"],
   "stemZh": "在 PR #780 之前，團隊只靠測試 stateKey[0] == 0xFF 來辨認 service-info key C(255, s)，而 fuzzer 的 trace 以「failed to decode expected service info from state key 0xffff0017…: EOF」失敗。為什麼單看第 0 個位元組會有歧義？現在的檢查又為什麼是可靠的？",
@@ -61,36 +33,8 @@ ITEMS = [
  "trap": "31-byte key 的第 0 個 byte：C(i) 是 chapter 編號、C(255, s) 是 255、C(s, h) 是 service id 的低 byte——三者可能相同。"
 },
 {
- "id": "appF-code-shuffle",
- "ch": "F", "section": "F Shuffling (Fisher–Yates)", "gpRef": "eq. F.1 (shuffle), F.2 (Q_l), F.3 (hash form); eq. 11.20–11.22 (guarantor assignment R, P, M); eq. 17.3 and the tranche-0 selection that follows it",
- "difficulty": 2, "kind": "code", "tags": ["shuffle", "guarantor-assignment", "calc"],
-  "stemZh": "這是團隊對 eq. F.1 洗牌函數 F 的實作。對於 s = [10, 20, 30, 40] 與 r = [3, 6, 4, 5]，它會回傳什麼？那個就地交換忠於 GP 的定義嗎？",
-  "optionsZh": [
-   "[40, 10, 30, 20]；忠實——GP 是把 s_{l−1} 寫進被挑中的位置並捨去最後一格，而「先交換再切掉尾端」是同一件事（副作用是呼叫者的 slice 被就地修改）",
-   "[40, 10, 20, 30]；不忠實——GP 是把被挑中的元素移除並把其餘左移、保持相對順序，所以與 s[l-1] 的交換會靜默地打亂存活者的順序",
-   "[20, 30, 10, 40]；不忠實——GP 的結果是所有交換套用完之後原地留下的那個陣列，而不是被依序挑出的元素序列，所以這個函數回傳的是 eq. F.1 所定義者的反序",
-   "[40, 30, 10, 20]；不忠實——GP 是對每個 r_i 取原始長度 l 的模並索引原序列、完全不縮短它，只在最後才丟棄重複"
-  ],
-  "stem": "This is the team's implementation of the shuffle F of eq. F.1. For s = [10, 20, 30, 40] and r = [3, 6, 4, 5], what does it return, and is the in-place swap faithful to the GP definition?",
- "code": {"lang": "go", "caption": "internal/utilities/shuffle/shuffle.go (FisherYatesShuffle)", "src": "func FisherYatesShuffle(s []types.U32, r []types.U32) []types.U32 {\n\tl := len(s)\n\n\t// If the sequence is empty, return an empty slice\n\tif l == 0 {\n\t\treturn make([]types.U32, 0)\n\t}\n\n\t// Calculate the index\n\tindex := r[0] % types.U32(l)\n\n\t// The selected element\n\tselected := s[index]\n\n\t// Swap elements\n\ts[index], s[l-1] = s[l-1], s[index]\n\n\t// Recursively shuffle the remaining elements\n\tshuffledRest := FisherYatesShuffle(s[:l-1], r[1:])\n\n\t// Return the shuffled sequence\n\treturn append([]types.U32{selected}, shuffledRest...)\n}"},
- "options": [
-  "[40, 10, 30, 20]; faithful — GP writes s_{l−1} into the picked slot and drops the last position, and swapping then slicing off the tail is the same thing (the caller's slice is mutated as a side effect)",
-  "[40, 10, 20, 30]; not faithful — GP removes the picked element and shifts the remainder left, preserving relative order, so the swap with s[l-1] silently permutes the survivors",
-  "[20, 30, 10, 40]; not faithful — GP's result is the array left in place after all swaps have been applied, not the sequence of picked elements, so this function returns the reverse of what eq. F.1 defines",
-  "[40, 30, 10, 20]; not faithful — GP takes every r_i modulo the original length l and indexes the original sequence without shrinking it, discarding duplicates only at the end"
- ],
- "answer": 0,
- "optNotes": [
-   "洞由 s_{l−1} 填補再縮短長度，所以「對調後切尾」與 eq. F.1 等價，逐步得 40、10、30、20。",
-   "這是「移除後左移、保序」的刪法；GP 明寫 s′_{r_0 mod l} = s_{l−1}，並不保留相對順序。",
-   "把經典 in-place Fisher–Yates 跑完的陣列當結果；eq. F.1 輸出的是依序挑出的元素序列。",
-   "每次都用原長度取模、不縮短序列；GP 的 l 每輪遞減，遞迴吃的是 s′[..l−1]。",
- ],
- "explanation": "eq. F.1：F(s, r) = [s_{r_0 mod l}] ⌢ F(s′[..l−1], r[1..])，其中 s′ = s 但 s′_{r_0 mod l} = s_{l−1}——輸出是「依序挑出的元素」，被挑走的洞由『最後一個』元素填補，再把長度縮 1。逐步：l = 4，3 mod 4 = 3 → 挑 40，s′ = [10, 20, 30]（洞就在最後，等同截掉）；l = 3，6 mod 3 = 0 → 挑 10，s′_0 = s_2 = 30 → [30, 20]；l = 2，4 mod 2 = 0 → 挑 30，s′_0 = 20 → [20]；最後挑 20。結果 [40, 10, 30, 20]。程式碼把 s[index] 與 s[l−1] 對調再取 s[:l−1]：對調後 index 位置放的正是 s_{l−1}，而移到尾端的元素被切掉，與 GP 完全等價；唯一差別是它就地修改呼叫者的 slice（guarantor_assignments.go 與 auditing.go 每次都建新 slice，所以無害）。eq. F.2/F.3：F(s, h) = F(s, Q_l(h))，Q_l(h)_i = decode_4(H(h ⌢ E_4(⌊i/8⌋))[4i mod 32 ..+4])——每個 Blake2b 供 8 個索引，1023 個 validator 需 128 次 hash。用途：eq. 11.21 的 guarantor 指派 P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], η′_2), ⌊(t mod E)/R⌋)（0.8.0 用 |κ′| 與 ⌊i/3⌋，0.7.2 是 ⌊C·i/V⌋），以及 ch. 17 初始 audit tranche F(reports, Y(seed_0))[..10]（eq. 17.3 之後的 tranche-0 式）。官方 shuffle 向量（jamtestvectors/shuffle，長度 0…341）可驗證 Q_l 與 F 的組合。",
- "trap": "GP 的 F 輸出「挑選順序」，洞由最後一個元素補；用 η′_2（不是 η′_1）避免 epoch 末的 fork 放大。"
-},
-{
  "id": "appG-ietf-vs-ring",
+ "lens": "對比",
  "ch": "G", "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)", "gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
  "difficulty": 2, "kind": "concept", "tags": ["bandersnatch", "vrf", "ring-vrf", "safrole"],
   "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。兩者各用在哪？各多大？輸出函數 Y 又取決於什麼？",
@@ -119,6 +63,7 @@ ITEMS = [
 },
 {
  "id": "appG-signing-contexts",
+ "lens": "機制",
  "ch": "G", "section": "Signing contexts X (definitions appendix) and their primitives", "gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
  "difficulty": 2, "kind": "concept", "tags": ["signing-contexts", "bandersnatch", "ed25519", "bls"],
   "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。列出這些 context 與各自搭配的原語——並指出唯一一個被用了兩次、搭配兩種不同原語的 context。",

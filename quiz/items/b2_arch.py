@@ -5,6 +5,7 @@
 ITEMS = [
 {
  "id": "arch-beefy-commitment",
+ "lens": "設計",
  "ch": "ARCH", "section": "18 Beefy Distribution (ch. 18)", "gpRef": "eq. 18.1–18.2; eq. 7.7–7.8; §19–20",
  "difficulty": 2, "kind": "concept", "tags": ["beefy", "grandpa", "bridging", "off-chain"],
   "stemZh": "依 Beefy Distribution 這一章，validator 用哪把金鑰、在什麼時候、簽什麼？這個簽章又是拿來做什麼的？",
@@ -33,6 +34,7 @@ ITEMS = [
 },
 {
  "id": "arch-best-chain-selection",
+ "lens": "演算法",
  "ch": "ARCH", "section": "19 Grandpa and the Best Chain (ch. 19)", "gpRef": "eq. 19.1–19.4; §17 (ban-listing)",
  "difficulty": 2, "kind": "concept", "tags": ["best-chain", "grandpa", "auditing", "off-chain"],
   "stemZh": "一個節點如何選出它據以建塊、並投 Grandpa 票的最佳區塊 B♭？這張票又攜帶什麼資料？",
@@ -61,6 +63,7 @@ ITEMS = [
 },
 {
  "id": "arch-audit-tranches",
+ "lens": "演算法",
  "ch": "ARCH", "section": "17 Auditing and Judging (ch. 17)", "gpRef": "eq. 17.1–17.19 (PDF numbering); §20 (10 audits/validator/slot)",
  "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves", "tranches", "off-chain"],
   "stemZh": "在稽核協定中，一位 validator 如何決定它必須稽核哪些剛變為可得的 work-report？這個集合又是如何隨時間成長的？",
@@ -89,6 +92,7 @@ ITEMS = [
 },
 {
  "id": "arch-guaranteeing-procedure",
+ "lens": "演算法",
  "ch": "ARCH", "section": "15 Guaranteeing (ch. 15)", "gpRef": "§15; eq. 14.13 (Ξ); eq. 11.24, 11.28",
  "difficulty": 2, "kind": "concept", "tags": ["guaranteeing", "off-chain", "work-reports"],
   "stemZh": "描述 Guaranteeing 一章的誠實 guarantor 策略：refine 之前檢查什麼、簽什麼怎麼簽、何時可以把 report 往下送、什麼會被懲罰、以及一位 guarantor 該簽多少。",
@@ -116,35 +120,8 @@ ITEMS = [
  "trap": "先驗 authorization 再跑 refine：白跑 Ψ_R 不會被罰，但浪費的是自己的 CPU 與獎勵。"
 },
 {
- "id": "arch-two-da-classes",
- "ch": "ARCH", "section": "16 Availability Assurance (ch. 16) & 14 Exporting / Availability Specifier", "gpRef": "§16; §14 (Exporting, eq. 14.18); eq. 11.5, 11.11–11.18",
- "difficulty": 2, "kind": "concept", "tags": ["availability", "erasure-coding", "d3l", "off-chain"],
-  "stemZh": "在一位 validator 於它的 assurance 中把某個 core 的位元設起之前，它必須持有哪些 erasure 編碼的資料？這些資料如何驗證？又必須保存多久？",
-  "optionsZh": [
-   "只需要它那一份 work-package bundle 的分片；segment 分片由後續的匯入者直接向匯出 package 的 guarantor 惰性取得；bundle 分片保存 L = 14,400 個 slot（24 小時）好讓 lookup-anchor 維持可稽核，而且不需要證明，因為 assurance 簽章會在鏈上對該 report 的 erasure-root 檢查",
-   "完整的 work-package bundle 加上每一個匯出 segment 的明文（不是分片），驗證方式是在背書前於本地重算該 work-report，並保存 D = 19,200 個 slot，好讓該 package 所引用的任何原像能在爭議視窗期間重新驗證",
-   "兩者都要：它那份可稽核 bundle 的分片（只保存到該 report 被視為已稽核／其區塊定案為止，在那之前依請求提供），以及該 report 的 segments-root 之下每一個匯出 segment 的分片加上分頁證明資料（長期的 D³L，保存 ≥ 28 天 = 672 個 epoch）；在宣稱持有之前，各自都要以 Merkle 證明對該 report 的 erasure-root 驗證",
-   "它的 bundle 分片與 segment 分片，驗證是對 segments-root 而非 erasure-root，因為 erasure-root 只承諾了 bundle；bundle 分片保存 28 天，而 segment 分片在該 report 被 accumulate 後即可丟棄，因為 accumulation 會把匯出的 segment 複製進鏈上 service 儲存"
-  ],
-  "stem": "Before a validator sets a core's bit in its assurance, which erasure-coded data must it hold, how is that data verified, and for how long must it be kept?",
- "options": [
-  "Only its shard of the work-package bundle; segment shards are fetched lazily by later importers directly from the guarantors of the exporting package; the bundle shard is retained for L = 14,400 slots (24 h) so that lookup-anchors stay auditable, and no proof is needed because the assurance signature is checked on-chain against the report's erasure-root",
-  "The full work-package bundle plus every exported segment in clear (not shards), verified by recomputing the work-report locally before assuring, and kept for D = 19,200 slots so that any preimage referenced by the package can be re-verified during the dispute window",
-  "Both its shard of the auditable bundle (kept only until the report is considered audited / its block finalized, served on request until then) and its shards of every exported segment under the report's segments-root plus paged-proof data (the long-term D³L, kept ≥ 28 days = 672 epochs), each verified by a Merkle proof against the report's erasure-root before possession is claimed",
-  "Its bundle shard and segment shards, verified against the segments-root rather than the erasure-root since the erasure-root only commits to the bundle; the bundle shard is kept for 28 days while segment shards may be dropped once the report is accumulated, because accumulation copies the exported segments into on-chain service storage"
- ],
- "answer": 2,
- "optNotes": [
-   "§16 要求兩類 shard 都持有；保留期也不是 L = 14,400，而且 assurance 前必須自己驗過 Merkle 證明。",
-   "assurer 持有的是 erasure-coded shard 而非明文 bundle 與 segment；D = 19,200 是 preimage expunge 期限。",
-   "兩類 shard 分得清楚：bundle shard 留到 audited／finality，segment shard 留 28 天，都以 erasure-root 驗證。",
-   "erasure-root u = M_B(transpose[b♣, s♣]) 同時承諾兩者；accumulation 也不會把 segment 複製進鏈上 storage。",
- ],
- "explanation": "§16：「There are two classes of shard a validator must have for an availability assignment before claiming possession in an assurance」——(1) bundle 的 erasure-coded shard：「needed to verify the work-report's validity and completeness and need not be retained after the work-report is considered audited. Until then, it should be provided on request」；(2) segments-root 所指每個 exported segment 的 shard：「These should be retained for 28 days and provided to any validator on request」。驗證：「trivially proven through the work-report's work-package erasure-root and a Merkle-proof of inclusion in the correct location」，且「a validator should not claim possession of shards in an assurance unless it has, and has verified, the corresponding proofs」——鏈上對 assurance（eq. 11.11–11.14）只驗 Ed25519 簽章（X_A ⌢ H(E(H_P, f))）與 bitfield、不驗 shard 內容，所以證明必須自己在鏈下驗完。§14 Exporting 把兩者稱為短期 Audit DA store（assurer 保留到「finality of the block in which the availability of the work-result's work-package is assured」）與長期 D³L（Distributed, Decentralized, Data Lake，≥ 28 天 = 672 個完整 epoch，還含 paged-proofs：每 64 個 segment 一頁 hash＋子樹證明）。Availability specifier（eq. 14.18／eq. 11.5）：erasure-root u = M_B(transpose[b♣, s♣])——同時承諾 bundle 與 segments（含 paged proofs）的 chunk，chunk 數 n = assuring validator set 大小；segments-root e 只承諾 exported segments 本身（constant-depth Merkle）。鏈上規則對照：report 在 > 2/3·|κ| 的 assurance 後才 available（eq. 11.17），逾 U = 5 slot 未 available 則清出 ρ（eq. 11.18）。§20：全網 DA 容量約 2 PB、每節點最多 6 TB；assuring 每 slot 上行 144 MB。團隊：internal/store/work_package_bundle_store.go、CE137/138（shard 分發／audit shard 請求）、CE139/140（segment shard 請求）；#1035：erasure 參數依驗證者數（tiny 6 → 3 片可重建，full 1023 → 342 片）。",
- "trap": "兩個 DA：短期 audit DA（bundle shard）vs 長期 import DA / D³L（segment shard＋paged proofs，28 天）——兩者都在同一個 erasure-root 之下。"
-},
-{
  "id": "arch-core-virtual-hardware",
+ "lens": "機制",
  "ch": "ARCH", "section": "20.1 Technical Characteristics & 20.2 Illustrating Performance (ch. 20)", "gpRef": "§20 Discussion",
  "difficulty": 2, "kind": "concept", "tags": ["performance", "hardware", "throughput", "rationale"],
   "stemZh": "Discussion 一章如何刻劃一份 work-package 在 JAM core 上所取得的「虛擬硬體」？它的結果之後又會怎樣？",
@@ -173,6 +150,7 @@ ITEMS = [
 },
 {
  "id": "arch-sweet-spot-further-work",
+ "lens": "對比",
  "ch": "ARCH", "section": "21 Conclusion / 21.1 Further Work (ch. 21)", "gpRef": "§21",
  "difficulty": 2, "kind": "rationale", "tags": ["rationale", "future-work", "architecture"],
   "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。這個甜蜜點落在什麼與什麼之間？留白的又是哪些？",
@@ -201,6 +179,7 @@ ITEMS = [
 },
 {
  "id": "arch-fuzz-protocol-m1",
+ "lens": "設計",
  "ch": "ARCH", "section": "jam-conformance fuzz protocol & the M1 evaluation pipeline", "gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
  "difficulty": 2, "kind": "concept", "tags": ["conformance", "fuzzer", "history", "m1"],
   "stemZh": "描述 W3F 用於 M1 稽核的 jam-conformance fuzz 協定：傳輸層、編碼、握手、訊息順序、以及 M1 的必備項目。",
@@ -229,6 +208,7 @@ ITEMS = [
 },
 {
  "id": "arch-prize-interview-rule12",
+ "lens": "設計",
  "ch": "ARCH", "section": "JAM Prize rules (rule 12) & milestone-delivery T&Cs", "gpRef": "jam.web3.foundation/rules #12; T&C 3.5 / 6.1 / 8.4; delivery template",
  "difficulty": 1, "kind": "concept", "tags": ["prize", "history", "interview"],
   "stemZh": "依 JAM Prize 規則與里程碑交付條款，送審後的口試其目的與地位是什麼？",

@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch06-gamma-components",
+ "lens": "機制",
  "ch": "6", "section": "6.2 Safrole Basic State", "gpRef": "eq. 6.3–6.6",
  "difficulty": 1, "kind": "concept", "tags": ["safrole", "state"],
   "stemZh": "Safrole 狀態 γ ≡ (γ_P, γ_Z, γ_S, γ_A)。四個分量各存什麼？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch06-key-rotation",
+ "lens": "時機",
  "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.14–6.15",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "validators", "epoch"],
   "stemZh": "在 epoch 換屆（e′ > e）時，依 eq. 6.14，validator 的金鑰集合是怎麼輪替的？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch06-valcount",
+ "lens": "機制",
  "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.7–6.8 (valcount)",
  "difficulty": 2, "kind": "delta", "tags": ["safrole", "validators", "delta-0.8.0"],
   "stemZh": "GP 0.8.0（PR #514）把 validator 集合的大小一般化了。ι、γ_P、κ 與 λ 允許哪些大小？",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "ch06-entropy-update",
+ "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.22–6.24",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "entropy"],
   "stemZh": "熵累積器 η 在每個區塊、以及在 epoch 換屆時是怎麼更新的？",
@@ -115,6 +119,7 @@ ITEMS = [
 },
 {
  "id": "ch06-which-eta-where",
+ "lens": "時機",
   "alsoCh": ["11"],
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.25, 6.30, 11.22",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "entropy"],
@@ -144,6 +149,7 @@ ITEMS = [
 },
 {
  "id": "ch06-seal-ticket-condition",
+ "lens": "演算法",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16 (ticket seal)",
  "difficulty": 3, "kind": "concept", "tags": ["safrole", "seal"],
   "stemZh": "當 γ′_S 是一串 ticket 時，seal H_S 必須滿足三個條件（eq. 6.16），其中 i = γ′_S[H_T mod E]。是哪三個？",
@@ -171,35 +177,8 @@ ITEMS = [
  "trap": "E_U(H) = 不含 H_S 的 header 序列化；H_V 則是 context X_E ⌢ Y(H_S)、訊息為空 []。"
 },
 {
- "id": "ch06-slot-sealer-cases",
- "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25",
- "difficulty": 2, "kind": "concept", "tags": ["safrole", "fallback"],
-  "stemZh": "posterior 的 slot-sealer 序列 γ′_S 有三種情形。現在來了一個區塊，e′ = e + 1、前一塊的 slot phase m = 480（< Y = 500）、而 γ_A 持有 600 張 ticket。γ′_S 是什麼？",
-  "optionsZh": [
-   "Z(γ_A)——accumulator 的 outside-in 排序，因為 e′ = e + 1 與 |γ_A| = E 都成立，而 m ≥ Y 那個子句約束的是新區塊的 phase m′、不是前一塊的",
-   "γ_S——維持不變，因為 eq. 6.25 的第二種情形涵蓋任何其前一塊仍位於同一個 epoch 之投票期內的區塊，只有 m ≥ Y 才會逼出一份新序列",
-   "F(η′_2, κ′)——fallback 金鑰，因為 eq. 6.25 的第一種情形還需要 m ≥ Y，而前一塊的 phase 仍在 ticket 投票期之內，所以那場競賽從未收尾",
-   "F(η_2, κ)——fallback 金鑰，因為 m = 480 < Y 確實選中第三種情形，但 F 的種子是前一塊出塊當時生效的 prior η_2 與 prior active set κ"
-  ],
-  "stem": "The posterior slot-sealer sequence γ′_S has three cases. A block arrives with e′ = e + 1, the previous block was at slot phase m = 480 (< Y = 500) and γ_A holds 600 tickets. What is γ′_S?",
- "options": [
-  "Z(γ_A) — the outside-in ordering of the accumulator, because e′ = e + 1 and |γ_A| = E both hold and the m ≥ Y clause constrains m′, the new block's phase, not the prior block's",
-  "γ_S — unchanged, because the second case of eq. 6.25 covers any block whose prior still sat inside the same epoch's ticket-submission window, and only m ≥ Y forces a fresh sequence",
-  "F(η′_2, κ′) — fallback keys, because eq. 6.25's first case also needs m ≥ Y and the prior block's phase is still inside the ticket-submission window, so the contest never closed",
-  "F(η_2, κ) — fallback keys, because m = 480 < Y does select the third case, but F is seeded with the prior η_2 and the prior active set κ that were in force while the previous block was authored"
- ],
- "answer": 2,
- "optNotes": [
-  "6.25 的 m 出自 τ（前一塊的 slot phase）；讀成 m′ 會讓本塊自己跨過 Y 就提前開票。",
-  "「γ_S 不變」的條件是 e′ = e（同一 epoch），本題 e′ = e + 1 已不適用。",
-  "三條件缺一不可：m = 480 < Y = 500，比賽尚未封閉，即使 accumulator 已滿也得走 fallback。",
-  "F 的參數必須是 posterior：κ′（= 舊 γ_P）才是本 epoch 的 active set，η′_2 也已 rotate 過。",
- ],
- "explanation": "eq. 6.25 三個分支：γ′_S ≡ Z(γ_A) 當 **e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E**；γ_S（原封不動）當 e′ = e；其餘走 F(η′_2, κ′)。本題給的是 e′ = e + 1 ✓、|γ_A| = 600 = E ✓，但 m = 480 < Y = 500 ✗——**三個條件缺一不可**，所以落到 fallback。**m 是誰的 phase 是這題的核心**：m 來自 τ（**prior** block 的時槽），m′ 才是本塊的。用 prior 的 phase 當門檻，是要確認「投票在上一塊的時候就已經結束」；本題的情境正是 epoch 在票還沒截止時就結束了——比賽從未收尾，自然不能拿 accumulator 當結果。**同理 e′ ≥ e + 2（整個 epoch 被跳過）也走 fallback**：那批 ticket 是為 e + 1 準備的，其 ring proof 對應的是當時的 γ_Z，中間隔一個 epoch 之後 ring root 與 entropy 都已再度輪替。**fallback 的種子一律是 posterior**：F(η′_2, κ′)——因為 epoch 第一塊會先完成 eq. 6.14 的金鑰輪換與 entropy rotate。相關名詞：Y = 500 是投票截止的 phase（epoch tail start）、E = 600 是 epoch 長度、Z 是 outside-in sequencer（eq. 6.26）、F 是 fallback key sequence（eq. 6.27）。",
- "trap": "面試愛問邊界：(1) 跳過整個 epoch；(2) accumulator 未滿；(3) 前一塊 m < Y。全部都是 fallback。"
-},
-{
  "id": "ch06-outside-in-Z",
+ "lens": "演算法",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.26 (Z)",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
   "stemZh": "ticket accumulator γ_A 保留 id 最小的 E 張 ticket 並依升冪排序，而 eq. 6.25 讓下個 epoch 的 slot-sealer 序列成為 Z(γ_A)。一張存活下來的 ticket，其排名如何對應到它可以封印的時槽？",
@@ -228,6 +207,7 @@ ITEMS = [
 },
 {
  "id": "ch06-epoch-marker",
+ "lens": "時機",
  "ch": "6", "section": "6.6 The Markers", "gpRef": "eq. 6.28",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "markers"],
   "stemZh": "在一個新 epoch 的第一塊（e′ > e）中，epoch marker H_E 究竟包含什麼？",
@@ -256,6 +236,7 @@ ITEMS = [
 },
 {
  "id": "ch06-winning-tickets-marker",
+ "lens": "時機",
  "ch": "6", "section": "6.6 The Markers", "gpRef": "eq. 6.29",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "markers"],
   "stemZh": "winning-tickets marker H_W 在什麼樣的確切條件下才非空？",
@@ -284,6 +265,7 @@ ITEMS = [
 },
 {
  "id": "ch06-ticket-extrinsic-limits",
+ "lens": "機制",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30–6.32",
  "difficulty": 2, "kind": "delta", "tags": ["safrole", "tickets", "delta-0.8.0"],
   "stemZh": "依 GP 0.8.0，tickets extrinsic E_T 受哪些界限約束？",
@@ -312,6 +294,7 @@ ITEMS = [
 },
 {
  "id": "ch06-ticket-accumulator-rules",
+ "lens": "時機",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.33–6.36",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets"],
   "stemZh": "說明新進 ticket n 與 posterior accumulator γ′_A 的規則——並指出關於「哪些 ticket 會留下來」最常見的誤解。",
@@ -340,6 +323,7 @@ ITEMS = [
 },
 {
  "id": "ch06-ticket-proof-context",
+ "lens": "演算法",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30, 6.32",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "tickets", "vrf"],
   "stemZh": "E_T 裡的一份 ticket 證明 p 是 Bandersnatch ring-VRF 證明。它是對哪個 ring root、用什麼 context 驗證的？ticket 的識別碼又是什麼？",
@@ -368,6 +352,7 @@ ITEMS = [
 },
 {
  "id": "ch06-seal-fallback",
+ "lens": "演算法",
  "ch": "6", "section": "6.4 Sealing", "gpRef": "eq. 6.17–6.18",
  "difficulty": 2, "kind": "concept", "tags": ["safrole", "seal", "fallback"],
   "stemZh": "在 fallback 模式下（γ′_S 是一串 Bandersnatch 金鑰），header 要通過哪些檢查？",
@@ -396,6 +381,7 @@ ITEMS = [
 },
 {
  "id": "ch06-code-slot-key-sequence",
+ "lens": "時機",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25 — internal/safrole/sealing.go UpdateSlotKeySequence",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code"],
   "stemZh": "這是團隊對 γ′_S 的實作。它讀的是哪些 prior 值、哪些 posterior 值？這符合 eq. 6.25 嗎？",
@@ -433,6 +419,7 @@ posteriorState.SetGammaS(newGammaS)"""},
 },
 {
  "id": "ch06-code-fallback-hash",
+ "lens": "演算法",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.27 — internal/safrole/slot_key_sequence.go",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "fallback"],
   "stemZh": "讀團隊的 FallbackKeySequence。它符合 eq. 6.27 嗎？不符合的話，究竟差在哪裡？",
@@ -470,6 +457,7 @@ posteriorState.SetGammaS(newGammaS)"""},
 },
 {
  "id": "ch06-code-entropy-order",
+ "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy", "gpRef": "eq. 6.23–6.24 — internal/safrole/sealing.go UpdateEntropy",
  "difficulty": 2, "kind": "code", "tags": ["safrole", "code", "entropy"],
   "stemZh": "在團隊的 UpdateEntropy 中，為什麼 `eta[0]` 是在輪替迴圈之後才被 posterior 的 η′_0 覆寫？如果讓迴圈在 UpdateEtaPrime0 寫入同一個陣列之後才跑，會出什麼問題？",

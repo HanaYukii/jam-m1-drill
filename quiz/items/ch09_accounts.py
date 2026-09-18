@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch09-account-fields",
+ "lens": "對比",
  "ch": "9", "section": "9 Service Accounts", "gpRef": "eq. 9.3",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "state"],
   "stemZh": "GP 0.8.0（eq. 9.3）的 service account A 有哪些欄位？一個 Ethereum 開發者會預期存在、卻沒有的欄位是哪個？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch09-code-metadata",
+ "lens": "演算法",
  "ch": "9", "section": "9.1 Code and Gas", "gpRef": "eq. 9.4",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "code"],
   "stemZh": "一個 service 的程式碼 a_c 與 metadata a_m 是怎麼從它的 code hash 導出的？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch09-lookup-status",
+ "lens": "時機",
   "alsoCh": ["14"],
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2.2 Semantics, eq. 9.7",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages"],
@@ -87,63 +90,8 @@ ITEMS = [
  "trap": "再次 solicit 一個 [x,y] 會變 [x,y,t]；forget 一個 [x] 變 [x,t]；forget [x,y]（y 夠舊）才真正刪除。"
 },
 {
- "id": "ch09-historical-lookup-calc",
- "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "eq. 9.7 (Λ)",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "calc"],
-  "stemZh": "某個 service 有一份 preimage p（雜湊 h、長度 40），其 a_l[(h, 40)] = [100, 250, 400]。當 t = 120、300、450 時，歷史查詢 Λ(a, t, h) 各回傳什麼？",
-  "optionsZh": [
-   "Λ 在 t = 120 與 t = 450 時回傳 p，但在 t = 300 時回傳 ∅",
-   "Λ 只在 t = 300 時回傳 p",
-   "只要 t ≥ 100，Λ 都回傳 p",
-   "Λ 在 t = 120 時回傳 p，但在 t = 450 時回傳 ∅，因為最後那一項標記的是第二次撤除"
-  ],
-  "stem": "A service has preimage p (hash h, length 40) with a_l[(h, 40)] = [100, 250, 400]. For t = 120, 300 and 450, what does the historical lookup Λ(a, t, h) return?",
- "options": [
-  "Λ returns p for t = 120 and t = 450, but ∅ for t = 300",
-  "Λ returns p for t = 300 only",
-  "Λ returns p for any t ≥ 100",
-  "Λ returns p for t = 120 but ∅ for t = 450, since the last entry marks a second withdrawal"
- ],
- "answer": 0,
- "optNotes": [
-   "三個時點依 x ≤ t < y ∨ z ≤ t 判定為 ✓/✗/✓，與這組答案完全相符。",
-   "剛好只認了空窗：250 … 400 才是 unavailable 的區間，t = 300 是唯一查不到的。",
-   "把 [x, y, z] 讀成「自 x 起一直可用」，忽略了 y = 250 到 z = 400 的空窗。",
-   "第三個時刻是「再次可用」的起點而不是第二次撤回，t = 450 ≥ 400 查得到。",
- ],
- "explanation": "eq. 9.7 的 Λ(a, t, h) 是「在時間點 t 回頭看，這個 preimage 當時算不算可用」。a_l[(h, z)] 這個 request 狀態最多存三個時槽，長度本身就是語意：**[]** = 已請求但還沒提供；**[x]** = 從 x 起可用（還在用）；**[x, y]** = x 起可用、y 時被移除；**[x, y, z]** = 移除後又在 z 被重新提供。所以三元素的可用條件是 x ≤ t < y ∨ z ≤ t——兩段開區間中間夾一段空窗。本題代入 a_l[(h, 40)] = [100, 250, 400]：t = 120 落在 [100, 250) ✓；t = 300 既不在 [100, 250)、也還沒到 400 ✗（這就是那段空窗）；t = 450 ≥ 400 ✓。**兩個容易漏掉的前提**：其一，Λ 還要求 h ∈ keys(a_p)，也就是 preimage 的**內容**現在仍在 state 裡——a_l 記的是「什麼時候可用」，a_p 才是 blob 本身，兩者是分開的。其二，t 的定義域是 (H_T − D) … H_T，D = C_expungeperiod = 19,200 時槽（19,200 × 6 秒 = 32 小時）：超過這個期間、又沒有被引用的 preimage 可以被 expunge，屆時連歷史查詢也查不到。（別和 L = 14,400 時槽 = 24 小時搞混，那是 §11 lookup anchor 的年齡上限，是另一個常數。）",
- "trap": "三個時間點的語意：available / unavailable / available again。"
-},
-{
- "id": "ch09-footprint-formula",
- "ch": "9", "section": "9.3 Account Footprint and Threshold Balance", "gpRef": "eq. 9.8",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "balance"],
-  "stemZh": "footprint 的 a_i（項數）與 a_o（位元組數）以及門檻餘額 a_t 是怎麼定義的？",
-  "optionsZh": [
-   "a_i = 2·|a_l| + |a_s|；a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|)；a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)",
-   "a_i = |a_l| + |a_s|；a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|)；a_t = max(0, B_S + B_I·a_i + B_L·a_o)",
-   "a_i = 2·|a_p| + |a_s|；a_o = Σ_{(h,d)∈a_p} (81 + |d|) + Σ_{(x,y)∈a_s} (34 + |x| + |y|)；a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)",
-   "a_i = 2·|a_l| + |a_s|；a_o = Σ_{(h,z)∈keys(a_l)} (32 + z) + Σ_{(x,y)∈a_s} (32 + |y|)；a_t = max(0, B_I·a_i + B_L·a_o − a_f)"
-  ],
-  "stem": "How are the footprint a_i (items) and a_o (octets) and the threshold balance a_t defined?",
- "options": [
-  "a_i = 2·|a_l| + |a_s|; a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|); a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)",
-  "a_i = |a_l| + |a_s|; a_o = Σ_{(h,z)∈keys(a_l)} (81 + z) + Σ_{(x,y)∈a_s} (34 + |x| + |y|); a_t = max(0, B_S + B_I·a_i + B_L·a_o)",
-  "a_i = 2·|a_p| + |a_s|; a_o = Σ_{(h,d)∈a_p} (81 + |d|) + Σ_{(x,y)∈a_s} (34 + |x| + |y|); a_t = max(0, B_S + B_I·a_i + B_L·a_o − a_f)",
-  "a_i = 2·|a_l| + |a_s|; a_o = Σ_{(h,z)∈keys(a_l)} (32 + z) + Σ_{(x,y)∈a_s} (32 + |y|); a_t = max(0, B_I·a_i + B_L·a_o − a_f)"
- ],
- "answer": 0,
- "optNotes": [
-   "完全對上 eq. 9.8：request 2 items / 81+z octets、storage 1 item / 34+|key|+|value|，門檻再扣 a_f。",
-   "request 的係數是 2·|a_l| 不是 1，而且 gratis offset a_f 必須從門檻裡扣掉。",
-   "求和應跑 requests dictionary a_l 的鍵 (h, z)、用宣告長度 z，不是跑 a_p 用實際 blob 長度。",
-   "固定開銷是 81 與 34 不是 32/32，storage 的 key 長度要計入，base deposit B_S 也不能漏。",
- ],
- "explanation": "eq. 9.8 三條式子，數字都是 GP 直接給定的常數，不需要推導但要記得。**a_i（項數）= 2·|a_l| + |a_s|**——每個 lookup request 算 **2 項**、每個 storage entry 算 1 項。request 算兩項是因為它同時佔用了 requests 字典與（供應後的）preimages 字典兩個位置。**a_o（位元組）= Σ_{(h,z) ∈ keys(a_l)} (81 + z) + Σ_{(x,y) ∈ a_s} (34 + |x| + |y|)**——81 與 34 是固定開銷（涵蓋 key、長度前綴、trie 節點等），z 是**宣告的** preimage 長度。**a_t（門檻餘額）= max(0, B_S + B_I·a_i + B_L·a_o − a_f)**，B_S = 100（基本）、B_I = 10（每項）、B_L = 1（每位元組），a_f 是 gratis 抵扣，扣成負數再由 max(0, ·) 夾回零。**最關鍵的設計點**：計價對象是 **requests 字典**而不是已經供應的 preimages——也就是說 `solicit` 一發出去就開始收押金，還沒有人提供資料也一樣算錢。這是為了防止免費占位：否則任何 service 都能無成本地宣告要一百萬個 preimage。**fuzzer 抓過的坑**：你們曾漏減 a_f，但因為測試 trace 的 DepositOffset 都是 0，錯了很久沒被發現——這類「參數恆為零所以錯得看不出來」的 bug 值得特別留意。",
- "trap": "request 算 2 items；storage 算 1 item。"
-},
-{
  "id": "ch09-privileges",
+ "lens": "機制",
  "ch": "9", "section": "9.4 Service Privileges", "gpRef": "eq. 9.9–9.10",
  "difficulty": 2, "kind": "concept", "tags": ["accounts", "privileges"],
   "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。每個分量各授予什麼權力？",
@@ -172,6 +120,7 @@ ITEMS = [
 },
 {
  "id": "ch09-preimage-vs-storage",
+ "lens": "對比",
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2 intro",
  "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "rationale"],
   "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。是哪三項？又有哪一個聽起來合理、其實是錯的「第四項差異」？",

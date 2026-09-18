@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "appB-result-constants",
+ "lens": "演算法",
  "ch": "B", "section": "B.1 Result Constants; Omega_A (assign)", "gpRef": "§B.1; Ω_A",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "privileges"],
   "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。順序是什麼？每個常數各指名哪一種錯？",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "appB-three-invocations",
+ "lens": "對比",
  "ch": "B", "section": "B.2–B.4 Invocations", "gpRef": "eq. B.1–B.2, B.5–B.6, B.9–B.11",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "pvm"],
   "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，每一種各暴露哪些 host call？service 呼叫到不在自己 invocation 集合內的 id 會怎樣？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "appB-accumulate-invocation",
+ "lens": "演算法",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.7–B.14",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "accumulate"],
   "stemZh": "從頭到尾描述 accumulate 的 invocation Ψ_A(e, t, s, g, i)：service 的程式碼不可得時會怎樣、機器怎麼設定、兩個 context 各做什麼、結果又如何處置。",
@@ -87,6 +90,7 @@ ITEMS = [
 },
 {
  "id": "appB-new-service-index",
+ "lens": "演算法",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.10, B.14 & `new` (§B.7)",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "accounts"],
   "stemZh": "在 GP 0.8.0 中，`new` host call 是怎麼挑選新的 service index 的？",
@@ -115,6 +119,7 @@ ITEMS = [
 },
 {
  "id": "appB-transfer-rules",
+ "lens": "演算法",
  "ch": "B", "section": "B.7 Accumulate Functions — transfer", "gpRef": "`transfer` = 21",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "transfers"],
   "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。這些檢查依什麼順序進行？每種失敗各是什麼意思？成功時又發生什麼？",
@@ -143,6 +148,7 @@ ITEMS = [
 },
 {
  "id": "appB-solicit-forget",
+ "lens": "演算法",
  "ch": "B", "section": "B.7 — solicit / forget / eject", "gpRef": "`solicit` = 24, `forget` = 25, `eject` = 22",
  "difficulty": 3, "kind": "concept", "tags": ["host-calls", "preimages"],
   "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前時槽 t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
@@ -171,6 +177,7 @@ ITEMS = [
 },
 {
  "id": "appB-bless-assign-designate",
+ "lens": "演算法",
  "ch": "B", "section": "B.7 — bless / assign / designate", "gpRef": "`bless` = 15, `assign` = 16, `designate` = 17",
  "difficulty": 2, "kind": "delta", "tags": ["host-calls", "privileges", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，bless、assign 與 designate 各自執行哪些權限檢查？",
@@ -199,6 +206,7 @@ ITEMS = [
 },
 {
  "id": "appB-checkpoint-yield",
+ "lens": "演算法",
  "ch": "B", "section": "B.7 — checkpoint / yield / provide", "gpRef": "`checkpoint` = 18, `yield` = 26, `provide` = 27",
  "difficulty": 2, "kind": "concept", "tags": ["host-calls", "accumulate"],
   "stemZh": "在 accumulate 之中，`checkpoint`、`yield` 與 `provide` 各自做什麼？",

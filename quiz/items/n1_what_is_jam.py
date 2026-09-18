@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n1-what-problem",
+ "lens": "對比",
   "ch": "N1", "section": "§1 Introduction", "gpRef": "§1",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "overview"],
   "stemZh": "一句話說，JAM 想成為什麼？",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n1-in-core-vs-on-chain-basic",
+ "lens": "對比",
   "ch": "N1", "section": "§1; §4 Overview", "gpRef": "§1 & §4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "in-core"],
   "stemZh": "「in-core」執行的工作與「on-chain」執行的工作，差別在哪裡？",
@@ -60,6 +62,7 @@ ITEMS = [
  },
  {
   "id": "n1-vs-ethereum-model",
+ "lens": "對比",
   "ch": "N1", "section": "§2 Previous Work; §4.9", "gpRef": "§2 & §4",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "comparison"],
   "alsoCh": ["N4"],
@@ -89,6 +92,7 @@ ITEMS = [
  },
  {
   "id": "n1-name-corejam",
+ "lens": "對比",
   "ch": "N1", "section": "§1", "gpRef": "§1",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "naming"],
   "stemZh": "JAM 這個名字由兩個字組成。是哪兩個字，它們又指什麼？",
@@ -117,6 +121,7 @@ ITEMS = [
  },
 {
   "id": "n1-why-one-chain",
+ "lens": "對比",
   "ch": "N1", "section": "§1; §2 Previous Work", "gpRef": "§1 & §2",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "architecture"],
   "stem": "Polkadot gets its capacity from many parallel chains. JAM keeps a single chain and gets capacity from cores instead. What does that buy?",
@@ -145,6 +150,7 @@ ITEMS = [
  },
  {
   "id": "n1-what-is-a-core",
+ "lens": "機制",
   "ch": "N1", "section": "§4.9 The Core Model", "gpRef": "§4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "core"],
   "alsoCh": ["N4", "N5"],
@@ -174,6 +180,7 @@ ITEMS = [
  },
  {
   "id": "n1-validator-roles",
+ "lens": "機制",
   "ch": "N1", "section": "§1; §11; §17", "gpRef": "§1, §11 & §17",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "roles"],
   "alsoCh": ["N6"],
@@ -203,6 +210,7 @@ ITEMS = [
  },
  {
   "id": "n1-gp-structure",
+ "lens": "機制",
   "ch": "N1", "section": "Gray Paper 全書結構", "gpRef": "§3–§14 & App. A–H",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "reading-guide"],
   "stem": "You open the Gray Paper for the first time. How is it laid out, and where should you look for what?",

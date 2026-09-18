@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n4-what-is-a-service",
+ "lens": "機制",
   "ch": "N4", "section": "§9 Service Accounts", "gpRef": "§9",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "service"],
   "stem": "What is a service in JAM?",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n4-refine-vs-accumulate",
+ "lens": "對比",
   "ch": "N4", "section": "§4.9; §12; §14", "gpRef": "§4, §12 & §14",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "service"],
   "alsoCh": ["N5"],
@@ -61,6 +63,7 @@ ITEMS = [
  },
  {
   "id": "n4-why-refine-stateless",
+ "lens": "設計",
   "ch": "N4", "section": "§14; §17", "gpRef": "§14 & §17",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "refine", "audit"],
   "alsoCh": ["N6"],
@@ -90,6 +93,7 @@ ITEMS = [
  },
  {
   "id": "n4-service-code",
+ "lens": "設計",
   "ch": "N4", "section": "§9.2 Preimage Lookups", "gpRef": "§9",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "service", "preimage"],
   "stem": "A service account stores a code hash, not the code itself. How does the code actually become available to run?",
@@ -118,6 +122,7 @@ ITEMS = [
  },
  {
   "id": "n4-threshold-balance",
+ "lens": "設計",
   "ch": "N4", "section": "§9.3", "gpRef": "§9",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "economics"],
   "stem": "A service's balance must stay above a threshold that grows with how much it stores. What is that rule preventing?",
@@ -146,6 +151,7 @@ ITEMS = [
  },
  {
   "id": "n4-privileges-basic",
+ "lens": "機制",
   "ch": "N4", "section": "§9.4 Privileges", "gpRef": "§9",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "privileges"],
   "stem": "A few service indices are recorded in the state as privileged. What does that privilege amount to?",
@@ -174,6 +180,7 @@ ITEMS = [
  },
  {
   "id": "n4-core-count-limit",
+ "lens": "設計",
   "ch": "N4", "section": "§11.3", "gpRef": "§11",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "core"],
   "alsoCh": ["N6"],
@@ -203,6 +210,7 @@ ITEMS = [
  },
  {
   "id": "n4-services-dont-call-directly",
+ "lens": "設計",
   "ch": "N4", "section": "§12.4 Deferred Transfers", "gpRef": "§12",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "service"],
   "stem": "One service wants to send value and a message to another. It cannot simply call into that service and wait for a reply. Why not?",

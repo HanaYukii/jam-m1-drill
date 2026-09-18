@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n2-block-shape",
+ "lens": "機制",
   "ch": "N2", "section": "§4.1 The Block", "gpRef": "§4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "block"],
   "stem": "What are the two parts of a JAM block?",
@@ -32,6 +33,7 @@ ITEMS = [
  },
  {
   "id": "n2-no-transactions",
+ "lens": "設計",
   "ch": "N2", "section": "§4.1; §4.9", "gpRef": "§4",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "extrinsic"],
   "alsoCh": ["N4"],
@@ -61,6 +63,7 @@ ITEMS = [
  },
  {
   "id": "n2-state-components-basic",
+ "lens": "機制",
   "ch": "N2", "section": "§4.2 The State", "gpRef": "§4",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "state"],
   "stem": "The state σ is split into many named components. What is the point of splitting it that way rather than treating it as one blob?",
@@ -89,6 +92,7 @@ ITEMS = [
  },
  {
   "id": "n2-prior-state-root-basic",
+ "lens": "時機",
   "ch": "N2", "section": "§5.1 The Header", "gpRef": "§5",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "header"],
   "alsoCh": ["N3"],
@@ -118,6 +122,7 @@ ITEMS = [
  },
  {
   "id": "n2-why-state-root",
+ "lens": "設計",
   "ch": "N2", "section": "§4.2; App. D", "gpRef": "§4 & App. D",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "merklization"],
   "stem": "Why does the state get reduced to a single 32-octet root at all?",
@@ -146,6 +151,7 @@ ITEMS = [
  },
  {
   "id": "n2-extrinsic-hash-basic",
+ "lens": "設計",
   "ch": "N2", "section": "§5.1", "gpRef": "§5",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "header"],
   "stem": "The header does not contain the extrinsic itself, only a hash of it. What does that hash have to support, beyond simply detecting tampering?",
@@ -174,6 +180,7 @@ ITEMS = [
  },
  {
   "id": "n2-what-a-transition-is",
+ "lens": "機制",
   "ch": "N2", "section": "§4.2", "gpRef": "§4",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "stf"],
   "stem": "What does it mean to say a node 'imports' a block?",
@@ -202,6 +209,7 @@ ITEMS = [
  },
  {
   "id": "n2-header-vs-state",
+ "lens": "設計",
   "ch": "N2", "section": "§5.1; §5.3", "gpRef": "§5",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "header", "light-client"],
   "alsoCh": ["N3"],

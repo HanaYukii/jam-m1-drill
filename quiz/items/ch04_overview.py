@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch04-stf-extrinsic",
+ "lens": "機制",
  "ch": "4", "section": "4.1 The Block", "gpRef": "eq. 4.2–4.3 (block / extrinsic)",
  "difficulty": 1, "kind": "concept", "tags": ["block", "extrinsic"],
   "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。列出這五個——再說一個大家以為區塊本體裡會有、但 JAM 根本沒有位置放的東西。",
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch04-state-components",
+ "lens": "機制",
  "ch": "4", "section": "4.2 The State", "gpRef": "eq. 4.4 (state composition)",
  "difficulty": 2, "kind": "concept", "tags": ["state"],
   "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。ρ、ξ、ω 與 θ 各存什麼？四個裡面哪一個最常被貼錯標籤、錯成什麼？",
@@ -59,6 +61,7 @@ ITEMS = [
 },
 {
  "id": "ch04-dependency-graph-alpha",
+ "lens": "時機",
   "alsoCh": ["8", "12"],
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.5–4.20",
  "difficulty": 2, "kind": "concept", "tags": ["stf", "ordering"],
@@ -88,6 +91,7 @@ ITEMS = [
 },
 {
  "id": "ch04-common-era",
+ "lens": "設計",
  "ch": "4", "section": "4.4 Time", "gpRef": "§4.4 (JAM Common Era)",
  "difficulty": 1, "kind": "concept", "tags": ["time"],
   "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
@@ -116,6 +120,7 @@ ITEMS = [
 },
 {
  "id": "ch04-in-core-vs-on-chain",
+ "lens": "對比",
  "ch": "4", "section": "4.8 The Core Model and Services", "gpRef": "§4.9.1–4.9.2",
  "difficulty": 1, "kind": "concept", "tags": ["architecture", "refine", "accumulate"],
   "stemZh": "對比 JAM 的 in-core 與 on-chain 兩種共識模型：各由誰執行？各靠什麼保障？",
@@ -144,6 +149,7 @@ ITEMS = [
 },
 {
  "id": "ch04-balance-timeslot-ranges",
+ "lens": "機制",
  "ch": "4", "section": "4.6–4.7", "gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
  "difficulty": 1, "kind": "concept", "tags": ["types"],
   "stemZh": "JAM 的餘額與 timeslot 各用什麼數值域？這些選擇隱含了什麼？",
@@ -172,6 +178,7 @@ ITEMS = [
 },
 {
  "id": "ch04-coretime-vs-gas",
+ "lens": "對比",
  "ch": "4", "section": "4.8.2 On Services and Accounts", "gpRef": "§4.9.2 last paragraphs",
  "difficulty": 2, "kind": "rationale", "tags": ["coretime", "authorization"],
   "stemZh": "JAM 用什麼取代了 Ethereum 那套「用 gas 購買區塊空間」的模型？",
@@ -200,6 +207,7 @@ ITEMS = [
 },
 {
  "id": "ch04-pvm-summary",
+ "lens": "機制",
  "ch": "4", "section": "4.5 The Virtual Machine and Gas", "gpRef": "§4.7 The Virtual Machine and Gas, eq. 4.22–4.27",
  "difficulty": 1, "kind": "concept", "tags": ["pvm"],
   "stemZh": "Overview 怎麼摘述 PVM——它的基礎、暫存器、位元組序與記憶體？",
@@ -228,6 +236,7 @@ ITEMS = [
 },
 {
  "id": "ch04-forks-safrole-grandpa",
+ "lens": "設計",
  "ch": "4", "section": "4.3 Which History?", "gpRef": "§4.3",
  "difficulty": 1, "kind": "rationale", "tags": ["consensus"],
   "stemZh": "JAM 對分叉提出三個目標：(1) 很少長出兩個 head、(2) 一旦長出應迅速收斂、(3) 應能指出某個近期區塊將永久留在歷史裡。哪個機制達成哪個目標？",

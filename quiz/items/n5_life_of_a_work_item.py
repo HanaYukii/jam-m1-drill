@@ -4,6 +4,7 @@
 ITEMS = [
  {
   "id": "n5-pipeline-order",
+ "lens": "時機",
   "ch": "N5", "section": "§11; §12; §14", "gpRef": "§11, §12 & §14",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "pipeline"],
   "alsoCh": ["N4", "N6"],
@@ -33,6 +34,7 @@ ITEMS = [
  },
  {
   "id": "n5-what-is-a-work-package",
+ "lens": "機制",
   "ch": "N5", "section": "§14 Work Packages", "gpRef": "§14",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "work-package"],
   "stem": "What does a work-package contain?",
@@ -61,6 +63,7 @@ ITEMS = [
  },
  {
   "id": "n5-why-report-is-small",
+ "lens": "設計",
   "ch": "N5", "section": "§11.1; §14", "gpRef": "§11 & §14",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "work-report"],
   "stem": "A work-package can be many megabytes, but the work-report that reaches the chain is capped at tens of kilobytes. Why the difference?",
@@ -89,6 +92,7 @@ ITEMS = [
  },
  {
   "id": "n5-what-available-means",
+ "lens": "時機",
   "ch": "N5", "section": "§11.2 Assurance", "gpRef": "§11",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "availability"],
   "alsoCh": ["N6"],
@@ -118,6 +122,7 @@ ITEMS = [
  },
  {
   "id": "n5-what-accumulate-does",
+ "lens": "機制",
   "ch": "N5", "section": "§12 Accumulation", "gpRef": "§12",
   "difficulty": 1, "kind": "concept", "tags": ["basics", "accumulate"],
   "stem": "When a report finally gets accumulated, what happens?",
@@ -146,6 +151,7 @@ ITEMS = [
  },
  {
   "id": "n5-why-authorizer",
+ "lens": "設計",
   "ch": "N5", "section": "§8 Authorization", "gpRef": "§8",
   "difficulty": 2, "kind": "rationale", "tags": ["basics", "authorization"],
   "stem": "Before a core will work on a package, the package must satisfy that core's authorizer. What problem does that solve?",
@@ -174,6 +180,7 @@ ITEMS = [
  },
  {
   "id": "n5-segments-basic",
+ "lens": "設計",
   "ch": "N5", "section": "§14", "gpRef": "§14",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "segments"],
   "stem": "Work-packages can import segments exported by earlier packages. Why is that needed at all, given refine cannot read the chain state?",
@@ -202,6 +209,7 @@ ITEMS = [
  },
  {
   "id": "n5-refine-failure",
+ "lens": "設計",
   "ch": "N5", "section": "§11.1; §14", "gpRef": "§11 & §14",
   "difficulty": 2, "kind": "concept", "tags": ["basics", "errors"],
   "stem": "One work-item inside a package runs out of gas during refine. What happens to that item and to the rest of the package?",

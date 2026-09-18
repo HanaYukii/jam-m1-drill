@@ -3,6 +3,7 @@
 ITEMS = [
 {
  "id": "ch05-parent-hash-covers-seal",
+ "lens": "機制",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.2", "difficulty": 2, "kind": "concept",
  "tags": ["header", "parent-hash", "seal"],
@@ -31,6 +32,7 @@ ITEMS = [
 },
 {
  "id": "ch05-what-header-alone-proves",
+ "lens": "設計",
   "alsoCh": ["6"],
  "ch": "5", "section": "5.1–5.3",
  "gpRef": "§5; eq. 5.8; eq. 5.9", "difficulty": 3, "kind": "concept",
@@ -61,6 +63,7 @@ ITEMS = [
 },
 {
  "id": "ch05-genesis-presumed",
+ "lens": "設計",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "§5（genesis header 與 σ_g）", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "genesis", "trust"],
@@ -89,6 +92,7 @@ ITEMS = [
 },
 {
  "id": "ch05-why-five-component-hash",
+ "lens": "設計",
  "ch": "5", "section": "5.2 The Extrinsic Hash",
  "gpRef": "eq. 5.4–5.7", "difficulty": 3, "kind": "rationale",
  "tags": ["header", "extrinsic-hash", "light-client"],
@@ -117,6 +121,7 @@ ITEMS = [
 },
 {
  "id": "ch05-epoch-marker-content",
+ "lens": "時機",
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§6.6", "difficulty": 2, "kind": "concept",
  "tags": ["header", "markers", "epoch"],
@@ -145,6 +150,7 @@ ITEMS = [
 },
 {
  "id": "ch05-index-not-key",
+ "lens": "設計",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.10", "difficulty": 2, "kind": "rationale",
  "tags": ["header", "author", "design"],
@@ -173,6 +179,7 @@ ITEMS = [
 },
 {
  "id": "ch05-offenders-marker-why",
+ "lens": "設計",
   "alsoCh": ["10", "6"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§10", "difficulty": 2, "kind": "rationale",
@@ -202,6 +209,7 @@ ITEMS = [
 },
 {
  "id": "ch05-markers-optionality-cost",
+ "lens": "設計",
   "alsoCh": ["6", "10"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11", "difficulty": 2, "kind": "concept",
@@ -231,6 +239,7 @@ ITEMS = [
 },
 {
  "id": "ch05-marker-misplacement",
+ "lens": "時機",
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "§5.3；§6.6", "difficulty": 3, "kind": "concept",
  "tags": ["header", "markers", "validity"],
@@ -260,6 +269,7 @@ ITEMS = [
 },
 {
  "id": "ch05-absent-commitments",
+ "lens": "對比",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.1；§4", "difficulty": 3, "kind": "rationale",
  "tags": ["header", "design", "comparison"],

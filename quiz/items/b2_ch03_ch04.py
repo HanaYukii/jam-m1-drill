@@ -6,6 +6,7 @@ ITEMS = [
 # ---------------------------------------------------------------------------------------------
 {
  "id": "ch03-sequence-set-subscripts",
+ "lens": "機制",
  "ch": "3", "section": "3.7 Sequences", "gpRef": "§3.7 (⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, ⟦T⟧_{n:}, ⟦T⟧_N); applied in eq. 8.1 and eq. 6.22",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "types"],
   "stemZh": "eq. 8.1 把 authorizer pool 與 queue 定型為 α ∈ ⟦⟦H⟧_{:O}⟧_C 與 φ ∈ ⟦⟦H⟧_Q⟧_C，而 eq. 6.22 把熵定型為 η ∈ ⟦H⟧_4。依 GP §3.7 的序列集合記號，這些下標各是什麼意思？",
@@ -34,6 +35,7 @@ ITEMS = [
 },
 {
  "id": "ch03-first-last-n-arrows",
+ "lens": "時機",
  "ch": "3", "section": "3.7.2 Editing", "gpRef": "§3.7.2 (⌢, ⧺, →s^n, ←s^n) and §3.7 (⟲); applied in eq. 7.8, eq. 8.2 and eq. 6.35",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "arrows"],
   "stemZh": "三條狀態轉移規則用到 GP §3.7.2 的箭號運算子：β_H′ ≡ ←(β_H† ⧺ e)^H（eq. 7.8）、α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O（eq. 8.2）、γ′_A ≡ →(依 ticket id 升冪排序的 n ∪ γ_A)^E（eq. 6.35）。箭號怎麼讀——各保留序列的哪一端——這對三條規則各意味著什麼？",
@@ -62,6 +64,7 @@ ITEMS = [
 },
 {
  "id": "ch03-bits-msb-first-trie",
+ "lens": "演算法",
  "ch": "3", "section": "3.7.3 Boolean values", "gpRef": "§3.7.3 bits(); eq. D.5–D.6 (M_σ, M); App. C.1.4 (bit-sequence encoding); eq. A.15 (PVM ℬ_n)",
  "difficulty": 3, "kind": "code", "tags": ["notation", "bits", "merklization", "codec"],
   "stemZh": "GP §3.7.3 以 bits([160, 0]) = [1, 0, 1, 0, 0, …] 這個例子定義了 octet 序列 B 的 bits(B)，而 M_σ（eq. D.5）是以 31 位元組 state key 的 bits(k) 為 trie 的鍵。團隊的 trie 用下面這段程式碼在每個深度切分條目。它與 GP 一致嗎？",
@@ -102,6 +105,7 @@ ITEMS = [
 },
 {
  "id": "ch03-vrf-signature-notation",
+ "lens": "機制",
  "ch": "3", "section": "3.8.2 Signing Schemes", "gpRef": "§3.8.2; applied in eq. 6.16 (seal), eq. 6.18 (H_V), eq. 6.30 (ticket proof) and eq. 6.32 (ticket id = Y)",
  "difficulty": 3, "kind": "concept", "tags": ["notation", "crypto", "vrf", "safrole"],
   "stemZh": "GP §3.8.2 把 Bandersnatch VRF 簽章寫成 Ṽ_k^m⟨x⟩ ⊂ B_96、VRF 輸出為 Y(·) ∈ H，而 eq. 6.16 要求 H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩。把它讀出來：下標、上標與角括號內的項各是什麼？Y(H_S) 取決於什麼？",
@@ -130,6 +134,7 @@ ITEMS = [
 },
 {
  "id": "ch03-hash-functions-and-codec-subscripts",
+ "lens": "機制",
  "ch": "3", "section": "3.8.1 Hashing", "gpRef": "§3.8.1 (H, H_K, H_0, E_l and E^{-1}_l assertions); Keccak applied in eq. 7.7",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "hashing", "codec"],
   "stemZh": "依 GP §3.8.1，H 與 H_K 各是什麼？把非 blob 的東西傳給雜湊函數會怎樣？E 與 E^{-1} 的下標又是什麼意思？",
@@ -158,6 +163,7 @@ ITEMS = [
 },
 {
  "id": "ch03-dictionary-semantics",
+ "lens": "機制",
  "ch": "3", "section": "3.5 Dictionaries", "gpRef": "eq. 3.7–3.11; 𝒰 in eq. 3.2; ∅ / A? / ∇ in §3.3",
  "difficulty": 2, "kind": "concept", "tags": ["notation", "dictionaries", "calc"],
   "stemZh": "令 d = {1 ↦ a, 2 ↦ b} 與 e = {2 ↦ c, 3 ↦ a} 是 ⟨N → B⟩ 中的字典。套用 GP §3.5（eq. 3.7–3.11），d ∪ e 與 V(d ∪ e) 各是什麼？在規則裡寫 d[3] 又斷言了什麼？",
@@ -189,6 +195,7 @@ ITEMS = [
 # ---------------------------------------------------------------------------------------------
 {
  "id": "ch04-dagger-intermediate-states",
+ "lens": "時機",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18",
  "difficulty": 2, "kind": "concept", "tags": ["stf", "intermediate-state", "ordering", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。它們各自剛吸收了什麼？",
@@ -217,6 +224,7 @@ ITEMS = [
 },
 {
  "id": "ch04-extrinsic-dependency-inputs",
+ "lens": "演算法",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.11–4.20",
  "difficulty": 3, "kind": "concept", "tags": ["stf", "extrinsic", "ordering"],
   "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），五個 extrinsic 成分各在哪裡進入狀態轉移？特別是：extrinsic 裡有任何東西直接餵給 accumulation 這一步嗎？",
@@ -245,6 +253,7 @@ ITEMS = [
 },
 {
  "id": "ch04-in-core-300x-rationale",
+ "lens": "設計",
  "ch": "4", "section": "4.8.1 In-core Consensus", "gpRef": "§4.9.1",
  "difficulty": 2, "kind": "rationale", "tags": ["architecture", "in-core", "scalability"],
   "stemZh": "Overview 表示 JAM 在 core 上應能做到單一機器全速執行該 VM 之「300 倍以上」的運算量。這個數字的根據是什麼？又是什麼讓這種未被複製的運算保持安全？",
@@ -273,6 +282,7 @@ ITEMS = [
 },
 {
  "id": "ch04-best-block-vs-finalized",
+ "lens": "機制",
  "ch": "4", "section": "4.6 Best block", "gpRef": "§4.6; §4.3 (head, finalized); §19 (best chain)",
  "difficulty": 2, "kind": "concept", "tags": ["consensus", "grandpa", "best-chain"],
   "stemZh": "GP §4.6 區分了「best block」與 Grandpa finality gadget 所回報的東西。best block 是什麼？什麼時候該用它？風險是什麼？",
