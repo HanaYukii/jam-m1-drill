@@ -11,7 +11,7 @@ ITEMS = [
  ],
  "ch": "6",
  "section": "6.2; 11.2–11.3; 10.2",
- "gpRef": "eq. 6.14, eq. 11.13 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), eq. 10.4",
+ "gpRef": "eq. 6.14, eq. 11.14 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), §10.2 (K(a))",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -48,7 +48,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "6",
  "section": "6.4 Entropy",
- "gpRef": "eq. 6.22–6.24, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20",
+ "gpRef": "eq. 6.22 and the §6.4 entropy update, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -89,7 +89,7 @@ ITEMS = [
  ],
  "ch": "9",
  "section": "4.1 dependency graph; 11.4; 12.4",
- "gpRef": "eq. 4.x (δ‡, δ′), eq. 11.45 (δ[d_s]_c), §11.4 gas floor, §12.4 preimage integration",
+ "gpRef": "eq. 4.16 (δ‡), eq. 4.18 (δ′), eq. 11.45 (δ[d_s]_c), §11.4 gas floor, §12.4 preimage integration",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -129,7 +129,7 @@ ITEMS = [
  ],
  "ch": "7",
  "section": "7.1; 11.2 (anchor)",
- "gpRef": "eq. 7.5 (β†), eq. 11.36, eq. 4.x (β′ ≺ θ′)",
+ "gpRef": "eq. 7.5 (β†), eq. 4.6, eq. 11.36, eq. 4.17 (β′ ≺ θ′)",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -170,7 +170,7 @@ ITEMS = [
  ],
  "ch": "5",
  "section": "4.1; 6.3; 10.2; 11.3",
- "gpRef": "eq. 4.x (τ′ ≺ H), eq. 6.10–6.11 (e, m), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28",
+ "gpRef": "§4.1 (τ′ ≺ H), §6.3 (e, m, e′, m′), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -252,7 +252,7 @@ ITEMS = [
  ],
  "ch": "6",
  "section": "6.2; 9.4 (designate)",
- "gpRef": "eq. 6.14, eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)",
+ "gpRef": "eq. 6.14 (§6.2 rotation), eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -292,7 +292,7 @@ ITEMS = [
  ],
  "ch": "10",
  "section": "10.4; 6.2 (Φ); 5 (H_O)",
- "gpRef": "eq. 10.6–10.7 (k ∉ ψ_O), eq. 10.14–10.16, eq. 6.14 (Φ), eq. 5.x (H_O)",
+ "gpRef": "§10.3 (culprit/fault conditions, k ∉ ψ_O), eq. 10.14, eq. 10.18 (ψ′_O), eq. 6.14 (Φ), §5 (H_O)",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -369,7 +369,7 @@ ITEMS = [
  ],
  "ch": "6",
  "section": "6.2; 6.7 Seal",
- "gpRef": "eq. 6.14, eq. 6.16, eq. 5.10 (H_I < |κ′|)",
+ "gpRef": "eq. 6.14 (§6.2), eq. 6.16, §5 (H_I < |κ′|)",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -406,7 +406,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "11",
  "section": "11.2 Assurances; 11.3",
- "gpRef": "eq. 11.13, eq. 11.17, eq. 11.18, eq. 11.31",
+ "gpRef": "eq. 11.14, eq. 11.17, eq. 11.18, eq. 11.31",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -443,7 +443,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "11",
  "section": "11.2–11.3",
- "gpRef": "eq. 11.18 (H_T ≥ t + U), eq. 11.x (ρ′[c] = (g, τ′)), eq. 11.28",
+ "gpRef": "eq. 11.18 (H_T ≥ t + U), §11.4 (ρ′[c] = (g, τ′)), eq. 11.28",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -766,7 +766,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "ARCH",
  "section": "1.3; 2.2 SNARK roll-ups",
- "gpRef": "§1.3 last paragraph, §2.2.x (SNARK roll-ups), §4.9.1",
+ "gpRef": "§1.3 last paragraph, §2.2 (SNARK roll-ups), §4.9.1",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -885,7 +885,7 @@ ITEMS = [
  ],
  "ch": "6",
  "section": "6.2 (Φ)",
- "gpRef": "eq. 6.14 (Φ), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20",
+ "gpRef": "eq. 6.14 (Φ, §6.2), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [
@@ -925,7 +925,7 @@ ITEMS = [
  ],
  "ch": "A",
  "section": "A.9 Gas Cost Model",
- "gpRef": "§A.9 prose, eq. A.8, eq. A.21 (block-start targets)",
+ "gpRef": "§A.9 prose, eq. A.54 (gas cost for block), eq. A.22 (jump-table alignment), §A.3 (basic blocks)",
  "difficulty": 2,
  "kind": "rationale",
  "tags": [

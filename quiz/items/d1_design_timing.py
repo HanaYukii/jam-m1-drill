@@ -6,7 +6,7 @@ ITEMS = [
  "id": "d1-rho-three-stages-order",
  "lens": "時機",
  "alsoCh": ["10"],
- "ch": "11", "section": "4.1 dependency graph; 10.4; 11.3", "gpRef": "eq. 4.x (ρ† ρ‡ ρ′), eq. 10.14, eq. 11.18",
+ "ch": "11", "section": "4.1 dependency graph; 10.4; 11.3", "gpRef": "eq. 4.12–4.14 (ρ†, ρ‡, ρ′), eq. 10.14, eq. 11.18",
  "difficulty": 2, "kind": "rationale", "tags": ["rho", "ordering", "design"],
   "stemZh": "ρ 在一個 block 裡被更新三次：ρ†（吃完 E_D）、ρ‡（吃完 E_A）、ρ′（吃完 E_G）。為什麼是這個順序？如果把 E_G 排在 E_A 之前處理，會壞在哪？",
   "optionsZh": [
@@ -154,7 +154,7 @@ ITEMS = [
  "id": "d1-checkpoint-collapse-walkthrough",
  "lens": "時機",
  "alsoCh": ["12"],
- "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "§B.4 prose (regular vs exceptional dimension), collapse function C, Ω_C",
+ "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "§B.4 prose (regular vs exceptional dimension), eq. B.7 (implications), collapse function C, Ω_C",
  "difficulty": 2, "kind": "concept", "tags": ["accumulate", "checkpoint", "context"],
   "stemZh": "Ψ_A 的 context 是一對 (x, y)：x 是一般維度，y 是例外維度。某個 service 在 accumulate 裡依序做了：寫 storage → checkpoint → transfer 給別人 → 再寫 storage → panic。這次呼叫最後回傳什麼？y 存在的意義是什麼？",
   "optionsZh": [

@@ -3734,7 +3734,7 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 ### 5-23　τ is the previous block's timeslot; τ′ = H_T is this block's. Which rules deliberately use the prior τ rather than H_T, and what is the principle behind the choice?
 
-<sub>4.1; 6.3; 10.2; 11.3 — ●●○ · 設計理由 · eq. 4.x (τ′ ≺ H), eq. 6.10–6.11 (e, m), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28</sub>
+<sub>4.1; 6.3; 10.2; 11.3 — ●●○ · 設計理由 · §4.1 (τ′ ≺ H), §6.3 (e, m, e′, m′), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28</sub>
 
 **標準答案**　Using τ: the epoch-change test e = ⌊τ/E⌋ vs e′ = ⌊H_T/E⌋, the ticket-regime condition m = τ mod E ≥ Y, and the verdict epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}. Using H_T: the guarantee slot window, the timeout and the queue index. Rules that look back at what has happened read τ; rules about this block's moment read H_T
 
@@ -4602,7 +4602,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ### 6-29　Within one block some checks read the prior κ and others the posterior κ′. Which reads which, and why the split?
 
-<sub>6.2; 11.2–11.3; 10.2 — ●●○ · 設計理由 · eq. 6.14, eq. 11.13 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), eq. 10.4</sub>
+<sub>6.2; 11.2–11.3; 10.2 — ●●○ · 設計理由 · eq. 6.14, eq. 11.14 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), §10.2 (K(a))</sub>
 
 **標準答案**　κ: assurance signatures, the 2/3·|κ| threshold and current-epoch verdict judgments. κ′: the seal and H_I bound, the guarantor assignment M and the |κ′|/3 core bound. Assurances and verdicts attest to what happened before this block, so they use that set; sealing and guaranteeing are this block's own acts, so they use the set it installs
 
@@ -4627,7 +4627,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ### 6-30　η has four slots. Who reads each one, and why does no lottery ever consume the live accumulator η_0 directly?
 
-<sub>6.4 Entropy — ●●○ · 設計理由 · eq. 6.22–6.24, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20</sub>
+<sub>6.4 Entropy — ●●○ · 設計理由 · eq. 6.22 and the §6.4 entropy update, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20</sub>
 
 **標準答案**　η′_0 absorbs Y(H_V) every block and is only the accumulator; the three history slots shift at an epoch change. η′_2 feeds the ticket context, the fallback F and the guarantor shuffle P; η′_3 feeds seal verification and the cross-epoch M*. η_0 is never used directly because it changes every block, and a contest's randomness must be frozen before the contest opens
 
@@ -4652,7 +4652,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ### 6-31　The delegator service calls designate in some block of epoch e, replacing ι with a new set of keys. In which epoch can those keys first seal a block, and through which steps?
 
-<sub>6.2; 9.4 (designate) — ●●○ · 設計理由 · eq. 6.14, eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)</sub>
+<sub>6.2; 9.4 (designate) — ●●○ · 設計理由 · eq. 6.14 (§6.2 rotation), eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)</sub>
 
 **標準答案**　Epoch e+2. designate writes ι′ in this block; the first block of e+1 rotates γ′_P = Φ(ι) and κ′ = the old γ_P, so the new keys are pending; during e+1 they submit tickets under γ′_Z, the ring root over γ_P; the first block of e+2 rotates again, κ′ = γ_P, and only then can they seal
 
@@ -4677,7 +4677,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ### 6-32　The seal of an epoch's first block is verified against κ′ — the very set this block rotates in. Why not against κ, and what does that imply for an implementation's header-validation flow?
 
-<sub>6.2; 6.7 Seal — ●●○ · 設計理由 · eq. 6.14, eq. 6.16, eq. 5.10 (H_I < |κ′|)</sub>
+<sub>6.2; 6.7 Seal — ●●○ · 設計理由 · eq. 6.14 (§6.2), eq. 6.16, §5 (H_I < |κ′|)</sub>
 
 **標準答案**　Because this block's author was chosen by tickets cast in the previous epoch by the then-pending set γ_P, which this block's rotation promotes to κ′; verifying against κ would reject every epoch's first block. For an implementation the seal, H_V and the epoch marker can only be checked after the posterior Safrole state is computed, so header validation runs in two phases
 
@@ -4802,7 +4802,7 @@ eq. 6.25 是全部：γ′_S 在 e′ = e + 1 時，若 m ≥ Y 且 |γ_A| = E�
 
 ### 6-37　An offender's key is replaced by an all-zero key by Φ at the next rotation rather than removed from the set. The GP states only the mechanism. What reason can be inferred from the other rules, and what effect does an all-zero key have inside the protocol?
 
-<sub>6.2 (Φ) — ●●○ · 設計理由 · eq. 6.14 (Φ), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20</sub>
+<sub>6.2 (Φ) — ●●○ · 設計理由 · eq. 6.14 (Φ, §6.2), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20</sub>
 
 **標準答案**　Inferred: the protocol names validators by index (H_I, assurer index, credential and judgment indices), so removing one shifts everyone after it, and eq. 6.8 needs the size to stay a multiple of 3 with cores = |κ|/3. Effect: a zero key cannot sign, so its slots go empty and its core keeps two usable guarantors, while all other indices stay put
 
@@ -5133,7 +5133,7 @@ eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本
 
 ### 7-12　The anchor check for E_G (eq. 11.36) compares the refinement context against β†, neither β nor β′. Why not β, and why not β′?
 
-<sub>7.1; 11.2 (anchor) — ●●○ · 設計理由 · eq. 7.5 (β†), eq. 11.36, eq. 4.x (β′ ≺ θ′)</sub>
+<sub>7.1; 11.2 (anchor) — ●●○ · 設計理由 · eq. 7.5 (β†), eq. 4.6, eq. 11.36, eq. 4.17 (β′ ≺ θ′)</sub>
 
 **標準答案**　Not β: its newest entry still holds H_0 as state root, so a report anchored on the parent would fail the state-root match; β† writes H_R in and then it matches. Not β′: it exists only after accumulate has produced θ′, and it would contain this block itself, which a report cannot anchor on
 
@@ -5725,7 +5725,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 
 ### 9-10　Service state appears in one block as δ, δ‡ and δ′. Which rule reads which, and why is E_P's 'providable' test made against the prior δ rather than against the post-accumulation δ‡?
 
-<sub>4.1 dependency graph; 11.4; 12.4 — ●●○ · 設計理由 · eq. 4.x (δ‡, δ′), eq. 11.45 (δ[d_s]_c), §11.4 gas floor, §12.4 preimage integration</sub>
+<sub>4.1 dependency graph; 11.4; 12.4 — ●●○ · 設計理由 · eq. 4.16 (δ‡), eq. 4.18 (δ′), eq. 11.45 (δ[d_s]_c), §11.4 gas floor, §12.4 preimage integration</sub>
 
 **標準答案**　The E_G checks (gas floor δ[d_s]_g, code hash δ[s]_c) read the prior δ; accumulate turns the prior δ into δ‡; E_P's providable test is also against the prior δ, and only then is it folded into δ‡ to give δ′, skipping preimages accumulation made useless. Judging against the prior state lets the author know E_P is valid without running accumulate first
 
@@ -6086,7 +6086,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 ### 10-12　A validator's Ed25519 key enters ψ′_O in block N via a culprit or fault. What happens immediately, what happens at the next epoch change, and what never happens inside the JAM protocol?
 
-<sub>10.4; 6.2 (Φ); 5 (H_O) — ●●○ · 設計理由 · eq. 10.6–10.7 (k ∉ ψ_O), eq. 10.14–10.16, eq. 6.14 (Φ), eq. 5.x (H_O)</sub>
+<sub>10.4; 6.2 (Φ); 5 (H_O) — ●●○ · 設計理由 · §10.3 (culprit/fault conditions, k ∉ ψ_O), eq. 10.14, eq. 10.18 (ψ′_O), eq. 6.14 (Φ), §5 (H_O)</sub>
 
 **標準答案**　Immediately: the key enters ψ′_O and H_O, later culprits or faults naming it are rejected (k ∉ ψ_O), and a report judged bad is cleared from ρ. At the next epoch change Φ replaces its γ′_P slot with an all-zero key, so an epoch later it can neither ticket, seal nor guarantee; until then its κ slot stands. Never: the state debiting its balance
 
@@ -6625,7 +6625,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ### 11-21　ρ is updated three times within one block: ρ† (after E_D), ρ‡ (after E_A) and ρ′ (after E_G). Why that order, and what would break if E_G were processed before E_A?
 
-<sub>4.1 dependency graph; 10.4; 11.3 — ●●○ · 設計理由 · eq. 4.x (ρ† ρ‡ ρ′), eq. 10.14, eq. 11.18</sub>
+<sub>4.1 dependency graph; 10.4; 11.3 — ●●○ · 設計理由 · eq. 4.12–4.14 (ρ†, ρ‡, ρ′), eq. 10.14, eq. 11.18</sub>
 
 **標準答案**　Disputes first, so a report judged bad is cleared before it can become available in the same block; assurances then free every core whose report became available or timed out; a guarantee may only land on a core with ρ‡[c] = ∅. With E_G before E_A, a core freed by this block's assurances would still look occupied, and a new guarantee for it would wait a block
 
@@ -6700,7 +6700,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ### 11-24　Assurance signatures are verified against κ[v] and the threshold is 2/3·|κ|, both the prior set, while guarantees use κ′. Why the asymmetry, and what happens to the reports waiting in ρ when |κ| ≠ |κ′|, and why?
 
-<sub>11.2 Assurances; 11.3 — ●●○ · 設計理由 · eq. 11.13, eq. 11.17, eq. 11.18, eq. 11.31</sub>
+<sub>11.2 Assurances; 11.3 — ●●○ · 設計理由 · eq. 11.14, eq. 11.17, eq. 11.18, eq. 11.31</sub>
 
 **標準答案**　The report an assurance attests entered ρ in an earlier block and its shards were cut for the set size of that time (eq. 11.31), so signers and threshold belong to that set; a guarantee is work newly accepted in this block, hence κ′. When |κ| ≠ |κ′| the old shard counts no longer fit, so eq. 11.18 clears all of ρ‡ — timed out early
 
@@ -6725,7 +6725,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ### 11-25　The availability timeout is H_T ≥ t + U. Whose time is t, why not the guarantee's own signed slot g_t, and how far apart can the two be?
 
-<sub>11.2–11.3 — ●●○ · 設計理由 · eq. 11.18 (H_T ≥ t + U), eq. 11.x (ρ′[c] = (g, τ′)), eq. 11.28</sub>
+<sub>11.2–11.3 — ●●○ · 設計理由 · eq. 11.18 (H_T ≥ t + U), §11.4 (ρ′[c] = (g, τ′)), eq. 11.28</sub>
 
 **標準答案**　t is the τ′ of the block that placed the report in ρ (ρ′[c] = (g, τ′)), not the guarantee's g_t. The timeout measures on-chain exposure to assurances, so the clock starts when the report enters ρ; g_t may precede inclusion by up to R = 10 slots, and with g_t a late guarantee could be timed out on arrival
 
@@ -8068,7 +8068,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 ### A-11　0.8.0 charges gas for a whole basic block up front on entry. Why price by block rather than by instruction, and how does that decision relate to 'indirect jumps must land on a block start'?
 
-<sub>A.9 Gas Cost Model — ●●○ · 設計理由 · §A.9 prose, eq. A.8, eq. A.21 (block-start targets)</sub>
+<sub>A.9 Gas Cost Model — ●●○ · 設計理由 · §A.9 prose, eq. A.54 (gas cost for block), eq. A.22 (jump-table alignment), §A.3 (basic blocks)</sub>
 
 **標準答案**　Because §A.9's model simulates a CPU microarchitecture — decode slots, execution units, reorder buffer — per basic block; instructions overlap, so only a whole block's cost is meaningful, and it is static, so a recompiler deducts once per entry. Since the charge is on entry, control may enter only at block starts, hence eq. A.21's ϖ requirement
 
@@ -8538,7 +8538,7 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 ### B-15　Ψ_A's context is a pair (x, y): x is the regular dimension, y the exceptional one. A service, during accumulate, does in order: write storage → checkpoint → transfer to another service → write storage again → panic. What does the invocation return, and what is y for?
 
-<sub>B.4 Accumulate Invocation — ●●○ · 概念 · §B.4 prose (regular vs exceptional dimension), collapse function C, Ω_C</sub>
+<sub>B.4 Accumulate Invocation — ●●○ · 概念 · §B.4 prose (regular vs exceptional dimension), eq. B.7 (implications), collapse function C, Ω_C</sub>
 
 **標準答案**　It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; with no checkpoint, y is the pre-invocation state, so a panic is a full rollback
 
@@ -9739,7 +9739,7 @@ GRANDPA 的輸入是「每個 validator 認為最好的鏈頭」，輸出是「�
 
 ### ARCH-24　JAM secures in-core computation with ELVES (guarantee + availability + audit + dispute) rather than SNARKs. What reason does the GP give, and what does the choice cost in the nature of correctness?
 
-<sub>1.3; 2.2 SNARK roll-ups — ●●○ · 設計理由 · §1.3 last paragraph, §2.2.x (SNARK roll-ups), §4.9.1</sub>
+<sub>1.3; 2.2 SNARK roll-ups — ●●○ · 設計理由 · §1.3 last paragraph, §2.2 (SNARK roll-ups), §4.9.1</sub>
 
 **標準答案**　Reason (§1.3): crypto-economic mechanisms 'inherit their low-cost and high-performance profiles and avert a bias toward centralization'; SNARK proving costs orders of magnitude more and concentrates provers. Cost: correctness is 'probably caught by an honest party', not 'mathematically certain', hence assurance, random auditors and branch-abandoning disputes
 
