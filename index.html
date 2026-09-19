@@ -416,7 +416,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   // ---------- rendering helpers ----------
   function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function inlineCode(s){ // `code` → <code>
-    return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
+    return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
   }
   // Gray Paper symbols -> their glossary one-liner, shown on hover.
   // u flag: the blackboard-bold letters live outside the BMP.
