@@ -1,6 +1,6 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 332 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+Gray Paper **0.8.0** · 21 章速記 · 333 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
 線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-20
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
@@ -15,7 +15,7 @@ Gray Paper **0.8.0** · 21 章速記 · 332 題 · 92 條名詞解釋 · New-JAM
 - [附錄 N5 · 一份工作的一生](#ch-n5) — 8 題
 - [附錄 N6 · 資料可得性與稽核](#ch-n6) — 8 題
 - [附錄 N7 · PVM 與 gas](#ch-n7) — 8 題
-- [附錄 N8 · 名詞與符號](#ch-n8) — 16 題
+- [附錄 N8 · 名詞與符號](#ch-n8) — 17 題
 - [§3 Notation](#ch-3) — 9 題
 - [§4 Overview](#ch-4) — 16 題
 - [§5 The Header](#ch-5) — 24 題
@@ -2507,7 +2507,7 @@ gas 是**停機問題的實用解法**。沒有它，一支寫了無窮迴圈的
 
 <a id="ch-n8"></a>
 
-## 附錄 N8 · 名詞與符號　<sub>16 題</sub>
+## 附錄 N8 · 名詞與符號　<sub>17 題</sub>
 
 ### N8-1　You see σ, σ′, ρ† and ρ‡ in one formula. What does each decoration mean?
 
@@ -2584,7 +2584,32 @@ GP 全篇的時間記號只有三種。**沒記號**：這個 block 開始前的
 
 ---
 
-### N8-4　Four nouns share the prefix 'work': work-package, work-item, work-report, work-digest. How do they relate, and which of them go on-chain?
+### N8-4　Five GP words whose everyday meaning misleads: extrinsic, refine, accumulate, wonky, culprit. What does each actually mean in JAM?
+
+<sub>§4.1; §4.9; §10; §12 — ●○○ · 概念 · §4.1 (extrinsic), §4.9 (refine/accumulate), §10 (wonky, culprit, fault), §12</sub>
+
+**標準答案**　Extrinsic: the block body — the five lists validators submit (tickets, preimages, guarantees, assurances, disputes); there are no user transactions. Refine: the in-core entry point that turns a big input into a small digest. Accumulate: the on-chain entry point that writes a digest's effect into state. Wonky: a verdict with exactly a third positive votes, undecidable. Culprit: a guarantor who signed a report later judged bad
+
+這五個字的字面意思都會把人帶偏。**extrinsic**（外來的）：Substrate 造的詞，用來取代 transaction，因為 block 裡的東西不只交易。JAM 沿用，實際指 block body 的五張清單，而且提交者都是 validator，沒有使用者交易——使用者的東西走 work-package，不進 block。**refine**（精煉）：不是「把東西修得更好」，是「把大輸入濃縮成小輸出」——MB 級的 package 進去、48 KB 以內的 report 出來，在 core 上跑、看不到 state。**accumulate**（累積）：不是「堆起來」，是「入帳」——唯一會改 service state 的入口，在鏈上跑。另外 GP 裡還有 ticket accumulator（γ_A）和 entropy accumulator（η_0），跟這個 accumulate 完全無關，只是都在「一直往裡加」。**wonky**（怪怪的）：verdict 的第三種結果，正面票恰好 ⌊|k|/3⌋，既不能判 good 也不能判 bad，report 被擱置。**culprit**（罪魁）：特指「擔保了壞 report 的 guarantor」；投錯票的人另有一個字叫 fault；兩者合稱 offender。口試時遇到這些詞，用你自己的話解釋內容，不要解釋字面。
+
+**逐項辨析**
+
+1. ✅ Extrinsic: the block body — the five lists validators submit (tickets, preimages, guarantees, assurances, disputes); there are no user transactions. Refine: the in-core entry point that turns a big input into a small digest. Accumulate: the on-chain entry point that writes a digest's effect into state. Wonky: a verdict with exactly a third positive votes, undecidable. Culprit: a guarantor who signed a report later judged bad  
+   對：§4.1 extrinsic 是「external to the system」的輸入；§4.9 兩個入口；§10 的 wonky 與 culprit。
+2. ❌ Extrinsic: data the chain stores outside itself in the D³L, referenced by hash only. Refine: the audit step that polishes a report before finality, re-running it until every judgment agrees. Accumulate: the ticket accumulator that collects lottery entries during the epoch. Wonky: a block whose seal failed verification and was dropped by the best-chain rule. Culprit: the auditor who cast the negative judgment that opened a dispute  
+   全是望文生義：extrinsic 不是鏈外儲存，accumulate 不是 ticket 累加器。
+3. ❌ Extrinsic: a user transaction signed with Ed25519 and paid for from the sender's balance. Refine: the process of shrinking the validator set at an epoch change. Accumulate: appending a block's outputs to the recent-history belt. Wonky: a report that exceeded the 48 KB size limit and was truncated. Culprit: the block author who included an invalid extrinsic and forfeits the block reward  
+   JAM 沒有使用者交易；refine 跟 validator 集合無關。
+4. ❌ Extrinsic: the header fields visible to light clients. Refine: erasure-coding a bundle into shards. Accumulate: collecting assurances until two thirds are reached. Wonky: a service whose balance is below threshold. Culprit: the builder of an unauthorized package  
+   extrinsic 是 body 不是 header；accumulate 跟 assurance 計票無關。
+
+> **陷阱**　extrinsic = body、refine = 縮小、accumulate = 入帳、wonky = 三分之一、culprit = 壞 report 的 guarantor。
+
+<sub>`n8-misleading-words`</sub>
+
+---
+
+### N8-5　Four nouns share the prefix 'work': work-package, work-item, work-report, work-digest. How do they relate, and which of them go on-chain?
 
 <sub>§4.9; §11; §14 — ●○○ · 概念 · §4.9, eq. 11.2, eq. 11.6, eq. 14.2</sub>
 
@@ -2609,7 +2634,7 @@ GP 全篇的時間記號只有三種。**沒記號**：這個 block 開始前的
 
 ---
 
-### N8-5　Match the Greek letters that a piece of work passes through: α, φ, ρ, ω, ξ, θ, δ. Which is which?
+### N8-6　Match the Greek letters that a piece of work passes through: α, φ, ρ, ω, ξ, θ, δ. Which is which?
 
 <sub>§4.2 state components — ●○○ · 概念 · eq. 4.4, §8, §11, §12</sub>
 
@@ -2634,7 +2659,7 @@ eq. 4.4 把 σ 拆成 17 個分量，其中七個是「工作管線」上的：*
 
 ---
 
-### N8-6　Now the consensus-side letters: β, γ, η, ι, κ, λ, ψ, π, χ, τ. Which is which?
+### N8-7　Now the consensus-side letters: β, γ, η, ι, κ, λ, ψ, π, χ, τ. Which is which?
 
 <sub>§4.2 state components — ●○○ · 概念 · eq. 4.4, §6, §7, §10, §13</sub>
 
@@ -2659,7 +2684,7 @@ eq. 4.4 把 σ 拆成 17 個分量，其中七個是「工作管線」上的：*
 
 ---
 
-### N8-7　The extrinsic has five parts: E_T, E_P, E_G, E_A, E_D. Name each and say who puts it there.
+### N8-8　The extrinsic has five parts: E_T, E_P, E_G, E_A, E_D. Name each and say who puts it there.
 
 <sub>§4.1 the extrinsic — ●○○ · 概念 · eq. 4.3, §6, §9, §10, §11</sub>
 
@@ -2684,7 +2709,7 @@ eq. 4.3：E ≡ (E_T, E_P, E_G, E_A, E_D)，這是 block body 的全部。**E_T*
 
 ---
 
-### N8-8　GP uses three location words: in-core, on-chain, off-chain. Sort these into the right place: refine, accumulate, is-authorized, auditing, GRANDPA voting, assurance signing, the E_A check.
+### N8-9　GP uses three location words: in-core, on-chain, off-chain. Sort these into the right place: refine, accumulate, is-authorized, auditing, GRANDPA voting, assurance signing, the E_A check.
 
 <sub>§4.9; §15–19 — ●○○ · 概念 · §4.9.1, §15–19</sub>
 
@@ -2709,7 +2734,7 @@ eq. 4.3：E ≡ (E_T, E_P, E_G, E_A, E_D)，這是 block body 的全部。**E_T*
 
 ---
 
-### N8-9　The header is H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S). Which letter is which?
+### N8-10　The header is H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S). Which letter is which?
 
 <sub>§5 the header — ●○○ · 概念 · eq. 5.1</sub>
 
@@ -2734,7 +2759,7 @@ eq. 4.3：E ≡ (E_T, E_P, E_G, E_A, E_D)，這是 block body 的全部。**E_T*
 
 ---
 
-### N8-10　Write one work-package's journey using only symbols and the extrinsic it rides in: which check reads α, which extrinsic puts it into ρ, what makes it leave ρ, and which symbols does accumulate write?
+### N8-11　Write one work-package's journey using only symbols and the extrinsic it rides in: which check reads α, which extrinsic puts it into ρ, what makes it leave ρ, and which symbols does accumulate write?
 
 <sub>§4 dependency graph; §8–12 — ●●○ · 概念 · §4.1, eq. 8.2, eq. 11.17, eq. 11.18, §12</sub>
 
@@ -2759,7 +2784,7 @@ eq. 4.3：E ≡ (E_T, E_P, E_G, E_A, E_D)，這是 block body 的全部。**E_T*
 
 ---
 
-### N8-11　Five role words: builder, author, guarantor, assurer, auditor. Who is a validator, and what does each one produce?
+### N8-12　Five role words: builder, author, guarantor, assurer, auditor. Who is a validator, and what does each one produce?
 
 <sub>§4.9; §14–17 — ●○○ · 概念 · §4.9.1, §14, §15, §16, §17, §19</sub>
 
@@ -2784,7 +2809,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 ---
 
-### N8-12　Each validator key bundles three public keys: Bandersnatch, Ed25519, BLS. Which noun uses which key?
+### N8-13　Each validator key bundles three public keys: Bandersnatch, Ed25519, BLS. Which noun uses which key?
 
 <sub>§6.2 validator keys; App. G — ●○○ · 概念 · eq. 6.7, §6, §10, §11, §18, App. G</sub>
 
@@ -2809,7 +2834,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 ---
 
-### N8-13　Safrole nouns: ticket, ticket accumulator, sealer sequence, seal, epoch marker, winning-tickets marker, fallback. Put each in one sentence.
+### N8-14　Safrole nouns: ticket, ticket accumulator, sealer sequence, seal, epoch marker, winning-tickets marker, fallback. Put each in one sentence.
 
 <sub>§6 — ●○○ · 概念 · §6, eq. 6.25, eq. 6.27, eq. 6.28–6.29</sub>
 
@@ -2834,7 +2859,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 ---
 
-### N8-14　Data-availability nouns: bundle, shard, erasure-root, segment, segments-root, audit DA, D³L. What is each?
+### N8-15　Data-availability nouns: bundle, shard, erasure-root, segment, segments-root, audit DA, D³L. What is each?
 
 <sub>§11; §14; §16; App. H — ●○○ · 概念 · eq. 11.5, §14, §16, App. H</sub>
 
@@ -2859,7 +2884,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 ---
 
-### N8-15　PVM nouns: invocation, host call, gas, basic block, page fault, inner PVM. One line each.
+### N8-16　PVM nouns: invocation, host call, gas, basic block, page fault, inner PVM. One line each.
 
 <sub>App. A; App. B — ●○○ · 概念 · §4.7, App. A, App. B</sub>
 
@@ -2884,7 +2909,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 ---
 
-### N8-16　Two last groups. Disputes: judgment, verdict, good/bad/wonky, culprit, fault, offender. Constants: C, E, P, R, U, L, D, H, Y. What are they?
+### N8-17　Two last groups. Disputes: judgment, verdict, good/bad/wonky, culprit, fault, offender. Constants: C, E, P, R, U, L, D, H, Y. What are they?
 
 <sub>§10; App. I — ●○○ · 概念 · §10, App. I</sub>
 

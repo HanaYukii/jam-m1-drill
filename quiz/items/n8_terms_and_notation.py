@@ -10,7 +10,10 @@ ITEMS = [
  "gpRef": "§3.x, eq. 4.1, §4.1 dependency graph",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["guarantee", "prior/posterior"],
+ "tags": [
+  "guarantee",
+  "prior/posterior"
+ ],
  "stem": "You see σ, σ′, ρ† and ρ‡ in one formula. What does each decoration mean?",
  "stemZh": "同一條公式裡出現 σ、σ′、ρ† 和 ρ‡。這些記號各代表什麼？",
  "options": [
@@ -43,7 +46,9 @@ ITEMS = [
  "gpRef": "§3.4, §3.5, §3.7",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["notation"],
+ "tags": [
+  "notation"
+ ],
  "stem": "How do you read ⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, {T}, ⟨K → V⟩ and T? in a GP type declaration?",
  "stemZh": "GP 的型別宣告裡，⟦T⟧、⟦T⟧_n、⟦T⟧_{:n}、{T}、⟨K → V⟩、T? 各怎麼讀？",
  "options": [
@@ -76,7 +81,10 @@ ITEMS = [
  "gpRef": "§3.7.2, §3.8.1, App. C",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["serialization", "notation"],
+ "tags": [
+  "serialization",
+  "notation"
+ ],
  "stem": "What do H(x), H_K(x), E(x), E_4(x), a ⌢ b, a ⧺ b and s[i]^⟲ each do?",
  "stemZh": "H(x)、H_K(x)、E(x)、E_4(x)、a ⌢ b、a ⧺ b、s[i]^⟲ 各是什麼意思？",
  "options": [
@@ -102,6 +110,43 @@ ITEMS = [
  "trap": "H = Blake2b、H_K = Keccak；E 是序列化；⟲ 是取餘索引。"
 },
 {
+ "id": "n8-misleading-words",
+ "lens": "機制",
+ "ch": "N8",
+ "section": "§4.1; §4.9; §10; §12",
+ "gpRef": "§4.1 (extrinsic), §4.9 (refine/accumulate), §10 (wonky, culprit, fault), §12",
+ "difficulty": 1,
+ "kind": "concept",
+ "tags": [
+  "extrinsic",
+  "refine",
+  "accumulate"
+ ],
+ "stem": "Five GP words whose everyday meaning misleads: extrinsic, refine, accumulate, wonky, culprit. What does each actually mean in JAM?",
+ "stemZh": "五個字面意思會誤導的 GP 用詞：extrinsic、refine、accumulate、wonky、culprit。在 JAM 裡各自實際指什麼？",
+ "options": [
+  "Extrinsic: the block body — the five lists validators submit (tickets, preimages, guarantees, assurances, disputes); there are no user transactions. Refine: the in-core entry point that turns a big input into a small digest. Accumulate: the on-chain entry point that writes a digest's effect into state. Wonky: a verdict with exactly a third positive votes, undecidable. Culprit: a guarantor who signed a report later judged bad",
+  "Extrinsic: data the chain stores outside itself in the D³L, referenced by hash only. Refine: the audit step that polishes a report before finality, re-running it until every judgment agrees. Accumulate: the ticket accumulator that collects lottery entries during the epoch. Wonky: a block whose seal failed verification and was dropped by the best-chain rule. Culprit: the auditor who cast the negative judgment that opened a dispute",
+  "Extrinsic: a user transaction signed with Ed25519 and paid for from the sender's balance. Refine: the process of shrinking the validator set at an epoch change. Accumulate: appending a block's outputs to the recent-history belt. Wonky: a report that exceeded the 48 KB size limit and was truncated. Culprit: the block author who included an invalid extrinsic and forfeits the block reward",
+  "Extrinsic: the header fields visible to light clients. Refine: erasure-coding a bundle into shards. Accumulate: collecting assurances until two thirds are reached. Wonky: a service whose balance is below threshold. Culprit: the builder of an unauthorized package"
+ ],
+ "optionsZh": [
+  "Extrinsic：block body——validator 交上來的五張清單（ticket、preimage、guarantee、assurance、dispute），沒有使用者交易。Refine：in-core 的入口，把大輸入變成小 digest。Accumulate：on-chain 的入口，把 digest 的效果寫進 state。Wonky：正面票恰好三分之一、無法定論的 verdict。Culprit：簽了後來被判 bad 的 report 的 guarantor",
+  "Extrinsic：鏈存在自己外面、只以 hash 引用的 D³L 資料。Refine：finality 前把 report 修飾一遍的 audit 步驟，反覆重跑直到所有判定一致。Accumulate：epoch 期間收集抽籤籤的 ticket accumulator。Wonky：seal 驗證失敗、被 best-chain 規則丟掉的 block。Culprit：投下負面票、開啟 dispute 的那位 auditor",
+  "Extrinsic：用 Ed25519 簽、從發送者餘額扣費的使用者交易。Refine：epoch 換檔時縮減 validator 集合的過程。Accumulate：把 block 的輸出接上 recent-history 的 belt。Wonky：超過 48 KB 上限而被截斷的 report。Culprit：收了無效 extrinsic、因此失去出塊獎勵的出塊者",
+  "Extrinsic：輕節點看得到的 header 欄位。Refine：把 bundle erasure code 成 shard。Accumulate：收集 assurance 直到超過三分之二。Wonky：餘額低於門檻的 service。Culprit：送出未授權 package 的 builder"
+ ],
+ "answer": 0,
+ "optNotes": [
+  "對：§4.1 extrinsic 是「external to the system」的輸入；§4.9 兩個入口；§10 的 wonky 與 culprit。",
+  "全是望文生義：extrinsic 不是鏈外儲存，accumulate 不是 ticket 累加器。",
+  "JAM 沒有使用者交易；refine 跟 validator 集合無關。",
+  "extrinsic 是 body 不是 header；accumulate 跟 assurance 計票無關。"
+ ],
+ "explanation": "這五個字的字面意思都會把人帶偏。**extrinsic**（外來的）：Substrate 造的詞，用來取代 transaction，因為 block 裡的東西不只交易。JAM 沿用，實際指 block body 的五張清單，而且提交者都是 validator，沒有使用者交易——使用者的東西走 work-package，不進 block。**refine**（精煉）：不是「把東西修得更好」，是「把大輸入濃縮成小輸出」——MB 級的 package 進去、48 KB 以內的 report 出來，在 core 上跑、看不到 state。**accumulate**（累積）：不是「堆起來」，是「入帳」——唯一會改 service state 的入口，在鏈上跑。另外 GP 裡還有 ticket accumulator（γ_A）和 entropy accumulator（η_0），跟這個 accumulate 完全無關，只是都在「一直往裡加」。**wonky**（怪怪的）：verdict 的第三種結果，正面票恰好 ⌊|k|/3⌋，既不能判 good 也不能判 bad，report 被擱置。**culprit**（罪魁）：特指「擔保了壞 report 的 guarantor」；投錯票的人另有一個字叫 fault；兩者合稱 offender。口試時遇到這些詞，用你自己的話解釋內容，不要解釋字面。",
+ "trap": "extrinsic = body、refine = 縮小、accumulate = 入帳、wonky = 三分之一、culprit = 壞 report 的 guarantor。"
+},
+{
  "id": "n8-work-nouns-chain",
  "lens": "機制",
  "ch": "N8",
@@ -109,7 +154,10 @@ ITEMS = [
  "gpRef": "§4.9, eq. 11.2, eq. 11.6, eq. 14.2",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["work-package", "work-item"],
+ "tags": [
+  "work-package",
+  "work-item"
+ ],
  "stem": "Four nouns share the prefix 'work': work-package, work-item, work-report, work-digest. How do they relate, and which of them go on-chain?",
  "stemZh": "四個以 work 開頭的名詞：work-package、work-item、work-report、work-digest。它們之間是什麼關係？哪些會上鏈？",
  "options": [
@@ -142,7 +190,10 @@ ITEMS = [
  "gpRef": "eq. 4.4, §8, §11, §12",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["authorizer", "guarantee"],
+ "tags": [
+  "authorizer",
+  "guarantee"
+ ],
  "stem": "Match the Greek letters that a piece of work passes through: α, φ, ρ, ω, ξ, θ, δ. Which is which?",
  "stemZh": "一份工作會經過這些希臘字母：α、φ、ρ、ω、ξ、θ、δ。各是什麼？",
  "options": [
@@ -175,7 +226,10 @@ ITEMS = [
  "gpRef": "eq. 4.4, §6, §7, §10, §13",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["validator set", "dispute"],
+ "tags": [
+  "validator set",
+  "dispute"
+ ],
  "stem": "Now the consensus-side letters: β, γ, η, ι, κ, λ, ψ, π, χ, τ. Which is which?",
  "stemZh": "換共識那一組字母：β、γ、η、ι、κ、λ、ψ、π、χ、τ。各是什麼？",
  "options": [
@@ -208,7 +262,9 @@ ITEMS = [
  "gpRef": "eq. 4.3, §6, §9, §10, §11",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["extrinsic"],
+ "tags": [
+  "extrinsic"
+ ],
  "stem": "The extrinsic has five parts: E_T, E_P, E_G, E_A, E_D. Name each and say who puts it there.",
  "stemZh": "extrinsic 有五個部分：E_T、E_P、E_G、E_A、E_D。各叫什麼、由誰放進去？",
  "options": [
@@ -241,7 +297,10 @@ ITEMS = [
  "gpRef": "§4.9.1, §15–19",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["core", "accumulate"],
+ "tags": [
+  "core",
+  "accumulate"
+ ],
  "stem": "GP uses three location words: in-core, on-chain, off-chain. Sort these into the right place: refine, accumulate, is-authorized, auditing, GRANDPA voting, assurance signing, the E_A check.",
  "stemZh": "GP 用三個位置詞：in-core、on-chain、off-chain。把這些歸位：refine、accumulate、is-authorized、audit、GRANDPA 投票、簽 assurance、檢查 E_A。",
  "options": [
@@ -274,7 +333,10 @@ ITEMS = [
  "gpRef": "eq. 5.1",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["header", "seal"],
+ "tags": [
+  "header",
+  "seal"
+ ],
  "stem": "The header is H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S). Which letter is which?",
  "stemZh": "header 是 H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S)。每個字母是什麼？",
  "options": [
@@ -307,7 +369,10 @@ ITEMS = [
  "gpRef": "§4.1, eq. 8.2, eq. 11.17, eq. 11.18, §12",
  "difficulty": 2,
  "kind": "concept",
- "tags": ["guarantee", "extrinsic"],
+ "tags": [
+  "guarantee",
+  "extrinsic"
+ ],
  "stem": "Write one work-package's journey using only symbols and the extrinsic it rides in: which check reads α, which extrinsic puts it into ρ, what makes it leave ρ, and which symbols does accumulate write?",
  "stemZh": "只用符號和它搭的 extrinsic 描述一份 work-package 的旅程：哪個檢查讀 α、哪個 extrinsic 把它放進 ρ、什麼讓它離開 ρ、accumulate 寫哪些符號？",
  "options": [
@@ -340,7 +405,10 @@ ITEMS = [
  "gpRef": "§4.9.1, §14, §15, §16, §17, §19",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["guarantee", "assurance"],
+ "tags": [
+  "guarantee",
+  "assurance"
+ ],
  "stem": "Five role words: builder, author, guarantor, assurer, auditor. Who is a validator, and what does each one produce?",
  "stemZh": "五個角色名詞：builder、author、guarantor、assurer、auditor。哪些是 validator？各自產出什麼？",
  "options": [
@@ -373,7 +441,10 @@ ITEMS = [
  "gpRef": "eq. 6.7, §6, §10, §11, §18, App. G",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["Bandersnatch", "Ed25519"],
+ "tags": [
+  "Bandersnatch",
+  "Ed25519"
+ ],
  "stem": "Each validator key bundles three public keys: Bandersnatch, Ed25519, BLS. Which noun uses which key?",
  "stemZh": "每把 validator key 綁三把公鑰：Bandersnatch、Ed25519、BLS。哪個名詞用哪把？",
  "options": [
@@ -406,7 +477,11 @@ ITEMS = [
  "gpRef": "§6, eq. 6.25, eq. 6.27, eq. 6.28–6.29",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["ticket", "Safrole", "seal"],
+ "tags": [
+  "ticket",
+  "Safrole",
+  "seal"
+ ],
  "stem": "Safrole nouns: ticket, ticket accumulator, sealer sequence, seal, epoch marker, winning-tickets marker, fallback. Put each in one sentence.",
  "stemZh": "Safrole 的名詞：ticket、ticket accumulator、sealer sequence、seal、epoch marker、winning-tickets marker、fallback。各一句話。",
  "options": [
@@ -439,7 +514,10 @@ ITEMS = [
  "gpRef": "eq. 11.5, §14, §16, App. H",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["segment", "erasure coding"],
+ "tags": [
+  "segment",
+  "erasure coding"
+ ],
  "stem": "Data-availability nouns: bundle, shard, erasure-root, segment, segments-root, audit DA, D³L. What is each?",
  "stemZh": "資料可得性的名詞：bundle、shard、erasure-root、segment、segments-root、audit DA、D³L。各是什麼？",
  "options": [
@@ -472,7 +550,10 @@ ITEMS = [
  "gpRef": "§4.7, App. A, App. B",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["PVM", "gas"],
+ "tags": [
+  "PVM",
+  "gas"
+ ],
  "stem": "PVM nouns: invocation, host call, gas, basic block, page fault, inner PVM. One line each.",
  "stemZh": "PVM 的名詞：invocation、host call、gas、basic block、page fault、inner PVM。各一句。",
  "options": [
@@ -505,7 +586,9 @@ ITEMS = [
  "gpRef": "§10, App. I",
  "difficulty": 1,
  "kind": "concept",
- "tags": ["dispute"],
+ "tags": [
+  "dispute"
+ ],
  "stem": "Two last groups. Disputes: judgment, verdict, good/bad/wonky, culprit, fault, offender. Constants: C, E, P, R, U, L, D, H, Y. What are they?",
  "stemZh": "最後兩組。Disputes：judgment、verdict、good/bad/wonky、culprit、fault、offender。常數：C、E、P、R、U、L、D、H、Y。各是什麼？",
  "options": [

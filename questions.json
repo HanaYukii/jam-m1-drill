@@ -150,7 +150,7 @@
     "group": "Interview extras"
    }
   ],
-  "count": 332,
+  "count": 333,
   "glossaryCats": {
    "state": "狀態與區塊",
    "block": "狀態與區塊",
@@ -12444,6 +12444,48 @@
    "refCh": [
     "3",
     "C"
+   ]
+  },
+  {
+   "id": "n8-misleading-words",
+   "lens": "機制",
+   "ch": "N8",
+   "section": "§4.1; §4.9; §10; §12",
+   "gpRef": "§4.1 (extrinsic), §4.9 (refine/accumulate), §10 (wonky, culprit, fault), §12",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "extrinsic",
+    "refine",
+    "accumulate"
+   ],
+   "stem": "Five GP words whose everyday meaning misleads: extrinsic, refine, accumulate, wonky, culprit. What does each actually mean in JAM?",
+   "stemZh": "五個字面意思會誤導的 GP 用詞：extrinsic、refine、accumulate、wonky、culprit。在 JAM 裡各自實際指什麼？",
+   "options": [
+    "Extrinsic: the block body — the five lists validators submit (tickets, preimages, guarantees, assurances, disputes); there are no user transactions. Refine: the in-core entry point that turns a big input into a small digest. Accumulate: the on-chain entry point that writes a digest's effect into state. Wonky: a verdict with exactly a third positive votes, undecidable. Culprit: a guarantor who signed a report later judged bad",
+    "Extrinsic: a user transaction signed with Ed25519 and paid for from the sender's balance. Refine: the process of shrinking the validator set at an epoch change. Accumulate: appending a block's outputs to the recent-history belt. Wonky: a report that exceeded the 48 KB size limit and was truncated. Culprit: the block author who included an invalid extrinsic and forfeits the block reward",
+    "Extrinsic: the header fields visible to light clients. Refine: erasure-coding a bundle into shards. Accumulate: collecting assurances until two thirds are reached. Wonky: a service whose balance is below threshold. Culprit: the builder of an unauthorized package",
+    "Extrinsic: data the chain stores outside itself in the D³L, referenced by hash only. Refine: the audit step that polishes a report before finality, re-running it until every judgment agrees. Accumulate: the ticket accumulator that collects lottery entries during the epoch. Wonky: a block whose seal failed verification and was dropped by the best-chain rule. Culprit: the auditor who cast the negative judgment that opened a dispute"
+   ],
+   "optionsZh": [
+    "Extrinsic：block body——validator 交上來的五張清單（ticket、preimage、guarantee、assurance、dispute），沒有使用者交易。Refine：in-core 的入口，把大輸入變成小 digest。Accumulate：on-chain 的入口，把 digest 的效果寫進 state。Wonky：正面票恰好三分之一、無法定論的 verdict。Culprit：簽了後來被判 bad 的 report 的 guarantor",
+    "Extrinsic：用 Ed25519 簽、從發送者餘額扣費的使用者交易。Refine：epoch 換檔時縮減 validator 集合的過程。Accumulate：把 block 的輸出接上 recent-history 的 belt。Wonky：超過 48 KB 上限而被截斷的 report。Culprit：收了無效 extrinsic、因此失去出塊獎勵的出塊者",
+    "Extrinsic：輕節點看得到的 header 欄位。Refine：把 bundle erasure code 成 shard。Accumulate：收集 assurance 直到超過三分之二。Wonky：餘額低於門檻的 service。Culprit：送出未授權 package 的 builder",
+    "Extrinsic：鏈存在自己外面、只以 hash 引用的 D³L 資料。Refine：finality 前把 report 修飾一遍的 audit 步驟，反覆重跑直到所有判定一致。Accumulate：epoch 期間收集抽籤籤的 ticket accumulator。Wonky：seal 驗證失敗、被 best-chain 規則丟掉的 block。Culprit：投下負面票、開啟 dispute 的那位 auditor"
+   ],
+   "answer": 0,
+   "optNotes": [
+    "對：§4.1 extrinsic 是「external to the system」的輸入；§4.9 兩個入口；§10 的 wonky 與 culprit。",
+    "JAM 沒有使用者交易；refine 跟 validator 集合無關。",
+    "extrinsic 是 body 不是 header；accumulate 跟 assurance 計票無關。",
+    "全是望文生義：extrinsic 不是鏈外儲存，accumulate 不是 ticket 累加器。"
+   ],
+   "explanation": "這五個字的字面意思都會把人帶偏。**extrinsic**（外來的）：Substrate 造的詞，用來取代 transaction，因為 block 裡的東西不只交易。JAM 沿用，實際指 block body 的五張清單，而且提交者都是 validator，沒有使用者交易——使用者的東西走 work-package，不進 block。**refine**（精煉）：不是「把東西修得更好」，是「把大輸入濃縮成小輸出」——MB 級的 package 進去、48 KB 以內的 report 出來，在 core 上跑、看不到 state。**accumulate**（累積）：不是「堆起來」，是「入帳」——唯一會改 service state 的入口，在鏈上跑。另外 GP 裡還有 ticket accumulator（γ_A）和 entropy accumulator（η_0），跟這個 accumulate 完全無關，只是都在「一直往裡加」。**wonky**（怪怪的）：verdict 的第三種結果，正面票恰好 ⌊|k|/3⌋，既不能判 good 也不能判 bad，report 被擱置。**culprit**（罪魁）：特指「擔保了壞 report 的 guarantor」；投錯票的人另有一個字叫 fault；兩者合稱 offender。口試時遇到這些詞，用你自己的話解釋內容，不要解釋字面。",
+   "trap": "extrinsic = body、refine = 縮小、accumulate = 入帳、wonky = 三分之一、culprit = 壞 report 的 guarantor。",
+   "refCh": [
+    "4",
+    "10",
+    "12"
    ]
   },
   {
