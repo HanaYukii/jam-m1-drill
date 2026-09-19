@@ -174,6 +174,8 @@ pre.code{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--
 .on-tag.ng{background:var(--line-2);color:var(--muted)}
 .on-tag.you{background:var(--bad);color:var(--surface)}
 .sym{border-bottom:1px dotted var(--muted);cursor:help}
+.sym{position:relative;cursor:pointer}
+.sym.open::after{content:attr(data-gloss);position:absolute;left:0;top:1.6em;z-index:50;min-width:16em;max-width:28em;padding:8px 10px;border-radius:8px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line-2);box-shadow:0 6px 24px rgba(0,0,0,.35);font-family:var(--sans);font-size:13px;line-height:1.5;white-space:normal;text-align:left}
 .tag.xch{background:var(--amber-soft);color:var(--amber);border-color:var(--amber);cursor:help}
 .expl-hdr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px;padding-bottom:8px;border-bottom:1px dashed var(--line-2)}
 .expl-hdr .hdr-k{font-size:11px;color:var(--muted);letter-spacing:.06em;margin:0 2px 0 4px}
@@ -430,7 +432,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     return String(html).split(/(<[^>]*>)/).map((part, i) => i % 2 ? part
       : part.replace(SYM_RE, m => {
           const g = symGloss(m);
-          return g ? '<span class="sym" title="'+esc(g)+'">'+m+'</span>' : m;
+          return g ? '<span class="sym" title="'+esc(g)+'" data-gloss="'+esc(g)+'">'+m+'</span>' : m;
         })
     ).join('');
   }
@@ -943,6 +945,11 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   $('#unseenFirst').onclick = (e)=>{ state.unseenFirst = !state.unseenFirst; e.currentTarget.setAttribute('aria-pressed', state.unseenFirst); refilter(); };
   $('#shuffleQ').onclick = (e)=>{ state.shuffle = !state.shuffle; e.currentTarget.setAttribute('aria-pressed', state.shuffle); refilter(); };
   $('#langZh').setAttribute('aria-pressed', useZh());
+  document.addEventListener('click', (e)=>{
+    const s = e.target.closest('.sym');
+    $$('.sym.open').forEach(x => { if (x !== s) x.classList.remove('open'); });
+    if (s){ s.classList.toggle('open'); e.stopPropagation(); }
+  });
   $('#langZh').onclick = (e)=>{ store.prefs.zh = !store.prefs.zh; save(); e.currentTarget.setAttribute('aria-pressed', store.prefs.zh); renderAll(); };
   let searchT = null;
   $('#search').addEventListener('input', e => { clearTimeout(searchT); searchT = setTimeout(()=>{ state.query = e.target.value.trim(); refilter(); }, 180); });
