@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n1-what-problem",
  "lens": "對比",
   "ch": "N1", "section": "§1 Introduction", "gpRef": "§1",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "overview"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stemZh": "一句話說，JAM 想成為什麼？",
   "optionsZh": [
    "一條能為許多獨立 service 執行大量運算的鏈：多數工作由少數 validator 在主鏈之外平行完成，鏈上只對結果達成共識",
@@ -35,7 +35,7 @@ ITEMS = [
   "id": "n1-in-core-vs-on-chain-basic",
  "lens": "對比",
   "ch": "N1", "section": "§1; §4 Overview", "gpRef": "§1 & §4",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "in-core"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stemZh": "「in-core」執行的工作與「on-chain」執行的工作，差別在哪裡？",
   "optionsZh": [
    "in-core 的工作只由被指派的少數 validator 執行、其他人不重跑；on-chain 的工作屬於狀態轉移的一部分，每個節點都會執行",
@@ -64,7 +64,7 @@ ITEMS = [
   "id": "n1-vs-ethereum-model",
  "lens": "對比",
   "ch": "N1", "section": "§2 Previous Work; §4.9", "gpRef": "§2 & §4",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "comparison"],
+  "difficulty": 2, "kind": "rationale", "tags": ["Ethereum"],
   "alsoCh": ["N4"],
   "stemZh": "與 Ethereum 相比，JAM 把使用者請求所執行的程式碼放在哪裡？這個選擇帶來什麼後果？",
   "optionsZh": [
@@ -94,7 +94,7 @@ ITEMS = [
   "id": "n1-name-corejam",
  "lens": "對比",
   "ch": "N1", "section": "§1", "gpRef": "§1",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "naming"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stemZh": "JAM 這個名字由兩個字組成。是哪兩個字，它們又指什麼？",
   "optionsZh": [
    "Join 與 Accumulate——把 in-core 的結果帶回鏈上的兩個階段，也是每個 service 都必須定義的操作",
@@ -123,7 +123,7 @@ ITEMS = [
   "id": "n1-why-one-chain",
  "lens": "對比",
   "ch": "N1", "section": "§1; §2 Previous Work", "gpRef": "§1 & §2",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "architecture"],
+  "difficulty": 2, "kind": "rationale", "tags": ["core", "Polkadot"],
   "stem": "Polkadot gets its capacity from many parallel chains. JAM keeps a single chain and gets capacity from cores instead. What does that buy?",
   "stemZh": "Polkadot 的處理能力來自許多條平行的鏈，JAM 卻只保留單一條鏈、改用 core 來取得能力。這樣做買到了什麼？",
   "options": [
@@ -152,7 +152,7 @@ ITEMS = [
   "id": "n1-what-is-a-core",
  "lens": "機制",
   "ch": "N1", "section": "§4.9 The Core Model", "gpRef": "§4",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "core"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "alsoCh": ["N4", "N5"],
   "stem": "What is a 'core' in JAM?",
   "stemZh": "JAM 裡的 core 是什麼？",
@@ -182,7 +182,7 @@ ITEMS = [
   "id": "n1-validator-roles",
  "lens": "機制",
   "ch": "N1", "section": "§1; §11; §17", "gpRef": "§1, §11 & §17",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "roles"],
+  "difficulty": 2, "kind": "concept", "tags": ["guarantee", "assurance"],
   "alsoCh": ["N6"],
   "stem": "The same validators take on several different jobs around one piece of work. What do a guarantor, an assurer and an auditor each do?",
   "stemZh": "同一批 validator 會圍繞同一份工作扮演幾種不同的角色。guarantor、assurer、auditor 各做什麼？",
@@ -212,7 +212,7 @@ ITEMS = [
   "id": "n1-gp-structure",
  "lens": "機制",
   "ch": "N1", "section": "Gray Paper 全書結構", "gpRef": "§3–§14 & App. A–H",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "reading-guide"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stem": "You open the Gray Paper for the first time. How is it laid out, and where should you look for what?",
   "stemZh": "你第一次打開 Gray Paper。它是怎麼編排的？該去哪裡找什麼？",
   "options": [

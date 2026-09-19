@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch05-prior-state-root",
  "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.9 (H_r)",
- "difficulty": 1, "kind": "rationale", "tags": ["header", "pipelining"],
+ "difficulty": 1, "kind": "rationale", "tags": ["state root", "header"],
   "stemZh": "與 Ethereum 和 Polkadot 不同，JAM 的 header 承諾的是先前的 state root（H_R = M_σ(σ)）而不是執行後的。GP 給的理由是什麼？",
   "optionsZh": [
    "為了讓區塊運算——特別是 Merklization——能夠管線化：出塊者不必先把新狀態 Merklize 完才能發布區塊",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "ch05-extrinsic-hash-080",
  "lens": "演算法",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7 (H_x)",
- "difficulty": 3, "kind": "delta", "tags": ["header", "delta-0.8.0", "codec"],
+ "difficulty": 3, "kind": "delta", "tags": ["extrinsic", "assurance", "dispute", "delta-0.8.0"],
   "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
   "optionsZh": [
    "p 與 g 是 E_P 與 E_G 完整的 codec 編碼，與區塊本體攜帶的一模一樣，所以 a 承諾了每一個 preimage blob 與每一份完整的 work-report",
@@ -92,7 +92,7 @@ ITEMS = [
  "id": "ch05-timeslot-validity",
  "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8",
- "difficulty": 1, "kind": "concept", "tags": ["header", "time"],
+ "difficulty": 1, "kind": "concept", "tags": ["timeslot", "header"],
   "stemZh": "一個區塊的時槽 H_T 必須滿足什麼條件，現在才算有效？",
   "optionsZh": [
    "P(H)_t < H_T ∧ H_T · P ≤ 𝕋——嚴格大於父區塊的時槽，且換算成秒之後不得晚於目前的牆鐘時間 𝕋",
@@ -121,7 +121,7 @@ ITEMS = [
  "id": "ch05-author-index",
  "lens": "機制",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 (H_i, H_a)",
- "difficulty": 2, "kind": "concept", "tags": ["header", "validators"],
+ "difficulty": 2, "kind": "concept", "tags": ["header", "validator set"],
   "stemZh": "出塊者索引 H_I 指涉的是哪一個 validator 集合？出塊者的 Bandersnatch 金鑰 H_A 又是怎麼取得的？",
   "optionsZh": [
    "指涉 prior 的 active set κ；H_A = κ[H_I]_b，而且 H_A 會與 H_I 並列、序列化成 header 的第十一個欄位",
@@ -151,7 +151,7 @@ ITEMS = [
  "lens": "機制",
   "alsoCh": ["11"],
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
- "difficulty": 2, "kind": "concept", "tags": ["header", "ancestry"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "lookup-anchor"],
   "stemZh": "GP 只要求實作保存過去 L = 14,400 個時槽（24 小時）內出塊的祖先 header。是哪一項鏈上檢查需要這個祖先集合 A？",
   "optionsZh": [
    "驗證某個 guarantee 的 lookup-anchor 區塊（雜湊、時槽與執行後的 state root）確實出現在這條鏈上——這是狀態 σ 自己無法佐證的",
@@ -180,7 +180,7 @@ ITEMS = [
  "id": "ch05-markers-types",
  "lens": "機制",
  "ch": "5", "section": "5.1 The Markers", "gpRef": "eq. 5.11 (markers)",
- "difficulty": 2, "kind": "concept", "tags": ["header", "markers"],
+ "difficulty": 2, "kind": "concept", "tags": ["header"],
   "stemZh": "依 eq. 5.11，三個 header marker（H_E、H_W、H_O）的型別各是什麼？哪些是 optional？",
   "optionsZh": [
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]——offenders marker 是一個普通序列，可以為空但永遠不是 None",

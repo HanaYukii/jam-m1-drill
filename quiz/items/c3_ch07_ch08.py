@@ -19,7 +19,7 @@ ITEMS = [
         "gpRef": "eq. 7.2 & 7.8; §7",
         "difficulty": 1,
         "kind": "concept",
-        "tags": ["recent-history", "reported-packages"],
+        "tags": ["recent history", "work-report"],
   "stemZh": "β_H 的每一項都帶一個欄位 p。在 GP 0.8.0 中，p 裝什麼？它的條目數又受什麼所限？",
   "optionsZh": [
    "一個字典，以該區塊中每個被擔保的 work-package 雜湊為 key、值是該 package 的 segment-root；至多 C = 341 項，因為一個區塊每個 core 至多只能回報一份 work-report",
@@ -53,7 +53,7 @@ ITEMS = [
         "gpRef": "eq. 7.8 & eq. 11.41–11.44",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["recent-history", "guarantees", "anti-replay"],
+        "tags": ["guarantee", "recent history"],
   "stemZh": "當某個區塊的 guarantees extrinsic E_G 在 §11 被驗證時，哪些鏈上檢查實際上會讀取存放在 β_H 裡的 reported-package 映射？",
   "optionsZh": [
    "有三項：進來的 package 雜湊不得已經是任何近期區塊之映射的 key（反重複）；每個 prerequisite 以及某份 report 之 segment-root lookup l 的每個 key 都必須是那樣的 key、或來自本塊自己的 guarantee；而且 l 必須是那些映射的子字典，因此每個 segment-root 都要與它的 package 雜湊相符",
@@ -86,7 +86,7 @@ ITEMS = [
         "gpRef": "eq. 7.7, 7.8; eq. E.8, E.10; §18 Beefy",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["recent-history", "mmr", "beefy", "keccak"],
+        "tags": ["BEEFY", "recent history", "MMR"],
   "stemZh": "追蹤在 GP 0.8.0 中，一個區塊的 accumulation 產出最終如何進入 BEEFY 簽章。",
   "optionsZh": [
    "每個區塊把編碼後的 θ′ 以 Keccak Merklize 成一個 root 並把該 root 附加到 belt β_B；新的 β_H 項目只儲存 belt 的 Keccak super-peak；validator 接著對它們所定案的每個區塊，以 BLS 簽署最新項目之 super-peak 的 domain-separated 雜湊",
@@ -119,7 +119,7 @@ ITEMS = [
         "gpRef": "eq. 7.5, 7.8 & eq. 11.36",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["recent-history", "pipelining", "ordering"],
+        "tags": ["recent history", "state root"],
   "stemZh": "某個實作者建構 β′_H 的方式是：先附加本塊的新項目（state root = H_0），然後才把 eq. 7.5 的父狀態根回填套用到「序列的最後一個元素」上。實際上會出什麼錯？",
   "optionsZh": [
    "那次回填會落在本塊自己剛新增的項目上，於是每一筆條目最後帶的都是它父區塊的 posterior root 而不是自己的，而父區塊那一筆則從未收到原本要給它的修正；從此 eq. 11.36 的 state-root 比對會拒絕誠實的 refinement context，而 C(3) 的原像也會與其他每個節點分歧",
@@ -152,7 +152,7 @@ ITEMS = [
         "gpRef": "eq. 7.2 & §D.1 state key C(3)",
         "difficulty": 3,
         "kind": "code",
-        "tags": ["recent-history", "codec", "delta-0.8.0", "gotcha"],
+        "tags": ["recent history", "serialization", "delta-0.8.0"],
   "stemZh": "這是團隊在 state key C(3) 之下、為單一筆 β_H 項目所寫的 GP 0.7.2 編碼器。有位審閱者反對，認為 GP 0.8.0 把該項目宣告為 ⟨h, s, b, t, p⟩——state root 排在 accumulation-output-log 的 super-peak 之前——所以這個編碼器一定把兩個欄位對調了。誰說得對？",
   "optionsZh": [
    "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後時槽、最後是 reported 映射；第 7 章的那個元組只是在命名各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的時槽",
@@ -214,7 +214,7 @@ ITEMS = [
         "gpRef": "§8.2 (note under eq. 8.1); assign host call (index 16)",
         "difficulty": 1,
         "kind": "concept",
-        "tags": ["authorization", "privileges", "host-calls"],
+        "tags": ["authorizer", "privileges", "host call"],
   "stemZh": "在 GP 0.8.0 中，誰有權更改某個 core 的 authorizer queue φ[c]？又是透過什麼機制？",
   "optionsZh": [
    "只有當前登記為該 core 之 assigner 的那個 service，而且只能在它的 accumulate 執行期間、藉由呼叫 `assign`——該呼叫會在單一次呼叫中替換那個 core 佇列的全部 Q = 80 個條目，並且也可以把 assigner 的角色轉交給另一個 service",
@@ -247,7 +247,7 @@ ITEMS = [
         "gpRef": "eq. 8.1–8.2",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["authorization", "rotation"],
+        "tags": ["authorizer", "timeslot"],
   "stemZh": "每個區塊都會把恰好一個佇列條目移進每個 core 的 pool。那個條目是怎麼被挑中的？而那些沒有出塊之時槽所對應的條目又會怎麼樣？",
   "optionsZh": [
    "靠對區塊自身時槽做的循環下標，也就是索引 H_T mod Q，任何地方都沒有儲存游標；沒有產出區塊的時槽，其條目這一輪就是不會被抽到，而那個索引要再過 80 個時槽才會輪回來",
@@ -280,7 +280,7 @@ ITEMS = [
         "gpRef": "eq. B.1–B.2; §8.1",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["authorization", "pvm", "delta-0.8.0"],
+        "tags": ["authorizer", "PVM", "delta-0.8.0"],
   "stemZh": "guarantor 在 refine 任何東西之前會先執行 Is-Authorized 邏輯 Ψ_I。那支程式實際上能觀察到什麼？",
   "optionsZh": [
    "只有它的兩個引數——work-package 與 core 索引（後者以 2 位元組編碼的引數交給 PVM）——加上 `fetch` 能從該 package 裡拉出來的東西、以及協定常數；完全沒有任何鏈上狀態，而且除了 `fetch` 之外，僅有的 host call 就是 gas 計數器與堆成長",
@@ -313,7 +313,7 @@ ITEMS = [
         "gpRef": "eq. 14.11; §8.1",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["authorization", "auditing", "determinism"],
+        "tags": ["authorizer", "preimage", "lookup-anchor"],
   "stemZh": "pool α[c] 裡除了 32 位元組的 authorizer 雜湊之外什麼都沒有。那麼 guarantor 要從哪裡取得可執行的 is-authorized 程式碼？又是以歷史上的哪一個時點解析的？為什麼是那裡？",
   "optionsZh": [
    "從 work-package 所指名的那個獨立 auth-code 宿主 service 的 preimage 儲存中取得，並以該 package 的 lookup-anchor 時槽做歷史查詢解析，好讓很久之後重跑這項檢查的 auditor 仍能解析出逐位元組相同的程式碼，即使該 service 此後已替換或遺忘了那份 preimage",
@@ -346,7 +346,7 @@ ITEMS = [
         "gpRef": "eq. 11.32 & eq. 8.2",
         "difficulty": 3,
         "kind": "code",
-        "tags": ["authorization", "guarantees", "prior-posterior"],
+        "tags": ["authorizer", "guarantee"],
   "stemZh": "這段 0.7.2 的程式碼實作的是 eq. 11.32 中 authorizer 的那一半。它有義務讀取哪一個 pool？而當成員測試失敗時，協定層級的後果是什麼？",
   "optionsZh": [
    "prior 的 pool，因為 posterior 那個要等 accumulation 之後才會從 posterior 佇列形成；而失敗只是一個普通的區塊有效性失敗——該 guarantee 不可能成為有效區塊的一部分，所以根本沒有 report 可以拿來懲罰誰，disputes 狀態也不會被寫入任何東西",

@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch09-account-fields",
  "lens": "對比",
  "ch": "9", "section": "9 Service Accounts", "gpRef": "eq. 9.3",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "state"],
+ "difficulty": 2, "kind": "concept", "tags": ["service", "Ethereum"],
   "stemZh": "GP 0.8.0（eq. 9.3）的 service account A 有哪些欄位？一個 Ethereum 開發者會預期存在、卻沒有的欄位是哪個？",
   "optionsZh": [
    "a_f——gratis storage offset，一筆以餘額計價的押金抵扣額",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch09-code-metadata",
  "lens": "演算法",
  "ch": "9", "section": "9.1 Code and Gas", "gpRef": "eq. 9.4",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "code"],
+ "difficulty": 2, "kind": "concept", "tags": ["gas", "service"],
   "stemZh": "一個 service 的程式碼 a_c 與 metadata a_m 是怎麼從它的 code hash 導出的？",
   "optionsZh": [
    "a_c 在該帳戶自己的 lookup a_p 裡的 preimage 必須能解碼成 E(var(m), c)——一段變長的 metadata blob 後面接著程式碼；否則兩者皆為 ∅",
@@ -64,7 +64,7 @@ ITEMS = [
  "lens": "時機",
   "alsoCh": ["14"],
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2.2 Semantics, eq. 9.7",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "timeslot"],
   "stemZh": "一筆 request 條目 a_l[(h, len)] 裝的是最多 3 個時槽的序列。[x, y] 是什麼意思？[x, y, z] 又是什麼意思？",
   "optionsZh": [
    "[x, y]：該 preimage 從 x 起可用、自 y 起不可用；[x, y, z]：從 x 起可用直到 y，並自 z 起再次可用",
@@ -93,7 +93,7 @@ ITEMS = [
  "id": "ch09-privileges",
  "lens": "機制",
  "ch": "9", "section": "9.4 Service Privileges", "gpRef": "eq. 9.9–9.10",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "privileges"],
+ "difficulty": 2, "kind": "concept", "tags": ["privileges", "service"],
   "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。每個分量各授予什麼權力？",
   "optionsZh": [
    "χ_M manager：可更動 χ（bless）並授予 gratis storage；χ_V delegator：可設定 ι（designate）；χ_R registrar：可建立索引小於 S = 2^16 的 service；χ_A assigners（每個 core 一個）：可設定 φ[c]（assign）；χ_Z：每個區塊都會被 accumulate、並帶固定 gas 額度的 service",
@@ -122,7 +122,7 @@ ITEMS = [
  "id": "ch09-preimage-vs-storage",
  "lens": "對比",
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2 intro",
- "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "rationale"],
+ "difficulty": 1, "kind": "rationale", "tags": ["preimage", "storage"],
   "stemZh": "GP 列出 preimage lookup 與一般 storage 之間的三項差異。是哪三項？又有哪一個聽起來合理、其實是錯的「第四項差異」？",
   "optionsZh": [
    "preimage 的資料由外部提供（透過 E_P），而 storage 的資料源自該 service 自己的 accumulation",

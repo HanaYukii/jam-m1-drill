@@ -6,7 +6,7 @@ ITEMS = [
  "id": "appD-code-service-info-key",
  "lens": "演算法",
  "ch": "D", "section": "D.1 Serialization (state-key constructor C)", "gpRef": "§D.1 state-key constructor C (unlabelled first equation of appendix D)",
- "difficulty": 3, "kind": "code", "tags": ["merklization", "state-keys", "fuzzer-bug"],
+ "difficulty": 3, "kind": "code", "tags": ["service", "serialization"],
   "stemZh": "在 PR #780 之前，團隊只靠測試 stateKey[0] == 0xFF 來辨認 service-info key C(255, s)，而 fuzzer 的 trace 以「failed to decode expected service info from state key 0xffff0017…: EOF」失敗。為什麼單看第 0 個位元組會有歧義？現在的檢查又為什麼是可靠的？",
   "optionsZh": [
    "C(s, h) 的 key 以 n_0（也就是 E_4(s) 的低位位元組）開頭，所以每一個 s mod 256 = 255 的 service，其 storage／preimage／request key 都會以 0xFF 開頭；新的檢查另外要求所有非 service-id 位置都為零，而一個由 Blake2b 導出的 key 要符合這點的機率可忽略不計",
@@ -36,7 +36,7 @@ ITEMS = [
  "id": "appG-ietf-vs-ring",
  "lens": "對比",
  "ch": "G", "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)", "gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
- "difficulty": 2, "kind": "concept", "tags": ["bandersnatch", "vrf", "ring-vrf", "safrole"],
+ "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch", "Safrole", "ring VRF"],
   "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。兩者各用在哪？各多大？輸出函數 Y 又取決於什麼？",
   "optionsZh": [
    "只有 E_T 裡的 ticket 證明是 784 位元組的 ring-VRF 證明（匿名，對照 144 位元組的 ring root 驗證）；seal H_S、熵 H_V 與稽核種子都是具名金鑰下 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是 VRF 輸出的前 32 個位元組，而且取決於 context 而非訊息",
@@ -65,7 +65,7 @@ ITEMS = [
  "id": "appG-signing-contexts",
  "lens": "機制",
  "ch": "G", "section": "Signing contexts X (definitions appendix) and their primitives", "gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
- "difficulty": 2, "kind": "concept", "tags": ["signing-contexts", "bandersnatch", "ed25519", "bls"],
+ "difficulty": 2, "kind": "concept", "tags": ["core"],
   "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。列出這些 context 與各自搭配的原語——並指出唯一一個被用了兩次、搭配兩種不同原語的 context。",
   "optionsZh": [
    "X_T = $jam_ticket_seal 被用了兩次：一次用於 ring-VRF 的 ticket 證明（context 為 X_T ⌢ η′_2 ⌢ [e]、空訊息、root 為 γ′_Z），一次用於一般的 IETF-VRF seal（context 為 X_T ⌢ η′_3 ⌢ [i_e]、訊息為 E_U(H)）",

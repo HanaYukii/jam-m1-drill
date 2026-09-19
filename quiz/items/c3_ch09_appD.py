@@ -10,7 +10,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "9", "section": "9.2 Preimage Lookups",
  "gpRef": "§9.2 (domain of Λ); App. B Refine Invocation (D ≡ L + 4,800 = 19,200)",
- "difficulty": 1, "kind": "rationale", "tags": ["accounts", "preimages", "constants"],
+ "difficulty": 1, "kind": "rationale", "tags": ["preimage", "timeslot"],
   "stemZh": "§9.2 把歷史查詢函數 Λ 的時槽引數限制在 (H_t − D … H_t) 這個窗口內，而常數附錄把 D 定為 19,200 個時槽。GP 為這個特定數字給出的理由是什麼？",
   "optionsZh": [
    "19,200 個時槽恰好是 32 個 epoch，也正是 accumulation 歷史 ξ 保留 work-package 雜湊的時間長度，所以在某份 work-package 還可能被重新 accumulate 之前，它用到的 preimage 不得被丟棄；D 因此被定為 32·E",
@@ -40,7 +40,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
- "difficulty": 2, "kind": "code", "tags": ["accounts", "balance", "host-calls", "fuzzer-bug"],
+ "difficulty": 2, "kind": "code", "tags": ["storage", "balance", "host call"],
   "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。依 GP 0.8.0，一筆 storage 條目對 a_i 與 a_o 各計多少？寫入後門檻超過餘額時必須怎麼處理？",
   "optionsZh": [
    "一筆 storage 條目對 a_i 計 1、對 a_o 計 32 + |v|——key 的長度從不計費，因為 JAM 在 trie 裡只存 storage key 的雜湊；而遇到 FULL 時該寫入仍然生效，差額則從餘額中扣除",
@@ -99,7 +99,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "時機",
  "ch": "9", "section": "9.2.2 Semantics",
  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "preimages", "host-calls"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "host call"],
   "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，GP 0.8.0 在每種情況下各做什麼？",
   "optionsZh": [
    "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 該 request 條目與 a_p[h] 兩者都被清除，但只有在 y < t − D 時；[x, y, w] → [w, t]，同樣只有在 y < t − D 時；其餘每一種情況都回傳 HUH",
@@ -129,7 +129,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "演算法",
  "ch": "9", "section": "9 Service Accounts",
  "gpRef": "§9 eq. 9.1 (N_S ≡ N_{2^32}); eq. B.14 (check); S = 2^16",
- "difficulty": 2, "kind": "concept", "tags": ["accounts", "service-id", "accumulation"],
+ "difficulty": 2, "kind": "concept", "tags": ["accumulate", "service"],
   "stemZh": "某個 service 在 accumulation 期間呼叫 `new`。GP 0.8.0 如何挑選子帳戶的索引？又如何避免與既有 service 相撞？",
   "optionsZh": [
    "索引是新帳戶 code hash 的 Blake2b 對 2^32 取模，好讓相同的程式碼永遠落在同一個位置、使重複部署變得便宜；完全沒有探測，而萬一該索引已被佔用，整個區塊就會被判為無效",
@@ -161,7 +161,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "設計",
  "ch": "D", "section": "D.2.1 Node Encoding and Trie Identification",
  "gpRef": "§D.1 (C → B_31); §D.2.1 (nodes fixed at 512 bit)",
- "difficulty": 1, "kind": "rationale", "tags": ["merklization", "trie", "state-keys"],
+ "difficulty": 1, "kind": "rationale", "tags": ["Merklization", "timeslot"],
   "stemZh": "state-key 建構子 C 被規定產出 B_31，然而 state trie 中其他每一個量——子節點識別、內嵌值的欄位、H(v)——都是 32 個 octet。是什麼迫使 key 少一個 octet？",
   "optionsZh": [
    "最高位的那個 octet 被保留下來，好讓 branch／leaf 的判別位元能被攜帶在 key 本身之內，這正是讓驗證者不必取得節點就能分辨兩種節點型別的機制",
@@ -191,7 +191,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "演算法",
  "ch": "D", "section": "D.1 Serialization",
  "gpRef": "§D.1 (state-key constructor C; the final four rows of T(σ))",
- "difficulty": 2, "kind": "concept", "tags": ["merklization", "state-keys", "accounts"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "service"],
   "stemZh": "在 T(σ) 中，某個 service 的 storage 條目、它的 preimage、以及它的 lookup-meta 條目全都走同一個 C 的第三種形式。究竟傳進去的是什麼？又是什麼讓這三類在 trie 中彼此分開？",
   "optionsZh": [
    "三者是靠完成後那 31 位元組 key 的第 0 個 octet 區分的：storage 是 0xFD、preimage 是 0xFE、lookup-meta 是 0xFF，其餘 30 個 octet 直接放 H(k) 或雜湊 h，而 service 索引則被摺進值而不是 key 裡",
@@ -221,7 +221,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "演算法",
  "ch": "D", "section": "D.2 Merklization",
  "gpRef": "§D.2 (M over D⟨b → (B_31, B)⟩); §3 notation (bits(·) is most-significant-first)",
- "difficulty": 3, "kind": "code", "tags": ["merklization", "trie", "state-root", "incremental"],
+ "difficulty": 3, "kind": "code", "tags": ["Merklization", "notation"],
   "stemZh": "M 是定義在以 bits(k) 為鍵的字典之上，而團隊的 Go 是在每個深度就地切分同一個 slice。有位隊友提議把它換成「把 key-val 升冪排序，然後像 M_B 那樣兩兩摺疊——同樣的葉子、同樣的 root，而且更好向量化」。哪個敘述正確？",
   "optionsZh": [
    "這個提議是可行的：升冪的 key 順序恰好就是 Patricia trie 的前序走訪，所以兩兩摺疊會重建出完全相同的形狀與 root；就地切分只不過是一項配置最佳化，而葉子快取兩種做法都能繼續運作，因為一片葉子的雜湊只取決於它自己的 key 與 value",

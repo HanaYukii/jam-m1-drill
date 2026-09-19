@@ -5,7 +5,7 @@ ITEMS = [
  "id": "appA-exit-reasons",
  "lens": "演算法",
  "ch": "A", "section": "A.1 Basic Definition", "gpRef": "eq. A.1 (Ψ) & §4.7",
- "difficulty": 1, "kind": "concept", "tags": ["pvm"],
+ "difficulty": 1, "kind": "concept", "tags": ["PVM", "dispute"],
   "stemZh": "PVM 的呼叫 Ψ 會回傳一個退出理由 ε。有哪些可能的退出理由？各自帶什麼資料？",
   "optionsZh": [
    "∎ halt（正常終止）、☇ panic、∞ out-of-gas、F̄ × address（page fault，帶最低的不可存取頁位址）、h̄ × id（host call，帶 host-call 識別碼）",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "appA-basic-blocks-gas",
  "lens": "演算法",
  "ch": "A", "section": "A.3 Basic Blocks & A.5 Single-Step", "gpRef": "eq. A.5–A.8, A.54",
- "difficulty": 3, "kind": "delta", "tags": ["pvm", "gas", "delta-0.8.0"],
+ "difficulty": 3, "kind": "delta", "tags": ["gas", "basic block", "PVM", "delta-0.8.0"],
   "stemZh": "GP 0.8.0（PR #508）引入了新的 gas 模型。gas 是怎麼扣的？",
   "optionsZh": [
    "以 basic block 為單位、事先扣款：在第一步、以及每當執行進入一個 basic block（或跳回它的起點）時，整個 block 的成本 ϱ^Δ 會被扣掉；若剩餘 gas 不足，機器以 ∞ 退出且計數器維持不變；ϱ^Δ = max(cycles − 3, 1)，來自一個模擬的亂序 CPU 模型",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "appA-memory-access",
  "lens": "演算法",
  "ch": "A", "section": "A.5 Single-Step State Transition", "gpRef": "eq. A.9–A.10 (ε^μ)",
- "difficulty": 2, "kind": "concept", "tags": ["pvm", "memory"],
+ "difficulty": 2, "kind": "concept", "tags": ["memory", "PVM", "transfer"],
   "stemZh": "當一條指令存取的 RAM 位址 (a) 低於 2^16、或 (b) 位於 2^16 以上的不可存取頁時，會發生什麼事？",
   "optionsZh": [
    "(a) 不論該頁可否存取，機器立即 panic；(b) 機器狀態維持不變，退出理由是 page fault F̄ × (Z_P·⌊addr/Z_P⌋)，回報最低的不可存取頁位址",
@@ -92,7 +92,7 @@ ITEMS = [
  "id": "appA-djump-alignment",
  "lens": "設計",
  "ch": "A", "section": "A.5 (dynamic jumps)", "gpRef": "eq. A.22 (jumptablealignment)",
- "difficulty": 2, "kind": "rationale", "tags": ["pvm", "rationale"],
+ "difficulty": 2, "kind": "rationale", "tags": ["PVM", "basic block"],
   "stemZh": "對於跳往位址 a 的動態跳躍，GP 要求 a mod Z_A = 0（Z_A = 2）、a ≠ 0、a ≤ |j|·Z_A，且 j[a/Z_A − 1] ∈ ϖ（一個 basic block 的起點）。為什麼要有對齊這條要求？",
   "optionsZh": [
    "因為 LLVM「在產生程式碼時要求並假設動態計算出的跳躍目標具有某種記憶體對齊」，而 JAM 的工具鏈依賴 LLVM，所以 GP 順從了那個假設",

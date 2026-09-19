@@ -14,11 +14,7 @@ ITEMS = [
  "gpRef": "eq. 6.14, eq. 11.14 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), §10.2 (K(a))",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "validator-sets",
-  "prior-posterior",
-  "timing"
- ],
+ "tags": ["validator set", "prior/posterior"],
  "stemZh": "同一個 block 裡，有些檢查讀 prior 的 κ，有些讀 posterior 的 κ′。哪些讀哪個？為什麼要分？",
  "optionsZh": [
   "讀 κ：assurance 簽章、2/3·|κ| 門檻、當前 epoch 的 verdict 判定。讀 κ′：seal 與 H_I 上界、guarantor 指派 M、|κ′|/3 的 core 上界。assurance 與 verdict 背書的是這個 block 之前發生的事，用當時的集合；seal 與 guarantee 是這個 block 自己的行為，用它裝上的集合",
@@ -51,11 +47,7 @@ ITEMS = [
  "gpRef": "eq. 6.22 and the §6.4 entropy update, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "entropy",
-  "timing",
-  "prior-posterior"
- ],
+ "tags": ["entropy", "timeslot"],
  "stemZh": "η 有四格。每一格各是誰在讀？為什麼「正在累積」的 η_0 從來沒有任何抽籤直接拿來用？",
  "optionsZh": [
   "η′_0 每個 block 混入 Y(H_V)，只當累積器；換檔時三格往後推。η′_2 給 ticket context、fallback F、guarantor 洗牌 P；η′_3 給 seal 驗證與跨 epoch 的 M*。η_0 不直接用，因為它每個 block 都在變，比賽用的隨機數必須在比賽開始前凍結",
@@ -92,11 +84,7 @@ ITEMS = [
  "gpRef": "eq. 4.16 (δ‡), eq. 4.18 (δ′), eq. 11.45 (δ[d_s]_c), §11.4 gas floor, §12.4 preimage integration",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "services",
-  "prior-posterior",
-  "timing"
- ],
+ "tags": ["service", "prior/posterior"],
  "stemZh": "service 狀態在一個 block 裡有三個版本：δ、δ‡、δ′。哪條規則讀哪個？為什麼 E_P 的「可提供」判定是對 prior 的 δ 做、而不是對 accumulate 之後的 δ‡？",
  "optionsZh": [
   "E_G 的檢查（gas 下限 δ[d_s]_g、code hash δ[s]_c）讀 prior δ；accumulate 把 prior δ 變成 δ‡；E_P 的可提供判定也對 prior δ，之後才併進 δ‡ 得 δ′，accumulate 途中變無用的 preimage 略過。對 prior 判定，出塊者不必先跑 accumulate 就知道 E_P 合法",
@@ -132,11 +120,7 @@ ITEMS = [
  "gpRef": "eq. 7.5 (β†), eq. 4.6, eq. 11.36, eq. 4.17 (β′ ≺ θ′)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "recent-history",
-  "anchor",
-  "timing"
- ],
+ "tags": ["lookup-anchor", "recent history"],
  "stemZh": "E_G 的 anchor 檢查（eq. 11.36）拿 refinement context 去對 β†，既不是 β 也不是 β′。為什麼不能是 β？為什麼不能是 β′？",
  "optionsZh": [
   "不能是 β：最新一筆的 state root 還是 H_0，anchor 在父 block 的 report 會對不上，β† 補上 H_R 才對得上。不能是 β′：它要等 accumulate 產出 θ′ 才存在，而且含這個 block 自己，report 不可能 anchor 在收納它的 block 上",
@@ -173,11 +157,7 @@ ITEMS = [
  "gpRef": "§4.1 (τ′ ≺ H), §6.3 (e, m, e′, m′), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "timeslot",
-  "prior-posterior",
-  "timing"
- ],
+ "tags": ["timeslot", "prior/posterior"],
  "stemZh": "τ 是上個 block 的 timeslot，τ′ = H_T 是這個 block 的。哪些規則刻意用 prior 的 τ、而不是 H_T？背後的原則是什麼？",
  "optionsZh": [
   "用 τ 的：epoch 換檔判定 e = ⌊τ/E⌋ 對 e′ = ⌊H_T/E⌋、ticket 制條件 m = τ mod E ≥ Y、verdict 的 epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}。用 H_T 的：guarantee 的 slot 視窗、逾時、queue 索引。回頭看已發生的事讀 τ，看這個 block 此刻讀 H_T",
@@ -214,11 +194,7 @@ ITEMS = [
  "gpRef": "eq. 11.42, §12.1 (R^Q, ω, ξ), eq. 7.x (β reported map)",
  "difficulty": 3,
  "kind": "rationale",
- "tags": [
-  "dependencies",
-  "recent-history",
-  "timing"
- ],
+ "tags": ["dependency", "guarantee", "recent history"],
  "stemZh": "report 的 prerequisite 會被檢查兩次：guarantee 上鏈時、accumulate 時。兩次各讀哪份歷史（E_G、β 的 reported map、ξ、ω）？為什麼 guarantee 時不能只查 ξ？",
  "optionsZh": [
   "guarantee 時（eq. 11.42）prerequisite 必須在同一個 E_G 或 β 最近 8 個 block 的 reported map 裡，證明它報過。accumulate 時（§12.1）R^Q 與 ω 的依賴對 ξ 消去，證明它做完了。guarantee 時只查 ξ 不夠，因為 prerequisite 通常已報但還沒 available，根本不在 ξ 裡",
@@ -255,11 +231,7 @@ ITEMS = [
  "gpRef": "eq. 6.14 (§6.2 rotation), eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "validator-sets",
-  "staging",
-  "timing"
- ],
+ "tags": ["validator set", "privileges"],
  "stemZh": "delegator service 在 epoch e 的某個 block 呼叫 designate，把 ι 換成一組新 key。這組 key 最早在哪個 epoch 能封 block？中間經過哪幾步？",
  "optionsZh": [
   "epoch e+2。designate 在本 block 寫入 ι′；e+1 的第一個 block 輪替 γ′_P = Φ(ι)、κ′ = 舊 γ_P，新 key 成為 pending；e+1 期間它們用 γ′_Z（γ_P 的 ring root）投 ticket；e+2 的第一個 block 再輪替 κ′ = γ_P，此時才能 seal",
@@ -295,11 +267,7 @@ ITEMS = [
  "gpRef": "§10.3 (culprit/fault conditions, k ∉ ψ_O), eq. 10.14, eq. 10.18 (ψ′_O), eq. 6.14 (Φ), §5 (H_O)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "offenders",
-  "disputes",
-  "timing"
- ],
+ "tags": ["dispute", "epoch"],
  "stemZh": "某個 validator 的 Ed25519 key 在 block N 因 culprit 或 fault 進了 ψ′_O。立刻發生什麼？下一次 epoch 換檔時發生什麼？什麼事情在 JAM 協定內永遠不會發生？",
  "optionsZh": [
   "立刻：key 進 ψ′_O 與 H_O，之後指名它的 culprit / fault 被拒（k ∉ ψ_O），被判 bad 的 report 從 ρ 清掉。下次換檔 Φ 把它在 γ′_P 的位置換成全零 key，再下個 epoch 它不能投 ticket、seal、guarantee；在那之前它的 κ 位置照舊。永遠不會：state 自己扣它的餘額",
@@ -332,11 +300,7 @@ ITEMS = [
  "gpRef": "eq. 11.20–11.23, eq. 11.28 (slot window)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "guarantors",
-  "rotation",
-  "timing"
- ],
+ "tags": ["guarantee", "entropy"],
  "stemZh": "guarantee 的 credential 可以對 M 或 M* 驗。為什麼需要 M* 這個「上一個 rotation 的指派」？它又為什麼只在上一個 rotation 落在上個 epoch 時才改用 λ′ 與 η′_3？",
  "optionsZh": [
   "因為 guarantee 可以晚到：eq. 11.28 允許 t 落在上一個 rotation，當時的 guarantor 是那個 rotation 的指派，鏈上必須重算才能驗 credential。上一個 rotation 通常在同一個 epoch，重算只是 τ′ − R、集合與 entropy 不變；跨了 epoch 邊界，當時的集合與 entropy 已變成 λ′ 與 η′_3，M* 才改用它們",
@@ -372,11 +336,7 @@ ITEMS = [
  "gpRef": "eq. 6.14 (§6.2), eq. 6.16, §5 (H_I < |κ′|)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "seal",
-  "prior-posterior",
-  "timing"
- ],
+ "tags": ["seal", "validator set"],
  "stemZh": "epoch 第一個 block 的 seal 是對 κ′ 驗的——也就是這個 block 自己輪替進來的那個集合。為什麼不對 κ 驗？這對實作的 header 驗證流程意味著什麼？",
  "optionsZh": [
   "因為這個 block 的作者是上個 epoch 由當時的 pending 集合 γ_P 投 ticket 選出來的，而 γ_P 在這個 block 的輪替裡正好升成 κ′；對 κ 驗會把每個 epoch 的第一個 block 都拒掉。實作上 seal、H_V 與 epoch marker 只能在算出 posterior Safrole 狀態後才能驗，header 驗證要分兩階段",
@@ -409,11 +369,7 @@ ITEMS = [
  "gpRef": "eq. 11.14, eq. 11.17, eq. 11.18, eq. 11.31",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "assurance",
-  "prior-posterior",
-  "timing"
- ],
+ "tags": ["assurance", "validator set", "guarantee"],
  "stemZh": "assurance 的簽章對 κ[v] 驗、門檻是 2/3·|κ|，都是 prior 的集合；guarantee 卻用 κ′。為什麼不對稱？當 |κ| ≠ |κ′| 時，ρ 裡等待中的 report 會怎樣、為什麼？",
  "optionsZh": [
   "assurance 背書的 report 是更早的 block 進 ρ 的，shard 依當時的集合大小切（eq. 11.31），所以簽的人與門檻都屬於那個集合；guarantee 是這個 block 新收的工作，所以用 κ′。|κ| ≠ |κ′| 時舊 shard 數對不上，eq. 11.18 把 ρ‡ 全清，視為提早逾時",
@@ -446,11 +402,7 @@ ITEMS = [
  "gpRef": "eq. 11.18 (H_T ≥ t + U), §11.4 (ρ′[c] = (g, τ′)), eq. 11.28",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "availability",
-  "timeout",
-  "timing"
- ],
+ "tags": ["assurance", "timeslot"],
  "stemZh": "availability 逾時的條件是 H_T ≥ t + U。這個 t 是誰的時間？為什麼不用 guarantee 自己簽的 slot g_t？兩個時間最多差多少？",
  "optionsZh": [
   "t 是 report 進 ρ 那個 block 的 τ′（ρ′[c] = (g, τ′)），不是 guarantee 的 g_t。逾時量的是上鏈後暴露給 assurance 多久，計時從進 ρ 起算；g_t 可以比收納早最多 R = 10 個 slot，若用 g_t，晚到的 guarantee 一進來就可能逾時",
@@ -486,12 +438,7 @@ ITEMS = [
  "gpRef": "§4.8 prose (minimize forks), §6 prose, eq. 6.25",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "safrole",
-  "babe",
-  "polkadot",
-  "comparison"
- ],
+ "tags": ["Polkadot", "Safrole"],
  "stemZh": "Polkadot 1.0 用 BABE 出塊，JAM 用 Safrole。就「某個 slot 的作者是什麼時候、怎麼決定的」這一點，兩者最根本的差別是什麼？這個差別買到什麼？",
  "optionsZh": [
   "BABE：每個 validator 每個 slot 各自算 VRF、低於門檻就能出塊，作者要等 block 出現才知道，一個 slot 可能零個或多個。Safrole：下個 epoch 每個 slot 的作者在這個 epoch 由匿名 ticket 排名定案，恰好一人一 slot。買到 §4.8 說的嚴格減少 slot 內與跨 slot 的 fork",
@@ -528,12 +475,7 @@ ITEMS = [
  "gpRef": "§6 prose (anonymous), eq. 6.30, eq. 6.16 (H_I reveals at seal)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "safrole",
-  "anonymity",
-  "babe",
-  "comparison"
- ],
+ "tags": ["Safrole", "Polkadot", "ring VRF"],
  "stemZh": "Safrole 把「哪張 ticket 排在哪個 slot」公開、卻把「誰持有那張 ticket」藏到出塊那一刻。BABE 兩者都不公開。Safrole 這樣拆開，比 BABE 多得到什麼、又保住了什麼？",
  "optionsZh": [
   "多得到可預測性：整個 epoch 的排程公開，每個 slot 確定恰好一位作者，網路能據此安排 rotation 與 audit 節奏。保住抗 DoS：ring-VRF 讓 ticket 對不回 validator，攻擊者知道下個 slot 有人出塊卻不知道是誰，直到 H_I 揭曉。BABE 只有後者",
@@ -569,12 +511,7 @@ ITEMS = [
  "gpRef": "eq. 6.25, eq. 6.27, eq. 6.16 (fallback seal case)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "safrole",
-  "fallback",
-  "babe",
-  "comparison"
- ],
+ "tags": ["fallback", "Safrole", "Polkadot"],
  "stemZh": "BABE 用 secondary slot 補空：某個 slot 沒人中籤時，由一個公開、可預測的次要作者補上。Safrole 的 fallback 跟它在「粒度」和「觸發條件」上有什麼不同？兩種設計各在保什麼？",
  "optionsZh": [
   "BABE 的 secondary 逐 slot：每個 slot 有一位公開的備援，primary 沒出現就補，所以匿名與公開作者在同一 epoch 交錯。Safrole 的 fallback 逐 epoch：只在邊界判斷上個 epoch 的 ticket 有沒有湊滿 E 張，沒有就整個下個 epoch 用 F(η′_2, κ′)。BABE 保每個 slot 有 block；Safrole 保一個 epoch 只有一種作者選法",
@@ -610,12 +547,7 @@ ITEMS = [
  "gpRef": "§4.6, §19 (best-chain conditions), §18",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "grandpa",
-  "finality",
-  "polkadot",
-  "comparison"
- ],
+ "tags": ["GRANDPA", "Polkadot"],
  "stemZh": "JAM 把出塊機制從 BABE 換成 Safrole，卻把 GRANDPA 原樣留下。為什麼 finality 不需要跟著重新設計？JAM 對 GRANDPA 唯一改動的地方在哪？",
  "optionsZh": [
   "因為 GRANDPA 對 block 怎麼產生是中立的：它只對哪條鏈投票，不管作者。Safrole 解決的是出塊層的 fork 問題，finality 不用動。唯一改的是餵給它的東西：best-chain 規則加了「已 audited」「無 equivocation」「ticket 封緘祖先優先」，投票帶 header 與 posterior state root",
@@ -651,11 +583,7 @@ ITEMS = [
  "gpRef": "§2.1 (co-opts ELVES), §4.9.1 (four stages), §14, §16",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "elves",
-  "polkadot",
-  "comparison"
- ],
+ "tags": ["ELVES", "Polkadot", "host call"],
  "stemZh": "GP 說 JAM「co-opts much of the same game-theoretic and cryptographic machinery as Polkadot known as ELVES」。把 Polkadot 1.0 的四個階段對到 JAM 的名字，然後說：在同一套 ELVES 之上，JAM 真正新增的是什麼？",
  "optionsZh": [
   "backing → guaranteeing、availability → assuring、approval → auditing、disputes → judging。新增的：core 只輸出小 digest，效果由 service 的 accumulate 在鏈上決定；DA 分成短期 audit DA 與長期 D³L，package 之間能 import / export segment；core 對跑什麼沒有意見",
@@ -691,11 +619,7 @@ ITEMS = [
  "gpRef": "eq. 5.1, eq. 5.4–5.7 (H_X), eq. 5.10–5.11",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "header",
-  "polkadot",
-  "comparison"
- ],
+ "tags": ["Polkadot", "work-digest"],
  "stemZh": "Polkadot relay chain 的 header 是 (parent hash, number, post-state root, extrinsics root, digest logs)，BABE 的 slot / VRF 與 seal 都塞在 digest 裡。對照 JAM 的十元組 header，最重要的三個結構差異是什麼？各自的理由？",
  "optionsZh": [
   "一、承諾 prior state root 而非 post，作者不必等 Merklize 就能發 block。二、seal、entropy VRF、author index 與三個 marker 是型別化欄位，不是不透明的 digest log，只讀 header 的節點就能驗作者。三、用 timeslot 取代 block number，因為 block 可以跳 slot；H_X 是五個分量雜湊再雜湊，光憑 header 就能證明某個分量",
@@ -732,11 +656,7 @@ ITEMS = [
  "gpRef": "§4.9 prose (no transactor), §8 prose",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "transactionless",
-  "authorization",
-  "design"
- ],
+ "tags": ["authorizer", "core"],
  "stemZh": "JAM 沒有 transaction。§4.9 說 JAM 裡「沒有 transactor 這個概念」。為什麼要把 Ethereum 那種「簽名的交易」整個拿掉？拿掉之後，「使用者提交東西」這件事去了哪裡？",
  "optionsZh": [
   "因為 Ethereum 的簽名同時做兩件事：證明誰授權、誰付費，綁在同一個帳戶。JAM 拆開：付費走 coretime，授權走在 in-core 跑的 is-authorized 程式，資料全經 refine 進入。使用者的提交變成帶 token 的 work-package 給 authorizer 看；想要交易式體驗，寫一支驗簽名的 authorizer 就有",
@@ -769,12 +689,7 @@ ITEMS = [
  "gpRef": "§1.3 last paragraph, §2.2 (SNARK roll-ups), §4.9.1",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "snark",
-  "elves",
-  "design",
-  "comparison"
- ],
+ "tags": ["Ethereum", "ELVES"],
  "stemZh": "JAM 用 ELVES（擔保 + 可得性 + 稽核 + 爭議）而不是 SNARK 來保證 in-core 運算正確。GP 給的理由是什麼？這個選擇在「正確性的性質」上付出了什麼代價？",
  "optionsZh": [
   "理由（§1.3）：crypto-economic 機制「inherits their low-cost and high-performance profiles and averts a bias toward centralization」；SNARK 證明成本高好幾個數量級、證明者集中。代價：正確性從「數學上確定」變成「機率上被誠實的人抓到」，所以需要 assurance、隨機 auditor 與整條分支作廢的 dispute",
@@ -807,11 +722,7 @@ ITEMS = [
  "gpRef": "eq. 6.30 (n = ⌈2E/|γ′_P|⌉), §6.6 prose, eq. 6.25",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "tickets",
-  "validator-sets",
-  "design"
- ],
+ "tags": ["ticket", "validator set"],
  "stemZh": "0.8.0 把每位 validator 能投的 ticket 數改成 n = ⌈2E/|γ′_P|⌉，validator 越少每人能投越多。GP 給的理由是什麼？為什麼分子是 2E 而不是 E？",
  "optionsZh": [
   "理由（§6.6）：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」；eq. 6.25 只在 |γ_A| = E 時用 ticket 模式。2E 讓容量是 slot 數的兩倍，部分 validator 離線仍能填滿；full 設定 n = 2，六人 n = 4",
@@ -847,11 +758,7 @@ ITEMS = [
  "gpRef": "§4.8 prose, §I (P = 6, E = 600)",
  "difficulty": 1,
  "kind": "rationale",
- "tags": [
-  "timing",
-  "safrole",
-  "design"
- ],
+ "tags": ["Safrole", "timeslot"],
  "stemZh": "slot 固定 6 秒、epoch 固定 600 個 slot（一小時）。GP 對「6 秒」這個數字的定位是什麼？Safrole 在這個時間結構上要「嚴格減少」的兩種東西是什麼？",
  "optionsZh": [
   "6 秒是「JAM block 之間的最小間隔」，不是保證每 6 秒一定有 block。Safrole 要嚴格減少的兩種 fork：slot 內的競爭與跨 slot 的競爭（不同 slot 的兩個有效 block 有同一個 parent）。epoch 是輪替、ticket 與 entropy 的單位；timeslot 用 32 位元",
@@ -888,11 +795,7 @@ ITEMS = [
  "gpRef": "eq. 6.14 (Φ, §6.2), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "offenders",
-  "validator-sets",
-  "design"
- ],
+ "tags": ["dispute", "validator set", "authorizer"],
  "stemZh": "offender 的 key 在下次輪替時被 Φ 換成全零 key，而不是從集合裡移除。GP 只寫了做法。從其他規則可以推出什麼理由？全零 key 在協定裡會產生什麼效果？",
  "optionsZh": [
   "推論：協定用 index 指涉 validator（H_I、assurer index、credential 與判定的 index），移除一個會讓後面的人全部位移；且 eq. 6.8 要求大小是 3 的倍數、core 數 = |κ|/3。效果：全零 key 簽不出任何簽章，它的 slot 會空、它的 core 只剩兩位可用的 guarantor，其他人的 index 完全不動",
@@ -928,11 +831,7 @@ ITEMS = [
  "gpRef": "§A.9 prose, eq. A.54 (gas cost for block), eq. A.22 (jump-table alignment), §A.3 (basic blocks)",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "gas",
-  "pvm",
-  "design"
- ],
+ "tags": ["gas", "PVM", "basic block"],
  "stemZh": "0.8.0 把 gas 改成「進入 basic block 時預扣整塊」。為什麼以 block 而不是以指令為單位計價？這個決定跟「間接跳躍必須落在 block 起點」有什麼關係？",
  "optionsZh": [
   "因為 §A.9 的模型是對每個 basic block 模擬 CPU 微架構——decode slot、執行單元、reorder buffer；指令會重疊，只有整塊的成本有意義，而且它是靜態的，recompiler 只要在入口扣一次。既然在入口扣，控制流就只能從 block 起點進入，這就是 eq. A.21 要求目標在 ϖ 裡的原因",
@@ -969,12 +868,7 @@ ITEMS = [
  "gpRef": "§4.8 prose (proof-of-authority, staking out of scope), §4.9 (coretime out of scope), §B (designate, assign), §21",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "staking",
-  "coretime",
-  "system-services",
-  "design"
- ],
+ "tags": ["coretime", "privileges"],
  "stemZh": "GP 把 staking、token 經濟、coretime 銷售全部標為 out of scope，卻又說 JAM 是 proof-of-authority。那 validator 到底由誰決定？這種「協定只留 API、經濟交給 service」的切法在保什麼？",
  "optionsZh": [
   "§4.8：validator「decided by a staking mechanism residing within some system hosted by JAM. The staking system is out of scope… instead there is an API」——就是 delegator 的 designate 寫 ι；coretime 同理由 assigner 的 assign 寫 φ。協定只定「誰能寫、寫到哪」，不定內容怎麼決定，經濟邏輯可以當 service 演進",
@@ -1011,12 +905,7 @@ ITEMS = [
  "gpRef": "§4.9 prose (refinement vs accumulation), §12 prose, §2.1",
  "difficulty": 2,
  "kind": "rationale",
- "tags": [
-  "accumulate",
-  "design",
-  "polkadot",
-  "comparison"
- ],
+ "tags": ["Polkadot", "accumulate", "work-digest"],
  "stemZh": "Polkadot 的 core 跑完 PVF，輸出就是 parachain 的新狀態（head data / state root），relay chain 只負責記錄。JAM 的 core 跑完 refine，輸出只是一小段 digest，然後還要在鏈上跑 service 的 accumulate 才決定狀態怎麼變。多這一步在買什麼？",
  "optionsZh": [
   "買的是結果進入同一個狀態機：§4.9 說 accumulate 提供「transferring balance and invoking the execution of code in other services」。core 若直接輸出狀態差異，只能改自己的 service，又回到 parachain 的隔離。讓鏈上 code 決定 digest 怎麼入帳，service 才能互動；代價是人人重跑 accumulate，所以 gas 小、輸入限 48 KB",

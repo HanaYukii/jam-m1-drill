@@ -8,7 +8,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "C", "section": "C.1 General Natural Number Serialization",
  "gpRef": "§C.1", "difficulty": 2, "kind": "concept",
- "tags": ["codec", "encoding", "bijection"],
+ "tags": ["serialization"],
   "stemZh": "GP §C.1 為一般的自然數給出了一種變長編碼 E(x)。是什麼決定一個值佔幾個位元組？為什麼這個設計對 GP 而言是被逼出來的、而不只是方便？",
   "optionsZh": [
    "第一個位元組裡的前綴宣告了長度，而每個值恰有唯一一種有效編碼；state root 雜湊的是編碼後的狀態，所以一個值有兩種編碼、或一段編碼能被讀成兩個值，都會讓誠實節點對 root 產生分歧",
@@ -39,7 +39,7 @@ ITEMS = [
   "alsoCh": ["C"],
  "ch": "D", "section": "D.2.1 Trie Node Encoding",
  "gpRef": "§D.2.1", "difficulty": 2, "kind": "concept",
- "tags": ["merklization", "trie", "state-root"],
+ "tags": ["Merklization", "serialization"],
   "stemZh": "state trie 的節點大小全都一樣。在走訪 trie 時，讀取者如何分辨三種節點？又是什麼決定一個 leaf 存的是值本身、還是只存它的雜湊？",
   "optionsZh": [
    "第一個位元區分 branch 與 leaf、第二個位元區分內嵌值的 leaf 與一般 leaf；至多 32 位元組的值會被內嵌（其長度就放在該位元組剩下的位元裡），更長的則以雜湊取代",
@@ -68,7 +68,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "7", "section": "7.4 The Accumulation Output Belt",
  "gpRef": "§7.4; §E.3", "difficulty": 2, "kind": "concept",
- "tags": ["mmr", "beefy", "recent-history"],
+ "tags": ["MMR", "recent history", "BEEFY"],
   "stemZh": "β_B 是一個 Merkle Mountain Range，每個區塊長出一個 root。描述 append 對這個結構做了什麼，以及 GP 為什麼在這裡選 MMR、而不是每個區塊重建一棵平衡的 Merkle 樹。",
   "optionsZh": [
    "append 把新的 root 放在高度 0，並與任何同高度的既有 peak 向上合併，留下一組 peak，其高度正是計數的二進位位數；這個結構是唯讀附加的，所以每次 append 花 O(log n)，而先前發出的證明仍然有效",
@@ -97,7 +97,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "11", "section": "11.2 Assurances",
  "gpRef": "§11.2", "difficulty": 2, "kind": "concept",
- "tags": ["assurance", "availability", "signature"],
+ "tags": ["assurance", "core"],
   "stemZh": "一份 assurance 帶有一個「每個 core 一位元」的 bitfield 加上一個簽章。實際被簽的是什麼？如果簽章只涵蓋 bitfield，會壞在哪裡？",
   "optionsZh": [
    "簽章涵蓋的是「父 header 雜湊連同編碼後 bitfield」的一個帶域分隔的雜湊；少了父雜湊，同一份簽好的 bitfield 就能被重播進較晚的區塊，使一位 validator 被算成在為它已不再持有的資料背書",
@@ -127,7 +127,7 @@ ITEMS = [
   "alsoCh": ["11"],
  "ch": "14", "section": "14.4 Work Result Size",
  "gpRef": "§14; eq. 11.x (W_R)", "difficulty": 2, "kind": "concept",
- "tags": ["work-report", "oversize", "limits"],
+ "tags": ["work-report", "refine"],
   "stemZh": "一份 work-package 的各項目接連 refine，而 report 有大小上限 W_R。這個上限是逐項套用、還是套用於整份 report？會越界的項目又會怎麼樣？",
   "optionsZh": [
    "是累計的：每個項目的輸出是拿 authorizer trace 加上已被接受的輸出一起衡量，而第一個會越過 W_R 的項目，其輸出被換成 OVERSIZE 錯誤，後面的項目仍照常 refine",
@@ -156,7 +156,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "A", "section": "A.4 Memory & Page Faults",
  "gpRef": "eq. A.9", "difficulty": 2, "kind": "concept",
- "tags": ["pvm", "page-fault", "memory"],
+ "tags": ["memory", "dispute", "PVM"],
   "stemZh": "一次多位元組的 store 跨越了兩個 page：第一個可寫、第二個未配置。PVM 會回報什麼？回報的位址為什麼要那樣定義？",
   "optionsZh": [
    "一個 page fault，帶著「此次存取所觸及、最低的不可存取位元組」其 page 對齊後的位址；對齊到 page 正是讓這個值成為 host 能據以行動的東西——它恰好就是 host 在恢復程式前必須映射的那個 page",
@@ -185,7 +185,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "A", "section": "A.3 Basic Blocks & Control Transfer",
  "gpRef": "§A.3; §A.5", "difficulty": 2, "kind": "concept",
- "tags": ["pvm", "control-flow", "gas"],
+ "tags": ["PVM", "gas"],
   "stemZh": "PVM 同時有靜態解析的跳躍與由暫存器算出的間接跳躍。間接跳躍的目標必須額外滿足哪些條件？如果把這些條件拿掉，gas 模型會壞在哪裡？",
   "optionsZh": [
    "間接跳躍的目標必須對齊、非零、位於 jump table 之中，且落在某個 basic block 的起點；少了「落在 block 起點」這項要求，程式就能從第一條指令以下進入一個 block 並執行它，而該 block 的 gas 從未被計費",
@@ -215,7 +215,7 @@ ITEMS = [
  "lens": "演算法",
  "ch": "B", "section": "B.1 Host Call Gas",
  "gpRef": "§B（PR #517）", "difficulty": 2, "kind": "delta",
- "tags": ["host-call", "gas", "delta-0.8.0"],
+ "tags": ["gas", "host call", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 重做了 host call 的計費方式。描述新收費的形狀，以及當一個 service 呼叫某個在它這次 invocation 中不可用的索引時會發生什麼。",
   "optionsZh": [
    "每個呼叫有一個基本成本，並在它搬移資料時再加上一項與所觸及 KiB 數成正比的費用；未知或不可用的索引會先被收取一個預設成本，所以剩餘 gas 不足的呼叫會以 out-of-gas 退出、而不是回傳錯誤碼",
@@ -244,7 +244,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "B", "section": "B.2 grow_heap",
  "gpRef": "§B（PR #508 / #517）", "difficulty": 2, "kind": "delta",
- "tags": ["host-call", "memory", "delta-0.8.0"],
+ "tags": ["memory", "host call", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 移除了 sbrk 指令，改以 grow_heap 這個 host call 提供堆積成長。呼叫者要傳什麼？在 0.8.0 的 gas 模型下，為什麼 host call 才是這個操作的正確歸屬？",
   "optionsZh": [
    "呼叫者指名它想要的堆積終點，並依新變為可寫的 page 數按比例計費；一條成本取決於其運算元的指令會破壞「basic block 的價格能在該 block 執行前靜態算出」這個保證",
@@ -273,7 +273,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "B", "section": "B.2 fetch",
  "gpRef": "§B", "difficulty": 2, "kind": "concept",
- "tags": ["host-call", "refine", "design"],
+ "tags": ["host call", "refine"],
   "stemZh": "fetch 是單一個 host call、在三種 invocation 中都可用，其第一個引數選擇要讀哪一份資料。GP 為什麼把這麼多資料來源摺進同一個呼叫，而不是各給一個索引？",
   "optionsZh": [
    "因為 host call 的編號是每個已部署 service 所編譯依循的 ABI 的一部分：用一個選擇子引數就能新增資料來源而不必重新編號，而每個來源各給一個新索引，最終會逼既有 service 重新建置",
@@ -302,7 +302,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "C", "section": "C.x Work Digest",
  "gpRef": "§C；eq. 11.7（𝔼）", "difficulty": 2, "kind": "concept",
- "tags": ["codec", "work-digest", "errors"],
+ "tags": ["work-digest", "serialization", "refine"],
   "stemZh": "一份 work digest 的 result 欄位存的不是 refine 的輸出、就是錯誤集合 𝔼 的某個成員。這種二擇一是怎麼編碼的？GP 為什麼把 refine 失敗當成值放上鏈，而不是直接拒絕該 report？",
   "optionsZh": [
    "成功是一個判別位元組後接帶長度前綴的 blob，而每種錯誤各是一個相異的單一位元組；把失敗保留為一般的值，讓 accumulate 能確切看到某項目是怎麼失敗的，也讓一個項目失敗不會使 package 中其他項目失效",
@@ -331,7 +331,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "6", "section": "6.5 The Slot Key Sequence",
  "gpRef": "eq. 6.25, 6.27 (F)", "difficulty": 2, "kind": "concept",
- "tags": ["safrole", "fallback", "anonymity"],
+ "tags": ["fallback", "Safrole", "ring VRF"],
   "stemZh": "當抵達的 ticket 太少時，γ′_S 會退回到一個由熵與啟用 validator 集合導出的金鑰序列。每個 slot 的出塊者是怎麼選出來的？在 fallback 生效期間，這條鏈放棄了什麼性質？",
   "optionsZh": [
    "每個 slot 的出塊者是把熵與 slot 索引一起雜湊、再對集合大小取模而選出的；整個 epoch 的排程因此可以事先被公開算出，所以 ring VRF ticket 所買到的匿名性在那個 epoch 就沒了",

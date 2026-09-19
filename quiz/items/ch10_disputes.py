@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch10-state",
  "lens": "機制",
  "ch": "10", "section": "10.1 The State", "gpRef": "eq. 10.1",
- "difficulty": 1, "kind": "concept", "tags": ["disputes", "state"],
+ "difficulty": 1, "kind": "concept", "tags": ["dispute", "PVM"],
   "stemZh": "disputes 狀態是 ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。這四個分量各裝什麼？",
   "optionsZh": [
    "ψ_G、ψ_B、ψ_W 分別是被判定為正確、錯誤、無法判定的 work-report 雜湊集合；ψ_O 是被認定誤判過某份 report 的 validator 的 Ed25519 金鑰集合",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch10-verdict-structure",
  "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.4",
- "difficulty": 2, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
+ "difficulty": 2, "kind": "delta", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
   "stemZh": "依 GP 0.8.0，E_V 裡的一個 verdict 由什麼組成？必須帶幾個判定、對哪一組金鑰？一個 extrinsic 最多能放幾個 verdict？",
   "optionsZh": [
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須恰好是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "ch10-verdict-thresholds",
  "lens": "設計",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 (V)",
- "difficulty": 2, "kind": "concept", "tags": ["disputes", "calc", "tiny"],
+ "difficulty": 2, "kind": "concept", "tags": ["dispute", "extrinsic"],
   "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，（t → 結果）的對照表是什麼？其他的 t 又會如何？",
   "optionsZh": [
    "t = 5 → good（⊤）；t = 0 → bad（⊥）；t = 2 → wonky（∅）；其他任何 t 都會讓區塊無效",
@@ -92,7 +92,7 @@ ITEMS = [
  "id": "ch10-culprits-faults",
  "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.6–10.7, 10.13",
- "difficulty": 3, "kind": "delta", "tags": ["disputes", "delta-0.8.0"],
+ "difficulty": 3, "kind": "delta", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，culprit（E_C）由什麼組成？fault（E_F）由什麼組成？誰的金鑰可以出現在 offender 裡？一個 good verdict 又需要什麼？",
   "optionsZh": [
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；一個 good verdict 仍需至少 1 個 fault",
@@ -121,7 +121,7 @@ ITEMS = [
  "id": "ch10-ordering",
  "lens": "時機",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.8–10.11",
- "difficulty": 2, "kind": "concept", "tags": ["disputes", "ordering"],
+ "difficulty": 2, "kind": "concept", "tags": ["dispute", "extrinsic"],
   "stemZh": "disputes extrinsic 施加了哪些排序與唯一性的約束？",
   "optionsZh": [
    "verdict 依 report 雜湊排序且唯一；culprits 與 faults 各自依 Ed25519 金鑰排序且唯一；verdict 內部的 judgment 依 validator 索引排序且唯一；任何 verdict 的 report 雜湊都不得已經出現在 ψ_G ∪ ψ_B ∪ ψ_W 裡",
@@ -150,7 +150,7 @@ ITEMS = [
  "id": "ch10-effects",
  "lens": "時機",
  "ch": "10", "section": "10.2–10.3", "gpRef": "eq. 10.14–10.19",
- "difficulty": 2, "kind": "concept", "tags": ["disputes", "state"],
+ "difficulty": 2, "kind": "concept", "tags": ["dispute", "header"],
   "stemZh": "處理 E_D 會對狀態產生哪些效果？header 的 offenders marker H_O 又必須包含什麼？",
   "optionsZh": [
    "對任何其待處理 report 被判定為 bad 或 wonky 的 core，ρ†[c] = ∅；ψ′_G、ψ′_B、ψ′_W 各自吸收自己 verdict 的 report 雜湊；ψ′_O 吸收全部的 culprit 與 fault 金鑰；H_O = [依序的 culprit 金鑰] ⌢ [依序的 fault 金鑰]",
@@ -179,7 +179,7 @@ ITEMS = [
  "id": "ch10-code-thresholds",
  "lens": "演算法",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi",
- "difficulty": 2, "kind": "code", "tags": ["disputes", "code", "delta-0.8.0"],
+ "difficulty": 2, "kind": "code", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
   "stemZh": "這是團隊的 verdict 分類程式碼。要符合 GP 0.8.0，必須改什麼？",
   "optionsZh": [
    "門檻必須依 |k| 計算，也就是由該 verdict 的 epoch index 所選出的那個 validator 集合（κ 或 λ）的長度，而不是用全域的 ValidatorsCount 常數",
@@ -220,7 +220,7 @@ ITEMS = [
  "id": "ch10-rationale",
  "lens": "設計",
  "ch": "10", "section": "10 intro", "gpRef": "§10 intro paragraphs",
- "difficulty": 1, "kind": "rationale", "tags": ["disputes", "rationale"],
+ "difficulty": 1, "kind": "rationale", "tags": ["dispute"],
   "stemZh": "GP 陳述的 disputes 系統目的有哪些？它刻意不自己做的又是什麼？",
   "optionsZh": [
    "把無效的 work-report 從處理管線中移除並封禁",

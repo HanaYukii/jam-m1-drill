@@ -7,7 +7,7 @@ ITEMS = [
  "id": "arch-beefy-commitment",
  "lens": "設計",
  "ch": "ARCH", "section": "18 Beefy Distribution (ch. 18)", "gpRef": "eq. 18.1–18.2; eq. 7.7–7.8; §19–20",
- "difficulty": 2, "kind": "concept", "tags": ["beefy", "grandpa", "bridging", "off-chain"],
+ "difficulty": 2, "kind": "concept", "tags": ["BEEFY", "GRANDPA"],
   "stemZh": "依 Beefy Distribution 這一章，validator 用哪把金鑰、在什麼時候、簽什麼？這個簽章又是拿來做什麼的？",
   "optionsZh": [
    "在匯入每個已定案的區塊之後：以 κ′[v] 的 BLS 金鑰對 $jam_beefy ⌢ b 做一個 BLS12-381 簽章，其中 b 是最新 β_H 條目所持有、accumulation 輸出腰帶的 Keccak MMR super-peak；這些簽章可自由發布，以便聚合成精簡的定案證明供橋接等第三方系統使用",
@@ -36,7 +36,7 @@ ITEMS = [
  "id": "arch-best-chain-selection",
  "lens": "演算法",
  "ch": "ARCH", "section": "19 Grandpa and the Best Chain (ch. 19)", "gpRef": "eq. 19.1–19.4; §17 (ban-listing)",
- "difficulty": 2, "kind": "concept", "tags": ["best-chain", "grandpa", "auditing", "off-chain"],
+ "difficulty": 2, "kind": "concept", "tags": ["GRANDPA"],
   "stemZh": "一個節點如何選出它據以建塊、並投 Grandpa 票的最佳區塊 B♭？這張票又攜帶什麼資料？",
   "optionsZh": [
    "在已定案區塊的後代之中採最長鏈規則；同一個 timeslot 的兩個有效區塊都會保留，因為 Safrole 容忍 equivocation；是否已稽核只影響 accumulation、不影響投票；票中攜帶 header 雜湊連同取自 header 的先前狀態 root H_R",
@@ -65,7 +65,7 @@ ITEMS = [
  "id": "arch-audit-tranches",
  "lens": "演算法",
  "ch": "ARCH", "section": "17 Auditing and Judging (ch. 17)", "gpRef": "eq. 17.1–17.19 (PDF numbering); §20 (10 audits/validator/slot)",
- "difficulty": 3, "kind": "concept", "tags": ["auditing", "elves", "tranches", "off-chain"],
+ "difficulty": 3, "kind": "concept", "tags": ["audit", "ELVES"],
   "stemZh": "在稽核協定中，一位 validator 如何決定它必須稽核哪些剛變為可得的 work-report？這個集合又是如何隨時間成長的？",
   "optionsZh": [
    "Tranche 0：每個 core 的三位 guarantor 重跑自己的 report，好讓被指控方承擔成本；每 6 秒（一個 slot）依序輪替加入其餘 validator，直到超過 2/3 做出判決，此時該 report 即算已稽核，而任何做出負面判決的 validator 會被罰沒；不需要任何公告，因為輪替順序可由區塊雜湊導出",
@@ -94,7 +94,7 @@ ITEMS = [
  "id": "arch-guaranteeing-procedure",
  "lens": "演算法",
  "ch": "ARCH", "section": "15 Guaranteeing (ch. 15)", "gpRef": "§15; eq. 14.13 (Ξ); eq. 11.24, 11.28",
- "difficulty": 2, "kind": "concept", "tags": ["guaranteeing", "off-chain", "work-reports"],
+ "difficulty": 2, "kind": "concept", "tags": ["guarantee", "refine"],
   "stemZh": "描述 Guaranteeing 一章的誠實 guarantor 策略：refine 之前檢查什麼、簽什麼怎麼簽、何時可以把 report 往下送、什麼會被懲罰、以及一位 guarantor 該簽多少。",
   "optionsZh": [
    "在跑任何 refine 邏輯之前，先拿最新鏈狀態的 authorizer pool 檢查該 package 的授權（連同其他鏈上收納條件）；算出 r = Ξ(p, c, l, v) 之後，以 Ed25519 簽 $jam_guarantee ⌢ H(E(r))；兩個簽章就足以把 report 送給下一位出塊者；一份無法被收納的 report 只是損失獎勵，而謊報 Ξ 結果則會受重罰；平均每個 timeslot 至多簽兩份 report",
@@ -123,7 +123,7 @@ ITEMS = [
  "id": "arch-core-virtual-hardware",
  "lens": "機制",
  "ch": "ARCH", "section": "20.1 Technical Characteristics & 20.2 Illustrating Performance (ch. 20)", "gpRef": "§20 Discussion",
- "difficulty": 2, "kind": "concept", "tags": ["performance", "hardware", "throughput", "rationale"],
+ "difficulty": 2, "kind": "concept", "tags": ["core", "work-package"],
   "stemZh": "Discussion 一章如何刻劃一份 work-package 在 JAM core 上所取得的「虛擬硬體」？它的結果之後又會怎樣？",
   "optionsZh": [
    "一整台 validator 機器（16 核、64 GB RAM、8 TB）獨佔一個 6 秒的 slot、鏈狀態 I/O 無上限；結果最大可達 12 MB，接著以相同的 I/O 預算 accumulate 至多一秒，這也是效能模型裡把 2/16 的 validator CPU 時間分給區塊執行的原因，而原像查詢也計入同一份 12 MB 預算",
@@ -152,7 +152,7 @@ ITEMS = [
  "id": "arch-sweet-spot-further-work",
  "lens": "對比",
  "ch": "ARCH", "section": "21 Conclusion / 21.1 Further Work (ch. 21)", "gpRef": "§21",
- "difficulty": 2, "kind": "rationale", "tags": ["rationale", "future-work", "architecture"],
+ "difficulty": 2, "kind": "rationale", "tags": ["ELVES"],
   "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。這個甜蜜點落在什麼與什麼之間？留白的又是哪些？",
   "optionsZh": [
    "甜蜜點＝在接受 Solana 級硬體需求的前提下，達到與完全同步鏈相當的連貫性；未決事項：一旦證明成本降到原生的 50,000 倍以下就以 SNARK 證明取代 ELVES 稽核、把 D³L 保存期從 28 天縮短為 24 小時、把 refine 的匯入 segment 移進區塊本體、以及把 coretime 銷售與質押寫進後續章節而非委由系統 service；網路協定已在附錄中定案",
@@ -181,7 +181,7 @@ ITEMS = [
  "id": "arch-fuzz-protocol-m1",
  "lens": "設計",
  "ch": "ARCH", "section": "jam-conformance fuzz protocol & the M1 evaluation pipeline", "gpRef": "davxy/jam-conformance fuzz-proto README; w3f/jam-milestone-delivery PRs",
- "difficulty": 2, "kind": "concept", "tags": ["conformance", "fuzzer", "history", "m1"],
+ "difficulty": 2, "kind": "concept", "tags": ["audit", "serialization"],
   "stemZh": "描述 W3F 用於 M1 稽核的 jam-conformance fuzz 協定：傳輸層、編碼、握手、訊息順序、以及 M1 的必備項目。",
   "optionsZh": [
    "一個架在 WebSocket（連接埠 19800）之上的 JSON-RPC 2.0 會話，由 fuzzer 監聽、目標端撥接；區塊以十六進位字串傳輸，每次 importBlock 呼叫回覆的是 header 雜湊而不是 state root；區塊被拒會關閉連線，ancestry 由 fuzzer 從 finalizedBlock 訂閱重建而非由外部提供，而且從不產生分叉，因為 Safrole 排除了 equivocation",
@@ -210,7 +210,7 @@ ITEMS = [
  "id": "arch-prize-interview-rule12",
  "lens": "設計",
  "ch": "ARCH", "section": "JAM Prize rules (rule 12) & milestone-delivery T&Cs", "gpRef": "jam.web3.foundation/rules #12; T&C 3.5 / 6.1 / 8.4; delivery template",
- "difficulty": 1, "kind": "concept", "tags": ["prize", "history", "interview"],
+ "difficulty": 1, "kind": "concept", "tags": ["ELVES"],
   "stemZh": "依 JAM Prize 規則與里程碑交付條款，送審後的口試其目的與地位是什麼？",
   "optionsZh": [
    "它是對效能測試（gas、trie／DB、簽章驗證、可得性）的強制口頭答辯，由基金會在標準硬體上執行；主持者是 W3F 員工而非 Fellowship，且不錄影，第 12 條只涵蓋 benchmark harness 的著作權，生成式 AI 的使用另依 clean-room 規則處理，而且設計上其結果無法改變所頒發的獎項",

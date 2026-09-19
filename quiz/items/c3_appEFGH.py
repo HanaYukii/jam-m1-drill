@@ -13,7 +13,7 @@ ITEMS = [
         "gpRef": "eq. E.1 (N), E.3 (M_B), E.4 (M), E.7 (C); eq. 11.5 (segment-root a_e); §14 availability specifier (erasure-root a_u)",
         "difficulty": 3,
         "kind": "rationale",
-        "tags": ["merklization", "segment-root", "erasure-root", "rationale"],
+        "tags": ["Merklization", "balance"],
   "stemZh": "附錄 E 給了兩個通用 Merkle root 函數：well-balanced 的 M_B 與定深的 M。在 availability specification 中，segment-root a_e 用其中一個、erasure-root a_u 用另一個。是哪個配哪個？well-balanced 的形狀相對於「一律補到 2 的冪」又買到了什麼？",
   "optionsZh": [
    "segment-root 用 M：前處理器 C 把每一項改寫成 H('$leaf' ⌢ s) 並以零雜湊補到 2^⌈log₂ n⌉ 片葉子，讓所有葉子位於同一深度、使 64 葉子的頁面對 J_6／L_6 保持大小對齊。erasure-root 用 M_B，因為它的葉子本來就是 64 位元組的雜湊對、預先雜湊是浪費，而在 ⌈|v|/2⌉ 處切分能讓最深層——以及那一層的葉子數——維持最小",
@@ -47,7 +47,7 @@ ITEMS = [
         "gpRef": "eq. E.1 (N), E.2 (trace T), E.5–E.6 (J_x, L_x), E.7 (C); eq. 14.12 (paged proofs)",
         "difficulty": 3,
         "kind": "code",
-        "tags": ["merklization", "justification", "proof-path", "bug"],
+        "tags": ["MMR", "Merklization"],
   "stemZh": "以下是團隊的 trace 函數，它產生的是納入佐證的兄弟節點。同一個檔案裡的節點函數 N 是用 `mid := (len(v) + 1) / 2` 切分輸入的。把兩者合起來看，缺陷是什麼？它又實際在哪裡咬人？",
   "optionsZh": [
    "照現況是沒問題的：對一棵 well-balanced 的樹而言，兩種取整慣例描述的是同一棵樹，因為 N 遞迴的正是這個函數所走訪的那些半邊。與 GP 唯一真正的分歧是順序——它回傳的序列是由葉子往上，而 GP 送出的是由 root 往下的另一組節點，所以在 CE 140 的呼叫點把 slice 反轉就是全部的修法",
@@ -110,7 +110,7 @@ ITEMS = [
         "gpRef": "eq. E.8 (A), E.9 (E_M), E.10 (M_R); eq. 7.3, 7.7–7.8; §18 Beefy Distribution",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["mmr", "mmb", "accumulation-log", "beefy"],
+        "tags": ["MMR", "BEEFY"],
   "stemZh": "Accumulation Output Log β_B 是一個 optional 雜湊的序列而不是單一個 root，然而每筆近期歷史條目只儲存一個由它導出的 32 位元組值 b。為什麼狀態要保留整個 peak 序列？那個單一值又是拿來做什麼的？",
   "optionsZh": [
    "append 函數 A 像二進位加法一樣進位——被佔用的槽 n 會與進來的葉子摺疊並進位到槽 n+1，空槽 ∅ 則直接填入——但 peak 序列本身只是一個快取，因為節點需要證明時隨時可以從最近 H 筆近期歷史條目重建它；那個單一值是對各 peak 取的 Blake2b well-balanced root M_B，放在 β_H 裡純粹是讓輕客戶端不必重放 accumulation 就能檢查該 log，而 Beefy 簽的是 state root 而不是那個值",
@@ -145,7 +145,7 @@ ITEMS = [
         "gpRef": "eq. F.1 (F); eq. 11.21 (guarantor permute P); §17 tranche-0 audit selection",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["shuffle", "determinism", "guarantor-assignment", "rationale"],
+        "tags": ["shuffle"],
   "stemZh": "團隊裡有位審閱者想把洗牌函數 F 中的 `r_0 mod l` 索引選取換成拒絕取樣，理由是只要 l 不整除 2³²，對 32 位元抽樣取模就有偏差。團隊該怎麼回應？",
   "optionsZh": [
    "拒絕這個更動。F 是一條共識規則而不是統計工具：每個節點都必須從相同的熵導出完全相同的排列，而它的輸出驅動 guarantor 對 core 的指派 P(|κ′|, η′_2, τ′) 以及 tranche-0 的稽核抽選。一個去偏的節點會把 validator 指派到不同的 core，接著拒絕完全有效的 guarantor 簽章並使鏈分裂；32 位元抽樣的殘餘偏差是被刻意接受的",
@@ -179,7 +179,7 @@ ITEMS = [
         "gpRef": "eq. F.2 (Q_l), F.3 (F from a hash); eq. 6.27 (fallback key sequence)",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["shuffle", "entropy", "safrole", "fallback"],
+        "tags": ["fallback", "shuffle", "Safrole"],
   "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
   "optionsZh": [
    "它們是同一個構造被用了兩次：§6 的 fallback 序列字面上就是把附錄 F 的洗牌套用在 active 金鑰集合 κ′ 上、以 η′_2 為種子、再截斷到 E 項，所以兩者都是每八個輸出做一次 Blake2b（對種子串接 ⌊i/8⌋ 的 4 位元組編碼）、都解碼位於偏移 4i mod 32 的 little-endian 窗口、也都以循環方式索引金鑰序列——這正是為什麼實作只需要一套雜湊展開常式",
@@ -214,7 +214,7 @@ ITEMS = [
         "gpRef": "§G; §3 signing schemes; eq. 6.30 (tickets extrinsic), eq. 6.16 (ticket seal)",
         "difficulty": 1,
         "kind": "rationale",
-        "tags": ["bandersnatch", "ring-vrf", "safrole", "anonymity", "rationale"],
+        "tags": ["Bandersnatch", "ring VRF", "Safrole"],
   "stemZh": "Safrole 本來可以用一般的 IETF VRF 簽章加上提交者已公開的 Bandersnatch 金鑰來證明 ticket 有效。為什麼 Gray Paper 堅持改用 ring VRF 證明？",
   "optionsZh": [
    "因為 ring VRF 的輸出不可偏置，而一般 VRF 的輸出可被簽署者靠重複提交來輾磨，所以只有 ring 形式才能讓下個 epoch 的 slot-sealer 序列安全公開；匿名只是樂見的副作用而非理由，而抗輾磨也正是 ticket 的訊息為空、其 context 不帶 entry index 的原因",
@@ -248,7 +248,7 @@ ITEMS = [
         "gpRef": "§G (ring root O, padding point); eq. 6.14–6.15 (key rotation and Φ); eq. 6.4 (γ_Z)",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["bandersnatch", "ring-vrf", "ring-root", "offenders"],
+        "tags": ["ring VRF", "dispute"],
   "stemZh": "epoch root γ′_Z 究竟承諾了什麼？而某位 validator 因其 Ed25519 金鑰落在 offenders 集合中、金鑰元組被 Φ 歸零之後，會怎麼樣？",
   "optionsZh": [
    "它承諾的是 pending 金鑰集合（也就是接下來那個 epoch 的 validator）依序排列的 Bandersnatch 成分，是一個在 epoch 邊界重算的定長 144 位元組承諾。一個全零的項目不是合法的曲線點，所以會用 Bandersnatch 的 padding 點代入它：ring 維持原本大小、其他每個成員保住自己的索引，而那個位置永遠產不出任何證明",
@@ -282,7 +282,7 @@ ITEMS = [
         "gpRef": "§G (Y as output(·)‥32); §3 signing schemes; eq. 6.6 (ticket), 6.16 (ticket seal), 6.30 (tickets extrinsic)",
         "difficulty": 3,
         "kind": "concept",
-        "tags": ["bandersnatch", "vrf-output", "ticket-identifier", "safrole"],
+        "tags": ["Safrole", "ring VRF"],
   "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的封印者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
   "optionsZh": [
    "因為儲存的識別碼是那份 ring 證明的 Blake2b 雜湊，而 Bandersnatch 的 ring 證明是確定性的，所以同一把金鑰與 context 會重現完全相同的證明位元組、因而重現相同的雜湊；訊息在那個雜湊裡完全不起作用。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index，seal 的則是同一個字串加 η′_3，而熵的輪替讓那兩串位元組在一個 epoch 之後相等",
@@ -319,7 +319,7 @@ ITEMS = [
         "gpRef": "eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority)",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["erasure-coding", "rationale", "gf65536", "threshold", "delta-0.8.0"],
+        "tags": ["erasure coding", "delta-0.8.0"],
   "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。這三項是什麼？這個編碼又為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
   "optionsZh": [
    "重建必須能在將近三分之二的 validator 惡意或失能時仍然存活，這把資料碎片數壓在 v/3 + 1 附近、並與 2/3+1 的 assurance 超級多數彼此契合；欄位是 16 位元的，所以一個碼字就是一對 octet、而其取值點可以索引到多達 v 個相異的 validator；再者碎片數的兩倍必須整除 4,104 個 octet 的 segment 大小，好讓一個 segment 編碼時完全不需要填補——這正是碎片數取「最大的那個合格值」而不是恰好 v/3 + 1 的原因",

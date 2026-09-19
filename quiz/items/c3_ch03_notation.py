@@ -18,7 +18,7 @@ ITEMS = [
         "gpRef": "§3.4; §3.7.4; §3.8.1",
         "difficulty": 1,
         "kind": "concept",
-        "tags": ["notation", "types", "blobs", "numbers"],
+        "tags": ["notation", "storage"],
   "stemZh": "Gray Paper 裡幾乎每個型別都建立在 §3.4 與 §3.7.4 固定下來的詞彙上：N、N_n、Z、N_L、B、B_x 與 B_$。照 GP 的定義把它們一個一個讀出來。",
   "optionsZh": [
    "帶下標的自然數集是嚴格小於下標的自然數，所以 N_n 有 n 個元素；N_L 是 octet 序列長度的集合、等同 N_{2^32}；B_x 是長度恰為 x 的 blob 集合，但 B_$ 是其中首個位元組為哨兵標記的子集；而 octet 就是小於 256 的自然數，兩者序列化方式相同",
@@ -64,7 +64,7 @@ ITEMS = [
         "gpRef": "§3.3; eq. 3.2 (substitute-if-nothing); applied at eq. 13.13",
         "difficulty": 1,
         "kind": "concept",
-        "tags": ["notation", "optional", "none", "error"],
+        "tags": ["notation", "service"],
   "stemZh": "§3.3 引入 ∅、∇ 與 optional 建構子 A?，eq. 3.2 定義了「若為空則替代」的函數 𝒰。§13.2 接著把一個 service 的 accumulation 條目寫成 𝒰(S[s], (0, 0, 0))，其中 S 是從 service index 到三元組的字典。把它讀出來：∅、∇ 與 A? 各是什麼意思？那個 𝒰 運算式算出來是什麼？",
   "optionsZh": [
    "∅ 標記一個「合法地沒有具體值」的項，並被定義為基數為零；optional 建構子給出 A? ≡ A ∪ {∅}；∇ 標記非預期的失敗或無效值，GP 偏好用它而不用 ⊥ 以免與布林假值混淆；而 𝒰 取出它第一個不是 ∅ 的參數——所以字典裡有該 service 時取它自己的三元組，否則取全零三元組",
@@ -112,7 +112,7 @@ ITEMS = [
         "gpRef": "§3.6 (named tuple components); eq. 4.1 (σ′ ≡ Υ(σ, B)); §4 state-transition dependency graph; eq. 13.1–13.3",
         "difficulty": 3,
         "kind": "concept",
-        "tags": ["notation", "tuples", "prior-vs-posterior", "state"],
+        "tags": ["notation", "statistics", "storage"],
   "stemZh": "eq. 13.1–13.2 宣告 π ≡ (π_V, π_L, π_C, π_S)，其中 (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧²，而 §13.1 接著處理 π_V†、π_V‡ 與 π′_V。面試官請你把這段記號唸出來。你怎麼唸——∈ 與三冒號的分別、平方的序列集合、以及 prime、dagger 與 double-dagger？",
   "optionsZh": [
    "型別宣告與具體值都用 ∈ 書寫，三重冒號保留給字典的 key/value 配對，所以那六個計數器只有位置意義、必須以索引而非名稱存取；把序列集合平方表示那兩筆紀錄各自都是序列，每位 validator 一筆六欄位項目；prime 代表某個狀態分量經 Grandpa 定案後的值，所以 π′ 要等 finality 追上鏈之後才有定義；而 dagger 與 double-dagger 標記的是同一個分量在某條後來被丟棄的分叉上的樣子",

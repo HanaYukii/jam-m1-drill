@@ -6,7 +6,7 @@ ITEMS = [
  "lens": "機制",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.2", "difficulty": 2, "kind": "concept",
- "tags": ["header", "parent-hash", "seal"],
+ "tags": ["seal", "serialization"],
   "stemZh": "H_P 被定義為父 header 某種編碼的 Blake2b 雜湊。被雜湊的是哪一種編碼？這個選擇帶來什麼後果？",
   "optionsZh": [
    "完整編碼，含父區塊的 seal，所以子區塊承諾的是父區塊實際被發布出去的那串位元組；任何人都無法重簽一個 header——即使作者與內容都相同——而不讓所有已經建在其上的區塊脫鏈",
@@ -36,7 +36,7 @@ ITEMS = [
   "alsoCh": ["6"],
  "ch": "5", "section": "5.1–5.3",
  "gpRef": "§5; eq. 5.8; eq. 5.9", "difficulty": 3, "kind": "concept",
- "tags": ["header", "light-client", "validation"],
+ "tags": ["header"],
   "stemZh": "一個節點只收到一個 header，既沒有區塊本體也沒有任何鏈上狀態。它能完成哪些檢查？第一個做不到的又是哪一個？",
   "optionsZh": [
    "它能檢查結構是否完整、時槽是否大於父區塊的、以及該時槽是否未落在未來；它無法驗證 seal，因為要知道誰有資格出那一槽，需要 sealer 序列，而它住在狀態裡",
@@ -66,7 +66,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "§5（genesis header 與 σ_g）", "difficulty": 2, "kind": "rationale",
- "tags": ["header", "genesis", "trust"],
+ "tags": ["header"],
   "stemZh": "GP 說對 genesis header 及其所代表狀態的共識是預設而非推導出來的。為什麼一個鏈的定義非得包含這樣一個假設不可？",
   "optionsZh": [
    "因為每個 header 的有效性都是相對於它的父區塊定義的，所以這條遞迴需要一個在鏈外達成共識的基底；沒有基底的話，任何自洽的鏈都會和其他鏈一樣有效，「這條」鏈也就沒有明確定義",
@@ -95,7 +95,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "5", "section": "5.2 The Extrinsic Hash",
  "gpRef": "eq. 5.4–5.7", "difficulty": 3, "kind": "rationale",
- "tags": ["header", "extrinsic-hash", "light-client"],
+ "tags": ["header", "extrinsic"],
   "stemZh": "H_X 雜湊的是五個各成分雜湊所組成的序列，而其中兩個成分的內部又把每一項各自化約成一個雜湊。這種形狀買到了什麼？為什麼只有那兩個被這樣處理？",
   "optionsZh": [
    "它讓第三方能夠證明某一份 preimage 或某一份 guarantee 被納入，而不必交出 extrinsic 的其餘部分；因此那些「外界會在意個別項目」的成分被逐項化，其餘的則整批承諾",
@@ -124,7 +124,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§6.6", "difficulty": 2, "kind": "concept",
- "tags": ["header", "markers", "epoch"],
+ "tags": ["header", "epoch"],
   "stemZh": "當一個區塊是某個新 epoch 的第一塊時，它的 epoch marker 會被填入內容。這個 marker 帶什麼？又是給誰用的？",
   "optionsZh": [
    "下一個與當前 epoch 的隨機數，加上接下來那個 epoch 每位 validator 的 Bandersnatch 與 Ed25519 金鑰——足夠讓只讀 header 的追隨者重建出誰可以出塊、並驗證他們的簽章",
@@ -153,7 +153,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.10", "difficulty": 2, "kind": "rationale",
- "tags": ["header", "author", "design"],
+ "tags": ["header"],
   "stemZh": "header 以索引而非公鑰來標識它的出塊者。除了省下位元組之外，這個選擇強制了什麼？代價又是什麼？",
   "optionsZh": [
    "它強制每位驗證者事先就對 posterior 的 active set 有共識，因為索引離開它就沒有意義；代價是一個 header 無法被孤立地解讀，而這正是 epoch marker 存在的原因",
@@ -183,7 +183,7 @@ ITEMS = [
   "alsoCh": ["10", "6"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11；§10", "difficulty": 2, "kind": "rationale",
- "tags": ["header", "markers", "disputes"],
+ "tags": ["dispute", "header"],
   "stemZh": "offenders marker 是一串普通的 Ed25519 金鑰、幾乎每一塊都是空的，而且它重複了 disputes 處理本來就會寫進狀態的資訊。為什麼還要放進 header？",
   "optionsZh": [
    "因為懲罰會改變之後哪些金鑰可以簽署，而只讀 header 的追隨者若沒有它，就會持續接受那些鏈上早已排除的 validator 的簽章",
@@ -213,7 +213,7 @@ ITEMS = [
   "alsoCh": ["6", "10"],
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "eq. 5.11", "difficulty": 2, "kind": "concept",
- "tags": ["header", "markers", "size"],
+ "tags": ["header"],
   "stemZh": "三個 marker 中有兩個是 optional、一個不是。考慮到各自被填入的頻率與可能的大小，這個不對稱買到了什麼？",
   "optionsZh": [
    "那兩個可能很大的——一整套金鑰、以及一整個 epoch 的 ticket——每個 epoch 至多出現一次，所以做成 optional 能讓平常的 header 維持固定的小尺寸；第三個平常是空的，而空序列本來就幾乎不佔空間",
@@ -242,7 +242,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "5", "section": "5.3 The Markers",
  "gpRef": "§5.3；§6.6", "difficulty": 3, "kind": "concept",
- "tags": ["header", "markers", "validity"],
+ "tags": ["header", "epoch"],
   "stemZh": "一個區塊在 epoch 中途抵達，卻帶著已填入內容的 epoch marker。validator 該怎麼處理它？這個處理背後的通則又是什麼？",
   "optionsZh": [
    "拒絕該區塊：marker 不是可以自由填寫的註記，而是由狀態轉移本身決定的值，所以一個 marker 與轉移產出不一致的 header，根本就不是一個有效的 header",
@@ -272,7 +272,7 @@ ITEMS = [
  "lens": "對比",
  "ch": "5", "section": "5.1 The Header",
  "gpRef": "eq. 5.1；§4", "difficulty": 3, "kind": "rationale",
- "tags": ["header", "design", "comparison"],
+ "tags": ["header", "gas"],
   "stemZh": "Ethereum 的 header 承諾了執行後的狀態、一個 receipts root、以及消耗掉的 gas。JAM 的 header 三者皆無。這三個角色分別跑到哪裡去了？",
   "optionsZh": [
    "執行後的狀態以下一個區塊的先前 state root 之姿出現；逐項的結果住在 report 內部的 work-digest 裡而不在 header；而資源用量是靠 core time 與 gas 上限事先設限，而不是事後回報",

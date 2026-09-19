@@ -8,7 +8,7 @@ ITEMS = [
  "id": "ch03-sequence-set-subscripts",
  "lens": "機制",
  "ch": "3", "section": "3.7 Sequences", "gpRef": "§3.7 (⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, ⟦T⟧_{n:}, ⟦T⟧_N); applied in eq. 8.1 and eq. 6.22",
- "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "types"],
+ "difficulty": 2, "kind": "concept", "tags": ["notation", "authorizer", "entropy"],
   "stemZh": "eq. 8.1 把 authorizer pool 與 queue 定型為 α ∈ ⟦⟦H⟧_{:O}⟧_C 與 φ ∈ ⟦⟦H⟧_Q⟧_C，而 eq. 6.22 把熵定型為 η ∈ ⟦H⟧_4。依 GP §3.7 的序列集合記號，這些下標各是什麼意思？",
   "optionsZh": [
    "⟦H⟧_{:O} 是長度至多 O 的雜湊序列集合，⟦H⟧_Q 是長度恰好 Q 的，⟦H⟧_4 是長度恰好 4 的；而外層的 ⟦·⟧_C 表示每個 core 恰好一個內層序列",
@@ -37,7 +37,7 @@ ITEMS = [
  "id": "ch03-first-last-n-arrows",
  "lens": "時機",
  "ch": "3", "section": "3.7.2 Editing", "gpRef": "§3.7.2 (⌢, ⧺, →s^n, ←s^n) and §3.7 (⟲); applied in eq. 7.8, eq. 8.2 and eq. 6.35",
- "difficulty": 2, "kind": "concept", "tags": ["notation", "sequences", "arrows"],
+ "difficulty": 2, "kind": "concept", "tags": ["ticket", "notation", "recent history"],
   "stemZh": "三條狀態轉移規則用到 GP §3.7.2 的箭號運算子：β_H′ ≡ ←(β_H† ⧺ e)^H（eq. 7.8）、α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O（eq. 8.2）、γ′_A ≡ →(依 ticket id 升冪排序的 n ∪ γ_A)^E（eq. 6.35）。箭號怎麼讀——各保留序列的哪一端——這對三條規則各意味著什麼？",
   "optionsZh": [
    "←^n 保留前 n 個元素、→^n 保留後 n 個：因此 β_H′ 與 α′[c] 在滿了之後會丟掉最新的條目，而 γ′_A 保留的是最大的 E 個 ticket id",
@@ -66,7 +66,7 @@ ITEMS = [
  "id": "ch03-bits-msb-first-trie",
  "lens": "演算法",
  "ch": "3", "section": "3.7.3 Boolean values", "gpRef": "§3.7.3 bits(); eq. D.5–D.6 (M_σ, M); App. C.1.4 (bit-sequence encoding); eq. A.15 (PVM ℬ_n)",
- "difficulty": 3, "kind": "code", "tags": ["notation", "bits", "merklization", "codec"],
+ "difficulty": 3, "kind": "code", "tags": ["Merklization", "notation"],
   "stemZh": "GP §3.7.3 以 bits([160, 0]) = [1, 0, 1, 0, 0, …] 這個例子定義了 octet 序列 B 的 bits(B)，而 M_σ（eq. D.5）是以 31 位元組 state key 的 bits(k) 為 trie 的鍵。團隊的 trie 用下面這段程式碼在每個深度切分條目。它與 GP 一致嗎？",
   "optionsZh": [
    "不一致：bits() 是最低位在前，與 codec 的位元序列編碼 E(b ∈ 𝕓)（把 b_i 放進 2^i）相符，所以遮罩必須是 1 << (depth mod 8)",
@@ -107,7 +107,7 @@ ITEMS = [
  "id": "ch03-vrf-signature-notation",
  "lens": "機制",
  "ch": "3", "section": "3.8.2 Signing Schemes", "gpRef": "§3.8.2; applied in eq. 6.16 (seal), eq. 6.18 (H_V), eq. 6.30 (ticket proof) and eq. 6.32 (ticket id = Y)",
- "difficulty": 3, "kind": "concept", "tags": ["notation", "crypto", "vrf", "safrole"],
+ "difficulty": 3, "kind": "concept", "tags": ["Bandersnatch", "notation", "seal"],
   "stemZh": "GP §3.8.2 把 Bandersnatch VRF 簽章寫成 Ṽ_k^m⟨x⟩ ⊂ B_96、VRF 輸出為 Y(·) ∈ H，而 eq. 6.16 要求 H_S ∈ Ṽ_{H_A}^{E_U(H)}⟨X_T ⌢ η′_3 ⧺ i_e⟩。把它讀出來：下標、上標與角括號內的項各是什麼？Y(H_S) 取決於什麼？",
   "optionsZh": [
    "角括號裝的是訊息、上標裝的是 context，所以 Y(H_S) 取決於 header 的序列化 E_U(H)；這正是讓 seal 的 VRF 輸出得以承諾區塊內容的機制",
@@ -136,7 +136,7 @@ ITEMS = [
  "id": "ch03-hash-functions-and-codec-subscripts",
  "lens": "機制",
  "ch": "3", "section": "3.8.1 Hashing", "gpRef": "§3.8.1 (H, H_K, H_0, E_l and E^{-1}_l assertions); Keccak applied in eq. 7.7",
- "difficulty": 2, "kind": "concept", "tags": ["notation", "hashing", "codec"],
+ "difficulty": 2, "kind": "concept", "tags": ["notation", "serialization"],
   "stemZh": "依 GP §3.8.1，H 與 H_K 各是什麼？把非 blob 的東西傳給雜湊函數會怎樣？E 與 E^{-1} 的下標又是什麼意思？",
   "optionsZh": [
    "H 是 Keccak-256（如 Yellow Paper）而 H_K 是 Blake2b-256；E 上的下標計的是輸入的 octet 數，所以 E_4 只接受已經屬於 B_4 的引數，而 E^{-1}_8 只接受小於 2^64 的自然數",
@@ -165,7 +165,7 @@ ITEMS = [
  "id": "ch03-dictionary-semantics",
  "lens": "機制",
  "ch": "3", "section": "3.5 Dictionaries", "gpRef": "eq. 3.7–3.11; 𝒰 in eq. 3.2; ∅ / A? / ∇ in §3.3",
- "difficulty": 2, "kind": "concept", "tags": ["notation", "dictionaries", "calc"],
+ "difficulty": 2, "kind": "concept", "tags": ["notation"],
   "stemZh": "令 d = {1 ↦ a, 2 ↦ b} 與 e = {2 ↦ c, 3 ↦ a} 是 ⟨N → B⟩ 中的字典。套用 GP §3.5（eq. 3.7–3.11），d ∪ e 與 V(d ∪ e) 各是什麼？在規則裡寫 d[3] 又斷言了什麼？",
   "optionsZh": [
    "d ∪ e = {1 ↦ a, 2 ↦ b, 3 ↦ a}，因為碰撞時左運算元勝出；V(d ∪ e) = [a, b, a] 會依插入順序保留重複值；而 d[3] = ∅ 在任何脈絡下都是一個普通且合法的查閱結果",
@@ -197,7 +197,7 @@ ITEMS = [
  "id": "ch04-dagger-intermediate-states",
  "lens": "時機",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18",
- "difficulty": 2, "kind": "concept", "tags": ["stf", "intermediate-state", "ordering", "delta-0.8.0"],
+ "difficulty": 2, "kind": "concept", "tags": ["guarantee", "dependency", "dependency graph", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。它們各自剛吸收了什麼？",
   "optionsZh": [
    "β_H† = β_H 在本塊的 guarantee E_G 被附加到最新條目之後；ρ† = ρ 在處理 assurance E_A 之後；ρ‡ = ρ† 在處理 guarantee E_G 之後；δ‡ = δ 在 preimage E_P 被整合之後、accumulation 執行之前",
@@ -226,7 +226,7 @@ ITEMS = [
  "id": "ch04-extrinsic-dependency-inputs",
  "lens": "演算法",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.11–4.20",
- "difficulty": 3, "kind": "concept", "tags": ["stf", "extrinsic", "ordering"],
+ "difficulty": 3, "kind": "concept", "tags": ["extrinsic", "dependency", "dependency graph"],
   "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），五個 extrinsic 成分各在哪裡進入狀態轉移？特別是：extrinsic 裡有任何東西直接餵給 accumulation 這一步嗎？",
   "optionsZh": [
    "preimages extrinsic E_P 是 accumulation 步驟（eq. 4.16）的輸入，所以某個 service 的 accumulate 程式碼可以讀到同一塊中被提供的 preimage",
@@ -255,7 +255,7 @@ ITEMS = [
  "id": "ch04-in-core-300x-rationale",
  "lens": "設計",
  "ch": "4", "section": "4.8.1 In-core Consensus", "gpRef": "§4.9.1",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "in-core", "scalability"],
+ "difficulty": 2, "kind": "rationale", "tags": ["core", "host call"],
   "stemZh": "Overview 表示 JAM 在 core 上應能做到單一機器全速執行該 VM 之「300 倍以上」的運算量。這個數字的根據是什麼？又是什麼讓這種未被複製的運算保持安全？",
   "optionsZh": [
    "一項給定的運算只由 validator 的一個子集執行，所以吞吐是隨網路規模而非隨單一機器擴展；擔保／背書／稽核（必要時再加判定）這套機制保障它，而無狀態的 in-core 執行可以被任何已同步到已定案鏈的節點重現",
@@ -284,7 +284,7 @@ ITEMS = [
  "id": "ch04-best-block-vs-finalized",
  "lens": "機制",
  "ch": "4", "section": "4.6 Best block", "gpRef": "§4.6; §4.3 (head, finalized); §19 (best chain)",
- "difficulty": 2, "kind": "concept", "tags": ["consensus", "grandpa", "best-chain"],
+ "difficulty": 2, "kind": "concept", "tags": ["GRANDPA", "work-report"],
   "stemZh": "GP §4.6 區分了「best block」與 Grandpa finality gadget 所回報的東西。best block 是什麼？什麼時候該用它？風險是什麼？",
   "optionsZh": [
    "best block 就是最近一個被 Grandpa 定案的區塊；JAM 節點從不在未定案的區塊之上出塊，這正是為什麼 Grandpa 只落後最新頭部 1–2 塊、也是為什麼從不會有推測性狀態暴露給應用程式",

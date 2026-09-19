@@ -5,7 +5,7 @@ ITEMS = [
  "id": "arch-corejam-name",
  "lens": "對比",
  "ch": "ARCH", "section": "1.1 Nomenclature / RFC-31", "gpRef": "§1.1 & RFC-31 CoreJam",
- "difficulty": 1, "kind": "rationale", "tags": ["architecture", "history"],
+ "difficulty": 1, "kind": "rationale", "tags": ["ELVES"],
   "stemZh": "JAM 這個名字從何而來？原始 CoreJam 模型的哪些階段真的在鏈上執行？",
   "optionsZh": [
    "來自 CoreJam（Polkadot Fellowship RFC-31），以其 Collect / Refine / Join / Accumulate 模型命名；只有 Join 與 Accumulate 發生在鏈上——Collect 與 Refine 是鏈下／in-core 的——因此稱為 Join-Accumulate Machine，而它是一套完整的協定而非 RFC-31 那種範圍受限的改動",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "arch-driving-factors",
  "lens": "對比",
  "ch": "ARCH", "section": "1.2–1.3 Driving Factors / Size-Coherency Antagonism", "gpRef": "§1.2–1.3",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
+ "difficulty": 2, "kind": "rationale", "tags": ["ELVES"],
   "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。五個因素是什麼？這條原則說了什麼？JAM 的設計又怎麼回應它？",
   "optionsZh": [
    "因素為：Resilience、Generality、Performance、Coherency、Accessibility；performance 與 coherency 互相對立，因為因果關係受訊號速度所限，所以狀態空間越大就越不連貫——JAM 的回應是把一個高度可擴展、大致連貫的元件（in-core）管線化進一個同步、完全連貫的元件（on-chain），以「cache affinity」取代粗暴的分割",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "arch-why-safrole",
  "lens": "對比",
  "ch": "ARCH", "section": "6 Safrole rationale", "gpRef": "§6 intro & §19",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "safrole", "rationale"],
+ "difficulty": 2, "kind": "rationale", "tags": ["Safrole", "Bandersnatch"],
   "stemZh": "JAM 為什麼採用 Safrole（票券式、匿名、ring-VRF）而不是類似 BABE 的 VRF 抽籤？",
   "optionsZh": [
    "Safrole 把每個 6 秒時槽限定給恰好一位事先決定的金鑰持有者（近乎無分叉）、讓未來時槽出塊者的身分在封印之前保持匿名（抗 DoS），並產生高品質且不可偏置的熵池；而 best-chain 規則另外偏好 ticket 封印（相對於 fallback）祖先較多的鏈",
@@ -93,7 +93,7 @@ ITEMS = [
  "lens": "設計",
   "alsoCh": ["11"],
  "ch": "ARCH", "section": "4.8.1, 11, 16, 17 rationale", "gpRef": "§4.9.1, §16–17, ELVES paper",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale", "elves"],
+ "difficulty": 2, "kind": "rationale", "tags": ["assurance", "audit", "ELVES"],
   "stemZh": "JAM 為什麼同時需要可得性（assurance + erasure coding）與稽核／爭議，才能保障 in-core 的運算？",
   "optionsZh": [
    "擔保為無效結果附上經濟成本；但 auditor 只有在輸入可取回時才能重新執行，所以必須先有 2/3+1 的 validator 背書自己持有 erasure-coded 的碎片（任意 1/3 即可重建）；接著隨機抽選的 auditor（ELVES）重跑那些 report，並在出現負面判定或缺席時升級處理；最後由 disputes 在鏈上為判決定案、封禁該 report 與 offender",
@@ -122,7 +122,7 @@ ITEMS = [
  "id": "arch-why-prior-root-and-pipelining",
  "lens": "設計",
  "ch": "ARCH", "section": "5 & 20 (pipelining)", "gpRef": "§5, §20 Discussion",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "pipelining"],
+ "difficulty": 2, "kind": "rationale", "tags": ["prior/posterior"],
   "stemZh": "JAM 的設計讓一個區塊的大部分工作能在該區塊傳播的同時進行。是哪些設計特徵讓這件事成為可能？",
   "optionsZh": [
    "時間上的平行（管線化）：header 帶的是先前的 state root，所以一個區塊可以在新狀態尚未 Merklize 完成之前就發布——那份成本落在下一個時槽；再加上空間上的平行，既跨越 σ 中大致獨立的各分量（§4.2.1 刻意讓其依賴圖保持淺），也跨越各個 core",
@@ -151,7 +151,7 @@ ITEMS = [
  "id": "arch-services-vs-accounts",
  "lens": "對比",
  "ch": "ARCH", "section": "4.8.2 services", "gpRef": "§4.9.2, §9",
- "difficulty": 1, "kind": "rationale", "tags": ["architecture", "services"],
+ "difficulty": 1, "kind": "rationale", "tags": ["service", "Ethereum"],
   "stemZh": "JAM 的 service 與 Ethereum 的帳戶模型有何不同？外部資料又是怎麼進入狀態的？",
   "optionsZh": [
    "JAM 只有 service 帳戶（程式碼 + 餘額 + 狀態，沒有私鑰、沒有 nonce）；每個都有兩個入口——refine（in-core、無狀態、任意輸入 → 小的 digest）與 accumulate（鏈上、有狀態）；所有外部資料都透過 refine、在 work-package 內進入，並以 coretime／authorizer 而不是簽署過的交易來授權",
@@ -180,7 +180,7 @@ ITEMS = [
  "id": "arch-jam-vs-polkadot-eth",
  "lens": "對比",
  "ch": "ARCH", "section": "2 Previous Work", "gpRef": "§2",
- "difficulty": 2, "kind": "rationale", "tags": ["architecture", "rationale"],
+ "difficulty": 2, "kind": "rationale", "tags": ["Polkadot", "Ethereum"],
   "stemZh": "依 GP 的「Previous Work」分析，Polkadot 1.0 與 Ethereum 式 rollup 的主要侷限是什麼？JAM 想克服的又是什麼？",
   "optionsZh": [
    "Polkadot：parachain 是彼此隔離的生態系，XCMP 非同步且顆粒粗，而取用受限於約 50 個拍賣插槽；rollup：安全性與經濟性異質、SNARK 的證明成本高出好幾個數量級（RISC-Zero 約比原生慢 61,000 倍）、而 sequencer 走向中心化——JAM 保留 Polkadot 的 ELVES 機制，但讓 core 變得無定見、無許可且半連貫",
@@ -209,7 +209,7 @@ ITEMS = [
  "id": "ch14-work-package",
  "lens": "機制",
  "ch": "14", "section": "14.2 Work Packages", "gpRef": "eq. 14.2–14.3 (§14.3)",
- "difficulty": 2, "kind": "concept", "tags": ["work-packages"],
+ "difficulty": 2, "kind": "concept", "tags": ["work-package"],
   "stemZh": "一份 work-package（eq. 14.2，屬於集合 ℙ）是 ⟨j, h, u, f, c, w⟩。六個欄位各裝什麼？",
   "optionsZh": [
    "j 授權 token；h auth-service 索引（承載 authorizer 程式碼的那個 service）；u authorizer code hash；f 設定 blob（參數化）；c refinement context；w 是 1 到 I = 16 個 work-item，每個帶 service、code hash、payload、refine 與 accumulate 的 gas 上限、imports（segment root／雜湊 + 索引）、extrinsic 的 (雜湊, 長度) 配對、以及匯出計數",

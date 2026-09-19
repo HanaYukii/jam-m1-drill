@@ -401,7 +401,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     h += '<span class="tag chtag">'+esc(chTag(it.ch))+' · '+esc(chName(it.ch))+'</span>';
     (it.alsoCh||[]).forEach(k => { h += '<span class="tag xch" title="跨章節：這題也算在該章">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
     (it.refCh||[]).forEach(k => { h += '<span class="tag refch" title="詳解引用到的章節（GP ref）">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
-    if ((it.tags||[]).length){ h += '<span class="hdr-k">重點</span>'; it.tags.forEach(tg => { h += '<span class="tag tg">'+esc(tg)+'</span>'; }); }
+    const tgs = (it.tags||[]).filter(x => x !== 'delta-0.8.0');
+    if (tgs.length){ h += '<span class="hdr-k">重點</span>'; tgs.forEach(tg => { h += '<span class="tag tg">'+esc(tg)+'</span>'; }); }
     return h + '</div>';
   }
 

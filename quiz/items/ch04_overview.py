@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch04-stf-extrinsic",
  "lens": "機制",
  "ch": "4", "section": "4.1 The Block", "gpRef": "eq. 4.2–4.3 (block / extrinsic)",
- "difficulty": 1, "kind": "concept", "tags": ["block", "extrinsic"],
+ "difficulty": 1, "kind": "concept", "tags": ["extrinsic"],
   "stemZh": "依 GP 0.8.0，一個 JAM 區塊的 extrinsic E 恰好是五個成分的元組。列出這五個——再說一個大家以為區塊本體裡會有、但 JAM 根本沒有位置放的東西。",
   "optionsZh": [
    "E_T——供 Safrole slot-sealer 競賽用的 ticket",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch04-state-components",
  "lens": "機制",
  "ch": "4", "section": "4.2 The State", "gpRef": "eq. 4.4 (state composition)",
- "difficulty": 2, "kind": "concept", "tags": ["state"],
+ "difficulty": 2, "kind": "concept", "tags": ["guarantee", "yield"],
   "stemZh": "GP eq. 4.4 把狀態 σ 切分成 17 個分量。ρ、ξ、ω 與 θ 各存什麼？四個裡面哪一個最常被貼錯標籤、錯成什麼？",
   "optionsZh": [
    "ρ → 每個 core 目前的 availability assignment（已被擔保但尚未 available 的 work-report）",
@@ -64,7 +64,7 @@ ITEMS = [
  "lens": "時機",
   "alsoCh": ["8", "12"],
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.5–4.20",
- "difficulty": 2, "kind": "concept", "tags": ["stf", "ordering"],
+ "difficulty": 2, "kind": "concept", "tags": ["dependency graph", "dependency", "authorizer"],
   "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
   "optionsZh": [
    "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的時槽 H_T 與先前的 pool α",
@@ -93,7 +93,7 @@ ITEMS = [
  "id": "ch04-common-era",
  "lens": "設計",
  "ch": "4", "section": "4.4 Time", "gpRef": "§4.4 (JAM Common Era)",
- "difficulty": 1, "kind": "concept", "tags": ["time"],
+ "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
   "optionsZh": [
    "2025 年 1 月 1 日 00:00 UTC——從午夜起算讓時槽 0 成為某個日曆日的第一槽，因此每個 14,400 槽的邊界在全世界都是一次日期變換",
@@ -122,7 +122,7 @@ ITEMS = [
  "id": "ch04-in-core-vs-on-chain",
  "lens": "對比",
  "ch": "4", "section": "4.8 The Core Model and Services", "gpRef": "§4.9.1–4.9.2",
- "difficulty": 1, "kind": "concept", "tags": ["architecture", "refine", "accumulate"],
+ "difficulty": 1, "kind": "concept", "tags": ["accumulate", "refine"],
   "stemZh": "對比 JAM 的 in-core 與 on-chain 兩種共識模型：各由誰執行？各靠什麼保障？",
   "optionsZh": [
    "in-core 的運算（refine）由每一位 validator 執行，而 on-chain 的運算（accumulate）只由出塊者執行、其他人在出現爭議時才重放",
@@ -151,7 +151,7 @@ ITEMS = [
  "id": "ch04-balance-timeslot-ranges",
  "lens": "機制",
  "ch": "4", "section": "4.6–4.7", "gpRef": "eq. 4.21 (balance), eq. 4.28 (timeslot)",
- "difficulty": 1, "kind": "concept", "tags": ["types"],
+ "difficulty": 1, "kind": "concept", "tags": ["balance", "timeslot"],
   "stemZh": "JAM 的餘額與 timeslot 各用什麼數值域？這些選擇隱含了什麼？",
   "optionsZh": [
    "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；時槽是 N_2^32，使協定的壽命延伸到 2840 年",
@@ -180,7 +180,7 @@ ITEMS = [
  "id": "ch04-coretime-vs-gas",
  "lens": "對比",
  "ch": "4", "section": "4.8.2 On Services and Accounts", "gpRef": "§4.9.2 last paragraphs",
- "difficulty": 2, "kind": "rationale", "tags": ["coretime", "authorization"],
+ "difficulty": 2, "kind": "rationale", "tags": ["coretime", "gas", "authorizer"],
   "stemZh": "JAM 用什麼取代了 Ethereum 那套「用 gas 購買區塊空間」的模型？",
   "optionsZh": [
    "區塊空間以 gas 計量，並在 work-report 被 accumulate 時從該 service 的餘額 a_b 扣款；餘額見底的 service 其 report 會被丟棄",
@@ -209,7 +209,7 @@ ITEMS = [
  "id": "ch04-pvm-summary",
  "lens": "機制",
  "ch": "4", "section": "4.5 The Virtual Machine and Gas", "gpRef": "§4.7 The Virtual Machine and Gas, eq. 4.22–4.27",
- "difficulty": 1, "kind": "concept", "tags": ["pvm"],
+ "difficulty": 1, "kind": "concept", "tags": ["PVM", "transfer"],
   "stemZh": "Overview 怎麼摘述 PVM——它的基礎、暫存器、位元組序與記憶體？",
   "optionsZh": [
    "一台源自 WebAssembly 的堆疊機，32 位元字組、16 個暫存器，線性記憶體以 64 KiB 為單位成長且沒有不可存取的頁",
@@ -238,7 +238,7 @@ ITEMS = [
  "id": "ch04-forks-safrole-grandpa",
  "lens": "設計",
  "ch": "4", "section": "4.3 Which History?", "gpRef": "§4.3",
- "difficulty": 1, "kind": "rationale", "tags": ["consensus"],
+ "difficulty": 1, "kind": "rationale", "tags": ["Safrole", "GRANDPA"],
   "stemZh": "JAM 對分叉提出三個目標：(1) 很少長出兩個 head、(2) 一旦長出應迅速收斂、(3) 應能指出某個近期區塊將永久留在歷史裡。哪個機制達成哪個目標？",
   "optionsZh": [
    "Safrole 達成 (1)、Grandpa 達成 (3)，而兩者共同促成 (2)",

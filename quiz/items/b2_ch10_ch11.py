@@ -6,7 +6,7 @@ ITEMS = [
  "id": "ch10-code-genesis-age-underflow",
  "lens": "時機",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.3 — internal/extrinsic/verdict_controller.go VerifySignature",
- "difficulty": 3, "kind": "code", "tags": ["disputes", "code", "fuzzer", "edge-case"],
+ "difficulty": 3, "kind": "code", "tags": ["dispute", "timeslot"],
   "stemZh": "此鏈仍在創世 epoch（先前的 τ < E，所以 ⌊τ/E⌋ = 0）。這段程式碼會接受哪個 verdict `Age`、而 GP 0.8.0（eq. 10.2–10.3）其實會判該區塊無效？屆時它又會拿哪一組金鑰去驗證這些判決？",
   "optionsZh": [
    "Age = 1：因為該檢查對 a 與 a−1 是對稱比較的，下一個 epoch 的索引也會通過，於是判決會被拿去對 κ 驗證，彷彿 epoch 已經翻頁",
@@ -50,7 +50,7 @@ ITEMS = [
  "id": "ch10-code-fault-equivalence-wonky",
  "lens": "演算法",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.7 — internal/extrinsic/fault_controller.go VerifyReportHashValidty",
- "difficulty": 3, "kind": "code", "tags": ["disputes", "code", "faults", "edge-case"],
+ "difficulty": 3, "kind": "code", "tags": ["dispute", "PVM", "validator set"],
   "stemZh": "在這個區塊裡，一個 verdict 把 report r 判為 wonky（恰好 ⌊|k|/3⌋ 個正面判決），所以 r ∈ ψ′_W 而 r ∉ ψ′_G ∪ ψ′_B。E_F 同時帶了一個 fault (r, ⊥, k, s)，簽章正確、來自一把不在 ψ_O 的 κ ∪ λ 金鑰。依 GP 0.8.0 eq. 10.7，這個區塊有效嗎？這段程式碼又會怎麼處理？",
   "optionsZh": [
    "有效：v = ⊥ 並未與一個非 good 的 verdict 相矛盾，所以這個 fault 成立、k 進入 ψ′_O 與 H_O；程式碼與此一致，因為對 wonky 的目標而言 inGood 與 inBad 都沒被設起",
@@ -96,7 +96,7 @@ ITEMS = [
  "id": "ch10-report-hash-identity",
  "lens": "設計",
  "ch": "10", "section": "10.1 The State", "gpRef": "eq. 10.1, 10.6, 10.14; cf. eq. 11.28",
- "difficulty": 2, "kind": "rationale", "tags": ["disputes", "rationale", "hashing"],
+ "difficulty": 2, "kind": "rationale", "tags": ["dispute", "work-report"],
   "stemZh": "ψ_G、ψ_B、ψ_W、每一則判決訊息、每一份 culprit 證明、以及 ρ† 的清除規則（eq. 10.14），全都用同一個 32 位元組的雜湊來指認爭議中的項目。那是哪個雜湊？為什麼它是爭議的正確身分？",
   "optionsZh": [
    "work-package 雜湊 (w_s)_h：package 才是工作的單位，所以判它就等於封禁針對該 package 做過的每一份 report，而 eq. 10.14 是拿 ρ[c] 裡持有的 package 雜湊與 verdict 比對",
@@ -125,7 +125,7 @@ ITEMS = [
  "id": "ch11-rho-pipeline-worked",
  "lens": "時機",
  "ch": "11", "section": "11.2 Package Availability Assurances / 11.5 Transitioning for Reports", "gpRef": "eq. 11.16–11.18, 11.32, 11.46",
- "difficulty": 3, "kind": "concept", "tags": ["assurances", "guarantees", "calc", "tiny", "timeout"],
+ "difficulty": 3, "kind": "concept", "tags": ["assurance", "guarantee"],
   "stemZh": "tiny 設定（|κ| = 6、U = 5），單一 core c = 0，沒有爭議。slot 40 的區塊：E_G 帶了 core 0 的 guarantee g₁。slot 42 的區塊：E_A 有 4 份把 bit 0 設起的 assurance。slot 45 的區塊：E_A 有 3 份把 bit 0 設起的 assurance，且 E_G 帶了另一份對 core 0、其餘皆有效的 guarantee g₂。在 slot 45 的區塊之後，ρ‡[0] 與 ρ′[0] 各是什麼？g₁ 的 report 曾被 accumulate 嗎？",
   "optionsZh": [
    "ρ‡[0] = ∅，因為 45 ≥ 40 + U；g₁ 的 report 從未進入 R，未經 accumulate 就被丟棄；g₂ 被接受，所以 ρ′[0] = (g₂, 45)",
@@ -154,7 +154,7 @@ ITEMS = [
  "id": "ch11-rotation-epoch-boundary-mstar",
  "lens": "時機",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.23, 11.28",
- "difficulty": 3, "kind": "concept", "tags": ["guarantees", "rotation", "calc", "epoch-boundary"],
+ "difficulty": 3, "kind": "concept", "tags": ["guarantee", "epoch"],
   "stemZh": "full 設定（E = 600、R = 10）。τ′ = 603 的區塊收納了一份 t = 595 的 guarantee。它的 credential 必須對哪個指派檢查？",
   "optionsZh": [
    "M* = (P(|κ′|, η′_2, 593), Φ(κ′))：前一個 rotation 一律使用當前 epoch 的熵與集合，只有 rotation 索引不同",
@@ -183,7 +183,7 @@ ITEMS = [
  "id": "ch11-lookup-anchor-ancestry",
  "lens": "設計",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.37–11.38",
- "difficulty": 2, "kind": "concept", "tags": ["guarantees", "context", "fuzzer"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "lookup-anchor", "guarantee"],
   "stemZh": "為什麼 lookup-anchor 的要求（eq. 11.38）無法單靠鏈上狀態 σ 檢查？conformance fuzzer 又是怎麼讓它對 M1 目標變得可檢查的？",
   "optionsZh": [
    "它只需要 β，也就是最近 H = 8 個區塊，其條目帶有 header 雜湊、state root 與 timeslot，所以這個檢查純粹是鏈上的；fuzzer 只是先重播足夠多的區塊把 β 填滿，才開始送出 guarantee",
@@ -212,7 +212,7 @@ ITEMS = [
  "id": "ch11-prerequisite-window",
  "lens": "時機",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.42",
- "difficulty": 3, "kind": "concept", "tags": ["guarantees", "dependencies", "edge-case"],
+ "difficulty": 3, "kind": "concept", "tags": ["guarantee", "dependency"],
   "stemZh": "E_G 中的一份 work-report 列了先決條件 p。package p 在 10 個區塊前被 guarantee、8 個區塊前被 accumulate，所以 p ∈ ξ，但 p 已不再出現在 β 的任何條目中（H = 8）。這份 guarantee 有效嗎？",
   "optionsZh": [
    "有效：p ∈ ξ 證明該 package 已被 accumulate，而 eq. 11.42 除了 extrinsic 與 β 之外也接受 ξ，所以依賴成立、該 report 一旦可得就會 accumulate",
@@ -241,7 +241,7 @@ ITEMS = [
  "id": "ch11-code-hash-prediction",
  "lens": "時機",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.45",
- "difficulty": 3, "kind": "concept", "tags": ["guarantees", "digest", "edge-case"],
+ "difficulty": 3, "kind": "concept", "tags": ["guarantee", "service"],
   "stemZh": "service s 在某份 work-package 建好之後升級了程式碼：該 work-item 的 code hash c 在建置當下是正確的、refine 也執行了 lookup anchor 當時可取得的程式碼，但收納區塊的先前狀態中 δ[s]_c ≠ c。這份 guarantee 在被收納時會如何？",
   "optionsZh": [
    "被接受：c 只是記錄 refine 實際執行了哪份程式碼、對 lookup anchor 的 posterior 狀態解析，而 accumulation 屆時就直接跑 δ′[s]_c 裡的東西",
@@ -270,7 +270,7 @@ ITEMS = [
  "id": "ch11-inactive-core-set-shrink",
  "lens": "時機",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.18, 11.23, 11.28, 11.31",
- "difficulty": 3, "kind": "delta", "tags": ["guarantees", "assurances", "delta-0.8.0", "variable-validators"],
+ "difficulty": 3, "kind": "delta", "tags": ["guarantee", "assurance", "validator set", "delta-0.8.0"],
   "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。這份 guarantee 有效嗎？逐一說明它通過或未通過的檢查。",
   "optionsZh": [
    "有效：M* 重現了前一個 rotation 的指派，在其之下 core 3 是啟用的、12 個 chunk 也是正確的分片數；eq. 11.28 的 core 界限是依 M* 所選中的集合來讀，而 ρ‡ 在 epoch 更替中原封不動",

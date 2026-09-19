@@ -7,7 +7,7 @@ ITEMS = [
  "lens": "時機",
  "alsoCh": ["10"],
  "ch": "11", "section": "4.1 dependency graph; 10.4; 11.3", "gpRef": "eq. 4.12–4.14 (ρ†, ρ‡, ρ′), eq. 10.14, eq. 11.18",
- "difficulty": 2, "kind": "rationale", "tags": ["rho", "ordering", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["guarantee", "assurance"],
   "stemZh": "ρ 在一個 block 裡被更新三次：ρ†（吃完 E_D）、ρ‡（吃完 E_A）、ρ′（吃完 E_G）。為什麼是這個順序？如果把 E_G 排在 E_A 之前處理，會壞在哪？",
   "optionsZh": [
    "disputes 先清掉被判 bad 的 report，它才不會在同一個 block 變 available；assurance 再把 available 或 timeout 的 core 清空；guarantee 只能落在 ρ‡[c] = ∅ 的 core。若 E_G 先於 E_A，剛被釋放的 core 在這個 block 仍是滿的，新 guarantee 得等下一個 block",
@@ -37,7 +37,7 @@ ITEMS = [
  "lens": "時機",
  "alsoCh": ["10", "11"],
  "ch": "6", "section": "6.2 validator sets; 10.3; 11.3", "gpRef": "eq. 6.14, eq. 10.4, eq. 11.23",
- "difficulty": 2, "kind": "rationale", "tags": ["validator-sets", "lambda", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["validator set", "storage"],
   "stemZh": "state 同時保留三個 validator set：ι（下期）、κ（本期）、λ（上期）。κ 是當然要有的；λ 為什麼要留在 state 裡？哪些檢查會去讀它？",
   "optionsZh": [
    "因為有些簽章是上個 epoch 的人簽的、卻在這個 epoch 才進 block：verdict 的 epoch index 可以是 e−1，判定簽章要對 λ 驗；epoch 邊界附近屬於上個 rotation 的 guarantee，M* 要用 λ′ 重算指派；culprit 與 fault 的 offender key 也允許來自 κ ∪ λ",
@@ -66,7 +66,7 @@ ITEMS = [
  "id": "d1-entropy-lag-ticket-and-seal",
  "lens": "時機",
  "ch": "6", "section": "6.4 entropy; 6.6 tickets; 6.7 seal", "gpRef": "eq. 6.22–6.24, eq. 6.16, eq. 6.30",
- "difficulty": 3, "kind": "rationale", "tags": ["entropy", "tickets", "seal", "design"],
+ "difficulty": 3, "kind": "rationale", "tags": ["ticket", "seal", "entropy"],
   "stemZh": "ticket 在 epoch e 提交時，ring-VRF 的 context 用 η′_2；到了 epoch e+1 用這張 ticket 封 block 時，seal 的 context 卻用 η′_3。為什麼兩邊用的下標不同？這個設計在保證什麼？",
   "optionsZh": [
    "下標不同、值相同：epoch 換檔時 η 整個往後推一格，e 時的 η′_2 在 e+1 就變成 η′_3。所以 ticket 與 seal 綁的是同一個 entropy 快照，而且它在 ticket 提交開始前就已經定死，沒有人能在比賽中途改它",
@@ -95,7 +95,7 @@ ITEMS = [
  "id": "d1-delta-plus-two-antagonistic-factors",
  "lens": "設計",
  "ch": "12", "section": "12.2 Execution", "gpRef": "§12.2 prose; eq. 12.17 (Δ+), eq. 12.18 (Δ*)",
- "difficulty": 2, "kind": "rationale", "tags": ["accumulation", "gas", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["accumulate", "gas"],
   "stemZh": "GP 把 accumulation 拆成兩層：Δ+ 逐 report 順序遞迴，裡面再呼叫 Δ* 把同一個 service 的東西併成一次 PVM 呼叫。§12.2 說這是為了調和「兩個略微對立的因素」。是哪兩個？為什麼一層順序、一層並行可以同時滿足？",
   "optionsZh": [
    "一是 gas：每個 work-item 只有事前的上限，實際用量要跑完才知道，省下來的 gas 才能給後面的 report，這逼出順序執行；二是 PVM 啟動成本：要攤平就得把同一個 service 的 item 塞進同一次呼叫，這逼出非順序的聚合。Δ+ 按 gas 上限切一段順序跑、段內 Δ* 按 service 聚合，各滿足一邊",
@@ -125,7 +125,7 @@ ITEMS = [
  "lens": "設計",
  "alsoCh": ["B"],
  "ch": "12", "section": "12.2 Execution; 20 Conclusion", "gpRef": "§12.2 prose, eq. 12.14 (𝕏), eq. 12.17, §20 Further Work",
- "difficulty": 2, "kind": "rationale", "tags": ["transfer", "accumulation", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["transfer", "accumulate"],
   "stemZh": "service A 在 accumulate 裡呼叫 transfer 給 service B，B 不會在同一次執行中收到，而是「延遲」到下一輪。為什麼 JAM 不做成同步呼叫？延遲後 B 是怎麼被喚醒、用誰的 gas 處理這筆轉帳？",
   "optionsZh": [
    "因為 Δ* 讓各 service 獨立執行、看不到彼此這一輪的改動，同步呼叫會打破這個獨立性。transfer 只被記進本輪輸出；Δ+ 的下一輪遞迴把它們當輸入，把 B 加進要 accumulate 的集合，B 拿到的 gas 是 transfer 裡宣告的 gas。GP 把 accumulate 內的同步呼叫列為未來可能的改動",
@@ -155,7 +155,7 @@ ITEMS = [
  "lens": "時機",
  "alsoCh": ["12"],
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "§B.4 prose (regular vs exceptional dimension), eq. B.7 (implications), collapse function C, Ω_C",
- "difficulty": 2, "kind": "concept", "tags": ["accumulate", "checkpoint", "context"],
+ "difficulty": 2, "kind": "concept", "tags": ["checkpoint", "accumulate", "storage"],
   "stemZh": "Ψ_A 的 context 是一對 (x, y)：x 是一般維度，y 是例外維度。某個 service 在 accumulate 裡依序做了：寫 storage → checkpoint → transfer 給別人 → 再寫 storage → panic。這次呼叫最後回傳什麼？y 存在的意義是什麼？",
   "optionsZh": [
    "回傳的是 y，也就是 checkpoint 當下的快照：第一次 storage 寫入保留，checkpoint 之後的 transfer 與第二次寫入全部消失、不會發出去。y 讓 service 自己決定「做到哪裡算數」：沒有 checkpoint 時 y 就是呼叫前的 state，panic 等於整次回滾",
@@ -185,7 +185,7 @@ ITEMS = [
  "lens": "時機",
  "alsoCh": ["10", "ARCH"],
  "ch": "12", "section": "17 Auditing; 19 Best Chain; 10 Disputes", "gpRef": "§17 prose, §19 (audited ∈ best-chain conditions), §10",
- "difficulty": 2, "kind": "rationale", "tags": ["audit", "finality", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["audit", "accumulate", "GRANDPA"],
   "stemZh": "report 一變 available 就會被 accumulate，但這時 audit 通常還沒做完。也就是說鏈上 state 已經被一份「還沒被驗證過」的結果改掉了。JAM 靠什麼讓這件事安全？如果之後發現那份 report 是壞的，state 怎麼辦？",
   "optionsZh": [
    "靠「先算、後定案」：節點只把已 audited 的 block 當作可以 finalize 與繼續建塊的 best block；若超過 1/3 的 validator 給出負面判定，含該 report 的 block 被 ban-list、它和所有後代都不再被承認。壞 report 的 state 改動不是被撤銷，而是整條分支被放棄，鏈從它之前重新長",
@@ -215,7 +215,7 @@ ITEMS = [
  "lens": "演算法",
  "alsoCh": ["11"],
  "ch": "ARCH", "section": "20 Discussion – Technical Characteristics", "gpRef": "§20.1 prose, §11.3 (three validators per core), eq. 6.8",
- "difficulty": 2, "kind": "concept", "tags": ["cores", "audits", "throughput", "design"],
+ "difficulty": 2, "kind": "concept", "tags": ["audit", "core"],
   "stemZh": "GP 的 Discussion 章給了一組數字：1,023 個 validator、每個 core 3 位、每位 validator 每個 timeslot 平均 10 次 audit。這三個數字怎麼推出「341 個 core」與「每份 report 30 次 audit」？當 validator set 縮小時，哪個數字跟著變？",
   "optionsZh": [
    "core 數 = validator 數 ÷ 每 core 人數 = 1023 ÷ 3 = 341；每份 report 的 audit 數 = 每人每 slot 的 audit 數 × validator 數 ÷ report 數 = 10 × 1023 ÷ 341 = 30。set 縮小時啟用的 core 數跟著變成 |κ| ÷ 3，每份 report 的 audit 數維持 30 不變",
@@ -245,7 +245,7 @@ ITEMS = [
  "lens": "設計",
  "alsoCh": ["11", "12"],
  "ch": "ARCH", "section": "1.3 Scaling under Size-Coherency Antagonism; 11; 12", "gpRef": "§1.3 prose, eq. 11.18 (U), ω ∈ ⟦…⟧_E, eq. 11.38 (L)",
- "difficulty": 3, "kind": "rationale", "tags": ["pipeline", "asynchrony", "design"],
+ "difficulty": 3, "kind": "rationale", "tags": ["core"],
   "stemZh": "§1.3 說 JAM「並不避免非同步，而是把它限制在 pipeline 的長度之內」。這句話落到協定裡是哪幾條具體的界限？一份工作從 in-core 到影響 state，最多能拖多久？",
   "optionsZh": [
    "三道界限：guarantee 進 ρ 後 U = 5 個 slot 內沒變 available 就被清掉；有 dependency 的 report 在 ω 裡最多等一個 epoch，逾期即丟；refine 讀的 lookup-anchor 最多 L = 14,400 個 slot 舊。所以一份 report 要嘛在幾個 slot 內 accumulate、要嘛被丟，沒有「掛著不知何時生效」的中間態",
@@ -275,7 +275,7 @@ ITEMS = [
  "lens": "對比",
  "alsoCh": ["14", "11"],
  "ch": "ARCH", "section": "1.3; 4.9.1; 11.2", "gpRef": "§1.3, §4.9.1 prose, eq. 11.4 (context), eq. 11.38, §B.2 (historical_lookup)",
- "difficulty": 2, "kind": "rationale", "tags": ["coherency", "lookup-anchor", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["lookup-anchor", "refine", "preimage"],
   "stemZh": "GP 把 in-core 稱為「mostly coherent」、on-chain 稱為「fully coherent」。落到 refine 身上，「mostly」具體是什麼意思？refine 到底能看到多少 chain state，透過什麼機制？",
   "optionsZh": [
    "refine 看不到當下的 state，只能透過 lookup-anchor 看一個「最近、已 finalize」的 block 當時的 preimage：refinement context 指定 anchor，historical_lookup 對著那個時點查。所以 refine 看到的是一份有年齡上限的舊快照，有連貫性但落後鏈頭一段有界的距離；accumulate 則看得到精確的當下 state",
@@ -305,7 +305,7 @@ ITEMS = [
  "lens": "時機",
  "alsoCh": ["12"],
  "ch": "5", "section": "4.1; 5.1 header; 12", "gpRef": "eq. 4.1 (σ′ = Υ(σ, B)), eq. 5.1 (H_R), §12",
- "difficulty": 2, "kind": "concept", "tags": ["state-root", "consensus", "design"],
+ "difficulty": 2, "kind": "concept", "tags": ["accumulate", "header"],
   "stemZh": "accumulate 的結果（δ‡、θ′ 等）並不會被放進 block。既然 block 裡沒有，全網怎麼對「這份 report accumulate 之後 state 長什麼樣」達成共識？一個 accumulate 算錯的 node 會在哪一步被抓到？",
   "optionsZh": [
    "block 只帶 extrinsic，state 是每個 node 各自從 σ′ = Υ(σ, B) 算出來的。共識來自下一個 block 的 header：H_R 必須等於父 block 的 posterior state root。算錯的 node 算出的 root 跟 H_R 對不上，就會判定下一個 block 無效、接不上鏈，等於自己被分叉掉",
@@ -335,7 +335,7 @@ ITEMS = [
  "lens": "對比",
  "alsoCh": ["8"],
  "ch": "ARCH", "section": "2.1 Polkadot; 4.9; 8 Authorization", "gpRef": "§2.1 prose, §8 prose, eq. 8.2, §B (assign)",
- "difficulty": 2, "kind": "rationale", "tags": ["cores", "authorization", "polkadot", "design"],
+ "difficulty": 2, "kind": "rationale", "tags": ["Polkadot", "authorizer"],
   "stemZh": "Polkadot 1.0 裡一個 core 綁死一條 parachain：core 永遠只做「驗證那條鏈的 block」。JAM 說 core 是無定見的（un-opinionated）。那在 JAM 裡，「這個 core 現在接受什麼工作」是由哪些東西決定的？拍賣得到的 slot 被什麼取代？",
   "optionsZh": [
    "由每個 core 的 authorizer pool α[c] 決定：只有 authorizer 在 pool 裡的 work-package 才會被這個 core 的 guarantor 接受，package 裡指名的 service 決定實際跑哪支 refine。pool 由 queue φ[c] 補充，φ[c] 只能被該 core 的 assigner 透過 assign 改寫。slot 拍賣被 coretime 取代：買到 coretime 的人透過 assigner 把自己的 authorizer 排進 φ[c]",

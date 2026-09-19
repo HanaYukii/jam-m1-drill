@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n5-pipeline-order",
  "lens": "時機",
   "ch": "N5", "section": "§11; §12; §14", "gpRef": "§11, §12 & §14",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "pipeline"],
+  "difficulty": 1, "kind": "concept", "tags": ["core"],
   "alsoCh": ["N4", "N6"],
   "stem": "Put the life of one piece of work in order, from a user handing it over to its effect landing in the state.",
   "stemZh": "把一份工作從使用者交出、到它的效果落進狀態為止的過程排出順序。",
@@ -36,7 +36,7 @@ ITEMS = [
   "id": "n5-what-is-a-work-package",
  "lens": "機制",
   "ch": "N5", "section": "§14 Work Packages", "gpRef": "§14",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "work-package"],
+  "difficulty": 1, "kind": "concept", "tags": ["work-package"],
   "stem": "What does a work-package contain?",
   "stemZh": "一份 work-package 裡面有什麼？",
   "options": [
@@ -65,7 +65,7 @@ ITEMS = [
   "id": "n5-why-report-is-small",
  "lens": "設計",
   "ch": "N5", "section": "§11.1; §14", "gpRef": "§11 & §14",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "work-report"],
+  "difficulty": 2, "kind": "rationale", "tags": ["work-report", "work-package"],
   "stem": "A work-package can be many megabytes, but the work-report that reaches the chain is capped at tens of kilobytes. Why the difference?",
   "stemZh": "一份 work-package 可以有好幾 MB，但真正上鏈的 work-report 卻被限制在幾十 KB。為什麼差這麼多？",
   "options": [
@@ -94,7 +94,7 @@ ITEMS = [
   "id": "n5-what-available-means",
  "lens": "時機",
   "ch": "N5", "section": "§11.2 Assurance", "gpRef": "§11",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "availability"],
+  "difficulty": 2, "kind": "concept", "tags": ["assurance", "accumulate"],
   "alsoCh": ["N6"],
   "stem": "A report sits in a block but cannot be accumulated until it becomes 'available'. What does available actually mean here?",
   "stemZh": "一份 report 已經在區塊裡，但要等到「available」之後才能被 accumulate。這裡的 available 究竟是什麼意思？",
@@ -124,7 +124,7 @@ ITEMS = [
   "id": "n5-what-accumulate-does",
  "lens": "機制",
   "ch": "N5", "section": "§12 Accumulation", "gpRef": "§12",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "accumulate"],
+  "difficulty": 1, "kind": "concept", "tags": ["accumulate", "work-report"],
   "stem": "When a report finally gets accumulated, what happens?",
   "stemZh": "當一份 report 終於被 accumulate 時，發生了什麼事？",
   "options": [
@@ -153,7 +153,7 @@ ITEMS = [
   "id": "n5-why-authorizer",
  "lens": "設計",
   "ch": "N5", "section": "§8 Authorization", "gpRef": "§8",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "authorization"],
+  "difficulty": 2, "kind": "rationale", "tags": ["authorizer", "work-package"],
   "stem": "Before a core will work on a package, the package must satisfy that core's authorizer. What problem does that solve?",
   "stemZh": "在 core 願意處理一份 package 之前，該 package 必須通過該 core 的 authorizer。這解決了什麼問題？",
   "options": [
@@ -182,7 +182,7 @@ ITEMS = [
   "id": "n5-segments-basic",
  "lens": "設計",
   "ch": "N5", "section": "§14", "gpRef": "§14",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "segments"],
+  "difficulty": 2, "kind": "concept", "tags": ["segment", "work-package"],
   "stem": "Work-packages can import segments exported by earlier packages. Why is that needed at all, given refine cannot read the chain state?",
   "stemZh": "work-package 可以匯入先前 package 匯出的 segment。既然 refine 讀不到鏈上狀態，為什麼還需要這個機制？",
   "options": [
@@ -211,7 +211,7 @@ ITEMS = [
   "id": "n5-refine-failure",
  "lens": "設計",
   "ch": "N5", "section": "§11.1; §14", "gpRef": "§11 & §14",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "errors"],
+  "difficulty": 2, "kind": "concept", "tags": ["refine", "work-package"],
   "stem": "One work-item inside a package runs out of gas during refine. What happens to that item and to the rest of the package?",
   "stemZh": "package 裡的某一個 work-item 在 refine 期間耗盡 gas。這個 item 與 package 的其餘部分會怎麼樣？",
   "options": [

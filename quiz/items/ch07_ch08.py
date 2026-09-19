@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch07-beta-structure",
  "lens": "機制",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.1–7.4",
- "difficulty": 2, "kind": "concept", "tags": ["recent-history", "state"],
+ "difficulty": 2, "kind": "concept", "tags": ["recent history"],
   "stemZh": "在 GP 0.8.0 中，recent-history 狀態是 β ≡ (β_H, β_B)。β_H 的每一筆近期區塊條目裝什麼？β_B 又是什麼？",
   "optionsZh": [
    "每筆 β_H 條目為：(header 雜湊 h, state root s, accumulation-output log 的 super-peak b, 時槽 t, 從被回報的 work-package 雜湊映到 segment root 的字典 p)；β_B 是 accumulation-output belt，一個由每塊 accumulation-output root 構成的 MMR",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch07-beta-dagger",
  "lens": "時機",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.5 & 7.8",
- "difficulty": 2, "kind": "concept", "tags": ["recent-history", "pipelining"],
+ "difficulty": 2, "kind": "concept", "tags": ["recent history", "state root"],
   "stemZh": "為什麼區塊 N 結束時，β_H 最新的那筆條目其 state root s = H_0（零雜湊）？它又是怎麼被補正的？",
   "optionsZh": [
    "因為算 β′ 的當下還不知道區塊 N 執行後的 state root（header 帶的是先前的 root）；區塊 N+1 會在任何人讀取 β 之前，用自己的 H_R 覆寫最後一筆的 s 來算出 β†（eq. 7.5）",
@@ -64,7 +64,7 @@ ITEMS = [
  "lens": "設計",
   "alsoCh": ["E"],
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7",
- "difficulty": 2, "kind": "rationale", "tags": ["recent-history", "mmr", "beefy"],
+ "difficulty": 2, "kind": "rationale", "tags": ["recent history", "MMR", "BEEFY"],
   "stemZh": "accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) 用的是 Keccak（H_K）而不是 Blake2b。s 是什麼？為什麼用 Keccak？",
   "optionsZh": [
    "s = [對 θ′ 中每個 (service, hash) 取 E_4(service) ⌢ E(hash)]；使用 Keccak 是「為了最大化與既有系統的相容性」",
@@ -94,7 +94,7 @@ ITEMS = [
  "lens": "設計",
   "alsoCh": ["11"],
  "ch": "7", "section": "7 Recent History", "gpRef": "§7 & eq. 11.36, 11.41–11.44",
- "difficulty": 1, "kind": "concept", "tags": ["recent-history"],
+ "difficulty": 1, "kind": "concept", "tags": ["recent history"],
   "stemZh": "依 GP，在 β_H 中保留最近 H = 8 個區塊的主要目的是什麼？",
   "optionsZh": [
    "防止重複或過期的 work-report：一份 guarantee 的 refinement-context anchor 必須出現在 β† 裡，而它的 work-package 雜湊不得已經是任何近期區塊之 reported-package 映射的 key",
@@ -123,7 +123,7 @@ ITEMS = [
  "id": "ch08-pool-queue-sizes",
  "lens": "機制",
  "ch": "8", "section": "8.2 Pool and Queue", "gpRef": "eq. 8.1",
- "difficulty": 1, "kind": "concept", "tags": ["authorization", "state"],
+ "difficulty": 1, "kind": "concept", "tags": ["authorizer"],
   "stemZh": "authorizer pool α 與 authorizer queue φ 的形狀各是什麼？",
   "optionsZh": [
    "α ∈ [[H]_{:O}]_C，O = 8（每個 core 至多 8 個 authorizer 雜湊）；φ ∈ [[H]_Q]_C，Q = 80（每個 core 恰好 80 個）",
@@ -152,7 +152,7 @@ ITEMS = [
  "id": "ch08-authorizer-identity",
  "lens": "機制",
  "ch": "8", "section": "8.1 Authorizers and Authorizations", "gpRef": "§8.1 & eq. 14.11 (§14.3; delta #522)",
- "difficulty": 2, "kind": "delta", "tags": ["authorization", "delta-0.8.0"],
+ "difficulty": 2, "kind": "delta", "tags": ["authorizer", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，一個 authorizer 是怎麼被識別的？授權的判定實際上在哪裡進行？",
   "optionsZh": [
    "authorizer = H(PVM code hash ⌢ 設定 blob)；is-authorized 的判定完全由 guarantor 在 core 內進行（Ψ_I），鏈上邏輯只檢查該 authorizer 是否在該 core 的 pool 裡",
@@ -181,7 +181,7 @@ ITEMS = [
  "id": "ch08-why-authorization",
  "lens": "設計",
  "ch": "8", "section": "8 Authorization", "gpRef": "§8 intro",
- "difficulty": 1, "kind": "rationale", "tags": ["authorization", "rationale"],
+ "difficulty": 1, "kind": "rationale", "tags": ["authorizer"],
   "stemZh": "GP 為授權系統給出的動機是什麼？",
   "optionsZh": [
    "把「打算使用某段 coretime」這個意圖，與「指定並提交某個特定工作負載」這件事解耦，好讓 JAM 能同時支援 Ethereum 式與 Polkadot 式的互動模式",

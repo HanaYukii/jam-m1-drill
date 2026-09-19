@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n3-slots-and-epochs",
  "lens": "機制",
   "ch": "N3", "section": "§4.8 Epochs and Slots", "gpRef": "§4",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "time"],
+  "difficulty": 1, "kind": "concept", "tags": ["epoch", "timeslot"],
   "stem": "How is time organised in JAM?",
   "stemZh": "JAM 的時間是怎麼組織的？",
   "options": [
@@ -35,7 +35,7 @@ ITEMS = [
   "id": "n3-what-safrole-does",
  "lens": "設計",
   "ch": "N3", "section": "§6 Safrole", "gpRef": "§6",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "safrole"],
+  "difficulty": 1, "kind": "concept", "tags": ["Safrole"],
   "stem": "What is Safrole for, in one sentence?",
   "stemZh": "一句話說，Safrole 是做什麼用的？",
   "options": [
@@ -64,7 +64,7 @@ ITEMS = [
   "id": "n3-why-anonymous",
  "lens": "設計",
   "ch": "N3", "section": "§6 Safrole", "gpRef": "§6",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "safrole", "security"],
+  "difficulty": 2, "kind": "rationale", "tags": ["Safrole", "timeslot"],
   "stem": "Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?",
   "stemZh": "Safrole 花了不少力氣讓未來時槽的出塊者身分保密。如果出塊表是公開的，會出什麼問題？",
   "options": [
@@ -93,7 +93,7 @@ ITEMS = [
   "id": "n3-fallback-basic",
  "lens": "機制",
   "ch": "N3", "section": "§6.5", "gpRef": "§6",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "safrole", "fallback"],
+  "difficulty": 2, "kind": "concept", "tags": ["fallback", "Safrole"],
   "stem": "If too few tickets are collected during an epoch, JAM does not stall. What does it do instead, and what is given up?",
   "stemZh": "如果一個 epoch 內收集到的票太少，JAM 不會停擺。它改用什麼做法？又放棄了什麼？",
   "options": [
@@ -122,7 +122,7 @@ ITEMS = [
   "id": "n3-safrole-vs-grandpa",
  "lens": "對比",
   "ch": "N3", "section": "§4.3; §19", "gpRef": "§4 & §19",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "finality"],
+  "difficulty": 2, "kind": "concept", "tags": ["GRANDPA", "Safrole"],
   "alsoCh": ["N1"],
   "stem": "JAM runs two separate consensus mechanisms. What does each one guarantee that the other does not?",
   "stemZh": "JAM 同時跑兩套共識機制。各自保證了什麼對方不保證的事？",
@@ -152,7 +152,7 @@ ITEMS = [
   "id": "n3-two-signatures",
  "lens": "設計",
   "ch": "N3", "section": "§5.1; §6.4", "gpRef": "§5 & §6",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "header", "entropy"],
+  "difficulty": 2, "kind": "concept", "tags": ["entropy", "header"],
   "stem": "Every header carries two Bandersnatch signatures, not one. What is the second one for?",
   "stemZh": "每個 header 都帶兩個 Bandersnatch 簽章而不是一個。第二個是做什麼用的？",
   "options": [
@@ -181,7 +181,7 @@ ITEMS = [
   "id": "n3-entropy-basic",
  "lens": "設計",
   "ch": "N3", "section": "§6.4 Entropy", "gpRef": "§6",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "entropy"],
+  "difficulty": 2, "kind": "rationale", "tags": ["entropy", "ticket"],
   "stem": "The chain needs randomness for the ticket lottery and for assigning validators to cores. Why can it not simply hash the latest block?",
   "stemZh": "這條鏈需要隨機性來做票券抽籤與 validator 對 core 的指派。為什麼不能就直接雜湊最新的區塊？",
   "options": [
@@ -210,7 +210,7 @@ ITEMS = [
   "id": "n3-block-too-new",
  "lens": "時機",
   "ch": "N3", "section": "§5.1", "gpRef": "§5",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "validity"],
+  "difficulty": 1, "kind": "concept", "tags": ["timeslot"],
   "alsoCh": ["N2"],
   "stem": "A node receives a well-formed block whose timeslot is a few seconds in the future. How should it treat it?",
   "stemZh": "一個節點收到一個格式正確、但時槽比現在早了幾秒（屬於未來）的區塊。它應該怎麼處理？",

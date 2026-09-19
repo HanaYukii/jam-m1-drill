@@ -5,7 +5,7 @@ ITEMS = [
  "id": "appE-merkle-functions",
  "lens": "演算法",
  "ch": "E", "section": "E.1 Binary Merkle Trees & E.2 MMR", "gpRef": "eq. E.1–E.8",
- "difficulty": 2, "kind": "concept", "tags": ["merklization", "mmr"],
+ "difficulty": 2, "kind": "concept", "tags": ["Merklization", "MMR"],
   "stemZh": "附錄 E 定義了通用的 Merklization 函數 N、M_B、M 與 MMR 的 append A。每一個各做什麼？各用在哪裡？",
   "optionsZh": [
    "N（節點）：在 ⌈n/2⌉ 處切分序列，並雜湊 '$node' ⌢ 左 ⌢ 右（well-balanced）；M_B 是對原始 blob 取的 well-balanced root（它刻意不對每一項先做雜湊）；M（定深）先把每片葉子雜湊成 '$leaf' ⌢ v，再用零雜湊補到 2 的冪——用於 segment root 與 paged proof；MMR 的 append 函數 A 以二進位加法式的進位加上一個 peak，而 super-peak 則以 '$peak' 前綴把各 peak 摺疊起來",

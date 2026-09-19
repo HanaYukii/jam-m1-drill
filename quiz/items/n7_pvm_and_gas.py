@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n7-what-is-pvm",
  "lens": "對比",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "pvm"],
+  "difficulty": 1, "kind": "concept", "tags": ["PVM", "host call"],
   "stem": "What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?",
   "stemZh": "PVM 是什麼？JAM 為什麼要自己定義一個，而不沿用既有的虛擬機？",
   "options": [
@@ -35,7 +35,7 @@ ITEMS = [
   "id": "n7-why-riscv",
  "lens": "對比",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm"],
+  "difficulty": 2, "kind": "rationale", "tags": ["PVM"],
   "stem": "The PVM is based on RISC-V rather than on a bespoke instruction set. What does that buy?",
   "stemZh": "PVM 以 RISC-V 為基礎而不是自創一套指令集。這樣做買到了什麼？",
   "options": [
@@ -64,7 +64,7 @@ ITEMS = [
   "id": "n7-what-gas-is-for",
  "lens": "機制",
   "ch": "N7", "section": "§4.7", "gpRef": "§4",
-  "difficulty": 1, "kind": "concept", "tags": ["basics", "gas"],
+  "difficulty": 1, "kind": "concept", "tags": ["gas"],
   "stem": "What is gas actually protecting in JAM?",
   "stemZh": "JAM 的 gas 實際上在保護什麼？",
   "options": [
@@ -93,7 +93,7 @@ ITEMS = [
   "id": "n7-determinism-requirement",
  "lens": "設計",
   "ch": "N7", "section": "App. A; §17", "gpRef": "App. A & §17",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm", "audit"],
+  "difficulty": 2, "kind": "rationale", "tags": ["PVM", "audit"],
   "alsoCh": ["N6"],
   "stem": "The PVM has no instruction for reading a clock, generating randomness or opening a socket. What would go wrong if it did?",
   "stemZh": "PVM 沒有任何讀取時鐘、產生隨機數或開啟網路連線的指令。如果有的話會出什麼問題？",
@@ -123,7 +123,7 @@ ITEMS = [
   "id": "n7-host-calls-basic",
  "lens": "設計",
   "ch": "N7", "section": "App. B", "gpRef": "App. B",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "host-calls"],
+  "difficulty": 2, "kind": "concept", "tags": ["host call", "storage"],
   "stem": "If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?",
   "stemZh": "既然 PVM 碰不到外界，一個 service 要怎麼讀取自己的 storage 或轉帳給另一個 service？",
   "options": [
@@ -152,7 +152,7 @@ ITEMS = [
   "id": "n7-no-crypto-instructions",
  "lens": "設計",
   "ch": "N7", "section": "§4.7; App. B", "gpRef": "§4 & App. B",
-  "difficulty": 2, "kind": "rationale", "tags": ["basics", "pvm"],
+  "difficulty": 2, "kind": "rationale", "tags": ["PVM", "service"],
   "stem": "The PVM deliberately omits instructions for cryptographic operations. Does that mean a service cannot hash anything?",
   "stemZh": "PVM 刻意省略了密碼學運算的指令。這是否表示 service 沒辦法做雜湊？",
   "options": [
@@ -181,7 +181,7 @@ ITEMS = [
   "id": "n7-memory-basic",
  "lens": "設計",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "pvm", "memory"],
+  "difficulty": 2, "kind": "concept", "tags": ["memory", "transfer", "PVM"],
   "stem": "The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?",
   "stemZh": "PVM 的記憶體是分頁的，碰到未映射的頁會引發 fault 而不是直接殺掉程式。這讓什麼變得可能？",
   "options": [
@@ -210,7 +210,7 @@ ITEMS = [
   "id": "n7-two-gas-budgets",
  "lens": "對比",
   "ch": "N7", "section": "§11.3; §12; §14", "gpRef": "§11, §12 & §14",
-  "difficulty": 2, "kind": "concept", "tags": ["basics", "gas"],
+  "difficulty": 2, "kind": "concept", "tags": ["gas", "accumulate"],
   "alsoCh": ["N5"],
   "stem": "refine and accumulate are given very different gas budgets. Why should the on-chain step get so much less?",
   "stemZh": "refine 與 accumulate 拿到的 gas 預算差距很大。為什麼鏈上那一步應該少那麼多？",
