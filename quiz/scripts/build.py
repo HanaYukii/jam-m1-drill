@@ -84,6 +84,19 @@ def symbol_map(terms):
         out.setdefault(k, v)
     return out
 
+_REF_CH = re.compile(r"(?:eq\.?|§|App\.)\s*([0-9]{1,2}|[A-I])(?=[\.\s,;:)\u2013-]|$)")
+_ARCHISH = {"1", "2", "15", "16", "17", "18", "19", "20", "21"}
+def ref_chapters(item):
+    """Chapters the gpRef string points at, beyond the item's own ch/alsoCh (display only)."""
+    seen = []
+    for m in _REF_CH.finditer(item.get("gpRef", "")):
+        k = m.group(1)
+        if k in _ARCHISH: k = "ARCH"
+        if k not in CHAPTERS: continue
+        if k == item["ch"] or k in (item.get("alsoCh") or []) or k in seen: continue
+        seen.append(k)
+    return seen
+
 def shuffle_options(item):
     """Deterministic per-item shuffle so the exported bank isn't 'answer = A' everywhere."""
     rnd = random.Random("jam-m1:" + item["id"])
@@ -92,6 +105,8 @@ def shuffle_options(item):
     new_opts = [item["options"][i] for i in order]
     new_ans = order.index(item["answer"])
     out = dict(item)
+    rc = ref_chapters(item)
+    if rc: out["refCh"] = rc
     out["options"] = new_opts
     out["answer"] = new_ans
     if item.get("optNotes"):

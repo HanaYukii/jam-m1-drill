@@ -175,6 +175,11 @@ pre.code{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--
 .on-tag.you{background:var(--bad);color:var(--surface)}
 .sym{border-bottom:1px dotted var(--muted);cursor:help}
 .tag.xch{background:var(--amber-soft);color:var(--amber);border-color:var(--amber);cursor:help}
+.expl-hdr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px;padding-bottom:8px;border-bottom:1px dashed var(--line-2)}
+.expl-hdr .hdr-k{font-size:11px;color:var(--muted);letter-spacing:.06em;margin:0 2px 0 4px}
+.expl-hdr .hdr-k:first-child{margin-left:0}
+.tag.refch{border-style:dashed;cursor:help}
+.tag.tg{background:transparent;color:var(--ink-2)}
 .on-x{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line-2);font-size:13.5px;line-height:1.7;color:var(--ink-2)}
 .results-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 10px}
 .results-head h3{font-size:15px;margin:0}
@@ -391,6 +396,14 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   }
   function chIndex(k){ return CHAPTERS.findIndex(c=>c.key===k); }
   function chName(k){ const c = CHAPTERS.find(c=>c.key===k); return c ? c.name : k; }
+  function explHeader(it){
+    let h = '<div class="expl-hdr"><span class="hdr-k">章節</span>';
+    h += '<span class="tag chtag">'+esc(chTag(it.ch))+' · '+esc(chName(it.ch))+'</span>';
+    (it.alsoCh||[]).forEach(k => { h += '<span class="tag xch" title="跨章節：這題也算在該章">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
+    (it.refCh||[]).forEach(k => { h += '<span class="tag refch" title="詳解引用到的章節（GP ref）">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
+    if ((it.tags||[]).length){ h += '<span class="hdr-k">重點</span>'; it.tags.forEach(tg => { h += '<span class="tag tg">'+esc(tg)+'</span>'; }); }
+    return h + '</div>';
+  }
 
   // ---------- rendering helpers ----------
   function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -478,7 +491,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     }
     h += '<div class="expl-block">';
     h += '<div class="expl-head">總說明</div>';
-    h += '<div class="expl '+(correct?'ok':'ng')+'">'+inlineCode(it.explanation)+'</div>';
+    h += '<div class="expl '+(correct?'ok':'ng')+'">'+explHeader(it)+inlineCode(it.explanation)+'</div>';
     h += '</div>';
     if (it.optNotes){
       h += '<div class="expl-block"><div class="expl-head">逐項辨析</div><ol class="optnotes">';
@@ -842,7 +855,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       }
       h += '<div class="qa-a"'+(open?'':' hidden')+'>';
       h += '<div class="qa-ans"><b>標準答案</b>'+glossSyms(inlineCode(qOpt(it, it.answer)))+'</div>';
-      h += '<div class="expl ok">'+inlineCode(it.explanation)+'</div>';
+      h += '<div class="expl ok">'+explHeader(it)+inlineCode(it.explanation)+'</div>';
       if (it.optNotes){
         h += '<div class="expl-block"><div class="expl-head">其他選項為什麼錯</div><ol class="optnotes">';
         it.options.forEach((o2, oi) => {
