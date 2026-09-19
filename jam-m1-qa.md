@@ -1,6 +1,6 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 316 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+Gray Paper **0.8.0** · 21 章速記 · 332 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
 線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-20
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
@@ -15,6 +15,7 @@ Gray Paper **0.8.0** · 21 章速記 · 316 題 · 92 條名詞解釋 · New-JAM
 - [附錄 N5 · 一份工作的一生](#ch-n5) — 8 題
 - [附錄 N6 · 資料可得性與稽核](#ch-n6) — 8 題
 - [附錄 N7 · PVM 與 gas](#ch-n7) — 8 題
+- [附錄 N8 · 名詞與符號](#ch-n8) — 16 題
 - [§3 Notation](#ch-3) — 9 題
 - [§4 Overview](#ch-4) — 16 題
 - [§5 The Header](#ch-5) — 24 題
@@ -2500,6 +2501,411 @@ gas 是**停機問題的實用解法**。沒有它，一支寫了無窮迴圈的
 > **陷阱**　預算差三個數量級，因為 accumulate 的成本要乘上節點數。
 
 <sub>`n7-two-gas-budgets`</sub>
+
+---
+
+
+<a id="ch-n8"></a>
+
+## 附錄 N8 · 名詞與符號　<sub>16 題</sub>
+
+### N8-1　You see σ, σ′, ρ† and ρ‡ in one formula. What does each decoration mean?
+
+<sub>§3 notation; §4.1 — ●○○ · 概念 · §3.x, eq. 4.1, §4.1 dependency graph</sub>
+
+**標準答案**　No mark is the state before this block (prior); a prime ′ is the state after it (posterior); † and ‡ are intermediate values inside the transition, after some but not all of the block has been applied
+
+GP 全篇的時間記號只有三種。**沒記號**：這個 block 開始前的值，也就是上一個 block 結束時的 state；**撇 ′**：這個 block 結束後的值；**† 和 ‡**：block 內部的中途值——轉移分好幾步，某個分量在第一步之後、第二步之前的樣子。最常見的例子是 ρ：ρ 是開始前，ρ† 是 disputes 處理完、ρ‡ 是 assurance 處理完、ρ′ 是 guarantee 也收完。看到 † 就問「已經做了哪一步、還沒做哪一步」，答案在 §4 的依賴圖裡（例如 ρ† ≺ (E_D, ρ)）。這個約定不在 §3 的記號章，而是在 §4.1 隨著 σ′ ≡ Υ(σ, B) 一起定的，口試常被拿來開場。
+
+**逐項辨析**
+
+1. ✅ No mark is the state before this block (prior); a prime ′ is the state after it (posterior); † and ‡ are intermediate values inside the transition, after some but not all of the block has been applied  
+   對：eq. 4.1 寫 σ′ = Υ(σ, B)，σ 是輸入、σ′ 是輸出；依賴圖裡 ρ†（吃完 E_D）、ρ‡（吃完 E_A）都是同一個 block 內的中途值。
+2. ❌ No mark is the state after this block; a prime ′ is the previous block's state; † and ‡ mark values that were finalized by GRANDPA one and two epochs ago respectively — the older the mark, the older the value  
+   撇是「之後」不是「之前」；† ‡ 與 finality 無關。
+3. ❌ No mark is the on-chain value; a prime ′ is the in-core copy that guarantors work with; † and ‡ are the two erasure-coded halves that assurers hold  
+   這些記號全是鏈上 state transition 的東西，跟 in-core 副本、erasure 分片無關。
+4. ❌ No mark is the full state; a prime ′ is its Merkle root; † is the header's commitment to it and ‡ the commitment carried in the next block's header  
+   Merkle root 寫成 M_σ(σ)，header 的承諾是 H_R；† ‡ 不是承諾。
+
+> **陷阱**　撇是「之後」。看到 † ‡ 先想「做到哪一步了」。
+
+<sub>`n8-prime-dagger-reading`</sub>
+
+---
+
+### N8-2　How do you read ⟦T⟧, ⟦T⟧_n, ⟦T⟧_{:n}, {T}, ⟨K → V⟩ and T? in a GP type declaration?
+
+<sub>§3.4–3.7 sets, sequences, dictionaries — ●○○ · 概念 · §3.4, §3.5, §3.7</sub>
+
+**標準答案**　⟦T⟧ a sequence of T; ⟦T⟧_n exactly n of them; ⟦T⟧_{:n} at most n; {T} a set (no order, no duplicates); ⟨K → V⟩ a dictionary from K to V; T? either a T or ∅ (absent)
+
+§3 定的六個容器記號：**⟦T⟧** 序列（有序、可重複），下標 **_n** 表示長度恰好 n（例：⟦H⟧_4 就是四個 hash，η 的型別），**_{:n}** 表示長度至多 n（例：α[c] ∈ ⟦H⟧_{:O} 是最多 8 個 authorizer hash）；**{T}** 集合（無序、不重複，例：ψ_G ∈ {H}）；**⟨K → V⟩** 字典（例：δ ∈ ⟨N_S → A⟩，service index 對到 account）；**T?** optional，值是 T 或 ∅，例如 ρ 的每格是 (𝔾, N_T)?，core 沒有 report 時就是 ∅。與 ∅ 相對的 **∇** 是「無效／出錯」，不是缺席。實作對應：⟦⟧ 是 slice、{} 是 set、⟨→⟩ 是 map、? 是 pointer 或 Option。
+
+**逐項辨析**
+
+1. ✅ ⟦T⟧ a sequence of T; ⟦T⟧_n exactly n of them; ⟦T⟧_{:n} at most n; {T} a set (no order, no duplicates); ⟨K → V⟩ a dictionary from K to V; T? either a T or ∅ (absent)  
+   對：§3.7 序列與下標、§3.4 集合、§3.5 字典、§3.3 optional。
+2. ❌ ⟦T⟧ a set of T; ⟦T⟧_n the n-th element; ⟦T⟧_{:n} the first n elements; {T} a sequence; ⟨K → V⟩ a function type; T? a T that may be invalid (∇)  
+   ⟦⟧ 是序列不是集合、{} 是集合不是序列；T? 是 ∅ 不是 ∇。
+3. ❌ ⟦T⟧ a Merkle tree of T; ⟦T⟧_n its depth; ⟦T⟧_{:n} its first n leaves; {T} the root; ⟨K → V⟩ a trie keyed by K; T? a T whose hash is stored instead of the value  
+   跟 Merkle 完全無關；Merklization 的記號是 M、M_B、M_σ。
+4. ❌ ⟦T⟧ a blob of T octets; ⟦T⟧_n a blob of n octets; ⟦T⟧_{:n} a blob up to n octets; {T} a hash of T; ⟨K → V⟩ a lookup table; T? a T encoded with a leading 0/1 byte only  
+   blob 的記號是 B、B_n；這裡講的是抽象型別，不是編碼。
+
+> **陷阱**　⟦⟧ 序列、{} 集合、⟨→⟩ 字典、? 可缺席。下標 _n 恰好、_{:n} 至多。
+
+<sub>`n8-type-brackets`</sub>
+
+---
+
+### N8-3　What do H(x), H_K(x), E(x), E_4(x), a ⌢ b, a ⧺ b and s[i]^⟲ each do?
+
+<sub>§3.7–3.8 operators, hashing, codec — ●○○ · 概念 · §3.7.2, §3.8.1, App. C</sub>
+
+**標準答案**　H is Blake2b-256 and H_K is Keccak-256; E(x) serializes x with the GP codec and E_4(x) is the 4-octet fixed-width form; ⌢ concatenates blobs, ⧺ concatenates sequences; s[i]^⟲ indexes s cyclically (i mod |s|)
+
+這七個記號幾乎每條公式都會碰到。**H(x)** 是 Blake2b-256，GP 預設的雜湊，輸出 32 octet；**H_K(x)** 是 Keccak-256，只用在跟外部系統相容的地方（accumulation 輸出的 MMR、給 BEEFY 簽的東西），因為 Ethereum 生態驗 Keccak 便宜。**E(x)** 是 App. C 的序列化：自然數用變長編碼、序列前綴長度、optional 前綴 0/1；**E_n(x)** 是把自然數固定編成 n 個 octet 的小端序版本（例：H_T 用 E_4，validator index 用 E_2）。**⌢** 接兩段 blob（octet 串），**⧺** 接兩個序列——語意相同，只是型別不同。**s[i]^⟲** 是「i 對序列長度取餘」的索引，例如 φ[c][H_T]^⟲ 就是 queue 的第 H_T mod 80 格。另外常見的 **→^n** 取前 n 個、**←^n** 取後 n 個（例：β 用 ←^H 只留最近 8 筆）。
+
+**逐項辨析**
+
+1. ✅ H is Blake2b-256 and H_K is Keccak-256; E(x) serializes x with the GP codec and E_4(x) is the 4-octet fixed-width form; ⌢ concatenates blobs, ⧺ concatenates sequences; s[i]^⟲ indexes s cyclically (i mod |s|)  
+   對：§3.8.1 定 H = Blake2b、H_K = Keccak；App. C 定 E 與 E_n；§3.7.2 定 ⌢、⧺、⟲。
+2. ❌ H is Keccak-256 and H_K is Blake2b-256; E(x) encrypts x and E_4(x) uses a 4-round variant; ⌢ appends one element, ⧺ merges two sets; s[i]^⟲ reverses s before indexing  
+   H 與 H_K 對調了；E 是序列化不是加密。
+3. ❌ H and H_K are the same Blake2b with and without a key; E(x) is the Merkle root of x and E_4(x) the root at depth 4; ⌢ is XOR, ⧺ is addition; s[i]^⟲ takes the i-th element from the end  
+   E 不是 Merkle（Merkle 是 M）；⌢ ⧺ 是接合不是運算。
+4. ❌ H is a 64-octet hash and H_K its 32-octet truncation; E(x) is the hex string of x and E_4(x) its first 4 characters; ⌢ and ⧺ are both string concatenation; s[i]^⟲ rotates the whole sequence by i  
+   兩個 hash 都是 32 octet；E 是二進位編碼不是 hex。
+
+> **陷阱**　H = Blake2b、H_K = Keccak；E 是序列化；⟲ 是取餘索引。
+
+<sub>`n8-hash-encode-concat`</sub>
+
+---
+
+### N8-4　Four nouns share the prefix 'work': work-package, work-item, work-report, work-digest. How do they relate, and which of them go on-chain?
+
+<sub>§4.9; §11; §14 — ●○○ · 概念 · §4.9, eq. 11.2, eq. 11.6, eq. 14.2</sub>
+
+**標準答案**　A work-package contains 1–16 work-items and is what a core receives; refine turns each work-item into a work-digest; the work-report bundles those digests plus context and is the only one that goes on-chain, via a guarantee
+
+把它們排成一條線：**work-package**（§14）是 builder 打包、送到 core 的輸入，可以很大（MB 級），裡面有 1 到 16 個 **work-item**，每個 item 指定 service、payload、gas 上限。guarantor 對每個 item 跑該 service 的 refine，輸出縮成一個 **work-digest**（eq. 11.6：result blob 或錯誤碼、gas 用量、匯出數等）。所有 digest 加上 refinement context、availability spec、authorizer 資訊，合成一份 **work-report**（eq. 11.2），上限 48 KB。只有 report 會上鏈——三位 guarantor 簽名後放進 E_G，進 ρ 等 assurance。package 本身不上鏈，被 erasure code 分給 validator 存著給 audit 用。所以方向是「大 → 小」：package（MB）→ report（KB）→ 每個 digest 只是幾個欄位。口試若問「report 跟 package 差在哪」：一個是輸入、一個是輸出摘要；一個留在 DA、一個上鏈。
+
+**逐項辨析**
+
+1. ✅ A work-package contains 1–16 work-items and is what a core receives; refine turns each work-item into a work-digest; the work-report bundles those digests plus context and is the only one that goes on-chain, via a guarantee  
+   對：eq. 14.2 package 含 w ∈ ⟦work-item⟧_{1:I}；eq. 11.6 digest 是每個 item 的結果；eq. 11.2 report 含 d ∈ ⟦digest⟧；上鏈的是 report（E_G）。
+2. ❌ A work-item contains several work-packages; each package is refined into a work-report; the work-digest is the hash of a report and is the only thing stored on-chain, in ρ  
+   包含關係反了；ρ 存的是整份 guarantee（含 report），不是 hash。
+3. ❌ A work-report is what the builder submits; guarantors split it into work-items, refine each into a work-package, and the work-digest is the erasure-coded form that assurers store; all four go on-chain  
+   builder 提交的是 package；四者只有 report 上鏈。
+4. ❌ A work-package and a work-report are the same object before and after signing; a work-item is one guarantor's signature and a work-digest is the audit result; only the digest goes on-chain  
+   package 與 report 是不同物件（大 vs 小）；work-item 不是簽章。
+
+> **陷阱**　package 進 core、report 上鏈；item 是 package 的一格、digest 是 report 的一格。
+
+<sub>`n8-work-nouns-chain`</sub>
+
+---
+
+### N8-5　Match the Greek letters that a piece of work passes through: α, φ, ρ, ω, ξ, θ, δ. Which is which?
+
+<sub>§4.2 state components — ●○○ · 概念 · eq. 4.4, §8, §11, §12</sub>
+
+**標準答案**　α authorizer pool per core, φ the queue that refills it, ρ the report each core currently holds awaiting assurance, ω reports waiting on dependencies, ξ package hashes already accumulated, θ this block's accumulation outputs, δ the service accounts
+
+eq. 4.4 把 σ 拆成 17 個分量，其中七個是「工作管線」上的：**α**（§8）每個 core 目前接受的 authorizer 名單，**φ**（§8）補充 α 的 80 格 queue；**ρ**（§11）每個 core 目前掛著的那份 guarantee，等 assurance 讓它 available；**ω**（§12）ready queue，available 了但還在等 dependency 的 report；**ξ**（§12）最近一個 epoch 已經 accumulate 過的 package hash，防重複；**θ**（§12）這個 block 每個 service 的 accumulation 輸出承諾，之後進 β 的 MMR；**δ**（§9）所有 service account，accumulate 真正改的東西。順著走一遍：package 的 authorizer 要在 **α** → report 進 **ρ** → available 後若有依賴進 **ω** → accumulate 寫 **δ**、記 **ξ**、產 **θ**。剩下十個字母是共識與時間那一組（下一題）。
+
+**逐項辨析**
+
+1. ✅ α authorizer pool per core, φ the queue that refills it, ρ the report each core currently holds awaiting assurance, ω reports waiting on dependencies, ξ package hashes already accumulated, θ this block's accumulation outputs, δ the service accounts  
+   對：eq. 4.4 的分量定義，§8（α φ）、§11（ρ）、§12（ω ξ θ）、§9（δ）。
+2. ❌ α the active validators, φ the previous validators, ρ the recent blocks, ω the entropy, ξ the ticket accumulator, θ the timeslot, δ the disputes state  
+   那些是 κ λ β η γ_A τ ψ 的意思，全錯位。
+3. ❌ α the service accounts, φ the privileged services, ρ the ready queue of reports waiting on dependencies, ω the authorizer pool per core, ξ this block's accumulation outputs, θ the report each core currently holds, δ the package hashes already accumulated  
+   七個全部互相對調，每個字母都指到了別的分量。
+4. ❌ α the header, φ the extrinsic, ρ the state root, ω the offenders, ξ the statistics, θ the epoch marker, δ the work-package  
+   header、extrinsic、state root 都不是 σ 的分量。
+
+> **陷阱**　α φ 是門票、ρ 是等候區、ω 是排隊區、ξ 是做過的、θ 是收據、δ 是帳本。
+
+<sub>`n8-state-letters-work-pipeline`</sub>
+
+---
+
+### N8-6　Now the consensus-side letters: β, γ, η, ι, κ, λ, ψ, π, χ, τ. Which is which?
+
+<sub>§4.2 state components — ●○○ · 概念 · eq. 4.4, §6, §7, §10, §13</sub>
+
+**標準答案**　β recent blocks, γ Safrole state (tickets, sealer sequence), η entropy, ι next validators, κ current validators, λ previous validators, ψ disputes (good/bad/wonky/offenders), π statistics, χ privileged services, τ the last block's timeslot
+
+另外十個分量：**β**（§7）最近 8 個 block 的摘要加 accumulation 輸出的 MMR；**γ**（§6）Safrole 內部狀態：γ_P 下期 key、γ_Z ring root、γ_S 本期 sealer 序列、γ_A ticket 累加器；**η**（§6）四格 entropy；**ι / κ / λ**（§6）validator 三代：staging（下期）、active（本期）、previous（上期）；**ψ**（§10）disputes 的四個集合；**π**（§13）活動統計；**χ**（§9）五個特權位子：manager、assigners、delegator、registrar、always-accumulate；**τ**（§4）最近一個 block 的 timeslot。記法：ι κ λ 是希臘字母順序，正好對應「下、現、上」——注意 ι 排最前面卻是「下期」。口試最常考的一組是 ι → γ_P → κ → λ 這條輪替線：每個 epoch 邊界往後推一格。
+
+**逐項辨析**
+
+1. ✅ β recent blocks, γ Safrole state (tickets, sealer sequence), η entropy, ι next validators, κ current validators, λ previous validators, ψ disputes (good/bad/wonky/offenders), π statistics, χ privileged services, τ the last block's timeslot  
+   對：eq. 4.4 與各章開頭的定義。
+2. ❌ β the belt of BEEFY signatures, γ the gas budget, η the epoch index, ι the initial state, κ the Keccak root, λ the lookup-anchor, ψ the PVM state, π the pool, χ the checkpoint, τ the ticket, and none of them is ever rotated at an epoch change  
+   全是望文生義的錯（β 不是 BEEFY、κ 不是 Keccak、χ 不是 checkpoint）。
+3. ❌ β validators, γ disputes, η recent blocks, ι timeslot, κ Safrole state, λ statistics, ψ entropy, π privileges, χ previous validators, τ next validators  
+   十個全部錯位：validator 是 κ、disputes 是 ψ、entropy 是 η。
+4. ❌ β authorizer queue, γ accounts, η ready queue, ι accumulated hashes, κ accumulation outputs, λ report per core, ψ authorizer pool, π work-package, χ header, τ extrinsic  
+   那是上一題工作管線的字母，而且也錯位。
+
+> **陷阱**　ι κ λ 是「下、現、上」；γ 是 Safrole 不是 gas；χ 是特權不是 checkpoint。
+
+<sub>`n8-state-letters-consensus`</sub>
+
+---
+
+### N8-7　The extrinsic has five parts: E_T, E_P, E_G, E_A, E_D. Name each and say who puts it there.
+
+<sub>§4.1 the extrinsic — ●○○ · 概念 · eq. 4.3, §6, §9, §10, §11</sub>
+
+**標準答案**　E_T tickets from validators competing for next epoch's slots; E_P preimages anyone supplies for a service that asked; E_G guarantees signed by a core's guarantors; E_A assurances from validators holding their shard; E_D disputes: verdicts, culprits, faults assembled by the author
+
+eq. 4.3：E ≡ (E_T, E_P, E_G, E_A, E_D)，這是 block body 的全部。**E_T** tickets（§6）：每位 validator 為「下個 epoch」的出塊權投的匿名籤，最多每 block 16 張。**E_P** preimages（§9、§12）：service 透過 solicit 說「我要這個 hash 的原像」，任何人都能把資料放進 E_P 供應上來，常見用途是部署 service 的 code。**E_G** guarantees（§11）：某 core 的 3 位 guarantor 對一份 work-report 的簽名，一個 block 每個 core 至多一份。**E_A** assurances（§11）：每位 validator 一份 bitfield，說「這些 core 的 shard 我拿到了」。**E_D** disputes（§10）：verdict（對某 report 的 2/3 判定）、culprit（擔保壞 report 的人）、fault（投錯票的人），由出塊者從鏈下蒐集來的判定組成。五個裡沒有「交易」——這是 JAM 跟 Ethereum 最明顯的名詞差異；使用者的東西走 work-package，不在 extrinsic 裡。
+
+**逐項辨析**
+
+1. ✅ E_T tickets from validators competing for next epoch's slots; E_P preimages anyone supplies for a service that asked; E_G guarantees signed by a core's guarantors; E_A assurances from validators holding their shard; E_D disputes: verdicts, culprits, faults assembled by the author  
+   對：eq. 4.3 與 §6、§9、§10、§11 各自的 extrinsic 定義。
+2. ❌ E_T transactions from users; E_P proofs of work from miners; E_G gas receipts from services; E_A audit results from auditors; E_D deposits from coretime buyers  
+   JAM 沒有交易、沒有 PoW、gas 不上鏈、audit 結果不直接上鏈。
+3. ❌ E_T timeslots proposed by the author; E_P privileges set by the manager; E_G GRANDPA votes; E_A account updates from accumulate; E_D digests from refine  
+   accumulate 與 refine 的產物都不是 extrinsic。
+4. ❌ E_T tickets that only the block author may submit, one per block; E_P preimages supplied by the guarantors of the report that needs them; E_G guarantees signed by the assurers holding shards; E_A assurances produced by the auditors after re-execution; E_D disputes filed by the delegator service on behalf of the validator set  
+   角色全錯：ticket 是所有 validator、guarantee 是 guarantor、assurance 是 assurer。
+
+> **陷阱**　T ticket、P preimage、G guarantee、A assurance、D dispute。沒有交易。
+
+<sub>`n8-extrinsic-five-nouns`</sub>
+
+---
+
+### N8-8　GP uses three location words: in-core, on-chain, off-chain. Sort these into the right place: refine, accumulate, is-authorized, auditing, GRANDPA voting, assurance signing, the E_A check.
+
+<sub>§4.9; §15–19 — ●○○ · 概念 · §4.9.1, §15–19</sub>
+
+**標準答案**　In-core: is-authorized and refine (run by a core's three guarantors). On-chain: accumulate and the E_A check (part of the state transition every node runs). Off-chain: auditing, GRANDPA voting and signing an assurance (things a validator does that are not in Υ)
+
+三個詞分的是「誰在跑、跑的東西算不算 state transition」。**in-core**：只有被指派到那個 core 的三位 guarantor 跑，內容是 is-authorized（Ψ_I）和 refine（Ψ_R），結果靠 ELVES 賽局保安全。**on-chain**：每個 node 匯入 block 時都要跑的東西，也就是 Υ 裡的每一步——accumulate（Ψ_A）當然是，「檢查 E_A 的簽章和 2/3 門檻」也是（§11 的規則），「檢查 E_G 的 credential」也是。**off-chain**：validator 依 §15–19 的誠實策略做、但不屬於 state transition 的事——挑 report 來 audit（§17）、對 best chain 投 GRANDPA（§19）、簽 BEEFY（§18）、拿到 shard 後「產生」一份 assurance（§16）。注意「簽 assurance」是 off-chain、「檢查 assurance」是 on-chain，同一個名詞兩個位置；audit 也是：做 audit 在 off-chain，結果若變成 verdict 進 E_D 才上鏈。
+
+**逐項辨析**
+
+1. ✅ In-core: is-authorized and refine (run by a core's three guarantors). On-chain: accumulate and the E_A check (part of the state transition every node runs). Off-chain: auditing, GRANDPA voting and signing an assurance (things a validator does that are not in Υ)  
+   對：§4.9.1 定義 in-core（少數人執行）與 on-chain（人人執行）；§15–19 是 off-chain 的誠實策略。
+2. ❌ In-core: refine and accumulate. On-chain: is-authorized and auditing. Off-chain: GRANDPA voting, assurance signing and the E_A check  
+   accumulate 是 on-chain；is-authorized 是 in-core；audit 是 off-chain；檢查 E_A 是 on-chain。
+3. ❌ In-core: everything a guarantor does, including auditing its own report and signing the assurance for it, since it already holds the data. On-chain: accumulate only, because it is the one step that writes state. Off-chain: is-authorized, refine and GRANDPA voting, none of which any other node re-runs  
+   audit 不是 guarantor 的工作（是隨機抽的 auditor）；is-authorized 與 refine 是 in-core。
+4. ❌ In-core: refine only. On-chain: accumulate, is-authorized, auditing and the E_A check. Off-chain: GRANDPA voting and assurance signing  
+   is-authorized 在 in-core；audit 在 off-chain。
+
+> **陷阱**　產生東西多半 off-chain，檢查東西一定 on-chain，refine 在 in-core。
+
+<sub>`n8-in-core-on-chain-off-chain`</sub>
+
+---
+
+### N8-9　The header is H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S). Which letter is which?
+
+<sub>§5 the header — ●○○ · 概念 · eq. 5.1</sub>
+
+**標準答案**　P parent hash, R prior state root, X extrinsic hash, T timeslot, E epoch marker, W winning-tickets marker, O offenders marker, I author index, V entropy VRF signature, S seal
+
+十個欄位分三組。**定位**：H_P 父 block 的 hash、H_T 這個 block 的 timeslot。**承諾**：H_R 執行「前」的 state root（不是後，這是 JAM 的特色）、H_X 五個 extrinsic 分量的 hash 再 hash。**共識**：H_I 作者在 κ′ 裡的 index（不是 key）、H_V 作者的 VRF 簽章、輸出餵進 entropy η_0、H_S seal，證明「這個 slot 是我的」。**三個 marker**：H_E epoch marker，只在 epoch 第一個 block 有，帶下期的 entropy 與 validator key；H_W winning-tickets marker，只在 ticket 提交期結束那個 block 有，公布下期的 sealer 序列；H_O offenders marker，列出這個 block 新增的 offender key，通常是空的。E、W 是 optional（沒有就 ∅），O 是序列（沒有就空序列）。記法：P/T 是位置，R/X 是內容，I/V/S 是作者，E/W/O 是公告。
+
+**逐項辨析**
+
+1. ✅ P parent hash, R prior state root, X extrinsic hash, T timeslot, E epoch marker, W winning-tickets marker, O offenders marker, I author index, V entropy VRF signature, S seal  
+   對：eq. 5.1 的十個欄位。
+2. ❌ P proof of work, R receipts root, X transactions root, T total difficulty, E epoch number, W weight, O output root, I identity key, V version, S signature  
+   那是 Ethereum header 的欄位名，JAM 一個都沒有。
+3. ❌ P posterior state root, R random seed, X extra data, T ticket, E extrinsic hash, W work-report hash, O ordering, I index of core, V validator count, S slot  
+   R 是 prior 不是 posterior；X 是 hash 不是額外資料；I 是 validator index。
+4. ❌ P parent hash, R posterior state root, X extrinsic list, T timeslot, E entropy, W winning validator key, O offenders count, I author public key, V VRF output, S seal  
+   R 是 prior；X 是 hash 不是清單；E 是 marker 不是 entropy 本身；I 是 index 不是 key；O 是 key 序列不是數量。
+
+> **陷阱**　R 是 prior。I 是 index 不是 key。E/W 可缺席、O 是可空的序列。
+
+<sub>`n8-header-letters`</sub>
+
+---
+
+### N8-10　Write one work-package's journey using only symbols and the extrinsic it rides in: which check reads α, which extrinsic puts it into ρ, what makes it leave ρ, and which symbols does accumulate write?
+
+<sub>§4 dependency graph; §8–12 — ●●○ · 概念 · §4.1, eq. 8.2, eq. 11.17, eq. 11.18, §12</sub>
+
+**標準答案**　Its authorizer must be in α[c]; the guarantee in E_G places it in ρ[c]; enough bits in E_A (> 2/3·|κ|) make it available and clear ρ‡[c], or it times out after U slots; accumulate then writes δ‡, ξ′, θ′ and possibly ω′, χ′, ι′, φ′
+
+把前面幾題的名詞接起來，用 §4 依賴圖的順序：(1) guarantor 收到 package，先看 **α[c]**（eq. 11.32 在鏈上也會再查一次）有沒有它的 authorizer，然後跑 refine 產出 report。(2) 三人簽名成 guarantee，出塊者放進 **E_G**，state transition 把它寫進 **ρ′[c]** —— 這是它第一次出現在 state 裡。(3) 之後幾個 block，validator 拿到 shard 後在 **E_A** 設 bit；某個 block 的 E_A 累計超過 2/3·|κ| 時（eq. 11.17）它進入 R（available），同時 eq. 11.18 把 **ρ‡[c]** 清空；沒等到就在 U = 5 個 slot 後逾時，也清空。(4) 同一個 block 的 accumulate 吃 R*，寫 **δ‡**（service account）、**ξ′**（記下它的 package hash）、**θ′**（它的輸出承諾）；若它有依賴則先進 **ω′** 排隊；若它的 service 是特權 service，還可能寫 **χ′、ι′、φ′**。(5) 最後 E_P 併進 δ‡ 得 **δ′**，下個 block 的 **H_R** 承諾整個 σ′。一句話：α 放行 → E_G 進 ρ → E_A 出 ρ → Δ+ 寫 δ ξ θ。
+
+**逐項辨析**
+
+1. ✅ Its authorizer must be in α[c]; the guarantee in E_G places it in ρ[c]; enough bits in E_A (> 2/3·|κ|) make it available and clear ρ‡[c], or it times out after U slots; accumulate then writes δ‡, ξ′, θ′ and possibly ω′, χ′, ι′, φ′  
+   對：eq. 11.32 讀 α；E_G → ρ′；eq. 11.17–11.18 用 E_A 決定 available 與清空；§12 的輸出是 δ‡、ξ′、θ′、ω′ 及特權相關的 χ′、ι′、φ′。
+2. ❌ Its authorizer must be in φ[c]; the assurance in E_A places it in ρ[c]; the guarantee in E_G, arriving a few blocks later, makes it available and clears ρ[c]; accumulate then writes β′ and π′ only, since the service state δ is changed by refine in-core  
+   pool 是 α 不是 φ；guarantee 與 assurance 的角色對調了。
+3. ❌ Its authorizer must be in χ; the ticket in E_T places it in ρ[c]; a verdict in E_D makes it available; accumulate then writes κ′ and η′  
+   χ、E_T、E_D 都跟 work-package 的旅程無關。
+4. ❌ Its authorizer must be in α[c]; the preimage in E_P places it in ρ[c]; GRANDPA finality makes it leave ρ; accumulate then writes the header's H_R  
+   E_P 是 preimage 不是 report；GRANDPA 不影響 ρ；H_R 是下個 block 的 header 帶的。
+
+> **陷阱**　α 讀、E_G 進、E_A 出、accumulate 寫 δ ξ θ。E_P 與 E_D 不在主線上。
+
+<sub>`n8-flow-in-symbols`</sub>
+
+---
+
+### N8-11　Five role words: builder, author, guarantor, assurer, auditor. Who is a validator, and what does each one produce?
+
+<sub>§4.9; §14–17 — ●○○ · 概念 · §4.9.1, §14, §15, §16, §17, §19</sub>
+
+**標準答案**　Builder: not a validator; assembles a work-package. Author: the validator whose ticket owns this slot; produces the block. Guarantor: one of a core's three validators; produces a signed work-report. Assurer: any validator; produces an assurance bit per core it holds a shard for. Auditor: a randomly drawn validator; produces a judgment
+
+JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四個「角色」都是同一批 validator 在不同時刻的帽子：**author** 是這個 slot 的 ticket 持有者，出 block；**guarantor** 是被指派到某 core 的三人，跑 refine、簽 report；**assurer** 是每個拿到 shard 的人，簽 assurance；**auditor** 是被 VRF 抽到的人，重跑 report、給 judgment。同一個 validator 在同一個 slot 可以同時是 author、guarantor、assurer、auditor。**builder** 是唯一不需要是 validator 的：§14 說它在鏈下組 work-package、送給 guarantor，GP 不規範它是誰——可以是使用者、collator、任何服務。口試被問「誰做 X」時，先答「validator」，再說是哪頂帽子。
+
+**逐項辨析**
+
+1. ✅ Builder: not a validator; assembles a work-package. Author: the validator whose ticket owns this slot; produces the block. Guarantor: one of a core's three validators; produces a signed work-report. Assurer: any validator; produces an assurance bit per core it holds a shard for. Auditor: a randomly drawn validator; produces a judgment  
+   對：§14 builder 在鏈下、不需是 validator；其餘四個都是同一群 validator 在不同時刻的角色。
+2. ❌ Builder: a validator that assembles blocks out of guarantees. Author: the service whose code the work-package targets. Guarantor: the coretime buyer who vouches that the package was paid for. Assurer: the auditor who re-runs the package and confirms the result. Auditor: the manager service that countersigns every dispute before it enters E_D  
+   builder 不是 validator、author 是 validator 不是 service、guarantor 不是買家。
+3. ❌ Builder, author, guarantor, assurer and auditor are five fixed validator ranks; a node is promoted from builder to auditor as it accumulates stake, and each rank produces one extrinsic type  
+   不是階級，是同一批人輪流做的事。
+4. ❌ Builder: produces the work-report. Author: produces the guarantee. Guarantor: produces the assurance. Assurer: produces the audit. Auditor: produces the block; only the auditor is a validator  
+   產出全部錯位一格，而且五個角色裡有四個是 validator。
+
+> **陷阱**　四頂帽子一群人；builder 是外人。
+
+<sub>`n8-roles-glossary`</sub>
+
+---
+
+### N8-12　Each validator key bundles three public keys: Bandersnatch, Ed25519, BLS. Which noun uses which key?
+
+<sub>§6.2 validator keys; App. G — ●○○ · 概念 · eq. 6.7, §6, §10, §11, §18, App. G</sub>
+
+**標準答案**　Bandersnatch: tickets (ring VRF), the seal, the entropy signature H_V, audit selection. Ed25519: guarantees, assurances, judgments, and the identity of offenders. BLS: BEEFY signatures only
+
+三把 key 對應三種需求。**Bandersnatch**（App. G）是一條支援 VRF 的曲線：凡是需要「可驗證的隨機輸出」的地方都用它——ticket 的 ring-VRF 證明（匿名）、seal 與 H_V（普通 VRF，輸出餵 entropy）、audit 抽籤。**Ed25519** 是普通簽章，快、小、人人會驗：guarantee 的 credential、assurance、dispute 的 judgment、culprit、fault 都用它，所以 offender 的「身分」就是 Ed25519 key（ψ_O、H_O 存的都是它）。**BLS** 可以把上千個簽章聚合成一個：只用在 BEEFY（§18），讓橋接系統驗一個簽章就等於驗了 2/3 的 validator。epoch marker H_E 帶的是 Bandersnatch 加 Ed25519 兩把，讓只讀 header 的節點能驗 seal 也能對 offender。
+
+**逐項辨析**
+
+1. ✅ Bandersnatch: tickets (ring VRF), the seal, the entropy signature H_V, audit selection. Ed25519: guarantees, assurances, judgments, and the identity of offenders. BLS: BEEFY signatures only  
+   對：§6 的 VRF 都是 Bandersnatch；§10–11 的簽章是 Ed25519；§18 BEEFY 用 BLS。
+2. ❌ Bandersnatch: BEEFY and GRANDPA. Ed25519: tickets and the seal. BLS: guarantees, assurances and judgments  
+   BEEFY 是 BLS；ticket/seal 是 Bandersnatch；guarantee 等是 Ed25519。
+3. ❌ Bandersnatch: everything that ends up on-chain, since every extrinsic must be VRF-signed. Ed25519: everything off-chain, such as networking and audit gossip. BLS: unused in 0.8.0, reserved for a future version's aggregated GRANDPA votes  
+   三把 key 的分工是依「需要 VRF 還是普通簽章還是可聚合」，不是鏈上鏈下。
+4. ❌ Bandersnatch: guarantees and assurances. Ed25519: the seal and tickets. BLS: judgments and offender identity  
+   Bandersnatch 與 Ed25519 對調了；BLS 只用在 BEEFY。
+
+> **陷阱**　要隨機用 Bandersnatch，要簽名用 Ed25519，要聚合用 BLS。
+
+<sub>`n8-three-key-types`</sub>
+
+---
+
+### N8-13　Safrole nouns: ticket, ticket accumulator, sealer sequence, seal, epoch marker, winning-tickets marker, fallback. Put each in one sentence.
+
+<sub>§6 — ●○○ · 概念 · §6, eq. 6.25, eq. 6.27, eq. 6.28–6.29</sub>
+
+**標準答案**　Ticket: an anonymous lottery entry for next epoch. Accumulator (γ_A): the best E tickets collected so far. Sealer sequence (γ_S): this epoch's slot-by-slot schedule. Seal: the author's proof it owns this slot. Epoch marker: next epoch's entropy and keys, in the first block. Winning-tickets marker: next epoch's schedule, announced when submission closes. Fallback: a public key sequence used when tickets ran short
+
+順著一個 epoch 走：epoch e 期間，validator 用 ring-VRF 投 **ticket**（E_T），分數是 VRF 輸出；鏈上把目前最好的 E 張留在 **ticket accumulator** γ_A。提交期在 slot Y = 500 關閉，關閉後第一個 block 的 header 帶 **winning-tickets marker** H_W，公告 γ_A 排成的下期排程。epoch e+1 第一個 block 做輪替，γ_A 變成 **sealer sequence** γ_S（每個 slot 一張 ticket），同時 header 帶 **epoch marker** H_E（下期的 entropy 與 validator key）。之後每個 block 的作者用 ticket 對應的 key 產生 **seal** H_S，證明這個 slot 是自己的。如果 epoch e 結束時 γ_A 沒湊滿 E 張，e+1 整個 epoch 進 **fallback**：γ_S 改成由 entropy 直接算出的公開 key 序列，還是一人一 slot，但誰出塊大家都看得到。
+
+**逐項辨析**
+
+1. ✅ Ticket: an anonymous lottery entry for next epoch. Accumulator (γ_A): the best E tickets collected so far. Sealer sequence (γ_S): this epoch's slot-by-slot schedule. Seal: the author's proof it owns this slot. Epoch marker: next epoch's entropy and keys, in the first block. Winning-tickets marker: next epoch's schedule, announced when submission closes. Fallback: a public key sequence used when tickets ran short  
+   對：§6 各名詞的定義；γ_A、γ_S 在 eq. 6.5；marker 在 eq. 6.28–6.29；fallback 在 eq. 6.25、6.27。
+2. ❌ Ticket: a signed transaction that pays for the slot. Accumulator: the gas meter for the epoch. Sealer sequence: the list of blocks GRANDPA has finalized. Seal: the block hash signed by the author. Epoch marker: a checkpoint header light clients sync from. Winning-tickets marker: the list of validators slashed this epoch. Fallback: the previous epoch's schedule reused unchanged when the new one is late  
+   全是別的系統的名詞：JAM 沒有交易、gas 不按 epoch 計、seal 不是 hash。
+3. ❌ Ticket: a coretime purchase receipt. Accumulator: the ready queue. Sealer sequence: the guarantor rotation. Seal: the BEEFY signature. Epoch marker: the offenders list. Winning-tickets marker: the audit assignments. Fallback: GRANDPA's secondary vote  
+   全部錯位：ticket 不是收據、accumulator 不是 ω、seal 不是 BEEFY。
+4. ❌ Ticket: the author's public key. Accumulator: the entropy η. Sealer sequence: the validator set κ. Seal: the assurance signature. Epoch marker: the state root. Winning-tickets marker: the extrinsic hash. Fallback: the previous validator set λ  
+   把 Safrole 名詞對到了 state 的其他分量。
+
+> **陷阱**　ticket 投 → accumulator 收 → marker 公告 → sealer sequence 定案 → seal 證明；不夠就 fallback。
+
+<sub>`n8-safrole-nouns`</sub>
+
+---
+
+### N8-14　Data-availability nouns: bundle, shard, erasure-root, segment, segments-root, audit DA, D³L. What is each?
+
+<sub>§11; §14; §16; App. H — ●○○ · 概念 · eq. 11.5, §14, §16, App. H</sub>
+
+**標準答案**　Bundle: the package plus its extrinsic data and imported segments, what an auditor needs to re-run. Shard: one validator's erasure-coded piece. Erasure-root: the Merkle root over all shards, in the report. Segment: a 4104-octet block of data one package exports for later ones. Segments-root: the root over a package's exported segments. Audit DA: short-lived storage of bundle shards. D³L: 28-day storage of segment shards
+
+兩條線。**Audit 線**：guarantor 把 **bundle**（package + extrinsic 資料 + import 進來的 segment + 證明）erasure code 成 |κ| 個 **shard**，每位 validator 一片，所有 shard 的 Merkle root 就是 report 裡的 **erasure-root**；validator 拿到自己那片才簽 assurance。這些 shard 存在 **audit DA**，只要活到 report 被 audit 完、block 定案就好。**資料線**：refine 可以 export **segment**（固定 4104 octet），這些 segment 也被 erasure code、分片，root 叫 **segments-root**，同樣寫在 report 的 availability spec；後面的 package 可以 import 它們。segment 的 shard 存在 **D³L**（Distributed Data Lake），要留 28 天，因為誰都可能之後 import。所以一份 report 有兩個 root：erasure-root 對 bundle（給 audit），segments-root 對 export（給後人用）。
+
+**逐項辨析**
+
+1. ✅ Bundle: the package plus its extrinsic data and imported segments, what an auditor needs to re-run. Shard: one validator's erasure-coded piece. Erasure-root: the Merkle root over all shards, in the report. Segment: a 4104-octet block of data one package exports for later ones. Segments-root: the root over a package's exported segments. Audit DA: short-lived storage of bundle shards. D³L: 28-day storage of segment shards  
+   對：§14 bundle 與 segment、eq. 11.5 的 erasure-root 與 segments-root、§16 兩種 DA、App. H erasure coding。
+2. ❌ Bundle: a group of consecutive blocks finalized together by one GRANDPA round. Shard: one parachain's slice of the global state. Erasure-root: the state root after expired preimages are pruned. Segment: one slice of an epoch, 60 slots long. Segments-root: the MMR built over those slices. Audit DA: the part of the disputes state that auditors read. D³L: a Merkle trie with exactly three levels, used for the service index  
+   全是別的概念：bundle 是 package 的資料包，跟 GRANDPA 無關。
+3. ❌ Bundle: the block body. Shard: one core's share of validators. Erasure-root: the hash of deleted preimages. Segment: a basic block of PVM code. Segments-root: the jump table. Audit DA: the auditors' assignment. D³L: the delegator's key list  
+   全部錯位：shard 是 validator 拿的分片，segment 是 4104 octet 的資料塊。
+4. ❌ Bundle: the accumulate input. Shard: a work-item. Erasure-root: the header hash. Segment: a work-digest. Segments-root: the extrinsic hash. Audit DA: the ready queue. D³L: the preimage store  
+   全部錯位：bundle 給 audit 用，audit DA 是儲存不是 queue。
+
+> **陷阱**　bundle 給 audit、segment 給後人；erasure-root 對前者、segments-root 對後者。
+
+<sub>`n8-da-nouns`</sub>
+
+---
+
+### N8-15　PVM nouns: invocation, host call, gas, basic block, page fault, inner PVM. One line each.
+
+<sub>App. A; App. B — ●○○ · 概念 · §4.7, App. A, App. B</sub>
+
+**標準答案**　Invocation: one of the three ways the protocol runs the PVM (Ψ_I, Ψ_R, Ψ_A), each with its own host-call table. Host call: the only door out of the machine, triggered by ecalli. Gas: the compute budget, charged per basic block on entry. Basic block: a straight run of instructions ending in a jump or trap. Page fault: touching an unmapped page; the host may map it and resume. Inner PVM: a PVM started from inside refine to run, say, a parachain runtime
+
+**Invocation**（App. B）是「協定在什麼場合、給什麼 host call 表跑 PVM」：Ψ_I 授權、Ψ_R refine、Ψ_A accumulate，機器同一台，門不同。**Host call** 是程式執行 ecalli n 時暫停、把控制權交給 host 跑 Ω_n（讀 storage、轉帳、fetch…）再回來；PVM 沒有 I/O，這是唯一的門。**Gas** 是計算上限，0.8.0 起以 **basic block** 為單位在進入時預扣——basic block 是從入口到下一個跳躍／trap 的直線指令段，成本靜態可算。**Page fault** 是存取未映射的 4 KB page，機器停下並回報位址，host 可以把 page 映射上再繼續（不一定是錯誤）。**Inner PVM** 是 refine 專用：用 machine / peek / poke / invoke 這組 host call 在 PVM 裡再開一台 PVM，parachain 的 runtime 就是這樣在 JAM 上跑的。
+
+**逐項辨析**
+
+1. ✅ Invocation: one of the three ways the protocol runs the PVM (Ψ_I, Ψ_R, Ψ_A), each with its own host-call table. Host call: the only door out of the machine, triggered by ecalli. Gas: the compute budget, charged per basic block on entry. Basic block: a straight run of instructions ending in a jump or trap. Page fault: touching an unmapped page; the host may map it and resume. Inner PVM: a PVM started from inside refine to run, say, a parachain runtime  
+   對：App. B 三種 invocation、App. A 的 host call / gas / basic block / page fault、§B.2 的 inner PVM。
+2. ❌ Invocation: a transaction call that a user signs and submits, one per work-item. Host call: a synchronous call from one service into another service's accumulate, returning its result immediately. Gas: the fee, paid in tokens from the caller's balance at the end of the block. Basic block: a 4 KB memory page, the unit at which the PVM maps and prices memory. Page fault: a panic that ends the invocation and rolls back to the checkpoint. Inner PVM: the accumulate half of a service, which runs nested inside its refine half  
+   全是別的概念：host call 不是跨 service 同步呼叫，gas 不是代幣費。
+3. ❌ Invocation: the seal. Host call: a GRANDPA vote. Gas: the slot length. Basic block: a genesis block. Page fault: a missing preimage. Inner PVM: the auditor's replay  
+   全部錯位：invocation 不是 seal，gas 不是 slot 長度。
+4. ❌ Invocation: an epoch. Host call: an extrinsic. Gas: the erasure-coding rate. Basic block: a work-item. Page fault: a dependency that never arrives. Inner PVM: the recompiler  
+   全部錯位：basic block 是指令段不是 work-item。
+
+> **陷阱**　三種 invocation 一台機器；host call 是門；gas 按 block 預扣；page fault 可恢復。
+
+<sub>`n8-pvm-nouns`</sub>
+
+---
+
+### N8-16　Two last groups. Disputes: judgment, verdict, good/bad/wonky, culprit, fault, offender. Constants: C, E, P, R, U, L, D, H, Y. What are they?
+
+<sub>§10; App. I — ●○○ · 概念 · §10, App. I</sub>
+
+**標準答案**　Judgment: one auditor's signed vote on a report. Verdict: ⌊2|k|/3⌋+1 judgments collected; good (all positive), bad (none), wonky (exactly a third). Culprit: a guarantor of a bad report. Fault: a judge who voted against the verdict. Offender: either, recorded in ψ_O. Constants: C cores 341, E slots per epoch 600, P seconds per slot 6, R rotation period 10, U availability timeout 5, L lookup-anchor age 14,400, D preimage expunge 19,200, H recent blocks 8, Y ticket close 500
+
+**Disputes 名詞**（§10）：auditor 重跑 report 後簽一票 **judgment**（有效／無效）；出塊者收齊 ⌊2|k|/3⌋+1 票組成 **verdict**，正面票數決定 report 是 **good**（全部正面）、**bad**（全部負面）或 **wonky**（恰好 ⌊|k|/3⌋ 正面，資料有問題但無法定論）；bad report 的 guarantor 是 **culprit**，投票方向與最終 verdict 相反的 auditor 是 **fault**，兩者的 Ed25519 key 進 ψ_O 成為 **offender**。**常數**（App. I）：C = 341 core、E = 600 slot/epoch、P = 6 秒/slot（所以 epoch 一小時）、R = 10 slot 換一次 guarantor、U = 5 slot 沒 available 就逾時、L = 14,400 slot（24 小時）是 refine 能看的最舊 state、D = 19,200 slot 後 preimage 才真正清掉、H = 8 個 recent block、Y = 500 之後不收 ticket。這九個字母在公式裡到處出現，看到大寫單字母先想是不是常數。
+
+**逐項辨析**
+
+1. ✅ Judgment: one auditor's signed vote on a report. Verdict: ⌊2|k|/3⌋+1 judgments collected; good (all positive), bad (none), wonky (exactly a third). Culprit: a guarantor of a bad report. Fault: a judge who voted against the verdict. Offender: either, recorded in ψ_O. Constants: C cores 341, E slots per epoch 600, P seconds per slot 6, R rotation period 10, U availability timeout 5, L lookup-anchor age 14,400, D preimage expunge 19,200, H recent blocks 8, Y ticket close 500  
+   對：§10 的名詞定義與 App. I 的常數表。
+2. ❌ Judgment: the block author's decision to include or drop a report. Verdict: GRANDPA's finality vote on the block. Good/bad/wonky: the three PVM exit codes for halt, panic and out-of-gas. Culprit: a validator that missed its slot. Fault: a page fault inside refine. Offender: a service whose balance fell below threshold. Constants: C the number of chains, E the total epochs since genesis, P the coretime price, R the per-block reward, U the user count, L the loop limit, D the trie depth, H the block height, Y the year of the Common Era  
+   全是望文生義：judgment 是 auditor 的票，常數是協定參數不是價格獎勵。
+3. ❌ Judgment: a service's yield. Verdict: an accumulate result. Good/bad/wonky: report size classes. Culprit: the builder. Fault: a failed refine. Offender: the delegator. Constants: C cost, E entropy, P pool, R report, U update, L lookup, D dispute, H hash, Y yield  
+   全部錯位：verdict 不是 accumulate 結果，culprit 不是 builder。
+4. ❌ Judgment: an assurance. Verdict: a guarantee. Good/bad/wonky: availability states. Culprit: an assurer. Fault: an auditor. Offender: the author. Constants all equal 1023  
+   全部錯位：judgment 不是 assurance，常數各不相同。
+
+> **陷阱**　judgment 一票、verdict 一票的集合、offender 兩種人；常數 C E P R U L D H Y 各一個數字。
+
+<sub>`n8-dispute-nouns-and-constants`</sub>
 
 ---
 

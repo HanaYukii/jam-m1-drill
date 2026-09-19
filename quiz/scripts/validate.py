@@ -9,7 +9,7 @@ ITEMS_DIR = os.path.join(ROOT, "items")
 CHAPTERS = {
     # 基礎套題：主題式，只考主幹（不是 GP 章節的鏡像）
     "N1": "JAM 是什麼", "N2": "區塊與狀態", "N3": "時間與出塊", "N4": "Core 與 Service",
-    "N5": "一份工作的一生", "N6": "資料可得性與稽核", "N7": "PVM 與 gas",
+    "N5": "一份工作的一生", "N6": "資料可得性與稽核", "N7": "PVM 與 gas", "N8": "名詞與符號",
     # M1 套題：對應 Gray Paper 章節
     "3": "Notation", "4": "Overview", "5": "The Header", "6": "Safrole", "7": "Recent History",
     "8": "Authorization", "9": "Service Accounts", "10": "Disputes", "11": "Reporting & Assurance",
