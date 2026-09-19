@@ -65,7 +65,7 @@ ITEMS = [
   "id": "n4-why-refine-stateless",
  "lens": "設計",
   "ch": "N4", "section": "§14; §17", "gpRef": "§14 & §17",
-  "difficulty": 2, "kind": "rationale", "tags": ["refine", "audit"],
+  "difficulty": 2, "kind": "rationale", "tags": ["refine"],
   "alsoCh": ["N6"],
   "stem": "Why is refine forbidden from reading the chain state?",
   "stemZh": "為什麼 refine 被禁止讀取鏈上狀態？",
@@ -95,7 +95,7 @@ ITEMS = [
   "id": "n4-service-code",
  "lens": "設計",
   "ch": "N4", "section": "§9.2 Preimage Lookups", "gpRef": "§9",
-  "difficulty": 2, "kind": "concept", "tags": ["preimage", "service"],
+  "difficulty": 2, "kind": "concept", "tags": ["service", "assurance"],
   "stem": "A service account stores a code hash, not the code itself. How does the code actually become available to run?",
   "stemZh": "service 帳戶存的是 code hash 而不是程式碼本身。程式碼實際上是怎麼變成可執行的？",
   "options": [

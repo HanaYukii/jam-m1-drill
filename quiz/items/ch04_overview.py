@@ -64,7 +64,7 @@ ITEMS = [
  "lens": "時機",
   "alsoCh": ["8", "12"],
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.5–4.20",
- "difficulty": 2, "kind": "concept", "tags": ["dependency graph", "dependency", "authorizer"],
+ "difficulty": 2, "kind": "concept", "tags": ["dependency", "dependency graph", "authorizer"],
   "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
   "optionsZh": [
    "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的時槽 H_T 與先前的 pool α",
@@ -93,7 +93,7 @@ ITEMS = [
  "id": "ch04-common-era",
  "lens": "設計",
  "ch": "4", "section": "4.4 Time", "gpRef": "§4.4 (JAM Common Era)",
- "difficulty": 1, "kind": "concept", "tags": ["core"],
+ "difficulty": 1, "kind": "concept", "tags": ["timeslot"],
   "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
   "optionsZh": [
    "2025 年 1 月 1 日 00:00 UTC——從午夜起算讓時槽 0 成為某個日曆日的第一槽，因此每個 14,400 槽的邊界在全世界都是一次日期變換",
@@ -122,7 +122,7 @@ ITEMS = [
  "id": "ch04-in-core-vs-on-chain",
  "lens": "對比",
  "ch": "4", "section": "4.8 The Core Model and Services", "gpRef": "§4.9.1–4.9.2",
- "difficulty": 1, "kind": "concept", "tags": ["accumulate", "refine"],
+ "difficulty": 1, "kind": "concept", "tags": ["core"],
   "stemZh": "對比 JAM 的 in-core 與 on-chain 兩種共識模型：各由誰執行？各靠什麼保障？",
   "optionsZh": [
    "in-core 的運算（refine）由每一位 validator 執行，而 on-chain 的運算（accumulate）只由出塊者執行、其他人在出現爭議時才重放",
@@ -180,7 +180,7 @@ ITEMS = [
  "id": "ch04-coretime-vs-gas",
  "lens": "對比",
  "ch": "4", "section": "4.8.2 On Services and Accounts", "gpRef": "§4.9.2 last paragraphs",
- "difficulty": 2, "kind": "rationale", "tags": ["coretime", "gas", "authorizer"],
+ "difficulty": 2, "kind": "rationale", "tags": ["gas", "coretime"],
   "stemZh": "JAM 用什麼取代了 Ethereum 那套「用 gas 購買區塊空間」的模型？",
   "optionsZh": [
    "區塊空間以 gas 計量，並在 work-report 被 accumulate 時從該 service 的餘額 a_b 扣款；餘額見底的 service 其 report 會被丟棄",
@@ -209,7 +209,7 @@ ITEMS = [
  "id": "ch04-pvm-summary",
  "lens": "機制",
  "ch": "4", "section": "4.5 The Virtual Machine and Gas", "gpRef": "§4.7 The Virtual Machine and Gas, eq. 4.22–4.27",
- "difficulty": 1, "kind": "concept", "tags": ["PVM", "transfer"],
+ "difficulty": 1, "kind": "concept", "tags": ["PVM", "gas"],
   "stemZh": "Overview 怎麼摘述 PVM——它的基礎、暫存器、位元組序與記憶體？",
   "optionsZh": [
    "一台源自 WebAssembly 的堆疊機，32 位元字組、16 個暫存器，線性記憶體以 64 KiB 為單位成長且沒有不可存取的頁",

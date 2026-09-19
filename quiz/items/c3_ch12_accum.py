@@ -70,7 +70,7 @@ ITEMS = [
     "gpRef": "eq. 12.7 (E), 12.8 (Q), 12.12, 12.33 (ω′)",
     "difficulty": 2,
     "kind": "rationale",
-    "tags": ["authorizer", "accumulate"],
+    "tags": ["dependency", "authorizer"],
   "stemZh": "佇列編輯函數 E(r, x) 做兩件事：剝除出現在 x 中的依賴，以及丟棄整筆條目。有位隊友只實作了第一件事。實際上會出什麼錯？",
   "optionsZh": [
    "Q 不再終止——E(r, P(g)) 交回的是同一批條目、其依賴集合仍然為空，所以下一次遞迴永遠挑到同一個 g——而且在區塊邊界上，ω′ 的兩個情形（i = 0 的 E(R^Q, ξ′[E−1]) 與 i ≥ τ′ − τ 的 E(ω↺[m−i], ξ′[E−1])）都會留下剛被 accumulate 的 report，於是它們會在之後的區塊被再 accumulate 一次",
@@ -121,7 +121,7 @@ ITEMS = [
     "gpRef": "eq. 12.8 (Q), 12.31–12.33; §12.1",
     "difficulty": 2,
     "kind": "concept",
-    "tags": ["accumulate", "dependency"],
+    "tags": ["dependency", "work-report"],
   "stemZh": "某份 report w 待在 ω 裡、還有一個未滿足的依賴 p，而 package p 永遠不會被 accumulate——攜帶 p 的那份 report 幾個區塊之前被擔保過，但在它的 core 上逾時、從未變成 available。依 GP 0.8.0 追蹤 w 的命運。",
   "optionsZh": [
    "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；接著它會在下一個區塊就被丟掉，因為 E(·, ξ′[E−1]) 會移除任何仍帶有「不存在於 ξ 中之依賴」的條目——GP 正是這樣取消一份帶有無法滿足依賴的 report",
@@ -170,7 +170,7 @@ ITEMS = [
     "gpRef": "§11.4 (report gas checks); eq. 12.23 (Δ1 g), 12.24 (block g); §9.1",
     "difficulty": 2,
     "kind": "concept",
-    "tags": ["gas", "accumulate"],
+    "tags": ["gas", "service"],
   "stemZh": "G_A = 10,000,000、G_T = 3,500,000,000，而每個 service 帳戶都帶有 a_g 與 a_m。每一個 accumulate gas 限制——上限與逐 service 的下限——各套用在哪裡？各在什麼時候檢查？",
   "optionsZh": [
    "逐 report：§11.4 要求各 digest 的 d_g 總和 ≤ G_A、且每份 digest 的 d_g ≥ δ[d_s]_g（目的 service 的 a_g），兩者都在擔保時對照 prior 的 δ 檢查；逐區塊：eq. 12.24 把 Δ+ 的預算定為 g = max(G_T, G_A·C + Σ values(χ_Z))；而 `transfer` host call 除非該筆轉帳的 gas l ≥ δ[d]_m 否則以 LOW 拒絕，所以一筆 deferred transfer 抵達時也帶著足夠收款方 Accumulate 的 gas",
@@ -220,7 +220,7 @@ ITEMS = [
     "gpRef": "eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B)",
     "difficulty": 2,
     "kind": "concept",
-    "tags": ["yield", "accumulate", "BEEFY"],
+    "tags": ["yield", "accumulate"],
   "stemZh": "在同一個區塊裡：service 5 被 accumulate 並以一個 32 位元組的雜湊呼叫 `yield`；service 6 被 accumulate、燒了 gas 但從未呼叫 `yield`；service 9 完全沒有 work-digest、只因一筆 deferred transfer 而被觸及，而它呼叫了 `yield`。θ′ 裡最後有什麼？又是誰消費它？",
   "optionsZh": [
    "θ′ 為 Δ* 的 service 集合 s 中的每一個 service 各放一項，沒有 yield 的以零雜湊代入，所以 θ′ 同時帶著 service 5、6、9 的配對且 |θ′| = |s|，這正是讓下游驗證者能依位置索引它的原因。它是獨立的狀態項目、每塊整批換掉，也是 β′_B 所附加的對象",
@@ -270,7 +270,7 @@ ITEMS = [
     "gpRef": "eq. 12.18 (d′), 12.20 (I), 12.21 (Y), 12.37",
     "difficulty": 2,
     "kind": "concept",
-    "tags": ["preimage", "accumulate"],
+    "tags": ["preimage"],
   "stemZh": "preimage 整合函數 I 在一個區塊的轉移中被套用了兩次。這兩處分別在哪裡？它的 Y 述詞又靜默地丟棄了什麼？",
   "optionsZh": [
    "一次在 Δ* 內部，形式為 e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p)——把 `provide` host call 所提供的 blob 摺進來，而且是在新建與被移除的 service 都併好之後；另一次在最後，形式為 δ′ = I(δ‡, E_P)。Y(d, s, i) 除非 s ∈ K(d) 且 d[s]_l[(H(i), |i|)] = [] 否則為 ⊥，所以一份指向「同一輪中被 eject 的 service」或指向「不是僅被 solicit 之 request」的 blob 會被丟棄而不追究",
@@ -323,7 +323,7 @@ ITEMS = [
     "gpRef": "eq. 11.17 (R), 12.4, 12.11 (R*), 12.17, 12.31",
     "difficulty": 2,
     "kind": "rationale",
-    "tags": ["accumulate", "assurance"],
+    "tags": ["accumulate", "work-report"],
   "stemZh": "R、R!、R^Q 與 R* 全都是序列而不是集合，即使決定哪些 report 有資格的只是「是否為成員」。為什麼順序對共識有影響？它又是在哪裡被固定下來的？",
   "optionsZh": [
    "因為 Δ+ 只 accumulate 符合 gas 預算的前綴 R*[..i]，接著記下 ξ′[E−1] = P(R*[..n])：不同的順序會產生不同的前綴、因而產生不同的 posterior 狀態。順序在 eq. 11.17 就被釘住了——R 是以遞增的 core 索引走訪 ρ† 並保留 assurance 超過 2/3·|κ| 者所建構的；R! 沿用該順序，而 Q 則依相依解開的輪次把佇列中的 report 接上去",
@@ -374,7 +374,7 @@ ITEMS = [
     "gpRef": "eq. 12.17 (Δ+), 12.24, 12.28",
     "difficulty": 3,
     "kind": "delta",
-    "tags": ["accumulate", "transfer", "gas", "delta-0.8.0"],
+    "tags": ["accumulate", "transfer", "delta-0.8.0"],
   "stemZh": "在 Δ+ 的遞迴中途，剩餘的 report 序列已空，但前一輪 Δ* 產出了三筆 deferred transfer t，而交給這次呼叫的 free-accumulation 映射是 ∅。Δ+ 還會做事嗎？在 GP 0.8.0 中它又交回什麼？",
   "optionsZh": [
    "不會。GP 的終止測試是前綴長度 i，而在 r = ⟦⟧ 時符合 gas 的最大前綴是 i = 0，所以基底情形 ⟨0, e, ∅, ⟦⟧, ⟦⟧⟩ 觸發、Δ* 從未被呼叫；那三筆待處理的 transfer 會透過 ω 帶進下一個區塊，這正是 ω 被定型成可以與延後的 report 並存的原因，而它們的 gas 會對照下一塊的預算 g 而非這一塊重新計費",
@@ -427,7 +427,7 @@ ITEMS = [
     "gpRef": "eq. 12.18 (Δ*), 12.19 (R)",
     "difficulty": 3,
     "kind": "concept",
-    "tags": ["privileges", "accumulate", "authorizer"],
+    "tags": ["privileges", "authorizer", "accumulate"],
   "stemZh": "在 Δ* 內部，core c 的 posterior authorizer 佇列 φ′[c] 與 posterior staging 金鑰 ι′ 各自都是從恰好一個 service 的 Δ1 輸出中提取出來的。是誰的輸出？又是由哪一個版本的 χ 選出的？",
   "optionsZh": [
    "φ′[c] = ((Δ(χ_A[c])_e)_q)[c] 而 ι′ = (Δ(χ_V)_e)_i——prior 的逐 core assigner 與 prior 的 delegator。即使這同一輪改寫了 χ′_A[c] 或 χ′_V，佇列與金鑰仍然來自該輪開始時持有該特權的那一位，而且只讀取那個 service 自己那份成分、逐個 core 索引地讀",
@@ -476,7 +476,7 @@ ITEMS = [
     "gpRef": "eq. 12.18 (u, t′)",
     "difficulty": 3,
     "kind": "code",
-    "tags": ["accumulate", "transfer"],
+    "tags": ["service", "accumulate"],
   "stemZh": "在團隊的 Δ* 中，service 集合 s 是一個 Go map，而這個迴圈從逐 service 的結果蒐集 u 與 t′。它違反了 GP 0.8.0 的哪項要求？可觀察的症狀又是什麼？",
   "optionsZh": [
    "沒有違反任何與共識相關的要求：eq. 12.18 把 t′ 寫成集合，而 u 只被 eq. 12.28 的 G(s) 消費、後者是逐 service 加總，所以兩者都與順序無關。攤平後的 ⌢⌢t′ 確實會以任意順序抵達下一輪 Δ+，但 eq. 12.23 會在 Ψ_A 看到之前先把每個目的地的 i^T 依發送方重新排序，所以兩個匯入同一區塊的節點仍會對 state root 取得一致",

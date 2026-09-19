@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n7-what-is-pvm",
  "lens": "對比",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
-  "difficulty": 1, "kind": "concept", "tags": ["PVM", "host call"],
+  "difficulty": 1, "kind": "concept", "tags": ["PVM"],
   "stem": "What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?",
   "stemZh": "PVM 是什麼？JAM 為什麼要自己定義一個，而不沿用既有的虛擬機？",
   "options": [
@@ -93,7 +93,7 @@ ITEMS = [
   "id": "n7-determinism-requirement",
  "lens": "設計",
   "ch": "N7", "section": "App. A; §17", "gpRef": "App. A & §17",
-  "difficulty": 2, "kind": "rationale", "tags": ["PVM", "audit"],
+  "difficulty": 2, "kind": "rationale", "tags": ["PVM"],
   "alsoCh": ["N6"],
   "stem": "The PVM has no instruction for reading a clock, generating randomness or opening a socket. What would go wrong if it did?",
   "stemZh": "PVM 沒有任何讀取時鐘、產生隨機數或開啟網路連線的指令。如果有的話會出什麼問題？",
@@ -123,7 +123,7 @@ ITEMS = [
   "id": "n7-host-calls-basic",
  "lens": "設計",
   "ch": "N7", "section": "App. B", "gpRef": "App. B",
-  "difficulty": 2, "kind": "concept", "tags": ["host call", "storage"],
+  "difficulty": 2, "kind": "concept", "tags": ["host call", "service"],
   "stem": "If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?",
   "stemZh": "既然 PVM 碰不到外界，一個 service 要怎麼讀取自己的 storage 或轉帳給另一個 service？",
   "options": [
@@ -181,7 +181,7 @@ ITEMS = [
   "id": "n7-memory-basic",
  "lens": "設計",
   "ch": "N7", "section": "§4.7; App. A", "gpRef": "§4 & App. A",
-  "difficulty": 2, "kind": "concept", "tags": ["memory", "transfer", "PVM"],
+  "difficulty": 2, "kind": "concept", "tags": ["memory", "dispute"],
   "stem": "The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?",
   "stemZh": "PVM 的記憶體是分頁的，碰到未映射的頁會引發 fault 而不是直接殺掉程式。這讓什麼變得可能？",
   "options": [

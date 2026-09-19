@@ -180,7 +180,7 @@ ITEMS = [
  "id": "ch11-availability-threshold",
  "lens": "時機",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17–11.18",
- "difficulty": 2, "kind": "delta", "tags": ["assurance", "work-report", "delta-0.8.0"],
+ "difficulty": 2, "kind": "delta", "tags": ["assurance", "balance", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，一份 report 什麼時候變成 available（R）？待處理的 assignment 又在什麼時候從 ρ‡ 被清除？",
   "optionsZh": [
    "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個時槽）、或 |κ| ≠ |κ′|（validator 集合大小改變了）",
@@ -209,7 +209,7 @@ ITEMS = [
  "id": "ch11-guarantor-assignment",
  "lens": "演算法",
  "ch": "11", "section": "11.3 Guarantor Assignments", "gpRef": "eq. 11.19–11.23",
- "difficulty": 3, "kind": "concept", "tags": ["guarantee", "shuffle"],
+ "difficulty": 3, "kind": "concept", "tags": ["guarantee", "core"],
   "stemZh": "在 GP 0.8.0 中，validator 是怎麼被指派到 core 上去做擔保的？",
   "optionsZh": [
    "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：序列 [0,0,0,1,1,1,…] 以熵 e = η′_2 做 Fisher-Yates 洗牌，再依 rotation 索引（R = 10 個時槽）旋轉；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
@@ -267,7 +267,7 @@ ITEMS = [
  "id": "ch11-report-checks-state",
  "lens": "時機",
  "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.31–11.33",
- "difficulty": 2, "kind": "concept", "tags": ["guarantee", "gas"],
+ "difficulty": 2, "kind": "concept", "tags": ["work-report", "guarantee"],
   "stemZh": "在一份進來的 report w 被放進 ρ′ 之前，要通過哪些鏈上檢查？",
   "optionsZh": [
    "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]（authorizer 在 prior 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
@@ -296,7 +296,7 @@ ITEMS = [
  "id": "ch11-contextual-validity",
  "lens": "演算法",
  "ch": "11", "section": "11.4.1 Contextual Validity of Reports", "gpRef": "eq. 11.35–11.45",
- "difficulty": 3, "kind": "concept", "tags": ["guarantee", "work-report"],
+ "difficulty": 3, "kind": "concept", "tags": ["work-report", "extrinsic"],
   "stemZh": "E_G 中 report 的脈絡有效性要求有哪些？又有哪一條聽起來合理、GP 其實沒有要求的規則？",
   "optionsZh": [
    "該 extrinsic 中沒有任何兩份 report 共用同一個 work-package 雜湊，而且任何 package 雜湊都不得出現在 β 的 reported 集合、ξ（已 accumulate）、ready queue ω 或 ρ 的某個待處理 assignment 裡",
@@ -325,7 +325,7 @@ ITEMS = [
  "id": "ch11-rho-prime",
  "lens": "時機",
  "ch": "11", "section": "11.5 Transitioning for Reports", "gpRef": "eq. 11.46",
- "difficulty": 1, "kind": "concept", "tags": ["guarantee", "work-report"],
+ "difficulty": 1, "kind": "concept", "tags": ["guarantee", "extrinsic"],
   "stemZh": "處理完 E_G 之後，對於收到一份新 guarantee g 的 core，ρ′[c] 裝的是什麼？",
   "optionsZh": [
    "(g, τ′)——整份 guarantee 配上當前區塊的時槽 τ′ 作為它的指派時間",
@@ -354,7 +354,7 @@ ITEMS = [
  "id": "ch11-code-availability",
  "lens": "演算法",
  "ch": "11", "section": "11.2.2 Available Reports", "gpRef": "eq. 11.17 — internal/extrinsic/assurance_controller.go",
- "difficulty": 2, "kind": "code", "tags": ["assurance", "work-report", "delta-0.8.0"],
+ "difficulty": 2, "kind": "code", "tags": ["assurance", "balance", "delta-0.8.0"],
   "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。這是 GP 的門檻嗎？它的正確性取決於什麼？",
   "optionsZh": [
    "只要 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 是從 κ 的即時大小導出的——tiny 是 6 取 5、full 是 1023 取 683——而不是來自編譯期常數，它就與 GP 嚴格的「> 2/3·|κ|」完全相符",

@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch10-state",
  "lens": "機制",
  "ch": "10", "section": "10.1 The State", "gpRef": "eq. 10.1",
- "difficulty": 1, "kind": "concept", "tags": ["dispute", "PVM"],
+ "difficulty": 1, "kind": "concept", "tags": ["dispute"],
   "stemZh": "disputes 狀態是 ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。這四個分量各裝什麼？",
   "optionsZh": [
    "ψ_G、ψ_B、ψ_W 分別是被判定為正確、錯誤、無法判定的 work-report 雜湊集合；ψ_O 是被認定誤判過某份 report 的 validator 的 Ed25519 金鑰集合",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "ch10-verdict-thresholds",
  "lens": "設計",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 (V)",
- "difficulty": 2, "kind": "concept", "tags": ["dispute", "extrinsic"],
+ "difficulty": 2, "kind": "concept", "tags": ["dispute", "balance"],
   "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，（t → 結果）的對照表是什麼？其他的 t 又會如何？",
   "optionsZh": [
    "t = 5 → good（⊤）；t = 0 → bad（⊥）；t = 2 → wonky（∅）；其他任何 t 都會讓區塊無效",
@@ -121,7 +121,7 @@ ITEMS = [
  "id": "ch10-ordering",
  "lens": "時機",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.8–10.11",
- "difficulty": 2, "kind": "concept", "tags": ["dispute", "extrinsic"],
+ "difficulty": 2, "kind": "concept", "tags": ["extrinsic", "dispute"],
   "stemZh": "disputes extrinsic 施加了哪些排序與唯一性的約束？",
   "optionsZh": [
    "verdict 依 report 雜湊排序且唯一；culprits 與 faults 各自依 Ed25519 金鑰排序且唯一；verdict 內部的 judgment 依 validator 索引排序且唯一；任何 verdict 的 report 雜湊都不得已經出現在 ψ_G ∪ ψ_B ∪ ψ_W 裡",
@@ -150,7 +150,7 @@ ITEMS = [
  "id": "ch10-effects",
  "lens": "時機",
  "ch": "10", "section": "10.2–10.3", "gpRef": "eq. 10.14–10.19",
- "difficulty": 2, "kind": "concept", "tags": ["dispute", "header"],
+ "difficulty": 2, "kind": "concept", "tags": ["header", "dispute"],
   "stemZh": "處理 E_D 會對狀態產生哪些效果？header 的 offenders marker H_O 又必須包含什麼？",
   "optionsZh": [
    "對任何其待處理 report 被判定為 bad 或 wonky 的 core，ρ†[c] = ∅；ψ′_G、ψ′_B、ψ′_W 各自吸收自己 verdict 的 report 雜湊；ψ′_O 吸收全部的 culprit 與 fault 金鑰；H_O = [依序的 culprit 金鑰] ⌢ [依序的 fault 金鑰]",
@@ -179,7 +179,7 @@ ITEMS = [
  "id": "ch10-code-thresholds",
  "lens": "演算法",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi",
- "difficulty": 2, "kind": "code", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
+ "difficulty": 2, "kind": "code", "tags": ["balance", "dispute", "delta-0.8.0"],
   "stemZh": "這是團隊的 verdict 分類程式碼。要符合 GP 0.8.0，必須改什麼？",
   "optionsZh": [
    "門檻必須依 |k| 計算，也就是由該 verdict 的 epoch index 所選出的那個 validator 集合（κ 或 λ）的長度，而不是用全域的 ValidatorsCount 常數",

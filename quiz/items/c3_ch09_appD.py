@@ -40,7 +40,7 @@ ITEMS = [
  "lens": "時機",
  "ch": "9", "section": "9.3 Account Footprint and Threshold Balance",
  "gpRef": "eq. 9.8 (a_i, a_o, a_t); App. B `write` (Ω_W)",
- "difficulty": 2, "kind": "code", "tags": ["storage", "balance", "host call"],
+ "difficulty": 2, "kind": "code", "tags": ["balance", "storage"],
   "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。依 GP 0.8.0，一筆 storage 條目對 a_i 與 a_o 各計多少？寫入後門檻超過餘額時必須怎麼處理？",
   "optionsZh": [
    "一筆 storage 條目對 a_i 計 1、對 a_o 計 32 + |v|——key 的長度從不計費，因為 JAM 在 trie 裡只存 storage key 的雜湊；而遇到 FULL 時該寫入仍然生效，差額則從餘額中扣除",
@@ -99,7 +99,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "時機",
  "ch": "9", "section": "9.2.2 Semantics",
  "gpRef": "§9.2.2 (four shapes of a_l); App. B `forget` (Ω_F), expunge period D = 19,200",
- "difficulty": 2, "kind": "concept", "tags": ["preimage", "host call"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "service"],
   "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，GP 0.8.0 在每種情況下各做什麼？",
   "optionsZh": [
    "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 該 request 條目與 a_p[h] 兩者都被清除，但只有在 y < t − D 時；[x, y, w] → [w, t]，同樣只有在 y < t − D 時；其餘每一種情況都回傳 HUH",
@@ -129,7 +129,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "演算法",
  "ch": "9", "section": "9 Service Accounts",
  "gpRef": "§9 eq. 9.1 (N_S ≡ N_{2^32}); eq. B.14 (check); S = 2^16",
- "difficulty": 2, "kind": "concept", "tags": ["accumulate", "service"],
+ "difficulty": 2, "kind": "concept", "tags": ["service", "accumulate"],
   "stemZh": "某個 service 在 accumulation 期間呼叫 `new`。GP 0.8.0 如何挑選子帳戶的索引？又如何避免與既有 service 相撞？",
   "optionsZh": [
    "索引是新帳戶 code hash 的 Blake2b 對 2^32 取模，好讓相同的程式碼永遠落在同一個位置、使重複部署變得便宜；完全沒有探測，而萬一該索引已被佔用，整個區塊就會被判為無效",
@@ -161,7 +161,7 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
  "lens": "設計",
  "ch": "D", "section": "D.2.1 Node Encoding and Trie Identification",
  "gpRef": "§D.1 (C → B_31); §D.2.1 (nodes fixed at 512 bit)",
- "difficulty": 1, "kind": "rationale", "tags": ["Merklization", "timeslot"],
+ "difficulty": 1, "kind": "rationale", "tags": ["Merklization", "serialization"],
   "stemZh": "state-key 建構子 C 被規定產出 B_31，然而 state trie 中其他每一個量——子節點識別、內嵌值的欄位、H(v)——都是 32 個 octet。是什麼迫使 key 少一個 octet？",
   "optionsZh": [
    "最高位的那個 octet 被保留下來，好讓 branch／leaf 的判別位元能被攜帶在 key 本身之內，這正是讓驗證者不必取得節點就能分辨兩種節點型別的機制",

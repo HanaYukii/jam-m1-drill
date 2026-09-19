@@ -5,7 +5,7 @@ ITEMS = [
  "id": "b2-appB-write-prev-length-full",
  "lens": "演算法",
  "ch": "B", "section": "B.5 General Functions — write", "gpRef": "§B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)",
- "difficulty": 2, "kind": "code", "tags": ["storage", "host call"],
+ "difficulty": 2, "kind": "code", "tags": ["balance", "host call"],
   "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。依 GP 0.8.0，成功時 φ′_7 回傳什麼？若這次寫入會讓門檻超過餘額會怎樣？修正前的程式碼錯在哪？",
   "optionsZh": [
    "成功時 φ′_7 = 5000，也就是剛寫入之值的長度；若 a_t > a_b 則該值仍會被儲存、φ′_7 = FULL，而差額會在該 service 下次 accumulation 時從餘額扣除——所以這次修正需要改的只有暫存器的值，而不是 map 變動的順序",
@@ -61,7 +61,7 @@ ITEMS = [
  "id": "b2-appB-read-cross-service-pure",
  "lens": "演算法",
  "ch": "B", "section": "B.5 General Functions — read", "gpRef": "§B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)",
- "difficulty": 3, "kind": "code", "tags": ["storage", "accumulate", "host call"],
+ "difficulty": 3, "kind": "code", "tags": ["service", "accumulate"],
   "stemZh": "這段節錄來自團隊在修正 #938 之後的 Ω_R（`read`），該修正加上了 `callerServiceID == serviceID` 的守衛（s* = φ_7，或當 φ_7 = 2^64−1 時為呼叫者自己）。正在 accumulate 的 service A 讀取 service B 的某個 storage key，而 B 在本塊並未 accumulate。這次讀取對 B 的帳戶可以做什麼、不可以做什麼？加守衛之前出了什麼問題？",
   "optionsZh": [
    "Ω_R(ϱ, ω, μ, s, s, d) 可以查閱 d 中的任何帳戶，但交回的只有呼叫者自己的帳戶 s（由 G 鏡射進 x）；讀取 B 是一次純粹的查閱、必須讓 B 保持不動——在加上守衛之前，B 的 key-val 被從未匹配池中逐出，B 的條目也就從合併後的 δ′ 中消失，state root 因而分歧",
@@ -118,7 +118,7 @@ ITEMS = [
  "id": "b2-appB-pages-access-modes",
  "lens": "演算法",
  "ch": "B", "section": "B.6 Refine Functions — pages", "gpRef": "§B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants",
- "difficulty": 3, "kind": "code", "tags": ["memory", "host call", "refine"],
+ "difficulty": 3, "kind": "code", "tags": ["memory", "host call"],
   "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。這段程式碼在哪些地方偏離了 GP 0.8.0 對 `pages` 的語意？",
   "optionsZh": [
    "這段程式碼是對的：Ω_Z 對每一個 r ∈ 0…4 都會把該範圍填零，差別只在最終的存取權（0 → 不可存取，1/3 → R，2/4 → W）；GP 從不區分「配置」與「改變模式」，這也是為什麼附錄 I 對每一個 r 都只訂一個基本成本加一個每頁費率",

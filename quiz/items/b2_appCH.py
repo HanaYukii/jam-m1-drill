@@ -36,7 +36,7 @@ ITEMS = [
  "id": "appG-ietf-vs-ring",
  "lens": "對比",
  "ch": "G", "section": "G Bandersnatch VRF (IETF VRF vs Ring VRF)", "gpRef": "§G; §3 cryptography notation; eq. 6.4, 6.14–6.18, 6.30; eq. 17.3 (audit seed)",
- "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch", "Safrole", "ring VRF"],
+ "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch"],
   "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。兩者各用在哪？各多大？輸出函數 Y 又取決於什麼？",
   "optionsZh": [
    "只有 E_T 裡的 ticket 證明是 784 位元組的 ring-VRF 證明（匿名，對照 144 位元組的 ring root 驗證）；seal H_S、熵 H_V 與稽核種子都是具名金鑰下 96 位元組的 IETF VRF 簽章；兩者的 Y(·) 都是 VRF 輸出的前 32 個位元組，而且取決於 context 而非訊息",
@@ -65,7 +65,7 @@ ITEMS = [
  "id": "appG-signing-contexts",
  "lens": "機制",
  "ch": "G", "section": "Signing contexts X (definitions appendix) and their primitives", "gpRef": "definitions appendix §Signing Contexts; eq. 6.16–6.18, 6.30, 11.14, 11.28, 17.3, 17.7, 17.16, 18.1; ch. 10 culprit/fault signature rules",
- "difficulty": 2, "kind": "concept", "tags": ["core"],
+ "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch"],
   "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。列出這些 context 與各自搭配的原語——並指出唯一一個被用了兩次、搭配兩種不同原語的 context。",
   "optionsZh": [
    "X_T = $jam_ticket_seal 被用了兩次：一次用於 ring-VRF 的 ticket 證明（context 為 X_T ⌢ η′_2 ⌢ [e]、空訊息、root 為 γ′_Z），一次用於一般的 IETF-VRF seal（context 為 X_T ⌢ η′_3 ⌢ [i_e]、訊息為 E_U(H)）",

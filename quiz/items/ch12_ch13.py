@@ -5,7 +5,7 @@ ITEMS = [
  "id": "ch12-history-queue-state",
  "lens": "演算法",
  "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.1–12.3",
- "difficulty": 2, "kind": "concept", "tags": ["accumulate", "authorizer"],
+ "difficulty": 2, "kind": "concept", "tags": ["authorizer", "accumulate"],
   "stemZh": "ξ（accumulated）與 ω（ready）是什麼？它們各有多大？",
   "optionsZh": [
    "ξ ∈ [{H}]_E——最近 E = 600 個時槽、每槽一個已 accumulate 的 work-package 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽一串「該槽變為 available 但依賴仍未滿足」的 report，每筆配上它尚未滿足的依賴集合",
@@ -92,7 +92,7 @@ ITEMS = [
  "id": "ch12-delta-star",
  "lens": "時機",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.18–12.19 (Δ*, R)",
- "difficulty": 3, "kind": "concept", "tags": ["accumulate", "privileges", "storage"],
+ "difficulty": 3, "kind": "concept", "tags": ["accumulate", "privileges"],
   "stemZh": "在 Δ*（平行 accumulation）中，哪些 service 會被 accumulate？當 manager 與某個具特權的 service 同時寫入同一個特權索引——assigners、delegator 或 registrar——時，哪一次寫入會存活？",
   "optionsZh": [
    "s = {有 digest 的 service} ∪ keys(f) ∪ {deferred transfer 的收款方}；每一個都透過 Δ1 恰好被 accumulate 一次；χ′_M 與 χ′_Z 單獨由 manager 的輸出決定；至於 assigners、delegator 與 registrar，衝突解析函數是 R(o, a, b) = b 當 a = o、否則為 a",
@@ -150,7 +150,7 @@ ITEMS = [
  "id": "ch12-deferred-transfer",
  "lens": "時機",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.14 & B.transfer",
- "difficulty": 1, "kind": "concept", "tags": ["transfer", "accumulate"],
+ "difficulty": 1, "kind": "concept", "tags": ["transfer", "balance"],
   "stemZh": "一筆 deferred transfer T = (s, d, a, m, g)。這些欄位是什麼？餘額又是在什麼時候移動的？",
   "optionsZh": [
    "s 來源 service、d 目的地、a 金額、m 為 W_T = 128 個 octet 的 memo、g 是給收款方處理用的 gas 上限；發送方的餘額在呼叫 `transfer` 當下就被扣除，而該金額要到之後某一輪目的地被 accumulate 時才入帳",
@@ -179,7 +179,7 @@ ITEMS = [
  "id": "ch12-outputs",
  "lens": "時機",
  "ch": "12", "section": "12.3 Final State Integration", "gpRef": "eq. 12.24–12.33 (δ† → δ‡ → δ′)",
- "difficulty": 2, "kind": "concept", "tags": ["accumulate", "service"],
+ "difficulty": 2, "kind": "concept", "tags": ["accumulate", "prior/posterior"],
   "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，每一項各怎麼併入 posterior 狀態？",
   "optionsZh": [
    "θ′ = b 中的 (service, 雜湊) 配對（那些 yield 出 32 位元組雜湊的 service）；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（accumulate 掉的項數 N、處理掉的 transfer 數 T、用掉的 gas G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
@@ -208,7 +208,7 @@ ITEMS = [
  "id": "ch12-preimage-integration",
  "lens": "時機",
  "ch": "12", "section": "12.4 Preimage Integration", "gpRef": "eq. 12.34–12.37",
- "difficulty": 2, "kind": "concept", "tags": ["preimage", "accumulate"],
+ "difficulty": 2, "kind": "concept", "tags": ["preimage", "extrinsic"],
   "stemZh": "preimages extrinsic E_P 受什麼規則管轄——什麼可以收、對哪個狀態檢查——又是怎麼、在什麼時候併入 δ′？",
   "optionsZh": [
    "E_P ∈ [(s, d)] 依序且唯一；每一組 (s, d) 都必須在 prior 的 δ 上為 providable——該 service 存在，且 δ[s]_l[(H(d), |d|)] = []（已請求、尚未提供）；整合發生在 accumulation 之後：δ′ = I(δ‡, E_P)，把 a_l[(H(d),|d|)] 設為 [τ′] 並寫入 a_p[H(d)] = d，任何已不再有用的 preimage 會被靜默丟棄",
@@ -237,7 +237,7 @@ ITEMS = [
  "id": "ch12-code-outer-accumulation",
  "lens": "對比",
  "ch": "12", "section": "12.2 Execution", "gpRef": "eq. 12.17 — internal/accumulation/accumulation.go OuterAccumulation",
- "difficulty": 3, "kind": "code", "tags": ["accumulate", "service", "delta-0.8.0"],
+ "difficulty": 3, "kind": "code", "tags": ["accumulate", "delta-0.8.0"],
   "stemZh": "這是團隊在 Δ+ 中的前綴選取程式碼。對照 GP 0.8.0 的 eq. 12.17，還缺了什麼？",
   "optionsZh": [
    "0.8.0 要求預算判斷必須把待處理 deferred transfer 的 gas 總和 t 與 free-accumulation 額度總和 f 一併計入（Σ d_g + Σ t_g + Σ f ≤ g），所以 gasSum 必須從那兩個總和起算而不是從 0",
@@ -340,7 +340,7 @@ n := len(t) + i + len(f)"""},
  "id": "ch13-service-stats",
  "lens": "演算法",
  "ch": "13", "section": "13.2 Cores and Services", "gpRef": "eq. 13.8, 13.13–13.17",
- "difficulty": 2, "kind": "concept", "tags": ["statistics", "service"],
+ "difficulty": 2, "kind": "concept", "tags": ["service", "accumulate"],
   "stemZh": "一個區塊的 π′_S 裡會出現哪些 service？accumulation 那一項又裝什麼？",
   "optionsZh": [
    "s = 在本塊各 report 中有 digest 的 service ∪ 在 E_P 中收到 preimage 的 service ∪ accumulation 統計的 key；每項裝有來自 E_P 的 provision（筆數、總大小）、refinement（筆數、gas）、imports／extrinsics／exports，以及 accumulation = S(s) = (項數 N, transfer 數 T, gas G) 或 (0,0,0)",

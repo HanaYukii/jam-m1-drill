@@ -5,7 +5,7 @@ ITEMS = [
  "id": "arch-audit-initial-tranche",
  "lens": "演算法",
  "ch": "ARCH", "section": "17.3 Selection of Reports", "gpRef": "eq. 17.2–17.4",
- "difficulty": 3, "kind": "concept", "tags": ["audit", "ELVES"],
+ "difficulty": 3, "kind": "concept", "tags": ["audit", "work-report"],
   "stemZh": "validator 如何挑出自己在初始 tranche（a_0）必須稽核的 work-report？",
   "optionsZh": [
    "它以 context X_U ⌢ Y(H_V) 對空訊息做一個 Bandersnatch VRF 簽章 s_0，再用 Y(s_0) 對每個 core 的序列 q 做 Fisher-Yates 洗牌，取前十個當中非空的那些",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "arch-audit-outcomes",
  "lens": "演算法",
  "ch": "ARCH", "section": "17.1 Overview", "gpRef": "§17.1",
- "difficulty": 2, "kind": "concept", "tags": ["dispute", "audit"],
+ "difficulty": 2, "kind": "concept", "tags": ["audit", "dispute"],
   "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。兩個門檻是什麼？各自導致什麼後果？",
   "optionsZh": [
    "若仍有超過 2/3 的 validator 發出正面判定，發出負面判定的人可能因浪費時間而受罰；若有超過 1/3 發出負面判定，含有該 report 的區塊會被列入禁用名單，它與其所有後代都會被忽略",

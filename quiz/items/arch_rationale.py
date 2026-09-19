@@ -5,7 +5,7 @@ ITEMS = [
  "id": "arch-corejam-name",
  "lens": "對比",
  "ch": "ARCH", "section": "1.1 Nomenclature / RFC-31", "gpRef": "§1.1 & RFC-31 CoreJam",
- "difficulty": 1, "kind": "rationale", "tags": ["ELVES"],
+ "difficulty": 1, "kind": "rationale", "tags": ["CoreJam"],
   "stemZh": "JAM 這個名字從何而來？原始 CoreJam 模型的哪些階段真的在鏈上執行？",
   "optionsZh": [
    "來自 CoreJam（Polkadot Fellowship RFC-31），以其 Collect / Refine / Join / Accumulate 模型命名；只有 Join 與 Accumulate 發生在鏈上——Collect 與 Refine 是鏈下／in-core 的——因此稱為 Join-Accumulate Machine，而它是一套完整的協定而非 RFC-31 那種範圍受限的改動",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "arch-driving-factors",
  "lens": "對比",
  "ch": "ARCH", "section": "1.2–1.3 Driving Factors / Size-Coherency Antagonism", "gpRef": "§1.2–1.3",
- "difficulty": 2, "kind": "rationale", "tags": ["ELVES"],
+ "difficulty": 2, "kind": "rationale", "tags": ["design factors"],
   "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。五個因素是什麼？這條原則說了什麼？JAM 的設計又怎麼回應它？",
   "optionsZh": [
    "因素為：Resilience、Generality、Performance、Coherency、Accessibility；performance 與 coherency 互相對立，因為因果關係受訊號速度所限，所以狀態空間越大就越不連貫——JAM 的回應是把一個高度可擴展、大致連貫的元件（in-core）管線化進一個同步、完全連貫的元件（on-chain），以「cache affinity」取代粗暴的分割",
@@ -93,7 +93,7 @@ ITEMS = [
  "lens": "設計",
   "alsoCh": ["11"],
  "ch": "ARCH", "section": "4.8.1, 11, 16, 17 rationale", "gpRef": "§4.9.1, §16–17, ELVES paper",
- "difficulty": 2, "kind": "rationale", "tags": ["assurance", "audit", "ELVES"],
+ "difficulty": 2, "kind": "rationale", "tags": ["assurance", "audit"],
   "stemZh": "JAM 為什麼同時需要可得性（assurance + erasure coding）與稽核／爭議，才能保障 in-core 的運算？",
   "optionsZh": [
    "擔保為無效結果附上經濟成本；但 auditor 只有在輸入可取回時才能重新執行，所以必須先有 2/3+1 的 validator 背書自己持有 erasure-coded 的碎片（任意 1/3 即可重建）；接著隨機抽選的 auditor（ELVES）重跑那些 report，並在出現負面判定或缺席時升級處理；最後由 disputes 在鏈上為判決定案、封禁該 report 與 offender",

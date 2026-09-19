@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n2-block-shape",
  "lens": "機制",
   "ch": "N2", "section": "§4.1 The Block", "gpRef": "§4",
-  "difficulty": 1, "kind": "concept", "tags": ["core"],
+  "difficulty": 1, "kind": "concept", "tags": ["block"],
   "stem": "What are the two parts of a JAM block?",
   "stemZh": "一個 JAM 區塊由哪兩個部分組成？",
   "options": [
@@ -35,7 +35,7 @@ ITEMS = [
   "id": "n2-no-transactions",
  "lens": "設計",
   "ch": "N2", "section": "§4.1; §4.9", "gpRef": "§4",
-  "difficulty": 2, "kind": "concept", "tags": ["extrinsic"],
+  "difficulty": 2, "kind": "concept", "tags": ["block"],
   "alsoCh": ["N4"],
   "stem": "JAM is described as transactionless. If there are no user transactions, how does anything from outside get into the state?",
   "stemZh": "JAM 被描述為 transactionless。既然沒有使用者交易，外界的東西要怎麼進入狀態？",
@@ -65,7 +65,7 @@ ITEMS = [
   "id": "n2-state-components-basic",
  "lens": "機制",
   "ch": "N2", "section": "§4.2 The State", "gpRef": "§4",
-  "difficulty": 2, "kind": "concept", "tags": ["core"],
+  "difficulty": 2, "kind": "concept", "tags": ["block"],
   "stem": "The state σ is split into many named components. What is the point of splitting it that way rather than treating it as one blob?",
   "stemZh": "狀態 σ 被拆成許多具名的分量。這樣拆而不是當成單一個大 blob，用意是什麼？",
   "options": [
@@ -182,7 +182,7 @@ ITEMS = [
   "id": "n2-what-a-transition-is",
  "lens": "機制",
   "ch": "N2", "section": "§4.2", "gpRef": "§4",
-  "difficulty": 1, "kind": "concept", "tags": ["segment"],
+  "difficulty": 1, "kind": "concept", "tags": ["block"],
   "stem": "What does it mean to say a node 'imports' a block?",
   "stemZh": "說一個節點「import」一個區塊，是什麼意思？",
   "options": [

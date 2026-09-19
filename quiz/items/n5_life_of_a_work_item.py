@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n5-pipeline-order",
  "lens": "時機",
   "ch": "N5", "section": "§11; §12; §14", "gpRef": "§11, §12 & §14",
-  "difficulty": 1, "kind": "concept", "tags": ["core"],
+  "difficulty": 1, "kind": "concept", "tags": ["work-package"],
   "alsoCh": ["N4", "N6"],
   "stem": "Put the life of one piece of work in order, from a user handing it over to its effect landing in the state.",
   "stemZh": "把一份工作從使用者交出、到它的效果落進狀態為止的過程排出順序。",

@@ -34,7 +34,7 @@ ITEMS = [
  "id": "ch07-beta-dagger",
  "lens": "時機",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.5 & 7.8",
- "difficulty": 2, "kind": "concept", "tags": ["recent history", "state root"],
+ "difficulty": 2, "kind": "concept", "tags": ["state root", "recent history"],
   "stemZh": "為什麼區塊 N 結束時，β_H 最新的那筆條目其 state root s = H_0（零雜湊）？它又是怎麼被補正的？",
   "optionsZh": [
    "因為算 β′ 的當下還不知道區塊 N 執行後的 state root（header 帶的是先前的 root）；區塊 N+1 會在任何人讀取 β 之前，用自己的 H_R 覆寫最後一筆的 s 來算出 β†（eq. 7.5）",
@@ -64,7 +64,7 @@ ITEMS = [
  "lens": "設計",
   "alsoCh": ["E"],
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7",
- "difficulty": 2, "kind": "rationale", "tags": ["recent history", "MMR", "BEEFY"],
+ "difficulty": 2, "kind": "rationale", "tags": ["MMR", "recent history"],
   "stemZh": "accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) 用的是 Keccak（H_K）而不是 Blake2b。s 是什麼？為什麼用 Keccak？",
   "optionsZh": [
    "s = [對 θ′ 中每個 (service, hash) 取 E_4(service) ⌢ E(hash)]；使用 Keccak 是「為了最大化與既有系統的相容性」",

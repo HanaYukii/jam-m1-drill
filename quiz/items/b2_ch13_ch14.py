@@ -8,7 +8,7 @@ ITEMS = [
  "id": "ch13-why-statistics",
  "lens": "設計",
  "ch": "13", "section": "13.1 Validator Activity", "gpRef": "§13.1 (intro paragraphs); §14.1 honest behavior; C(13) in App. D",
- "difficulty": 1, "kind": "rationale", "tags": ["statistics", "privileges"],
+ "difficulty": 1, "kind": "rationale", "tags": ["statistics"],
   "stemZh": "JAM 這條鏈為什麼要保留 validator 的活動統計？GP 對那些無法在鏈上直接量測的活動又怎麼說？",
   "optionsZh": [
    "JAM 直接支付 validator：每個區塊 STF 都會按 π_V 的比例從某個 treasury service 扣款，就像它處理懲罰那樣；出塊、擔保與背書可在鏈上追蹤，而 GRANDPA、BEEFY 與稽核也可以，因為 validator 簽署的每一則訊息最終都會被納入某個區塊",
@@ -90,7 +90,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-code-refine-args",
  "lens": "演算法",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. B.5 (Ψ_R argument a and gas w_g); eq. B.1 (Ψ_I uses E_2(c)); eq. 14.9 (G_R) — PVM/refine_invocation.go RefineInvoke",
- "difficulty": 3, "kind": "code", "tags": ["refine", "dispute"],
+ "difficulty": 3, "kind": "code", "tags": ["refine", "PVM"],
   "stemZh": "以下是團隊的 Ψ_R 建構交給 Ψ_M 之引數 blob a 的方式。對照 GP 0.8.0 的 eq. B.5：哪些成分正確？哪一個錯了？",
   "optionsZh": [
    "core 索引必須編碼為 E_2(c)，也就是固定的兩個 octet，與 Ψ_I 的做法完全相同，所以那個緊湊的 EncodeUint 是錯的；至於 service 索引 w_s、緊湊的 i、帶長度前綴的 payload、對編碼後 package 取的 H(p) 以及 gas 上限 w_g 都與 GP 相符",
@@ -140,7 +140,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-compute-report-signature",
  "lens": "演算法",
  "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31",
- "difficulty": 3, "kind": "delta", "tags": ["work-report", "accumulated set", "delta-0.8.0"],
+ "difficulty": 3, "kind": "delta", "tags": ["work-report", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 重新定義了 work-report 的計算函數 Ξ。它的引數是什麼？在什麼條件下它才會以 E 失敗？",
   "optionsZh": [
    "Ξ(p, c, l, v) 收下 package、core、一個 segment-root 字典 l（每個被 h⊞ import 引用到的 work-package 雜湊各一項）以及 assurer 集合大小 v；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob、或 keys(l) 與那組 h⊞ 雜湊不符時才產生 ∇——某個 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束並不會讓 Ξ 失敗",
@@ -169,7 +169,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
  "id": "ch14-paged-proofs",
  "lens": "演算法",
  "ch": "14", "section": "14.3.1 Exporting / 14.4.1 Availability Specifier", "gpRef": "eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12",
- "difficulty": 2, "kind": "concept", "tags": ["segment", "assurance"],
+ "difficulty": 2, "kind": "concept", "tags": ["assurance", "segment"],
   "stemZh": "匯出的 segment 由 availability specification 的 segments-root e 承諾，並透過 paged proof 佐證。e 怎麼算？一份 paged proof 裝什麼？兩者最後放到哪裡？",
   "optionsZh": [
    "e = M(s)，是對匯出 segment 所建之定深二元 Merkle 樹的 root，葉子加 '$leaf' 前綴並以零雜湊補到 2 的冪；P(s) 產生 ⌈|s|/64⌉ 個額外的 segment，每個都是「通往某個 64 葉子子樹的 Merkle 路徑 J_6(s, i)、加上該子樹那一頁的 64 個葉子雜湊 L_6(s, i)」的補零編碼；兩者都會被 erasure-code 進長期的 D³L",

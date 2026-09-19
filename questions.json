@@ -169,8 +169,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "PVM",
-    "dispute"
+    "PVM"
    ],
    "stemZh": "PVM 的呼叫 Ψ 會回傳一個退出理由 ε。有哪些可能的退出理由？各自帶什麼資料？",
    "optionsZh": [
@@ -210,7 +209,6 @@
    "tags": [
     "gas",
     "basic block",
-    "PVM",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0（PR #508）引入了新的 gas 模型。gas 是怎麼扣的？",
@@ -247,8 +245,7 @@
    "kind": "concept",
    "tags": [
     "memory",
-    "PVM",
-    "transfer"
+    "PVM"
    ],
    "stemZh": "當一條指令存取的 RAM 位址 (a) 低於 2^16、或 (b) 位於 2^16 以上的不可存取頁時，會發生什麼事？",
    "optionsZh": [
@@ -283,7 +280,6 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "PVM",
     "basic block"
    ],
    "stemZh": "對於跳往位址 a 的動態跳躍，GP 要求 a mod Z_A = 0（Z_A = 2）、a ≠ 0、a ≤ |j|·Z_A，且 j[a/Z_A − 1] ∈ ϖ（一個 basic block 的起點）。為什麼要有對齊這條要求？",
@@ -320,7 +316,6 @@
    "kind": "concept",
    "tags": [
     "privileges",
-    "host call",
     "authorizer"
    ],
    "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。順序是什麼？每個常數各指名哪一種錯？",
@@ -356,8 +351,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "PVM",
-    "host call"
+    "host call",
+    "service"
    ],
    "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，每一種各暴露哪些 host call？service 呼叫到不在自己 invocation 集合內的 id 會怎樣？",
    "optionsZh": [
@@ -393,7 +388,7 @@
    "kind": "concept",
    "tags": [
     "accumulate",
-    "host call"
+    "service"
    ],
    "stemZh": "從頭到尾描述 accumulate 的 invocation Ψ_A(e, t, s, g, i)：service 的程式碼不可得時會怎樣、機器怎麼設定、兩個 context 各做什麼、結果又如何處置。",
    "optionsZh": [
@@ -428,8 +423,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "host call",
-    "service"
+    "service",
+    "host call"
    ],
    "stemZh": "在 GP 0.8.0 中，`new` host call 是怎麼挑選新的 service index 的？",
    "optionsZh": [
@@ -465,7 +460,7 @@
    "kind": "concept",
    "tags": [
     "transfer",
-    "host call"
+    "gas"
    ],
    "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。這些檢查依什麼順序進行？每種失敗各是什麼意思？成功時又發生什麼？",
    "optionsZh": [
@@ -501,7 +496,7 @@
    "kind": "concept",
    "tags": [
     "preimage",
-    "host call"
+    "timeslot"
    ],
    "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前時槽 t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
    "optionsZh": [
@@ -537,7 +532,6 @@
    "kind": "delta",
    "tags": [
     "privileges",
-    "host call",
     "delta-0.8.0"
    ],
    "stemZh": "在 GP 0.8.0 中，bless、assign 與 designate 各自執行哪些權限檢查？",
@@ -574,8 +568,7 @@
    "kind": "concept",
    "tags": [
     "checkpoint",
-    "yield",
-    "accumulate"
+    "yield"
    ],
    "stemZh": "在 accumulate 之中，`checkpoint`、`yield` 與 `provide` 各自做什麼？",
    "optionsZh": [
@@ -646,7 +639,7 @@
    "difficulty": 1,
    "kind": "rationale",
    "tags": [
-    "ELVES"
+    "CoreJam"
    ],
    "stemZh": "JAM 這個名字從何而來？原始 CoreJam 模型的哪些階段真的在鏈上執行？",
    "optionsZh": [
@@ -681,7 +674,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "ELVES"
+    "design factors"
    ],
    "stemZh": "GP 點名了五個驅動因素、以及一條稱為「size-coherency antagonism」的原則。五個因素是什麼？這條原則說了什麼？JAM 的設計又怎麼回應它？",
    "optionsZh": [
@@ -759,8 +752,7 @@
    "kind": "rationale",
    "tags": [
     "assurance",
-    "audit",
-    "ELVES"
+    "audit"
    ],
    "stemZh": "JAM 為什麼同時需要可得性（assurance + erasure coding）與稽核／爭議，才能保障 in-core 的運算？",
    "optionsZh": [
@@ -1029,8 +1021,7 @@
    "difficulty": 3,
    "kind": "code",
    "tags": [
-    "PVM",
-    "storage"
+    "PVM"
    ],
    "stemZh": "在這份 load_imm_jump_ind 的實作中，即使動態跳躍 panic，暫存器寫入 φ_A = ν_X 仍然會發生。這是 GP 0.8.0 所規定的嗎？這個差異有可能被觀察到嗎？",
    "optionsZh": [
@@ -1074,7 +1065,6 @@
    "kind": "delta",
    "tags": [
     "PVM",
-    "dispute",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0 的 deblob(p, ı) 會回傳 error——而 Ψ 隨即在未執行任何指令的情況下 panic——除非 v_blob(c, k, 0) 與 v_inst(c, k, ı) 同時成立。這兩個驗證器實際上強制了哪些條件？",
@@ -1110,7 +1100,7 @@
    "difficulty": 2,
    "kind": "code",
    "tags": [
-    "storage",
+    "balance",
     "host call"
    ],
    "stemZh": "這段節錄是團隊在修正 #980 之後的 Ω_W（`write`）。某個 service 把一個目前存有 100 個 octet 之值的 key 覆寫成 5,000 個 octet 的值（φ_7…φ_10 = k_O, k_Z, v_O, v_Z）。依 GP 0.8.0，成功時 φ′_7 回傳什麼？若這次寫入會讓門檻超過餘額會怎樣？修正前的程式碼錯在哪？",
@@ -1154,9 +1144,8 @@
    "difficulty": 3,
    "kind": "code",
    "tags": [
-    "storage",
-    "accumulate",
-    "host call"
+    "service",
+    "accumulate"
    ],
    "stemZh": "這段節錄來自團隊在修正 #938 之後的 Ω_R（`read`），該修正加上了 `callerServiceID == serviceID` 的守衛（s* = φ_7，或當 φ_7 = 2^64−1 時為呼叫者自己）。正在 accumulate 的 service A 讀取 service B 的某個 storage key，而 B 在本塊並未 accumulate。這次讀取對 B 的帳戶可以做什麼、不可以做什麼？加守衛之前出了什麼問題？",
    "optionsZh": [
@@ -1197,8 +1186,7 @@
    "kind": "code",
    "tags": [
     "memory",
-    "host call",
-    "refine"
+    "host call"
    ],
    "stemZh": "這段節錄是團隊的 `pages`（Ω_Z），作用在內層機器 n 的頁範圍 [p, p+c) 上、模式為 r（φ_7…φ_10 = n, p, c, r）。這段程式碼在哪些地方偏離了 GP 0.8.0 對 `pages` 的語意？",
    "optionsZh": [
@@ -1279,9 +1267,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "Bandersnatch",
-    "Safrole",
-    "ring VRF"
+    "Bandersnatch"
    ],
    "stemZh": "JAM 使用兩種 Bandersnatch 構造：單一 context 化的 IETF VRF 簽章、以及 ring-VRF 證明。兩者各用在哪？各多大？輸出函數 Y 又取決於什麼？",
    "optionsZh": [
@@ -1321,7 +1307,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "core"
+    "Bandersnatch"
    ],
    "stemZh": "JAM 的每個簽章都由一個 context 字串 X 做 domain separation。列出這些 context 與各自搭配的原語——並指出唯一一個被用了兩次、搭配兩種不同原語的 context。",
    "optionsZh": [
@@ -1359,8 +1345,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "BEEFY",
-    "GRANDPA"
+    "BEEFY"
    ],
    "stemZh": "依 Beefy Distribution 這一章，validator 用哪把金鑰、在什麼時候、簽什麼？這個簽章又是拿來做什麼的？",
    "optionsZh": [
@@ -1434,7 +1419,7 @@
    "kind": "concept",
    "tags": [
     "audit",
-    "ELVES"
+    "assurance"
    ],
    "stemZh": "在稽核協定中，一位 validator 如何決定它必須稽核哪些剛變為可得的 work-report？這個集合又是如何隨時間成長的？",
    "optionsZh": [
@@ -1545,7 +1530,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "ELVES"
+    "design factors"
    ],
    "stemZh": "結論一章稱 JAM 為一個「甜蜜點」，接著列出這份論文刻意留白的部分。這個甜蜜點落在什麼與什麼之間？留白的又是哪些？",
    "optionsZh": [
@@ -1580,8 +1565,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "audit",
-    "serialization"
+    "JAM Prize",
+    "audit"
    ],
    "stemZh": "描述 W3F 用於 M1 稽核的 jam-conformance fuzz 協定：傳輸層、編碼、握手、訊息順序、以及 M1 的必備項目。",
    "optionsZh": [
@@ -1616,7 +1601,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "ELVES"
+    "JAM Prize"
    ],
    "stemZh": "依 JAM Prize 規則與里程碑交付條款，送審後的口試其目的與地位是什麼？",
    "optionsZh": [
@@ -1651,8 +1636,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "notation",
     "authorizer",
+    "notation",
     "entropy"
    ],
    "stemZh": "eq. 8.1 把 authorizer pool 與 queue 定型為 α ∈ ⟦⟦H⟧_{:O}⟧_C 與 φ ∈ ⟦⟦H⟧_Q⟧_C，而 eq. 6.22 把熵定型為 η ∈ ⟦H⟧_4。依 GP §3.7 的序列集合記號，這些下標各是什麼意思？",
@@ -1693,8 +1678,8 @@
    "kind": "concept",
    "tags": [
     "ticket",
-    "notation",
-    "recent history"
+    "recent history",
+    "authorizer"
    ],
    "stemZh": "三條狀態轉移規則用到 GP §3.7.2 的箭號運算子：β_H′ ≡ ←(β_H† ⧺ e)^H（eq. 7.8）、α′[c] ≡ ←(F(c) ⧺ φ′[c][H_T]^⟲)^O（eq. 8.2）、γ′_A ≡ →(依 ticket id 升冪排序的 n ∪ γ_A)^E（eq. 6.35）。箭號怎麼讀——各保留序列的哪一端——這對三條規則各意味著什麼？",
    "optionsZh": [
@@ -1735,7 +1720,7 @@
    "kind": "code",
    "tags": [
     "Merklization",
-    "notation"
+    "state root"
    ],
    "stemZh": "GP §3.7.3 以 bits([160, 0]) = [1, 0, 1, 0, 0, …] 這個例子定義了 octet 序列 B 的 bits(B)，而 M_σ（eq. D.5）是以 31 位元組 state key 的 bits(k) 為 trie 的鍵。團隊的 trie 用下面這段程式碼在每個深度切分條目。它與 GP 一致嗎？",
    "optionsZh": [
@@ -1820,8 +1805,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "notation",
-    "serialization"
+    "serialization",
+    "notation"
    ],
    "stemZh": "依 GP §3.8.1，H 與 H_K 各是什麼？把非 blob 的東西傳給雜湊函數會怎樣？E 與 E^{-1} 的下標又是什麼意思？",
    "optionsZh": [
@@ -1896,7 +1881,6 @@
    "tags": [
     "guarantee",
     "dependency",
-    "dependency graph",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。它們各自剛吸收了什麼？",
@@ -1932,9 +1916,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "extrinsic",
     "dependency",
-    "dependency graph"
+    "extrinsic"
    ],
    "stemZh": "照字面閱讀 0.8.0 的依賴圖（eq. 4.5–4.20），五個 extrinsic 成分各在哪裡進入狀態轉移？特別是：extrinsic 裡有任何東西直接餵給 accumulation 這一步嗎？",
    "optionsZh": [
@@ -1969,8 +1952,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "core",
-    "host call"
+    "core"
    ],
    "stemZh": "Overview 表示 JAM 在 core 上應能做到單一機器全速執行該 VM 之「300 倍以上」的運算量。這個數字的根據是什麼？又是什麼讓這種未被複製的運算保持安全？",
    "optionsZh": [
@@ -2045,7 +2027,7 @@
    "kind": "code",
    "tags": [
     "serialization",
-    "seal"
+    "header"
    ],
    "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。在 GP 0.8.0 的 E(H) 與 E_U(H) 之下這為什麼成立？E_U 的欄位順序是什麼？",
    "optionsZh": [
@@ -2088,9 +2070,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "assurance",
-    "dispute",
-    "ticket",
+    "extrinsic",
+    "header",
     "delta-0.8.0"
    ],
    "stemZh": "某個輕客戶端只持有一個已驗證的 header H，想確認 service s 的 preimage blob d 有被納入該區塊的 E_P。已知 H_X = H(E(H#(a)))、a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]（eq. 5.4–5.7），它需要的最小見證是什麼？檢查的形狀又是什麼？",
@@ -2163,6 +2144,7 @@
    "kind": "code",
    "tags": [
     "header",
+    "JAM Prize",
     "delta-0.8.0"
    ],
    "stemZh": "在 fuzzer bug #825（一個 H_I = 65535 的 header 讓 UpdateEtaPrime0 以「index out of range [65535] with length 6」panic，因為該索引在被驗證之前就被使用）之後，團隊加了這個檢查。它用的界限是 GP 0.8.0 所規定的那一個嗎？",
@@ -2206,9 +2188,9 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "recent history",
     "MMR",
-    "accumulate"
+    "accumulate",
+    "recent history"
    ],
    "stemZh": "區塊 N 沒有 accumulate 出任何產出，所以 θ′ = []。accumulation-output belt β_B 以及寫進區塊 N 之 β_H 條目的 super-peak b 會怎麼樣？",
    "optionsZh": [
@@ -2332,7 +2314,7 @@
    "kind": "code",
    "tags": [
     "ticket",
-    "Safrole"
+    "extrinsic"
    ],
    "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段（main 與 0.8.0 分支相同），在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都高於一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
    "optionsZh": [
@@ -2373,8 +2355,7 @@
    "kind": "code",
    "tags": [
     "seal",
-    "Safrole",
-    "entropy"
+    "Bandersnatch"
    ],
    "stemZh": "團隊的 RunSTF 在 UpdateSafrole 前後分兩階段驗證 header；把 posterior 狀態傳給第二階段正是 fuzzer bug #784「Header VRF Verification Failure on some cases」的修法（PR #791）。對於一個新 epoch 的第一塊，為什麼 seal H_S、熵來源 H_V 與 epoch marker H_E 只能在第二階段檢查？",
    "optionsZh": [
@@ -2417,7 +2398,7 @@
    "difficulty": 3,
    "kind": "code",
    "tags": [
-    "Safrole",
+    "seal",
     "entropy",
     "delta-0.8.0"
    ],
@@ -2462,9 +2443,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "Safrole",
-    "entropy",
-    "validator set"
+    "validator set",
+    "epoch"
    ],
    "stemZh": "full 參數（E = 600、Y = 500）。前一塊 τ = 1195 且 accumulator 已飽和（|γ_A| = E）；下一塊 H_T = 1810（中間完全沒有出塊）。以 prior 值表示 posterior 值，描述這次轉移：輪替發生幾次？κ′、λ′、γ′_P 與 η′ 各變成什麼？用的是哪個 sealer 序列、為什麼？哪些 marker 會出現？",
    "optionsZh": [
@@ -2499,9 +2479,8 @@
    "difficulty": 3,
    "kind": "delta",
    "tags": [
-    "ticket",
     "validator set",
-    "Safrole",
+    "epoch",
     "delta-0.8.0"
    ],
    "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這在 0.8.0 是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能封緘這第一塊？",
@@ -2540,9 +2519,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "dispute",
     "ring VRF",
-    "Safrole"
+    "epoch"
    ],
    "stemZh": "在 epoch 換屆時，ι 中有一位 validator 的 Ed25519 金鑰落在 ψ′_O 裡，所以 Φ 把它整筆 336 位元組的項目換成零。這對新 epoch 的 γ′_Z 與 ticket 驗證有什麼影響？",
    "optionsZh": [
@@ -2580,8 +2558,8 @@
    "difficulty": 3,
    "kind": "rationale",
    "tags": [
-    "seal",
     "Bandersnatch",
+    "seal",
     "ticket"
    ],
    "stemZh": "ticket 證明是以 context X_T ⌢ η′_2 ++ r 對空訊息所做的 ring-VRF 證明，而 seal H_S 是以 context X_T ⌢ η′_3 ++ i_e 對 E_U(H)（整個未簽署 header）所做的一般 Bandersnatch 簽章。既然如此，eq. 6.16 為什麼還能要求 i_y = Y(H_S)，也就是 seal 的 VRF 輸出等於 ticket id？",
@@ -2621,7 +2599,6 @@
    "difficulty": 3,
    "kind": "rationale",
    "tags": [
-    "Safrole",
     "ticket",
     "seal"
    ],
@@ -2658,7 +2635,6 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "Safrole",
     "Bandersnatch",
     "Ed25519"
    ],
@@ -2741,7 +2717,6 @@
    "kind": "code",
    "tags": [
     "dispute",
-    "PVM",
     "validator set"
    ],
    "stemZh": "在這個區塊裡，一個 verdict 把 report r 判為 wonky（恰好 ⌊|k|/3⌋ 個正面判決），所以 r ∈ ψ′_W 而 r ∉ ψ′_G ∪ ψ′_B。E_F 同時帶了一個 fault (r, ⊥, k, s)，簽章正確、來自一把不在 ψ_O 的 κ ∪ λ 金鑰。依 GP 0.8.0 eq. 10.7，這個區塊有效嗎？這段程式碼又會怎麼處理？",
@@ -2821,8 +2796,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "assurance",
-    "guarantee"
+    "guarantee",
+    "assurance"
    ],
    "stemZh": "tiny 設定（|κ| = 6、U = 5），單一 core c = 0，沒有爭議。slot 40 的區塊：E_G 帶了 core 0 的 guarantee g₁。slot 42 的區塊：E_A 有 4 份把 bit 0 設起的 assurance。slot 45 的區塊：E_A 有 3 份把 bit 0 設起的 assurance，且 E_G 帶了另一份對 core 0、其餘皆有效的 guarantee g₂。在 slot 45 的區塊之後，ρ‡[0] 與 ρ′[0] 各是什麼？g₁ 的 report 曾被 accumulate 嗎？",
    "optionsZh": [
@@ -2857,8 +2832,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "epoch"
+    "epoch",
+    "guarantee"
    ],
    "stemZh": "full 設定（E = 600、R = 10）。τ′ = 603 的區塊收納了一份 t = 595 的 guarantee。它的 credential 必須對哪個指派檢查？",
    "optionsZh": [
@@ -2895,7 +2870,7 @@
    "tags": [
     "preimage",
     "lookup-anchor",
-    "guarantee"
+    "JAM Prize"
    ],
    "stemZh": "為什麼 lookup-anchor 的要求（eq. 11.38）無法單靠鏈上狀態 σ 檢查？conformance fuzzer 又是怎麼讓它對 M1 目標變得可檢查的？",
    "optionsZh": [
@@ -2930,8 +2905,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "dependency"
+    "dependency",
+    "guarantee"
    ],
    "stemZh": "E_G 中的一份 work-report 列了先決條件 p。package p 在 10 個區塊前被 guarantee、8 個區塊前被 accumulate，所以 p ∈ ξ，但 p 已不再出現在 β 的任何條目中（H = 8）。這份 guarantee 有效嗎？",
    "optionsZh": [
@@ -2966,8 +2941,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "service"
+    "refine",
+    "guarantee"
    ],
    "stemZh": "service s 在某份 work-package 建好之後升級了程式碼：該 work-item 的 code hash c 在建置當下是正確的、refine 也執行了 lookup anchor 當時可取得的程式碼，但收納區塊的先前狀態中 δ[s]_c ≠ c。這份 guarantee 在被收納時會如何？",
    "optionsZh": [
@@ -3003,7 +2978,6 @@
    "kind": "delta",
    "tags": [
     "guarantee",
-    "assurance",
     "validator set",
     "delta-0.8.0"
    ],
@@ -3040,8 +3014,7 @@
    "difficulty": 1,
    "kind": "rationale",
    "tags": [
-    "statistics",
-    "privileges"
+    "statistics"
    ],
    "stemZh": "JAM 這條鏈為什麼要保留 validator 的活動統計？GP 對那些無法在鏈上直接量測的活動又怎麼說？",
    "optionsZh": [
@@ -3126,7 +3099,7 @@
    "kind": "code",
    "tags": [
     "refine",
-    "dispute"
+    "PVM"
    ],
    "stemZh": "以下是團隊的 Ψ_R 建構交給 Ψ_M 之引數 blob a 的方式。對照 GP 0.8.0 的 eq. B.5：哪些成分正確？哪一個錯了？",
    "optionsZh": [
@@ -3170,7 +3143,6 @@
    "kind": "delta",
    "tags": [
     "work-report",
-    "accumulated set",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0 重新定義了 work-report 的計算函數 Ξ。它的引數是什麼？在什麼條件下它才會以 E 失敗？",
@@ -3209,8 +3181,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "segment",
-    "assurance"
+    "assurance",
+    "segment"
    ],
    "stemZh": "匯出的 segment 由 availability specification 的 segments-root e 承諾，並透過 paged proof 佐證。e 怎麼算？一份 paged proof 裝什麼？兩者最後放到哪裡？",
    "optionsZh": [
@@ -3250,7 +3222,7 @@
    "kind": "concept",
    "tags": [
     "audit",
-    "ELVES"
+    "work-report"
    ],
    "stemZh": "validator 如何挑出自己在初始 tranche（a_0）必須稽核的 work-report？",
    "optionsZh": [
@@ -3285,8 +3257,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "dispute",
-    "audit"
+    "audit",
+    "dispute"
    ],
    "stemZh": "GP §17.1 描述了出現負面判定時會發生什麼事。兩個門檻是什麼？各自導致什麼後果？",
    "optionsZh": [
@@ -3322,7 +3294,7 @@
    "kind": "rationale",
    "tags": [
     "Merklization",
-    "balance"
+    "assurance"
    ],
    "stemZh": "附錄 E 給了兩個通用 Merkle root 函數：well-balanced 的 M_B 與定深的 M。在 availability specification 中，segment-root a_e 用其中一個、erasure-root a_u 用另一個。是哪個配哪個？well-balanced 的形狀相對於「一律補到 2 的冪」又買到了什麼？",
    "optionsZh": [
@@ -3406,7 +3378,7 @@
    "kind": "concept",
    "tags": [
     "MMR",
-    "BEEFY"
+    "recent history"
    ],
    "stemZh": "Accumulation Output Log β_B 是一個 optional 雜湊的序列而不是單一個 root，然而每筆近期歷史條目只儲存一個由它導出的 32 位元組值 b。為什麼狀態要保留整個 peak 序列？那個單一值又是拿來做什麼的？",
    "optionsZh": [
@@ -3485,8 +3457,7 @@
    "kind": "concept",
    "tags": [
     "fallback",
-    "shuffle",
-    "Safrole"
+    "shuffle"
    ],
    "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
    "optionsZh": [
@@ -3525,8 +3496,7 @@
    "kind": "rationale",
    "tags": [
     "Bandersnatch",
-    "ring VRF",
-    "Safrole"
+    "ticket"
    ],
    "stemZh": "Safrole 本來可以用一般的 IETF VRF 簽章加上提交者已公開的 Bandersnatch 金鑰來證明 ticket 有效。為什麼 Gray Paper 堅持改用 ring VRF 證明？",
    "optionsZh": [
@@ -3604,8 +3574,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "Safrole",
-    "ring VRF"
+    "accumulate",
+    "ticket"
    ],
    "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的封印者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
    "optionsZh": [
@@ -3684,8 +3654,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "notation",
-    "storage"
+    "notation"
    ],
    "stemZh": "Gray Paper 裡幾乎每個型別都建立在 §3.4 與 §3.7.4 固定下來的詞彙上：N、N_n、Z、N_L、B、B_x 與 B_$。照 GP 的定義把它們一個一個讀出來。",
    "optionsZh": [
@@ -3759,9 +3728,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "notation",
     "statistics",
-    "storage"
+    "notation"
    ],
    "stemZh": "eq. 13.1–13.2 宣告 π ≡ (π_V, π_L, π_C, π_S)，其中 (π_V, π_L) ∈ ⟦(b ∈ N, t ∈ N, p ∈ N, d ∈ N, g ∈ N, a ∈ N)⟧²，而 §13.1 接著處理 π_V†、π_V‡ 與 π′_V。面試官請你把這段記號唸出來。你怎麼唸——∈ 與三冒號的分別、平方的序列集合、以及 prime、dagger 與 double-dagger？",
    "optionsZh": [
@@ -3800,8 +3768,8 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "recent history",
-    "work-report"
+    "work-report",
+    "recent history"
    ],
    "stemZh": "β_H 的每一項都帶一個欄位 p。在 GP 0.8.0 中，p 裝什麼？它的條目數又受什麼所限？",
    "optionsZh": [
@@ -3839,8 +3807,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "recent history"
+    "work-report",
+    "extrinsic"
    ],
    "stemZh": "當某個區塊的 guarantees extrinsic E_G 在 §11 被驗證時，哪些鏈上檢查實際上會讀取存放在 β_H 裡的 reported-package 映射？",
    "optionsZh": [
@@ -3876,7 +3844,6 @@
    "kind": "concept",
    "tags": [
     "BEEFY",
-    "recent history",
     "MMR"
    ],
    "stemZh": "追蹤在 GP 0.8.0 中，一個區塊的 accumulation 產出最終如何進入 BEEFY 簽章。",
@@ -3916,8 +3883,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "recent history",
-    "state root"
+    "state root",
+    "recent history"
    ],
    "stemZh": "某個實作者建構 β′_H 的方式是：先附加本塊的新項目（state root = H_0），然後才把 eq. 7.5 的父狀態根回填套用到「序列的最後一個元素」上。實際上會出什麼錯？",
    "optionsZh": [
@@ -3955,8 +3922,8 @@
    "difficulty": 3,
    "kind": "code",
    "tags": [
-    "recent history",
     "serialization",
+    "accumulate",
     "delta-0.8.0"
    ],
    "stemZh": "這是團隊在 state key C(3) 之下、為單一筆 β_H 項目所寫的 GP 0.7.2 編碼器。有位審閱者反對，認為 GP 0.8.0 把該項目宣告為 ⟨h, s, b, t, p⟩——state root 排在 accumulation-output-log 的 super-peak 之前——所以這個編碼器一定把兩個欄位對調了。誰說得對？",
@@ -4001,8 +3968,7 @@
    "kind": "concept",
    "tags": [
     "authorizer",
-    "privileges",
-    "host call"
+    "core"
    ],
    "stemZh": "在 GP 0.8.0 中，誰有權更改某個 core 的 authorizer queue φ[c]？又是透過什麼機制？",
    "optionsZh": [
@@ -4073,8 +4039,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "authorizer",
-    "PVM",
+    "refine",
+    "guarantee",
     "delta-0.8.0"
    ],
    "stemZh": "guarantor 在 refine 任何東西之前會先執行 Is-Authorized 邏輯 Ψ_I。那支程式實際上能觀察到什麼？",
@@ -4154,7 +4120,7 @@
    "kind": "code",
    "tags": [
     "authorizer",
-    "guarantee"
+    "work-report"
    ],
    "stemZh": "這段 0.7.2 的程式碼實作的是 eq. 11.32 中 authorizer 的那一半。它有義務讀取哪一個 pool？而當成員測試失敗時，協定層級的後果是什麼？",
    "optionsZh": [
@@ -4236,9 +4202,8 @@
    "difficulty": 2,
    "kind": "code",
    "tags": [
-    "storage",
     "balance",
-    "host call"
+    "storage"
    ],
    "stemZh": "這是團隊修正「write 在餘額檢查之前就變動 StorageDict」那個 bug 之後的 Ω_W。依 GP 0.8.0，一筆 storage 條目對 a_i 與 a_o 各計多少？寫入後門檻超過餘額時必須怎麼處理？",
    "optionsZh": [
@@ -4282,7 +4247,7 @@
    "kind": "concept",
    "tags": [
     "preimage",
-    "host call"
+    "service"
    ],
    "stemZh": "某個 service 在時間 t 對自己的某個 request key (h, z) 呼叫 `forget`。逐一考慮 a_l[(h, z)] 的四種形狀，GP 0.8.0 在每種情況下各做什麼？",
    "optionsZh": [
@@ -4320,8 +4285,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "accumulate",
-    "service"
+    "service",
+    "accumulate"
    ],
    "stemZh": "某個 service 在 accumulation 期間呼叫 `new`。GP 0.8.0 如何挑選子帳戶的索引？又如何避免與既有 service 相撞？",
    "optionsZh": [
@@ -4360,7 +4325,7 @@
    "kind": "rationale",
    "tags": [
     "Merklization",
-    "timeslot"
+    "serialization"
    ],
    "stemZh": "state-key 建構子 C 被規定產出 B_31，然而 state trie 中其他每一個量——子節點識別、內嵌值的欄位、H(v)——都是 32 個 octet。是什麼迫使 key 少一個 octet？",
    "optionsZh": [
@@ -4511,8 +4476,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "authorizer",
-    "accumulate"
+    "dependency",
+    "authorizer"
    ],
    "stemZh": "佇列編輯函數 E(r, x) 做兩件事：剝除出現在 x 中的依賴，以及丟棄整筆條目。有位隊友只實作了第一件事。實際上會出什麼錯？",
    "optionsZh": [
@@ -4547,8 +4512,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "accumulate",
-    "dependency"
+    "dependency",
+    "work-report"
    ],
    "stemZh": "某份 report w 待在 ω 裡、還有一個未滿足的依賴 p，而 package p 永遠不會被 accumulate——攜帶 p 的那份 report 幾個區塊之前被擔保過，但在它的 core 上逾時、從未變成 available。依 GP 0.8.0 追蹤 w 的命運。",
    "optionsZh": [
@@ -4584,7 +4549,7 @@
    "kind": "concept",
    "tags": [
     "gas",
-    "accumulate"
+    "service"
    ],
    "stemZh": "G_A = 10,000,000、G_T = 3,500,000,000，而每個 service 帳戶都帶有 a_g 與 a_m。每一個 accumulate gas 限制——上限與逐 service 的下限——各套用在哪裡？各在什麼時候檢查？",
    "optionsZh": [
@@ -4624,8 +4589,7 @@
    "kind": "concept",
    "tags": [
     "yield",
-    "accumulate",
-    "BEEFY"
+    "accumulate"
    ],
    "stemZh": "在同一個區塊裡：service 5 被 accumulate 並以一個 32 位元組的雜湊呼叫 `yield`；service 6 被 accumulate、燒了 gas 但從未呼叫 `yield`；service 9 完全沒有 work-digest、只因一筆 deferred transfer 而被觸及，而它呼叫了 `yield`。θ′ 裡最後有什麼？又是誰消費它？",
    "optionsZh": [
@@ -4663,8 +4627,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "preimage",
-    "accumulate"
+    "preimage"
    ],
    "stemZh": "preimage 整合函數 I 在一個區塊的轉移中被套用了兩次。這兩處分別在哪裡？它的 Y 述詞又靜默地丟棄了什麼？",
    "optionsZh": [
@@ -4700,7 +4663,7 @@
    "kind": "rationale",
    "tags": [
     "accumulate",
-    "assurance"
+    "work-report"
    ],
    "stemZh": "R、R!、R^Q 與 R* 全都是序列而不是集合，即使決定哪些 report 有資格的只是「是否為成員」。為什麼順序對共識有影響？它又是在哪裡被固定下來的？",
    "optionsZh": [
@@ -4740,7 +4703,6 @@
    "tags": [
     "accumulate",
     "transfer",
-    "gas",
     "delta-0.8.0"
    ],
    "stemZh": "在 Δ+ 的遞迴中途，剩餘的 report 序列已空，但前一輪 Δ* 產出了三筆 deferred transfer t，而交給這次呼叫的 free-accumulation 映射是 ∅。Δ+ 還會做事嗎？在 GP 0.8.0 中它又交回什麼？",
@@ -4777,8 +4739,8 @@
    "kind": "concept",
    "tags": [
     "privileges",
-    "accumulate",
-    "authorizer"
+    "authorizer",
+    "accumulate"
    ],
    "stemZh": "在 Δ* 內部，core c 的 posterior authorizer 佇列 φ′[c] 與 posterior staging 金鑰 ι′ 各自都是從恰好一個 service 的 Δ1 輸出中提取出來的。是誰的輸出？又是由哪一個版本的 χ 選出的？",
    "optionsZh": [
@@ -4813,8 +4775,8 @@
    "difficulty": 3,
    "kind": "code",
    "tags": [
-    "accumulate",
-    "transfer"
+    "service",
+    "accumulate"
    ],
    "stemZh": "在團隊的 Δ* 中，service 集合 s 是一個 Go map，而這個迴圈從逐 service 的結果蒐集 u 與 t′。它違反了 GP 0.8.0 的哪項要求？可觀察的症狀又是什麼？",
    "optionsZh": [
@@ -4856,7 +4818,6 @@
    "tags": [
     "statistics",
     "assurance",
-    "guarantee",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0 §13.1 以三個有序步驟導出 validator 活動紀錄——先 π_V†，再 (π_V‡, π′_L)，最後 π′_V——其中 e = ⌊τ/E⌋、e′ = ⌊τ′/E⌋。現在看一個新 epoch 的第一塊（因此 e′ ≠ e）：出塊者是 validator 7、它的 assurance extrinsic E_A 帶有 validator 4 與 9 的簽章、而 guarantee extrinsic E_G 記功給 validator 22。這一塊自身的增量最後落在哪裡？",
@@ -4931,8 +4892,6 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "privileges",
-    "statistics",
     "Merklization"
    ],
    "stemZh": "面試官反問：「validator 計數器在我看來像遙測資料。為什麼它們要成為 σ 的一個分量、還被 Merklize 進 state trie？又為什麼要保留兩份 validator 紀錄而不是一個滾動的計數器？」以 GP 為根據的回答是什麼？",
@@ -5046,8 +5005,7 @@
    "kind": "concept",
    "tags": [
     "MMR",
-    "recent history",
-    "BEEFY"
+    "Merklization"
    ],
    "stemZh": "β_B 是一個 Merkle Mountain Range，每個區塊長出一個 root。描述 append 對這個結構做了什麼，以及 GP 為什麼在這裡選 MMR、而不是每個區塊重建一棵平衡的 Merkle 樹。",
    "optionsZh": [
@@ -5157,9 +5115,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "memory",
     "dispute",
-    "PVM"
+    "memory"
    ],
    "stemZh": "一次多位元組的 store 跨越了兩個 page：第一個可寫、第二個未配置。PVM 會回報什麼？回報的位址為什麼要那樣定義？",
    "optionsZh": [
@@ -5193,7 +5150,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "PVM",
+    "transfer",
     "gas"
    ],
    "stemZh": "PVM 同時有靜態解析的跳躍與由暫存器算出的間接跳躍。間接跳躍的目標必須額外滿足哪些條件？如果把這些條件拿掉，gas 模型會壞在哪裡？",
@@ -5230,7 +5187,7 @@
    "kind": "delta",
    "tags": [
     "gas",
-    "host call",
+    "assurance",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0 重做了 host call 的計費方式。描述新收費的形狀，以及當一個 service 呼叫某個在它這次 invocation 中不可用的索引時會發生什麼。",
@@ -5302,7 +5259,7 @@
    "kind": "concept",
    "tags": [
     "host call",
-    "refine"
+    "assurance"
    ],
    "stemZh": "fetch 是單一個 host call、在三種 invocation 中都可用，其第一個引數選擇要讀哪一份資料。GP 為什麼把這麼多資料來源摺進同一個呼叫，而不是各給一個索引？",
    "optionsZh": [
@@ -5376,8 +5333,7 @@
    "kind": "concept",
    "tags": [
     "fallback",
-    "Safrole",
-    "ring VRF"
+    "ticket"
    ],
    "stemZh": "當抵達的 ticket 太少時，γ′_S 會退回到一個由熵與啟用 validator 集合導出的金鑰序列。每個 slot 的出塊者是怎麼選出來的？在 fallback 生效期間，這條鏈放棄了什麼性質？",
    "optionsZh": [
@@ -5855,8 +5811,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "dependency graph",
     "dependency",
+    "dependency graph",
     "authorizer"
    ],
    "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
@@ -5892,7 +5848,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "timeslot"
    ],
    "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
    "optionsZh": [
@@ -5927,8 +5883,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "accumulate",
-    "refine"
+    "core"
    ],
    "stemZh": "對比 JAM 的 in-core 與 on-chain 兩種共識模型：各由誰執行？各靠什麼保障？",
    "optionsZh": [
@@ -5999,9 +5954,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "coretime",
     "gas",
-    "authorizer"
+    "coretime"
    ],
    "stemZh": "JAM 用什麼取代了 Ethereum 那套「用 gas 購買區塊空間」的模型？",
    "optionsZh": [
@@ -6037,7 +5991,7 @@
    "kind": "concept",
    "tags": [
     "PVM",
-    "transfer"
+    "gas"
    ],
    "stemZh": "Overview 怎麼摘述 PVM——它的基礎、暫存器、位元組序與記憶體？",
    "optionsZh": [
@@ -6180,8 +6134,7 @@
    "kind": "delta",
    "tags": [
     "extrinsic",
-    "assurance",
-    "dispute",
+    "header",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
@@ -6363,8 +6316,8 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "Safrole",
-    "ticket"
+    "ticket",
+    "Safrole"
    ],
    "stemZh": "Safrole 狀態 γ ≡ (γ_P, γ_Z, γ_S, γ_A)。四個分量各存什麼？",
    "optionsZh": [
@@ -6399,7 +6352,6 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "Safrole",
     "epoch"
    ],
    "stemZh": "在 epoch 換屆（e′ > e）時，依 eq. 6.14，validator 的金鑰集合是怎麼輪替的？",
@@ -6436,7 +6388,6 @@
    "kind": "delta",
    "tags": [
     "validator set",
-    "Safrole",
     "delta-0.8.0"
    ],
    "stemZh": "GP 0.8.0（PR #514）把 validator 集合的大小一般化了。ι、γ_P、κ 與 λ 允許哪些大小？",
@@ -6473,8 +6424,7 @@
    "kind": "concept",
    "tags": [
     "entropy",
-    "accumulate",
-    "Safrole"
+    "accumulate"
    ],
    "stemZh": "熵累積器 η 在每個區塊、以及在 epoch 換屆時是怎麼更新的？",
    "optionsZh": [
@@ -6513,7 +6463,7 @@
    "kind": "concept",
    "tags": [
     "entropy",
-    "Safrole"
+    "seal"
    ],
    "stemZh": "在 GP 0.8.0 中，η′_2 與 η′_3 各有特定的用途。各用在哪裡？",
    "optionsZh": [
@@ -6549,8 +6499,8 @@
    "kind": "concept",
    "tags": [
     "seal",
-    "Safrole",
-    "ticket"
+    "ticket",
+    "Safrole"
    ],
    "stemZh": "當 γ′_S 是一串 ticket 時，seal H_S 必須滿足三個條件（eq. 6.16），其中 i = γ′_S[H_T mod E]。是哪三個？",
    "optionsZh": [
@@ -6586,7 +6536,6 @@
    "kind": "concept",
    "tags": [
     "ticket",
-    "Safrole",
     "seal"
    ],
    "stemZh": "ticket accumulator γ_A 保留 id 最小的 E 張 ticket 並依升冪排序，而 eq. 6.25 讓下個 epoch 的 slot-sealer 序列成為 Z(γ_A)。一張存活下來的 ticket，其排名如何對應到它可以封印的時槽？",
@@ -6622,8 +6571,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "Safrole",
-    "header"
+    "header",
+    "epoch"
    ],
    "stemZh": "在一個新 epoch 的第一塊（e′ > e）中，epoch marker H_E 究竟包含什麼？",
    "optionsZh": [
@@ -6659,7 +6608,7 @@
    "kind": "concept",
    "tags": [
     "ticket",
-    "Safrole"
+    "header"
    ],
    "stemZh": "winning-tickets marker H_W 在什麼樣的確切條件下才非空？",
    "optionsZh": [
@@ -6696,7 +6645,6 @@
    "tags": [
     "ticket",
     "extrinsic",
-    "Safrole",
     "delta-0.8.0"
    ],
    "stemZh": "依 GP 0.8.0，tickets extrinsic E_T 受哪些界限約束？",
@@ -6733,8 +6681,7 @@
    "kind": "concept",
    "tags": [
     "ticket",
-    "accumulate",
-    "Safrole"
+    "accumulate"
    ],
    "stemZh": "說明新進 ticket n 與 posterior accumulator γ′_A 的規則——並指出關於「哪些 ticket 會留下來」最常見的誤解。",
    "optionsZh": [
@@ -6770,8 +6717,7 @@
    "kind": "concept",
    "tags": [
     "ticket",
-    "Safrole",
-    "ring VRF"
+    "Bandersnatch"
    ],
    "stemZh": "E_T 裡的一份 ticket 證明 p 是 Bandersnatch ring-VRF 證明。它是對哪個 ring root、用什麼 context 驗證的？ticket 的識別碼又是什麼？",
    "optionsZh": [
@@ -6807,8 +6753,7 @@
    "kind": "concept",
    "tags": [
     "seal",
-    "fallback",
-    "Safrole"
+    "fallback"
    ],
    "stemZh": "在 fallback 模式下（γ′_S 是一串 Bandersnatch 金鑰），header 要通過哪些檢查？",
    "optionsZh": [
@@ -6843,8 +6788,8 @@
    "difficulty": 2,
    "kind": "code",
    "tags": [
-    "Safrole",
-    "timeslot"
+    "timeslot",
+    "prior/posterior"
    ],
    "stemZh": "這是團隊對 γ′_S 的實作。它讀的是哪些 prior 值、哪些 posterior 值？這符合 eq. 6.25 嗎？",
    "optionsZh": [
@@ -6885,7 +6830,7 @@
    "kind": "code",
    "tags": [
     "fallback",
-    "Safrole"
+    "seal"
    ],
    "stemZh": "讀團隊的 FallbackKeySequence。它符合 eq. 6.27 嗎？不符合的話，究竟差在哪裡？",
    "optionsZh": [
@@ -6926,7 +6871,7 @@
    "kind": "code",
    "tags": [
     "entropy",
-    "Safrole"
+    "seal"
    ],
    "stemZh": "在團隊的 UpdateEntropy 中，為什麼 `eta[0]` 是在輪替迴圈之後才被 posterior 的 η′_0 覆寫？如果讓迴圈在 UpdateEtaPrime0 寫入同一個陣列之後才跑，會出什麼問題？",
    "optionsZh": [
@@ -7001,8 +6946,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "recent history",
-    "state root"
+    "state root",
+    "recent history"
    ],
    "stemZh": "為什麼區塊 N 結束時，β_H 最新的那筆條目其 state root s = H_0（零雜湊）？它又是怎麼被補正的？",
    "optionsZh": [
@@ -7040,9 +6985,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "recent history",
     "MMR",
-    "BEEFY"
+    "recent history"
    ],
    "stemZh": "accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) 用的是 Keccak（H_K）而不是 Blake2b。s 是什麼？為什麼用 Keccak？",
    "optionsZh": [
@@ -7335,8 +7279,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "privileges",
-    "service"
+    "privileges"
    ],
    "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。每個分量各授予什麼權力？",
    "optionsZh": [
@@ -7407,8 +7350,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "dispute",
-    "PVM"
+    "dispute"
    ],
    "stemZh": "disputes 狀態是 ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。這四個分量各裝什麼？",
    "optionsZh": [
@@ -7481,7 +7423,7 @@
    "kind": "concept",
    "tags": [
     "dispute",
-    "extrinsic"
+    "balance"
    ],
    "stemZh": "一個 verdict 的結果取決於 t，也就是 ⌊2|k|/3⌋+1 個簽章當中正面判定的數量。在 tiny 設定（|k| = 6）下，（t → 結果）的對照表是什麼？其他的 t 又會如何？",
    "optionsZh": [
@@ -7553,8 +7495,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "dispute",
-    "extrinsic"
+    "extrinsic",
+    "dispute"
    ],
    "stemZh": "disputes extrinsic 施加了哪些排序與唯一性的約束？",
    "optionsZh": [
@@ -7589,8 +7531,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "dispute",
-    "header"
+    "header",
+    "dispute"
    ],
    "stemZh": "處理 E_D 會對狀態產生哪些效果？header 的 offenders marker H_O 又必須包含什麼？",
    "optionsZh": [
@@ -7625,8 +7567,8 @@
    "difficulty": 2,
    "kind": "code",
    "tags": [
+    "balance",
     "dispute",
-    "extrinsic",
     "delta-0.8.0"
    ],
    "stemZh": "這是團隊的 verdict 分類程式碼。要符合 GP 0.8.0，必須改什麼？",
@@ -7922,7 +7864,7 @@
    "kind": "delta",
    "tags": [
     "assurance",
-    "work-report",
+    "balance",
     "delta-0.8.0"
    ],
    "stemZh": "在 GP 0.8.0 中，一份 report 什麼時候變成 available（R）？待處理的 assignment 又在什麼時候從 ρ‡ 被清除？",
@@ -7959,7 +7901,7 @@
    "kind": "concept",
    "tags": [
     "guarantee",
-    "shuffle"
+    "core"
    ],
    "stemZh": "在 GP 0.8.0 中，validator 是怎麼被指派到 core 上去做擔保的？",
    "optionsZh": [
@@ -8030,8 +7972,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "gas"
+    "work-report",
+    "guarantee"
    ],
    "stemZh": "在一份進來的 report w 被放進 ρ′ 之前，要通過哪些鏈上檢查？",
    "optionsZh": [
@@ -8066,8 +8008,8 @@
    "difficulty": 3,
    "kind": "concept",
    "tags": [
-    "guarantee",
-    "work-report"
+    "work-report",
+    "extrinsic"
    ],
    "stemZh": "E_G 中 report 的脈絡有效性要求有哪些？又有哪一條聽起來合理、GP 其實沒有要求的規則？",
    "optionsZh": [
@@ -8103,7 +8045,7 @@
    "kind": "concept",
    "tags": [
     "guarantee",
-    "work-report"
+    "extrinsic"
    ],
    "stemZh": "處理完 E_G 之後，對於收到一份新 guarantee g 的 core，ρ′[c] 裝的是什麼？",
    "optionsZh": [
@@ -8139,7 +8081,7 @@
    "kind": "code",
    "tags": [
     "assurance",
-    "work-report",
+    "balance",
     "delta-0.8.0"
    ],
    "stemZh": "團隊的可得性檢查用的是 `totalAvailable[i] >= types.ValidatorsSuperMajority`。這是 GP 的門檻嗎？它的正確性取決於什麼？",
@@ -8180,8 +8122,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "accumulate",
-    "authorizer"
+    "authorizer",
+    "accumulate"
    ],
    "stemZh": "ξ（accumulated）與 ω（ready）是什麼？它們各有多大？",
    "optionsZh": [
@@ -8290,8 +8232,7 @@
    "kind": "concept",
    "tags": [
     "accumulate",
-    "privileges",
-    "storage"
+    "privileges"
    ],
    "stemZh": "在 Δ*（平行 accumulation）中，哪些 service 會被 accumulate？當 manager 與某個具特權的 service 同時寫入同一個特權索引——assigners、delegator 或 registrar——時，哪一次寫入會存活？",
    "optionsZh": [
@@ -8363,7 +8304,7 @@
    "kind": "concept",
    "tags": [
     "transfer",
-    "accumulate"
+    "balance"
    ],
    "stemZh": "一筆 deferred transfer T = (s, d, a, m, g)。這些欄位是什麼？餘額又是在什麼時候移動的？",
    "optionsZh": [
@@ -8399,7 +8340,7 @@
    "kind": "concept",
    "tags": [
     "accumulate",
-    "service"
+    "prior/posterior"
    ],
    "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，每一項各怎麼併入 posterior 狀態？",
    "optionsZh": [
@@ -8435,7 +8376,7 @@
    "kind": "concept",
    "tags": [
     "preimage",
-    "accumulate"
+    "extrinsic"
    ],
    "stemZh": "preimages extrinsic E_P 受什麼規則管轄——什麼可以收、對哪個狀態檢查——又是怎麼、在什麼時候併入 δ′？",
    "optionsZh": [
@@ -8471,7 +8412,6 @@
    "kind": "code",
    "tags": [
     "accumulate",
-    "service",
     "delta-0.8.0"
    ],
    "stemZh": "這是團隊在 Δ+ 中的前綴選取程式碼。對照 GP 0.8.0 的 eq. 12.17，還缺了什麼？",
@@ -8588,8 +8528,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "statistics",
-    "service"
+    "service",
+    "accumulate"
    ],
    "stemZh": "一個區塊的 π′_S 裡會出現哪些 service？accumulation 那一項又裝什麼？",
    "optionsZh": [
@@ -8628,7 +8568,7 @@
    "kind": "rationale",
    "tags": [
     "guarantee",
-    "assurance"
+    "extrinsic"
    ],
    "stemZh": "ρ 在一個 block 裡被更新三次：ρ†（吃完 E_D）、ρ‡（吃完 E_A）、ρ′（吃完 E_G）。為什麼是這個順序？如果把 E_G 排在 E_A 之前處理，會壞在哪？",
    "optionsZh": [
@@ -8670,8 +8610,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "validator set",
-    "storage"
+    "validator set"
    ],
    "stemZh": "state 同時保留三個 validator set：ι（下期）、κ（本期）、λ（上期）。κ 是當然要有的；λ 為什麼要留在 state 裡？哪些檢查會去讀它？",
    "optionsZh": [
@@ -8744,7 +8683,7 @@
    "kind": "rationale",
    "tags": [
     "accumulate",
-    "gas"
+    "work-report"
    ],
    "stemZh": "GP 把 accumulation 拆成兩層：Δ+ 逐 report 順序遞迴，裡面再呼叫 Δ* 把同一個 service 的東西併成一次 PVM 呼叫。§12.2 說這是為了調和「兩個略微對立的因素」。是哪兩個？為什麼一層順序、一層並行可以同時滿足？",
    "optionsZh": [
@@ -8783,7 +8722,7 @@
    "kind": "rationale",
    "tags": [
     "transfer",
-    "accumulate"
+    "service"
    ],
    "stemZh": "service A 在 accumulate 裡呼叫 transfer 給 service B，B 不會在同一次執行中收到，而是「延遲」到下一輪。為什麼 JAM 不做成同步呼叫？延遲後 B 是怎麼被喚醒、用誰的 gas 處理這筆轉帳？",
    "optionsZh": [
@@ -8825,7 +8764,6 @@
    "kind": "concept",
    "tags": [
     "checkpoint",
-    "accumulate",
     "storage"
    ],
    "stemZh": "Ψ_A 的 context 是一對 (x, y)：x 是一般維度，y 是例外維度。某個 service 在 accumulate 裡依序做了：寫 storage → checkpoint → transfer 給別人 → 再寫 storage → panic。這次呼叫最後回傳什麼？y 存在的意義是什麼？",
@@ -8866,8 +8804,7 @@
    "kind": "rationale",
    "tags": [
     "audit",
-    "accumulate",
-    "GRANDPA"
+    "accumulate"
    ],
    "stemZh": "report 一變 available 就會被 accumulate，但這時 audit 通常還沒做完。也就是說鏈上 state 已經被一份「還沒被驗證過」的結果改掉了。JAM 靠什麼讓這件事安全？如果之後發現那份 report 是壞的，state 怎麼辦？",
    "optionsZh": [
@@ -8948,7 +8885,8 @@
    "difficulty": 3,
    "kind": "rationale",
    "tags": [
-    "core"
+    "core",
+    "design factors"
    ],
    "stemZh": "§1.3 說 JAM「並不避免非同步，而是把它限制在 pipeline 的長度之內」。這句話落到協定裡是哪幾條具體的界限？一份工作從 in-core 到影響 state，最多能拖多久？",
    "optionsZh": [
@@ -8987,7 +8925,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "lookup-anchor",
+    "design factors",
     "refine",
     "preimage"
    ],
@@ -9074,7 +9012,7 @@
    "kind": "rationale",
    "tags": [
     "Polkadot",
-    "authorizer"
+    "core"
    ],
    "stemZh": "Polkadot 1.0 裡一個 core 綁死一條 parachain：core 永遠只做「驗證那條鏈的 block」。JAM 說 core 是無定見的（un-opinionated）。那在 JAM 裡，「這個 core 現在接受什麼工作」是由哪些東西決定的？拍賣得到的 slot 被什麼取代？",
    "optionsZh": [
@@ -9326,7 +9264,7 @@
    "tags": [
     "dependency",
     "guarantee",
-    "recent history"
+    "accumulated set"
    ],
    "stemZh": "report 的 prerequisite 會被檢查兩次：guarantee 上鏈時、accumulate 時。兩次各讀哪份歷史（E_G、β 的 reported map、ξ、ω）？為什麼 guarantee 時不能只查 ξ？",
    "optionsZh": [
@@ -9365,8 +9303,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "validator set",
-    "privileges"
+    "privileges",
+    "epoch"
    ],
    "stemZh": "delegator service 在 epoch e 的某個 block 呼叫 designate，把 ι 換成一組新 key。這組 key 最早在哪個 epoch 能封 block？中間經過哪幾步？",
    "optionsZh": [
@@ -9555,8 +9493,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "assurance",
-    "timeslot"
+    "timeslot",
+    "guarantee"
    ],
    "stemZh": "availability 逾時的條件是 H_T ≥ t + U。這個 t 是誰的時間？為什麼不用 guarantee 自己簽的 slot g_t？兩個時間最多差多少？",
    "optionsZh": [
@@ -9637,9 +9575,9 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "Safrole",
     "Polkadot",
-    "ring VRF"
+    "ticket",
+    "Safrole"
    ],
    "stemZh": "Safrole 把「哪張 ticket 排在哪個 slot」公開、卻把「誰持有那張 ticket」藏到出塊那一刻。BABE 兩者都不公開。Safrole 這樣拆開，比 BABE 多得到什麼、又保住了什麼？",
    "optionsZh": [
@@ -9678,8 +9616,7 @@
    "kind": "rationale",
    "tags": [
     "fallback",
-    "Safrole",
-    "Polkadot"
+    "timeslot"
    ],
    "stemZh": "BABE 用 secondary slot 補空：某個 slot 沒人中籤時，由一個公開、可預測的次要作者補上。Safrole 的 fallback 跟它在「粒度」和「觸發條件」上有什麼不同？兩種設計各在保什麼？",
    "optionsZh": [
@@ -9760,8 +9697,7 @@
    "kind": "rationale",
    "tags": [
     "ELVES",
-    "Polkadot",
-    "host call"
+    "Polkadot"
    ],
    "stemZh": "GP 說 JAM「co-opts much of the same game-theoretic and cryptographic machinery as Polkadot known as ELVES」。把 Polkadot 1.0 的四個階段對到 JAM 的名字，然後說：在同一套 ELVES 之上，JAM 真正新增的是什麼？",
    "optionsZh": [
@@ -9804,7 +9740,7 @@
    "kind": "rationale",
    "tags": [
     "Polkadot",
-    "work-digest"
+    "header"
    ],
    "stemZh": "Polkadot relay chain 的 header 是 (parent hash, number, post-state root, extrinsics root, digest logs)，BABE 的 slot / VRF 與 seal 都塞在 digest 裡。對照 JAM 的十元組 header，最重要的三個結構差異是什麼？各自的理由？",
    "optionsZh": [
@@ -9843,8 +9779,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "authorizer",
-    "core"
+    "core",
+    "Ethereum"
    ],
    "stemZh": "JAM 沒有 transaction。§4.9 說 JAM 裡「沒有 transactor 這個概念」。為什麼要把 Ethereum 那種「簽名的交易」整個拿掉？拿掉之後，「使用者提交東西」這件事去了哪裡？",
    "optionsZh": [
@@ -9957,7 +9893,7 @@
    "difficulty": 1,
    "kind": "rationale",
    "tags": [
-    "Safrole",
+    "epoch",
     "timeslot"
    ],
    "stemZh": "slot 固定 6 秒、epoch 固定 600 個 slot（一小時）。GP 對「6 秒」這個數字的定位是什麼？Safrole 在這個時間結構上要「嚴格減少」的兩種東西是什麼？",
@@ -9997,9 +9933,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "dispute",
-    "validator set",
-    "authorizer"
+    "dispute"
    ],
    "stemZh": "offender 的 key 在下次輪替時被 Φ 換成全零 key，而不是從集合裡移除。GP 只寫了做法。從其他規則可以推出什麼理由？全零 key 在協定裡會產生什麼效果？",
    "optionsZh": [
@@ -10038,7 +9972,6 @@
    "kind": "rationale",
    "tags": [
     "gas",
-    "PVM",
     "basic block"
    ],
    "stemZh": "0.8.0 把 gas 改成「進入 basic block 時預扣整塊」。為什麼以 block 而不是以指令為單位計價？這個決定跟「間接跳躍必須落在 block 起點」有什麼關係？",
@@ -10079,7 +10012,7 @@
    "kind": "rationale",
    "tags": [
     "coretime",
-    "privileges"
+    "service"
    ],
    "stemZh": "GP 把 staking、token 經濟、coretime 銷售全部標為 out of scope，卻又說 JAM 是 proof-of-authority。那 validator 到底由誰決定？這種「協定只留 API、經濟交給 service」的切法在保什麼？",
    "optionsZh": [
@@ -10121,9 +10054,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "Polkadot",
-    "accumulate",
-    "work-digest"
+    "work-digest",
+    "Polkadot"
    ],
    "stemZh": "Polkadot 的 core 跑完 PVF，輸出就是 parachain 的新狀態（head data / state root），relay chain 只負責記錄。JAM 的 core 跑完 refine，輸出只是一小段 digest，然後還要在鏈上跑 service 的 accumulate 才決定狀態怎麼變。多這一步在買什麼？",
    "optionsZh": [
@@ -10158,7 +10090,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "JAM"
    ],
    "stemZh": "一句話說，JAM 想成為什麼？",
    "optionsZh": [
@@ -10277,7 +10209,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "CoreJam"
    ],
    "stemZh": "JAM 這個名字由兩個字組成。是哪兩個字，它們又指什麼？",
    "optionsZh": [
@@ -10439,7 +10371,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "JAM"
    ],
    "stem": "You open the Gray Paper for the first time. How is it laid out, and where should you look for what?",
    "stemZh": "你第一次打開 Gray Paper。它是怎麼編排的？該去哪裡找什麼？",
@@ -10479,7 +10411,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "block"
    ],
    "stem": "What are the two parts of a JAM block?",
    "stemZh": "一個 JAM 區塊由哪兩個部分組成？",
@@ -10517,7 +10449,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "extrinsic"
+    "block"
    ],
    "alsoCh": [
     "N4"
@@ -10558,7 +10490,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "core"
+    "block"
    ],
    "stem": "The state σ is split into many named components. What is the point of splitting it that way rather than treating it as one blob?",
    "stemZh": "狀態 σ 被拆成許多具名的分量。這樣拆而不是當成單一個大 blob，用意是什麼？",
@@ -10716,7 +10648,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "segment"
+    "block"
    ],
    "stem": "What does it mean to say a node 'imports' a block?",
    "stemZh": "說一個節點「import」一個區塊，是什麼意思？",
@@ -10872,7 +10804,6 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "Safrole",
     "timeslot"
    ],
    "stem": "Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?",
@@ -10912,7 +10843,7 @@
    "kind": "concept",
    "tags": [
     "fallback",
-    "Safrole"
+    "ticket"
    ],
    "stem": "If too few tickets are collected during an epoch, JAM does not stall. What does it do instead, and what is given up?",
    "stemZh": "如果一個 epoch 內收集到的票太少，JAM 不會停擺。它改用什麼做法？又放棄了什麼？",
@@ -10950,8 +10881,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "GRANDPA",
-    "Safrole"
+    "Safrole",
+    "GRANDPA"
    ],
    "alsoCh": [
     "N1"
@@ -10993,7 +10924,7 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "entropy",
+    "Bandersnatch",
     "header"
    ],
    "stem": "Every header carries two Bandersnatch signatures, not one. What is the second one for?",
@@ -11195,8 +11126,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "refine",
-    "audit"
+    "refine"
    ],
    "alsoCh": [
     "N6"
@@ -11238,8 +11168,8 @@
    "difficulty": 2,
    "kind": "concept",
    "tags": [
-    "preimage",
-    "service"
+    "service",
+    "assurance"
    ],
    "stem": "A service account stores a code hash, not the code itself. How does the code actually become available to run?",
    "stemZh": "service 帳戶存的是 code hash 而不是程式碼本身。程式碼實際上是怎麼變成可執行的？",
@@ -11435,7 +11365,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "core"
+    "work-package"
    ],
    "alsoCh": [
     "N4",
@@ -11757,7 +11687,7 @@
    "kind": "rationale",
    "tags": [
     "erasure coding",
-    "assurance"
+    "work-package"
    ],
    "stem": "Why does JAM erasure-code a work-package instead of simply asking every validator to keep a full copy?",
    "stemZh": "JAM 為什麼要把 work-package 做 erasure coding，而不是直接要求每位 validator 各留一份完整副本？",
@@ -11958,7 +11888,8 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "assurance"
+    "assurance",
+    "balance"
    ],
    "stem": "The availability threshold is set above two thirds of validators. Why not a simple majority?",
    "stemZh": "可得性門檻訂在超過三分之二的 validator。為什麼不是簡單多數就好？",
@@ -12080,8 +12011,7 @@
    "difficulty": 1,
    "kind": "concept",
    "tags": [
-    "PVM",
-    "host call"
+    "PVM"
    ],
    "stem": "What is the PVM, and why does JAM define one instead of reusing an existing virtual machine?",
    "stemZh": "PVM 是什麼？JAM 為什麼要自己定義一個，而不沿用既有的虛擬機？",
@@ -12197,8 +12127,7 @@
    "difficulty": 2,
    "kind": "rationale",
    "tags": [
-    "PVM",
-    "audit"
+    "PVM"
    ],
    "alsoCh": [
     "N6"
@@ -12241,7 +12170,7 @@
    "kind": "concept",
    "tags": [
     "host call",
-    "storage"
+    "service"
    ],
    "stem": "If the PVM cannot touch the outside world, how does a service read its own storage or send value to another service?",
    "stemZh": "既然 PVM 碰不到外界，一個 service 要怎麼讀取自己的 storage 或轉帳給另一個 service？",
@@ -12320,8 +12249,7 @@
    "kind": "concept",
    "tags": [
     "memory",
-    "transfer",
-    "PVM"
+    "dispute"
    ],
    "stem": "The PVM's memory is paged, and touching an unmapped page raises a fault rather than killing the program outright. What does that make possible?",
    "stemZh": "PVM 的記憶體是分頁的，碰到未映射的頁會引發 fault 而不是直接殺掉程式。這讓什麼變得可能？",

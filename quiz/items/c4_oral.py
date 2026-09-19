@@ -68,7 +68,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "7", "section": "7.4 The Accumulation Output Belt",
  "gpRef": "§7.4; §E.3", "difficulty": 2, "kind": "concept",
- "tags": ["MMR", "recent history", "BEEFY"],
+ "tags": ["MMR", "Merklization"],
   "stemZh": "β_B 是一個 Merkle Mountain Range，每個區塊長出一個 root。描述 append 對這個結構做了什麼，以及 GP 為什麼在這裡選 MMR、而不是每個區塊重建一棵平衡的 Merkle 樹。",
   "optionsZh": [
    "append 把新的 root 放在高度 0，並與任何同高度的既有 peak 向上合併，留下一組 peak，其高度正是計數的二進位位數；這個結構是唯讀附加的，所以每次 append 花 O(log n)，而先前發出的證明仍然有效",
@@ -156,7 +156,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "A", "section": "A.4 Memory & Page Faults",
  "gpRef": "eq. A.9", "difficulty": 2, "kind": "concept",
- "tags": ["memory", "dispute", "PVM"],
+ "tags": ["dispute", "memory"],
   "stemZh": "一次多位元組的 store 跨越了兩個 page：第一個可寫、第二個未配置。PVM 會回報什麼？回報的位址為什麼要那樣定義？",
   "optionsZh": [
    "一個 page fault，帶著「此次存取所觸及、最低的不可存取位元組」其 page 對齊後的位址；對齊到 page 正是讓這個值成為 host 能據以行動的東西——它恰好就是 host 在恢復程式前必須映射的那個 page",
@@ -185,7 +185,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "A", "section": "A.3 Basic Blocks & Control Transfer",
  "gpRef": "§A.3; §A.5", "difficulty": 2, "kind": "concept",
- "tags": ["PVM", "gas"],
+ "tags": ["transfer", "gas"],
   "stemZh": "PVM 同時有靜態解析的跳躍與由暫存器算出的間接跳躍。間接跳躍的目標必須額外滿足哪些條件？如果把這些條件拿掉，gas 模型會壞在哪裡？",
   "optionsZh": [
    "間接跳躍的目標必須對齊、非零、位於 jump table 之中，且落在某個 basic block 的起點；少了「落在 block 起點」這項要求，程式就能從第一條指令以下進入一個 block 並執行它，而該 block 的 gas 從未被計費",
@@ -215,7 +215,7 @@ ITEMS = [
  "lens": "演算法",
  "ch": "B", "section": "B.1 Host Call Gas",
  "gpRef": "§B（PR #517）", "difficulty": 2, "kind": "delta",
- "tags": ["gas", "host call", "delta-0.8.0"],
+ "tags": ["gas", "assurance", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 重做了 host call 的計費方式。描述新收費的形狀，以及當一個 service 呼叫某個在它這次 invocation 中不可用的索引時會發生什麼。",
   "optionsZh": [
    "每個呼叫有一個基本成本，並在它搬移資料時再加上一項與所觸及 KiB 數成正比的費用；未知或不可用的索引會先被收取一個預設成本，所以剩餘 gas 不足的呼叫會以 out-of-gas 退出、而不是回傳錯誤碼",
@@ -273,7 +273,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "B", "section": "B.2 fetch",
  "gpRef": "§B", "difficulty": 2, "kind": "concept",
- "tags": ["host call", "refine"],
+ "tags": ["host call", "assurance"],
   "stemZh": "fetch 是單一個 host call、在三種 invocation 中都可用，其第一個引數選擇要讀哪一份資料。GP 為什麼把這麼多資料來源摺進同一個呼叫，而不是各給一個索引？",
   "optionsZh": [
    "因為 host call 的編號是每個已部署 service 所編譯依循的 ABI 的一部分：用一個選擇子引數就能新增資料來源而不必重新編號，而每個來源各給一個新索引，最終會逼既有 service 重新建置",
@@ -331,7 +331,7 @@ ITEMS = [
  "lens": "設計",
  "ch": "6", "section": "6.5 The Slot Key Sequence",
  "gpRef": "eq. 6.25, 6.27 (F)", "difficulty": 2, "kind": "concept",
- "tags": ["fallback", "Safrole", "ring VRF"],
+ "tags": ["fallback", "ticket"],
   "stemZh": "當抵達的 ticket 太少時，γ′_S 會退回到一個由熵與啟用 validator 集合導出的金鑰序列。每個 slot 的出塊者是怎麼選出來的？在 fallback 生效期間，這條鏈放棄了什麼性質？",
   "optionsZh": [
    "每個 slot 的出塊者是把熵與 slot 索引一起雜湊、再對集合大小取模而選出的；整個 epoch 的排程因此可以事先被公開算出，所以 ring VRF ticket 所買到的匿名性在那個 epoch 就沒了",

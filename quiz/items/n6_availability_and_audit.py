@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n6-why-erasure-coding",
  "lens": "設計",
   "ch": "N6", "section": "§11.2; App. H", "gpRef": "§11 & App. H",
-  "difficulty": 2, "kind": "rationale", "tags": ["erasure coding", "assurance"],
+  "difficulty": 2, "kind": "rationale", "tags": ["erasure coding", "work-package"],
   "stem": "Why does JAM erasure-code a work-package instead of simply asking every validator to keep a full copy?",
   "stemZh": "JAM 為什麼要把 work-package 做 erasure coding，而不是直接要求每位 validator 各留一份完整副本？",
   "options": [
@@ -153,7 +153,7 @@ ITEMS = [
   "id": "n6-why-two-thirds",
  "lens": "設計",
   "ch": "N6", "section": "§11.2; §17", "gpRef": "§11 & §17",
-  "difficulty": 2, "kind": "rationale", "tags": ["assurance"],
+  "difficulty": 2, "kind": "rationale", "tags": ["assurance", "balance"],
   "stem": "The availability threshold is set above two thirds of validators. Why not a simple majority?",
   "stemZh": "可得性門檻訂在超過三分之二的 validator。為什麼不是簡單多數就好？",
   "options": [

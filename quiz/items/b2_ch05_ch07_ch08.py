@@ -6,7 +6,7 @@ ITEMS = [
  "id": "ch05-unsigned-header-serialization",
  "lens": "演算法",
  "ch": "5", "section": "5 The Header (serialization, Appendix C.2)", "gpRef": "eq. 5.1 & §C.2 (E(H), E_U(H))",
- "difficulty": 2, "kind": "code", "tags": ["serialization", "seal"],
+ "difficulty": 2, "kind": "code", "tags": ["serialization", "header"],
   "stemZh": "團隊是靠「把完整 header 編碼後截斷」來導出未簽署的 header 序列化。在 GP 0.8.0 的 E(H) 與 E_U(H) 之下這為什麼成立？E_U 的欄位順序是什麼？",
   "optionsZh": [
    "E_U(H) 省略了兩個 Bandersnatch 簽章——熵來源 H_V 與 seal H_S——所以合規的實作必須從 E(H) 切掉 192 個 octet，而 seal 的訊息裡完全不含 VRF 材料，這正是阻止兩個簽章互相依賴的原因",
@@ -59,7 +59,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "id": "ch05-extrinsic-hash-inclusion-proof",
  "lens": "設計",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7",
- "difficulty": 3, "kind": "concept", "tags": ["assurance", "dispute", "ticket", "delta-0.8.0"],
+ "difficulty": 3, "kind": "concept", "tags": ["extrinsic", "header", "delta-0.8.0"],
   "stemZh": "某個輕客戶端只持有一個已驗證的 header H，想確認 service s 的 preimage blob d 有被納入該區塊的 E_P。已知 H_X = H(E(H#(a)))、a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]（eq. 5.4–5.7），它需要的最小見證是什麼？檢查的形狀又是什麼？",
   "optionsZh": [
    "一條長度為 log₂|E_P| 的 Merkle 路徑，從葉子 H(d) 一路到 H_X，因為 H_X 是對該區塊每一個 extrinsic 項目所取的二元 Merkle root，所以見證是 O(log n) 個雜湊、只隨區塊變滿而對數成長",
@@ -117,7 +117,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "id": "ch05-author-index-bound-set",
  "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 & eq. 6.8 (valcount)",
- "difficulty": 3, "kind": "code", "tags": ["header", "delta-0.8.0"],
+ "difficulty": 3, "kind": "code", "tags": ["header", "JAM Prize", "delta-0.8.0"],
   "stemZh": "在 fuzzer bug #825（一個 H_I = 65535 的 header 讓 UpdateEtaPrime0 以「index out of range [65535] with length 6」panic，因為該索引在被驗證之前就被使用）之後，團隊加了這個檢查。它用的界限是 GP 0.8.0 所規定的那一個嗎？",
   "optionsZh": [
    "是：eq. 5.10 定義 H_I ∈ N_{|κ|}——出塊者必須屬於 prior 的 active set，因為該區塊建立在 prior 狀態上、而它的 seal 是在該 epoch 的金鑰輪換套用之前就被驗證的，所以 len(priorState.Kappa) 正是規格的界限，#825 需要的只是把這個測試移到 UpdateEtaPrime0 之前",
@@ -155,7 +155,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "id": "ch07-belt-empty-output",
  "lens": "時機",
  "ch": "7", "section": "7 Recent History", "gpRef": "eq. 7.6–7.7 & eq. E.1, E.3",
- "difficulty": 3, "kind": "concept", "tags": ["recent history", "MMR", "accumulate"],
+ "difficulty": 3, "kind": "concept", "tags": ["MMR", "accumulate", "recent history"],
   "stemZh": "區塊 N 沒有 accumulate 出任何產出，所以 θ′ = []。accumulation-output belt β_B 以及寫進區塊 N 之 β_H 條目的 super-peak b 會怎麼樣？",
   "optionsZh": [
    "什麼都不會被附加，而 b 沿用父區塊的 super-peak，所以 belt 只對「至少產出一個 accumulation output」的區塊各持有一片葉子，BEEFY 的驗證者則單純跳過空區塊",

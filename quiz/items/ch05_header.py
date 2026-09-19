@@ -63,7 +63,7 @@ ITEMS = [
  "id": "ch05-extrinsic-hash-080",
  "lens": "演算法",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7 (H_x)",
- "difficulty": 3, "kind": "delta", "tags": ["extrinsic", "assurance", "dispute", "delta-0.8.0"],
+ "difficulty": 3, "kind": "delta", "tags": ["extrinsic", "header", "delta-0.8.0"],
   "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
   "optionsZh": [
    "p 與 g 是 E_P 與 E_G 完整的 codec 編碼，與區塊本體攜帶的一模一樣，所以 a 承諾了每一個 preimage blob 與每一份完整的 work-report",

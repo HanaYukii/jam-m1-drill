@@ -21,7 +21,7 @@ ITEMS = [
         "gpRef": "eq. 13.4–13.6",
         "difficulty": 3,
         "kind": "concept",
-        "tags": ["statistics", "assurance", "guarantee", "delta-0.8.0"],
+        "tags": ["statistics", "assurance", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 §13.1 以三個有序步驟導出 validator 活動紀錄——先 π_V†，再 (π_V‡, π′_L)，最後 π′_V——其中 e = ⌊τ/E⌋、e′ = ⌊τ′/E⌋。現在看一個新 epoch 的第一塊（因此 e′ ≠ e）：出塊者是 validator 7、它的 assurance extrinsic E_A 帶有 validator 4 與 9 的簽章、而 guarantee extrinsic E_G 記功給 validator 22。這一塊自身的增量最後落在哪裡？",
   "optionsZh": [
    "這一塊貢獻的一切全都落進剛歸零的累積器，因為 eq. 13.4 是把 assurance 那一輪套用在 π_V‡ 而不是 π_V 上；所以 validator 7 的出塊／ticket／preimage 計數與 validator 22 的 guarantee 記功，會和 validator 4、9 的 assurance 增量一起坐在當期紀錄裡，而封存則原封保留上一個 epoch 的總計",
@@ -126,7 +126,7 @@ ITEMS = [
         "gpRef": "§13.1; eq. 4.4 (state composition); eq. 13.1–13.3; App. D key C(13)",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["privileges", "statistics", "Merklization"],
+        "tags": ["Merklization"],
   "stemZh": "面試官反問：「validator 計數器在我看來像遙測資料。為什麼它們要成為 σ 的一個分量、還被 Merklize 進 state trie？又為什麼要保留兩份 validator 紀錄而不是一個滾動的計數器？」以 GP 為根據的回答是什麼？",
   "optionsZh": [
    "這基本上是序列化上的便利：JIP-2 RPC 的統計端點與 conformance 向量想要一個形狀固定的紀錄，所以 π 只是搭順風車待在 σ 裡好給那些消費者一個穩定的版面；而且因為它被排除在附錄 D 的 state trie 建構之外，一個完全跳過這項更新的節點仍然會算出相同的 state root。那個配對的存在只是為了讓測試向量能一次比對整個 epoch 的總計",

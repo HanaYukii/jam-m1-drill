@@ -9,7 +9,7 @@ ITEMS = [
  "id": "ch06-code-useless-ticket-gap",
  "lens": "演算法",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.35–6.36 — internal/safrole/extrinsic_tickets.go CreateNewTicketAccumulator",
- "difficulty": 3, "kind": "code", "tags": ["ticket", "Safrole"],
+ "difficulty": 3, "kind": "code", "tags": ["ticket", "extrinsic"],
   "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段（main 與 0.8.0 分支相同），在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都高於一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
   "optionsZh": [
    "依 eq. 6.35 該區塊有效：γ′_A 就是保留最小的 E 個 id，所以那 3 張 ticket 不會被留下、對該區塊也沒有進一步要求；這段程式碼完全合規、不需要額外檢查",
@@ -66,7 +66,7 @@ return nil"""},
  "id": "ch06-code-header-checks-posterior",
  "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16–6.18, 6.28; §5 eq. 5.10 — internal/stf/sft.go RunSTF, validate_header.go ValidateHeaderVrf",
- "difficulty": 3, "kind": "code", "tags": ["seal", "Safrole", "entropy"],
+ "difficulty": 3, "kind": "code", "tags": ["seal", "Bandersnatch"],
   "stemZh": "團隊的 RunSTF 在 UpdateSafrole 前後分兩階段驗證 header；把 posterior 狀態傳給第二階段正是 fuzzer bug #784「Header VRF Verification Failure on some cases」的修法（PR #791）。對於一個新 epoch 的第一塊，為什麼 seal H_S、熵來源 H_V 與 epoch marker H_E 只能在第二階段檢查？",
   "optionsZh": [
    "因為 seal 簽的是 E_U(H)，而它內嵌了 H_E 與 H_W，所以那些 marker 必須先定案；validator 集合本身無關緊要，因為只要區塊有效就有 κ′ = κ，而且 seal 的 context η′_3 在每一塊都等於 η_3",
@@ -122,7 +122,7 @@ func ValidateHeaderVrf(header types.Header, priorState *types.State, posteriorSt
  "id": "ch06-code-author-index-bound",
  "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "§5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader",
- "difficulty": 3, "kind": "code", "tags": ["Safrole", "entropy", "delta-0.8.0"],
+ "difficulty": 3, "kind": "code", "tags": ["seal", "entropy", "delta-0.8.0"],
   "stemZh": "在 fuzzer bug #825（計算 η′_0 時 panic「index out of range [65535] with length 6」）之後，團隊把這個檢查加進了在 UpdateSafrole 之前執行的 ValidateNonVRFHeader。它用的界限是 GP 0.8.0 規定的那個嗎？差異什麼時候會浮現？",
   "optionsZh": [
    "這個檢查正是 GP 所規定的：eq. 5.10 以 |κ|（prior active set）為 H_I 的界限，這正是它可以在金鑰輪換之前驗證而不失一般性的原因，因此它在任何 validator 集合大小下都涵蓋了 fuzzer 的 65535 案例",
@@ -158,7 +158,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-skip-epochs-transition",
  "lens": "時機",
  "ch": "6", "section": "6.3–6.7 (epoch transition across skipped epochs)", "gpRef": "eq. 6.2, 6.14, 6.24, 6.25, 6.28–6.29, 6.35",
- "difficulty": 3, "kind": "concept", "tags": ["Safrole", "entropy", "validator set"],
+ "difficulty": 3, "kind": "concept", "tags": ["validator set", "epoch"],
   "stemZh": "full 參數（E = 600、Y = 500）。前一塊 τ = 1195 且 accumulator 已飽和（|γ_A| = E）；下一塊 H_T = 1810（中間完全沒有出塊）。以 prior 值表示 posterior 值，描述這次轉移：輪替發生幾次？κ′、λ′、γ′_P 與 η′ 各變成什麼？用的是哪個 sealer 序列、為什麼？哪些 marker 會出現？",
   "optionsZh": [
    "輪換是每經過一個 epoch 就套用一次，所以這裡是兩次：κ′ = Φ(ι)、λ′ = γ_P、(η′_1, η′_2, η′_3) = (η′_0, η_0, η_1)；γ′_S = F(η_0, Φ(ι))；H_E 出現而 H_W 不出現",
@@ -187,7 +187,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-variable-set-boundary",
  "lens": "時機",
  "ch": "6", "section": "6.3 Key Rotation / 6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10",
- "difficulty": 3, "kind": "delta", "tags": ["ticket", "validator set", "Safrole", "delta-0.8.0"],
+ "difficulty": 3, "kind": "delta", "tags": ["validator set", "epoch", "delta-0.8.0"],
   "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這在 0.8.0 是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能封緘這第一塊？",
   "optionsZh": [
    "n = ⌈24/6⌉ = 4，因為 n 是從封印這個 epoch 的 active set κ′ 算出來的；γ′_Z 維持是 6 把金鑰的 ring，而 H_E 列出 6 組配對，直到那 9 位 validator 在 epoch e + 2 真正變為 active 為止",
@@ -216,7 +216,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-ring-root-nulled-keys",
  "lens": "機制",
  "ch": "6", "section": "6.3 Key Rotation / Appendix G", "gpRef": "eq. 6.14–6.15, G.3 (ring root), App. G padding-point note",
- "difficulty": 3, "kind": "concept", "tags": ["dispute", "ring VRF", "Safrole"],
+ "difficulty": 3, "kind": "concept", "tags": ["ring VRF", "epoch"],
   "stemZh": "在 epoch 換屆時，ι 中有一位 validator 的 Ed25519 金鑰落在 ψ′_O 裡，所以 Φ 把它整筆 336 位元組的項目換成零。這對新 epoch 的 γ′_Z 與 ticket 驗證有什麼影響？",
   "optionsZh": [
    "該 offender 的位置會被移出 ring，所以 γ′_Z 承諾的是 |γ′_P| − 1 把金鑰、而每個人的 ring 位置都往前移一格；這正是 accumulator 必須在 epoch 邊界重新排序、以及 H_E 只列出倖存金鑰的原因",
@@ -245,7 +245,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-vrf-output-message-independence",
  "lens": "設計",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.16, 6.24, 6.30, 6.32; §3.8.2 Signing Schemes; App. G eq. G.2/G.5",
- "difficulty": 3, "kind": "rationale", "tags": ["seal", "Bandersnatch", "ticket"],
+ "difficulty": 3, "kind": "rationale", "tags": ["Bandersnatch", "seal", "ticket"],
   "stemZh": "ticket 證明是以 context X_T ⌢ η′_2 ++ r 對空訊息所做的 ring-VRF 證明，而 seal H_S 是以 context X_T ⌢ η′_3 ++ i_e 對 E_U(H)（整個未簽署 header）所做的一般 Bandersnatch 簽章。既然如此，eq. 6.16 為什麼還能要求 i_y = Y(H_S)，也就是 seal 的 VRF 輸出等於 ticket id？",
   "optionsZh": [
    "因為 VRF 的輸出只取決於私鑰與 context（「influenced by x but not by m」），而到了封印的時候，提交當時的熵已經從 η′_2 輪替成 η′_3、兩邊的 context 因此吻合：同一把金鑰在任何訊息之下都會重現同一個 ticket id——在 ring 證明中匿名、在 seal 中可歸屬",
@@ -274,7 +274,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-why-m-ge-Y",
  "lens": "時機",
  "ch": "6", "section": "6.5 The Slot-Sealer Sequence", "gpRef": "eq. 6.25, 6.29, 6.31, 6.35; §6.6–6.7 prose",
- "difficulty": 3, "kind": "rationale", "tags": ["Safrole", "ticket", "seal"],
+ "difficulty": 3, "kind": "rationale", "tags": ["ticket", "seal"],
   "stemZh": "eq. 6.25 只在 e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E 時才把 accumulator 當成下一個 slot-sealer 序列。其中 m ≥ Y 這個關於前一塊的性質，實際上保證了什麼？GP 又為什麼把票券模式綁在它身上？",
   "optionsZh": [
    "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的時槽",
@@ -303,7 +303,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-three-keys-epoch-marker",
  "lens": "設計",
  "ch": "6", "section": "6.3 Key Rotation / 6.6 The Markers", "gpRef": "eq. 6.10–6.13, 6.15, 6.28; §5 eq. 5.11; eq. 11.14, 11.28, 17.7, 18.1",
- "difficulty": 2, "kind": "concept", "tags": ["Safrole", "Bandersnatch", "Ed25519"],
+ "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch", "Ed25519"],
   "stemZh": "每把 validator 金鑰都捆綁了一把 Bandersnatch、一把 Ed25519 與一把 BLS 公鑰。每把金鑰在協定裡各做什麼用？自 GP 0.6.4 起，epoch marker H_E 又為什麼要在 Bandersnatch 金鑰之外一併攜帶 Ed25519 金鑰？",
   "optionsZh": [
    "Bandersnatch：seal、H_V 與 BEEFY；Ed25519：ticket ring 證明、guarantee、assurance 與稽核公告；BLS：judgment、culprit、fault 與 offender 身分（ψ_O、H_O、Φ）。H_E 攜帶 Ed25519 金鑰是因為 ring root γ′_Z 是對 γ′_P 之 Ed25519 金鑰的承諾，而只讀 header 的節點必須能自行重建它",

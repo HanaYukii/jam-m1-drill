@@ -85,7 +85,7 @@ ITEMS = [
  "id": "b2-appA-load-imm-jump-ind-reg-write",
  "lens": "演算法",
  "ch": "A", "section": "A.5.1 Instruction Tables (load_imm_jump_ind) & A.1 (Ψ on panic)", "gpRef": "eq. A.34 table (opcode 180), A.22 (djump), A.1 (Ψ returns φ′ on ☇/∎), A.10; §B invoke",
- "difficulty": 3, "kind": "code", "tags": ["PVM", "storage"],
+ "difficulty": 3, "kind": "code", "tags": ["PVM"],
   "stemZh": "在這份 load_imm_jump_ind 的實作中，即使動態跳躍 panic，暫存器寫入 φ_A = ν_X 仍然會發生。這是 GP 0.8.0 所規定的嗎？這個差異有可能被觀察到嗎？",
   "optionsZh": [
    "不是：§A.1 那句「the machine state represents the prior state of said instruction」涵蓋 ☇，就如同它涵蓋 ∞、F̄ 與 h̄ 一樣，所以 djump panic 時 φ_A 必須維持不變；這個寫入是一個潛伏的 bug，之所以沒被發現只是因為 Ψ_M 的 R 函數把 ☇ 映到 panic 結果並把整個暫存器檔丟掉",
@@ -136,7 +136,7 @@ func instLoadImmJumpInd(interp *Interpreter, pc ProgramCounter, skipLength Progr
  "id": "b2-appA-vblob-terminator",
  "lens": "演算法",
  "ch": "A", "section": "A.1 Basic Definition (deblob validity v_blob / v_inst)", "gpRef": "eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ)",
- "difficulty": 2, "kind": "delta", "tags": ["PVM", "dispute", "delta-0.8.0"],
+ "difficulty": 2, "kind": "delta", "tags": ["PVM", "delta-0.8.0"],
   "stemZh": "GP 0.8.0 的 deblob(p, ı) 會回傳 error——而 Ψ 隨即在未執行任何指令的情況下 panic——除非 v_blob(c, k, 0) 與 v_inst(c, k, ı) 同時成立。這兩個驗證器實際上強制了哪些條件？",
   "optionsZh": [
    "只強制 |k| = |c| 以及每個 jump-table 項目都指向某個 basic block 的起點；opcode 的合法性留給執行期處理，屆時未知的 opcode 行為等同 opcode 0 而 trap，而進入點 ı 不論落在哪裡都被接受，因為 Ψ 會從 k 重新推導出最近的 opcode 邊界",

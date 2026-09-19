@@ -6,7 +6,7 @@ ITEMS = [
   "id": "n1-what-problem",
  "lens": "對比",
   "ch": "N1", "section": "§1 Introduction", "gpRef": "§1",
-  "difficulty": 1, "kind": "concept", "tags": ["core"],
+  "difficulty": 1, "kind": "concept", "tags": ["JAM"],
   "stemZh": "一句話說，JAM 想成為什麼？",
   "optionsZh": [
    "一條能為許多獨立 service 執行大量運算的鏈：多數工作由少數 validator 在主鏈之外平行完成，鏈上只對結果達成共識",
@@ -94,7 +94,7 @@ ITEMS = [
   "id": "n1-name-corejam",
  "lens": "對比",
   "ch": "N1", "section": "§1", "gpRef": "§1",
-  "difficulty": 1, "kind": "concept", "tags": ["core"],
+  "difficulty": 1, "kind": "concept", "tags": ["CoreJam"],
   "stemZh": "JAM 這個名字由兩個字組成。是哪兩個字，它們又指什麼？",
   "optionsZh": [
    "Join 與 Accumulate——把 in-core 的結果帶回鏈上的兩個階段，也是每個 service 都必須定義的操作",
@@ -212,7 +212,7 @@ ITEMS = [
   "id": "n1-gp-structure",
  "lens": "機制",
   "ch": "N1", "section": "Gray Paper 全書結構", "gpRef": "§3–§14 & App. A–H",
-  "difficulty": 1, "kind": "concept", "tags": ["core"],
+  "difficulty": 1, "kind": "concept", "tags": ["JAM"],
   "stem": "You open the Gray Paper for the first time. How is it laid out, and where should you look for what?",
   "stemZh": "你第一次打開 Gray Paper。它是怎麼編排的？該去哪裡找什麼？",
   "options": [

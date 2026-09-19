@@ -93,7 +93,7 @@ ITEMS = [
  "id": "ch09-privileges",
  "lens": "機制",
  "ch": "9", "section": "9.4 Service Privileges", "gpRef": "eq. 9.9–9.10",
- "difficulty": 2, "kind": "concept", "tags": ["privileges", "service"],
+ "difficulty": 2, "kind": "concept", "tags": ["privileges"],
   "stemZh": "特權狀態 χ ≡ (χ_M, χ_V, χ_R, χ_A, χ_Z)。每個分量各授予什麼權力？",
   "optionsZh": [
    "χ_M manager：可更動 χ（bless）並授予 gratis storage；χ_V delegator：可設定 ι（designate）；χ_R registrar：可建立索引小於 S = 2^16 的 service；χ_A assigners（每個 core 一個）：可設定 φ[c]（assign）；χ_Z：每個區塊都會被 accumulate、並帶固定 gas 額度的 service",

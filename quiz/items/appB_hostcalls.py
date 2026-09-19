@@ -5,7 +5,7 @@ ITEMS = [
  "id": "appB-result-constants",
  "lens": "演算法",
  "ch": "B", "section": "B.1 Result Constants; Omega_A (assign)", "gpRef": "§B.1; Ω_A",
- "difficulty": 2, "kind": "concept", "tags": ["privileges", "host call", "authorizer"],
+ "difficulty": 2, "kind": "concept", "tags": ["privileges", "authorizer"],
   "stemZh": "某個 service 呼叫 `assign` 想給 core c 一份新的 authorizer queue 並指定新的 assigner。Ω_A 可能以四種不同理由拒絕這次呼叫，而且檢查順序是固定的。順序是什麼？每個常數各指名哪一種錯？",
   "optionsZh": [
    "要寫進佇列的那段記憶體讀不到就 panic；core 索引大於等於 C 得到 CORE；呼叫者不是該 core 目前的 assigner 得到 HUH；被指名的新 assigner 不在 service-id 集合內得到 WHO。每個常數指名的是「哪一種東西壞了」：越界的索引、缺少的權限、解析不出的身分。",
@@ -34,7 +34,7 @@ ITEMS = [
  "id": "appB-three-invocations",
  "lens": "對比",
  "ch": "B", "section": "B.2–B.4 Invocations", "gpRef": "eq. B.1–B.2, B.5–B.6, B.9–B.11",
- "difficulty": 2, "kind": "concept", "tags": ["PVM", "host call"],
+ "difficulty": 2, "kind": "concept", "tags": ["host call", "service"],
   "stemZh": "PVM 有三種 invocation 型別。在 GP 0.8.0 中，每一種各暴露哪些 host call？service 呼叫到不在自己 invocation 集合內的 id 會怎樣？",
   "optionsZh": [
    "Ψ_I（is-authorized，無狀態）：只有 gas、grow_heap、fetch；Ψ_R（refine）：gas、grow_heap、fetch、historical_lookup、export、machine、peek、poke、pages、invoke、expunge；Ψ_A（accumulate）：gas、grow_heap、fetch、lookup、read、write、info、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide；其他任何 id 花費 M_∅ = 1000 gas 並回傳 WHAT",
@@ -63,7 +63,7 @@ ITEMS = [
  "id": "appB-accumulate-invocation",
  "lens": "演算法",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.7–B.14",
- "difficulty": 3, "kind": "concept", "tags": ["accumulate", "host call"],
+ "difficulty": 3, "kind": "concept", "tags": ["accumulate", "service"],
   "stemZh": "從頭到尾描述 accumulate 的 invocation Ψ_A(e, t, s, g, i)：service 的程式碼不可得時會怎樣、機器怎麼設定、兩個 context 各做什麼、結果又如何處置。",
   "optionsZh": [
    "若該 service 的程式碼不可得或大於 W_C，它回傳的狀態只把收到的 transfer 金額入帳、其餘毫無作用；否則它以一個 regular context x 與一個 exceptional context y 執行 Ψ_M(code, 進入點 5, g, E(t, s, |i|), F, I(s, s)^2)（只有 `checkpoint` 會把 x 複製到 y）；遇到 ☇ 或 ∞ 時結果收斂到 y；32 位元組的回傳 blob 會成為 yield 的雜湊；輸入透過 `fetch` 讀取",
@@ -92,7 +92,7 @@ ITEMS = [
  "id": "appB-new-service-index",
  "lens": "演算法",
  "ch": "B", "section": "B.4 Accumulate Invocation", "gpRef": "eq. B.10, B.14 & `new` (§B.7)",
- "difficulty": 3, "kind": "concept", "tags": ["host call", "service"],
+ "difficulty": 3, "kind": "concept", "tags": ["service", "host call"],
   "stemZh": "在 GP 0.8.0 中，`new` host call 是怎麼挑選新的 service index 的？",
   "optionsZh": [
    "context 的 next-free id 起始於 check(decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S − 2^8) + S)，其中 S = 2^16；check() 以線性探測（+1，在 [S, 2^32 − 2^8) 內回繞）直到找到一個不在 keys(δ) 裡的索引；每次 `new` 之後，下一個候選是 check(S + (i − S + 42) mod (2^32 − S − 2^8))；只有 registrar 可以改為指定某個小於 S 的索引，若該索引已存在則回傳 FULL",
@@ -121,7 +121,7 @@ ITEMS = [
  "id": "appB-transfer-rules",
  "lens": "演算法",
  "ch": "B", "section": "B.7 Accumulate Functions — transfer", "gpRef": "`transfer` = 21",
- "difficulty": 2, "kind": "concept", "tags": ["transfer", "host call"],
+ "difficulty": 2, "kind": "concept", "tags": ["transfer", "gas"],
   "stemZh": "`transfer` host call（φ_7 = d、φ_8 = a、φ_9 = l 為 gas、φ_10 = o 為 memo 指標）可能以數種方式失敗。這些檢查依什麼順序進行？每種失敗各是什麼意思？成功時又發生什麼？",
   "optionsZh": [
    "memo 讀不到 → panic；d ∉ keys(δ) → WHO；l < δ[d]_m（收款方的 minmemogas）→ LOW；餘額 − a < 自身門檻 a_t → CASH；其餘為 OK：該筆轉帳被附加到 context 的 transfer 清單、發送方餘額減少 a，並扣 gas g = M_T + l",
@@ -150,7 +150,7 @@ ITEMS = [
  "id": "appB-solicit-forget",
  "lens": "演算法",
  "ch": "B", "section": "B.7 — solicit / forget / eject", "gpRef": "`solicit` = 24, `forget` = 25, `eject` = 22",
- "difficulty": 3, "kind": "concept", "tags": ["preimage", "host call"],
+ "difficulty": 3, "kind": "concept", "tags": ["preimage", "timeslot"],
   "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前時槽 t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
   "optionsZh": [
    "solicit：沒有該項 → []（若新的 footprint 付不起則 FULL）；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → [x, t]；[x, y, w] 且 y < t − D → [w, t]；其餘 → HUH",
@@ -179,7 +179,7 @@ ITEMS = [
  "id": "appB-bless-assign-designate",
  "lens": "演算法",
  "ch": "B", "section": "B.7 — bless / assign / designate", "gpRef": "`bless` = 15, `assign` = 16, `designate` = 17",
- "difficulty": 2, "kind": "delta", "tags": ["privileges", "host call", "delta-0.8.0"],
+ "difficulty": 2, "kind": "delta", "tags": ["privileges", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，bless、assign 與 designate 各自執行哪些權限檢查？",
   "optionsZh": [
    "bless：呼叫者必須是當前的 manager χ_M（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → CORE，呼叫者必須是 χ_A[c]（否則 HUH），寫入 80 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_V（否則 HUH），把 ι 設為 z 把 336 位元組的金鑰",
@@ -208,7 +208,7 @@ ITEMS = [
  "id": "appB-checkpoint-yield",
  "lens": "演算法",
  "ch": "B", "section": "B.7 — checkpoint / yield / provide", "gpRef": "`checkpoint` = 18, `yield` = 26, `provide` = 27",
- "difficulty": 2, "kind": "concept", "tags": ["checkpoint", "yield", "accumulate"],
+ "difficulty": 2, "kind": "concept", "tags": ["checkpoint", "yield"],
   "stemZh": "在 accumulate 之中，`checkpoint`、`yield` 與 `provide` 各自做什麼？",
   "optionsZh": [
    "checkpoint：把 regular context x 複製到 exceptional context y（因此之後的 panic／OOG 會提交存檔當下的狀態），並在 φ_7 回傳剩餘 gas；yield(o)：把位址 o 處的 32 位元組雜湊記為該 service 的 accumulation 產出（θ 的條目／BEEFY 可見的承諾）；provide(s, o, z)：為 service s（若 φ_7 = 2^64−1 則為呼叫者自己）某個狀態為 [] 的 request 提供 preimage 位元組，出錯時回傳 WHO／HUH，並在該輪之後才整合",
