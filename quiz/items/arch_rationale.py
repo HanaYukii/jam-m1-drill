@@ -66,8 +66,8 @@ ITEMS = [
  "difficulty": 2, "kind": "rationale", "tags": ["Safrole", "Bandersnatch"],
   "stemZh": "JAM 為什麼採用 Safrole（票券式、匿名、ring-VRF）而不是類似 BABE 的 VRF 抽籤？",
   "optionsZh": [
-   "Safrole 把每個 6 秒slot限定給恰好一位事先決定的金鑰持有者（近乎無分叉）、讓未來slot出塊者的身分在出塊之前保持匿名（抗 DoS），並產生高品質且不可偏置的熵池；而 best-chain 規則另外偏好 ticket 出塊（相對於 fallback）祖先較多的鏈",
-   "Safrole 的優點是可以有多位 validator 同時贏得同一槽、使slot永不落空：ring VRF 讓他們各自證明自己是 γ_P 的成員，產生的分叉由哪個區塊先抵達 Grandpa 決勝，而 ticket 每一槽都從 η_0 重新抽取，所以沒有出塊者能被預測超過一槽以上",
+   "Safrole 把每個 6 秒 slot 限定給恰好一位事先決定的金鑰持有者（近乎無分叉）、讓未來 slot 出塊者的身分在出塊之前保持匿名（抗 DoS），並產生高品質且不可偏置的熵池；而 best-chain 規則另外偏好 ticket 出塊（相對於 fallback）祖先較多的鏈",
+   "Safrole 的優點是可以有多位 validator 同時贏得同一槽、使 slot 永不落空：ring VRF 讓他們各自證明自己是 γ_P 的成員，產生的分叉由哪個區塊先抵達 Grandpa 決勝，而 ticket 每一槽都從 η_0 重新抽取，所以沒有出塊者能被預測超過一槽以上",
    "Safrole 的存在是為了把簽章移出熱路徑：ticket 是一個在出塊時揭露的單純雜湊原像，所以檢查一個 seal 只要一次雜湊而不是一次 VRF 驗證；匿名來自 validator 每個 epoch 輪換 Ed25519 金鑰，而熵池 η 直接取自區塊雜湊，因為雜湊本來就是均勻的",
    "Safrole 是坐在 Grandpa 之下的 finality gadget：它指派每一槽一位出塊者，而該出塊者必須先蒐集 2/3+1 的預投票，該區塊才能延伸這條鏈，這正是 JAM 完全沒有分叉、也不需要 fork-choice 規則的原因；fallback 金鑰只用在創世 epoch、也就是還沒有任何 ticket 累積之前"
   ],
@@ -125,9 +125,9 @@ ITEMS = [
  "difficulty": 2, "kind": "rationale", "tags": ["prior/posterior"],
   "stemZh": "JAM 的設計讓一個區塊的大部分工作能在該區塊傳播的同時進行。是哪些設計特徵讓這件事成為可能？",
   "optionsZh": [
-   "時間上的平行（管線化）：header 帶的是先前的 state root，所以一個區塊可以在新狀態尚未 Merklize 完成之前就發布——那份成本落在下一個slot；再加上空間上的平行，既跨越 σ 中大致獨立的各分量（§4.2.1 刻意讓其依賴圖保持淺），也跨越各個 core",
+   "時間上的平行（管線化）：header 帶的是先前的 state root，所以一個區塊可以在新狀態尚未 Merklize 完成之前就發布——那份成本落在下一個 slot；再加上空間上的平行，既跨越 σ 中大致獨立的各分量（§4.2.1 刻意讓其依賴圖保持淺），也跨越各個 core",
    "時間上的平行來自 header 帶著執行後的 state root，這讓節點不必重放就能接受一個區塊，所以 Merklization 必須在發布前完成、但永遠不必重做；空間上的平行則來自給每個 core 自己的 σ 片段，所以兩個 core 永遠不會碰到同一個狀態分量、accumulation 完全平行",
-   "區塊是提早一槽出的：slot n+1 的持票人在slot n 的狀態一存在時就拿到它、預先算好自己的區塊，等slot開啟時只需簽名，所以執行後的 root 早已知道、可以放進 header；接著那 341 個 core 各自重放該區塊，把 Merklization 的成本分攤 341 份",
+   "區塊是提早一槽出的：slot n+1 的持票人在 slot n 的狀態一存在時就拿到它、預先算好自己的區塊，等 slot 開啟時只需簽名，所以執行後的 root 早已知道、可以放進 header；接著那 341 個 core 各自重放該區塊，把 Merklization 的成本分攤 341 份",
    "refine 與 accumulate 兩者都在鏈下執行：某個 core 的 guarantor 執行整條管線、只發布一份狀態差異，讓鏈上那一步只剩一次 Merkle 修補；因此 header 的 state-root 欄位被留成零雜湊、只在 Grandpa 定案該區塊之後才修正，這正是把管線限制在 8 塊近期歷史窗口內的原因"
   ],
   "stem": "JAM is designed so that most of a block's work can proceed while the block propagates. Which design features make that possible?",

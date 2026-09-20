@@ -92,7 +92,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
   "stemZh": "某個節點在牆鐘時間 T 收到一個區塊，其 header 滿足 H_T · P > T，同時 P(H)_t < H_T 也成立（父區塊已知且較舊）。GP §5 如何歸類這個區塊？",
   "optionsZh": [
    "它是永久無效的；而且因為提前於時鐘出塊是一種違規，該出塊者的 Ed25519 金鑰必須在下一塊的 disputes extrinsic 中以 culprit 身分進入 ψ_O，所以節點應該丟棄該 header 而不是留著",
-   "只要偏移小於一個slot週期 P = 6 秒它就是有效的，GP 明確給了這個時鐘偏移容忍度，好讓在slot最開頭出塊的誠實出塊者不會被時鐘略慢的對等節點拒絕",
+   "只要偏移小於一個 slot 週期 P = 6 秒它就是有效的，GP 明確給了這個時鐘偏移容忍度，好讓在 slot 最開頭出塊的誠實出塊者不會被時鐘略慢的對等節點拒絕",
    "它是有效的：只有排序規則 P(H)_t < H_T 屬於共識，而牆鐘的比較只是出塊時的指引——這正是為什麼 STF 測試向量裡完全沒有 T 這個概念，而匯入節點必須接受該區塊",
    "它目前不滿足 eq. 5.8，但 GP 註明這類區塊「may become valid as T advances」——與 H_T ≤ P(H)_t 那種永遠不可能變有效的區塊不同，它只是暫時無效，日後可以重新評估"
   ],
@@ -232,7 +232,7 @@ func (a *AuthPool) RemoveLeftMostPairedValue(h OpaqueHash) {
   "要編輯哪個 pool 由 (g_w)_c 決定；eq. 11.28 允許 g_t 落在前一個 rotation，反推會挑到別的 pool。",
   "§3 的 s ⊖ {v} 是 excepting the left-most element equal to v，只移除最舊的那一個。",
  ],
- "explanation": "eq. 8.3：F(c) ≡ α[c] ⊖ {(g_w)_a} 當 ∃g ∈ E_G 且該 guarantee 的 report 指向 core c，否則 F(c) = α[c]。⊖ 是 sequence-minus-leftmost：**只移除最左邊那一個符合的元素**。**為什麼「刪掉全部」是錯的**：α[c] 是**序列不是集合**，同一個 authorizer hash 重複出現完全合法——queue φ[c] 很可能整排都排同一個 authorizer（例如某條專用 core），每個slot補一筆進 pool，pool 裡自然會累積多個相同的 hash。這些重複代表的是**可用額度**：有幾個就能用幾次。一次全刪等於把剩餘額度一併沒收，pool 憑空縮水，後續 guarantee 就會在 eq. 11.32（w_a ∈ α[w_c]）找不到 authorizer 而被拒——測試向量因此對不上。**為什麼只需要移除一個就夠**：eq. 11.25 保證 E_G 裡每個 core 至多一個 guarantee、且依 core index 排序不重複，所以一塊之內同一個 core 不會消耗兩次。**還有第二個錯**：舊實作忽略了 report 的 core index，等於在錯的 core 的 pool 上做移除。#692 的修法正是兩件事一起補——比對 report 的 core、且只移除最左邊一個。",
+ "explanation": "eq. 8.3：F(c) ≡ α[c] ⊖ {(g_w)_a} 當 ∃g ∈ E_G 且該 guarantee 的 report 指向 core c，否則 F(c) = α[c]。⊖ 是 sequence-minus-leftmost：**只移除最左邊那一個符合的元素**。**為什麼「刪掉全部」是錯的**：α[c] 是**序列不是集合**，同一個 authorizer hash 重複出現完全合法——queue φ[c] 很可能整排都排同一個 authorizer（例如某條專用 core），每個 slot 補一筆進 pool，pool 裡自然會累積多個相同的 hash。這些重複代表的是**可用額度**：有幾個就能用幾次。一次全刪等於把剩餘額度一併沒收，pool 憑空縮水，後續 guarantee 就會在 eq. 11.32（w_a ∈ α[w_c]）找不到 authorizer 而被拒——測試向量因此對不上。**為什麼只需要移除一個就夠**：eq. 11.25 保證 E_G 裡每個 core 至多一個 guarantee、且依 core index 排序不重複，所以一塊之內同一個 core 不會消耗兩次。**還有第二個錯**：舊實作忽略了 report 的 core index，等於在錯的 core 的 pool 上做移除。#692 的修法正是兩件事一起補——比對 report 的 core、且只移除最左邊一個。",
  "trap": "⊖（seqminusl）只砍最左邊一個；pool 與 queue 都是「序列」，允許重複。"
 },
 {

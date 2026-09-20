@@ -184,9 +184,9 @@ ITEMS = [
   "stemZh": "ticket accumulator γ_A 保留 id 最小的 E 張 ticket 並依升冪排序，而 eq. 6.25 讓下個 epoch 的 slot-sealer 序列成為 Z(γ_A)。一張存活下來的 ticket，其排名如何對應到它可以出塊的 slot？",
   "optionsZh": [
    "最小的 id 出第一個 slot 的 block、最大的出第二個、第二小的出第三個，依此類推：Z 同時從排序好的序列兩端往內取，所以排名的兩個極端會並排坐在 epoch 的開頭",
-   "排名順序與slot順序一致，因為 accumulator 在插入時就已排序；Z 只對 fallback 序列有意義，而後者由熵導出、抵達時本來就毫無順序可言",
+   "排名順序與 slot 順序一致，因為 accumulator 在插入時就已排序；Z 只對 fallback 序列有意義，而後者由熵導出、抵達時本來就毫無順序可言",
    "最大的 id 出第一個 slot 的 block、最小的出第二個，所以 Z 一樣是從兩端往內取，只是從排名的另一端開始而不是從頭開始",
-   "排名被交替發配到 epoch 的兩半，所以最小的 id 出第一個 slot 的 block、次小的出塊中間那個slot、第三小的出第二個，如此橫跨兩半交錯下去"
+   "排名被交替發配到 epoch 的兩半，所以最小的 id 出第一個 slot 的 block、次小的出塊中間那個 slot、第三小的出第二個，如此橫跨兩半交錯下去"
   ],
   "stem": "The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?",
  "options": [
@@ -215,7 +215,7 @@ ITEMS = [
    "(η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])——prior 的 η_0 與 η_1，加上將在下個 epoch 接手的 pending validator γ′_P 的 Bandersnatch 與 Ed25519 金鑰",
    "(η′_0, η′_1, [(k_b, k_e) | k ∈ κ′])——posterior 的 η′_0 與 η′_1，加上剛在本 epoch 變為 active 的那批 validator 的 Bandersnatch 與 Ed25519 金鑰",
    "(η_2, η_3, [(k_b, k_e) | k ∈ ι])——兩個最舊的歷史熵，加上 staging 集合的 Bandersnatch 與 Ed25519 金鑰，內容就是 designate host call 留下的樣子",
-   "(η_0, η_1, Z(γ_A))——prior 的 η_0 與 η_1，加上以 outside-in 排序的 ticket 識別碼，每個slot一張，用來出接下來那個 epoch 的每一槽"
+   "(η_0, η_1, Z(γ_A))——prior 的 η_0 與 η_1，加上以 outside-in 排序的 ticket 識別碼，每個 slot 一張，用來出接下來那個 epoch 的每一槽"
   ],
   "stem": "What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?",
  "options": [
@@ -427,7 +427,7 @@ posteriorState.SetGammaS(newGammaS)"""},
    "雜湊是對的——Blake2b 就是 GP 的 H，而且前 4 個 octet 是以 little-endian 解碼——但 eq. 6.27 的 cyclic 下標是對傳入的金鑰序列長度（也就是 |κ′|）取模，程式碼卻是對編譯期常數 ValidatorsCount 取模",
    "雜湊是錯的——§3.8 把 H 保留給 Blake2b-256，但 eq. 6.27 要的是 H_K、也就是 Keccak-256，正如那段殘留的註解所說——而模數是對的，因為 cyclic 下標就是對 ValidatorsCount 所持的固定 validator 數取模",
    "取的片段是錯的——eq. 6.27 的下標取的是 H(r ⌢ E_4(i)) 的最後四個 octet 並以 big-endian 解碼，所以 Blake2bHashPartial(·, 4) 讀錯了一端——而對 ValidatorsCount 取模則與該式的 cyclic 下標完全相符",
-   "那個取模是多餘的——四個 Blake2b octet 的 decode_4 本來就落在 N_E 之內，而 eq. 6.27 根本沒有任何模數，所以 `%= ValidatorsCount` 是憑空多出來的一步，可能把兩個不同的slot映到同一位 validator、破壞「一槽一人」"
+   "那個取模是多餘的——四個 Blake2b octet 的 decode_4 本來就落在 N_E 之內，而 eq. 6.27 根本沒有任何模數，所以 `%= ValidatorsCount` 是憑空多出來的一步，可能把兩個不同的 slot 映到同一位 validator、破壞「一槽一人」"
   ],
   "stem": "Read the team's FallbackKeySequence. Does it conform to eq. 6.27? If not, where exactly does it diverge?",
  "code": {"lang": "go", "caption": "internal/safrole/slot_key_sequence.go", "src": """for i = 0; i < epochLength; i++ {

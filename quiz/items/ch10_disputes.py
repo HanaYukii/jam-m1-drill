@@ -39,7 +39,7 @@ ITEMS = [
   "optionsZh": [
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須恰好是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須至少是 ⌊2|k|/3⌋+1，且可以從 κ ∪ λ 合併後的集合中取；每份 extrinsic 沒有 verdict 數量上限",
-   "每個 verdict 是 (report 雜湊, 該爭議被提起的slot, judgments)；judgment 的數量必須恰好是 ⌊|k|/3⌋+1，其中 k 永遠是 posterior 的 κ′；每份 extrinsic 至多 N_V = 16 個 verdict",
+   "每個 verdict 是 (report 雜湊, 該爭議被提起的 slot, judgments)；judgment 的數量必須恰好是 ⌊|k|/3⌋+1，其中 k 永遠是 posterior 的 κ′；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, 一個對 report 雜湊的聚合 BLS 簽章)；簽署者必須是 k 當中的 ⌊2|k|/3⌋+1 位成員；每份 extrinsic 至多 N_V = 16 個 verdict"
   ],
   "stem": "Per GP 0.8.0, what is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?",
@@ -127,7 +127,7 @@ ITEMS = [
    "verdict 依 report 雜湊排序且唯一；culprits 與 faults 各自依 Ed25519 金鑰排序且唯一；verdict 內部的 judgment 依 validator 索引排序且唯一；任何 verdict 的 report 雜湊都不得已經出現在 ψ_G ∪ ψ_B ∪ ψ_W 裡",
    "verdict 依 report 雜湊排序且唯一；culprits 與 faults 各自依 report 雜湊排序且唯一；verdict 內部的 judgment 依它們的 ⊤/⊥ 投票排序且唯一；已經在 ψ_G ∪ ψ_B ∪ ψ_W 裡的 report 雜湊可以被重新判定以推翻先前的 verdict",
    "verdict 依該 verdict 的 epoch index 排序且唯一；culprits 與 faults 各自依 Ed25519 金鑰排序且唯一；judgment 依 validator 索引排序且唯一；任何 verdict 的 report 雜湊都不得已經出現在 ψ_O 裡",
-   "verdict 依每個爭議被提起的slot排序；culprits 與 faults 依該 offender 在 κ 中的索引排序；judgment 依簽章排序；任何位置的重複都會被靜默丟棄，而不是讓區塊無效"
+   "verdict 依每個爭議被提起的 slot 排序；culprits 與 faults 依該 offender 在 κ 中的索引排序；judgment 依簽章排序；任何位置的重複都會被靜默丟棄，而不是讓區塊無效"
   ],
   "stem": "Which ordering/uniqueness constraints does the disputes extrinsic impose?",
  "options": [

@@ -39,7 +39,7 @@ ITEMS = [
   "optionsZh": [
    "因為算 β′ 的當下還不知道區塊 N 執行後的 state root（header 帶的是先前的 root）；區塊 N+1 會在任何人讀取 β 之前，用自己的 H_R 覆寫最後一筆的 s 來算出 β†（eq. 7.5）",
    "因為 state root 要到區塊被定案後才有意義：該條目會保持 H_0 直到 Grandpa 定案區塊 N，屆時 finality gadget 會把真正的 root 寫進該條目，eq. 11.36 也才開始接受以它為 anchor",
-   "因為 β_H 的條目根本不帶 state root：eq. 7.2 宣告一個項目為 ⟨h, b, t, p⟩，零雜湊只是 C(3) 會略過的佔位符，所以 eq. 11.36 只憑 header 雜湊、super-peak 與slot來比對 anchor",
+   "因為 β_H 的條目根本不帶 state root：eq. 7.2 宣告一個項目為 ⟨h, b, t, p⟩，零雜湊只是 C(3) 會略過的佔位符，所以 eq. 11.36 只憑 header 雜湊、super-peak 與 slot 來比對 anchor",
    "因為 root 是放進 β_B 而不是這裡：每個區塊把自己執行後的 state root 當成 belt 的下一片葉子附加上去，所以 β_H 的項目可以永遠把 s 留在 H_0，而 anchor 的 state root 是拿去對照 b"
   ],
   "stem": "Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?",
@@ -116,7 +116,7 @@ ITEMS = [
   "fallback key sequence F 的種子是 η′_2、抽的是 κ′ 的 Bandersnatch key（§6），與 β 無關。",
   "最新一筆的 s 在本塊仍是 H_0、要等下一塊 β† 補正；β_B 是 output belt，不存任何簽章。",
  ],
- "explanation": "§7 第一句就給了答案：「This is used to preclude the possibility of duplicate or out of date work-reports from being submitted.」**防重複、防過期，兩件事。****防過期**（eq. 11.36）：refinement context 的 anchor——(header hash, state root, belt super-peak, timeslot)——必須能在 β† 裡找到完全相符的一筆。因為 β_H 只留 H = 8 筆，這等於規定 **anchor 最多只能是 8 個區塊之前**，report 不能拿很舊的鏈狀態當前提。**防重複**（eq. 11.41）：新 report 的 work-package hash 不得出現在任何 β 條目的 p 字典裡——同一份工作不能被重複計酬或重複 accumulate。**還有兩個附帶用途**（eq. 11.42、11.44）：prerequisite 與 segment-root lookup 所指的 package，必須在本塊的 extrinsic 裡、或在 β 的 p 裡找得到，否則依賴關係就懸空了。**為什麼是 8 而不是更多**：窗口越長，節點要保存與掃描的資料越多；8 塊約 48 秒，足夠涵蓋 guarantee 從產生到進鏈的正常延遲（一個 rotation R = 10 個slot），又不會讓檢查成本失控。**注意這與 L = 14,400 的 ancestor 窗口是兩回事**：後者存的是 header 序列、供 lookup anchor 用。",
+ "explanation": "§7 第一句就給了答案：「This is used to preclude the possibility of duplicate or out of date work-reports from being submitted.」**防重複、防過期，兩件事。****防過期**（eq. 11.36）：refinement context 的 anchor——(header hash, state root, belt super-peak, timeslot)——必須能在 β† 裡找到完全相符的一筆。因為 β_H 只留 H = 8 筆，這等於規定 **anchor 最多只能是 8 個區塊之前**，report 不能拿很舊的鏈狀態當前提。**防重複**（eq. 11.41）：新 report 的 work-package hash 不得出現在任何 β 條目的 p 字典裡——同一份工作不能被重複計酬或重複 accumulate。**還有兩個附帶用途**（eq. 11.42、11.44）：prerequisite 與 segment-root lookup 所指的 package，必須在本塊的 extrinsic 裡、或在 β 的 p 裡找得到，否則依賴關係就懸空了。**為什麼是 8 而不是更多**：窗口越長，節點要保存與掃描的資料越多；8 塊約 48 秒，足夠涵蓋 guarantee 從產生到進鏈的正常延遲（一個 rotation R = 10 個 slot），又不會讓檢查成本失控。**注意這與 L = 14,400 的 ancestor 窗口是兩回事**：後者存的是 header 序列、供 lookup anchor 用。",
  "trap": "anchor 深度 ≤ 8 blocks；lookup anchor 深度 ≤ 14,400 slots（用 ancestors A）。"
 },
 {
@@ -128,7 +128,7 @@ ITEMS = [
   "optionsZh": [
    "α ∈ [[H]_{:O}]_C，O = 8（每個 core 至多 8 個 authorizer 雜湊）；φ ∈ [[H]_Q]_C，Q = 80（每個 core 恰好 80 個）",
    "α ∈ [[H]_{:Q}]_C，Q = 80（每個 core 至多 80 個在池中）；φ ∈ [[H]_O]_C，O = 8（每個 core 恰好 8 個在佇列中）",
-   "α ∈ [H]_C——每個 core 一個現行 authorizer、每塊替換；φ ∈ [[H]_E]_C，E = 600，每個 epoch slot一筆佇列項目",
+   "α ∈ [H]_C——每個 core 一個現行 authorizer、每塊替換；φ ∈ [[H]_E]_C，E = 600，每個 epoch slot 一筆佇列項目",
    "α 與 φ 都是從 authorizer 雜湊映到 core 索引的字典 D⟨H → N_C⟩，所以同一個雜湊永遠不會重複、也不需要每個 core 的長度上限"
   ],
   "stem": "What are the shapes of the authorizer pool α and authorizer queue φ?",
@@ -145,7 +145,7 @@ ITEMS = [
   "α[c] 是可容多個 hash 的序列（eq. 8.3 才需要移除最左邊一個）；queue 長度是獨立常數 Q，不隨 E 走。",
   "與 eq. 8.1 的型別直接衝突：兩者都是 per-core 序列，同一 hash 在同一 pool 重複完全合法。",
  ],
- "explanation": "eq. 8.1：**α ∈ ⟦⟦H⟧_{:O}⟧_C**，O = C_authpoolsize = 8——每個 core **最多** 8 個（注意是 `:O`，上界不是定值）；**φ ∈ ⟦⟦H⟧_Q⟧_C**，Q = C_authqueuesize = 80——每個 core **恰好** 80 個（定長）。兩者都是每個 core 一份，所以外層是 ⟦…⟧_C。**分工**：α 是「現在這個 core 可以用哪些 authorizer」，是 guarantor 檢查 report 時實際比對的清單；φ 是「未來要依序補進 α 的排程」，每個slot從 φ[c][H_T mod Q] 取一筆補進去。取模讓 φ 變成一個循環排程——**80 個slot（8 分鐘）繞一圈**，所以一份 φ 可以持續供給而不必頻繁改寫。**誰能改**：φ 只能由 accumulate 期間具 assigner 權限的 service 透過 `assign` host call 修改，而 assigner 是**每個 core 各自指定**的（χ_A[c]），不是全域單一權限——這讓不同 core 可以由不同的 service 掌管授權策略。α 則沒有人能直接寫，它完全由 eq. 8.2 的規則推導。**編碼**：狀態 trie 裡 C(1) 存 [var(x) | x ∈ α]、C(2) 存 E(φ)。",
+ "explanation": "eq. 8.1：**α ∈ ⟦⟦H⟧_{:O}⟧_C**，O = C_authpoolsize = 8——每個 core **最多** 8 個（注意是 `:O`，上界不是定值）；**φ ∈ ⟦⟦H⟧_Q⟧_C**，Q = C_authqueuesize = 80——每個 core **恰好** 80 個（定長）。兩者都是每個 core 一份，所以外層是 ⟦…⟧_C。**分工**：α 是「現在這個 core 可以用哪些 authorizer」，是 guarantor 檢查 report 時實際比對的清單；φ 是「未來要依序補進 α 的排程」，每個 slot 從 φ[c][H_T mod Q] 取一筆補進去。取模讓 φ 變成一個循環排程——**80 個 slot（8 分鐘）繞一圈**，所以一份 φ 可以持續供給而不必頻繁改寫。**誰能改**：φ 只能由 accumulate 期間具 assigner 權限的 service 透過 `assign` host call 修改，而 assigner 是**每個 core 各自指定**的（χ_A[c]），不是全域單一權限——這讓不同 core 可以由不同的 service 掌管授權策略。α 則沒有人能直接寫，它完全由 eq. 8.2 的規則推導。**編碼**：狀態 trie 裡 C(1) 存 [var(x) | x ∈ α]、C(2) 存 E(φ)。",
  "trap": "O = 8、Q = 80；pool 是 :O（可少於 8），queue 是固定長度 Q。"
 },
 {
@@ -187,7 +187,7 @@ ITEMS = [
    "把「打算使用某段 coretime」這個意圖，與「指定並提交某個特定工作負載」這件事解耦，好讓 JAM 能同時支援 Ethereum 式與 Polkadot 式的互動模式",
    "給每個 core 自己的 gas 市場：guarantor 逐塊競標 coretime，成交價記錄在 α[c] 中 authorizer 雜湊的旁邊，因此壅塞的 core 使用起來更貴",
    "用每個 core 的 authorizer 投票取代 Grandpa 的 finality 投票：當某份 work-report 獲得該 core 池中超過三分之二 authorizer 的簽署即為最終，而 O = 8 這個上限正是為此而設",
-   "限制單一 service 可提交多少工作：pool 的 O = 8 個項目扮演每個 service 的速率限制器，所以本slot已經有 package 被回報的 service，不能在任何 core 上再讓第二份被擔保"
+   "限制單一 service 可提交多少工作：pool 的 O = 8 個項目扮演每個 service 的速率限制器，所以本 slot 已經有 package 被回報的 service，不能在任何 core 上再讓第二份被擔保"
   ],
   "stem": "What motivation does the GP give for the authorization system?",
  "options": [

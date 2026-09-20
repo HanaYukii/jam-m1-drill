@@ -164,7 +164,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
    "輪換是每經過一個 epoch 就套用一次，所以這裡是兩次：κ′ = Φ(ι)、λ′ = γ_P、(η′_1, η′_2, η′_3) = (η′_0, η_0, η_1)；γ′_S = F(η_0, Φ(ι))；H_E 出現而 H_W 不出現",
    "輪換恰好發生一次：κ′ = γ_P、λ′ = κ、γ′_P = Φ(ι)、(η′_1, η′_2, η′_3) = (η_0, η_1, η_2)；儘管 m = 595 ≥ Y 且 γ_A 已滿，γ′_S 仍為 F(η_1, γ_P)；H_E 出現、H_W 不出現；而 γ′_A 只從這一塊的 E_T 重新建立",
    "γ′_S = Z(γ_A)，因為前一塊落在 tail 內（m = 595 ≥ Y）且 accumulator 已飽和；金鑰與熵輪換一次；而且因為這一塊結束了那場競賽，H_W = Z(γ_A) 也會被送出",
-   "該區塊會以 BadSlot 被拒絕：eq. 6.25 沒有 e′ = e + 2 的情形，所以一條鏈可以跳過個別slot但絕不能跳過整個 epoch；因此下一個有效的 H_T 必須是 epoch 2 的某一槽，只有從那裡才能抵達 epoch 3"
+   "該區塊會以 BadSlot 被拒絕：eq. 6.25 沒有 e′ = e + 2 的情形，所以一條鏈可以跳過個別 slot 但絕不能跳過整個 epoch；因此下一個有效的 H_T 必須是 epoch 2 的某一槽，只有從那裡才能抵達 epoch 3"
   ],
   "stem": "Full parameters (E = 600, Y = 500). The prior block has τ = 1195 and a saturated accumulator (|γ_A| = E); the next block has H_T = 1810 (nothing was authored in between). Expressing posterior values in terms of PRIOR ones, describe the transition: how many rotations happen, what κ′, λ′, γ′_P and η′ become, which sealer sequence is used and why, and which markers appear.",
  "options": [
@@ -277,7 +277,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "difficulty": 3, "kind": "rationale", "tags": ["ticket", "seal"],
   "stemZh": "eq. 6.25 只在 e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E 時才把 accumulator 當成下一個 slot-sealer 序列。其中 m ≥ Y 這個關於前一塊的性質，實際上保證了什麼？GP 又為什麼把票券模式綁在它身上？",
   "optionsZh": [
-   "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的slot",
+   "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的 slot",
    "保證沒有任何在 tail 內提交的 ticket 被計入：在 m ≥ Y 之後抵達的 ticket 會是對照錯誤的 ring root 與熵證明的，因為屆時 γ′_Z 與 η′_2 已經指向再下一個 epoch",
    "保證即將結束的那個 epoch 有某一塊是在 tail 內出的——而由於 γ_A 一旦 m′ ≥ Y 就凍結，這恰好就是「該 epoch 內曾公告 H_W = Z(γ_A)」的條件，所以只讀 header 的節點永遠不會被要求去驗證一個它從未見過之序列的 ticket seal",
    "保證前一塊的出塊者持有 ticket（T = 1），因為以 fallback 出塊的區塊不被允許代表持票人結束一場競賽；這也正是 §19 best-chain 規則在偏好 ticket 化祖先時所計數的東西"

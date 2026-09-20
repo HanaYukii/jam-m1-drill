@@ -56,7 +56,7 @@ ITEMS = [
   "ω 是 ready queue（已 available 但 dependency 未滿足的 report）；authorizer queue 是 φ。",
   "θ 確實是本區塊的 accumulation output log，配對無誤。",
  ],
- "explanation": "eq. 4.4：σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω, ξ)，共 17 個分量。**最容易混的是兩組佇列，記法是「誰餵誰」**：α 是 **authorizer pool**——每個 core 目前可用的 authorizer hash（最多 O = 8 個）；φ 是 **authorizer queue**——每個 core 固定 Q = 80 筆的補給來源，每個slot從 φ 挪一筆進 α。所以「pool 的補給來源」是 φ，不是 ω。ω 是 **ready queue**——已經 available、但依賴還沒滿足、等著被 accumulate 的 report；ξ 是 **accumulation history**——最近一個 epoch 內已被 accumulate 的 work-package hash 集合，用來防重複與判斷依賴是否已滿足；θ 是 **accumulation output log**——本塊各 service 透過 `yield` 產出的 (service, hash) 序列，會被 β 的 belt 吸收。**其餘的分組記憶**：狀態核心 δ（service accounts）、χ（privileges）；Safrole 一組 γ（四元組）、η（entropy）、ι/κ/λ（staging/active/previous 三組金鑰）、τ（slot）；流程一組 ρ（availability assignments）、β（recent history）、ψ（disputes）、π（statistics）。口試常見的追問是「哪些是每塊都動、哪些只在 epoch 邊界動」——η_0、τ、β、ρ、π 每塊都動，ι/κ/λ 的輪替與 γ_Z 的更新只在 e′ > e 時發生。",
+ "explanation": "eq. 4.4：σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω, ξ)，共 17 個分量。**最容易混的是兩組佇列，記法是「誰餵誰」**：α 是 **authorizer pool**——每個 core 目前可用的 authorizer hash（最多 O = 8 個）；φ 是 **authorizer queue**——每個 core 固定 Q = 80 筆的補給來源，每個 slot 從 φ 挪一筆進 α。所以「pool 的補給來源」是 φ，不是 ω。ω 是 **ready queue**——已經 available、但依賴還沒滿足、等著被 accumulate 的 report；ξ 是 **accumulation history**——最近一個 epoch 內已被 accumulate 的 work-package hash 集合，用來防重複與判斷依賴是否已滿足；θ 是 **accumulation output log**——本塊各 service 透過 `yield` 產出的 (service, hash) 序列，會被 β 的 belt 吸收。**其餘的分組記憶**：狀態核心 δ（service accounts）、χ（privileges）；Safrole 一組 γ（四元組）、η（entropy）、ι/κ/λ（staging/active/previous 三組金鑰）、τ（slot）；流程一組 ρ（availability assignments）、β（recent history）、ψ（disputes）、π（statistics）。口試常見的追問是「哪些是每塊都動、哪些只在 epoch 邊界動」——η_0、τ、β、ρ、π 每塊都動，ι/κ/λ 的輪替與 γ_Z 的更新只在 e′ > e 時發生。",
  "trap": "ω (vartheta) vs φ (phi) 容易混：ω = ready/queued reports，φ = auth queue。"
 },
 {
@@ -67,7 +67,7 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["dependency", "dependency graph", "authorizer"],
   "stemZh": "在狀態轉移的依賴圖中，posterior 的 authorizer pool α′ 被定義為 α′ ≺ (H, E_G, φ′, α)。這對區塊匯入時的計算順序有什麼含意？",
   "optionsZh": [
-   "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的slot H_T 與先前的 pool α",
+   "α′ 可以在任何 extrinsic 被驗證之前就算出來，因為 eq. 4.5–4.20 讓它只依賴 header 的 slot H_T 與先前的 pool α",
    "α′ 必須在 accumulation 之後才能算，因為 φ′（posterior 的 authorizer queue）要等 accumulate 跑完才知道（`assign` host call 可能改動它）",
    "α′ 必須在 guarantees extrinsic 被驗證之前算出來，因為 eq. 11.32 是拿每份 report 的 authorizer 去比對 posterior 的 pool α′[w_c]",
    "α′ 與 extrinsic 無關、可以和 Safrole 平行執行，因為 φ 只會透過 delegator χ_V 持有的 `designate` 特權改變"
@@ -96,10 +96,10 @@ ITEMS = [
  "difficulty": 1, "kind": "concept", "tags": ["timeslot"],
   "stemZh": "JAM Common Era 從什麼時候開始？為什麼選那個時刻？",
   "optionsZh": [
-   "2025 年 1 月 1 日 00:00 UTC——從午夜起算讓slot 0 成為某個日曆日的第一槽，因此每個 14,400 槽的邊界在全世界都是一次日期變換",
+   "2025 年 1 月 1 日 00:00 UTC——從午夜起算讓 slot 0 成為某個日曆日的第一槽，因此每個 14,400 槽的邊界在全世界都是一次日期變換",
    "2025 年 1 月 1 日 12:00 UTC——選正午確保所有主要時區在距起點恰好 24 小時的整數倍處都落在同一個日曆日",
-   "2024 年 1 月 1 日 12:00 UTC——第一版 Gray Paper 發表的那天，所以slot索引是從規格自己的生日開始數",
-   "1970 年 1 月 1 日 00:00 UTC——也就是 Unix 紀元本身，所以 JAM 的slot索引就是當前 Unix 時間除以 P = 6 秒"
+   "2024 年 1 月 1 日 12:00 UTC——第一版 Gray Paper 發表的那天，所以 slot 索引是從規格自己的生日開始數",
+   "1970 年 1 月 1 日 00:00 UTC——也就是 Unix 紀元本身，所以 JAM 的 slot 索引就是當前 Unix 時間除以 P = 6 秒"
   ],
   "stem": "When does the JAM Common Era begin, and why was that particular time of day chosen?",
  "options": [
@@ -115,7 +115,7 @@ ITEMS = [
   "年份錯了（是 2025），而且 GP 從未把 common era 綁在自身的出版日上。",
   "若 era 就是 Unix epoch，腳註那個 1,735,732,800 秒的偏移就會是 0。",
  ],
- "explanation": "GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」，註腳補上這是 Unix 紀元後的 1,735,732,800 秒。**選正午的理由 GP 直接寫出來了**：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」也就是說，從 Common Era 起算每滿 24 小時的那一刻，從東亞到美洲的所有主要時區都還落在**同一個日曆日**——若選午夜 UTC，那一刻在美洲還是前一天、在東亞已是後一天，任何以「第幾天」做分期的人工對照都會出現跨日歧義。**與slot的關係**：timeslot index 就是自 Common Era 起算的 6 秒週期數，所以 eq. 5.8 的有效性條件寫成 H_T · P ≤ 𝕋（P = 6 秒、𝕋 是牆鐘秒數）。**順帶算一下壽命**：slot是 u32（eq. 4.28 的 N_T ≡ N_{2^32}），2^32 × 6 秒 ≈ 816.6 年，所以編號會在 2841 年 8 月中用完。",
+ "explanation": "GP §4.4：「we define the time in terms of seconds passed since the beginning of the JAM Common Era, 1200 UTC on January 1, 2025」，註腳補上這是 Unix 紀元後的 1,735,732,800 秒。**選正午的理由 GP 直接寫出來了**：「Midday UTC is selected to ensure that all major timezones are on the same date at any exact 24-hour multiple from the beginning of the common era.」也就是說，從 Common Era 起算每滿 24 小時的那一刻，從東亞到美洲的所有主要時區都還落在**同一個日曆日**——若選午夜 UTC，那一刻在美洲還是前一天、在東亞已是後一天，任何以「第幾天」做分期的人工對照都會出現跨日歧義。**與 slot 的關係**：timeslot index 就是自 Common Era 起算的 6 秒週期數，所以 eq. 5.8 的有效性條件寫成 H_T · P ≤ 𝕋（P = 6 秒、𝕋 是牆鐘秒數）。**順帶算一下壽命**：slot 是 u32（eq. 4.28 的 N_T ≡ N_{2^32}），2^32 × 6 秒 ≈ 816.6 年，所以編號會在 2841 年 8 月中用完。",
  "trap": "數字題：1,735,732,800；slot = 6 秒；epoch = 600 slots = 1 小時。"
 },
 {
@@ -154,10 +154,10 @@ ITEMS = [
  "difficulty": 1, "kind": "concept", "tags": ["balance", "timeslot"],
   "stemZh": "JAM 的餘額與 timeslot 各用什麼數值域？這些選擇隱含了什麼？",
   "optionsZh": [
-   "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；slot是 N_2^32，使協定的壽命延伸到 2840 年",
-   "餘額是 N_2^128 以配合 Polkadot 的 10^10 面額；slot是 N_2^64，所以槽索引永遠不會回繞、協定也沒有明訂的終止日",
-   "餘額是 N_2^64、採用 Ethereum 的 10^18 面額；slot是 N_2^32，套用該面額後總發行量上限約為 18 顆完整代幣",
-   "餘額與slot都是 N_2^64、採用 Kusama 的 10^12 面額，使協定的終止日遠在 2840 年之後"
+   "餘額是 N_2^64（u64）、標準面額為 10^9 顆代幣；slot 是 N_2^32，使協定的壽命延伸到 2840 年",
+   "餘額是 N_2^128 以配合 Polkadot 的 10^10 面額；slot 是 N_2^64，所以槽索引永遠不會回繞、協定也沒有明訂的終止日",
+   "餘額是 N_2^64、採用 Ethereum 的 10^18 面額；slot 是 N_2^32，套用該面額後總發行量上限約為 18 顆完整代幣",
+   "餘額與 slot 都是 N_2^64、採用 Kusama 的 10^12 面額，使協定的終止日遠在 2840 年之後"
   ],
   "stem": "What numeric domains does JAM use for balances and timeslots, and what do those choices imply?",
  "options": [
@@ -173,7 +173,7 @@ ITEMS = [
   "10^18 是 Ethereum 的值；套上去 18×10^9 tokens 只剩 18 顆，正說明 GP 為何選 10^9。",
   "三處都錯：timeslot 是 u32、面額是 10^9，而 10^12 是 Kusama 的。",
  ],
- "explanation": "兩個數域，兩個都在 §4 明文定義。**餘額** eq. 4.21：N_B ≡ N_{2^64}，也就是 u64。GP 同時說明面額是 10^-9（十億分之一顆為最小單位），因此「there may never be more than around 18×10^9 tokens」——2^64 個最小單位除以 10^9 約等於 184 億顆。選 u64 而不是更寬的型別，是因為餘額要塞進定寬的序列化欄位，也讓 service account 的門檻餘額計算不必動用大數。**slot** eq. 4.28：N_T ≡ N_{2^32}，即 u32，計數的是自 JAM Common Era 起算的 6 秒slot。算一下就知道壽命：2^32 × 6 秒 ≈ 257 億秒 ≈ **817 年**；Common Era 起點是 2025-01-01 1200 UTC，所以slot編號會在 **2841 年 8 月中**用完。（GP 特別註明選正午 UTC，是為了讓所有主要時區在 24 小時的整數倍處都落在同一天。）**干擾項的來源**：GP 在同一段把 Polkadot 的 10^10、Kusama 的 10^12 與 Ethereum 的 10^18 明文列為對照，說 JAM 的 10^9「different to」它們——那三個數字就是被拿來當錯誤面額用的。順帶一提，service index 也是 u32（N_S），與slot同寬但意義無關，是另一個常被混淆的點。",
+ "explanation": "兩個數域，兩個都在 §4 明文定義。**餘額** eq. 4.21：N_B ≡ N_{2^64}，也就是 u64。GP 同時說明面額是 10^-9（十億分之一顆為最小單位），因此「there may never be more than around 18×10^9 tokens」——2^64 個最小單位除以 10^9 約等於 184 億顆。選 u64 而不是更寬的型別，是因為餘額要塞進定寬的序列化欄位，也讓 service account 的門檻餘額計算不必動用大數。**slot** eq. 4.28：N_T ≡ N_{2^32}，即 u32，計數的是自 JAM Common Era 起算的 6 秒 slot。算一下就知道壽命：2^32 × 6 秒 ≈ 257 億秒 ≈ **817 年**；Common Era 起點是 2025-01-01 1200 UTC，所以 slot 編號會在 **2841 年 8 月中**用完。（GP 特別註明選正午 UTC，是為了讓所有主要時區在 24 小時的整數倍處都落在同一天。）**干擾項的來源**：GP 在同一段把 Polkadot 的 10^10、Kusama 的 10^12 與 Ethereum 的 10^18 明文列為對照，說 JAM 的 10^9「different to」它們——那三個數字就是被拿來當錯誤面額用的。順帶一提，service index 也是 u32（N_S），與 slot 同寬但意義無關，是另一個常被混淆的點。",
  "trap": "u64 balance、u32 timeslot、u32 service index。"
 },
 {
@@ -185,7 +185,7 @@ ITEMS = [
   "optionsZh": [
    "區塊空間以 gas 計量，並在 work-report 被 accumulate 時從該 service 的餘額 a_b 扣款；餘額見底的 service 其 report 會被丟棄",
    "coretime 是事先購買的（Agile-Coretime 式）並指派給一個授權代理；採購流程不在 GP 的範圍內，預期由某個 system parachain 處理",
-   "validator 把每個 6 秒的slot拍賣給出價最高的 work-package 建構者，而 §8 的授權系統的存在就是為了結算該拍賣並支付得標金",
+   "validator 把每個 6 秒的 slot 拍賣給出價最高的 work-package 建構者，而 §8 的授權系統的存在就是為了結算該拍賣並支付得標金",
    "work-package 的建構者簽署一筆交易，在被納入時從自己的帳戶扣款，與 Ethereum 完全相同——這是 JAM 唯一保留可由簽章識別之交易者的地方"
   ],
   "stem": "How does JAM replace Ethereum's gas-purchase model for buying blockspace?",
@@ -260,7 +260,7 @@ ITEMS = [
   "Grandpa 在 GP 裡就是 finality gadget 本身，不是只為 BEEFY bridging 服務的附件。",
   "ELVES 是 in-core 計算正確性的 auditing 機制，與這三個 fork 目標無直接關係。",
  ],
- "explanation": "GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」**Safrole → 目標 1（很少長出兩個 head）**：它把每個 6 秒slot的出塊權限定給**唯一一位**持票人，所以正常情況下同一個 slot 不會有兩個合法區塊。注意 GP 自己用了「not-necessarily forkless」——Safrole 減少分叉但不保證消除，網路延遲或 fallback 模式下仍可能分叉。**Grandpa → 目標 3（某個近期區塊永久留在歷史裡）**：出塊機制本身無法給出「永不回滾」的保證，那是 finality gadget 的工作。**兩者共同 → 目標 2（分叉快速收斂）**：Safrole 讓分叉少發生，Grandpa 讓已發生的分叉有一個明確的收斂點；再加上 §19 的 best-chain 規則偏好 ticket-sealed 祖先較多的分支（T = 1 的那些），三者一起讓分叉不會拖長。**口試常見的追問**：「為什麼不用單一機制解決三件事？」——因為「快速出塊」與「不可回滾」在非同步網路下是互相拉扯的目標，分開處理才能各自最佳化。",
+ "explanation": "GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) extension of the blockchain; and Grandpa, which governs the finalization… the former delivers point 1, the latter delivers point 3 and both are important for delivering point 2.」**Safrole → 目標 1（很少長出兩個 head）**：它把每個 6 秒 slot 的出塊權限定給**唯一一位**持票人，所以正常情況下同一個 slot 不會有兩個合法區塊。注意 GP 自己用了「not-necessarily forkless」——Safrole 減少分叉但不保證消除，網路延遲或 fallback 模式下仍可能分叉。**Grandpa → 目標 3（某個近期區塊永久留在歷史裡）**：出塊機制本身無法給出「永不回滾」的保證，那是 finality gadget 的工作。**兩者共同 → 目標 2（分叉快速收斂）**：Safrole 讓分叉少發生，Grandpa 讓已發生的分叉有一個明確的收斂點；再加上 §19 的 best-chain 規則偏好 ticket-sealed 祖先較多的分支（T = 1 的那些），三者一起讓分叉不會拖長。**口試常見的追問**：「為什麼不用單一機制解決三件事？」——因為「快速出塊」與「不可回滾」在非同步網路下是互相拉扯的目標，分開處理才能各自最佳化。",
  "trap": ""
 },
 ]

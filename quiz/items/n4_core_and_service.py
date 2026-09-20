@@ -166,7 +166,7 @@ ITEMS = [
    "有權變更協定層級的設定，例如某個 core 會接受哪些 authorizer、下一批 validator 是誰；透過 accumulate 期間的 host call 行使",
    "有權繞過 gas 模型，因此具特權的 service 想跑多久就跑多久，它的 accumulate 不會被計量、限流或中途截斷",
    "有權讀寫任何其他 service 的 storage，系統 service 就是靠這個在升級後維持其餘狀態的一致",
-   "有權不按順序出塊，使具特權的 service 能把緊急變更硬塞進鏈裡，不必等自己的slot"
+   "有權不按順序出塊，使具特權的 service 能把緊急變更硬塞進鏈裡，不必等自己的 slot"
   ],
   "answer": 0,
   "explanation": "特權是**改動協定層設定的權力**，而且全部透過 accumulate 期間的 host call 行使。χ 記錄五種：manager（可改特權本身）、每個 core 的 assigner（用 `assign` 改該 core 的 authorizer queue）、delegator（用 `designate` 改下一批 validator）、registrar、以及 always-accumulate 集合。重點是**特權沒有跳出規則之外**：具特權的 service 一樣要跑 accumulate、一樣被計 gas、一樣不能讀別人的 storage。它只是被允許呼叫某些平常會回 HUH 的 host call。",

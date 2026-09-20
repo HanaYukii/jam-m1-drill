@@ -58,7 +58,7 @@ ITEMS = [
   "optionsZh": [
    "有三項：進來的 package 雜湊不得已經是任何近期區塊之映射的 key（反重複）；每個 prerequisite 以及某份 report 之 segment-root lookup l 的每個 key 都必須是那樣的 key、或來自本塊自己的 guarantee；而且 l 必須是那些映射的子字典，因此每個 segment-root 都要與它的 package 雜湊相符",
    "只有反重複那一項；prerequisite 與 segment-root lookup 改為對照 ξ（accumulation 歷史）與 ready queue ω 解析，而它們的依賴集合才是最終讓一份 report 得以進入 accumulation 的關鍵——所以 β_H 裡的映射在那裡是多餘的，純粹為了重複測試而存在",
-   "只有 refinement-context 的 anchor 檢查：anchor 的 header 雜湊、state root、super-peak 與slot全都是在 β† 的映射中查找的，而重複則留到 accumulation 階段才抓，屆時已經出現在 ξ 裡的 package 雜湊只會被從 ready queue 丟掉而不會讓區塊無效",
+   "只有 refinement-context 的 anchor 檢查：anchor 的 header 雜湊、state root、super-peak 與 slot 全都是在 β† 的映射中查找的，而重複則留到 accumulation 階段才抓，屆時已經出現在 ξ 裡的 package 雜湊只會被從 ready queue 丟掉而不會讓區塊無效",
    "一項都沒有：那些映射的存在是為了替第三方建立 BEEFY 的納入證明，而 §11 是靠從區塊儲存中解碼最近八塊的 E_G 來重新導出近期的 package 雜湊——這也是為什麼祖先集合 A 必須保留 L = 14,400 個完整含 extrinsic 的區塊而不只是 header"
   ],
   "stem": "When a block's guarantees extrinsic E_G is validated in §11, which of the on-chain checks actually read the reported-package maps stored inside β_H?",
@@ -155,7 +155,7 @@ ITEMS = [
         "tags": ["serialization", "accumulate", "delta-0.8.0"],
   "stemZh": "這是團隊在 state key C(3) 之下、為單一筆 β_H 項目所寫的 GP 0.7.2 編碼器。有位審閱者反對，認為 GP 0.8.0 把該項目宣告為 ⟨h, s, b, t, p⟩——state root 排在 accumulation-output-log 的 super-peak 之前——所以這個編碼器一定把兩個欄位對調了。誰說得對？",
   "optionsZh": [
-   "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後slot、最後是 reported 映射；第 7 章的那個元組只是在命名各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的slot",
+   "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後 slot、最後是 reported 映射；第 7 章的那個元組只是在命名各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的 slot",
    "審閱者是對的：一個狀態分量永遠依它的定義式所列欄位順序序列化，所以 C(3) 需要的是 header 雜湊、state root、super-peak、slot、reported 映射；附錄 D 只是重述第 7 章的元組、兩者不可能牴觸，所以照現況這個編碼器會產生錯誤的 C(3) 原像、因而產生錯誤的 state root",
    "兩者都錯：C(3) 只裝 β_B 編碼後的 peak 序列，而逐區塊的項目是透過 header 裡的一個 marker 承諾、其餘由各節點自行保存在鏈外，所以這個編碼器根本不該餵給狀態序列化，它用哪種順序都動不了 state root",
    "審閱者在順序與形狀上都對：0.8.0 把每個項目的 super-peak 換成了完整的 peak 序列，所以每一項都必須編碼整條 belt，而這段程式碼卻只寫了單一個 32 位元組的雜湊；eq. 11.36 也是拿 anchor 去對照那個序列而不是對照單一個承諾"
@@ -248,10 +248,10 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["authorizer", "timeslot"],
-  "stemZh": "每個區塊都會把恰好一個佇列條目移進每個 core 的 pool。那個條目是怎麼被挑中的？而那些沒有出塊之slot所對應的條目又會怎麼樣？",
+  "stemZh": "每個區塊都會把恰好一個佇列條目移進每個 core 的 pool。那個條目是怎麼被挑中的？而那些沒有出塊之 slot 所對應的條目又會怎麼樣？",
   "optionsZh": [
-   "靠對區塊自身slot做的循環下標，也就是索引 H_T mod Q，任何地方都沒有儲存游標；沒有產出區塊的slot，其條目這一輪就是不會被抽到，而那個索引要再過 80 個slot才會輪回來",
-   "靠一個放在 pool 旁邊、每匯入一個區塊就前進一步的逐 core 游標，所以沒有任何佇列條目會被跳過——空slot只是延後了輪替，而該游標與 α[c] 一起序列化在 state key C(1) 之下",
+   "靠對區塊自身 slot 做的循環下標，也就是索引 H_T mod Q，任何地方都沒有儲存游標；沒有產出區塊的 slot，其條目這一輪就是不會被抽到，而那個索引要再過 80 個 slot 才會輪回來",
+   "靠一個放在 pool 旁邊、每匯入一個區塊就前進一步的逐 core 游標，所以沒有任何佇列條目會被跳過——空 slot 只是延後了輪替，而該游標與 α[c] 一起序列化在 state key C(1) 之下",
    "靠索引 H_T mod O，所以只有前八個佇列位置會輪進 pool，其餘 72 個在 `assign` 呼叫把它們往前挪之前都無法觸及，因此停在索引 40 的 authorizer 在 `assign` 輪動佇列之前一直碰不到",
    "靠取出最舊的尚未使用條目（FIFO）並在它進入 pool 時從佇列中刪除，這正是為什麼 assigner 必須至少每 80 個區塊替某個 core 補一次佇列，也是為什麼 φ[c] 在兩次補充之間會短於 Q"
   ],
@@ -269,7 +269,7 @@ ITEMS = [
             "O = 8 只出現在最後的 ←(…)^O 截斷；80 格每一格都會在 80 個 slot 內輪到，沒有碰不到的格子。",
             "刪掉用過的項會讓 φ[c] 短於 Q，直接違反 eq. 8.1 的固定長度型別；queue 也不需要定期補。",
         ],
-        "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c]^⟲[H_T])^O。索引的來源是 **header 自己的 timeslot**，經由 §3.7 的模數下標 s^⟲[i] ≡ s[i mod |s|] 化成 H_T mod Q。**沒有任何游標被存在狀態裡**——這是這題的重點。eq. 8.1 規定 φ ∈ ⟦⟦H⟧_Q⟧_C：每個 core 的 queue 是**恰好** Q = 80 個的定長序列（對照 α ∈ ⟦⟦H⟧_{:O}⟧_C 是**至多** O = 8 個），所以取模永遠落在合法範圍內。**空 slot 的後果**：沒有出塊的slot，其對應的那一格這一輪就是被跳過，要再等 80 個slot（8 分鐘）繞回來才有機會。這不是遺漏，而是設計——索引綁在時間上，鏈上任何節點都能獨立算出來，不需要協調。**實作陷阱**：若自己維護一個「下一個要取哪格」的游標，在鏈上出現空 slot（Safrole 沒出票、或單純沒人出塊）時就會與參考實作分歧，而且分歧會一直累積下去，state root 從此對不上。**另一個常見誤解**：queue 不會因為被抽取而縮短或清空——它不是 FIFO，同一格會被反覆讀取。唯一能改動 φ 的是 `assign` host call 的整批覆寫。",
+        "explanation": "eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c]^⟲[H_T])^O。索引的來源是 **header 自己的 timeslot**，經由 §3.7 的模數下標 s^⟲[i] ≡ s[i mod |s|] 化成 H_T mod Q。**沒有任何游標被存在狀態裡**——這是這題的重點。eq. 8.1 規定 φ ∈ ⟦⟦H⟧_Q⟧_C：每個 core 的 queue 是**恰好** Q = 80 個的定長序列（對照 α ∈ ⟦⟦H⟧_{:O}⟧_C 是**至多** O = 8 個），所以取模永遠落在合法範圍內。**空 slot 的後果**：沒有出塊的 slot，其對應的那一格這一輪就是被跳過，要再等 80 個 slot（8 分鐘）繞回來才有機會。這不是遺漏，而是設計——索引綁在時間上，鏈上任何節點都能獨立算出來，不需要協調。**實作陷阱**：若自己維護一個「下一個要取哪格」的游標，在鏈上出現空 slot（Safrole 沒出票、或單純沒人出塊）時就會與參考實作分歧，而且分歧會一直累積下去，state root 從此對不上。**另一個常見誤解**：queue 不會因為被抽取而縮短或清空——它不是 FIFO，同一格會被反覆讀取。唯一能改動 φ 的是 `assign` host call 的整批覆寫。",
         "trap": "抽 queue 用 mod Q（80），截 pool 用 O（8）——兩個常數各司其職，別互換。",
     },
     {
@@ -285,7 +285,7 @@ ITEMS = [
   "optionsZh": [
    "只有它的兩個引數——work-package 與 core 索引（後者以 2 位元組編碼的引數交給 PVM）——加上 `fetch` 能從該 package 裡拉出來的東西、以及協定常數；完全沒有任何鏈上狀態，而且除了 `fetch` 之外，僅有的 host call 就是 gas 計數器與堆成長",
    "work-package 加上 service 帳戶 δ 的唯讀快照，經由 Accumulate 所用的同一批 `read` 與 `lookup` host call 取得，所以 authorizer 可以檢查餘額、或確認 coretime 買家仍持有它正在執行的那個 core；該快照釘在 anchor 區塊上，好讓每位 auditor 看到相同的值",
-   "work-package、core 索引，以及一個釘在 lookup-anchor slot上的歷史查詢，與 Refine 拿到的完全相同，因為授權程式碼本身就是由同一個查詢解析出來的；因此 authorizer 可以讀取其宿主 service 在該slot之前所請求過的任何 preimage，例如 coretime 買家發布的白名單",
+   "work-package、core 索引，以及一個釘在 lookup-anchor slot 上的歷史查詢，與 Refine 拿到的完全相同，因為授權程式碼本身就是由同一個查詢解析出來的；因此 authorizer 可以讀取其宿主 service 在該 slot 之前所請求過的任何 preimage，例如 coretime 買家發布的白名單",
    "work-package 與該 core 自己的 authorizer pool——後者連同 core 索引一起遞入，因為它至多只有 O × 32 = 256 個 octet——好讓那段程式碼能確認自己的雜湊仍在池中、提早中止，而不是把 guarantor 的 gas 燒在一個 eq. 11.32 反正會拒絕的 package 上"
   ],
   "stem": "A guarantor runs the Is-Authorized logic Ψ_I before refining anything. What is that program actually able to observe?",
@@ -316,7 +316,7 @@ ITEMS = [
         "tags": ["authorizer", "preimage", "lookup-anchor"],
   "stemZh": "pool α[c] 裡除了 32 位元組的 authorizer 雜湊之外什麼都沒有。那麼 guarantor 要從哪裡取得可執行的 is-authorized 程式碼？又是以歷史上的哪一個時點解析的？為什麼是那裡？",
   "optionsZh": [
-   "從 work-package 所指名的那個獨立 auth-code 宿主 service 的 preimage 儲存中取得，並以該 package 的 lookup-anchor slot做歷史查詢解析，好讓很久之後重跑這項檢查的 auditor 仍能解析出逐位元組相同的程式碼，即使該 service 此後已替換或遺忘了那份 preimage",
+   "從 work-package 所指名的那個獨立 auth-code 宿主 service 的 preimage 儲存中取得，並以該 package 的 lookup-anchor slot 做歷史查詢解析，好讓很久之後重跑這項檢查的 auditor 仍能解析出逐位元組相同的程式碼，即使該 service 此後已替換或遺忘了那份 preimage",
    "從第一個 work-item 之 service 的帳戶中取得，讀的是 anchor 區塊的 posterior 狀態，因為 anchor 本來就已經把 refinement context 釘在一個每位 validator 都同意過的近期 state root 上——eq. 11.36 已經把那個 root 與 β† 比對過，所以不需要另外的保存規則來維持程式碼可解析",
    "從 work-package 本身取得：程式碼 blob 就與 token 和設定 blob 一起在 bundle 裡傳送，而那正是 64,000 個 octet 的上限所限制的東西，所以 guarantor 根本不需要做 preimage 查詢，而 α[c] 中所池化的雜湊就只是那段程式碼區段的 Blake2b",
    "從 pool 條目本身取得：α[c] 裡的雜湊就是「程式碼串接其設定」的 preimage 雜湊，所以 guarantor 可以憑雜湊向任何對等節點取得該 blob，並對照當前的最佳頭部執行它——這也是為什麼一個 authorizer 要等到有人發布了它的 preimage 之後才變得可用"
@@ -352,7 +352,7 @@ ITEMS = [
    "prior 的 pool，因為 posterior 那個要等 accumulation 之後才會從 posterior 佇列形成；而失敗只是一個普通的區塊有效性失敗——該 guarantee 不可能成為有效區塊的一部分，所以根本沒有 report 可以拿來懲罰誰，disputes 狀態也不會被寫入任何東西",
    "posterior 的 pool，因為該 report 正被納入這一塊、而 eq. 8.2 的輪替是在處理 guarantee 之前套用的；失敗則使該區塊無效，這也是為什麼依賴圖把 α′ 列在 ρ′ 的輸入之中而不是反過來",
    "哪個 pool 都可以，因為輪替只移除該 report 自己消耗掉的那個 authorizer；失敗會把該 report 的 guarantor 記為 culprit 寫進 disputes 狀態，好讓下個 epoch 的懲罰集合沒收他們，而他們的 Ed25519 金鑰會經由這個 header 自己的 offenders marker 進入 ψ_O",
-   "prior 的 pool，但該 report 仍然會以空的 authorizer trace 被收進 availability assignments，並在 accumulation 時被靜默丟棄——這也是為什麼缺席的 authorizer 對 guarantor 毫無代價，而 ρ‡ 會一直持有該條目直到 U = 5 個slot的 assurance 逾時把它清掉"
+   "prior 的 pool，但該 report 仍然會以空的 authorizer trace 被收進 availability assignments，並在 accumulation 時被靜默丟棄——這也是為什麼缺席的 authorizer 對 guarantor 毫無代價，而 ρ‡ 會一直持有該條目直到 U = 5 個 slot 的 assurance 逾時把它清掉"
   ],
   "stem": "This 0.7.2 code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?",
         "code": {

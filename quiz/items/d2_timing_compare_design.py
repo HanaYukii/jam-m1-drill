@@ -533,7 +533,7 @@ ITEMS = [
   "反了：BABE 逐 slot、Safrole 逐 epoch。",
   "eq. 6.25 明確定義 fallback 為 F(η′_2, κ′)；BABE 有 secondary slot；GRANDPA 不處理出塊。"
  ],
- "explanation": "eq. 6.25 是全部：γ′_S 在 e′ = e + 1 時，若 m ≥ Y 且 |γ_A| = E，取 Z(γ_A)（ticket 模式）；否則取 F(η′_2, κ′)（fallback）；非換檔 block 則不變。決定只在 epoch 邊界做一次，決定的是整個 epoch。eq. 6.27 的 F 用 η′_2 對每個 slot 算一個 hash、對 |κ′| 取模，得到一串公開的 Bandersnatch key——這是「排程公開、持有者也公開」的模式，匿名性沒了，但「恰好一人一 slot」還在，seal 改用 X_F context 驗（eq. 6.16 第二種情形）。BABE 的 secondary slot（Polkadot 文件）是另一種思路：primary 抽籤照常，每個 slot 另外用 round-robin 指定一位公開的備援，primary 沒出現他就補，所以 epoch 內兩種作者交錯出現。兩種設計保的東西不同：BABE 在意「盡量不要有空 slot」，Safrole 在意「同一個 epoch 內作者的選法只有一種、事前就定」——這讓 ch06-fallback-purpose 那題問的「fallback 期間放棄什麼」有明確答案：放棄匿名，不放棄確定性。順帶：Safrole 的 ticket 模式下，持有者離線那個 slot就是空的，沒有替補，這是它接受的代價。",
+ "explanation": "eq. 6.25 是全部：γ′_S 在 e′ = e + 1 時，若 m ≥ Y 且 |γ_A| = E，取 Z(γ_A)（ticket 模式）；否則取 F(η′_2, κ′)（fallback）；非換檔 block 則不變。決定只在 epoch 邊界做一次，決定的是整個 epoch。eq. 6.27 的 F 用 η′_2 對每個 slot 算一個 hash、對 |κ′| 取模，得到一串公開的 Bandersnatch key——這是「排程公開、持有者也公開」的模式，匿名性沒了，但「恰好一人一 slot」還在，seal 改用 X_F context 驗（eq. 6.16 第二種情形）。BABE 的 secondary slot（Polkadot 文件）是另一種思路：primary 抽籤照常，每個 slot 另外用 round-robin 指定一位公開的備援，primary 沒出現他就補，所以 epoch 內兩種作者交錯出現。兩種設計保的東西不同：BABE 在意「盡量不要有空 slot」，Safrole 在意「同一個 epoch 內作者的選法只有一種、事前就定」——這讓 ch06-fallback-purpose 那題問的「fallback 期間放棄什麼」有明確答案：放棄匿名，不放棄確定性。順帶：Safrole 的 ticket 模式下，持有者離線那個 slot 就是空的，沒有替補，這是它接受的代價。",
  "trap": "BABE secondary 是每個 slot 的備胎；Safrole fallback 是整個 epoch 換模式，中途不切。"
 },
 {

@@ -16,20 +16,20 @@ ITEMS = [
    "Into rounds rather than slots, where a round ends once two thirds of validators have signed the same block, so its length depends on network latency"
   ],
   "optionsZh": [
-   "切成 6 秒一個slot，600 個slot組成一個 epoch；每個slot至多一個區塊，而且只有一位 validator 有資格出塊",
-   "切成長度不定的區塊：一個slot從看到前一個區塊開始，到下一位出塊者蒐集到足夠工作填滿一塊為止",
-   "切成 6 秒一個slot並組成 epoch，但每個slot允許多個區塊，只要它們建在不同的父區塊上、之後再合併",
-   "切成回合而非slot：一個回合在三分之二的 validator 簽署同一個區塊後結束，長度因此取決於網路延遲"
+   "切成 6 秒一個 slot，600 個 slot 組成一個 epoch；每個 slot 至多一個區塊，而且只有一位 validator 有資格出塊",
+   "切成長度不定的區塊：一個 slot 從看到前一個區塊開始，到下一位出塊者蒐集到足夠工作填滿一塊為止",
+   "切成 6 秒一個 slot 並組成 epoch，但每個 slot 允許多個區塊，只要它們建在不同的父區塊上、之後再合併",
+   "切成回合而非 slot：一個回合在三分之二的 validator 簽署同一個區塊後結束，長度因此取決於網路延遲"
   ],
   "answer": 0,
-  "explanation": "**P = 6 秒是一個slot，E = 600 個slot是一個 epoch**（所以一個 epoch 是一小時）。slot是絕對時間的格子，從 JAM Common Era（2025-01-01 1200 UTC）起算——不是「上一塊之後六秒」，而是掛在牆鐘上的固定刻度，所以每個節點都能獨立算出現在是第幾槽。每個slot至多一個合法區塊，出塊權由 Safrole 事先指派給唯一一位 validator。這也是 JAM「幾乎不分叉」的來源：同一格只有一個人有資格，分叉只會因為網路問題或 fallback 才發生。",
+  "explanation": "**P = 6 秒是一個 slot，E = 600 個 slot 是一個 epoch**（所以一個 epoch 是一小時）。slot 是絕對時間的格子，從 JAM Common Era（2025-01-01 1200 UTC）起算——不是「上一塊之後六秒」，而是掛在牆鐘上的固定刻度，所以每個節點都能獨立算出現在是第幾槽。每個 slot 至多一個合法區塊，出塊權由 Safrole 事先指派給唯一一位 validator。這也是 JAM「幾乎不分叉」的來源：同一格只有一個人有資格，分叉只會因為網路問題或 fallback 才發生。",
   "optNotes": [
    "6 秒一槽、600 槽一 epoch、每槽一人有資格——三個數字撐起整個出塊模型。",
-   "slot掛在牆鐘上而非相對於前一塊，所以每個節點都算得出現在是第幾槽。",
-   "同一個slot只有一位有出塊資格，不存在「允許多塊之後再合併」這回事。",
+   "slot 掛在牆鐘上而非相對於前一塊，所以每個節點都算得出現在是第幾槽。",
+   "同一個 slot 只有一位有出塊資格，不存在「允許多塊之後再合併」這回事。",
    "出塊不等待簽署門檻；那是 finality（Grandpa）的事，與出塊節奏無關。"
   ],
-  "trap": "P = 6 秒、E = 600 槽；slot是絕對刻度，不是相對於前一塊。"
+  "trap": "P = 6 秒、E = 600 槽；slot 是絕對刻度，不是相對於前一塊。"
  },
  {
   "id": "n3-what-safrole-does",
@@ -45,7 +45,7 @@ ITEMS = [
    "It spreads each work-package's erasure-coded shards across validators so a report's data stays recoverable"
   ],
   "optionsZh": [
-   "它事先且匿名地決定，接下來那個 epoch 的每一個slot由哪一位 validator 出塊",
+   "它事先且匿名地決定，接下來那個 epoch 的每一個 slot 由哪一位 validator 出塊",
    "它藉由蒐集超級多數的簽章來為區塊定案，使超過一定深度的區塊永遠不會被回滾",
    "它把 validator 指派到各個 core，讓每個 core 有三名 guarantor，並每隔幾槽輪換一次以限制串通",
    "它把每份 work-package 的 erasure-coded 碎片分發給 validator，使報告背後的資料保持可重建"
@@ -66,7 +66,7 @@ ITEMS = [
   "ch": "N3", "section": "§6 Safrole", "gpRef": "§6",
   "difficulty": 2, "kind": "rationale", "tags": ["timeslot"],
   "stem": "Safrole goes to considerable trouble to keep the identity of a future slot's author secret. What would go wrong if the schedule were public?",
-  "stemZh": "Safrole 花了不少力氣讓未來slot的出塊者身分保密。如果出塊表是公開的，會出什麼問題？",
+  "stemZh": "Safrole 花了不少力氣讓未來 slot 的出塊者身分保密。如果出塊表是公開的，會出什麼問題？",
   "options": [
    "Anyone could see who is about to author and attack or bribe exactly that validator, so a cheap targeted action could stop blocks that a network-wide attack could not",
    "Anyone could compute the same schedule and author in someone else's slot, because knowing who is next is what proves entitlement to seal a block",
@@ -75,8 +75,8 @@ ITEMS = [
   ],
   "optionsZh": [
    "任何人都能看出接下來由誰出塊，於是可以精準攻擊或收買那一位；一個廉價的針對性行動就能擋下區塊，而全網規模的攻擊反而做不到",
-   "任何人都能算出同一份出塊表，因而能在別人的slot出塊，因為「知道下一個是誰」正是出 block 的資格證明",
-   "validator 能看見自己未來的slot，於是會把票拖到最後一刻才提交，導致 accumulator 空著、整個 epoch 停擺",
+   "任何人都能算出同一份出塊表，因而能在別人的 slot 出塊，因為「知道下一個是誰」正是出 block 的資格證明",
+   "validator 能看見自己未來的 slot，於是會把票拖到最後一刻才提交，導致 accumulator 空著、整個 epoch 停擺",
    "出塊表會把 validator 集合洩漏給尚未同步狀態的觀察者，讓他們能偽造 header 裡的 epoch marker"
   ],
   "answer": 0,
@@ -106,10 +106,10 @@ ITEMS = [
    "退回用 entropy 與 validator 集合挑選出塊者：區塊照樣產出，但整個 epoch 的出塊表變成任何人都算得出來",
    "延長該 epoch 直到收到足夠的票：匿名性得以保留，但這段期間整條鏈的出塊速率會變得無法預測",
    "讓任何 validator 以先到先得的方式出任何一槽：區塊照樣產出，但可能有兩位 validator 出塊同一槽而造成分叉",
-   "沿用上一個 epoch 的出塊表：匿名性得以保留，但同一批 validator 會連續兩輪拿到相同的slot"
+   "沿用上一個 epoch 的出塊表：匿名性得以保留，但同一批 validator 會連續兩輪拿到相同的 slot"
   ],
   "answer": 0,
-  "explanation": "票不夠時走 **fallback**：直接用 entropy 與 active validator 集合算出每一槽的出塊者。這條路的計算輸入在 epoch 一開始就全部公開，所以**整個 epoch 的出塊表任何人都能算出來**——匿名性在這段期間完全消失，針對性 DoS 與賄賂重新變得可行。GP 仍然這樣設計，是因為**活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。這也解釋了為什麼票券投票有 Y = 500 的截止線——留 500 個slot讓票累積，盡量不走到 fallback。",
+  "explanation": "票不夠時走 **fallback**：直接用 entropy 與 active validator 集合算出每一槽的出塊者。這條路的計算輸入在 epoch 一開始就全部公開，所以**整個 epoch 的出塊表任何人都能算出來**——匿名性在這段期間完全消失，針對性 DoS 與賄賂重新變得可行。GP 仍然這樣設計，是因為**活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。這也解釋了為什麼票券投票有 Y = 500 的截止線——留 500 個 slot 讓票累積，盡量不走到 fallback。",
   "optNotes": [
    "用 entropy 直接算出塊者，代價是整個 epoch 的排班變成公開資訊。",
    "epoch 長度固定為 E = 600，不會為了等票而延長。",
@@ -136,7 +136,7 @@ ITEMS = [
    "Safrole 讓兩個區塊競爭同一個位置變得罕見；Grandpa 讓超過某個點的區塊成為永久，而這是出塊機制本身永遠無法承諾的",
    "Safrole 決定區塊內部交易的順序，Grandpa 決定區塊彼此之間的順序，兩者合起來給出所有工作的單一全序",
    "Safrole 在分叉出現時決定哪條鏈最好，Grandpa 決定由誰出塊，所以兩者是先後執行而非平行運作",
-   "Safrole 保證每個slot都會產出區塊，Grandpa 保證每個區塊最終都會被稽核，兩者合起來涵蓋活性與正確性"
+   "Safrole 保證每個 slot 都會產出區塊，Grandpa 保證每個區塊最終都會被稽核，兩者合起來涵蓋活性與正確性"
   ],
   "answer": 0,
   "explanation": "兩者解決的是**不同的問題**。Safrole 管「誰可以出塊」：每槽只有一位有資格，因此很少長出兩個競爭的 head——但它無法保證某個區塊永遠不會被回滾，因為更長的鏈隨時可能出現。Grandpa 管 **finality**：一旦足夠多的 validator 對某個區塊表態，它就永久留在歷史裡。GP §4.3 列了三個目標：很少分叉（Safrole）、分叉快速收斂（兩者共同）、能指出某個近期區塊永久留存（Grandpa）。JAM 沒有交易也就沒有「交易排序」，稽核則是另一套機制（ELVES）。",
@@ -162,7 +162,7 @@ ITEMS = [
    "One is used during normal operation and the other only during fallback, so a verifier can tell from the header which mode the epoch is in"
   ],
   "optionsZh": [
-   "一個出塊區塊、證明出塊者對這個slot有資格；另一個產生新的隨機性，被混進整條鏈的 entropy pool",
+   "一個出塊區塊、證明出塊者對這個 slot 有資格；另一個產生新的隨機性，被混進整條鏈的 entropy pool",
    "一個由本塊出塊者簽、另一個由上一塊的出塊者簽，兩者除了父雜湊之外再把兩個區塊串在一起",
    "一個涵蓋 header、另一個涵蓋 extrinsic，讓節點在還沒下載區塊本體之前就能先檢查 header",
    "一個用於正常運作、另一個只在 fallback 時使用，讓驗證者能從 header 看出這個 epoch 處於哪種模式"
@@ -192,12 +192,12 @@ ITEMS = [
   ],
   "optionsZh": [
    "因為區塊內容由出塊者決定，他可以試很多種版本、挑一個雜湊對自己有利的發布出來；VRF 的輸出則由金鑰決定，不由內容決定",
-   "因為區塊雜湊只有 32 位元組，用來為橫跨六百個slot、數百位 validator 的抽籤提供種子，熵量太少",
+   "因為區塊雜湊只有 32 位元組，用來為橫跨六百個 slot、數百位 validator 的抽籤提供種子，熵量太少",
    "因為區塊雜湊要等區塊傳播之後才知道，而抽籤必須在區塊廣播給任何人之前就完成",
    "因為雜湊是確定性的，而抽籤需要一個一旦被使用就無法被別人重現的來源"
   ],
   "answer": 0,
-  "explanation": "問題在**可偏置（bias）**。如果隨機性直接來自區塊雜湊，出塊者可以微調區塊內容（多放一筆、少放一筆、換個順序）試出很多不同的雜湊，再挑一個讓自己下個 epoch 拿到好slot的版本發布——這叫 grinding attack。JAM 改用 VRF：Y(H_V) 的值由**私鑰與 context 決定**，出塊者換再多內容也只能得到同一個輸出，沒有可挑的餘地。而且 context 綁在 seal 的輸出上，訊息在產生熵之前就固定了。確定性本身不是問題——隨機性必須人人可重算，否則無法達成共識。",
+  "explanation": "問題在**可偏置（bias）**。如果隨機性直接來自區塊雜湊，出塊者可以微調區塊內容（多放一筆、少放一筆、換個順序）試出很多不同的雜湊，再挑一個讓自己下個 epoch 拿到好 slot 的版本發布——這叫 grinding attack。JAM 改用 VRF：Y(H_V) 的值由**私鑰與 context 決定**，出塊者換再多內容也只能得到同一個輸出，沒有可挑的餘地。而且 context 綁在 seal 的輸出上，訊息在產生熵之前就固定了。確定性本身不是問題——隨機性必須人人可重算，否則無法達成共識。",
   "optNotes": [
    "出塊者能試很多版本挑對自己有利的雜湊，這正是 VRF 要擋掉的 grinding。",
    "32 位元組是標準的種子長度，熵量從來不是問題。",
@@ -213,7 +213,7 @@ ITEMS = [
   "difficulty": 1, "kind": "concept", "tags": ["timeslot"],
   "alsoCh": ["N2"],
   "stem": "A node receives a well-formed block whose timeslot is a few seconds in the future. How should it treat it?",
-  "stemZh": "一個節點收到一個格式正確、但slot比現在早了幾秒（屬於未來）的區塊。它應該怎麼處理？",
+  "stemZh": "一個節點收到一個格式正確、但 slot 比現在早了幾秒（屬於未來）的區塊。它應該怎麼處理？",
   "options": [
    "Treat it as not yet valid rather than invalid, because the same block becomes valid as the clock advances and discarding it would punish a peer for a small clock difference",
    "Reject it permanently and treat the sender as misbehaving, because a block claiming a future slot can only come from an author trying to seize a slot it was not given",
@@ -222,16 +222,16 @@ ITEMS = [
   ],
   "optionsZh": [
    "當成「還不到時候」而不是無效，因為同一個區塊會隨著時鐘前進而變得有效；丟棄它等於因為一點時鐘誤差就懲罰對方",
-   "永久拒絕並把發送方視為行為不端，因為宣稱未來slot的區塊只可能來自想搶奪非屬自己slot的出塊者",
-   "立刻接受，因為slot只用於排序，而 seal 已經證明出塊者對該slot有資格，不論它何時抵達",
-   "接受但先不轉發給其他節點，直到該slot到來，因為轉發未來區塊會讓它傳播得比協定預期更快"
+   "永久拒絕並把發送方視為行為不端，因為宣稱未來 slot 的區塊只可能來自想搶奪非屬自己 slot 的出塊者",
+   "立刻接受，因為 slot 只用於排序，而 seal 已經證明出塊者對該 slot 有資格，不論它何時抵達",
+   "接受但先不轉發給其他節點，直到該 slot 到來，因為轉發未來區塊會讓它傳播得比協定預期更快"
   ],
   "answer": 0,
-  "explanation": "有效性條件是 P(H)_T < H_T ∧ H_T · P ≤ 𝕋，其中後半是**暫時性**的。GP 特別補了一句：「Blocks considered invalid by this rule may become valid as 𝕋 advances」——來自未來的區塊只是還沒到時候，不是攻擊。實作上通常先留著、等時間到再處理。把它當成永久無效並封鎖來源是常見的錯誤，在節點之間時鐘略有偏差時會造成不必要的斷線。相對地，前半（必須嚴格大於父區塊的slot）是永久性的，違反就是真的無效。",
+  "explanation": "有效性條件是 P(H)_T < H_T ∧ H_T · P ≤ 𝕋，其中後半是**暫時性**的。GP 特別補了一句：「Blocks considered invalid by this rule may become valid as 𝕋 advances」——來自未來的區塊只是還沒到時候，不是攻擊。實作上通常先留著、等時間到再處理。把它當成永久無效並封鎖來源是常見的錯誤，在節點之間時鐘略有偏差時會造成不必要的斷線。相對地，前半（必須嚴格大於父區塊的 slot）是永久性的，違反就是真的無效。",
   "optNotes": [
    "GP 明說這類區塊會隨時間推進而變有效，所以是暫時無效而非永久拒絕。",
    "時鐘小幅偏差就足以產生「未來區塊」，直接視為惡意會造成不必要的斷線。",
-   "slot不只用於排序，它本身就是有效性條件的一部分。",
+   "slot 不只用於排序，它本身就是有效性條件的一部分。",
    "協定沒有規定要延遲轉發；傳播策略不影響有效性判定。"
   ],
   "trap": "「太未來」是暫時無效；「不大於父區塊」才是永久無效。"

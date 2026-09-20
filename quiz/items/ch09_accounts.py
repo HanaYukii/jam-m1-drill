@@ -65,7 +65,7 @@ ITEMS = [
   "alsoCh": ["14"],
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2.2 Semantics, eq. 9.7",
  "difficulty": 2, "kind": "concept", "tags": ["preimage", "timeslot"],
-  "stemZh": "一筆 request 條目 a_l[(h, len)] 裝的是最多 3 個slot的序列。[x, y] 是什麼意思？[x, y, z] 又是什麼意思？",
+  "stemZh": "一筆 request 條目 a_l[(h, len)] 裝的是最多 3 個 slot 的序列。[x, y] 是什麼意思？[x, y, z] 又是什麼意思？",
   "optionsZh": [
    "[x, y]：該 preimage 從 x 起可用、自 y 起不可用；[x, y, z]：從 x 起可用直到 y，並自 z 起再次可用",
    "[x, y]：該 preimage 在 x 被請求、在 y 首次被提供；[x, y, z]：在 y 被提供、然後在 z 被完全從狀態中清除",

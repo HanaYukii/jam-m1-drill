@@ -347,7 +347,7 @@ ITEMS = [
   "The fallback assigns every slot to the validator set collectively and accepts the first valid seal to arrive; anonymity is unaffected because no schedule exists, at the cost of occasional competing blocks at the same height",
  ],
  "answer": 0,
- "explanation": "eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))[…4])]^⟲ _bs | i ∈ N_E ]。逐步拆：對 epoch 內的每個 slot 索引 i，把 entropy r 接上 i 的 4 位元組編碼一起 Blake2b、取雜湊的**前 4 個位元組**解成整數，用它**對 validator 數取模**（`^⟲` 就是 §3.7 的模數下標記號）選出一位驗證者，再取他的 Bandersnatch 公鑰。r 用的是 η′_2、k 用的是 κ′，兩者都是 posterior。**代價很具體**：這條式子的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來。這正是 ring VRF ticket 花大力氣買來的匿名性——§6 開宗明義說「the identity of the key-holder of any future timeslot will have a very high degree of anonymity」——在 fallback 生效期間完全消失。後果不是理論性的：知道誰在哪個 slot 出塊，針對性 DoS 與事前賄賂都重新變得可行。**GP 仍然這樣設計，是因為活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。Y = 500 的投票截止線正是為了讓票源有整整 500 個slot可以累積，盡量不走到這條路上。",
+ "explanation": "eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))[…4])]^⟲ _bs | i ∈ N_E ]。逐步拆：對 epoch 內的每個 slot 索引 i，把 entropy r 接上 i 的 4 位元組編碼一起 Blake2b、取雜湊的**前 4 個位元組**解成整數，用它**對 validator 數取模**（`^⟲` 就是 §3.7 的模數下標記號）選出一位驗證者，再取他的 Bandersnatch 公鑰。r 用的是 η′_2、k 用的是 κ′，兩者都是 posterior。**代價很具體**：這條式子的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來。這正是 ring VRF ticket 花大力氣買來的匿名性——§6 開宗明義說「the identity of the key-holder of any future timeslot will have a very high degree of anonymity」——在 fallback 生效期間完全消失。後果不是理論性的：知道誰在哪個 slot 出塊，針對性 DoS 與事前賄賂都重新變得可行。**GP 仍然這樣設計，是因為活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。Y = 500 的投票截止線正是為了讓票源有整整 500 個 slot 可以累積，盡量不走到這條路上。",
  "optNotes": [
   "hash(entropy ⌢ slot index) 取模選人、以及匿名性全失，兩者是 eq. 6.26 與其代價。",
   "純輪流會讓出塊順序與 validator 索引綁死，任何人都能長期預測，且無法隨 entropy 變動。",

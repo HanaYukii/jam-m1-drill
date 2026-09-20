@@ -183,8 +183,8 @@ ITEMS = [
   "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
   "optionsZh": [
    "它們是同一個構造被用了兩次：§6 的 fallback 序列字面上就是把附錄 F 的洗牌套用在 active 金鑰集合 κ′ 上、以 η′_2 為種子、再截斷到 E 項，所以兩者都是每八個輸出做一次 Blake2b（對種子串接 ⌊i/8⌋ 的 4 位元組編碼）、都解碼位於偏移 4i mod 32 的 little-endian 窗口、也都以循環方式索引金鑰序列——這正是為什麼實作只需要一套雜湊展開常式",
-   "洗牌的展開是每八個輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是每個slot雜湊一次，對象是種子串接該slot索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
-   "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個slot做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
+   "洗牌的展開是每八個輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是每個 slot 雜湊一次，對象是種子串接該 slot 索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
+   "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個 slot 做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
    "兩者都是每個輸出雜湊一次（對種子串接該索引的 4 位元組編碼）、也都只取每個摘要的前四個 octet；差別在洗牌接著以 big-endian 解碼並直接使用其自然範圍內的值，而 §6 的 fallback 以 little-endian 解碼並對金鑰序列長度取模，所以位元組序是唯一真正的差異，也是 fallback seal 不符的經典來源"
   ],
   "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",

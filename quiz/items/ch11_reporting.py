@@ -8,8 +8,8 @@ ITEMS = [
  "difficulty": 2, "kind": "delta", "tags": ["guarantee", "assurance", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，ρ（availability assignments）的每一項裝什麼？PR #494 又為什麼要改它？",
   "optionsZh": [
-   "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C——整份 guarantee，也就是 work-report 連同它的 2–3 個 guarantor 簽章，再加上它被回報的那個slot",
-   "ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C——只有 report 與它的slot、沒有簽章，與 0.7.2 相同；guarantor 的身分改由 β 中記錄的 guarantee 還原",
+   "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C——整份 guarantee，也就是 work-report 連同它的 2–3 個 guarantor 簽章，再加上它被回報的那個 slot",
+   "ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C——只有 report 與它的 slot、沒有簽章，與 0.7.2 相同；guarantor 的身分改由 β 中記錄的 guarantee 還原",
    "ρ ∈ [(h ∈ ℍ report 雜湊, t ∈ N_T timeslot)?]_C——每個 core 只有一個 32 位元組的承諾，guarantee 本身在該 report 被 accumulate 之前都由 guarantor 保存在鏈外",
    "ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot, f ∈ bits[|κ|])?]_C——guarantee、slot，加上一個跨區塊累積 assurance 直到達成超級多數的 bitfield"
   ],
@@ -27,7 +27,7 @@ ITEMS = [
   "eq. 11.17 要把 (ρ†[c]_g)_w 這份完整 report 交給 accumulation，光有 hash 拼不回 digest。",
   "可用性是單一區塊內的統計：eq. 11.17 只對本塊 E_A 求和，state 裡沒有跨塊累加的 bitfield。",
  ],
- "explanation": "eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可以是 ∅（沒有待處理的工作）或一組 (guarantee, slot)。**0.8.0（PR #494）的改動是把存的東西從 report 換成整份 guarantee**，也就是連 2–3 個 guarantor 簽章一起留著。GP 給了兩個理由：**其一，「To determine the guarantors to try directly fetching the bundle from」**——auditor 要重跑 refine 就得先拿到 work-package bundle，而最可能還持有完整 bundle 的就是當初擔保它的那幾位；有簽章才知道去找誰，否則只能靠 erasure coding 從 1/3 的 shard 慢慢重建，代價高得多。**其二，「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic」**——若這份 report 後來被判為 bad，那些簽章就是把擔保者列為 culprit 的證據。簽章丟了，就罰不到人。**t 是進鏈的slot τ′**（不是 guarantee 自己帶的 slot），用來起算 U = 5 的 timeout。**連帶影響狀態序列化**：C(10) 從只存 report 變成 ↕(g, E_4(t))，這是遷移時必須同步改的地方。",
+ "explanation": "eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可以是 ∅（沒有待處理的工作）或一組 (guarantee, slot)。**0.8.0（PR #494）的改動是把存的東西從 report 換成整份 guarantee**，也就是連 2–3 個 guarantor 簽章一起留著。GP 給了兩個理由：**其一，「To determine the guarantors to try directly fetching the bundle from」**——auditor 要重跑 refine 就得先拿到 work-package bundle，而最可能還持有完整 bundle 的就是當初擔保它的那幾位；有簽章才知道去找誰，否則只能靠 erasure coding 從 1/3 的 shard 慢慢重建，代價高得多。**其二，「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic」**——若這份 report 後來被判為 bad，那些簽章就是把擔保者列為 culprit 的證據。簽章丟了，就罰不到人。**t 是進鏈的 slot τ′**（不是 guarantee 自己帶的 slot），用來起算 U = 5 的 timeout。**連帶影響狀態序列化**：C(10) 從只存 report 變成 ↕(g, E_4(t))，這是遷移時必須同步改的地方。",
  "trap": "遷移點：ρ 的型別與序列化都變了（issue #1012 樹）。"
 },
 {
@@ -183,9 +183,9 @@ ITEMS = [
  "difficulty": 2, "kind": "delta", "tags": ["assurance", "balance", "delta-0.8.0"],
   "stemZh": "在 GP 0.8.0 中，一份 report 什麼時候變成 available（R）？待處理的 assignment 又在什麼時候從 ρ‡ 被清除？",
   "optionsZh": [
-   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個slot）、或 |κ| ≠ |κ′|（validator 集合大小改變了）",
-   "當設起 bit c 的 assurance 數量 ≥ 2/3·|κ| 時即為 available（tiny：6 取 4 以上；full：682 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個slot）、或 |κ| ≠ |κ′|",
-   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U 但 U = 10 個slot、或 epoch 索引已改變",
+   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個 slot）、或 |κ| ≠ |κ′|（validator 集合大小改變了）",
+   "當設起 bit c 的 assurance 數量 ≥ 2/3·|κ| 時即為 available（tiny：6 取 4 以上；full：682 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U（U = 5 個 slot）、或 |κ| ≠ |κ′|",
+   "當設起 bit c 的 assurance 數量 > 2/3·|κ| 時即為 available（tiny：6 取 5 以上；full：683 以上）；ρ‡[c] = ∅ 的條件是該 report 已 available、或 H_T ≥ t + U 但 U = 10 個 slot、或 epoch 索引已改變",
    "當設起 bit c 的 assurance 數量 > 1/2·|κ| 時即為 available（tiny：6 取 4 以上；full：512 以上）；ρ‡[c] 只有在該 report 已被 accumulate 之後才會 = ∅，所以 assignment 永遠不會逾時、也不會對 |κ| 的改變有任何反應"
   ],
   "stem": "When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?",
@@ -202,7 +202,7 @@ ITEMS = [
   "U = 5 不是 10；清除條件是 |κ| ≠ |κ′| 而非 epoch 邊界，人數沒變的換屆不清任何 pending。",
   "門檻是 2/3 super-majority；等 accumulate 才清會讓湊不到票的 report 把 core 永久卡死。",
  ],
- "explanation": "**成為 available（eq. 11.17）**：R ≡ [ρ†[c] 的 report | Σ_a a_f[c] > (2/3)·|κ|]——注意是**嚴格大於** 2/3，對整數而言等價於 ≥ ⌊2|κ|/3⌋ + 1。tiny（|κ| = 6）：> 4，也就是至少 **5**；full（|κ| = 1023）：> 682，也就是至少 **683**。門檻訂在這裡是因為 ELVES 的安全假設要求超過 2/3 的 validator 誠實且在線；而 erasure coding 只需 1/3 的 shard 就能重建，所以 2/3 的背書意味著「資料確實救得回來」。**清除 pending（eq. 11.18）**：ρ‡[c] = ∅ 當 **① 本來就空** ∨ **② 已經 available** ∨ **③ H_T ≥ t + U（逾時，U = C_assurancetimeoutperiod = 5 個slot）** ∨ **④ |κ| ≠ |κ′|**。**第四個條件是 0.8.0 新增的**，而且理由很硬：validator 集合大小一變，erasure chunk 數（必須等於 |κ′|）與 assurer 集合就全部對不上了，那些 pending 的 report 再等下去也不可能湊到有效的背書——所以一律視同提早逾時。你們 0.7.2 的 FilterAvailableReports 只實作了逾時那條，缺的正是這個 size-change 條件。",
+ "explanation": "**成為 available（eq. 11.17）**：R ≡ [ρ†[c] 的 report | Σ_a a_f[c] > (2/3)·|κ|]——注意是**嚴格大於** 2/3，對整數而言等價於 ≥ ⌊2|κ|/3⌋ + 1。tiny（|κ| = 6）：> 4，也就是至少 **5**；full（|κ| = 1023）：> 682，也就是至少 **683**。門檻訂在這裡是因為 ELVES 的安全假設要求超過 2/3 的 validator 誠實且在線；而 erasure coding 只需 1/3 的 shard 就能重建，所以 2/3 的背書意味著「資料確實救得回來」。**清除 pending（eq. 11.18）**：ρ‡[c] = ∅ 當 **① 本來就空** ∨ **② 已經 available** ∨ **③ H_T ≥ t + U（逾時，U = C_assurancetimeoutperiod = 5 個 slot）** ∨ **④ |κ| ≠ |κ′|**。**第四個條件是 0.8.0 新增的**，而且理由很硬：validator 集合大小一變，erasure chunk 數（必須等於 |κ′|）與 assurer 集合就全部對不上了，那些 pending 的 report 再等下去也不可能湊到有效的背書——所以一律視同提早逾時。你們 0.7.2 的 FilterAvailableReports 只實作了逾時那條，缺的正是這個 size-change 條件。",
  "trap": "timeout 比較的是 H_T（本塊 slot）與 assignment 的 t（guarantee 進鏈的 slot）。"
 },
 {
@@ -212,10 +212,10 @@ ITEMS = [
  "difficulty": 3, "kind": "concept", "tags": ["guarantee", "core"],
   "stemZh": "在 GP 0.8.0 中，validator 是怎麼被指派到 core 上去做擔保的？",
   "optionsZh": [
-   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：序列 [0,0,0,1,1,1,…] 以熵 e = η′_2 做 Fisher-Yates 洗牌，再依 rotation 索引（R = 10 個slot）旋轉；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
+   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：序列 [0,0,0,1,1,1,…] 以熵 e = η′_2 做 Fisher-Yates 洗牌，再依 rotation 索引（R = 10 個 slot）旋轉；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
    "P(v, e, t) = R(F([⌊C·i/v⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)：基底序列先把 v 位 validator 攤平到全部 C 個 core 上，再以熵 e = η′_2 做 Fisher-Yates 洗牌；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——全部 C = 341 個 core 都是作用中的",
    "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)，洗牌用的熵是 η′_1、旋轉週期是 R = 600，也就是每個 epoch 旋轉一次；M = (P(|κ′|, η′_1, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的",
-   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), t mod R)：洗好的序列每個slot旋轉一次，所以每位 validator 的 core 每塊往前推進一格，熵為 e = η′_2；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的"
+   "P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), t mod R)：洗好的序列每個 slot 旋轉一次，所以每位 validator 的 core 每塊往前推進一格，熵為 e = η′_2；M = (P(|κ′|, η′_2, τ′), Φ(κ′))——只有索引小於 |κ′|/3 的 core 是作用中的"
   ],
   "stem": "How are validators assigned to cores for guaranteeing in GP 0.8.0?",
  "options": [
@@ -272,7 +272,7 @@ ITEMS = [
   "optionsZh": [
    "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]（authorizer 在 prior 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
    "ρ[w_c] = ∅（該 core 在 prior 狀態下是空的）；w_a ∈ α′[w_c]（authorizer 在 posterior 的 pool 裡）；各 digest 的 accumulate gas 總和 ≤ G_T = 3,500,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 |κ′|",
-   "ρ‡[w_c] = ∅，而且該 core 還必須已經空置滿 U = 5 個slot；w_a ∈ α[w_c]；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000 且沒有每個 service 的下限；erasure 碎片數等於 |κ′|",
+   "ρ‡[w_c] = ∅，而且該 core 還必須已經空置滿 U = 5 個 slot；w_a ∈ α[w_c]；各 digest 的 accumulate gas 總和 ≤ G_A = 10,000,000 且沒有每個 service 的下限；erasure 碎片數等於 |κ′|",
    "ρ‡[w_c] = ∅（該 core 在 disputes 與 assurances 處理完之後是空的）；w_a ∈ α[w_c]；各 digest 用掉的 refine gas 總和 ≤ G_R = 5,000,000,000，且每個 digest 的 gas ≥ δ[d_s]_g；erasure 碎片數等於 prior 狀態下的 |κ|"
   ],
   "stem": "Which on-chain checks apply to each incoming report w before it is placed in ρ′?",
@@ -318,7 +318,7 @@ ITEMS = [
   "eq. 11.42 與 11.43–11.44 正是這一項：prereq/srlookup 的 key 與 segment root 都要對得上。",
   "GP 沒有「service 閒置過久失效」這條規則，唯一相關的是 eq. 11.45 的 d_c = δ[d_s]_c。",
  ],
- "explanation": "§11.4.1 的清單相當長，值得整組記起來，**因為它們共同回答「這份 report 放在這條鏈的這個位置合不合理」**：**eq. 11.35**：同一塊裡不得有兩份指向同一個 package 的 report。**eq. 11.36–11.38**：anchor 四元組必須對得上 β† 的某一筆（所以最多 8 塊之前）；lookup anchor 的slot不得早於 H_T − L（L = 14,400）；且必須真的出現在祖先集合 A 裡。**eq. 11.39–11.41**：package hash 不得已經出現在 β 的 reported 集合、ξ（accumulation history）、ready queue ω，或任何還 pending 的 ρ 裡——四個地方都要查，才算真正防住重複。**eq. 11.42–11.44**：prerequisites 與 segment-root lookup 的鍵必須有著落，且 lookup 的值也要吻合。**eq. 11.45**：d_c = δ[d_s]_c——digest 宣告的 code hash 必須等於該 service 當前的 code hash。**清單裡沒有的是「service 必須近期 accumulate 過」這種活躍度要求**——service 只會因為 `eject` 而消失（§9），閒置多久都不影響它能不能被 report。**一個容易誤答的方向**：§11.4.1 附註說這些檢查**刻意允許表面上的依賴環**，因為 accumulation 端的 Q 函數永遠不會去 accumulate 環裡的東西，在報告階段就拒絕反而會擋掉合法的交錯依賴。",
+ "explanation": "§11.4.1 的清單相當長，值得整組記起來，**因為它們共同回答「這份 report 放在這條鏈的這個位置合不合理」**：**eq. 11.35**：同一塊裡不得有兩份指向同一個 package 的 report。**eq. 11.36–11.38**：anchor 四元組必須對得上 β† 的某一筆（所以最多 8 塊之前）；lookup anchor 的 slot 不得早於 H_T − L（L = 14,400）；且必須真的出現在祖先集合 A 裡。**eq. 11.39–11.41**：package hash 不得已經出現在 β 的 reported 集合、ξ（accumulation history）、ready queue ω，或任何還 pending 的 ρ 裡——四個地方都要查，才算真正防住重複。**eq. 11.42–11.44**：prerequisites 與 segment-root lookup 的鍵必須有著落，且 lookup 的值也要吻合。**eq. 11.45**：d_c = δ[d_s]_c——digest 宣告的 code hash 必須等於該 service 當前的 code hash。**清單裡沒有的是「service 必須近期 accumulate 過」這種活躍度要求**——service 只會因為 `eject` 而消失（§9），閒置多久都不影響它能不能被 report。**一個容易誤答的方向**：§11.4.1 附註說這些檢查**刻意允許表面上的依賴環**，因為 accumulation 端的 Q 函數永遠不會去 accumulate 環裡的東西，在報告階段就拒絕反而會擋掉合法的交錯依賴。",
  "trap": "面試官可能要求你列舉「所有」contextual checks——建議背下 anchor / lookup-anchor / no-dup / prereq / srlookup / code-hash 六類。"
 },
 {
@@ -328,10 +328,10 @@ ITEMS = [
  "difficulty": 1, "kind": "concept", "tags": ["guarantee", "extrinsic"],
   "stemZh": "處理完 E_G 之後，對於收到一份新 guarantee g 的 core，ρ′[c] 裝的是什麼？",
   "optionsZh": [
-   "(g, τ′)——整份 guarantee 配上當前區塊的slot τ′ 作為它的指派時間",
-   "(g, g_t)——整份 guarantee 配上該 guarantee 自己的slot t，而它可能早了一整個 rotation",
+   "(g, τ′)——整份 guarantee 配上當前區塊的 slot τ′ 作為它的指派時間",
+   "(g, g_t)——整份 guarantee 配上該 guarantee 自己的 slot t，而它可能早了一整個 rotation",
    "(w, τ′)——只有 work-report，guarantor 的憑證在被驗證之後就被丟棄",
-   "(H(E(w)), τ′)——report 的雜湊配上當前區塊的slot，而該 guarantee 移入 β"
+   "(H(E(w)), τ′)——report 的雜湊配上當前區塊的 slot，而該 guarantee 移入 β"
   ],
   "stem": "After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?",
  "options": [
@@ -347,7 +347,7 @@ ITEMS = [
   "0.8.0 (#494) 的 ρ 型別就是 (g, t)：簽章要留著抓 bundle、以及在 dispute 時構造 culprits。",
   "β 每筆從不存 guarantee（eq. 7.2）；而 eq. 11.17 之後要交出整份 report，只有 hash 不夠。",
  ],
- "explanation": "eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G 使得該 guarantee 的 report 指向 core c，否則沿用 ρ‡[c]。也就是**整份 guarantee**（work-report 加上 2–3 個 guarantor 簽章）配上一個時間戳一起掛在該 core 上。**時間戳是這題的坑**：存的是 **τ′（本塊的slot）**，不是 guarantee 自己帶的 slot g_t。兩者可以差到一整個 rotation（R = 10 個slot）——report 可以在被擔保之後隔幾塊才進鏈。這個差別直接決定 eq. 11.18 的逾時從哪一刻起算：報告若在 U = 5 個slot內沒有湊到 availability 的超級多數，就會被清掉；用 g_t 當起點會讓可用時間平白縮水。你們 code-map 3.7.6 特別標了這一點。**另一個常被忽略的細節**：對 c ≥ |κ′| / 3 的 core，ρ′[c] 恆為 ∅。因為每個 core 需要 3 名 guarantor，active validator 只有 |κ′| 個，能同時運作的 core 數自然被 |κ′| / 3 卡住；這保證待審計的 report 數不會超過現有驗證者能負擔的量（tiny 設定下 |κ| = 6 就只有 2 個 core 在動）。相關名詞：ρ 是 availability assignments、ρ† 是清掉 disputes 判定為壞的那些之後的中間值、ρ‡ 是再處理完 assurances 之後的中間值。",
+ "explanation": "eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G 使得該 guarantee 的 report 指向 core c，否則沿用 ρ‡[c]。也就是**整份 guarantee**（work-report 加上 2–3 個 guarantor 簽章）配上一個時間戳一起掛在該 core 上。**時間戳是這題的坑**：存的是 **τ′（本塊的 slot）**，不是 guarantee 自己帶的 slot g_t。兩者可以差到一整個 rotation（R = 10 個 slot）——report 可以在被擔保之後隔幾塊才進鏈。這個差別直接決定 eq. 11.18 的逾時從哪一刻起算：報告若在 U = 5 個 slot 內沒有湊到 availability 的超級多數，就會被清掉；用 g_t 當起點會讓可用時間平白縮水。你們 code-map 3.7.6 特別標了這一點。**另一個常被忽略的細節**：對 c ≥ |κ′| / 3 的 core，ρ′[c] 恆為 ∅。因為每個 core 需要 3 名 guarantor，active validator 只有 |κ′| 個，能同時運作的 core 數自然被 |κ′| / 3 卡住；這保證待審計的 report 數不會超過現有驗證者能負擔的量（tiny 設定下 |κ| = 6 就只有 2 個 core 在動）。相關名詞：ρ 是 availability assignments、ρ† 是清掉 disputes 判定為壞的那些之後的中間值、ρ‡ 是再處理完 assurances 之後的中間值。",
  "trap": ""
 },
 {
