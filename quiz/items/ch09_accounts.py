@@ -65,7 +65,7 @@ ITEMS = [
   "alsoCh": ["14"],
  "ch": "9", "section": "9.2 Preimage Lookups", "gpRef": "§9.2.2 Semantics, eq. 9.7",
  "difficulty": 2, "kind": "concept", "tags": ["preimage", "timeslot"],
-  "stemZh": "一筆 request 條目 a_l[(h, len)] 裝的是最多 3 個時槽的序列。[x, y] 是什麼意思？[x, y, z] 又是什麼意思？",
+  "stemZh": "一筆 request 條目 a_l[(h, len)] 裝的是最多 3 個slot的序列。[x, y] 是什麼意思？[x, y, z] 又是什麼意思？",
   "optionsZh": [
    "[x, y]：該 preimage 從 x 起可用、自 y 起不可用；[x, y, z]：從 x 起可用直到 y，並自 z 起再次可用",
    "[x, y]：該 preimage 在 x 被請求、在 y 首次被提供；[x, y, z]：在 y 被提供、然後在 z 被完全從狀態中清除",
@@ -86,7 +86,7 @@ ITEMS = [
    "[x, y] 只是標成 unavailable，preimage 仍留在 a_p；[x, y, z] 是 §9.2.2 明列的合法形狀。",
    "a_l 掛在單一服務帳戶底下，鍵是 (h, len)、值是這個服務自己的可用性歷史，不記請求者身分。",
  ],
- "explanation": "§9.2.2 用**序列長度**編碼四種狀態，這是刻意的設計：**[]** = 已請求、還沒有人提供；**[x]** = 自 x 起可用；**[x, y]** = 曾於 x 起可用、自 y 起不可用；**[x, y, z]** = x 到 y 可用、自 z 起再次可用。eq. 9.7 的可用性判定 I(l, t) 直接對應：[x] → x ≤ t；[x, y] → x ≤ t < y；[x, y, z] → x ≤ t < y ∨ z ≤ t；[] → 恆為否。**為什麼只往尾端追加、不覆寫**：refine 在 in-core 會用 historical_lookup 查 preimage，而審計時 auditor 必須能對**任意一個 lookup-anchor 時點**重算出「當時到底可不可用」——若狀態被覆寫成單一布林值，這個重算就做不到，稽核也就失效了。所以這不是為了省空間，是為了**可追溯性**。**真正的刪除還要再等**：`forget` 只有在 y < t − D（D = 19,200 時槽 = 32 小時）之後才會真的移除，確保任何還在有效窗口內的稽核都查得到。你們的 `query` host call 把這四種狀態編進 φ_7／φ_8 回傳，讓 service 自己也能讀到。",
+ "explanation": "§9.2.2 用**序列長度**編碼四種狀態，這是刻意的設計：**[]** = 已請求、還沒有人提供；**[x]** = 自 x 起可用；**[x, y]** = 曾於 x 起可用、自 y 起不可用；**[x, y, z]** = x 到 y 可用、自 z 起再次可用。eq. 9.7 的可用性判定 I(l, t) 直接對應：[x] → x ≤ t；[x, y] → x ≤ t < y；[x, y, z] → x ≤ t < y ∨ z ≤ t；[] → 恆為否。**為什麼只往尾端追加、不覆寫**：refine 在 in-core 會用 historical_lookup 查 preimage，而審計時 auditor 必須能對**任意一個 lookup-anchor 時點**重算出「當時到底可不可用」——若狀態被覆寫成單一布林值，這個重算就做不到，稽核也就失效了。所以這不是為了省空間，是為了**可追溯性**。**真正的刪除還要再等**：`forget` 只有在 y < t − D（D = 19,200 slot = 32 小時）之後才會真的移除，確保任何還在有效窗口內的稽核都查得到。你們的 `query` host call 把這四種狀態編進 φ_7／φ_8 回傳，讓 service 自己也能讀到。",
  "trap": "再次 solicit 一個 [x,y] 會變 [x,y,t]；forget 一個 [x] 變 [x,t]；forget [x,y]（y 夠舊）才真正刪除。"
 },
 {
@@ -144,7 +144,7 @@ ITEMS = [
    "方向剛好說反：GP 說的是 preimage「may not be removed freely」，被綁住的是 preimage 不是 storage。",
    "這正是 §9.2 的第三個差異：供應後要先標成 unavailable，過一段時間才能移除。",
  ],
- "explanation": "§9.2 列出的三個差異：**① 索引方式**——preimage 是 hash → preimage（key 由內容決定），storage 是任意 key → value。**② 資料來源**——preimage 由**外部**透過 E_P extrinsic 提供，storage 則由 accumulate 自己寫入。**③ 移除方式**——GP 原文：preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。**第三點是這題的重點，理由也在同一段**：refine 在 in-core 會用 historical_lookup 查 preimage，而 auditor 事後重跑時必須能確定「在那個 lookup-anchor 時點，這份資料到底算不算可用」。若 service 能隨時把 preimage 抹掉，這個判定就沒有依據，一個惡意 service 甚至可以在被稽核前刪掉資料、讓所有 auditor 都無法驗證。所以移除必須走「先標記不可用、等過 D = 19,200 時槽（32 小時）、再由 `forget` 真正刪除」的兩段式流程。**storage 沒有這個限制**：它是 accumulate 的私有狀態，不參與 in-core 的稽核路徑，服務想刪就刪。「28 天」這個數字則是 §14 匯出 segment 的保存期限，跟這裡無關，是常見的混淆來源。",
+ "explanation": "§9.2 列出的三個差異：**① 索引方式**——preimage 是 hash → preimage（key 由內容決定），storage 是任意 key → value。**② 資料來源**——preimage 由**外部**透過 E_P extrinsic 提供，storage 則由 accumulate 自己寫入。**③ 移除方式**——GP 原文：preimage「once supplied, may not be removed freely; instead it goes through a process of being marked as unavailable, and only after a period of time may it be removed」。**第三點是這題的重點，理由也在同一段**：refine 在 in-core 會用 historical_lookup 查 preimage，而 auditor 事後重跑時必須能確定「在那個 lookup-anchor 時點，這份資料到底算不算可用」。若 service 能隨時把 preimage 抹掉，這個判定就沒有依據，一個惡意 service 甚至可以在被稽核前刪掉資料、讓所有 auditor 都無法驗證。所以移除必須走「先標記不可用、等過 D = 19,200 slot（32 小時）、再由 `forget` 真正刪除」的兩段式流程。**storage 沒有這個限制**：它是 accumulate 的私有狀態，不參與 in-core 的稽核路徑，服務想刪就刪。「28 天」這個數字則是 §14 匯出 segment 的保存期限，跟這裡無關，是常見的混淆來源。",
  "trap": "forget 後要等 D = 19,200 slots 才能真正刪除。"
 },
 ]

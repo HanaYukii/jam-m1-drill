@@ -40,7 +40,7 @@ ITEMS = [
    "為了讓區塊運算——特別是 Merklization——能夠管線化：出塊者不必先把新狀態 Merklize 完才能發布區塊",
    "為了讓輕客戶端只靠 header 鏈就能驗證狀態，因為先前的 root 已經被父區塊簽署過，不需要再自行推導",
    "為了縮小 header：先前的 state root 可以用較短的編碼表示，而執行後的 root 必須用完整的 32 位元組",
-   "為了讓分叉時兩個競爭區塊帶有相同的 state root，使 best-chain 規則能單純比較時槽而不必比較狀態"
+   "為了讓分叉時兩個競爭區塊帶有相同的 state root，使 best-chain 規則能單純比較slot而不必比較狀態"
   ],
   "stem": "Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?",
  "options": [
@@ -93,11 +93,11 @@ ITEMS = [
  "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8",
  "difficulty": 1, "kind": "concept", "tags": ["timeslot", "header"],
-  "stemZh": "一個區塊的時槽 H_T 必須滿足什麼條件，現在才算有效？",
+  "stemZh": "一個區塊的slot H_T 必須滿足什麼條件，現在才算有效？",
   "optionsZh": [
-   "P(H)_t < H_T ∧ H_T · P ≤ 𝕋——嚴格大於父區塊的時槽，且換算成秒之後不得晚於目前的牆鐘時間 𝕋",
-   "P(H)_t ≤ H_T ∧ H_T · P ≤ 𝕋——允許與父區塊同一個時槽，因為同槽的兩個區塊會由 best-chain 規則決定取捨",
-   "P(H)_t < H_T ∧ H_T · P ≥ 𝕋——時槽必須落在未來，讓其他 validator 有時間在該槽到來前收到區塊",
+   "P(H)_t < H_T ∧ H_T · P ≤ 𝕋——嚴格大於父區塊的slot，且換算成秒之後不得晚於目前的牆鐘時間 𝕋",
+   "P(H)_t ≤ H_T ∧ H_T · P ≤ 𝕋——允許與父區塊同一個slot，因為同槽的兩個區塊會由 best-chain 規則決定取捨",
+   "P(H)_t < H_T ∧ H_T · P ≥ 𝕋——slot必須落在未來，讓其他 validator 有時間在該槽到來前收到區塊",
    "只要求 P(H)_t < H_T——牆鐘的比較屬於鏈下的傳播策略，不是區塊有效性的一部分"
   ],
   "stem": "Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?",
@@ -114,7 +114,7 @@ ITEMS = [
   "wall-clock 條件方向反了：H_T·P ≥ T 等於只接受當下或未來的區塊。",
   "要求恰好 parent + 1 就禁止跳 slot，但沒人出塊時 slot 本來就會被跳過。",
  ],
- "explanation": "eq. 5.8：**P(H)_T < H_T ∧ H_T · P ≤ 𝕋**。兩個條件的性質完全不同，這是這題的重點。**前半是永久性的**：本塊的時槽必須嚴格大於父的（GP：「It is always strictly greater than that of its parent」）。違反就是永遠無效——你們 STF 裡的 `BadSlot` 對應的正是這種 τ ≥ τ′ 的情況。**後半是暫時性的**：H_T 乘上 P = 6 秒（每個時槽的長度）不得超過目前的牆鐘秒數 𝕋（自 JAM Common Era 起算）。GP 特別補一句「Blocks considered invalid by this rule may become valid as 𝕋 advances」——**一個「來自未來」的區塊只是還沒到時候，不該被永久丟棄或當成攻擊**，實作上通常先留著、等時間到再處理。把這兩者混為一談是常見的實作 bug：對未來區塊直接 ban 掉來源節點，會在時鐘些微不同步時互相斷線。**注意這條規則不需要任何狀態**：前半只要父 header、後半只要一個時鐘，所以它是「只拿到 header 能驗什麼」那題裡的第二層——真正卡住的是需要 κ′ 與 γ′_S 的 seal。",
+ "explanation": "eq. 5.8：**P(H)_T < H_T ∧ H_T · P ≤ 𝕋**。兩個條件的性質完全不同，這是這題的重點。**前半是永久性的**：本塊的slot必須嚴格大於父的（GP：「It is always strictly greater than that of its parent」）。違反就是永遠無效——你們 STF 裡的 `BadSlot` 對應的正是這種 τ ≥ τ′ 的情況。**後半是暫時性的**：H_T 乘上 P = 6 秒（每個slot的長度）不得超過目前的牆鐘秒數 𝕋（自 JAM Common Era 起算）。GP 特別補一句「Blocks considered invalid by this rule may become valid as 𝕋 advances」——**一個「來自未來」的區塊只是還沒到時候，不該被永久丟棄或當成攻擊**，實作上通常先留著、等時間到再處理。把這兩者混為一談是常見的實作 bug：對未來區塊直接 ban 掉來源節點，會在時鐘些微不同步時互相斷線。**注意這條規則不需要任何狀態**：前半只要父 header、後半只要一個時鐘，所以它是「只拿到 header 能驗什麼」那題裡的第二層——真正卡住的是需要 κ′ 與 γ′_S 的 seal。",
  "trap": "跳 slot 是合法的（例如沒人出塊），這也是為什麼 Safrole 要處理 e′ > e+1（整個 epoch 被跳過）的情況。"
 },
 {
@@ -152,9 +152,9 @@ ITEMS = [
   "alsoCh": ["11"],
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.3 (ancestors A) & §11.4 lookup anchor",
  "difficulty": 2, "kind": "concept", "tags": ["preimage", "lookup-anchor"],
-  "stemZh": "GP 只要求實作保存過去 L = 14,400 個時槽（24 小時）內出塊的祖先 header。是哪一項鏈上檢查需要這個祖先集合 A？",
+  "stemZh": "GP 只要求實作保存過去 L = 14,400 個slot（24 小時）內出塊的祖先 header。是哪一項鏈上檢查需要這個祖先集合 A？",
   "optionsZh": [
-   "驗證某個 guarantee 的 lookup-anchor 區塊（雜湊、時槽與執行後的 state root）確實出現在這條鏈上——這是狀態 σ 自己無法佐證的",
+   "驗證某個 guarantee 的 lookup-anchor 區塊（雜湊、slot與執行後的 state root）確實出現在這條鏈上——這是狀態 σ 自己無法佐證的",
    "驗證每個新區塊的父雜湊 H_P 確實是父 header 的 Blake2b——這需要回溯到最後一個被定案的區塊為止的每一個 header",
    "驗證每份 availability assurance 的 anchor 與父雜湊 H_P 相符——這需要在保存的 header 裡搜尋以定位那個 anchor",
    "在跳過一個 epoch 之後重算 fallback 的 slot-sealer 序列 F(η′_2, κ′)——這需要被跳過那個 epoch 裡每個 header 的熵 VRF H_V"
@@ -173,7 +173,7 @@ ITEMS = [
   "eq. 11.12 的 a_a = H_P 是一次等值比對，不需要在保留的 header 序列裡搜尋。",
   "F(η′_2, κ′)（eq. 6.27）的輸入只有 posterior entropy 與 κ′ 兩個 state 分量，不讀歷史 header。",
  ],
- "explanation": "eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個時槽（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的時槽等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root（最後這項是 0.8.0 新增的）。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。",
+ "explanation": "eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個slot（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的slot等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root（最後這項是 0.8.0 新增的）。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。",
  "trap": "L = 14,400 slots = 24h；recent history H = 8 blocks 是給 anchor 用的，lookup anchor 用 A。"
 },
 {
@@ -185,7 +185,7 @@ ITEMS = [
   "optionsZh": [
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]——offenders marker 是一個普通序列，可以為空但永遠不是 None",
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [ed25519 key]?——三者都是 optional，而且在 epoch 第一塊之外三者都是 None",
-   "H_E ∈ ([336 位元組 validator key]_V)?；H_W ∈ ([bandersnatch key]_E)?；H_O ∈ [ed25519 key]——epoch marker 帶的是完整金鑰，winners marker 帶的是 fallback 的封印者",
+   "H_E ∈ ([336 位元組 validator key]_V)?；H_W ∈ ([bandersnatch key]_E)?；H_O ∈ [ed25519 key]——epoch marker 帶的是完整金鑰，winners marker 帶的是 fallback 的出塊者",
    "H_E ∈ (H, H, [(bandersnatch, ed25519)]_V)?；H_W ∈ ([ticket]_E)?；H_O ∈ [N_V]?——offenders marker 是 optional 的，而且裝的是 validator 索引而不是金鑰"
   ],
   "stem": "Per eq. 5.11, what are the types of the three header markers H_E, H_W and H_O, and which of them are optional?",

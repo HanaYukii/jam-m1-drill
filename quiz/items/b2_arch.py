@@ -40,9 +40,9 @@ ITEMS = [
   "stemZh": "一個節點如何選出它據以建塊、並投 Grandpa 票的最佳區塊 B♭？這張票又攜帶什麼資料？",
   "optionsZh": [
    "在已定案區塊的後代之中採最長鏈規則；同一個 timeslot 的兩個有效區塊都會保留，因為 Safrole 容忍 equivocation；是否已稽核只影響 accumulation、不影響投票；票中攜帶 header 雜湊連同取自 header 的先前狀態 root H_R",
-   "候選者必須是最新已定案區塊的後代、必須被視為已稽核、且不得含有「位於節點已見過 equivocation 之 timeslot」的未定案祖先；在這些之中，帶有最多 ticket 封緘（非 fallback）祖先的那條鏈勝出；票中攜帶最佳 header 連同它的 posterior state root",
+   "候選者必須是最新已定案區塊的後代、必須被視為已稽核、且不得含有「位於節點已見過 equivocation 之 timeslot」的未定案祖先；在這些之中，帶有最多 ticket 出塊（非 fallback）祖先的那條鏈勝出；票中攜帶最佳 header 連同它的 posterior state root",
    "候選者必須是已定案區塊的後代且帶有最多 guarantee；累計 timeslot 最大的那條鏈勝出，好懲罰停滯的 core；票中只攜帶 header，因為 Grandpa 與狀態無關、state root 由 Beefy 提供",
-   "候選者是所有父區塊已知的區塊；帶有最多 fallback 封緘祖先的那條鏈勝出，因為 fallback 金鑰屬於誠實多數；票中攜帶 header 加上 accumulation 輸出的 super-peak，好讓橋接能重用 Grandpa 的定案證明"
+   "候選者是所有父區塊已知的區塊；帶有最多 fallback 出塊祖先的那條鏈勝出，因為 fallback 金鑰屬於誠實多數；票中攜帶 header 加上 accumulation 輸出的 super-peak，好讓橋接能重用 Grandpa 的定案證明"
   ],
   "stem": "How does a node choose the best block B♭ on which it builds and casts Grandpa votes, and what data does the vote carry?",
  "options": [

@@ -24,7 +24,7 @@ ITEMS = [
   "The length is carried out-of-band by the enclosing structure's own length prefix, so E(x) itself is just the little-endian digits; the GP relies on the enclosing tuple to make the whole encoding unambiguous rather than on E(x) alone",
  ],
  "answer": 0,
- "explanation": "§C.1 的通用自然數編碼是「前綴決定長度」的變長編碼，值域到 2^64、輸出 1 到 9 個位元組：E(0) = [0]；當 2^(7l) ≤ x < 2^(7(l+1))（l ∈ N_8）時，第一個位元組是 2^8 − 2^(8−l) + ⌊x / 2^(8l)⌋，後面接 E_l(x mod 2^(8l))；x 再大就用 [255] ⌢ E_8(x)。直觀說法：**第一個位元組的高位有幾個連續的 1，後面就跟幾個位元組**，所以小數值只佔一兩個位元組，而讀取端看第一個位元組就知道要再吃幾個，不需要往前掃描或依賴外層資訊。**真正的重點是雙射（bijective）**——附錄 D 的 state root 是對**編碼後的位元組**做 hash，不是對解碼後的值。於是「同一個值有兩種寫法」會讓兩個誠實節點算出不同的 root（共識直接分裂），「同一串位元組能解成兩個值」則讓一份 Merkle 證明可以被挪用到另一個值上。這也是為什麼字典必須先依 key 排序再編碼：正規化（canonicalisation）是編碼規格的一部分，不是實作可自由發揮的細節。**別和 E_l 搞混**：E 是這個變長編碼；E_l（如 E_2、E_4、E_8）是定寬的 little-endian 整數，用在長度、時槽、索引這類「寬度本來就固定」的欄位上，兩者在 GP 裡並存、各有各的場合。",
+ "explanation": "§C.1 的通用自然數編碼是「前綴決定長度」的變長編碼，值域到 2^64、輸出 1 到 9 個位元組：E(0) = [0]；當 2^(7l) ≤ x < 2^(7(l+1))（l ∈ N_8）時，第一個位元組是 2^8 − 2^(8−l) + ⌊x / 2^(8l)⌋，後面接 E_l(x mod 2^(8l))；x 再大就用 [255] ⌢ E_8(x)。直觀說法：**第一個位元組的高位有幾個連續的 1，後面就跟幾個位元組**，所以小數值只佔一兩個位元組，而讀取端看第一個位元組就知道要再吃幾個，不需要往前掃描或依賴外層資訊。**真正的重點是雙射（bijective）**——附錄 D 的 state root 是對**編碼後的位元組**做 hash，不是對解碼後的值。於是「同一個值有兩種寫法」會讓兩個誠實節點算出不同的 root（共識直接分裂），「同一串位元組能解成兩個值」則讓一份 Merkle 證明可以被挪用到另一個值上。這也是為什麼字典必須先依 key 排序再編碼：正規化（canonicalisation）是編碼規格的一部分，不是實作可自由發揮的細節。**別和 E_l 搞混**：E 是這個變長編碼；E_l（如 E_2、E_4、E_8）是定寬的 little-endian 整數，用在長度、slot、索引這類「寬度本來就固定」的欄位上，兩者在 GP 裡並存、各有各的場合。",
  "optNotes": [
   "前綴宣告長度 + 唯一編碼，理由正是 state root 對編碼結果取 hash。",
   "掃描終止位元組不是 GP 的做法，且雙射是規格要求而非慣例——state root 取的是編碼後的位元組，不是解碼後的值。",
@@ -347,7 +347,7 @@ ITEMS = [
   "The fallback assigns every slot to the validator set collectively and accepts the first valid seal to arrive; anonymity is unaffected because no schedule exists, at the cost of occasional competing blocks at the same height",
  ],
  "answer": 0,
- "explanation": "eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))[…4])]^⟲ _bs | i ∈ N_E ]。逐步拆：對 epoch 內的每個 slot 索引 i，把 entropy r 接上 i 的 4 位元組編碼一起 Blake2b、取雜湊的**前 4 個位元組**解成整數，用它**對 validator 數取模**（`^⟲` 就是 §3.7 的模數下標記號）選出一位驗證者，再取他的 Bandersnatch 公鑰。r 用的是 η′_2、k 用的是 κ′，兩者都是 posterior。**代價很具體**：這條式子的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來。這正是 ring VRF ticket 花大力氣買來的匿名性——§6 開宗明義說「the identity of the key-holder of any future timeslot will have a very high degree of anonymity」——在 fallback 生效期間完全消失。後果不是理論性的：知道誰在哪個 slot 出塊，針對性 DoS 與事前賄賂都重新變得可行。**GP 仍然這樣設計，是因為活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。Y = 500 的投票截止線正是為了讓票源有整整 500 個時槽可以累積，盡量不走到這條路上。",
+ "explanation": "eq. 6.27 把 F 定義得很具體：F(r, k) = [ k[decode_4(Blake2b(r ⌢ E_4(i))[…4])]^⟲ _bs | i ∈ N_E ]。逐步拆：對 epoch 內的每個 slot 索引 i，把 entropy r 接上 i 的 4 位元組編碼一起 Blake2b、取雜湊的**前 4 個位元組**解成整數，用它**對 validator 數取模**（`^⟲` 就是 §3.7 的模數下標記號）選出一位驗證者，再取他的 Bandersnatch 公鑰。r 用的是 η′_2、k 用的是 κ′，兩者都是 posterior。**代價很具體**：這條式子的輸入在 epoch 一開始就全部公開，任何人都能把**整個 epoch 的出塊表**算出來。這正是 ring VRF ticket 花大力氣買來的匿名性——§6 開宗明義說「the identity of the key-holder of any future timeslot will have a very high degree of anonymity」——在 fallback 生效期間完全消失。後果不是理論性的：知道誰在哪個 slot 出塊，針對性 DoS 與事前賄賂都重新變得可行。**GP 仍然這樣設計，是因為活性優先於匿名性**：寧可退化成公開的輪值表，也不要因為票不夠就停鏈。Y = 500 的投票截止線正是為了讓票源有整整 500 個slot可以累積，盡量不走到這條路上。",
  "optNotes": [
   "hash(entropy ⌢ slot index) 取模選人、以及匿名性全失，兩者是 eq. 6.26 與其代價。",
   "純輪流會讓出塊順序與 validator 索引綁死，任何人都能長期預測，且無法隨 entropy 變動。",

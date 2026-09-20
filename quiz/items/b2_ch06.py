@@ -164,7 +164,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
    "輪換是每經過一個 epoch 就套用一次，所以這裡是兩次：κ′ = Φ(ι)、λ′ = γ_P、(η′_1, η′_2, η′_3) = (η′_0, η_0, η_1)；γ′_S = F(η_0, Φ(ι))；H_E 出現而 H_W 不出現",
    "輪換恰好發生一次：κ′ = γ_P、λ′ = κ、γ′_P = Φ(ι)、(η′_1, η′_2, η′_3) = (η_0, η_1, η_2)；儘管 m = 595 ≥ Y 且 γ_A 已滿，γ′_S 仍為 F(η_1, γ_P)；H_E 出現、H_W 不出現；而 γ′_A 只從這一塊的 E_T 重新建立",
    "γ′_S = Z(γ_A)，因為前一塊落在 tail 內（m = 595 ≥ Y）且 accumulator 已飽和；金鑰與熵輪換一次；而且因為這一塊結束了那場競賽，H_W = Z(γ_A) 也會被送出",
-   "該區塊會以 BadSlot 被拒絕：eq. 6.25 沒有 e′ = e + 2 的情形，所以一條鏈可以跳過個別時槽但絕不能跳過整個 epoch；因此下一個有效的 H_T 必須是 epoch 2 的某一槽，只有從那裡才能抵達 epoch 3"
+   "該區塊會以 BadSlot 被拒絕：eq. 6.25 沒有 e′ = e + 2 的情形，所以一條鏈可以跳過個別slot但絕不能跳過整個 epoch；因此下一個有效的 H_T 必須是 epoch 2 的某一槽，只有從那裡才能抵達 epoch 3"
   ],
   "stem": "Full parameters (E = 600, Y = 500). The prior block has τ = 1195 and a saturated accumulator (|γ_A| = E); the next block has H_T = 1810 (nothing was authored in between). Expressing posterior values in terms of PRIOR ones, describe the transition: how many rotations happen, what κ′, λ′, γ′_P and η′ become, which sealer sequence is used and why, and which markers appear.",
  "options": [
@@ -188,9 +188,9 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "lens": "時機",
  "ch": "6", "section": "6.3 Key Rotation / 6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10",
  "difficulty": 3, "kind": "delta", "tags": ["validator set", "epoch", "delta-0.8.0"],
-  "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這在 0.8.0 是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能封緘這第一塊？",
+  "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這在 0.8.0 是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能出這第一個 block？",
   "optionsZh": [
-   "n = ⌈24/6⌉ = 4，因為 n 是從封印這個 epoch 的 active set κ′ 算出來的；γ′_Z 維持是 6 把金鑰的 ring，而 H_E 列出 6 組配對，直到那 9 位 validator 在 epoch e + 2 真正變為 active 為止",
+   "n = ⌈24/6⌉ = 4，因為 n 是從為這個 epoch 出塊 的 active set κ′ 算出來的；γ′_Z 維持是 6 把金鑰的 ring，而 H_E 列出 6 組配對，直到那 9 位 validator 在 epoch e + 2 真正變為 active 為止",
    "n = ⌊24/9⌋ = 2，而且 seal 現在必須來自那 9 位新進 validator 之一（H_I < 9），因為 γ′_Z 從這一塊起就承諾他們的金鑰、而 H_E 列出他們的 9 組配對",
    "在 epoch e + 1 期間提交的 ticket 需要 entry index < n = ⌈24/9⌉ = 3、並對照 9 把金鑰的 γ′_Z 做 ring 證明；H_E 列出 9 組 (k_b, k_e) 配對；但該區塊的 H_I 必須 < 6，而它的 seal 來自 κ′，也就是舊的 6 人 γ_P",
    "該區塊無效：eq. 6.8 要求 |ι| = |κ| 恆成立，所以 validator 數量只能靠帶新 chainspec 從創世重啟來改變；designate 對 z = 9 本來就會回傳 HUH"
@@ -248,10 +248,10 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "difficulty": 3, "kind": "rationale", "tags": ["Bandersnatch", "seal", "ticket"],
   "stemZh": "ticket 證明是以 context X_T ⌢ η′_2 ++ r 對空訊息所做的 ring-VRF 證明，而 seal H_S 是以 context X_T ⌢ η′_3 ++ i_e 對 E_U(H)（整個未簽署 header）所做的一般 Bandersnatch 簽章。既然如此，eq. 6.16 為什麼還能要求 i_y = Y(H_S)，也就是 seal 的 VRF 輸出等於 ticket id？",
   "optionsZh": [
-   "因為 VRF 的輸出只取決於私鑰與 context（「influenced by x but not by m」），而到了封印的時候，提交當時的熵已經從 η′_2 輪替成 η′_3、兩邊的 context 因此吻合：同一把金鑰在任何訊息之下都會重現同一個 ticket id——在 ring 證明中匿名、在 seal 中可歸屬",
+   "因為 VRF 的輸出只取決於私鑰與 context（「influenced by x but not by m」），而到了出塊的時候，提交當時的熵已經從 η′_2 輪替成 η′_3、兩邊的 context 因此吻合：同一把金鑰在任何訊息之下都會重現同一個 ticket id——在 ring 證明中匿名、在 seal 中可歸屬",
    "因為 ticket id 被定義為證明位元組的 Blake2b 雜湊，而 eq. 6.16 要求 seal 內嵌一份原本 784 位元組 ring 證明的副本，好讓每個驗證者光憑 header 就能重算那個雜湊；E_U(H) 這個訊息只是把那份內嵌副本綁定到這個特定區塊上",
    "因為 ticket 證明與 seal 事實上都是對空訊息簽署的——E_U(H) 從頭到尾都只是 H_V 的訊息，而 H_V 的輸出餵給 η′_0——所以兩個 VRF 輸出理所當然相等；因此 i_y = Y(H_S) 這個同一性檢查是對照 H_V 而不是對照 seal 做的",
-   "因為只要那些 ticket 是在與被封印區塊同一個 epoch 內提交的，就有 η′_2 = η′_3，所以出塊者只是重新簽了一個完全相同的 context；驗證者在處理 seal 時會忽略訊息、但在處理 ring 證明時不會，這正是 ticket 帶 [] 而 seal 帶 E_U(H) 的原因"
+   "因為只要那些 ticket 是在與被簽的 block同一個 epoch 內提交的，就有 η′_2 = η′_3，所以出塊者只是重新簽了一個完全相同的 context；驗證者在處理 seal 時會忽略訊息、但在處理 ring 證明時不會，這正是 ticket 帶 [] 而 seal 帶 E_U(H) 的原因"
   ],
   "stem": "A ticket proof is a ring-VRF proof with context X_T ⌢ η′_2 ++ r over the EMPTY message, while the seal H_S is a plain Bandersnatch signature with context X_T ⌢ η′_3 ++ i_e over E_U(H), the whole unsigned header. Why can eq. 6.16 nevertheless demand i_y = Y(H_S), i.e. that the seal's VRF output equal the ticket id?",
  "options": [
@@ -277,10 +277,10 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "difficulty": 3, "kind": "rationale", "tags": ["ticket", "seal"],
   "stemZh": "eq. 6.25 只在 e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E 時才把 accumulator 當成下一個 slot-sealer 序列。其中 m ≥ Y 這個關於前一塊的性質，實際上保證了什麼？GP 又為什麼把票券模式綁在它身上？",
   "optionsZh": [
-   "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的時槽",
+   "保證該 epoch 期間至少提交了 Y 張 ticket，所以那場競賽夠競爭、accumulator 才值得被信任而不必退回 fallback 金鑰；若不足 Y 筆，outside-in 排序 Z 會留下沒有被指派的slot",
    "保證沒有任何在 tail 內提交的 ticket 被計入：在 m ≥ Y 之後抵達的 ticket 會是對照錯誤的 ring root 與熵證明的，因為屆時 γ′_Z 與 η′_2 已經指向再下一個 epoch",
    "保證即將結束的那個 epoch 有某一塊是在 tail 內出的——而由於 γ_A 一旦 m′ ≥ Y 就凍結，這恰好就是「該 epoch 內曾公告 H_W = Z(γ_A)」的條件，所以只讀 header 的節點永遠不會被要求去驗證一個它從未見過之序列的 ticket seal",
-   "保證前一塊的出塊者持有 ticket（T = 1），因為以 fallback 封印的區塊不被允許代表持票人結束一場競賽；這也正是 §19 best-chain 規則在偏好 ticket 化祖先時所計數的東西"
+   "保證前一塊的出塊者持有 ticket（T = 1），因為以 fallback 出塊的區塊不被允許代表持票人結束一場競賽；這也正是 §19 best-chain 規則在偏好 ticket 化祖先時所計數的東西"
   ],
   "stem": "Eq. 6.25 uses the accumulator as the next slot-sealer sequence only when e′ = e + 1 ∧ m ≥ Y ∧ |γ_A| = E. What does the conjunct m ≥ Y — a property of the PRIOR block — actually guarantee, and why does the GP tie the ticket regime to it?",
  "options": [

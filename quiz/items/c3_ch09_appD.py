@@ -11,12 +11,12 @@ ITEMS = [
  "ch": "9", "section": "9.2 Preimage Lookups",
  "gpRef": "§9.2 (domain of Λ); App. B Refine Invocation (D ≡ L + 4,800 = 19,200)",
  "difficulty": 1, "kind": "rationale", "tags": ["preimage", "timeslot"],
-  "stemZh": "§9.2 把歷史查詢函數 Λ 的時槽引數限制在 (H_t − D … H_t) 這個窗口內，而常數附錄把 D 定為 19,200 個時槽。GP 為這個特定數字給出的理由是什麼？",
+  "stemZh": "§9.2 把歷史查詢函數 Λ 的slot引數限制在 (H_t − D … H_t) 這個窗口內，而常數附錄把 D 定為 19,200 個slot。GP 為這個特定數字給出的理由是什麼？",
   "optionsZh": [
-   "19,200 個時槽恰好是 32 個 epoch，也正是 accumulation 歷史 ξ 保留 work-package 雜湊的時間長度，所以在某份 work-package 還可能被重新 accumulate 之前，它用到的 preimage 不得被丟棄；D 因此被定為 32·E",
-   "這段期間必須比兩個 epoch 的稽核窗口（1,200 個時槽）長十六倍，好讓 erasure-code 過的 bundle 在爭議期間仍能從 1,023 位 validator 的碎片重建；D 是從那個保存期導出的，與任何 anchor 年齡無關",
-   "Ω_H 在任何仍可能發生稽核的時刻都必須回傳相同的答案；而 lookup anchor 本身可能比近期歷史再舊上 L = 14,400 個時槽，所以這段期間就是那個 anchor 年齡再加上 4,800 個時槽（八小時）的安全餘裕",
-   "每 octet 的押金 B_L 會在這段期間內線性退還，而 19,200 個時槽在每槽六秒之下正是 32 小時——這是選用性狀態的標準押金退還時程；B_L 會在那些時槽內等額分期退回 a_b"
+   "19,200 個slot恰好是 32 個 epoch，也正是 accumulation 歷史 ξ 保留 work-package 雜湊的時間長度，所以在某份 work-package 還可能被重新 accumulate 之前，它用到的 preimage 不得被丟棄；D 因此被定為 32·E",
+   "這段期間必須比兩個 epoch 的稽核窗口（1,200 個slot）長十六倍，好讓 erasure-code 過的 bundle 在爭議期間仍能從 1,023 位 validator 的碎片重建；D 是從那個保存期導出的，與任何 anchor 年齡無關",
+   "Ω_H 在任何仍可能發生稽核的時刻都必須回傳相同的答案；而 lookup anchor 本身可能比近期歷史再舊上 L = 14,400 個slot，所以這段期間就是那個 anchor 年齡再加上 4,800 個slot（八小時）的安全餘裕",
+   "每 octet 的押金 B_L 會在這段期間內線性退還，而 19,200 個slot在每槽六秒之下正是 32 小時——這是選用性狀態的標準押金退還時程；B_L 會在那些slot內等額分期退回 a_b"
   ],
   "stem": "§9.2 bounds the timeslot argument of the historical-lookup function Λ to the window (H_t − D … H_t), and the constants appendix fixes D = 19,200 timeslots. What is the GP's stated reason for that particular number?",
  "options": [
@@ -104,8 +104,8 @@ func CalcStorageItemfootprint(storageRawKey string, storageData types.ByteSequen
   "optionsZh": [
    "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 該 request 條目與 a_p[h] 兩者都被清除，但只有在 y < t − D 時；[x, y, w] → [w, t]，同樣只有在 y < t − D 時；其餘每一種情況都回傳 HUH",
    "[] → HUH，沒有東西可忘；[x] → 該 request 條目與 a_p[h] 兩者立即被丟棄；[x, y] → [x, y, t]；[x, y, w] → [w, t] 且不附帶任何年齡條件；其餘每一種情況都回傳 HUH",
-   "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 只要 y < t 就立刻清除該條目與 a_p[h]，不必等 D 個時槽；[x, y, w] → 直接丟棄而不是改寫；其餘每一種情況都回傳 HUH",
-   "[] → 丟棄；[x] → 連同 a_p[h] 一起丟棄；[x, y] → 連同 a_p[h] 一起丟棄；[x, y, w] → 連同 a_p[h] 一起丟棄；每一種形狀都立刻塌陷，而那個 D 個時槽的延遲只管 `eject`"
+   "[] → 該 request 條目被丟棄；[x] → [x, t]；[x, y] → 只要 y < t 就立刻清除該條目與 a_p[h]，不必等 D 個slot；[x, y, w] → 直接丟棄而不是改寫；其餘每一種情況都回傳 HUH",
+   "[] → 丟棄；[x] → 連同 a_p[h] 一起丟棄；[x, y] → 連同 a_p[h] 一起丟棄；[x, y, w] → 連同 a_p[h] 一起丟棄；每一種形狀都立刻塌陷，而那個 D 個slot的延遲只管 `eject`"
   ],
   "stem": "A service calls `forget` at time t for one of its own request keys (h, z). Taking the four shapes of a_l[(h, z)] in turn, what does GP 0.8.0 do in each case?",
  "options": [

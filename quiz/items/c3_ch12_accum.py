@@ -126,8 +126,8 @@ ITEMS = [
   "optionsZh": [
    "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；接著它會在下一個區塊就被丟掉，因為 E(·, ξ′[E−1]) 會移除任何仍帶有「不存在於 ξ 中之依賴」的條目——GP 正是這樣取消一份帶有無法滿足依賴的 report",
    "Q 永遠不會送出它，而且讓 w 變成 available 的那個區塊是無效的：§12.1 說在依賴無效的情況下 accumulation 會被整個取消，而取消是以拒絕該區塊來表示的，所以一份在 core 上逾時的 report 會回溯地使「第一個排入依賴它之 report」的後續區塊無效",
-   "Q 只會擋它一陣子：在 E = 600 個時槽之後該依賴被視為過期，i ≥ τ′ − τ 的情形不再對那一槽套用 E，於是 Q 把 w 的依賴集合當成空的、以它手上有的運算元把它 accumulate 掉——所以這份工作至多延遲一個 epoch，但絕不會被無聲遺失",
-   "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；它每個區塊只是被 i ≥ τ′ − τ 的情形 ω′↺[m−i] = E(ω↺[m−i], ξ′[E−1]) 往前帶，並在至多一個 epoch 之後、當時槽索引繞回、i = 0 的情形以新區塊的 R^Q 覆寫那一槽時消失"
+   "Q 只會擋它一陣子：在 E = 600 個slot之後該依賴被視為過期，i ≥ τ′ − τ 的情形不再對那一槽套用 E，於是 Q 把 w 的依賴集合當成空的、以它手上有的運算元把它 accumulate 掉——所以這份工作至多延遲一個 epoch，但絕不會被無聲遺失",
+   "Q 永遠不會送出它，因為它的依賴集合永遠不會被清空；它每個區塊只是被 i ≥ τ′ − τ 的情形 ω′↺[m−i] = E(ω↺[m−i], ξ′[E−1]) 往前帶，並在至多一個 epoch 之後、當slot索引繞回、i = 0 的情形以新區塊的 R^Q 覆寫那一槽時消失"
   ],
   "stem": "A report w is sitting in ω with one outstanding dependency p, and package p is never accumulated — the "
             "report carrying p was guaranteed a few blocks ago but timed out on its core and never became available. "

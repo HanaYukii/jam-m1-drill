@@ -261,7 +261,7 @@ ITEMS = [
    "一項給定的運算只由 validator 的一個子集執行，所以吞吐是隨網路規模而非隨單一機器擴展；擔保／背書／稽核（必要時再加判定）這套機制保障它，而無狀態的 in-core 執行可以被任何已同步到已定案鏈的節點重現",
    "每位 validator 仍然執行每一項 in-core 運算，只是 PVM 的重編譯器讓 RISC-V 程式碼比 EVM 位元碼快約 300 倍；因此安全性來自完全複製、與 on-chain 模型完全相同，也不需要任何稽核階段",
    "in-core 的結果單憑 guarantor 的簽章就被接受、從不被其他任何人重新執行；guarantor 所抵押的經濟質押（在日後爭議時被沒收）就是讓那個 300 倍數字在沒有進一步驗證下仍然安全的原因",
-   "那 300 倍來自 341 個 core 各自平行地用滿整個 6 秒時槽；in-core 的程式碼可以讀取截至 lookup-anchor 區塊為止的任意鏈上狀態，而正是那個錨定讓它的結果能被其他節點重現"
+   "那 300 倍來自 341 個 core 各自平行地用滿整個 6 秒slot；in-core 的程式碼可以讀取截至 lookup-anchor 區塊為止的任意鏈上狀態，而正是那個錨定讓它的結果能被其他節點重現"
   ],
   "stem": "The Overview states that JAM should be able to do 'upwards of 300 times' the computation in-core as a single machine running the VM at full speed. What justifies this figure, and what keeps such unreplicated computation safe?",
  "options": [
@@ -290,7 +290,7 @@ ITEMS = [
    "best block 就是最近一個被 Grandpa 定案的區塊；JAM 節點從不在未定案的區塊之上出塊，這正是為什麼 Grandpa 只落後最新頭部 1–2 塊、也是為什麼從不會有推測性狀態暴露給應用程式",
    "best block 單純就是頭部——祖先數最多的有效區塊——而競爭頭部之間的平手則以較小的 header 雜湊決勝；Grandpa 只是在幾塊之後確認那個頭部，對於「出塊時該選哪個父區塊」毫無作用",
    "best block 是 best chain（§19）的頭部，用在延遲比確定性更重要的時候——例如替即將出的區塊選父區塊、或把最新狀態回報給下游應用程式——代價是它可能永遠不會成為正典",
-   "best block 是最近一個時槽不落在未來的區塊；Grandpa 只在事後被諮詢、用來修剪落敗的分叉，所以不論是出塊還是對應用程式提供狀態，都不需要另外的 best-chain 規則"
+   "best block 是最近一個slot不落在未來的區塊；Grandpa 只在事後被諮詢、用來修剪落敗的分叉，所以不論是出塊還是對應用程式提供狀態，都不需要另外的 best-chain 規則"
   ],
   "stem": "GP §4.6 distinguishes the 'best block' from what the Grandpa finality gadget reports. What is the best block, when is it the right one to use, and what is the risk?",
  "options": [
@@ -302,11 +302,11 @@ ITEMS = [
  "answer": 2,
  "optNotes": [
   "與 GP 相反：那樣每塊都要等 finality，而 Grandpa 本來就落後最新 head 約 1–2 塊。",
-  "§19 的 best chain 不是最長鏈，選的是 ticket 封印祖先數最多者，GP 也沒有 header hash tie-break。",
+  "§19 的 best chain 不是最長鏈，選的是 ticket 出塊祖先數最多者，GP 也沒有 header hash tie-break。",
   "GP 明講 best block 就是 §19 best chain 的 head，用於出塊選 parent 與查最新狀態這類低延遲場合。",
   "「timeslot 不在未來」只是 block 暫時有效性的條件（§4.4、§5），不是 best block 的定義。",
  ],
- "explanation": "GP §4.6：「The simplest and least risky means… would be to inspect the Grandpa finality mechanism… However… Grandpa will typically return a block some small period older than the most recently authored block. (Existing deployments suggest around 1-2 blocks in the past…) There are often circumstances when we may wish to have less latency at the risk of the returned block not ultimately forming a part of the future canonical chain. E.g. we may be in a position of being able to author a block, and we need to decide what its parent should be. Alternatively, we may care to speculate about the most recent state… In these cases, we define the best block as the head of the best chain, itself defined in section 19.」§19 的 best block B♭ 必須：以 finalized block 為祖先、未 finalized 的部分沒有 equivocation（同一 timeslot 兩個有效 block）、已 audited；候選中選「使用 slot-sealer ticket（而非 fallback key）封印的祖先數最多」者，Grandpa 投票投的就是它（連同 posterior state root）。§4.3 另把 head 定義為「the block with the most ancestors」——finalized、best、head 是三個不同的概念。",
+ "explanation": "GP §4.6：「The simplest and least risky means… would be to inspect the Grandpa finality mechanism… However… Grandpa will typically return a block some small period older than the most recently authored block. (Existing deployments suggest around 1-2 blocks in the past…) There are often circumstances when we may wish to have less latency at the risk of the returned block not ultimately forming a part of the future canonical chain. E.g. we may be in a position of being able to author a block, and we need to decide what its parent should be. Alternatively, we may care to speculate about the most recent state… In these cases, we define the best block as the head of the best chain, itself defined in section 19.」§19 的 best block B♭ 必須：以 finalized block 為祖先、未 finalized 的部分沒有 equivocation（同一 timeslot 兩個有效 block）、已 audited；候選中選「使用 slot-sealer ticket（而非 fallback key）出塊的祖先數最多」者，Grandpa 投票投的就是它（連同 posterior state root）。§4.3 另把 head 定義為「the block with the most ancestors」——finalized、best、head 是三個不同的概念。",
  "trap": "finalized（Grandpa，落後 1–2 塊、最安全）≠ best（§19 best chain 的 head，出塊/查詢用）≠ head（祖先最多）。"
 },
 ]

@@ -234,7 +234,7 @@ ITEMS = [
  "tags": ["privileges", "epoch"],
  "stemZh": "delegator service 在 epoch e 的某個 block 呼叫 designate，把 ι 換成一組新 key。這組 key 最早在哪個 epoch 能封 block？中間經過哪幾步？",
  "optionsZh": [
-  "epoch e+2。designate 在本 block 寫入 ι′；e+1 的第一個 block 輪替 γ′_P = Φ(ι)、κ′ = 舊 γ_P，新 key 成為 pending；e+1 期間它們用 γ′_Z（γ_P 的 ring root）投 ticket；e+2 的第一個 block 再輪替 κ′ = γ_P，此時才能 seal",
+  "epoch e+2。designate 在本 block 寫入 ι′；e+1 的第一個 block 輪替 γ′_P = Φ(ι)、κ′ = 舊 γ_P，新 key 成為 pending；e+1 期間它們用 γ′_Z（γ_P 的 ring root）投 ticket；e+2 的第一個 block 再輪替 κ′ = γ_P，此時才能簽 block",
   "epoch e+1。designate 寫入 ι′ 後，epoch e+1 的第一個 block 直接把 ι 升成 κ′，因為 0.8.0 為了讓集合大小可變，把 pending 這一層拿掉了；新 key 在 e 期間就以 fallback 的身分投 ticket，e+1 一開始就能 seal",
   "epoch e 當下。designate 是 accumulate 裡的 host call，ι′ 在同一個 block 生效並立刻取代 κ′，因為 delegator 是特權 service、它的決定不需要等輪替；下一個 slot 的 seal 就對新 key 驗",
   "epoch e+3。ι → γ_P → κ 各要一個 epoch，再加上新 key 必須先在 λ 待一個 epoch 讓 dispute 有時間追溯它們，所以總共三次輪替；這也是為什麼 state 要保留 λ"
@@ -253,7 +253,7 @@ ITEMS = [
   "designate 只寫 ι′，κ′ 只在 epoch 換檔時由 γ_P 升上來；沒有任何 host call 能直接改 κ。",
   "λ 是「剛卸任」的集合，不是入職前的等待區；ι → γ_P → κ 只有兩次輪替。"
  ],
- "explanation": "把 eq. 6.14 攤開：在 e′ > e 的 block，(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)。也就是每個 epoch 邊界，ι 升成 pending、pending 升成 active、active 退成 previous。designate（§B）只寫 ι′。所以時間線：epoch e 的 block N 呼叫 designate → ι′ 是新 key；epoch e+1 的第一個 block → γ′_P = Φ(ι)（新 key 成為 pending，offender 歸零），κ′ = 舊的 γ_P（不是新 key）；epoch e+1 全程新 key 在 pending，此時 γ′_Z 是對 γ_P 算的 ring root，所以它們可以用 ring-VRF 投 ticket、競爭 e+2 的 slot；epoch e+2 的第一個 block → κ′ = γ_P = 新 key，從這個 block 起（含這個 block，因為 seal 對 κ′ 驗）新 key 才能 seal。為什麼要隔兩層：pending 那一個 epoch 是 ticket 提交期，作者必須在成為 active 之前就投完票，這是 Safrole「作者提前一個 epoch 決定」的必然結果。與 d2-kappa-vs-kappa-prime-readers 對照：第 e+2 個 epoch 的第一個 block，seal 對 κ′ 驗，所以新 key 從那一刻就有效，不用再等一個 block。",
+ "explanation": "把 eq. 6.14 攤開：在 e′ > e 的 block，(γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)。也就是每個 epoch 邊界，ι 升成 pending、pending 升成 active、active 退成 previous。designate（§B）只寫 ι′。所以時間線：epoch e 的 block N 呼叫 designate → ι′ 是新 key；epoch e+1 的第一個 block → γ′_P = Φ(ι)（新 key 成為 pending，offender 歸零），κ′ = 舊的 γ_P（不是新 key）；epoch e+1 全程新 key 在 pending，此時 γ′_Z 是對 γ_P 算的 ring root，所以它們可以用 ring-VRF 投 ticket、競爭 e+2 的 slot；epoch e+2 的第一個 block → κ′ = γ_P = 新 key，從這個 block 起（含這個 block，因為 seal 對 κ′ 驗）新 key 才能簽 block。為什麼要隔兩層：pending 那一個 epoch 是 ticket 提交期，作者必須在成為 active 之前就投完票，這是 Safrole「作者提前一個 epoch 決定」的必然結果。與 d2-kappa-vs-kappa-prime-readers 對照：第 e+2 個 epoch 的第一個 block，seal 對 κ′ 驗，所以新 key 從那一刻就有效，不用再等一個 block。",
  "trap": "ι 今天寫，下個 epoch 投票，再下個 epoch 出塊。兩次輪替，不是一次也不是三次。"
 },
 {
@@ -289,7 +289,7 @@ ITEMS = [
   "ψ_O 不清空，是累積的；沒有 registrar 扣押金這回事，GP 沒定義押金。",
   "Φ 換掉的是整個 336-octet 的 key 條目（含 Bandersnatch 與 Ed25519），而且只在換檔時；ι 由 delegator 全權決定，GP 沒有「designate 拒絕 ψ_O」的規則。"
  ],
- "explanation": "分三個時間點。**block N 當下**（§10.4）：eq. 10.16 把 culprit 與 fault 的 key 併進 ψ′_O；H_O 必須恰好列出這些新 offender（eq. 5.x「must contain exactly the keys of all new offenders」）；eq. 10.14 把 report hash ∈ ψ′_B 的 core 從 ρ 清掉。從此 eq. 10.6–10.7 的 k ∉ ψ_O 條件讓同一把 key 不能再被列為 offender——這是去重，不是赦免。**下一次換檔**（eq. 6.14）：γ′_P = Φ(ι)，§6.2 原文「incoming keys belonging to the offenders ψ′_O are replaced with a null key containing only zeroes」。注意 Φ 作用在「進入 pending」那一步，所以 offender 在當前 epoch 的 κ 位置不變，還能 seal 自己剩下的 slot、還能 guarantee；到再下個 epoch（它本來會再成為 active 時）位置變成零 key，簽不出任何有效簽章。**永遠不會**：JAM state 不含任何「扣餘額」的規則，ch10-rationale 那題的重點就是 disputes 系統「不自己 slash」，只把 offender 記在 ψ_O 與 H_O，讓 staking 那個 system service 讀取後處理。設計上這是「協定只記事實、經濟後果交給 service」的一貫立場。",
+ "explanation": "分三個時間點。**block N 當下**（§10.4）：eq. 10.16 把 culprit 與 fault 的 key 併進 ψ′_O；H_O 必須恰好列出這些新 offender（eq. 5.x「must contain exactly the keys of all new offenders」）；eq. 10.14 把 report hash ∈ ψ′_B 的 core 從 ρ 清掉。從此 eq. 10.6–10.7 的 k ∉ ψ_O 條件讓同一把 key 不能再被列為 offender——這是去重，不是赦免。**下一次換檔**（eq. 6.14）：γ′_P = Φ(ι)，§6.2 原文「incoming keys belonging to the offenders ψ′_O are replaced with a null key containing only zeroes」。注意 Φ 作用在「進入 pending」那一步，所以 offender 在當前 epoch 的 κ 位置不變，還能簽 自己剩下的 slot、還能 guarantee；到再下個 epoch（它本來會再成為 active 時）位置變成零 key，簽不出任何有效簽章。**永遠不會**：JAM state 不含任何「扣餘額」的規則，ch10-rationale 那題的重點就是 disputes 系統「不自己 slash」，只把 offender 記在 ψ_O 與 H_O，讓 staking 那個 system service 讀取後處理。設計上這是「協定只記事實、經濟後果交給 service」的一貫立場。",
  "trap": "ψ_O 是立刻、Φ 是換檔、slash 是永遠不在 GP 裡。"
 },
 {
@@ -550,7 +550,7 @@ ITEMS = [
  "tags": ["GRANDPA", "Polkadot"],
  "stemZh": "JAM 把出塊機制從 BABE 換成 Safrole，卻把 GRANDPA 原樣留下。為什麼 finality 不需要跟著重新設計？JAM 對 GRANDPA 唯一改動的地方在哪？",
  "optionsZh": [
-  "因為 GRANDPA 對 block 怎麼產生是中立的：它只對哪條鏈投票，不管作者。Safrole 解決的是出塊層的 fork 問題，finality 不用動。唯一改的是餵給它的東西：best-chain 規則加了「已 audited」「無 equivocation」「ticket 封緘祖先優先」，投票帶 header 與 posterior state root",
+  "因為 GRANDPA 對 block 怎麼產生是中立的：它只對哪條鏈投票，不管作者。Safrole 解決的是出塊層的 fork 問題，finality 不用動。唯一改的是餵給它的東西：best-chain 規則加了「已 audited」「無 equivocation」「ticket 出塊祖先優先」，投票帶 header 與 posterior state root",
   "因為 GRANDPA 在 JAM 裡已經被 BEEFY 取代：BEEFY 的 BLS 聚合簽名就是 finality，GRANDPA 只留下名字給文件相容。JAM 改動的地方是把投票從 header 改成 accumulation output 的 super-peak，所以投票不再需要帶 state root，audited 條件也就不需要了",
   "因為 GRANDPA 被併進 Safrole 了：ticket 的排名同時決定作者與 finality 順序，seal 的簽章就是 finality 投票。JAM 改的是把 GRANDPA 的 2/3 門檻改成 ticket 的 Y 尾段條件",
   "因為 GRANDPA 改成逐 work-report 投票：每份 report available 之後由 validator 投票定案，block 的 finality 是所有 report 定案的結果。JAM 改的是投票單位，從 block 變成 report"
@@ -564,12 +564,12 @@ ITEMS = [
  ],
  "answer": 0,
  "optNotes": [
-  "對：§19 列 best block 的條件（descend from finalized、audited、無 equivocation、ticket 封緘祖先最多），投票帶 header 與 posterior state root（arch-best-chain-selection）；GRANDPA 本身沒改。",
+  "對：§19 列 best block 的條件（descend from finalized、audited、無 equivocation、ticket 出塊祖先最多），投票帶 header 與 posterior state root（arch-best-chain-selection）；GRANDPA 本身沒改。",
   "BEEFY 是給 bridge 用的額外簽名（§18），不取代 GRANDPA；它在 block finalize 之後才簽。",
   "Safrole 只管出塊，seal 不是 finality 投票；Y 是 ticket 提交期的尾段界線。",
   "GRANDPA 投的是鏈（block），不是 report；report 的「定案」靠的是 audit 與它所在 block 的 finality。"
  ],
- "explanation": "GRANDPA 的輸入是「每個 validator 認為最好的鏈頭」，輸出是「所有誠實節點都同意不可逆的前綴」。它對鏈頭怎麼來的沒有任何假設，所以出塊層從 BABE 換成 Safrole 對它是透明的。JAM 需要改的是「什麼算最好的鏈頭」，§19 給了條件：從最新 finalized block 往下、被視為 audited、未定案部分沒有 equivocation、在這些裡選 ticket 封緘（非 fallback）祖先最多的（§6 說 ticket 封緘「is of greater security」，所以優先）。「必須 audited」是關鍵的新條件：JAM 的 block 在 accumulate 時還沒被驗證（d1-accumulate-before-audit），若 GRANDPA 對未 audited 的 block 投票，壞 report 就可能被定案。§17 原文：「One prerequisite of a node finalizing a block is for it to view the block as audited.」投票內容則是 header 加 posterior state root（arch-best-chain-selection）。BEEFY（§18）是另一層：在 GRANDPA 定案之後，validator 對 accumulation output 的 super-peak 做 BLS 簽名，給 bridge 用，不參與 finality 判定。所以三個機制分工：Safrole 決定誰出塊、GRANDPA 決定哪條鏈不可逆、BEEFY 讓外部系統便宜地驗證定案結果。",
+ "explanation": "GRANDPA 的輸入是「每個 validator 認為最好的鏈頭」，輸出是「所有誠實節點都同意不可逆的前綴」。它對鏈頭怎麼來的沒有任何假設，所以出塊層從 BABE 換成 Safrole 對它是透明的。JAM 需要改的是「什麼算最好的鏈頭」，§19 給了條件：從最新 finalized block 往下、被視為 audited、未定案部分沒有 equivocation、在這些裡選 ticket 出塊（非 fallback）祖先最多的（§6 說 ticket 出塊「is of greater security」，所以優先）。「必須 audited」是關鍵的新條件：JAM 的 block 在 accumulate 時還沒被驗證（d1-accumulate-before-audit），若 GRANDPA 對未 audited 的 block 投票，壞 report 就可能被定案。§17 原文：「One prerequisite of a node finalizing a block is for it to view the block as audited.」投票內容則是 header 加 posterior state root（arch-best-chain-selection）。BEEFY（§18）是另一層：在 GRANDPA 定案之後，validator 對 accumulation output 的 super-peak 做 BLS 簽名，給 bridge 用，不參與 finality 判定。所以三個機制分工：Safrole 決定誰出塊、GRANDPA 決定哪條鏈不可逆、BEEFY 讓外部系統便宜地驗證定案結果。",
  "trap": "GRANDPA 沒改，改的是餵給它的 best-chain 規則：audited 才能投。"
 },
 {

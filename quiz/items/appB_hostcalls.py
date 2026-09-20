@@ -151,7 +151,7 @@ ITEMS = [
  "lens": "演算法",
  "ch": "B", "section": "B.7 — solicit / forget / eject", "gpRef": "`solicit` = 24, `forget` = 25, `eject` = 22",
  "difficulty": 3, "kind": "concept", "tags": ["preimage", "timeslot"],
-  "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前時槽 t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
+  "stemZh": "給定 request 狀態 l = a_l[(h, z)] 與當前slot t，`solicit` 與 `forget` 各自執行哪些狀態轉換？",
   "optionsZh": [
    "solicit：沒有該項 → []（若新的 footprint 付不起則 FULL）；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → [x, t]；[x, y, w] 且 y < t − D → [w, t]；其餘 → HUH",
    "solicit：沒有該項 → []（若新的 footprint 付不起則 CASH）；[x, y] → [x, y, t]；其餘 → HUH。forget：[] 或 [x, y] 且 y < t − D → 刪除 request 與 preimage；[x] → []（立即變為不可用）；[x, y, w] 且 y < t − D → [w, t]；其餘 → HUH",

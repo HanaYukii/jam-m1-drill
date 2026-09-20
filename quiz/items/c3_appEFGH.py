@@ -183,8 +183,8 @@ ITEMS = [
   "stemZh": "Gray Paper 有兩處把一個 32 位元組的雜湊展開成一串索引：餵給洗牌的 numeric-sequence-from-hash 函數，以及 §6 在 ticket accumulator 未滿時挑選一整個 epoch 份 Bandersnatch 金鑰的 fallback 金鑰序列函數。這兩種展開實際上差在哪裡？",
   "optionsZh": [
    "它們是同一個構造被用了兩次：§6 的 fallback 序列字面上就是把附錄 F 的洗牌套用在 active 金鑰集合 κ′ 上、以 η′_2 為種子、再截斷到 E 項，所以兩者都是每八個輸出做一次 Blake2b（對種子串接 ⌊i/8⌋ 的 4 位元組編碼）、都解碼位於偏移 4i mod 32 的 little-endian 窗口、也都以循環方式索引金鑰序列——這正是為什麼實作只需要一套雜湊展開常式",
-   "洗牌的展開是每八個輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是每個時槽雜湊一次，對象是種子串接該時槽索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
-   "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個時槽做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
+   "洗牌的展開是每八個輸出做一次 Blake2b——雜湊的是種子串接 ⌊i/8⌋ 的 4 位元組編碼——並解碼位於偏移 4i mod 32 的 little-endian 4 位元組窗口，所以一個 32 位元組摘要供應八個連續的 32 位元數字。而 §6 的 fallback 是每個slot雜湊一次，對象是種子串接該slot索引的編碼，並且只解碼開頭的 4 個 octet，再用結果以循環方式索引金鑰序列",
+   "剛好相反：洗牌的展開是每個輸出雜湊一次（對種子串接 i 的 4 位元組編碼）並取每個摘要的前四個 octet；而 §6 的 fallback 是每八個slot做一次 Blake2b（雜湊種子與 ⌊i/8⌋ 的編碼）並解碼偏移 4i mod 32 的 little-endian 窗口，這正是讓整個 epoch 的 fallback 金鑰能一次算得很便宜的原因",
    "兩者都是每個輸出雜湊一次（對種子串接該索引的 4 位元組編碼）、也都只取每個摘要的前四個 octet；差別在洗牌接著以 big-endian 解碼並直接使用其自然範圍內的值，而 §6 的 fallback 以 little-endian 解碼並對金鑰序列長度取模，所以位元組序是唯一真正的差異，也是 fallback seal 不符的經典來源"
   ],
   "stem": "Two places in the Gray Paper expand a 32-octet hash into a sequence of indices: the numeric-sequence-from-hash function that feeds the shuffle, and the fallback key-sequence function of §6 that picks an epoch's worth of Bandersnatch keys when the ticket accumulator is not full. How do the two expansions actually differ?",
@@ -283,12 +283,12 @@ ITEMS = [
         "difficulty": 3,
         "kind": "concept",
         "tags": ["accumulate", "ticket"],
-  "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的封印者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
+  "stemZh": "ticket accumulator 只保留「32 位元組識別碼 + entry index」的元組；extrinsic 中那份 784 位元組的 ring 證明一經驗證就被丟棄。一個 epoch 之後，某一槽的出塊者必須出示一個 96 位元組的簽章，其輸出要等於當初儲存的那個識別碼——即使它現在簽的是序列化後的未簽署 header 而不是空訊息。是什麼讓這件事成為可能？",
   "optionsZh": [
    "因為儲存的識別碼是那份 ring 證明的 Blake2b 雜湊，而 Bandersnatch 的 ring 證明是確定性的，所以同一把金鑰與 context 會重現完全相同的證明位元組、因而重現相同的雜湊；訊息在那個雜湊裡完全不起作用。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index，seal 的則是同一個字串加 η′_3，而熵的輪替讓那兩串位元組在一個 epoch 之後相等",
    "因為 seal 把儲存的 ring 證明重新發布在 seal 欄位裡——96 位元組的形式就是那同一份證明剝掉零知識部分後的樣子，這正是兩種大小不同的原因——所以不論簽的是什麼，它的輸出理所當然不變。context 確實會在 epoch 邊界從 η′_2 移到 η′_3，但被剝除過的證明會把它原本的輸出一併帶著走，所以儲存的識別碼仍然吻合",
    "因為 VRF 的輸出是一個受 context 影響、但不受訊息影響的高熵雜湊，只由私鑰與輸入決定。ticket 的 context 是 ticket-seal 字串加 η′_2 與 entry index；seal 的則是同一個字串加 η′_3 與該 ticket 的 entry index，而熵的輪替讓那兩串位元組在一個 epoch 之後相等，所以同一把金鑰在兩種簽章型別之下都產出相同的 32 個 octet",
-   "因為識別碼只由 η′_2 連同 entry index 導出，所以每位 validator 不必看過證明就能重算每一個 ticket 識別碼；簽章只提供「有權使用它」的證明，這也是為什麼證明本身不必保留。一個 epoch 之後 seal 在 η′_3 之下簽署，但既然識別碼從不依賴任何私鑰，封印者只需要出示相同的 entry index"
+   "因為識別碼只由 η′_2 連同 entry index 導出，所以每位 validator 不必看過證明就能重算每一個 ticket 識別碼；簽章只提供「有權使用它」的證明，這也是為什麼證明本身不必保留。一個 epoch 之後 seal 在 η′_3 之下簽署，但既然識別碼從不依賴任何私鑰，出塊者只需要出示相同的 entry index"
   ],
   "stem": "The ticket accumulator keeps only tuples of a 32-octet identifier and an entry index; the 784-octet ring proof from the extrinsic is thrown away once verified. An epoch later the sealer of a slot must present a 96-octet signature whose output equals that stored identifier, even though it now signs the serialized unsigned header rather than an empty message. What makes that possible?",
         "options": [

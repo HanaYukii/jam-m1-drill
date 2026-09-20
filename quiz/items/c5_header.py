@@ -12,7 +12,7 @@ ITEMS = [
    "完整編碼，含父區塊的 seal，所以子區塊承諾的是父區塊實際被發布出去的那串位元組；任何人都無法重簽一個 header——即使作者與內容都相同——而不讓所有已經建在其上的區塊脫鏈",
    "未簽署的編碼，讓父區塊的 seal 留在承諾鏈之外；這使得 validator 可以替換遺失的 seal 而不干擾其後代，這正是無 seal 封存儲存得以成立的原因",
    "完整編碼，但把 marker 清成空的形式，好讓同一個父區塊不論是否開啟了一個 epoch 都得到同一個雜湊；這讓雜湊在 marker 較晚才加入的 epoch 邊界上保持穩定",
-   "只雜湊父區塊的 state root 與時槽，因為這兩個欄位已經唯一決定了父區塊；雜湊整個 header 會讓這個承諾依賴於子區塊無法獨立重建的資料"
+   "只雜湊父區塊的 state root 與slot，因為這兩個欄位已經唯一決定了父區塊；雜湊整個 header 會讓這個承諾依賴於子區塊無法獨立重建的資料"
   ],
   "stem": "H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?",
  "options": [
@@ -22,7 +22,7 @@ ITEMS = [
   "A hash of the parent's state root and timeslot only, since those two fields already determine the parent uniquely; hashing the whole header would make the commitment depend on data the child cannot independently reconstruct",
  ],
  "answer": 0,
- "explanation": "eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**編碼——含 seal H_S 的那一版。GP 為 header 定義了兩個序列化函數：E(H) 含 seal、E_U(H) 不含（「with and without the latter seal component」），而 **E_U 的用途只有一個：當 seal 自己要簽的訊息**。父雜湊用的是 E，不是 E_U。**推論**：每個子區塊都把父區塊「實際發布出去的那串位元組」原封釘死。改動父 header 的任何一個位元組——包括用同一把金鑰對同樣的內容重簽一次 seal——都會算出不同的 H_P，讓所有已經建在上面的區塊瞬間脫鏈。這正是「鏈」這個字的意思，也是為什麼 seal 必須是 header 的欄位，而不是掛在旁邊的附屬資料：若父雜湊只涵蓋 E_U，同一份內容就能被簽出多個都合法的父節點，等於憑空製造分叉。**順帶記兩件相關的事**：§5 用 P 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），但實作只被要求保存「過去 24 小時（L = 14,400 個時槽）內出塊的祖先 header」——所以「能不能往回追」是有窗口的，這個窗口後來在 §11 的 lookup-anchor 檢查會再出現一次。",
+ "explanation": "eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**編碼——含 seal H_S 的那一版。GP 為 header 定義了兩個序列化函數：E(H) 含 seal、E_U(H) 不含（「with and without the latter seal component」），而 **E_U 的用途只有一個：當 seal 自己要簽的訊息**。父雜湊用的是 E，不是 E_U。**推論**：每個子區塊都把父區塊「實際發布出去的那串位元組」原封釘死。改動父 header 的任何一個位元組——包括用同一把金鑰對同樣的內容重簽一次 seal——都會算出不同的 H_P，讓所有已經建在上面的區塊瞬間脫鏈。這正是「鏈」這個字的意思，也是為什麼 seal 必須是 header 的欄位，而不是掛在旁邊的附屬資料：若父雜湊只涵蓋 E_U，同一份內容就能被簽出多個都合法的父節點，等於憑空製造分叉。**順帶記兩件相關的事**：§5 用 P 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），但實作只被要求保存「過去 24 小時（L = 14,400 個slot）內出塊的祖先 header」——所以「能不能往回追」是有窗口的，這個窗口後來在 §11 的 lookup-anchor 檢查會再出現一次。",
  "optNotes": [
   "完整編碼（含 seal）與「重簽即脫鏈」的推論，正是 eq. 5.2 的直接後果。",
   "E_U 是簽章訊息，不是父雜湊的輸入；若不涵蓋 seal，同一份內容可以被重複簽出多個合法父節點。",
@@ -39,10 +39,10 @@ ITEMS = [
  "tags": ["header"],
   "stemZh": "一個節點只收到一個 header，既沒有區塊本體也沒有任何鏈上狀態。它能完成哪些檢查？第一個做不到的又是哪一個？",
   "optionsZh": [
-   "它能檢查結構是否完整、時槽是否大於父區塊的、以及該時槽是否未落在未來；它無法驗證 seal，因為要知道誰有資格出那一槽，需要 sealer 序列，而它住在狀態裡",
+   "它能檢查結構是否完整、slot是否大於父區塊的、以及該slot是否未落在未來；它無法驗證 seal，因為要知道誰有資格出那一槽，需要 sealer 序列，而它住在狀態裡",
    "除了 extrinsic 雜湊之外它什麼都能檢查，因為只有那個欄位依賴 header 之外的資料；seal 是自足的，因為出塊者的公鑰本身就是 header 的欄位之一、不需要任何外部查找",
-   "它能檢查 seal 與熵簽章，因為兩者光憑出塊者索引就能驗證；它無法檢查的是時槽，因為要與父區塊比較就必須保存過父 header",
-   "沒有狀態它什麼都檢查不了，因為連時槽的界限都是對著 posterior 的 validator 集合表述的；這正是為什麼 GP 要求實作在驗證任何 header 之前先保存 24 小時的祖先"
+   "它能檢查 seal 與熵簽章，因為兩者光憑出塊者索引就能驗證；它無法檢查的是slot，因為要與父區塊比較就必須保存過父 header",
+   "沒有狀態它什麼都檢查不了，因為連slot的界限都是對著 posterior 的 validator 集合表述的；這正是為什麼 GP 要求實作在驗證任何 header 之前先保存 24 小時的祖先"
   ],
   "stem": "A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?",
  "options": [
@@ -52,7 +52,7 @@ ITEMS = [
   "It can check nothing without state, because even the timeslot bound is expressed against the posterior validator set; this is why the GP requires implementations to keep 24 hours of ancestors before validating any header",
  ],
  "answer": 0,
- "explanation": "把檢查按「需要什麼才做得到」分三層就很清楚。**只要 header 自己**：結構檢查——eq. 5.1 的 header 是 10 元組 (H_P 父雜湊, H_R 先前狀態根, H_X extrinsic 雜湊, H_T 時槽, H_E, H_W, H_O 三個 marker, H_I 作者索引, H_V 熵 VRF 簽章, H_S seal)，欄位數、型別與長度都能就地驗。**要父 header 或時鐘**：eq. 5.8 的時間條件 P(H)_T < H_T ∧ H_T · P ≤ 𝕋。這裡 P(H) 是父 header（存過那張 header 即可，不必有狀態）、P = 6 是每個時槽的秒數、𝕋 是牆鐘時間；前半只要父 header，後半只要一個時鐘。GP 還補一句「blocks considered invalid by this rule may become valid as 𝕋 advances」——「太未來」是暫時無效，不是永久無效。**要狀態**：seal。而且 H_S 是雙重狀態相依。其一，header 只放 H_I（索引），不放公鑰；§5 原文特別註明 H_A ≡ κ′[H_I]_b 「is merely an equivalence, and is not serialized as part of the header」，要拿驗簽用的 Bandersnatch 公鑰就得查 κ′。其二，就算有了公鑰還要確認「這個 slot 本來就該由他出塊」：§6 定義 H_S 是「a Bandersnatch signature produced with the private key corresponding to the entry at index m′ of the current epoch’s slot-sealer sequence γ′_S」，m′ 是本塊在 epoch 內的 slot phase。κ′ 與 γ′_S 都是狀態。相關名詞（站上「名詞」模式都查得到）：validator 金鑰有四組——κ active（現任）、λ previous（上一輪）、ι staging（待命）、γ_P pending（下個 epoch 生效）；γ_S 是 slot-sealer sequence，票券模式下每格是一張 ticket、fallback 模式下每格直接是 Bandersnatch 公鑰；E_U(H) 是「不含 H_S 的 header 編碼」，也就是 seal 實際簽的那段訊息。**這題真正的落點**：正因為 seal 需要狀態，header 才要帶 marker。H_E 在每個 epoch 第一塊給出下個 epoch 的 entropy 與整組 validator 金鑰、H_W 在票券截止那一塊給出整個 epoch 的 600 張 ticket。只同步 header 鏈的輕客戶端因此能自行推出 κ′ 與 γ′_S 的變化、往後一路驗 seal，不必重放狀態——§6 說得很直接，marker 存在是為了「minimize data transfer necessary to determine the validator keys associated with any given epoch」。",
+ "explanation": "把檢查按「需要什麼才做得到」分三層就很清楚。**只要 header 自己**：結構檢查——eq. 5.1 的 header 是 10 元組 (H_P 父雜湊, H_R 先前狀態根, H_X extrinsic 雜湊, H_T slot, H_E, H_W, H_O 三個 marker, H_I 作者索引, H_V 熵 VRF 簽章, H_S seal)，欄位數、型別與長度都能就地驗。**要父 header 或時鐘**：eq. 5.8 的時間條件 P(H)_T < H_T ∧ H_T · P ≤ 𝕋。這裡 P(H) 是父 header（存過那張 header 即可，不必有狀態）、P = 6 是每個slot的秒數、𝕋 是牆鐘時間；前半只要父 header，後半只要一個時鐘。GP 還補一句「blocks considered invalid by this rule may become valid as 𝕋 advances」——「太未來」是暫時無效，不是永久無效。**要狀態**：seal。而且 H_S 是雙重狀態相依。其一，header 只放 H_I（索引），不放公鑰；§5 原文特別註明 H_A ≡ κ′[H_I]_b 「is merely an equivalence, and is not serialized as part of the header」，要拿驗簽用的 Bandersnatch 公鑰就得查 κ′。其二，就算有了公鑰還要確認「這個 slot 本來就該由他出塊」：§6 定義 H_S 是「a Bandersnatch signature produced with the private key corresponding to the entry at index m′ of the current epoch’s slot-sealer sequence γ′_S」，m′ 是本塊在 epoch 內的 slot phase。κ′ 與 γ′_S 都是狀態。相關名詞（站上「名詞」模式都查得到）：validator 金鑰有四組——κ active（現任）、λ previous（上一輪）、ι staging（待命）、γ_P pending（下個 epoch 生效）；γ_S 是 slot-sealer sequence，票券模式下每格是一張 ticket、fallback 模式下每格直接是 Bandersnatch 公鑰；E_U(H) 是「不含 H_S 的 header 編碼」，也就是 seal 實際簽的那段訊息。**這題真正的落點**：正因為 seal 需要狀態，header 才要帶 marker。H_E 在每個 epoch 第一塊給出下個 epoch 的 entropy 與整組 validator 金鑰、H_W 在票券截止那一塊給出整個 epoch 的 600 張 ticket。只同步 header 鏈的輕客戶端因此能自行推出 κ′ 與 γ′_S 的變化、往後一路驗 seal，不必重放狀態——§6 說得很直接，marker 存在是為了「minimize data transfer necessary to determine the validator keys associated with any given epoch」。",
  "optNotes": [
   "結構與時間可查、seal 需要 sealer 序列（狀態）——這正是 marker 存在的理由。",
   "作者的公鑰不是 header 欄位：H_I 是索引，H_A ≡ κ′[H_I]_b 只是等價式，不被序列化。",
@@ -71,7 +71,7 @@ ITEMS = [
   "optionsZh": [
    "因為每個 header 的有效性都是相對於它的父區塊定義的，所以這條遞迴需要一個在鏈外達成共識的基底；沒有基底的話，任何自洽的鏈都會和其他鏈一樣有效，「這條」鏈也就沒有明確定義",
    "因為 genesis 狀態太大，無法用後續區塊所用的同一個函數來 Merklize，所以它的 root 必須另外公布並暫且信任，直到第一個真正的區塊建立起常規的不變式",
-   "因為 genesis 區塊沒有出塊者、因而沒有 seal，而 GP 的有效性規則只針對已封印的 header 陳述；預設 genesis 是一種記號上的捷徑，正式的鏈會用一個 genesis seal 來取代它",
+   "因為 genesis 區塊沒有出塊者、因而沒有 seal，而 GP 的有效性規則只針對已簽的 header 陳述；預設 genesis 是一種記號上的捷徑，正式的鏈會用一個 genesis seal 來取代它",
    "因為 genesis 時的 validator 集合無法被承諾在它本應授權的那份狀態之內，所以啟動用的金鑰是由 chain spec 分發的，而 state root 由每個節點自行從那個檔案重算"
   ],
   "stem": "The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?",
@@ -277,7 +277,7 @@ ITEMS = [
   "optionsZh": [
    "執行後的狀態以下一個區塊的先前 state root 之姿出現；逐項的結果住在 report 內部的 work-digest 裡而不在 header；而資源用量是靠 core time 與 gas 上限事先設限，而不是事後回報",
    "三者都被摺進 extrinsic 雜湊，它的五個成分裡包含一個 results 成分；JAM 只是把同樣的承諾重新組織到單一欄位底下，好讓輕客戶端只需跟隨一個 root 而不是三個",
-   "執行後的狀態由 seal 承諾，因為它簽署了出塊者算出的 state root；receipt 被 header 裡的 accumulation output log 取代；而 gas 被省略是因為 JAM 是以時槽而非以 gas 計量 core time",
+   "執行後的狀態由 seal 承諾，因為它簽署了出塊者算出的 state root；receipt 被 header 裡的 accumulation output log 取代；而 gas 被省略是因為 JAM 是以slot而非以 gas 計量 core time",
    "三者都被延後到 BEEFY 的承諾，這也是 JAM 的 header 比較小的原因：任何外部驗證者需要的東西都是對著 accumulation-output MMR 證明的，而不是對著 header 本身"
   ],
   "stem": "An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?",

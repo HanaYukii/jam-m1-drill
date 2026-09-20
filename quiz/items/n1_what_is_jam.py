@@ -41,7 +41,7 @@ ITEMS = [
    "in-core 的工作只由被指派的少數 validator 執行、其他人不重跑；on-chain 的工作屬於狀態轉移的一部分，每個節點都會執行",
    "in-core 的工作跑在 PVM 裡，on-chain 的工作直接跑在 validator 自己的硬體上，所以前者必須計量而後者不必",
    "in-core 是任何碰到 service 自有 storage 的工作，on-chain 是任何碰到餘額的工作，界線跟著寫入哪一塊狀態走",
-   "in-core 發生在區塊被封印之前、on-chain 發生在它被 finalize 之後，兩者的差別是時間先後而不是由誰執行"
+   "in-core 發生在區塊出 block 之前、on-chain 發生在它被 finalize 之後，兩者的差別是時間先後而不是由誰執行"
   ],
   "stem": "What is the difference between work done 'in-core' and work done 'on-chain'?",
   "options": [
