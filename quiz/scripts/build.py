@@ -2,7 +2,7 @@
 """Build the JAM M1 Drill: items/*.py -> dist/questions.json, dist/artifact.html (fragment), dist/jam-m1-drill.html (standalone)."""
 import json, os, sys, random, datetime, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from validate import load_items, validate, CHAPTERS, load_terms, validate_terms, GLOSS_CATS, load_sheets, validate_sheets
+from validate import load_items, validate, CHAPTERS, load_terms, validate_terms, GLOSS_CATS, load_sheets, validate_sheets, load_pages, validate_pages
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
@@ -132,6 +132,11 @@ def main():
     if serr:
         for e in serr: print("ERROR:", e)
         sys.exit(1)
+    pages = load_pages()
+    perr = validate_pages(pages)
+    if perr:
+        for e in perr: print("ERROR:", e)
+        sys.exit(1)
     items = [shuffle_options(i) for i in items]
     chapters = [{"key": k, "name": v, "group": GROUPS.get(k, "Other")} for k, v in CHAPTERS.items()]
     data = {
@@ -146,6 +151,7 @@ def main():
         "items": items,
         "terms": terms,
         "sheets": sheets,
+        "pages": pages,
         "symbols": symbol_map(terms),
     }
     json_txt = json.dumps(data, ensure_ascii=False, separators=(",", ":"))

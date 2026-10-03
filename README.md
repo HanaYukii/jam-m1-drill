@@ -17,8 +17,9 @@ Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, bu
   for the model answer and explanation, no options to pick), **cheat sheet** (21 condensed pages — one per
   chapter and appendix: flow, constants, key equations, the questions examiners keep asking, and the
   0.7.2→0.8.0 deltas),
-  **mock exam** (interview weighting: two random chapters + architecture + appendices), and a
-  Leitner-style wrong-answer box.
+  **mock exam** (interview weighting: two random chapters + architecture + appendices), a
+  Leitner-style wrong-answer box, and a **reference page** (新舊對照: Polkadot 1.0 → 2.0 → JAM design
+  comparison, every row tagged with its source; open it directly with `#evo`).
 
 Also shipped as a printable handout: **[`jam-m1-qa.md`](jam-m1-qa.md)** — all 21 cheat sheets, then every
 question with its model answer, explanation and GP reference, then the full glossary, in one
@@ -48,6 +49,7 @@ The page is generated from typed question data:
 ```
 items/*.py            # questions, one module per chapter group
 glossary/*.py         # glossary terms
+pages/*.py            # long-form reference pages (the 新舊對照 tab); schema-checked at build
 scripts/validate.py   # content gate: schema, 4 distinct options, no answer leaks,
                       #   no letter references (options are shuffled at build and at render)
 scripts/check_refs.py # every "eq. X.Y" must exist in that chapter of the Gray Paper

@@ -56,8 +56,33 @@ code,pre,.mono{font-family:var(--mono)}
 .modes button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .rail h2{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
 .chapters{display:flex;flex-direction:column;gap:2px}
-.rail[data-mode="gloss"] .chapters-block,.rail[data-mode="gloss"] .filters{display:none}
-.modes button:nth-child(5):last-child{grid-column:span 2}
+.rail[data-mode="gloss"] .chapters-block,.rail[data-mode="gloss"] .filters,
+.rail[data-mode="evo"] .chapters-block,.rail[data-mode="evo"] .filters{display:none}
+.modes button:nth-child(5):last-child,.modes button:nth-child(7):last-child{grid-column:span 2}
+/* reference page (新舊對照) */
+.card.page{max-width:1180px}
+.page h2{font-size:21px;margin:0 0 8px;letter-spacing:-.01em}
+.page .lead{color:var(--ink-2);line-height:1.75;margin:0 0 4px;max-width:84ch}
+.page .checked{font-size:12px;color:var(--muted);margin:0 0 14px}
+.page-toc{display:flex;flex-wrap:wrap;gap:6px}
+.page section{margin-top:28px;scroll-margin-top:14px}
+.page section>h3{font-size:16px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.page p{line-height:1.75;margin:0 0 10px;max-width:88ch}
+.page ul{margin:0 0 10px;padding-left:20px;line-height:1.75;max-width:92ch}
+.page ul li{margin-bottom:5px}
+.page code{font-size:.9em;background:var(--surface-2);padding:1px 4px;border-radius:4px}
+.page .note{background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;padding:9px 13px;font-size:14px;line-height:1.65;margin:10px 0 4px;max-width:88ch}
+.tblwrap{overflow-x:auto;margin:8px 0 14px;border:1px solid var(--line);border-radius:8px}
+table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.6}
+table.cmp.wide{min-width:920px}
+table.cmp th,table.cmp td{text-align:left;vertical-align:top;padding:8px 11px;border-bottom:1px solid var(--line)}
+table.cmp tbody tr:last-child td{border-bottom:0}
+table.cmp thead th{font-size:12px;letter-spacing:.03em;color:var(--muted);font-weight:600;background:var(--surface-2);white-space:nowrap}
+table.cmp td:first-child{font-weight:600;min-width:7.5em}
+table.cmp td.src{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:9.5em}
+.page dl.links{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:baseline;font-size:13.5px}
+.page dl.links dt{font-family:var(--mono);font-size:12px;color:var(--accent);white-space:nowrap}
+.page dl.links dd{margin:0}
 .qa-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;color:var(--muted);font-size:13px}
 .card.qa{margin-bottom:12px}
 .qa-q{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:transparent;border:0;padding:0;margin:0;cursor:pointer;color:var(--ink);font:inherit}
@@ -82,7 +107,10 @@ code,pre,.mono{font-family:var(--mono)}
 .sheet-pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 @media print{
   .app{display:block}
-  .rail,#status,.qa-bar,.drawer-toggle,.qa-caret{display:none!important}
+  .rail,#status,.qa-bar,.drawer-toggle,.qa-caret,.page-toc{display:none!important}
+  .card.page{break-inside:auto;page-break-inside:auto}
+  .tblwrap{overflow:visible;border-color:#bbb}
+  table.cmp.wide{min-width:0}
   body,.stage,.card{background:#fff!important;color:#000!important}
   .card{max-width:none;border:0;border-bottom:1px solid #ccc;border-radius:0;box-shadow:none;padding:10px 0 14px;margin:0;break-inside:avoid;page-break-inside:avoid}
   .qa-a[hidden]{display:block!important}
@@ -274,6 +302,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           <button role="tab" data-mode="mock" aria-pressed="false">模擬考</button>
           <button role="tab" data-mode="review" aria-pressed="false">錯題本</button>
           <button role="tab" data-mode="gloss" aria-pressed="false">名詞</button>
+          <button role="tab" data-mode="evo" aria-pressed="false">新舊對照</button>
         </div>
       </div>
       <div class="chapters-block">
@@ -331,6 +360,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   const TERMS = DATA.terms || [];
   const SYMS  = DATA.symbols || {};
   const SHEETS = DATA.sheets || [];
+  const PAGES = DATA.pages || [];
   const GCATS = META.glossaryCats || {};
   const CHAPTERS = META.chapters; // [{key,name,group}]
   const STORE_KEY = 'jam-m1-drill-v1';
@@ -573,6 +603,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     } else if (state.mode === 'qa'){
       h += '<span class="stat"><span class="k">問答</span><b>'+list.length+'</b><span class="k">/ '+total+' 題 · 一題一題讀</span></span>';
       h += '<span class="stat"><span class="k">已展開</span><b>'+(state.qaOpen? list.length : state.qaSeen.size)+'</b></span>';
+    } else if (state.mode === 'evo'){
+      h += '<span class="stat"><span class="k">新舊對照</span><b>Polkadot 1.0 → 2.0 → JAM</b></span>';
     } else if (state.mode === 'gloss'){
       h += '<span class="stat"><span class="k">名詞解釋</span><b>' + TERMS.length + '</b><span class="k">條 · Gray Paper 0.8.0 符號</span></span>';
     } else if (state.mode === 'review'){
@@ -892,6 +924,39 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   }
 
   // ---------- 速記 cheat sheet ----------
+  // ---------- reference page: content lives in pages/*.py, validated at build time ----------
+  function renderPage(id){
+    const el = $('#content');
+    const pg = PAGES.find(p => p.id === id);
+    if (!pg){ el.innerHTML = '<div class="empty"><h3>這一頁還沒有內容</h3></div>'; return; }
+    const txt = s => glossSyms(inlineCode(s));
+    const block = b => {
+      if (b.kind === 'p') return '<p>'+txt(b.text)+'</p>';
+      if (b.kind === 'callout') return '<div class="note">'+txt(b.text)+'</div>';
+      if (b.kind === 'list') return '<ul>'+b.items.map(x=>'<li>'+txt(x)+'</li>').join('')+'</ul>';
+      if (b.kind === 'links') return '<dl class="links">'+b.items.map(l=>'<dt>'+esc(l.code||'')+'</dt><dd><a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a></dd>').join('')+'</dl>';
+      if (b.kind === 'table'){
+        const srcCol = b.head[b.head.length-1] === '來源' ? b.head.length-1 : -1;
+        return '<div class="tblwrap"><table class="cmp'+(b.wide?' wide':'')+'"><thead><tr>'
+          + b.head.map(x=>'<th>'+esc(x)+'</th>').join('') + '</tr></thead><tbody>'
+          + b.rows.map(r=>'<tr>'+r.map((c,i)=> i===srcCol ? '<td class="src">'+esc(c)+'</td>' : '<td>'+txt(c)+'</td>').join('')+'</tr>').join('')
+          + '</tbody></table></div>';
+      }
+      return '';
+    };
+    let h = '<div class="card page">';
+    h += '<h2>'+esc(pg.title)+'</h2>';
+    h += '<p class="lead">'+txt(pg.lead)+'</p>';
+    h += '<p class="checked">資料檢視日期 '+esc(pg.checked)+'</p>';
+    h += '<div class="page-toc">'+pg.sections.map(s=>'<button class="chip" data-sec="'+esc(s.id)+'">'+esc(s.title)+'</button>').join('')+'</div>';
+    pg.sections.forEach(s => { h += '<section id="pg-'+esc(s.id)+'"><h3>'+esc(s.title)+'</h3>'+s.blocks.map(block).join('')+'</section>'; });
+    h += '</div>';
+    el.innerHTML = h;
+    $$('#content .page-toc [data-sec]').forEach(b => b.onclick = () => {
+      const t = document.getElementById('pg-'+b.dataset.sec);
+      if (t) t.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
   function renderSheet(){
     const el = $('#content');
     const have = SHEETS.map(s=>s.ch);
@@ -930,7 +995,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     if (m === 'practice') buildQueue();
     renderAll();
   }
-  function renderAll(){ renderChapters(); renderStatus(); if (state.mode==='practice') renderPractice(); else if (state.mode==='qa') renderQA(); else if (state.mode==='sheet') renderSheet(); else if (state.mode==='mock') renderMock(); else if (state.mode==='gloss') renderGloss(); else renderReview(); }
+  function renderAll(){ renderChapters(); renderStatus(); if (state.mode==='practice') renderPractice(); else if (state.mode==='qa') renderQA(); else if (state.mode==='sheet') renderSheet(); else if (state.mode==='mock') renderMock(); else if (state.mode==='gloss') renderGloss(); else if (state.mode==='evo') renderPage('polkadot-evolution'); else renderReview(); }
 
   $('#chapters').addEventListener('click', e => {
     const b = e.target.closest('.ch'); if (!b) return;
@@ -962,7 +1027,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   };
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea')) return;
-    if (state.mode === 'gloss' || state.mode === 'qa' || state.mode === 'sheet') return;
+    if (state.mode === 'gloss' || state.mode === 'qa' || state.mode === 'sheet' || state.mode === 'evo') return;
     if (e.key >= '1' && e.key <= '4'){
       const btn = $$('#content .opt')[+e.key-1]; if (btn && !btn.disabled){ btn.click(); e.preventDefault(); }
     } else if (e.key === 'Enter' || e.key === 'ArrowRight'){
@@ -978,5 +1043,6 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   $('#brandSub').textContent = META.gpVersion+' · '+META.team;
   $('#rail').dataset.mode = state.mode;
   buildQueue(); renderAll();
+  if (location.hash === '#evo') setMode('evo');
 })();
 </script>

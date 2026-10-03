@@ -163,5 +163,19 @@ console.log(JSON.stringify(results, null, 1));
   await page.waitForTimeout(250);
   console.log('sheet no h-overflow @420:', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   console.log('sheet errors:', JSON.stringify(errs));
+
+  // ---- reference page (新舊對照) ----
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator('.modes button[data-mode="evo"]').click();
+  await page.waitForTimeout(300);
+  console.log('page title:', await page.locator('.page h2').textContent(),
+              '| sections:', await page.locator('.page section').count(),
+              '| tables:', await page.locator('.page table.cmp').count(),
+              '| rows:', await page.locator('.page table.cmp tbody tr').count());
+  await page.screenshot({ path: 'dist/shot-page.png', fullPage: true });
+  await page.setViewportSize({ width: 420, height: 800 });
+  await page.waitForTimeout(250);
+  console.log('page no h-overflow @420:', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  console.log('page errors:', JSON.stringify(errs));
   await browser2.close();
 }

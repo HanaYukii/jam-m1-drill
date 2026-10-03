@@ -58,6 +58,53 @@ def validate_sheets(sheets):
     sheets.sort(key=lambda x: order.index(x["ch"]) if x["ch"] in order else 99)
     return errors
 
+PAGE_DIR = os.path.join(ROOT, "pages")
+PAGE_BLOCKS = {"p", "list", "table", "callout", "links"}
+
+def load_pages():
+    """Long-form reference pages (pages/*.py, each exporting PAGE). Rendered by the app as their own tab."""
+    pages = []
+    for path in sorted(glob.glob(os.path.join(PAGE_DIR, "*.py"))):
+        spec = importlib.util.spec_from_file_location("pg_" + os.path.basename(path)[:-3], path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        pages.append(mod.PAGE)
+    return pages
+
+def validate_pages(pages):
+    errors, seen = [], set()
+    for pg in pages:
+        w = "page " + str(pg.get("id"))
+        for k in ("id", "title", "lead", "checked", "sections"):
+            if not pg.get(k): errors.append(f"{w}: missing {k}")
+        if pg.get("id") in seen: errors.append(f"{w}: duplicate id")
+        seen.add(pg.get("id"))
+        sids = set()
+        for sec in pg.get("sections", []):
+            sw = f"{w} / {sec.get('id')}"
+            if not sec.get("id") or not sec.get("title"): errors.append(f"{sw}: section needs id and title")
+            if sec.get("id") in sids: errors.append(f"{sw}: duplicate section id")
+            sids.add(sec.get("id"))
+            if not sec.get("blocks"): errors.append(f"{sw}: section has no blocks")
+            for i, b in enumerate(sec.get("blocks", [])):
+                bw = f"{sw} block {i}"
+                kind = b.get("kind")
+                if kind not in PAGE_BLOCKS:
+                    errors.append(f"{bw}: unknown kind {kind!r}"); continue
+                if kind in ("p", "callout") and not b.get("text"): errors.append(f"{bw}: missing text")
+                if kind == "list" and not b.get("items"): errors.append(f"{bw}: missing items")
+                if kind == "table":
+                    head, rows = b.get("head") or [], b.get("rows") or []
+                    if not head or not rows: errors.append(f"{bw}: table needs head and rows")
+                    for r in rows:
+                        if len(r) != len(head):
+                            errors.append(f"{bw}: row {str(r[0])[:24]!r} has {len(r)} cells, head has {len(head)}")
+                if kind == "links":
+                    for l in b.get("items") or []:
+                        if not (l.get("label") and str(l.get("url", "")).startswith("https://")):
+                            errors.append(f"{bw}: link needs a label and an https url")
+    return errors
+
 def load_terms():
     terms, srcs = [], {}
     for path in sorted(glob.glob(os.path.join(GLOSS_DIR, "*.py"))):
@@ -225,6 +272,9 @@ if __name__ == "__main__":
     report(items)
     print("glossary terms:", len(terms), dict(collections.Counter(t["cat"] for t in terms)))
     errors += errors_g
+    pages = load_pages()
+    errors += validate_pages(pages)
+    print("pages:", len(pages), [pg.get("id") for pg in pages])
     for w in warnings:
         print("WARN:", w)
     for e in errors:
