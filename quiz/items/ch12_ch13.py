@@ -4,30 +4,15 @@ ITEMS = [
 {
  "id": "ch12-history-queue-state",
  "lens": "演算法",
- "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.1–12.3",
+ "ch": "12", "section": "12.1 History and Queuing", "gpRef": "eq. 12.1–12.3, 12.31–12.33",
  "difficulty": 2, "kind": "concept", "tags": ["authorizer", "accumulate"],
   "stemZh": "ξ（accumulated）與 ω（ready）是什麼？它們各有多大？",
-  "optionsZh": [
-   "ξ ∈ [{H}]_E——最近 E = 600 個 slot、每槽一個已 accumulate 的 work-package 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽一串「該槽變為 available 但依賴仍未滿足」的 report，每筆配上它尚未滿足的依賴集合",
-   "ξ ∈ [{H}]_E——最近 E = 600 個 slot、每槽一個已 accumulate 的 work-report 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽收錄該槽變為 available 的每一份 report，不論依賴是否已滿足，每筆配上它原本宣告的完整依賴集合",
-   "ξ ∈ {H}——一個扁平集合，裝下有史以來每一個被 accumulate 的 work-package 雜湊、永不修剪；ω ∈ [[(𝕎, {H})]]_E——每槽一串該槽變為 available 但依賴仍未滿足的 work-item，每筆配上它尚未滿足的依賴集合",
-   "ξ ∈ [{H}]_C——每個 core 一個已 accumulate 的 work-package 雜湊集合，共 C = 341 個；ω ∈ [[(ℝ, {H})]]_C——每個 core 一條佇列，裝該 core 依賴仍未滿足的 report，每筆配上它尚未滿足的依賴集合"
-  ],
+  "optionsZh": ["ξ ∈ [{H}]_E——長度 E = 600 的已 accumulate work-package 雜湊集合序列，每個 block transition 左移並加入本塊結果；ω ∈ [[(ℝ, {H})]]_E——按 slot 循環索引的 report 佇列，保存曾有依賴且尚未處理的 report 與目前未滿足的依賴集合", "ξ ∈ [{H}]_E——最近 E = 600 個 slot、每槽一個已 accumulate 的 work-report 雜湊集合（一個 epoch 份的歷史）；ω ∈ [[(ℝ, {H})]]_E——每槽收錄該槽變為 available 的每一份 report，不論依賴是否已滿足，每筆配上它原本宣告的完整依賴集合", "ξ ∈ {H}——一個扁平集合，裝下有史以來每一個被 accumulate 的 work-package 雜湊、永不修剪；ω ∈ [[(𝕎, {H})]]_E——每槽一串該槽變為 available 但依賴仍未滿足的 work-item，每筆配上它尚未滿足的依賴集合", "ξ ∈ [{H}]_C——每個 core 一個已 accumulate 的 work-package 雜湊集合，共 C = 341 個；ω ∈ [[(ℝ, {H})]]_C——每個 core 一條佇列，裝該 core 依賴仍未滿足的 report，每筆配上它尚未滿足的依賴集合"],
   "stem": "What are ξ (accumulated) and ω (ready) and how big are they?",
- "options": [
-  "ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set",
-  "ξ ∈ [{H}]_E — one set of accumulated WORK-REPORT hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, every report that became available in that slot, whether or not its dependencies are met, each paired with the full dependency set it originally declared",
-  "ξ ∈ {H} — one flat set holding every work-package hash ever accumulated, never pruned; ω ∈ [[(𝕎, {H})]]_E — per slot, the work-ITEMS made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set",
-  "ξ ∈ [{H}]_C — one set of accumulated work-package hashes per core, so C = 341 sets; ω ∈ [[(ℝ, {H})]]_C — one queue per core holding that core's reports which still have unfulfilled dependencies, each paired with its outstanding dependency set"
- ],
+ "options": ["ξ ∈ [{H}]_E — an E = 600-entry sequence of accumulated work-package hash sets, shifted once per block transition; ω ∈ [[(ℝ, {H})]]_E — a slot-indexed cyclic queue of not-yet-accumulated reports that have or had dependencies, each paired with its remaining dependency set", "ξ ∈ [{H}]_E — one set of accumulated WORK-REPORT hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, every report that became available in that slot, whether or not its dependencies are met, each paired with the full dependency set it originally declared", "ξ ∈ {H} — one flat set holding every work-package hash ever accumulated, never pruned; ω ∈ [[(𝕎, {H})]]_E — per slot, the work-ITEMS made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set", "ξ ∈ [{H}]_C — one set of accumulated work-package hashes per core, so C = 341 sets; ω ∈ [[(ℝ, {H})]]_C — one queue per core holding that core's reports which still have unfulfilled dependencies, each paired with its outstanding dependency set"],
  "answer": 0,
- "optNotes": [
-  "eq. 12.1 與 12.3 都以 slot 索引、長度 E，ω 配的是尚未滿足的 dependency 集合。",
-  "P(r) 取的是 avspec 的 work-package hash；eq. 12.4 只把有依賴者放進 R^Q，配的也是修剪後剩下的依賴。",
-  "ξ 是長度 E 的序列、歷史只留一個 epoch；ω 裝的是 work-report ℝ，𝕎 是 §14.3 的 work-item。",
-  "ξ 與 ω 都以 slot 索引、長度都是 E = 600；App. D 的 C(14) 也是照 slot 逐格序列化。",
- ],
- "explanation": "兩個都是**長度 E = 600 的環狀緩衝**，也就是「一個 epoch 份的歷史」。**ξ（accumulation history，eq. 12.1）**：ξ ∈ ⟦{H}⟧_E——每個 slot 一個集合，裝該 slot 已 accumulate 的 work-package hash；ξ_∪ 是全部的聯集。用途是**防重複**與**判斷依賴是否已滿足**。**ω（ready queue，eq. 12.3）**：ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E——每個 slot 一串「已經 available、但依賴還沒滿足」的 report，每筆配上它**尚未滿足的**依賴集合（會隨時間被扣減，不是原始清單）。**環狀怎麼轉**：ξ′[E−1] 放本塊剛 accumulate 的 hash、其餘左移；ω′[m]（m = H_T mod E）放本塊新產生的 R^Q，而**被跳過的 slot（沒出塊的那些）會被清空**。**為什麼是一個 epoch 的長度**：依賴等太久就沒有意義了——被依賴的 package 若一個 epoch 都沒出現，等下去也不會出現。所以懸而未決的 report 最終會被環狀覆蓋而自然消失，**不需要額外的清理機制**。這也表示「依賴解不開」不會讓區塊無效，只是那份工作靜靜地過期。這正是 test vectors 裡 accumulate 目錄的 enqueue／unlock／ring-wrap 三類案例在測的東西。",
+ "optNotes": ["eq. 12.31–12.33：ξ 每個 transition 左移，ω 依 slot 循環索引；兩者長度都是 E，但更新方式不同。", "P(r) 取的是 avspec 的 work-package hash；eq. 12.4 只把有依賴者放進 R^Q，配的也是修剪後剩下的依賴。", "ξ 是長度 E 的有界序列，不是永久集合；ω 裝 work-report ℝ，不是 work-item 𝕎。", "ξ 與 ω 的外層長度都是 E = 600，而非 core 數 C；ω 另依 slot 循環索引。"],
+ "explanation": "§12.1 說 ξ 保留「an epoch worth of work-reports」，型別為 ξ ∈ ⟦{H}⟧_E，保存已累積的 work-package hashes，其聯集用於解開依賴與檢查重複。ω ∈ ⟦⟦(ℝ,{H})⟧⟧_E，保存已 available、尚未累積且現在或曾經有依賴的 reports，配的是目前剩餘的依賴集合。兩者長度均為 E = 600，但不是相同的每-slot ring 更新：eq. 12.31–12.32 讓 ξ 每個 block transition 左移一格，末格加入 P(R*[..n])；eq. 12.33 讓 ω 以 m = H_T mod E 定位新槽，依 τ′−τ 清空跳過的 slots，其他槽再用 E 剪除已處理項目與依賴。依賴解不開的 report 不會由 Q 選出，最終會隨 ω 的槽位覆寫或清理而消失；這不是對該依賴永遠不可能出現的證明。集合內容、report 型別與兩種更新方式都不可混淆。",
  "trap": "ξ 存的是 package hash 不是 report hash；ready 的依賴在每次 accumulate 後用 E() 修剪。"
 },
 {
@@ -182,26 +167,16 @@ ITEMS = [
  "difficulty": 2, "kind": "concept", "tags": ["accumulate", "prior/posterior"],
   "stemZh": "Δ+ 回傳 (n, e′, b, u, t) 之後，每一項各怎麼併入 posterior 狀態？",
   "optionsZh": [
-   "θ′ = b 中的 (service, 雜湊) 配對（那些 yield 出 32 位元組雜湊的 service）；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（accumulate 掉的項數 N、處理掉的 transfer 數 T、用掉的 gas G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
+   "θ′ = b 中的 (service, 雜湊) 配對（最終產生非空 output 的 service）；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（accumulate 掉的項數 N、處理掉的 transfer 數 T、用掉的 gas G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
    "θ′ = H(E(δ†))，一個對整份 posterior service 狀態的單一承諾；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*)，也就是整個可 accumulate 序列",
    "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（項數 N、用掉的 gas G），transfer 計數已被移除；δ‡ 把 keys(δ†) 中每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])",
    "θ′ = b 中的 (service, 雜湊) 配對；(δ†, ι′, φ′, χ′) 來自 e′；accumulation 統計逐 service 記錄（N、T、G）；δ‡ 把出現在統計裡的每個 service 的 a_a 標記為 τ′；ξ′[E−1] = P(R*[..n])，而 ω′ 會被完全清空，因此排隊中的 report 永遠無法跨越一個區塊存活"
   ],
   "stem": "After Δ+ returns (n, e′, b, u, t), how is each of those integrated into the posterior state?",
- "options": [
-  "θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])",
-  "θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence",
-  "θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, G gas used), the transfer count having been dropped; δ‡ marks a_a = τ′ for every service in keys(δ†); ξ′[E−1] = P(R*[..n])",
-  "θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n]) and ω′ is emptied in full, so that no queued report ever survives a block"
- ],
+ "options": ["θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])", "θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence", "θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, G gas used), the transfer count having been dropped; δ‡ marks a_a = τ′ for every service in keys(δ†); ξ′[E−1] = P(R*[..n])", "θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n]) and ω′ is emptied in full, so that no queued report ever survives a block"],
  "answer": 0,
- "optNotes": [
-  "θ′ 取 b 的 (s, h) 配對、統計是三元組、a_a 只更新 keys(S)、ξ′[E−1] 只收 R*[..n]，四項全對。",
-  "θ′ 是 accumulation output log 不是狀態雜湊；ξ′[E−1] 只收本塊真的做完的 R*[..n]。",
-  "0.8.0 的 S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。",
-  "ω′ 是環狀更新：只有被跳過的 slot 會清空，其餘 slot 保留並同樣經過 E 修剪。",
- ],
- "explanation": "Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.24）：θ′ ≡ [(s, h) ∈ b]，也就是有呼叫 `yield` 且回傳非 ∅ 的 service 及其 hash——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。**為什麼要記這個時間**：`eject` 需要它來判斷一個 service 是否已經長期閒置。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。",
+ "optNotes": ["θ′ 取 b 的 (s, h) 配對、統計是三元組、a_a 只更新 keys(S)、ξ′[E−1] 只收 R*[..n]，四項全對。", "θ′ 是 accumulation output log 不是狀態雜湊；ξ′[E−1] 只收本塊真的做完的 R*[..n]。", "0.8.0 的 S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。", "ω′ 當前槽寫入修剪後的新 queue，跳過的 slots 清空，其餘槽保留並經 E 修剪，不是整個 ω 清空。"],
+ "explanation": "Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.25）：θ′ ≡ [(s, h) ∈ b]，也就是Δ1 最終 output 非 ∅ 的 service 及其 hash；附錄 B.13 允許正常回傳的 32-byte blob 成為 output，並非一定要呼叫 `yield`——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。此處只更新 last-accumulation record；不要與 `eject` 對 preimage request 歷史及 expunge period 的檢查混淆。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。",
  "trap": "a_a（last accumulation slot）只對「這塊真的 accumulate 過」的 service 更新。"
 },
 {

@@ -1,7 +1,7 @@
 # JAM M1 Drill — 問答講義
 
 Gray Paper **0.8.0** · 21 章速記 · 333 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-09-20
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-10-03
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
@@ -502,53 +502,53 @@ core 上的計算怎麼被「認證」與「保存」：guarantor 跑完 refine 
 
 ## §12 Accumulation
 
-把已 available 的 work-report 依 dependency 解鎖，排成序列後逐 service 呼叫 accumulate，在 gas 上限內產出新的 δ / χ / ι / φ 與本塊 output log θ。這是 JAM「鏈上」真正改狀態的唯一入口。
+把已 available 的 work-report 排成候選序列，在 gas 預算內執行各 service 的 accumulate，將工作結果套入鏈上 service 狀態，並產出 χ′ / ι′ / φ′ 與 output log θ′。
 
 **流程**
 
-1. R = 本塊剛變 available 的 reports（來自 ρ‡ 被 assurance 清掉的那些）
-2. R! = 無 prerequisite 且 l = ∅ → 立刻可累積；R^Q = 其餘進佇列
-3. ω（ready queue，長度 E 的環狀緩衝）存「已 available 但依賴未滿足」的 (report, 未滿足依賴集)
-4. ξ（accumulated history，長度 E）存過去每個 slot 累積過的 package hash，用來解鎖與擋重複
-5. R* = Q(ω 由舊到新展開) ⌢ R!　→ 這就是本塊要餵給 Δ 的序列
-6. Δ+ 依 gas 上限決定「這塊能吃幾個」→ Δ* 對單一 service 跑一輪 → Δ1 真正呼叫 PVM 的 accumulate
-7. δ† → δ‡ → δ′：deferred transfer 在 δ‡ 之後才套用；θ′ 收 (service, hash) 的 output log
+1. R = 本塊經 assurance 剛變 available 的 reports，不是本塊 E_G 新加入的所有 reports
+2. R! = 無 prerequisite 且 segment-root lookup 為空；R^Q = 其餘配上依賴並用 ξ 的聯集修剪
+3. ω 保存已 available、尚未累積且現在或曾經有依賴的 (report, 剩餘依賴集)
+4. ξ 是長度 E 的已累積 package hash 集合序列；每次 block transition 左移，末格加入本塊結果
+5. R* = R! ⌢ Q(q)；q = E(flatten(ω[m..]) ⌢ flatten(ω[..m]) ⌢ R^Q, P(R!))，m = H_T mod E
+6. Δ+ 挑可負擔的 report 前綴並遞迴；Δ* 本輪按 service 執行並合併；Δ1 組參數交給 Ψ_A
+7. deferred transfers 在同 block 後續 Δ+ 輪次整合；δ† 是整個 Δ+ 的帳戶結果，δ‡ 更新 last-accumulation record，δ′ 再整合 E_P
 
 **常數與門檻**
 
-- `E = 600` — ω 與 ξ 的長度＝一個 epoch 的 slot 數
-- `G_A / G_T / G_I` — 單次 accumulate 上限 / 整塊總 gas / is-authorized 上限；Δ+ 用的是總量門檻
-- `χ_M / χ_A / χ_V / χ_R` — manager / assigners / delegator / registrar 四個特權 service（0.8.0 的 χ 形狀）
-- `χ_Z` — always-accumulate 集合：即使本塊沒有 report 也會被呼叫，帶各自的 gas 配額
+- `E = 600` — ξ 與 ω 長度相同，但 ξ 按 transition 左移，ω 按 slot 循環索引並清理跳過的 slots
+- `G_A / G_T` — 每 report 的 digest accumulation gas 總上限 / block gas 基準；初始 g 依 eq. 12.24 取 max
+- `χ_M / χ_A / χ_V / χ_R` — manager / 每 core 的 assigner / delegator / registrar 索引，角色不必由不同 service 擔任
+- `χ_Z` — service id → 基本 gas 配額的字典；第一輪帶入，即使沒有 report 或 transfer 也可觸發執行
 
 **核心公式**
 
 - `eq. 12.1–12.3` — ξ ∈ ⟦{H}⟧_E、ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 的型別與長度
-- `eq. 12.4–12.6` — R! / R^Q / R* 三段切法與 Q 函數（依賴解鎖）
-- `eq. 12.18` — deferred transfer 要以 s ↕ s 排序後處理 —— 不是 map 迭代順序
-- `eq. 12.24` — (n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ 取 Δ+ 回傳的 output log
+- `eq. 12.4–12.12` — D 取依賴、E 刪項目並剪依賴、P 取 package hashes、Q 依序解鎖；R! 排在 Q(q) 前
+- `eq. 12.18` — 依 service index 的確定順序串接 transfers，保留每個 service 輸出序列內的順序
+- `eq. 12.24–12.26` — Δ+ 回傳 (n, e′, b, u, t)；e′ 給出 δ† 等狀態，b 形成 θ′
 
 **最常被追問**
 
-- **為什麼要 ω / ξ 兩個環狀緩衝，不能只用一個集合？**  
-  ξ 是「已累積」的歷史，用來擋重複與解鎖依賴；ω 是「已 available 但還不能累積」的待辦。兩者都做成長度 E 的環，是為了讓過期自動掉出去、狀態有界，且 O(1) 就能回答「這個 package 最近累積過沒」。
-- **Δ+ / Δ* / Δ1 為什麼要分三層？**  
-  Δ1 = 對單一 service 呼叫 PVM 的 accumulate（真正執行）；Δ* = 把同一輪裡每個 service 各跑一次並合併狀態；Δ+ = 在 gas 上限下決定「這一塊到底能吃 R* 的前幾個」，回傳吃掉的個數 n。分層是為了讓 gas 上限的截斷只發生在最外層，內層保持純函數。
-- **accumulate 失敗（panic / OOG）會怎樣？**  
-  該 service 這一輪的狀態變更整批丟棄，但 report 仍算「已累積」進 ξ，不會無限重試；gas 照扣（block-level 預扣），output log 記空。這是刻意的：否則一個壞 service 可以卡住整條鏈。
-- **為什麼 deferred transfer 要另外一個 δ‡ 階段？**  
-  accumulate 期間 service 之間若能直接互改餘額，結果就會依賴執行順序。先全部收集成 transfer，再以固定排序統一套用，才能讓所有節點得到相同的 δ′。
+- **為什麼需要 ω 和 ξ？**  
+  ξ 記已累積的 package hashes，ω 記尚未處理的 reports 及剩餘依賴。兩者有界但更新方式不同；GP 的集合定義本身不保證實作查詢為 O(1)。
+- **Δ+ / Δ* / Δ1 為什麼分三層？**  
+  Δ+ 以 gas limits 選前綴，再依 actual usage 決定後續輪次；Δ* 聚合同一 service 的工作以攤銷 PVM 啟動成本並合併結果；Δ1 組出單一 service 的 gas 與 operands，呼叫 Ψ_A。
+- **panic 或 OOG 會怎樣？**  
+  附錄 B.4 的 collapse 採 exceptional context y；checkpoint 保存的變更、transfers、output 與 provisions 可以留下。初始 context 已含 incoming transfer 入帳，actual gas used 仍回報；不能說全部回滾或 output 必空。已處理的 report 前綴仍記入 ξ。
+- **deferred transfer 延到何時？**  
+  sender 在局部 context 扣款並記錄 transfer，最終採用的 context 決定是否送出。合併後交給下一輪 Δ+ 的 receiver，通常仍在同一 block。δ‡ 本身只更新最後累積時間，並非 transfer 執行階段。
 
 **0.7.2 → 0.8.0**
 
-- ready queue 由 0.7.2 的 ϑ 更名為 ω（state key 與型別都沒動），為了不跟 output log θ 撞符號
-- χ 由單純 bless 三元組擴成 manager / assigners / delegator / registrar 四個角色，且只有 manager 能改 bless
-- accumulate 的 gas 改成 block-level 預扣（見附錄 A 的 0.8.0 gas model）
+- v0.8.0 ready queue 使用 ω；對照舊實作 Vartheta 時須區分 output log θ
+- v0.8.0 的 χ 有 manager、assigners、delegator、registrar、always-accumulate 五類欄位；bless 檢查 manager 權限
+- eq. 12.17 選前綴也要計入 transfer gas 與 free allowance；這與附錄 A 的 basic-block instruction gas 計費是不同層次
 
 **對應程式碼**
 
-- internal/accumulate/ — Δ+/Δ*/Δ1 的對應實作；注意 Vartheta 欄位就是 ω
-- ⚠ 團隊實作用 Go map 迭代順序處理 transfer，eq. 12.18 要求 s ↕ s 排序，且 sort.Slice 不穩定 → state root 可能分歧
+- 歷史 code-map：internal/accumulation/ 的 OuterAccumulation / ParallelizedAccumulation / SingleServiceAccumulation；PVM/accumulate_invocation.go 的 Psi_A
+- Review 線索：unordered map 收集 transfer 或不穩定排序可能改變 operand 順序；是否仍存在須核對目前 checkout
 
 ---
 
@@ -7284,26 +7284,26 @@ eq. 12.8 的 Q 只挑 dependency 集合為空的項目（g = [r | (r, ∅) ↕ r
 
 ---
 
-### 12-5　In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, and it calls `yield`. What ends up in θ′, and what consumes it?
+### 12-5　In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, and it calls `yield`. Assume these are the only accumulation invocations in the block, and all three terminate normally with an empty return blob. What ends up in θ′, and what consumes it?
 
-<sub>12.3 Final State Integration — ●●○ · 概念 · eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B)</sub>
+<sub>12.3 Final State Integration — ●●○ · 概念 · eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B); eq. B.13 (collapse)</sub>
 
 **標準答案**　b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, so θ′ carries exactly the pairs for services 5 and 9 — service 6 shows up in u and in the accumulation statistics S but not here. θ′ is a state item of its own, replaced wholesale each block, and it is the input to β′_B = A(β_B, M_B(s, H_K), H_K) whose super-peak is stored in the new β_H entry
 
-eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 的條件就是「**沒呼叫 `yield` 就不入列**」。所以本題三個服務：5 有 yield → 入列；6 只燒 gas → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。
+eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 檢查的是 **Δ1 最後的 output**。附錄 B.13 的 collapse C 在正常回傳 32-byte blob 時採用該 blob，其他正常回傳才取 context yield；panic／OOG 則取 checkpoint context。因此沒呼叫 `yield` 不代表一定沒有 output。所以本題三個服務：5 有 yield → 入列；6 無 yield 且正常回傳空 blob → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。
 
 **逐項辨析**
 
 1. ❌ θ′ holds one entry for every service in Δ*'s service set s, with the zero hash standing in for services that did not yield, so θ′ carries pairs for services 5, 6 and 9 alike and |θ′| = |s|, which is what lets downstream verifiers index it by position. It is a state item of its own, replaced wholesale each block, and it is what β′_B appends to  
-   與 eq. 12.18 的 b ≠ ∅ 過濾直接衝突，也讓「零 hash」這個合法的 yield 值無從分辨。
+   與 eq. 12.18 的 y ≠ ∅ 過濾衝突；零 hash 是合法 output，不能用來代替沒有 output。
 2. ❌ b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, so this block contributes exactly the pairs for services 5 and 9; but θ′ is the append-only log of every accumulation output since genesis, so those two pairs are merely its tail, and the belt β_B is a cache of the Merkle root taken over that whole log  
    方向顛倒：θ′ 每塊整批換掉（state key C(16)），真正跨區塊累積的是 §7 的 β_B。
 3. ✅ b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, so θ′ carries exactly the pairs for services 5 and 9 — service 6 shows up in u and in the accumulation statistics S but not here. θ′ is a state item of its own, replaced wholesale each block, and it is the input to β′_B = A(β_B, M_B(s, H_K), H_K) whose super-peak is stored in the new β_H entry  
-   b ≠ ∅ 濾掉沒呼叫 yield 的 service 6，而 transfer 收款方本來就在 s 裡，所以 5 與 9 都入列。
+   service 6 既無 yield 又正常回傳空 blob，最終 y = ∅；5 與 9 的 yield 保留，所以入列。
 4. ❌ b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}, but only services holding at least one work-digest in R*[..n] are members of s, so θ′ carries the pair for service 5 alone — service 9 is excluded even though it yielded, because a service reached solely by a deferred transfer can never commit an accumulation output. θ′ is replaced wholesale each block and is what β′_B appends to  
    eq. 12.18 的 s 是三段聯集，純收款與 always-accumulate 服務同樣會被 Δ1 呼叫、同樣能 yield。
 
-> **陷阱**　沒 yield 就沒 commitment：θ′ 的長度由 yield 次數決定，不由 |s| 決定。
+> **陷阱**　看最終 output 是否非空，不是計算 yield 呼叫次數；正常回傳的 32-byte blob 也能形成 commitment。
 
 <sub>`c3-ch12-theta-from-yield`</sub>
 
@@ -7467,22 +7467,22 @@ eq. 12.18 對這兩個輸出都用了有序迭代記號：u = ⟦(s, Δ(s)_u) | 
 
 ### 12-11　What are ξ (accumulated) and ω (ready) and how big are they?
 
-<sub>12.1 History and Queuing — ●●○ · 概念 · eq. 12.1–12.3</sub>
+<sub>12.1 History and Queuing — ●●○ · 概念 · eq. 12.1–12.3, 12.31–12.33</sub>
 
-**標準答案**　ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set
+**標準答案**　ξ ∈ [{H}]_E — an E = 600-entry sequence of accumulated work-package hash sets, shifted once per block transition; ω ∈ [[(ℝ, {H})]]_E — a slot-indexed cyclic queue of not-yet-accumulated reports that have or had dependencies, each paired with its remaining dependency set
 
-兩個都是**長度 E = 600 的環狀緩衝**，也就是「一個 epoch 份的歷史」。**ξ（accumulation history，eq. 12.1）**：ξ ∈ ⟦{H}⟧_E——每個 slot 一個集合，裝該 slot 已 accumulate 的 work-package hash；ξ_∪ 是全部的聯集。用途是**防重複**與**判斷依賴是否已滿足**。**ω（ready queue，eq. 12.3）**：ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E——每個 slot 一串「已經 available、但依賴還沒滿足」的 report，每筆配上它**尚未滿足的**依賴集合（會隨時間被扣減，不是原始清單）。**環狀怎麼轉**：ξ′[E−1] 放本塊剛 accumulate 的 hash、其餘左移；ω′[m]（m = H_T mod E）放本塊新產生的 R^Q，而**被跳過的 slot（沒出塊的那些）會被清空**。**為什麼是一個 epoch 的長度**：依賴等太久就沒有意義了——被依賴的 package 若一個 epoch 都沒出現，等下去也不會出現。所以懸而未決的 report 最終會被環狀覆蓋而自然消失，**不需要額外的清理機制**。這也表示「依賴解不開」不會讓區塊無效，只是那份工作靜靜地過期。這正是 test vectors 裡 accumulate 目錄的 enqueue／unlock／ring-wrap 三類案例在測的東西。
+§12.1 說 ξ 保留「an epoch worth of work-reports」，型別為 ξ ∈ ⟦{H}⟧_E，保存已累積的 work-package hashes，其聯集用於解開依賴與檢查重複。ω ∈ ⟦⟦(ℝ,{H})⟧⟧_E，保存已 available、尚未累積且現在或曾經有依賴的 reports，配的是目前剩餘的依賴集合。兩者長度均為 E = 600，但不是相同的每-slot ring 更新：eq. 12.31–12.32 讓 ξ 每個 block transition 左移一格，末格加入 P(R*[..n])；eq. 12.33 讓 ω 以 m = H_T mod E 定位新槽，依 τ′−τ 清空跳過的 slots，其他槽再用 E 剪除已處理項目與依賴。依賴解不開的 report 不會由 Q 選出，最終會隨 ω 的槽位覆寫或清理而消失；這不是對該依賴永遠不可能出現的證明。集合內容、report 型別與兩種更新方式都不可混淆。
 
 **逐項辨析**
 
-1. ✅ ξ ∈ [{H}]_E — one set of accumulated work-package hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, the reports made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set  
-   eq. 12.1 與 12.3 都以 slot 索引、長度 E，ω 配的是尚未滿足的 dependency 集合。
+1. ✅ ξ ∈ [{H}]_E — an E = 600-entry sequence of accumulated work-package hash sets, shifted once per block transition; ω ∈ [[(ℝ, {H})]]_E — a slot-indexed cyclic queue of not-yet-accumulated reports that have or had dependencies, each paired with its remaining dependency set  
+   eq. 12.31–12.33：ξ 每個 transition 左移，ω 依 slot 循環索引；兩者長度都是 E，但更新方式不同。
 2. ❌ ξ ∈ [{H}]_E — one set of accumulated WORK-REPORT hashes per slot for the last E = 600 slots (an epoch of history); ω ∈ [[(ℝ, {H})]]_E — per slot, every report that became available in that slot, whether or not its dependencies are met, each paired with the full dependency set it originally declared  
    P(r) 取的是 avspec 的 work-package hash；eq. 12.4 只把有依賴者放進 R^Q，配的也是修剪後剩下的依賴。
 3. ❌ ξ ∈ {H} — one flat set holding every work-package hash ever accumulated, never pruned; ω ∈ [[(𝕎, {H})]]_E — per slot, the work-ITEMS made available in that slot that still have unfulfilled dependencies, each paired with its outstanding dependency set  
-   ξ 是長度 E 的序列、歷史只留一個 epoch；ω 裝的是 work-report ℝ，𝕎 是 §14.3 的 work-item。
+   ξ 是長度 E 的有界序列，不是永久集合；ω 裝 work-report ℝ，不是 work-item 𝕎。
 4. ❌ ξ ∈ [{H}]_C — one set of accumulated work-package hashes per core, so C = 341 sets; ω ∈ [[(ℝ, {H})]]_C — one queue per core holding that core's reports which still have unfulfilled dependencies, each paired with its outstanding dependency set  
-   ξ 與 ω 都以 slot 索引、長度都是 E = 600；App. D 的 C(14) 也是照 slot 逐格序列化。
+   ξ 與 ω 的外層長度都是 E = 600，而非 core 數 C；ω 另依 slot 循環索引。
 
 > **陷阱**　ξ 存的是 package hash 不是 report hash；ready 的依賴在每次 accumulate 後用 E() 修剪。
 
@@ -7619,20 +7619,20 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 <sub>12.3 Final State Integration — ●●○ · 概念 · eq. 12.24–12.33 (δ† → δ‡ → δ′)</sub>
 
-**標準答案**　θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])
+**標準答案**　θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])
 
-Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.24）：θ′ ≡ [(s, h) ∈ b]，也就是有呼叫 `yield` 且回傳非 ∅ 的 service 及其 hash——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。**為什麼要記這個時間**：`eject` 需要它來判斷一個 service 是否已經長期閒置。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。
+Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.25）：θ′ ≡ [(s, h) ∈ b]，也就是Δ1 最終 output 非 ∅ 的 service 及其 hash；附錄 B.13 允許正常回傳的 32-byte blob 成為 output，並非一定要呼叫 `yield`——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。此處只更新 last-accumulation record；不要與 `eject` 對 preimage request 歷史及 expunge period 的檢查混淆。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。
 
 **逐項辨析**
 
-1. ✅ θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])  
+1. ✅ θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])  
    θ′ 取 b 的 (s, h) 配對、統計是三元組、a_a 只更新 keys(S)、ξ′[E−1] 只收 R*[..n]，四項全對。
 2. ❌ θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence  
    θ′ 是 accumulation output log 不是狀態雜湊；ξ′[E−1] 只收本塊真的做完的 R*[..n]。
-3. ❌ θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, G gas used), the transfer count having been dropped; δ‡ marks a_a = τ′ for every service in keys(δ†); ξ′[E−1] = P(R*[..n])  
+3. ❌ θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, G gas used), the transfer count having been dropped; δ‡ marks a_a = τ′ for every service in keys(δ†); ξ′[E−1] = P(R*[..n])  
    0.8.0 的 S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。
-4. ❌ θ′ = the (service, hash) pairs in b (services that yielded a 32-byte hash); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n]) and ω′ is emptied in full, so that no queued report ever survives a block  
-   ω′ 是環狀更新：只有被跳過的 slot 會清空，其餘 slot 保留並同樣經過 E 修剪。
+4. ❌ θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n]) and ω′ is emptied in full, so that no queued report ever survives a block  
+   ω′ 當前槽寫入修剪後的新 queue，跳過的 slots 清空，其餘槽保留並經 E 修剪，不是整個 ω 清空。
 
 > **陷阱**　a_a（last accumulation slot）只對「這塊真的 accumulate 過」的 service 更新。
 
@@ -8971,20 +8971,20 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 <sub>B.4 Accumulate Invocation — ●●○ · 概念 · §B.4 prose (regular vs exceptional dimension), eq. B.7 (implications), collapse function C, Ω_C</sub>
 
-**標準答案**　It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; with no checkpoint, y is the pre-invocation state, so a panic is a full rollback
+**標準答案**　It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; without a checkpoint, y is the initialized context: execution changes roll back, but incoming transfers credited before initialization remain
 
-§B.4 原文：「our invocation context to be a pair of these contexts… one dimension being the regular dimension and generally named x and the other being the exceptional dimension and being named y. The only function which actually alters this second dimension is checkpoint, Ω_C」，以及「we… collapse the result of the invocation to one or the other depending on whether the termination was regular or exceptional (i.e. out-of-gas or panic)」。所以 Ψ_A 的回傳值（poststate、defxfers、yield、provisions）在 regular halt 時全部取自 x，在 panic 或 ∞ 時全部取自 y。走一遍題目的序列：呼叫開始 y = x = 初始 context；第一次 write 改 x；checkpoint 把 x 複製到 y（此時 y 含第一次 write）；transfer 與第二次 write 只改 x；panic → collapse 取 y → 第一次 write 留下、transfer 沒有發出、第二次 write 消失。設計意義：service 作者可以用 checkpoint 把「已經確認要生效的部分」鎖住，後面再做風險較高的事，失敗時不必從零重來；同時 transfer 也跟著 y 走，不會出現「錢轉出去了但帳沒記」的半套狀態。
+§B.4 原文：「our invocation context to be a pair of these contexts… one dimension being the regular dimension and generally named x and the other being the exceptional dimension and being named y. The only function which actually alters this second dimension is checkpoint, Ω_C」，以及「we… collapse the result of the invocation to one or the other depending on whether the termination was regular or exceptional (i.e. out-of-gas or panic)」。所以 Ψ_A 的回傳值（poststate、defxfers、yield、provisions）在 panic 或 ∞ 時取自 y；regular halt 使用 x 的正常結果，但若回傳 blob 恰為 32 bytes，output 由該 blob 決定，而非 x 中的 yield。走一遍題目的序列：先將 incoming transfers 入帳，再令 y = x = 初始 context；第一次 write 改 x；checkpoint 把 x 複製到 y（此時 y 含第一次 write）；transfer 與第二次 write 只改 x；panic → collapse 取 y → 第一次 write 留下、transfer 沒有發出、第二次 write 消失。設計意義：service 作者可以用 checkpoint 把「已經確認要生效的部分」鎖住，後面再做風險較高的事，失敗時不必從零重來；同時 transfer 也跟著 y 走，不會出現「錢轉出去了但帳沒記」的半套狀態。
 
 **逐項辨析**
 
-1. ✅ It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; with no checkpoint, y is the pre-invocation state, so a panic is a full rollback  
-   對：§B.4 說 collapse function C 依終止是 regular 還是 exceptional（out-of-gas 或 panic）選 x 或 y；y 只被 Ω_C（checkpoint）改寫，初始值等於呼叫前的 context。
+1. ✅ It returns y, the snapshot taken at checkpoint: the first storage write survives, while the transfer and the second write made after the checkpoint vanish and are never sent. y lets a service decide how much of its progress should count; without a checkpoint, y is the initialized context: execution changes roll back, but incoming transfers credited before initialization remain  
+   對：panic／OOG 的 collapse 選 y；y 初始包含 incoming transfer 入帳，之後僅由 checkpoint 更新。
 2. ❌ It returns x as it stood the instant before the panic: both storage writes and the transfer survive, and only the instructions not yet executed after the panic have no effect, since a panic is merely an early stop rather than an error. y is used solely for out-of-gas: when gas runs out the machine cannot vouch for x's consistency, so only then does it fall back to the y taken at checkpoint  
    panic 是 exceptional 終止，結果取 y 不取 x；y 對 panic 與 out-of-gas 一視同仁。
 3. ❌ It returns the pre-invocation state with every change discarded, because any exceptional termination signals a bug in the service logic: checkpoint only resets where gas accounting starts and how ϱ is refunded, never the state; y is a copy the GP introduces so that the collapse function formally always has something to select, and an implementation need not store it  
-   checkpoint 就是把 x 複製進 y，直接改變回傳的 state；沒有 checkpoint 才會退到呼叫前。
+   checkpoint 把 x 複製到 y；沒有 checkpoint 時退回已含 incoming transfer 入帳的初始化 context。
 4. ❌ It returns a merge of x and y: storage writes are taken from x (newer, so both count), transfers from y (safer, so that transfer is not sent), and the panic only clears the yield to ∅ and empties the provisions; that way a service never loses all its progress to one bug and never sends a transfer it did not get to confirm  
-   GP 沒有任何合併規則：整個結果 (state, transfers, yield, provisions) 一律從同一個維度取。
+   本題 panic 時 state、outgoing transfers、yield、provisions 全取 y，不會混合 x 和 y。
 
 > **陷阱**　panic 與 out-of-gas 對 y 一視同仁；沒 checkpoint 就是整次作廢。
 

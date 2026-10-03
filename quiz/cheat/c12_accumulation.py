@@ -1,51 +1,40 @@
 # -*- coding: utf-8 -*-
-SHEETS = [{
- "ch": "12",
- "title": "Accumulation",
- "one": "把已 available 的 work-report 依 dependency 解鎖，排成序列後逐 service 呼叫 accumulate，"
-        "在 gas 上限內產出新的 δ / χ / ι / φ 與本塊 output log θ。這是 JAM「鏈上」真正改狀態的唯一入口。",
- "flow": [
-   "R = 本塊剛變 available 的 reports（來自 ρ‡ 被 assurance 清掉的那些）",
-   "R! = 無 prerequisite 且 l = ∅ → 立刻可累積；R^Q = 其餘進佇列",
-   "ω（ready queue，長度 E 的環狀緩衝）存「已 available 但依賴未滿足」的 (report, 未滿足依賴集)",
-   "ξ（accumulated history，長度 E）存過去每個 slot 累積過的 package hash，用來解鎖與擋重複",
-   "R* = Q(ω 由舊到新展開) ⌢ R!　→ 這就是本塊要餵給 Δ 的序列",
-   "Δ+ 依 gas 上限決定「這塊能吃幾個」→ Δ* 對單一 service 跑一輪 → Δ1 真正呼叫 PVM 的 accumulate",
-   "δ† → δ‡ → δ′：deferred transfer 在 δ‡ 之後才套用；θ′ 收 (service, hash) 的 output log",
- ],
- "consts": [
-   ["E = 600", "ω 與 ξ 的長度＝一個 epoch 的 slot 數"],
-   ["G_A / G_T / G_I", "單次 accumulate 上限 / 整塊總 gas / is-authorized 上限；Δ+ 用的是總量門檻"],
-   ["χ_M / χ_A / χ_V / χ_R", "manager / assigners / delegator / registrar 四個特權 service（0.8.0 的 χ 形狀）"],
-   ["χ_Z", "always-accumulate 集合：即使本塊沒有 report 也會被呼叫，帶各自的 gas 配額"],
- ],
- "eqs": [
-   ["eq. 12.1–12.3", "ξ ∈ ⟦{H}⟧_E、ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 的型別與長度"],
-   ["eq. 12.4–12.6", "R! / R^Q / R* 三段切法與 Q 函數（依賴解鎖）"],
-   ["eq. 12.18", "deferred transfer 要以 s ↕ s 排序後處理 —— 不是 map 迭代順序"],
-   ["eq. 12.24", "(n, e′, b, u, t) ≡ Δ+(g, [], R*, e, χ_Z)；θ′ 取 Δ+ 回傳的 output log"],
- ],
- "asked": [
-   ["為什麼要 ω / ξ 兩個環狀緩衝，不能只用一個集合？",
-    "ξ 是「已累積」的歷史，用來擋重複與解鎖依賴；ω 是「已 available 但還不能累積」的待辦。"
-    "兩者都做成長度 E 的環，是為了讓過期自動掉出去、狀態有界，且 O(1) 就能回答「這個 package 最近累積過沒」。"],
-   ["Δ+ / Δ* / Δ1 為什麼要分三層？",
-    "Δ1 = 對單一 service 呼叫 PVM 的 accumulate（真正執行）；Δ* = 把同一輪裡每個 service 各跑一次並合併狀態；"
-    "Δ+ = 在 gas 上限下決定「這一塊到底能吃 R* 的前幾個」，回傳吃掉的個數 n。分層是為了讓 gas 上限的截斷只發生在最外層，內層保持純函數。"],
-   ["accumulate 失敗（panic / OOG）會怎樣？",
-    "該 service 這一輪的狀態變更整批丟棄，但 report 仍算「已累積」進 ξ，不會無限重試；"
-    "gas 照扣（block-level 預扣），output log 記空。這是刻意的：否則一個壞 service 可以卡住整條鏈。"],
-   ["為什麼 deferred transfer 要另外一個 δ‡ 階段？",
-    "accumulate 期間 service 之間若能直接互改餘額，結果就會依賴執行順序。"
-    "先全部收集成 transfer，再以固定排序統一套用，才能讓所有節點得到相同的 δ′。"],
- ],
- "delta": [
-   "ready queue 由 0.7.2 的 ϑ 更名為 ω（state key 與型別都沒動），為了不跟 output log θ 撞符號",
-   "χ 由單純 bless 三元組擴成 manager / assigners / delegator / registrar 四個角色，且只有 manager 能改 bless",
-   "accumulate 的 gas 改成 block-level 預扣（見附錄 A 的 0.8.0 gas model）",
- ],
- "code": [
-   "internal/accumulate/ — Δ+/Δ*/Δ1 的對應實作；注意 Vartheta 欄位就是 ω",
-   "⚠ 團隊實作用 Go map 迭代順序處理 transfer，eq. 12.18 要求 s ↕ s 排序，且 sort.Slice 不穩定 → state root 可能分歧",
- ],
-}]
+SHEETS = [{'ch': '12',
+  'title': 'Accumulation',
+  'one': '把已 available 的 work-report 排成候選序列，在 gas 預算內執行各 service 的 accumulate，將工作結果套入鏈上 service 狀態，並產出 χ′ / '
+         'ι′ / φ′ 與 output log θ′。',
+  'flow': ['R = 本塊經 assurance 剛變 available 的 reports，不是本塊 E_G 新加入的所有 reports',
+           'R! = 無 prerequisite 且 segment-root lookup 為空；R^Q = 其餘配上依賴並用 ξ 的聯集修剪',
+           'ω 保存已 available、尚未累積且現在或曾經有依賴的 (report, 剩餘依賴集)',
+           'ξ 是長度 E 的已累積 package hash 集合序列；每次 block transition 左移，末格加入本塊結果',
+           'R* = R! ⌢ Q(q)；q = E(flatten(ω[m..]) ⌢ flatten(ω[..m]) ⌢ R^Q, P(R!))，m = H_T mod E',
+           'Δ+ 挑可負擔的 report 前綴並遞迴；Δ* 本輪按 service 執行並合併；Δ1 組參數交給 Ψ_A',
+           'deferred transfers 在同 block 後續 Δ+ 輪次整合；δ† 是整個 Δ+ 的帳戶結果，δ‡ 更新 last-accumulation record，δ′ 再整合 '
+           'E_P'],
+  'consts': [['E = 600', 'ξ 與 ω 長度相同，但 ξ 按 transition 左移，ω 按 slot 循環索引並清理跳過的 slots'],
+             ['G_A / G_T', '每 report 的 digest accumulation gas 總上限 / block gas 基準；初始 g 依 eq. 12.24 取 max'],
+             ['χ_M / χ_A / χ_V / χ_R',
+              'manager / 每 core 的 assigner / delegator / registrar 索引，角色不必由不同 service 擔任'],
+             ['χ_Z', 'service id → 基本 gas 配額的字典；第一輪帶入，即使沒有 report 或 transfer 也可觸發執行']],
+  'eqs': [['eq. 12.1–12.3', 'ξ ∈ ⟦{H}⟧_E、ω ∈ ⟦⟦(ℝ, {H})⟧⟧_E 的型別與長度'],
+          ['eq. 12.4–12.12', 'D 取依賴、E 刪項目並剪依賴、P 取 package hashes、Q 依序解鎖；R! 排在 Q(q) 前'],
+          ['eq. 12.18', '依 service index 的確定順序串接 transfers，保留每個 service 輸出序列內的順序'],
+          ['eq. 12.24–12.26', 'Δ+ 回傳 (n, e′, b, u, t)；e′ 給出 δ† 等狀態，b 形成 θ′']],
+  'asked': [['為什麼需要 ω 和 ξ？',
+             'ξ 記已累積的 package hashes，ω 記尚未處理的 reports 及剩餘依賴。兩者有界但更新方式不同；GP 的集合定義本身不保證實作查詢為 O(1)。'],
+            ['Δ+ / Δ* / Δ1 為什麼分三層？',
+             'Δ+ 以 gas limits 選前綴，再依 actual usage 決定後續輪次；Δ* 聚合同一 service 的工作以攤銷 PVM 啟動成本並合併結果；Δ1 組出單一 '
+             'service 的 gas 與 operands，呼叫 Ψ_A。'],
+            ['panic 或 OOG 會怎樣？',
+             '附錄 B.4 的 collapse 採 exceptional context y；checkpoint 保存的變更、transfers、output 與 provisions '
+             '可以留下。初始 context 已含 incoming transfer 入帳，actual gas used 仍回報；不能說全部回滾或 output 必空。已處理的 report '
+             '前綴仍記入 ξ。'],
+            ['deferred transfer 延到何時？',
+             'sender 在局部 context 扣款並記錄 transfer，最終採用的 context 決定是否送出。合併後交給下一輪 Δ+ 的 receiver，通常仍在同一 block。δ‡ '
+             '本身只更新最後累積時間，並非 transfer 執行階段。']],
+  'delta': ['v0.8.0 ready queue 使用 ω；對照舊實作 Vartheta 時須區分 output log θ',
+            'v0.8.0 的 χ 有 manager、assigners、delegator、registrar、always-accumulate 五類欄位；bless 檢查 manager 權限',
+            'eq. 12.17 選前綴也要計入 transfer gas 與 free allowance；這與附錄 A 的 basic-block instruction gas 計費是不同層次'],
+  'code': ['歷史 code-map：internal/accumulation/ 的 OuterAccumulation / ParallelizedAccumulation / '
+           'SingleServiceAccumulation；PVM/accumulate_invocation.go 的 Psi_A',
+           'Review 線索：unordered map 收集 transfer 或不穩定排序可能改變 operand 順序；是否仍存在須核對目前 checkout']}]

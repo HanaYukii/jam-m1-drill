@@ -217,20 +217,18 @@ ITEMS = [
  "lens": "演算法",
     "ch": "12",
     "section": "12.3 Final State Integration",
-    "gpRef": "eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B)",
+    "gpRef": "eq. 12.18 (b), 12.25 (θ′); eq. 7.7 (β′_B); eq. B.13 (collapse)",
     "difficulty": 2,
     "kind": "concept",
     "tags": ["yield", "accumulate"],
-  "stemZh": "在同一個區塊裡：service 5 被 accumulate 並以一個 32 位元組的雜湊呼叫 `yield`；service 6 被 accumulate、燒了 gas 但從未呼叫 `yield`；service 9 完全沒有 work-digest、只因一筆 deferred transfer 而被觸及，而它呼叫了 `yield`。θ′ 裡最後有什麼？又是誰消費它？",
+  "stemZh": "在同一個區塊裡：service 5 被 accumulate 並以一個 32 位元組的雜湊呼叫 `yield`；service 6 被 accumulate、燒了 gas 但從未呼叫 `yield`；service 9 完全沒有 work-digest、只因一筆 deferred transfer 而被觸及，而它呼叫了 `yield`。假設這就是本塊全部 accumulation invocations，三者均正常結束且回傳空 blob。θ′ 裡最後有什麼？又是誰消費它？",
   "optionsZh": [
    "θ′ 為 Δ* 的 service 集合 s 中的每一個 service 各放一項，沒有 yield 的以零雜湊代入，所以 θ′ 同時帶著 service 5、6、9 的配對且 |θ′| = |s|，這正是讓下游驗證者能依位置索引它的原因。它是獨立的狀態項目、每塊整批換掉，也是 β′_B 所附加的對象",
    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，所以這一塊貢獻的恰好是 service 5 與 9 的配對；但 θ′ 是自創世以來每一筆 accumulation 產出的 append-only log，所以那兩組配對只是它的尾巴，而 belt β_B 是對整份 log 所取 Merkle root 的快取",
    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，所以 θ′ 恰好帶著 service 5 與 9 的配對——service 6 會出現在 u 與 accumulation 統計 S 裡，但不在這裡。θ′ 是獨立的狀態項目、每塊整批換掉，而且是 β′_B = A(β_B, M_B(s, H_K), H_K) 的輸入，其 super-peak 儲存在新的 β_H 條目裡",
    "b = {(s, y) | s ∈ s, y = Δ(s)_y, y ≠ ∅}，但只有在 R*[..n] 中持有至少一份 work-digest 的 service 才是 s 的成員，所以 θ′ 只帶著 service 5 的配對——service 9 即使 yield 了也被排除，因為只因 deferred transfer 而被觸及的 service 永遠無法承諾一筆 accumulation 產出。θ′ 每塊整批換掉，也是 β′_B 所附加的對象"
   ],
-  "stem": "In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns "
-            "gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, "
-            "and it calls `yield`. What ends up in θ′, and what consumes it?",
+  "stem": "In one block: service 5 accumulates and calls `yield` with a 32-octet hash; service 6 accumulates and burns gas but never calls `yield`; service 9 has no work-digest at all and is reached only by a deferred transfer, and it calls `yield`. Assume these are the only accumulation invocations in the block, and all three terminate normally with an empty return blob. What ends up in θ′, and what consumes it?",
     "options": [
         "θ′ holds one entry for every service in Δ*'s service set s, with the zero hash standing in for services "
         "that did not yield, so θ′ carries pairs for services 5, 6 and 9 alike and |θ′| = |s|, which is what lets "
@@ -251,14 +249,9 @@ ITEMS = [
         "output. θ′ is replaced wholesale each block and is what β′_B appends to",
     ],
     "answer": 2,
-    "optNotes": [
-        "與 eq. 12.18 的 b ≠ ∅ 過濾直接衝突，也讓「零 hash」這個合法的 yield 值無從分辨。",
-        "方向顛倒：θ′ 每塊整批換掉（state key C(16)），真正跨區塊累積的是 §7 的 β_B。",
-        "b ≠ ∅ 濾掉沒呼叫 yield 的 service 6，而 transfer 收款方本來就在 s 裡，所以 5 與 9 都入列。",
-        "eq. 12.18 的 s 是三段聯集，純收款與 always-accumulate 服務同樣會被 Δ1 呼叫、同樣能 yield。",
-    ],
-    "explanation": "eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 的條件就是「**沒呼叫 `yield` 就不入列**」。所以本題三個服務：5 有 yield → 入列；6 只燒 gas → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。",
-    "trap": "沒 yield 就沒 commitment：θ′ 的長度由 yield 次數決定，不由 |s| 決定。",
+    "optNotes": ["與 eq. 12.18 的 y ≠ ∅ 過濾衝突；零 hash 是合法 output，不能用來代替沒有 output。", "方向顛倒：θ′ 每塊整批換掉（state key C(16)），真正跨區塊累積的是 §7 的 β_B。", "service 6 既無 yield 又正常回傳空 blob，最終 y = ∅；5 與 9 的 yield 保留，所以入列。", "eq. 12.18 的 s 是三段聯集，純收款與 always-accumulate 服務同樣會被 Δ1 呼叫、同樣能 yield。"],
+    "explanation": "eq. 12.18：b = {(s, y) | s ∈ s, y = Δ(s)_y, **y ≠ ∅**}——那個 y ≠ ∅ 檢查的是 **Δ1 最後的 output**。附錄 B.13 的 collapse C 在正常回傳 32-byte blob 時採用該 blob，其他正常回傳才取 context yield；panic／OOG 則取 checkpoint context。因此沒呼叫 `yield` 不代表一定沒有 output。所以本題三個服務：5 有 yield → 入列；6 無 yield 且正常回傳空 blob → **不入列**（它只會出現在 u 與 eq. 12.28 的統計 S 裡）；9 雖然沒有 work-digest、只是被 deferred transfer 打到，但它有 yield → **入列**。**9 為什麼會被 accumulate**：Δ* 的服務集合是 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ **{t_d | t ∈ t}**——最後那項就是轉帳的收款方，所以純粹被轉帳觸發的服務一樣會跑 accumulate、一樣能 yield。**θ′ 是什麼**（eq. 12.25）：θ′ ≡ ⟦(s, h) ∈ b⟧，它是 σ 裡**獨立的一個狀態項**（state key C(16)），**每個區塊整批換掉**，不是自創世以來的累積。**真正累積的是 §7 的 β_B**：eq. 7.7 用 Keccak 先把 θ′ 編碼後的序列做 M_B 得出本塊的 root，再 MMR append 到 belt 上，belt 的 super-peak 才寫進新的 β_H 條目。**兩層要分清楚**：θ′ 是「這一塊產出了什麼」，β_B 是「從創世到現在所有產出的承諾」。",
+    "trap": "看最終 output 是否非空，不是計算 yield 呼叫次數；正常回傳的 32-byte blob 也能形成 commitment。",
 },
 
 # ─────────────────────────────────────────────────────────── 7 · L2 · concept
