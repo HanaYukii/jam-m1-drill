@@ -1004,6 +1004,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   $$('.modes button').forEach(b=> b.onclick = ()=> setMode(b.dataset.mode));
   $$('#diffChips .chip').forEach(b=> b.onclick = ()=>{ const d=+b.dataset.diff; if (state.diffs.has(d)) state.diffs.delete(d); else state.diffs.add(d); b.setAttribute('aria-pressed', state.diffs.has(d)); refilter(); });
   $$('#lensChips .chip').forEach(b=> b.onclick = ()=>{ const l=b.dataset.lens; if (state.lenses.has(l)) state.lenses.delete(l); else state.lenses.add(l); b.setAttribute('aria-pressed', state.lenses.has(l)); refilter(); });
+  $$('#kindChips .chip').forEach(b=>{ if (!ITEMS.some(it => it.kind === b.dataset.kind)) b.remove(); });  // no dead filters
   $$('#kindChips .chip').forEach(b=> b.onclick = ()=>{ const k=b.dataset.kind; if (state.kinds.has(k)) state.kinds.delete(k); else state.kinds.add(k); b.setAttribute('aria-pressed', state.kinds.has(k)); refilter(); });
   $('#unseenFirst').onclick = (e)=>{ state.unseenFirst = !state.unseenFirst; e.currentTarget.setAttribute('aria-pressed', state.unseenFirst); refilter(); };
   $('#shuffleQ').onclick = (e)=>{ state.shuffle = !state.shuffle; e.currentTarget.setAttribute('aria-pressed', state.shuffle); refilter(); };
