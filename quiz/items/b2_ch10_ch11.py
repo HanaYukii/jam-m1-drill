@@ -176,7 +176,7 @@ ITEMS = [
   "GP 明講可以用前一個 rotation 的 t，M* 正是為此而存在。",
   "⌊593/600⌋ = 0 ≠ ⌊603/600⌋ = 1 → 取 (λ′, η′_3)，P 內的 rotation index 是 59。",
  ],
- "explanation": "先看視窗：R(⌊603/10⌋ − 1) = 590 ≤ 595 ≤ 603 ✓。再看 rotation：⌊603/10⌋ = 60 ≠ ⌊595/10⌋ = 59 → 用 M*（eq. 11.28 的 otherwise）。eq. 11.23：(k, e) = (κ′, η′_2) 當 ⌊(τ′ − R)/E⌋ = ⌊τ′/E⌋，否則 (λ′, η′_3)。為什麼這樣才對：epoch 換屆時 λ′ = κ（eq. 6.14）、η′_3 = η_2（eq. 6.24），正好是上個 epoch 期間算 M 所用的 (κ′, η′_2)，所以 M* 精確重現 rotation 59 的分配；換屆後 η′_2 已是新 epoch 的 entropy，拿它配 λ′ 或 κ′ 都算不出當時的分配。注意 0.8.0 額外要求：即使用 M*，w_c 仍須 < |κ′|/3（posterior set）——「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」；且 Φ 用的是 ψ′_O，本塊新抓到的 offender 在 λ′ 裡也會被 null 掉。你們 GStarFunc：`(tau − R)/E == tau/E` 選 (η′_2, κ′) 否則 (η′_3, λ′)，再以 tau − R 呼叫 NewGuranatorAssignments——一致。",
+ "explanation": "先看視窗：R(⌊603/10⌋ − 1) = 590 ≤ 595 ≤ 603 ✓。再看 rotation：⌊603/10⌋ = 60 ≠ ⌊595/10⌋ = 59 → 用 M*（eq. 11.28 的 otherwise）。eq. 11.23：(k, e) = (κ′, η′_2) 當 ⌊(τ′ − R)/E⌋ = ⌊τ′/E⌋，否則 (λ′, η′_3)。為什麼這樣才對：epoch 換屆時 λ′ = κ（eq. 6.14）、η′_3 = η_2（eq. 6.24），正好是上個 epoch 期間算 M 所用的 (κ′, η′_2)，所以 M* 精確重現 rotation 59 的分配；換屆後 η′_2 已是新 epoch 的 entropy，拿它配 λ′ 或 κ′ 都算不出當時的分配。注意另一個要求：即使用 M*，w_c 仍須 < |κ′|/3（posterior set）——「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」；且 Φ 用的是 ψ′_O，本塊新抓到的 offender 在 λ′ 裡也會被 null 掉。你們 GStarFunc：`(tau − R)/E == tau/E` 選 (η′_2, κ′) 否則 (η′_3, λ′)，再以 tau − R 呼叫 NewGuranatorAssignments——一致。",
  "trap": "M* 的 entropy/set 由 τ′ − R 落在哪個 epoch 決定；(λ′, η′_3) 這組合只在 epoch 開頭的第一個 rotation 出現。"
 },
 {
@@ -265,34 +265,5 @@ ITEMS = [
  ],
  "explanation": "§11.1.4：「We include the hash of the code of the service at the time of being reported c, which must be accurately predicted within the work-report according to equation 11.45」；eq. 11.45：∀w ∈ I, ∀d ∈ w_d：d_c = δ[d_s]_c，δ 是 prior state。§14 的 work-item 也說 c 是「the code hash of the service at the time of reporting (whose preimage must be available from the perspective of the lookup anchor block)」——refine 執行的是這個 hash 在 lookup-anchor 視角下 historical lookup 到的 preimage，而鏈上檢查的是包含區塊當下的 δ[s]_c（reports vectors 有 bad_code_hash 案例）。理由：accumulate 稍後會用當下的 code 執行，若 report 是用已被淘汰的 code 算出來的，不該進入 accumulation，而是讓 guarantor 重做。附帶一提，BAD 是 refine 階段在 lookup-anchor 視角查不到 code preimage 時就寫進 digest 的值（eq. 11.7），與這條鏈上檢查是兩回事。你們 CheckWorkResult：`w.CodeHash != delta[w.ServiceID].ServiceInfo.CodeHash` → BadCodeHash，δ 取自 prior state。",
  "trap": "digest 的 c 是「預測」：refine 用 lookup-anchor 的 code，鏈上卻比對 prior δ 的 code hash。"
-},
-{
- "id": "ch11-inactive-core-set-shrink",
- "lens": "時機",
- "ch": "11", "section": "11.4 Work Report Guarantees", "gpRef": "eq. 11.18, 11.23, 11.28, 11.31",
- "difficulty": 3, "kind": "delta", "tags": ["guarantee", "validator set", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0，C = 341、E = 600、R = 10。epoch e 期間啟用集合為 |κ| = 12（core 0–3 啟用）；epoch 更替時集合縮為 |κ′| = 9。新 epoch 的第一個區塊（τ′ = 600）帶了一份對 core 3、t = 595 的 guarantee，由 M* 指派給 core 3 的那三位 validator 簽署。這份 guarantee 有效嗎？逐一說明它通過或未通過的檢查。",
-  "optionsZh": [
-   "有效：M* 重現了前一個 rotation 的指派，在其之下 core 3 是啟用的、12 個 chunk 也是正確的分片數；eq. 11.28 的 core 界限是依 M* 所選中的集合來讀，而 ρ‡ 在 epoch 更替中原封不動",
-   "有效，但 ρ′[3] 蓋的是該 guarantee 自己的 slot t = 595 而不是 τ′ = 600，於是 eq. 11.18 的 H_T ≥ t + U 在 slot 600 就已成立，該指派在建立它的那個區塊裡就被丟掉",
-   "無效：即使在 M* 之下，eq. 11.28 仍以 |κ′|/3 = 3 為 w_c 的上界，所以 core 3 現在是未啟用的；eq. 11.31 要求 (w_s)_v = |κ′| = 9，而不是該 report 所帶的 12 個 chunk；而且 eq. 11.18 因 |κ| ≠ |κ′| 早已把 ρ‡ 清空",
-   "無效的唯一理由是簽署者來自 λ′：eq. 11.23 只允許 assurance 讓 M* 退回前一個 epoch 的金鑰，所以 epoch 首個區塊裡的 guarantee 需要 κ′ 簽章，而 w_c 可以是任何小於 C/3 的 core"
-  ],
-  "stem": "GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Is that guarantee valid? Walk through the checks it meets or fails.",
- "options": [
-  "Valid: M* reproduces the previous rotation's assignment, under which core 3 was active and 12 chunks were the right shard count; eq. 11.28's core bound is read against whichever set M* selects, and ρ‡ survives an epoch change untouched",
-  "Valid, but ρ′[3] is stamped with the guarantee's own slot t = 595 instead of τ′ = 600, so eq. 11.18's H_T ≥ t + U already holds at slot 600 and the assignment is dropped in the very block that created it",
-  "Invalid: eq. 11.28 bounds w_c by |κ′|/3 = 3 even under M*, so core 3 is now inactive; eq. 11.31 wants (w_s)_v = |κ′| = 9, not the 12 chunks the report carries; and eq. 11.18 has already emptied ρ‡ because |κ| ≠ |κ′|",
-  "Invalid only because the signers come from λ′: eq. 11.23 lets M* fall back to the previous epoch's keys for assurances alone, so a guarantee in an epoch's first block needs κ′ signatures and w_c may be any core below C/3"
- ],
- "answer": 2,
- "optNotes": [
-  "M/M* 只決定誰有資格簽；w_c 的上限永遠用 posterior κ′，ρ‡ 也會被 |κ| ≠ |κ′| 清空。",
-  "eq. 11.46 的 timestamp 永遠是 τ′ = 600，600 ≥ 605 不成立，不會當場被清掉。",
-  "三條 0.8.0 新規則同時命中：core 上限 |κ′|/3 = 3、shard 數要 9、且 ρ‡ 已因換屆清空。",
-  "eq. 11.23 的 M* 本來就是 guarantor 的上一輪分配，λ′ 成員簽名合法；上限也不是 C/3。",
- ],
- "explanation": "這題把 0.8.0 因「validator 數可變」（eq. 6.8：|κ| ∈ {3c}）而新增的三條規則放在一起。(1) eq. 11.28：c[v] = w_c < |κ′|/3——用 **posterior** κ′ 的大小，且 GP 明說「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」，所以 core 3（|κ′|/3 = 3 → active 只有 0–2）即使透過 M* = (P(|λ′|, η′_3, 590), Φ(λ′)) 找得到合法簽署者也不行。(2) eq. 11.31：(w_s)_v = |κ′| = 9——每個 assurer 拿一個 chunk，chunk 數必須等於新的 assurer 數；為 12 個 validator 編的 report 對不上。(3) eq. 11.18：|κ| ≠ |κ′| 時 ρ‡ 全部清空（「Items cleared in this way can be viewed as having timed out early」）——舊集合留下的 pending report 也無法再被新集合 assure。0.7.2 沒有這些問題（V = 1023 = 3C 固定），你們 0.7.2 的 FilterAvailableReports 也沒有 size-change 條件（#1027 review 才補上），|κ′|/3 的 core 上限與 (w_s)_v = |κ′| 亦是 #1016/#1037 的範圍。",
- "trap": "0.8.0 三個「跟著 |κ′| 走」的地方：active core 數 |κ′|/3、erasure shard 數 |κ′|、|κ| ≠ |κ′| 就清 ρ‡。"
 },
 ]

@@ -10,14 +10,14 @@ ITEMS = [
  "lens": "演算法",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.35–6.36 — internal/safrole/extrinsic_tickets.go CreateNewTicketAccumulator",
  "difficulty": 3, "kind": "code", "tags": ["ticket", "extrinsic"],
-  "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段（main 與 0.8.0 分支相同），在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都高於一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
+  "stemZh": "這是團隊 CreateNewTicketAccumulator 的尾段，在新 ticket 通過 tail／attempt／證明／排序／重複等檢查之後才會抵達。某個 m′ = 300 的區塊帶了 3 張有效的 ticket，其 id 全都高於一個已飽和的 γ_A（|γ_A| = E）中的每一個 id。GP 要求什麼？這段程式碼又做了什麼？",
   "optionsZh": [
    "依 eq. 6.35 該區塊有效：γ′_A 就是保留最小的 E 個 id，所以那 3 張 ticket 不會被留下、對該區塊也沒有進一步要求；這段程式碼完全合規、不需要額外檢查",
    "eq. 6.36（n ⊆ γ′_A）會讓該區塊無效，但這段程式碼在 [:E] 的截斷中靜默地丟掉那 3 張 ticket 並接受了它——這是一個參考實作會拒絕的區塊",
    "依 eq. 6.34 該區塊無效，因為新的 id 與 γ_A 相撞，而對合併排序後序列所做的 VerifyTicketsDuplicate 正是抓到這個情況的檢查，所以程式碼是合規的",
    "依 eq. 6.31 該區塊無效，因為只有在 |γ_A| < E 時才接受 ticket；程式碼應該在合併之前比較 len(previousTicketsAccumulator) 與 E 並回傳 UnexpectedTicket"
   ],
-  "stem": "This is the tail of the team's CreateNewTicketAccumulator (identical on main and on the 0.8.0 branch), reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?",
+  "stem": "This is the tail of the team's CreateNewTicketAccumulator, reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?",
  "code": {"lang": "go", "caption": "internal/safrole/extrinsic_tickets.go (CreateNewTicketAccumulator, tail)", "src": """// (6.34) Get previous ticket accumulator
 previousTicketsAccumulator := GetPreviousTicketsAccumulator()
 
@@ -122,15 +122,15 @@ func ValidateHeaderVrf(header types.Header, priorState *types.State, posteriorSt
  "id": "ch06-code-author-index-bound",
  "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "§5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader",
- "difficulty": 3, "kind": "code", "tags": ["seal", "entropy", "delta-0.8.0"],
-  "stemZh": "在 fuzzer bug #825（計算 η′_0 時 panic「index out of range [65535] with length 6」）之後，團隊把這個檢查加進了在 UpdateSafrole 之前執行的 ValidateNonVRFHeader。它用的界限是 GP 0.8.0 規定的那個嗎？差異什麼時候會浮現？",
+ "difficulty": 3, "kind": "code", "tags": ["seal", "entropy"],
+  "stemZh": "在 fuzzer bug #825（計算 η′_0 時 panic「index out of range [65535] with length 6」）之後，團隊把這個檢查加進了在 UpdateSafrole 之前執行的 ValidateNonVRFHeader。它用的界限是 GP 規定的那個嗎？差異什麼時候會浮現？",
   "optionsZh": [
    "這個檢查正是 GP 所規定的：eq. 5.10 以 |κ|（prior active set）為 H_I 的界限，這正是它可以在金鑰輪換之前驗證而不失一般性的原因，因此它在任何 validator 集合大小下都涵蓋了 fuzzer 的 65535 案例",
    "這個檢查是不必要的：超出範圍的 H_I 本來就會通不過 seal 簽章檢查並被回報為 VrfSealInvalid，所以 fuzzer 期望的拒絕無論如何都會產生；#825 真正的修法屬於 UpdateEtaPrime0 內部，也就是 panic 被引發的地方",
-   "GP 的界限是 |κ′|（posterior）而不是 |κ|；這個檢查今天之所以等價，只是因為這裡的每個金鑰序列都恰好有 V 項（offender 是就地歸零，#1037）——一旦 0.8.0 的集合大小變更使 |γ_P| ≠ |κ|，取自 prior κ 的界限在邊界上就是錯的",
+   "GP 的界限是 |κ′|（posterior）而不是 |κ|；這個檢查今天之所以等價，只是因為這裡的每個金鑰序列都恰好有 V 項（offender 是就地歸零，#1037）——一旦集合大小變更使 |γ_P| ≠ |κ|，取自 prior κ 的界限在邊界上就是錯的",
    "界限應該是 |ι|，因為在 epoch 邊界上出塊者是從 eq. 6.14 剛剛提升進 κ′ 的 staging 集合中抽出的；用 prior 或 posterior 的 κ 為界都會在第一塊上拒絕每一位來自新進集合的出塊者"
   ],
-  "stem": "After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Is the bound it uses the one GP 0.8.0 specifies, and when would the difference show?",
+  "stem": "After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Is the bound it uses the one the GP specifies, and when would the difference show?",
  "code": {"lang": "go", "caption": "internal/stf/validate_header.go (ValidateNonVRFHeader)", "src": """// Validate author_index out of range.
 // NOTE: There is currently no official error code defined for this case.
 // We may need to update this once the spec updates.
@@ -141,17 +141,17 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "options": [
   "The check is exactly what the GP specifies: eq. 5.10 bounds H_I by |κ|, the prior active set, which is precisely why it can be verified before key rotation without loss of generality, and it therefore covers the fuzzer's 65535 case at any validator-set size",
   "The check is unnecessary: an out-of-range H_I already fails the seal signature check and is reported as VrfSealInvalid, so the fuzzer's expected rejection is produced anyway; the real fix for #825 belonged inside UpdateEtaPrime0, where the panic was raised",
-  "The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a 0.8.0 set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary",
+  "The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary",
   "The bound should be |ι|, since at an epoch boundary the block author is drawn from the staging set that eq. 6.14 has just promoted into κ′; bounding by either the prior or the posterior κ would reject every author from the incoming set on the first block"
  ],
  "answer": 2,
  "optNotes": [
   "eq. 5.10 寫的是 H_I ∈ N_{|κ′|}——邊界取的是 posterior κ′ 的長度，不是 prior κ。",
   "根本走不到簽章驗證：索引 κ′[H_I] 時就先 panic，修法塞進 UpdateEtaPrime0 也治標不治本。",
-  "今天 |κ| = |κ′| 只因序列永遠是 V 筆；0.8.0 允許長度變動後，κ′ = γ_P 在邊界就會不同長。",
+  "今天 |κ| = |κ′| 只因序列永遠是 V 筆；長度一旦變動（eq. 6.8 允許），κ′ = γ_P 在邊界就會不同長。",
   "eq. 6.14 在邊界把 ι 推進的是 γ′_P，κ′ 取的是舊 γ_P——ι 還要再過一個邊界才成為 κ。",
  ],
- "explanation": "§5 eq. 5.10：H_I ∈ N_{|κ′|}、H_A ≡ κ′[H_I]_b——邊界是 **posterior** κ′ 的長度。#825 的 panic（index out of range [65535] with length 6）就是 H_I 在 range check 之前被拿去索引 validator 陣列；Go 直接 panic 而不是回傳錯誤，fuzzer 視為 target crash。這段檢查放在 ValidateNonVRFHeader（UpdateSafrole 之前），手上只有 prior state，於是用 len(priorState.Kappa)；今天這是等價的，因為 codebase 裡 ι/γ_P/κ/λ 永遠都是 V 筆（offender 只被 Φ 歸零、不移除，#1037），|κ| = |κ′|。但 GP 0.8.0 eq. 6.7/6.8（PR #514）允許每個序列長度各自 ∈ N_V = {6, 9, …, 1023}，designate host call 也只要求 z ∈ N_V；當 |γ_P| ≠ |κ| 時，epoch 第一塊的 κ′ = γ_P（eq. 6.14）長度會變（eq. 11.18 也因此在 |κ| ≠ |κ′| 時清空 ρ‡），正確做法是先算出 κ′ 的長度（e′ > e 時取 |γ_P|，否則 |κ|）再檢查。錯誤碼方面 GP 與官方 enum 沒有對應值，你們暫用 AuthorIndexOutOfRange (13)。",
+ "explanation": "§5 eq. 5.10：H_I ∈ N_{|κ′|}、H_A ≡ κ′[H_I]_b——邊界是 **posterior** κ′ 的長度。#825 的 panic（index out of range [65535] with length 6）就是 H_I 在 range check 之前被拿去索引 validator 陣列；Go 直接 panic 而不是回傳錯誤，fuzzer 視為 target crash。這段檢查放在 ValidateNonVRFHeader（UpdateSafrole 之前），手上只有 prior state，於是用 len(priorState.Kappa)；今天這是等價的，因為 codebase 裡 ι/γ_P/κ/λ 永遠都是 V 筆（offender 只被 Φ 歸零、不移除，#1037），|κ| = |κ′|。但 GP eq. 6.7/6.8 允許每個序列長度各自 ∈ 𝕍 = {6, 9, …, 1023}，designate host call 也只要求 z ∈ 𝕍；當 |γ_P| ≠ |κ| 時，epoch 第一塊的 κ′ = γ_P（eq. 6.14）長度會變（eq. 11.18 也因此在 |κ| ≠ |κ′| 時清空 ρ‡），正確做法是先算出 κ′ 的長度（e′ > e 時取 |γ_P|，否則 |κ|）再檢查。錯誤碼方面 GP 與官方 enum 沒有對應值，你們暫用 AuthorIndexOutOfRange (13)。",
  "trap": "面試官可能追問：H_I 越界時你們回什麼？答：沒有官方 code，自訂 13；重點是必須在任何 κ′[H_I] 之前檢查，否則 panic。"
 },
 {
@@ -187,15 +187,15 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "id": "ch06-variable-set-boundary",
  "lens": "時機",
  "ch": "6", "section": "6.3 Key Rotation / 6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10",
- "difficulty": 3, "kind": "delta", "tags": ["validator set", "epoch", "delta-0.8.0"],
-  "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這在 0.8.0 是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能出這第一個 block？",
+ "difficulty": 3, "kind": "concept", "tags": ["validator set", "epoch"],
+  "stemZh": "tiny 參數（E = 12）。在 epoch e 期間，delegator service 把 staging 集合 ι 設成 9 位 validator，而 γ_P 與 κ 仍持有 6 位——這是合法設定（eq. 6.8）。考慮 epoch e + 1 的第一塊。新 epoch 的 ticket 規則是什麼（entry index 上界、ring）？H_E 列出什麼？誰能出這第一個 block？",
   "optionsZh": [
    "n = ⌈24/6⌉ = 4，因為 n 是從為這個 epoch 出塊 的 active set κ′ 算出來的；γ′_Z 維持是 6 把金鑰的 ring，而 H_E 列出 6 組配對，直到那 9 位 validator 在 epoch e + 2 真正變為 active 為止",
    "n = ⌊24/9⌋ = 2，而且 seal 現在必須來自那 9 位新進 validator 之一（H_I < 9），因為 γ′_Z 從這一塊起就承諾他們的金鑰、而 H_E 列出他們的 9 組配對",
    "在 epoch e + 1 期間提交的 ticket 需要 entry index < n = ⌈24/9⌉ = 3、並對照 9 把金鑰的 γ′_Z 做 ring 證明；H_E 列出 9 組 (k_b, k_e) 配對；但該區塊的 H_I 必須 < 6，而它的 seal 來自 κ′，也就是舊的 6 人 γ_P",
    "該區塊無效：eq. 6.8 要求 |ι| = |κ| 恆成立，所以 validator 數量只能靠帶新 chainspec 從創世重啟來改變；designate 對 z = 9 本來就會回傳 HUH"
   ],
-  "stem": "Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal 0.8.0 configuration (eq. 6.8). Consider the first block of epoch e + 1. What does the ticket regime look like for the new epoch (entry-index bound, ring), what does H_E list, and who may seal that first block?",
+  "stem": "Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal configuration (eq. 6.8). Consider the first block of epoch e + 1. What does the ticket regime look like for the new epoch (entry-index bound, ring), what does H_E list, and who may seal that first block?",
  "options": [
   "n = ⌈24/6⌉ = 4, because n is computed from the active set κ′ that seals this epoch; γ′_Z stays a 6-key ring and H_E lists 6 pairs until the 9 validators actually become active in epoch e + 2",
   "n = ⌊24/9⌋ = 2, and the seal must now come from one of the 9 incoming validators (H_I < 9), because γ′_Z commits to their keys from this block on and H_E lists their 9 pairs",
@@ -207,9 +207,9 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
   "分母是 γ′_P 不是 κ′；γ′_Z 與 H_E 在這一塊就已換成 9 人（eq. 6.14 的 z 對 γ′_P 取）。",
   "n 用的是 ceiling 不是 floor（⌈24/9⌉ = 3）；而且本 epoch 出塊的仍是 κ′ 這 6 個人。",
   "ticket 規則跟著 γ′_P（9 人）走，seal 與 H_I 跟著 κ′（舊的 6 人 γ_P）走，兩者在這塊分家。",
-  "eq. 6.7/6.8 沒有要求四個序列彼此等長；designate 只檢查 z ∈ N_V，11.18 更明文處理 |κ| ≠ |κ′|。",
+  "eq. 6.7/6.8 沒有要求四個序列彼此等長；designate 只檢查 z ∈ 𝕍，11.18 更明文處理 |κ| ≠ |κ′|。",
  ],
- "explanation": "eq. 6.14：e′ > e 時 γ′_P = Φ(ι)（9 筆）、κ′ = γ_P（6 筆）、λ′ = κ、z = O([k_b | k ∈ γ′_P])——ring 有 9 個成員。eq. 6.30：n = ⌈2E/|γ′_P|⌉ = ⌈24/9⌉ = ⌈2.67⌉ = 3，entry index ∈ N_3 = {0, 1, 2}。eq. 6.28：H_E 列出 γ′_P 的 9 組 (k_b, k_e)。但本 epoch 出塊的是 κ′（舊的 6 人 γ_P）：§5 eq. 5.10 H_I ∈ N_{|κ′|} = N_6，seal 由 κ′[H_I]_b 簽（6.16/6.17），fallback F(η′_2, κ′) 的索引 mod 6；9 位新 validator 要到 epoch e + 2 才成為 κ。eq. 6.7/6.8（0.8.0 PR #514「Support smaller validator sets」）：ι、γ_P、κ、λ 各自 ∈ [K]_{N_V}、N_V = {3c | c ∈ N_{2..C+1}}。連帶影響：active core 數 = |κ′|/3，本 epoch 2 個、下個 epoch 3 個。你們的 code 目前撐不住這種鏈：GetVerifier 要求 len(gammaK) == ValidatorsCount，ValidateHeaderEpochMark 要求 len(em.Validators) == ValidatorsCount，兩者都會拒絕合法區塊——這就是 open issue #1037。",
+ "explanation": "eq. 6.14：e′ > e 時 γ′_P = Φ(ι)（9 筆）、κ′ = γ_P（6 筆）、λ′ = κ、z = O([k_b | k ∈ γ′_P])——ring 有 9 個成員。eq. 6.30：n = ⌈2E/|γ′_P|⌉ = ⌈24/9⌉ = ⌈2.67⌉ = 3，entry index ∈ N_3 = {0, 1, 2}。eq. 6.28：H_E 列出 γ′_P 的 9 組 (k_b, k_e)。但本 epoch 出塊的是 κ′（舊的 6 人 γ_P）：§5 eq. 5.10 H_I ∈ N_{|κ′|} = N_6，seal 由 κ′[H_I]_b 簽（6.16/6.17），fallback F(η′_2, κ′) 的索引 mod 6；9 位新 validator 要到 epoch e + 2 才成為 κ。eq. 6.7/6.8：ι、γ_P、κ、λ 各自 ∈ ⟦𝕂⟧_𝕍、𝕍 = {3c | c ∈ N_{2..C+1}}。連帶影響：active core 數 = |κ′|/3，本 epoch 2 個、下個 epoch 3 個。你們的 code 目前撐不住這種鏈：GetVerifier 要求 len(gammaK) == ValidatorsCount，ValidateHeaderEpochMark 要求 len(em.Validators) == ValidatorsCount，兩者都會拒絕合法區塊——這就是 open issue #1037。",
  "trap": "一句話：ticket 規則跟著 γ′_P（下個 epoch 的人），seal/author 規則跟著 κ′（這個 epoch 的人）。"
 },
 {
@@ -304,14 +304,14 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
  "lens": "設計",
  "ch": "6", "section": "6.3 Key Rotation / 6.6 The Markers", "gpRef": "eq. 6.10–6.13, 6.15, 6.28; §5 eq. 5.11; eq. 11.14, 11.28, 17.7, 18.1",
  "difficulty": 2, "kind": "concept", "tags": ["Bandersnatch", "Ed25519"],
-  "stemZh": "每把 validator 金鑰都捆綁了一把 Bandersnatch、一把 Ed25519 與一把 BLS 公鑰。每把金鑰在協定裡各做什麼用？自 GP 0.6.4 起，epoch marker H_E 又為什麼要在 Bandersnatch 金鑰之外一併攜帶 Ed25519 金鑰？",
+  "stemZh": "每把 validator 金鑰都捆綁了一把 Bandersnatch、一把 Ed25519 與一把 BLS 公鑰。每把金鑰在協定裡各做什麼用？epoch marker H_E 又為什麼要在 Bandersnatch 金鑰之外一併攜帶 Ed25519 金鑰？",
   "optionsZh": [
    "Bandersnatch：seal、H_V 與 BEEFY；Ed25519：ticket ring 證明、guarantee、assurance 與稽核公告；BLS：judgment、culprit、fault 與 offender 身分（ψ_O、H_O、Φ）。H_E 攜帶 Ed25519 金鑰是因為 ring root γ′_Z 是對 γ′_P 之 Ed25519 金鑰的承諾，而只讀 header 的節點必須能自行重建它",
    "Bandersnatch：ticket ring 證明、H_S、H_V、稽核抽選的 VRF；Ed25519：guarantee、assurance、judgment／culprit／fault、稽核公告、offender 身分（ψ_O、H_O、Φ）；BLS：只用於 BEEFY。H_E 攜帶 Ed25519 金鑰，好讓只讀 header 的節點能把每一個以 Ed25519 簽署的產物、以及每一筆 H_O 條目歸屬到某位 validator",
    "Bandersnatch：ticket ring 證明、seal 與 H_V；Ed25519：其餘一切，包括 BEEFY 簽章與稽核公告；BLS 則是保留的 metadata、目前尚無任何協定用途，就像 k_m 一樣。H_E 攜帶 Ed25519 金鑰是為了讓 GRANDPA 的投票者能只憑 header 鏈就依質押加權",
    "Bandersnatch：ticket ring 證明、seal、H_V 與稽核抽選的 VRF；Ed25519：只用於 guarantee 與 assurance；BLS：judgment、culprit、fault 與 BEEFY。H_E 攜帶 Ed25519 金鑰是因為 Φ 需要它們才能在 epoch 邊界把 κ′ 之中的 offender 歸零，而 κ′ 無法從 header 以其他方式重建"
   ],
-  "stem": "Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. What is each key used for in the protocol, and why has the epoch marker H_E carried the Ed25519 keys alongside the Bandersnatch keys since GP 0.6.4?",
+  "stem": "Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. What is each key used for in the protocol, and why does the epoch marker H_E carry the Ed25519 keys alongside the Bandersnatch keys?",
  "options": [
   "Bandersnatch: seals, H_V and BEEFY; Ed25519: ticket ring proofs, guarantees, assurances and audit announcements; BLS: judgments, culprits, faults and offender identity (ψ_O, H_O, Φ). H_E carries Ed25519 keys because the ring root γ′_Z is a commitment to the Ed25519 keys of γ′_P, which header-only nodes must be able to rebuild for themselves",
   "Bandersnatch: ticket ring proofs, H_S, H_V, audit-selection VRFs; Ed25519: guarantees, assurances, judgments/culprits/faults, audit announcements, offender identity (ψ_O, H_O, Φ); BLS: BEEFY only. H_E carries Ed25519 keys so a header-only node can attribute every Ed25519-signed artefact and every H_O entry to a validator",
@@ -325,7 +325,7 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
   "BEEFY（18.1）用 κ′[v]_bls，BLS 並非未用的保留欄位；GP 也沒有「以 stake 加權 GRANDPA」。",
   "judgments/culprits/faults 都直接帶 Ed25519 key 與簽章；Φ 作用在 ι → γ′_P、讀的是 state 而非 header。",
  ],
- "explanation": "eq. 6.10–6.13：k_b Bandersnatch、k_e Ed25519、k_l BLS（144 bytes）、k_m metadata（opaque，不參與任何密碼學）。Bandersnatch：ticket ring proof（6.30，對 γ′_Z）、seal H_S（6.16/6.17）、entropy VRF H_V（6.18）、§17 auditing 的 VRF seed（s_0、s_n 用 κ[v]_b）。Ed25519：guarantee credentials（11.28）、assurances（11.14，κ[a]_e）、verdict 中的 judgments（§10 用 k[i]_e，k 取自 κ 或 λ）、culprits/faults（10.2 的 tuple 直接帶 Ed25519 key 與簽章）、audit announcements（17.7）、以及 offender 身分——ψ_O 是 Ed25519 key 的集合，H_O ∈ [H_E]（5.11），Φ 用 k_e ∈ ψ′_O 判斷（6.15）。BLS：只有 BEEFY（18.1，κ′[v]_bls 對 accumulation-output MMR 的 Keccak 簽章）。eq. 6.28：H_E = (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])；§6.6：marker 是給「do not synchronize the entire state」的節點用 header 鏈追蹤 validator 變化——只有 Bandersnatch 的話，這種節點能驗 seal，卻無法把 guarantee/assurance/judgment/announcement 或 H_O 裡的 Ed25519 key 對應到 validator，因此 0.6.4 把 Ed25519 key 加進 H_E（changelog：「Ed25519 keys in epoch marker」）；BLS 與 metadata 不在 H_E 內。你們的 EpochMarkValidatorKeys 就是 {Bandersnatch, Ed25519} 兩欄，ValidateHeaderEpochMark 兩者都比。",
+ "explanation": "eq. 6.10–6.13：k_b Bandersnatch、k_e Ed25519、k_l BLS（144 bytes）、k_m metadata（opaque，不參與任何密碼學）。Bandersnatch：ticket ring proof（6.30，對 γ′_Z）、seal H_S（6.16/6.17）、entropy VRF H_V（6.18）、§17 auditing 的 VRF seed（s_0、s_n 用 κ[v]_b）。Ed25519：guarantee credentials（11.28）、assurances（11.14，κ[a]_e）、verdict 中的 judgments（§10 用 k[i]_e，k 取自 κ 或 λ）、culprits/faults（10.2 的 tuple 直接帶 Ed25519 key 與簽章）、audit announcements（17.7）、以及 offender 身分——ψ_O 是 Ed25519 key 的集合，H_O ∈ [H_E]（5.11），Φ 用 k_e ∈ ψ′_O 判斷（6.15）。BLS：只有 BEEFY（18.1，κ′[v]_bls 對 accumulation-output MMR 的 Keccak 簽章）。eq. 6.28：H_E = (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])；§6.6：marker 是給「do not synchronize the entire state」的節點用 header 鏈追蹤 validator 變化——只有 Bandersnatch 的話，這種節點能驗 seal，卻無法把 guarantee/assurance/judgment/announcement 或 H_O 裡的 Ed25519 key 對應到 validator，因此 H_E 也帶上 Ed25519 key；BLS 與 metadata 不在 H_E 內。你們的 EpochMarkValidatorKeys 就是 {Bandersnatch, Ed25519} 兩欄，ValidateHeaderEpochMark 兩者都比。",
  "trap": "口訣：Bandersnatch = Safrole（票、seal、entropy、audit 抽籤）；Ed25519 = 其他所有簽章與 offender 身分；BLS = 只有 BEEFY。"
 },
 ]

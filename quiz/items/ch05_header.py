@@ -60,35 +60,6 @@ ITEMS = [
  "trap": "設計理念題。延伸：Grandpa vote 會帶 posterior state root（§19）以彌補 header 只有 prior root。"
 },
 {
- "id": "ch05-extrinsic-hash-080",
- "lens": "演算法",
- "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7 (H_x)",
- "difficulty": 3, "kind": "delta", "tags": ["extrinsic", "header", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0（PR #524）重新定義了 extrinsic 雜湊 H_X = H(E(H#(a)))，其中 a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]。preimages（p）與 guarantees（g）這兩個成分是怎麼形成的？",
-  "optionsZh": [
-   "p 與 g 是 E_P 與 E_G 完整的 codec 編碼，與區塊本體攜帶的一模一樣，所以 a 承諾了每一個 preimage blob 與每一份完整的 work-report",
-   "p 編碼的是 (E_4(service), H(data)) 配對的序列，g 編碼的是 (H(work-report), E_4(slot), var(credential)) 三元組的序列，兩個序列都帶變長前綴",
-   "p 是把所有 preimage blob 串接後的 Blake2b 雜湊、g 是把所有 work-report 串接後的 Keccak 雜湊，所以 a 各只帶一個 32 位元組的葉子",
-   "p 與 g 從 a 中被移除，a 因此是三元素序列 [E_T(E_T), E_A(E_A), E_D(E_D)]；preimage 與 guarantee 只透過先前的 state root 被承諾"
-  ],
-  "stem": "GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?",
- "options": [
-  "p and g are the full codec encodings of E_P and E_G exactly as the block body carries them, so a commits to every preimage blob and every complete work-report",
-  "p encodes the sequence of (E_4(service), H(data)) pairs and g encodes the sequence of (H(work-report), E_4(slot), var(credential)) tuples, each sequence var-length prefixed",
-  "p is the Blake2b hash of the concatenated preimage blobs and g is the Keccak hash of the concatenated work-reports, so a carries exactly one 32-octet leaf for each",
-  "p and g are dropped from a, which is then the three-element sequence [E_T(E_T), E_A(E_A), E_D(E_D)]; preimages and guarantees are committed only via the prior state root"
- ],
- "answer": 1,
- "optNotes": [
-  "那樣 a 會扛著整包 blob 與整份 report，恰好毀掉「逐項證明 inclusion」的設計目的。",
-  "eq. 5.6–5.7 兩者都是 E(var[…]) 的形狀：序列每個元素先換成 hash 再編碼。",
-  "H# 是 blake-many（對序列每個元素各取一次 hash），且 Keccak 在 JAM 只用於 §18 的 BEEFY MMR。",
-  "eq. 5.5 的 a 是五個元素；preimages 與 guarantees 正是靠 H_X 而非 state root 進入 header。",
- ],
- "explanation": "eq. 5.4–5.7：H_X = H(E(H#(a)))，其中 a 是五個成分各自的承諾，**每個成分先被壓成自己的雜湊、再一起雜湊**。0.8.0（PR #524）重新定義了其中兩個：p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])——preimage 存的是 (service index, blob 的雜湊)；g = E(var[(H(w), E_4(t), var(a)) | (w, t, a) ∈ E_G])——guarantee 存的是 (work-report 的雜湊, slot, 擔保簽章)。**GP 給的理由寫在 §5**：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——因為只放雜湊，第三方就能用一份 Merkle proof 證明「某個 preimage 或某份 report 確實在這個區塊裡」，而**不必附上整個 blob 或整份報告**。work-report 可以接近 48 KiB（W_R），preimage 更可能是任意大小，差別是實質的。**為什麼是兩層雜湊**：先各自 hash 再合併，讓每個成分成為獨立的承諾——證明某個 preimage 存在時，不需要揭露 tickets、assurances 或 disputes 的內容。這是「承諾結構跟隨證明需求」的典型設計，與 §7 的 β_B 用 MMR 是同一種思路。",
- "trap": "0.7.2→0.8.0 差異；H# 是 blake-many（對序列每個元素各取 hash 再 encode）。"
-},
-{
  "id": "ch05-timeslot-validity",
  "lens": "時機",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.8",
@@ -173,7 +144,7 @@ ITEMS = [
   "eq. 11.12 的 a_a = H_P 是一次等值比對，不需要在保留的 header 序列裡搜尋。",
   "F(η′_2, κ′)（eq. 6.27）的輸入只有 posterior entropy 與 κ′ 兩個 state 分量，不讀歷史 header。",
  ],
- "explanation": "eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個 slot（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的 slot 等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root（最後這項是 0.8.0 新增的）。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。",
+ "explanation": "eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個 slot（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的 slot 等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。",
  "trap": "L = 14,400 slots = 24h；recent history H = 8 blocks 是給 anchor 用的，lookup anchor 用 A。"
 },
 {

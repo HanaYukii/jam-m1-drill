@@ -54,9 +54,9 @@ ITEMS = [
    "三張表分別對上 eq. B.2/B.6/B.11，未知 id 走 F 的 default：扣 M_∅ 後填 WHAT 續跑。",
    "正好顛倒——in-core 沒有共識狀態，refine 只能做依 lookup-anchor 時間的 historical_lookup。",
    "inner PVM 與 D3L export 只在 eq. B.6；eq. B.2 的 is-authorized 是 stateless，連 accounts 都拿不到。",
-   "grow_heap 三張表都有（0.8.0 用它取代 sbrk 指令），且未知 id 絕不是 ☇。",
+   "grow_heap 三張表都有，且未知 id 絕不是 ☇。",
  ],
- "explanation": "eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refine）：+ historical_lookup、export、machine、peek、poke、pages、invoke、expunge（inner PVM 與 D3L export）；eq. B.11（accumulate）：+ lookup/read/write/info（透過 G 包裝，讓對自身帳戶的變更同步進 context）、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide。分界的原理：in-core 的 refine 沒有共識狀態，只能做依 lookup-anchor 時間的 historical_lookup；accumulate 在鏈上，讀寫的是當下 partial state；is-authorized 則是 stateless，context 恆為 ∅。0.8.0（GP PR #508）把 sbrk 指令換成 grow_heap host call（index 1）並列進三張表。未知 id 走 F 的 default——扣 M_∅ = 1000 後 φ′_7 = WHAT 繼續執行，只有扣到 ϱ′ < 0 才 ∞。",
+ "explanation": "eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refine）：+ historical_lookup、export、machine、peek、poke、pages、invoke、expunge（inner PVM 與 D3L export）；eq. B.11（accumulate）：+ lookup/read/write/info（透過 G 包裝，讓對自身帳戶的變更同步進 context）、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide。分界的原理：in-core 的 refine 沒有共識狀態，只能做依 lookup-anchor 時間的 historical_lookup；accumulate 在鏈上，讀寫的是當下 partial state；is-authorized 則是 stateless，context 恆為 ∅。grow_heap（index 1）三張表都有。未知 id 走 F 的 default——扣 M_∅ = 1000 後 φ′_7 = WHAT 繼續執行，只有扣到 ϱ′ < 0 才 ∞。",
  "trap": "read/write/lookup/info 在 accumulate 才有；refine 用 historical_lookup（依 lookup-anchor 時間）。"
 },
 {
@@ -174,35 +174,6 @@ ITEMS = [
  ],
  "explanation": "Ω_S（solicit, 24）：(h,z) 不存在 → 新增 [] 並付 footprint（a_balance < a_minbalance → FULL）；[x,y] → append t（重新請求）；其他 → HUH。Ω_F（forget, 25）：[] 或 [x,y] 且 y < t − D → 刪 request 與 preimage；[x] → [x, t]（標記 unavailable，preimage 仍留著）；[x,y,w] 且 y < t − D → [w, t]；其他 → HUH。三元素 [x,y,w] 的過期判定看的是**中間**的 y（上一次停止可用的時刻），w 是最近一次重新請求的時刻，必然比較新。preimage 的請求狀態機由 solicit/forget 在 accumulate 中驅動，E_P extrinsic 只負責把 [] 推進到 [x]。D = C_expungeperiod = 19,200（= L + 4,800，§B.3 說明：審計最晚可在 accumulate 後兩個 epoch 發生，lookup anchor 最多 L 舊，再留 8 小時安全邊際）。`eject`（22）讓一個 codehash = E_32(caller id) 且只剩單一 request（items = 2）的 service 被銷毀並把餘額轉給呼叫者，條件同樣是 [x,y] 且 y < t − D。",
  "trap": "刪除必須等 D 個 slot（32h）——確保 refine 的 historical lookup 仍可判定。"
-},
-{
- "id": "appB-bless-assign-designate",
- "lens": "演算法",
- "ch": "B", "section": "B.7 — bless / assign / designate", "gpRef": "`bless` = 15, `assign` = 16, `designate` = 17",
- "difficulty": 2, "kind": "delta", "tags": ["privileges", "delta-0.8.0"],
-  "stemZh": "在 GP 0.8.0 中，bless、assign 與 designate 各自執行哪些權限檢查？",
-  "optionsZh": [
-   "bless：呼叫者必須是當前的 manager χ_M（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → CORE，呼叫者必須是 χ_A[c]（否則 HUH），寫入 80 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_V（否則 HUH），把 ι 設為 z 把 336 位元組的金鑰",
-   "bless：呼叫者必須是當前的 registrar χ_R（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → CORE，呼叫者必須是 χ_A[c]（否則 HUH），寫入 80 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_M（否則 HUH），把 ι 設為 z 把 336 位元組的金鑰",
-   "bless：呼叫者必須是當前的 manager χ_M（否則 HUH），設定 (m, a[C], v, r, z)；assign(c, o, a)：c ≥ C → HUH，呼叫者必須是 χ_A[c]（否則 CORE），寫入 32 項的佇列 φ[c] 與新的 assigner a；designate(o, z)：z 必須是合法的 validator 數量且呼叫者必須是 χ_V（否則 HUH），把 ι 設為 z 把 32 位元組的 Ed25519 金鑰",
-   "三者都只以 manager 為關卡：除非呼叫者是 χ_M，否則各自回傳 HUH。bless 另外在 m、v 或 r 不是 service index 時回傳 WHO，assign 另外在 c ≥ C 時回傳 CORE 並寫入 80 項的佇列 φ[c]，designate 則另外要求 z ∈ N_V；χ_A[c] 與 χ_V 是唯讀的，只有 bless 能改動它們"
-  ],
-  "stem": "Which privilege checks do bless, assign and designate perform in GP 0.8.0?",
- "options": [
-  "bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 336-octet keys",
-  "bless: caller must be the current registrar χ_R (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_M (else HUH), sets ι to z 336-octet keys",
-  "bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → HUH, caller must be χ_A[c] (else CORE), writes the 32-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 32-octet Ed25519 keys",
-  "All three are gated on the manager alone: each returns HUH unless the caller is χ_M. bless additionally returns WHO when m, v or r is not a service index, assign additionally returns CORE for c ≥ C and writes the 80-entry queue φ[c], and designate additionally requires z ∈ N_V; χ_A[c] and χ_V are read-only and only bless can change them"
- ],
- "answer": 0,
- "optNotes": [
-   "三者分屬 χ_M、χ_A[c]、χ_V 三把獨立權限，且 assign 成功時會把 χ_A[c] 改寫成參數 a。",
-   "張冠李戴：χ_R 只在 new 裡決定誰能指定 < S 的低位索引，designate 由 delegator χ_V 專屬。",
-   "CORE = core index unknown 專對應 c ≥ C，權限不符一律 HUH；Q = 80、每把 key 336 octets。",
-   "漏掉 owned privilege：assign 會寫入新的 χ_A[c]，core 指派權可以轉手而不必回頭找 manager。",
- ],
- "explanation": "Ω_B（bless, 15）：讀 m, a（4C 個 u32 assigners）, v, r, o/n（z 的 (u32, u64) pairs）；x_s ≠ χ_M → HUH（0.8.0 #519 新增：只有 manager 能 bless）；m/v/r 不是有效 service id → WHO。Ω_A（assign, 16）：c ≥ C → CORE；x_s ≠ χ_A[c] → HUH；a 無效 → WHO；否則 φ[c] = Q = 80 個 32-octet hash，χ_A[c] = a（owned privilege：assigner 可把權限轉給別人）。Ω_D（designate, 17）：z ∉ N_V（不是 6..1023 的 3 倍數）或 x_s ≠ χ_V → HUH；否則 ι = 讀入的 z 個 336-octet key（32 Bandersnatch + 32 Ed25519 + 144 BLS + 128 metadata）。三把權限刻意分開：manager 管全域、每個 core 各有自己的 assigner、validator key 由 delegator 專管。這三者的變更經 Δ* 的 R() 合併規則整合。",
- "trap": "0.8.0 designate 也要驗 z 是合法 validator 數（#514）。"
 },
 {
  "id": "appB-checkpoint-yield",

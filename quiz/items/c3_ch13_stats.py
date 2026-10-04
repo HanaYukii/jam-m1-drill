@@ -21,21 +21,15 @@ ITEMS = [
         "gpRef": "eq. 13.4–13.6",
         "difficulty": 3,
         "kind": "concept",
-        "tags": ["statistics", "assurance", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0 §13.1 以三個有序步驟導出 validator 活動紀錄——先 π_V†，再 (π_V‡, π′_L)，最後 π′_V——其中 e = ⌊τ/E⌋、e′ = ⌊τ′/E⌋。現在看一個新 epoch 的第一塊（因此 e′ ≠ e）：出塊者是 validator 7、它的 assurance extrinsic E_A 帶有 validator 4 與 9 的簽章、而 guarantee extrinsic E_G 記功給 validator 22。這一塊自身的增量最後落在哪裡？",
+        "tags": ["statistics", "assurance"],
+  "stemZh": "§13.1 以三個有序步驟導出 validator 活動紀錄——先 π_V†，再 (π_V‡, π′_L)，最後 π′_V——其中 e = ⌊τ/E⌋、e′ = ⌊τ′/E⌋。現在看一個新 epoch 的第一塊（因此 e′ ≠ e）：出塊者是 validator 7、它的 assurance extrinsic E_A 帶有 validator 4 與 9 的簽章、而 guarantee extrinsic E_G 記功給 validator 22。這一塊自身的增量最後落在哪裡？",
   "optionsZh": [
    "這一塊貢獻的一切全都落進剛歸零的累積器，因為 eq. 13.4 是把 assurance 那一輪套用在 π_V‡ 而不是 π_V 上；所以 validator 7 的出塊／ticket／preimage 計數與 validator 22 的 guarantee 記功，會和 validator 4、9 的 assurance 增量一起坐在當期紀錄裡，而封存則原封保留上一個 epoch 的總計",
    "兩筆 assurance 增量落進上期封存，因為它們是先加到 prior 紀錄上、而在換屆時被搬過去的正是那份已經加過的紀錄；validator 7 的出塊／ticket／preimage 計數與 validator 22 的 guarantee 記功則從剛歸零的累積器起算，因此落在當期紀錄。這一塊是被刻意拆分到兩份紀錄裡的",
    "這一塊貢獻的一切全都落進上期封存，因為 eq. 13.6 把其餘五個計數器也套用在 π_V† 上，而在換屆時被搬過去的是整輪的結果；所以 validator 7 的計數、validator 22 的 guarantee 記功與 validator 4、9 的 assurance 增量會一起進入 π′_L。當期紀錄要到新 epoch 的第二塊為止都維持全零序列",
    "換屆是由 header 的 epoch marker H_E 觸發的，而不是比較 ⌊τ/E⌋ 與 ⌊τ′/E⌋；而且當 H_E ≠ ∅ 時兩份紀錄都被歸零，而不是其中一份覆蓋另一份；因此 validator 7 的計數、validator 22 的記功與 validator 4、9 的 assurance 增量全都是當期紀錄的首批項目，封存對這一塊毫無貢獻"
   ],
-  "stem": (
-            "GP 0.8.0 §13.1 derives the validator activity records in three ordered steps — π_V†, then "
-            "(π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch "
-            "(so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by "
-            "validators 4 and 9, and its guarantee extrinsic E_G credits validator 22. Where do this block's "
-            "own increments end up?"
-        ),
+  "stem": "§13.1 derives the validator activity records in three ordered steps — π_V†, then (π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch (so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by validators 4 and 9, and its guarantee extrinsic E_G credits validator 22. Where do this block's own increments end up?",
         "options": [
             "Everything this block contributes lands in the freshly zeroed accumulator, because eq. 13.4 "
             "applies the assurance pass to π_V‡ rather than to π_V; validator 7's block/ticket/preimage "
@@ -65,7 +59,7 @@ ITEMS = [
             "eq. 13.6 明寫 π′_V ≡ π_V‡ except …，五個 counter 的起點是 rollover 之後的 π_V‡。",
             "π_L 從來不會被歸零：eq. 13.5 的 otherwise 分支是把 π_V† 整包搬過去覆寫它。",
         ],
-        "explanation": "eq. 13.4 先做 π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——assurance 是加在 **prior** 的 π_V 上。eq. 13.5 之後才做 epoch rollover：(π_V‡, π′_L) = (π_V†, π_L) when e′ = e，otherwise ([(0, …), …], π_V†)，其中 e = ⌊τ/E⌋（prior τ）、e′ = ⌊τ′/E⌋（posterior τ′ = H_T）。eq. 13.6 才從已歸零的 π_V‡ 出發：b += (v = H_I)、t += |E_T|、p += |E_P|、d += Σ_{d ∈ E_P}|d|（都只給 author）、g += (κ′[v] ∈ G)，這些落在 π′_V。因此同一塊的六個 counter 被刻意拆到兩個 record：a 記在舊 epoch、其餘五個記在新 epoch。「整塊都進新累加器」正是 0.7.2 的作法（也是 statistics.go 目前的行為，PR #1034 才修）。順帶一提，eq. 6.28 的 H_E 恰好在 e′ > e 時非 ∅，觸發時機與 eq. 13.5 的 e′ ≠ e 重合，但 §13 從不讀它——H_E 只帶 (η_0, η_1) 與 γ′_P 的金鑰序列。",
+        "explanation": "eq. 13.4 先做 π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——assurance 是加在 **prior** 的 π_V 上。eq. 13.5 之後才做 epoch rollover：(π_V‡, π′_L) = (π_V†, π_L) when e′ = e，otherwise ([(0, …), …], π_V†)，其中 e = ⌊τ/E⌋（prior τ）、e′ = ⌊τ′/E⌋（posterior τ′ = H_T）。eq. 13.6 才從已歸零的 π_V‡ 出發：b += (v = H_I)、t += |E_T|、p += |E_P|、d += Σ_{d ∈ E_P}|d|（都只給 author）、g += (κ′[v] ∈ G)，這些落在 π′_V。因此同一塊的六個 counter 被刻意拆到兩個 record：a 記在舊 epoch、其餘五個記在新 epoch。「整塊都進新累加器」是最容易寫錯的版本（statistics.go 原本就是這樣，PR #1034 才修）。順帶一提，eq. 6.28 的 H_E 恰好在 e′ > e 時非 ∅，觸發時機與 eq. 13.5 的 e′ ≠ e 重合，但 §13 從不讀它——H_E 只帶 (η_0, η_1) 與 γ′_P 的金鑰序列。",
         "trap": "口訣：assurance 在 rollover 之前，b/t/p/d/g 在 rollover 之後；epoch 邊界那一塊會被劈成兩半。",
     },
     {
@@ -77,20 +71,14 @@ ITEMS = [
         "difficulty": 2,
         "kind": "concept",
         "tags": ["guarantee", "statistics"],
-  "stemZh": "GP 0.8.0 把 guarantee 計數器更新為 π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G)，其中 G 是 eq. 11.28 的 reporters 集合。假設某塊的 E_G 有兩份 guarantee：validator 12 在兩份裡都簽了憑證（一份依本 rotation 的指派、一份依前一個 rotation 的），validator 30 只在其中一份簽了，而該塊的出塊者是 validator 5。g 計數器會怎麼變動？",
+  "stemZh": "GP 把 guarantee 計數器更新為 π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G)，其中 G 是 eq. 11.28 的 reporters 集合。假設某塊的 E_G 有兩份 guarantee：validator 12 在兩份裡都簽了憑證（一份依本 rotation 的指派、一份依前一個 rotation 的），validator 30 只在其中一份簽了，而該塊的出塊者是 validator 5。g 計數器會怎麼變動？",
   "optionsZh": [
    "validator 12 增加 1、validator 30 增加 1、出塊者不動——加上去的那一項是對該 validator 之 Ed25519 金鑰是否屬於某個金鑰集合的布林成員測試，所以同一塊裡簽兩份憑證仍然只前進一步，而索引 v 是透過 posterior 的 active set 解析的",
    "validator 12 增加 2、validator 30 增加 1、出塊者不動——加上去的那一項計的是憑證簽章的數量而不是做成員測試，所以在同一塊的兩份 guarantee 中簽名的 validator 會前進兩步，而索引 v 是透過 posterior 的 active set 解析的",
    "validator 12 增加 1、validator 30 增加 1，而出塊者另外增加 2——加上去的那一項是布林成員測試，所以每位 guarantor 只前進一步，出塊者則按該塊帶入的每份 report 各記一步，而索引 v 是透過 prior 的 active set κ 解析的",
    "只有出塊者變動，而且增加 2——g 記錄的是出塊者帶上鏈的 report 數，每份一步；guarantor 則改由 assurance 計數器 a 記功，而因為那個計數器是對 prior 紀錄遞增的，只要該塊落在 epoch 邊界上，他們的增量就會落進封存"
   ],
-  "stem": (
-            "GP 0.8.0 updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the "
-            "reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a "
-            "credential in both of them (one report under this rotation's assignment, one under the previous "
-            "rotation's), validator 30 signed a credential in only one, and the block's author is validator 5. "
-            "How does the g counter move?"
-        ),
+  "stem": "The GP updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a credential in both of them (one report under this rotation's assignment, one under the previous rotation's), validator 30 signed a credential in only one, and the block's author is validator 5. How does the g counter move?",
         "options": [
             "Validator 12 moves by 1, validator 30 by 1, the author not at all — the added term is a Boolean "
             "membership test of the validator's Ed25519 key against a set of keys, so two credentials in the "
@@ -111,11 +99,11 @@ ITEMS = [
         "answer": 0,
         "optNotes": [
             "(κ′[v] ∈ G) 是集合成員的 Boolean，同一塊簽兩份也只 +1，且索引跑的是 N_{|κ′|}。",
-            "來源是 §13.1 的 prose 與 0.7.0 的 per-report 舊讀法，與 eq. 13.6 的成員測試方向相反。",
+            "來源是 §13.1 的 prose 那種 per-report 讀法，與 eq. 13.6 的成員測試方向相反。",
             "eq. 13.6 只有 b/t/p/d 帶 v = H_I 的條件，g 的式子裡沒有 author 的位置；索引也是 posterior κ′。",
             "a 的增量條件是 ∃a ∈ E_A : a_v = v，資料來源是 assurance extrinsic 而不是 E_G。",
         ],
-        "explanation": "eq. 11.28 定義 reporters set：k ∈ G ⟺ ∃(r, t, a) ∈ E_G, ∃(v, s) ∈ a : k = (k_v)_e——G 是 **Ed25519 公鑰的集合**（k 取自本 rotation 或前一 rotation 的 guarantor assignment）。eq. 13.6 的增量 (κ′[v] ∈ G) 是一個 Boolean，依 §3.7.3「⊤ = 1、⊥ = 0」的隱含轉換，同一塊裡簽兩份 report 也只能 +1（實作上就是先把 G 建成 reportersSet，再對每個 validator 最多 +1）。這裡有一個 GP 自身的矛盾必須知道：§13.1 的欄位說明寫「g: The number of reports guaranteed by the validator」，但依 eq. 13.6 的集合成員測試，g 每塊最多 +1，實際語意是「該 validator 在這一塊有沒有 guarantee 過 report」而不是 report 的筆數。考試以 eq. 13.6 為準，但要認得那句 prose——團隊在 0.7.0 時期（#710/#711）採用的正是這種 per-report 舊讀法。索引用的是 **posterior** 的 κ′（eq. 13.6 的 ∀v ∈ N_{|κ′|}），不是 prior 的 κ——注意 eq. 13.4 的 assurance 迴圈才是跑 N_{|κ|}，兩者刻意不同。",
+        "explanation": "eq. 11.28 定義 reporters set：k ∈ G ⟺ ∃(r, t, a) ∈ E_G, ∃(v, s) ∈ a : k = (k_v)_e——G 是 **Ed25519 公鑰的集合**（k 取自本 rotation 或前一 rotation 的 guarantor assignment）。eq. 13.6 的增量 (κ′[v] ∈ G) 是一個 Boolean，依 §3.7.3「⊤ = 1、⊥ = 0」的隱含轉換，同一塊裡簽兩份 report 也只能 +1（實作上就是先把 G 建成 reportersSet，再對每個 validator 最多 +1）。這裡有一個 GP 自身的矛盾必須知道：§13.1 的欄位說明寫「g: The number of reports guaranteed by the validator」，但依 eq. 13.6 的集合成員測試，g 每塊最多 +1，實際語意是「該 validator 在這一塊有沒有 guarantee 過 report」而不是 report 的筆數。考試以 eq. 13.6 為準，但要認得那句 prose——團隊早期（#710/#711）採用的正是這種 per-report 讀法。索引用的是 **posterior** 的 κ′（eq. 13.6 的 ∀v ∈ N_{|κ′|}），不是 prior 的 κ——注意 eq. 13.4 的 assurance 迴圈才是跑 N_{|κ|}，兩者刻意不同。",
         "trap": "GP 字面寫 κ′[v] ∈ G，但 κ′[v] ∈ K 是四欄位金鑰 tuple 而 G ⊂ H；實作一律讀成 (κ′[v])_e ∈ G。",
     },
     {

@@ -52,14 +52,14 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
   "E_U 是直接省略 seal 而不是填零：C.2 寫的是 E(H) = E(E_U(H), H_S)。",
   "H_O 再長也只是把 seal 的起點往後推，「尾端 96 bytes 就是 seal」與 H_O 長度無關。",
  ],
- "explanation": "附錄 C.2：E(H) = E(E_U(H), H_S)，而 E_U(H) = E(H_P, H_R, H_X, E_4(H_T), E_epochmark(H_E), maybe(H_R), E_2(H_I), H_V, var(H_O))。H_V 仍留在 E_U 內（seal 簽到 H_V；H_V 的 VRF context 則含 Y(H_S)，而 VRF output 只由 key 與 context 決定、與 message 無關，所以不循環）。注意序列化順序與 eq. 5.1 的 tuple 順序不同：E_U 裡 E_2(H_I)、H_V 排在 H_O 之前，H_O 以 var（長度前綴）放在 E_U 最後；H_E 用 E(0) 或 E(1, η_0, η_1, var(k))，H_W 用 maybe（0 或 1 ⌢ 固定 E 張 ticket）。你們 Header.Encode 的欄位順序 Parent…AuthorIndex, EntropySource, OffendersMark, Seal 正是這個順序，所以 HeaderUSerialization 的做法正確。0.8.0 的小 delta：epoch marker 的 key 序列改為 var(k)（#1031）。",
+ "explanation": "附錄 C.2：E(H) = E(E_U(H), H_S)，而 E_U(H) = E(H_P, H_R, H_X, E_4(H_T), E_epochmark(H_E), maybe(H_R), E_2(H_I), H_V, var(H_O))。H_V 仍留在 E_U 內（seal 簽到 H_V；H_V 的 VRF context 則含 Y(H_S)，而 VRF output 只由 key 與 context 決定、與 message 無關，所以不循環）。注意序列化順序與 eq. 5.1 的 tuple 順序不同：E_U 裡 E_2(H_I)、H_V 排在 H_O 之前，H_O 以 var（長度前綴）放在 E_U 最後；H_E 用 E(0) 或 E(1, η_0, η_1, var(k))，H_W 用 maybe（0 或 1 ⌢ 固定 E 張 ticket）。你們 Header.Encode 的欄位順序 Parent…AuthorIndex, EntropySource, OffendersMark, Seal 正是這個順序，所以 HeaderUSerialization 的做法正確。",
  "trap": "序列化順序 p r x t e w i v o | s（H_O 在 H_V 之後、seal 最後），eq. 5.1 的 tuple 順序是 p r x t e w o i v s；E_U = E(H) 去尾 96 bytes。"
 },
 {
  "id": "ch05-extrinsic-hash-inclusion-proof",
  "lens": "設計",
  "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.4–5.7",
- "difficulty": 3, "kind": "concept", "tags": ["extrinsic", "header", "delta-0.8.0"],
+ "difficulty": 3, "kind": "concept", "tags": ["extrinsic", "header"],
   "stemZh": "某個輕客戶端只持有一個已驗證的 header H，想確認 service s 的 preimage blob d 有被納入該區塊的 E_P。已知 H_X = H(E(H#(a)))、a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]（eq. 5.4–5.7），它需要的最小見證是什麼？檢查的形狀又是什麼？",
   "optionsZh": [
    "一條長度為 log₂|E_P| 的 Merkle 路徑，從葉子 H(d) 一路到 H_X，因為 H_X 是對該區塊每一個 extrinsic 項目所取的二元 Merkle root，所以見證是 O(log n) 個雜湊、只隨區塊變滿而對數成長",
@@ -77,11 +77,11 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  "answer": 2,
  "optNotes": [
   "H# 只是逐項 map 後平鋪再取一次 hash，不是二元 Merkle tree，p 內部沒有 log 長度的路徑。",
-  "那是 0.7.2 的情況；#524 之後 p 只帶 (service, blake(blob))，不必附上其他人的 blob。",
+  "p 只帶 (service, blake(blob)) 而不是 blob 本身，所以不必附上其他人的 blob。",
   "witness = 四個 sibling hash + 整段 p（每項 36 bytes），大小隨區塊裡的 preimage 數線性成長。",
   "p 是先整段編碼再取一次 hash，單憑一組 (s, H(d)) 與 H_X 是重算不出來的。",
  ],
- "explanation": "eq. 5.4：H_X ≡ H(E(H#(a)))，H# 是把 H 逐項套用到序列 a 的每個元素（§3 notation：f^# 表示 map），所以 H_X = H(h_T ⌢ h_p ⌢ h_g ⌢ h_A ⌢ h_D)，其中 h_p = H(p)、p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])（eq. 5.6）。這是兩層結構：外層是 5 個 component hash 平鋪後再 hash，內層的 p 是一整個 blob。§5 說明：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——0.8.0 PR #524 把 p 從 E_P(E_P)（含完整 blob）改成 (service, blake(blob)) 的序列，證明時才不必附上其他 preimage 的 blob。你們 CreateExtrinsicHash（0.7.2）對 preimages 仍是 hash 整個 EncodeExtrinsicPreimages，升到 0.8.0 時要改成對 (E_4(s), H(d)) 序列取 hash（#1031）；guarantees 那一段（g，report 用 H(w) 代替）在 0.7.2 已經做對。",
+ "explanation": "eq. 5.4：H_X ≡ H(E(H#(a)))，H# 是把 H 逐項套用到序列 a 的每個元素（§3 notation：f^# 表示 map），所以 H_X = H(h_T ⌢ h_p ⌢ h_g ⌢ h_A ⌢ h_D)，其中 h_p = H(p)、p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])（eq. 5.6）。這是兩層結構：外層是 5 個 component hash 平鋪後再 hash，內層的 p 是一整個 blob。§5 說明：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——所以 p 不是 E_P(E_P)（含完整 blob），而是 (service, blake(blob)) 的序列，證明時才不必附上其他 preimage 的 blob；guarantees 那一段（g）同理，report 用 H(w) 代替。",
  "trap": "H_X 是「hash of five hashes」，不是 Merkle root；只有 p 與 g 以 hash 代替內容，E_T/E_A/E_D 是整包 encode 後 hash。"
 },
 {
@@ -112,44 +112,6 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
  ],
  "explanation": "eq. 5.8：P(H)_t < H_T ∧ H_T·P ≤ T（P = 6 秒，T 為自 JAM Common Era 起的 wall-clock 秒數）。§5：「A block may only be regarded as valid once the time-slot index H_T is in the past」，而且「Blocks considered invalid by this rule may become valid as T advances」——節點可以暫存未來區塊、等 T 追上再 import。對照你們的 code：STF 裡只檢查 τ < τ′（safrole.go 的 BadSlot：「timeslot value must be strictly monotonic」），wall-clock 條件放在 header_controller.ValidateTimeSlot（出塊路徑，用 time.Now() 與 JamCommonEra 2025-01-01 12:00 UTC 相減）；STF test vectors 與 fuzzer trace 都不含 wall-clock，所以這條規則只在 live 節點的 gossip/import 路徑上有意義。",
  "trap": "「暫時無效」只適用於未來 slot；跳過的 slot（H_T > P(H)_t + 1）是合法的，不要跟未來 slot 混淆。"
-},
-{
- "id": "ch05-author-index-bound-set",
- "lens": "時機",
- "ch": "5", "section": "5 The Header", "gpRef": "eq. 5.10 & eq. 6.8 (valcount)",
- "difficulty": 3, "kind": "code", "tags": ["header", "JAM Prize", "delta-0.8.0"],
-  "stemZh": "在 fuzzer bug #825（一個 H_I = 65535 的 header 讓 UpdateEtaPrime0 以「index out of range [65535] with length 6」panic，因為該索引在被驗證之前就被使用）之後，團隊加了這個檢查。它用的界限是 GP 0.8.0 所規定的那一個嗎？",
-  "optionsZh": [
-   "是：eq. 5.10 定義 H_I ∈ N_{|κ|}——出塊者必須屬於 prior 的 active set，因為該區塊建立在 prior 狀態上、而它的 seal 是在該 epoch 的金鑰輪換套用之前就被驗證的，所以 len(priorState.Kappa) 正是規格的界限，#825 需要的只是把這個測試移到 UpdateEtaPrime0 之前",
-   "不完全是：eq. 5.10 是以 |κ′|（posterior 的 active set，其金鑰同時也用來驗證 H_S 與 H_V）為 H_I 的界限；prior 的 κ 只有在 |κ| = |κ′| 時才等價，而這在今天成立只是因為團隊從不調整集合大小，但 0.8.0 允許 validator 集合大小跨 epoch 邊界改變（eq. 6.8）",
-   "是：那個界限就是常數 V（full 1023／tiny 6）；κ 與 κ′ 在每一種設定下都恰好持有 V 項，所以用哪個長度都行、選哪個集合純粹是形式問題——#825 唯一實質的修正就是把範圍測試排到索引被解參考之前",
-   "不對：H_I 索引的是 pending set γ_P，因為一個 epoch 的第一塊是由新進的 validator 出塊的；因此界限必須是從 prior 的 Safrole 狀態讀出的 |γ_P|，因為 κ′ 要等 seal 驗證完才被指派，用它來界定 H_I 會構成循環"
-  ],
-  "stem": "After fuzzer bug #825 (a header with H_I = 65535 panicked UpdateEtaPrime0 with 'index out of range [65535] with length 6' because the index was used before being validated), the team added this check. Is the bound it uses the one GP 0.8.0 specifies?",
- "code": {"lang": "go", "caption": "internal/stf/validate_header.go (ValidateNonVRFHeader, excerpt)", "src": """	// Validate author_index out of range.
-	// NOTE: There is currently no official error code defined for this case.
-	// We may need to update this once the spec updates.
-	if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
-		errCode := SafroleErrorCode.AuthorIndexOutOfRange
-		return &errCode
-	}
-	return nil
-}"""},
- "options": [
-  "Yes: eq. 5.10 defines H_I ∈ N_{|κ|} — the author must belong to the prior active set, because the block is built on the prior state and its seal is verified before the epoch's key rotation is applied, so len(priorState.Kappa) is exactly the spec bound and #825 needed nothing beyond moving the test ahead of UpdateEtaPrime0",
-  "Not exactly: eq. 5.10 bounds H_I by |κ′| (the posterior active set, whose key also verifies H_S and H_V); the prior κ is equivalent only while |κ| = |κ′|, which holds today because the team never resizes the set, but 0.8.0 lets validator-set sizes differ across an epoch boundary (eq. 6.8)",
-  "Yes: the bound is the constant V (1023 full / 6 tiny); κ and κ′ always hold exactly V entries in every configuration, so either length works and the choice of set is purely cosmetic — the only substantive fix for #825 was ordering the range test before the index is dereferenced",
-  "No: H_I indexes the pending set γ_P, since the first block of an epoch is sealed by the incoming validators; the bound must therefore be |γ_P| read out of the prior Safrole state, because κ′ is only assigned once the seal has been verified and bounding H_I by it would be circular"
- ],
- "answer": 1,
- "optNotes": [
-  "順序講反了：κ′ ≺ (H, τ, κ, γ) 先算出來、seal 驗證在其後，拿 κ′ 當上界沒有循環問題。",
-  "eq. 5.10 的上界是 |κ′|；0.8.0 (#514) 起 |κ| 與 |κ′| 可在 epoch 交界不相等。",
-  "eq. 6.8 的 𝕍 ≡ {3c | 2 ≤ c ≤ C} 允許長度變動，「V 是常數」是 0.7.2 的寫法。",
-  "epoch 首塊時 κ′ 已經等於舊的 γ_P，index 的對象就是 κ′ 本身，不必繞道 γ_P。",
- ],
- "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b——用的是 posterior active set（epoch 的第一個區塊由剛輪替進來的 κ′ = 舊 γ_P 出塊；#784/#791 就是因為用 prior κ/η 驗 seal 與 H_V 而失敗）。0.7.2 這裡的上界是常數 V；0.8.0（PR #514）改為 |κ′|，且 eq. 6.8 允許 validator 序列長度是 6 到 3C 之間任何 3 的倍數、designate 可以改變 ι 的長度。你們目前 |κ| ≡ |κ′| ≡ ValidatorsCount（offender 的 key 就地清零、不移除，issue #1037），所以 len(priorState.Kappa) 暫時等價；一旦支援變動大小，集合變大時會誤拒合法的 H_I ∈ [|κ|, |κ′|)，變小時會放過非法 index，接著在 η′_0 = H(η_0 ⌢ Y(H_V)) 或 seal 驗證取 κ′[H_I] 時再度 panic——正是 #825 的症狀。另一個重點：這個 bound check 必須排在所有使用 κ′[H_I] 的步驟（UpdateEtaPrime0、seal/VRF 驗證）之前——#825 的本質是「先用後驗」。",
- "trap": "H_I 對 κ′ 取 index，bound 也是 |κ′|；0.8.0 之後不要再把 V 當常數用。"
 },
 {
  "id": "ch07-belt-empty-output",

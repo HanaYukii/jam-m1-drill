@@ -41,7 +41,7 @@ ITEMS = [
             "core index 從頭到尾沒有進 β（report 自帶 w_c），O = 8 是 authorizer pool 的上限。",
             "I = 16 是單一 work-package 的 work-item 數上限（eq. 14.2），而一個區塊可有多達 C 份 report。",
         ],
-        "explanation": "eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 把它建成 {((g_r)_s)_p ↦ ((g_r)_s)_e | g ∈ E_G}，也就是「本區塊 guarantee 的 work-package hash ↦ 該 package 的 segment-root（exports root）」。§7 原文說得很直白：\"the corresponding work-package hashes of each item reported (which is no more than the total number of cores, C = 341)\" —— 上限來自每個 core 每個區塊至多一份 report（eq. 11.32 要求 ρ‡[w_c] = ∅）。團隊 0.7.2 對應的型別是 []ReportedWorkPackage{Hash, ExportsRoot}，其 Validate() 正是拿 CoresCount 當上限。",
+        "explanation": "eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 把它建成 {((g_r)_s)_p ↦ ((g_r)_s)_e | g ∈ E_G}，也就是「本區塊 guarantee 的 work-package hash ↦ 該 package 的 segment-root（exports root）」。§7 原文說得很直白：\"the corresponding work-package hashes of each item reported (which is no more than the total number of cores, C = 341)\" —— 上限來自每個 core 每個區塊至多一份 report（eq. 11.32 要求 ρ‡[w_c] = ∅）。團隊對應的型別是 []ReportedWorkPackage{Hash, ExportsRoot}，其 Validate() 正是拿 CoresCount 當上限。",
         "trap": "p 的 value 不是隨便的雜湊，是 segment-root；eq. 11.44 要靠這個 value 驗 segment-root 與 package hash 配對。",
     },
     {
@@ -108,7 +108,7 @@ ITEMS = [
             "eq. 5.1 只有 epoch／winners／offenders 三個 marker；belt 確實進了 C(3)，bridge 仍得走狀態證明。",
             "MMB 是 append-only 且全程用 Keccak；C(16) 只裝本區塊的 θ，翻不到舊區塊的 root。",
         ],
-        "explanation": "eq. 7.6–7.7：s = [E_4(s) ⌢ E(h) | (s, h) ∈ θ′]，β′_B ≡ A(β_B, M_B(s, H_K), H_K)，全程用 Keccak，GP 原文的理由是 \"to maximize compatibility with legacy systems\"。eq. 7.8 新 item 的 b 欄位放 M_R(β′_B)，也就是 belt 的 super-peak（eq. E.10：先濾掉 ∅ peaks，只剩一個就直接回傳，否則以 $peak ⌢ M_R(前 n−1 個) ⌢ 最後一個 由右向左折疊）。beefy.tex eq. 18.1：F_v ≡ S^BLS_{κ′[v]_l}(X_B ⌢ last(β_H)_b)，X_B = $jam_beefy，對每個 finalized block 簽一次。把序列壓成單一 commitment 才能給第三方簡潔證明。GP 0.8.0 的用語是 MMB（Merkle mountain belt）／Accumulation Output Log，團隊 0.7.2 程式碼叫它 beefyBelt / BeefyRoot，是同一個東西。",
+        "explanation": "eq. 7.6–7.7：s = [E_4(s) ⌢ E(h) | (s, h) ∈ θ′]，β′_B ≡ A(β_B, M_B(s, H_K), H_K)，全程用 Keccak，GP 原文的理由是 \"to maximize compatibility with legacy systems\"。eq. 7.8 新 item 的 b 欄位放 M_R(β′_B)，也就是 belt 的 super-peak（eq. E.10：先濾掉 ∅ peaks，只剩一個就直接回傳，否則以 $peak ⌢ M_R(前 n−1 個) ⌢ 最後一個 由右向左折疊）。beefy.tex eq. 18.1：F_v ≡ S^BLS_{κ′[v]_l}(X_B ⌢ last(β_H)_b)，X_B = $jam_beefy，對每個 finalized block 簽一次。把序列壓成單一 commitment 才能給第三方簡潔證明。GP 的用語是 MMB（Merkle mountain belt）／Accumulation Output Log，團隊程式碼叫它 beefyBelt / BeefyRoot，是同一個東西。",
         "trap": "θ′ 是本區塊的輸出序列（另一個狀態項），β_B 是跨區塊的 belt；被 append 的是 θ′ 的 M_B root，不是 θ′ 本身。",
     },
     {
@@ -144,67 +144,6 @@ ITEMS = [
         "explanation": "eq. 7.5 的 β† ≡ β_H 只改「β_H 最後一個 item」的 s ← H_R，而 H_R 是本區塊 header 攜帶的 *parent* posterior state root（header.tex：JAM 刻意在 header 放 prior state root 以利 pipelining）。正確順序是先 β_H → β†（修好上一個區塊的 s），再 append 新 item 且 s = H_0。順序顛倒後，被修的是剛 append 的新 item，於是它拿到的是「上一個區塊」的 root，而上一個區塊的 item 再也拿不到本該補給它的 root（注意：不會有任何 item 停在 H_0，新 item 一 append 就被錯位的修正立刻蓋掉）。後果有兩層：eq. 11.36 要求 x_s = y_s（context 的 anchor posterior state root 對上 β† item 的 s），guarantor 給的是真值，這台節點比對必失敗；而 C(3) 直接把每個 item 的 s 編進狀態序列化，state root 立刻和別人不同，fuzz trace 會停在 state-root mismatch。GP 自己的註腳講清楚了為什麼 H_0 是安全的：\"β′ is not utilized except to define the next block's β†\"。",
         "trap": "β† 修的是「上一個區塊」的 s，不是自己的；先修再 append，順序寫反不會報錯，只會 state root 不對。",
     },
-    {
-        "id": "c3-ch07-c3-field-order",
- "lens": "演算法",
-        "ch": "7",
-        "section": "7 Recent History",
-        "gpRef": "eq. 7.2 & §D.1 state key C(3)",
-        "difficulty": 3,
-        "kind": "code",
-        "tags": ["serialization", "accumulate", "delta-0.8.0"],
-  "stemZh": "這是團隊在 state key C(3) 之下、為單一筆 β_H 項目所寫的 GP 0.7.2 編碼器。有位審閱者反對，認為 GP 0.8.0 把該項目宣告為 ⟨h, s, b, t, p⟩——state root 排在 accumulation-output-log 的 super-peak 之前——所以這個編碼器一定把兩個欄位對調了。誰說得對？",
-  "optionsZh": [
-   "編碼器的順序是對的：狀態序列化是由附錄 D 的 C(3) 定死的，它送出的是 header 雜湊、然後 super-peak、然後 state root、然後 slot、最後是 reported 映射；第 7 章的那個元組只是在命名各成分。真正的 0.8.0 落差是 state root 與 reported 映射之間少了那個 4 位元組的 slot",
-   "審閱者是對的：一個狀態分量永遠依它的定義式所列欄位順序序列化，所以 C(3) 需要的是 header 雜湊、state root、super-peak、slot、reported 映射；附錄 D 只是重述第 7 章的元組、兩者不可能牴觸，所以照現況這個編碼器會產生錯誤的 C(3) 原像、因而產生錯誤的 state root",
-   "兩者都錯：C(3) 只裝 β_B 編碼後的 peak 序列，而逐區塊的項目是透過 header 裡的一個 marker 承諾、其餘由各節點自行保存在鏈外，所以這個編碼器根本不該餵給狀態序列化，它用哪種順序都動不了 state root",
-   "審閱者在順序與形狀上都對：0.8.0 把每個項目的 super-peak 換成了完整的 peak 序列，所以每一項都必須編碼整條 belt，而這段程式碼卻只寫了單一個 32 位元組的雜湊；eq. 11.36 也是拿 anchor 去對照那個序列而不是對照單一個承諾"
-  ],
-  "stem": "This is the team's GP 0.7.2 encoder for one β_H item under state key C(3). A reviewer objects that GP 0.8.0 declares the item as ⟨h, s, b, t, p⟩ — state root ahead of the accumulation-output-log super-peak — so the encoder must have two fields swapped. Who is right?",
-        "code": {
-            "lang": "go",
-            "caption": "internal/types/encode.go:1950-1980 (BlockInfo.Encode; log line elided)",
-            "src": """func (bi *BlockInfo) Encode(e *Encoder) error {
-	// HeaderHash
-	if err := bi.HeaderHash.Encode(e); err != nil {
-		return err
-	}
-	// BeefyRoot
-	if err := bi.BeefyRoot.Encode(e); err != nil {
-		return err
-	}
-	// StateRoot
-	if err := bi.StateRoot.Encode(e); err != nil {
-		return err
-	}
-	// Reported
-	if err := e.EncodeLength(uint64(len(bi.Reported))); err != nil {
-		return err
-	}
-	for _, reportedWorkPackage := range bi.Reported {
-		if err := reportedWorkPackage.Encode(e); err != nil {
-			return err
-		}
-	}
-	return nil
-}""",
-        },
-        "options": [
-            "The encoder's order is right: state serialization is fixed by C(3) in appendix D, which emits header hash, then super-peak, then state root, then the timeslot, then the reported map; the tuple in chapter 7 merely names the components. The real 0.8.0 gap is the missing 4-byte timeslot between the state root and the reported map",
-            "The reviewer is right: a state component is always serialized in the order its defining equation lists the fields, so C(3) needs header hash, state root, super-peak, timeslot, reported map; appendix D merely restates the tuple of chapter 7 and the two can never disagree, so as written the encoder produces the wrong C(3) preimage and therefore the wrong state root",
-            "Both are wrong: C(3) holds only the encoded peak sequence of β_B, while the per-block items are committed through a marker in the header and otherwise kept off-chain by each node, so this encoder should not be feeding state serialization at all and whichever order it uses cannot move the state root",
-            "The reviewer is right about the order and about the shape: 0.8.0 replaced the per-item super-peak with the full peak sequence, so each item must encode the whole belt where this code writes a single 32-byte hash, and eq. 11.36 compares an anchor against that sequence rather than against one commitment",
-        ],
-        "answer": 0,
-        "optNotes": [
-            "D.1 的 C(3) 明寫 ⟨h, b, s, E_4(t), var(p)⟩，b 排在 s 前面；真正缺的是 0.8.0 的 4-byte t。",
-            "「附錄 D 只是重述第 7 章的 tuple」正是本題要打掉的直覺：D.1 是獨立定義，就是把 b 排在 s 前面。",
-            "header 只有 epoch／winners／offenders 三個 marker；C(3) 同時存整條 belt 與每一筆 item。",
-            "eq. 7.2 把 b 的型別寫成 b ∈ H（E.10 算出的單一 super-peak），eq. 11.36 也只比一個 32-byte 值。",
-        ],
-        "explanation": "兩個地方都是 0.8.0 原文，但講的是不同的事。eq. 7.2 用具名欄位宣告集合：β_H ∈ ⟦⟨h ∈ H, s ∈ H, b ∈ H, t ∈ N_T, p ∈ D⟨H → H⟩⟩⟧_:8。附錄 D 的 C(3) 才是序列化定義，它明寫成 E(var[⟨h, b, s, E_4(t), var(p)⟩ | … ∈ β_H], mmrencode(β_B))——super-peak 在 state root 前面。GP 具名 tuple 的欄位順序不等於 codec 順序，狀態這一塊以 D.1 為準；jam test vectors 的 history JSON（header_hash, mmr, state_root, reported）與團隊的 BlockInfo{HeaderHash, BeefyRoot, StateRoot, Reported} 都跟 D.1 一致，這段 0.7.2 程式碼的順序沒問題。真正要補的是 0.8.0 新增的 t：GP PR #526 把 anchor 的 timeslot 放進 refinement context，eq. 11.36 因此多比一項 x_n = y_t，團隊 PR #1031 就是在 state_root 與 reported 之間插入 4-byte timeslot。",
-        "trap": "宣告順序 ≠ 編碼順序。C(3) 是 b 在 s 前面；照 chapter 7 的順序寫 codec，值全對也會 state root 不對。",
-    },
     # ------------------------------------------------------------------ §8
     {
         "id": "c3-ch08-queue-writer",
@@ -236,7 +175,7 @@ ITEMS = [
             "extrinsic 只有 E_T、E_P、E_G、E_A、E_D 五種，coretime 的成交紀錄也不是鏈上共識條件。",
             "eq. 8.1 的 φ 是不折不扣的狀態元件（序列化在 C(2)）；eq. 5.1 的 marker 只有三個。",
         ],
-        "explanation": "§8.2 在 eq. 8.1 底下直接寫死：\"The portion of state φ may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service.\" 那個 privileged service 就是 χ_A[c]（per-core assigner）。host call Ω_A（`assign` = 16）從 ω_7..ω_9 取 (c, o, a)，自 memory 位址 o 讀 Q = 80 個 32-byte hash：c ≥ C 回 CORE，呼叫者 service id ≠ χ_A[c] 回 HUH，a 不是合法 service id 回 WHO，成功才 φ[c] ← q 並把 χ_A[c] ← a（Owned Privileges，讓 assigner 可以轉手）。所以是整批覆寫單一 core 的 queue，不是逐格插入。`bless` 動的是 χ 的 privileges（0.8.0 PR #519 起只有 manager 能呼叫）。",
+        "explanation": "§8.2 在 eq. 8.1 底下直接寫死：\"The portion of state φ may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service.\" 那個 privileged service 就是 χ_A[c]（per-core assigner）。host call Ω_A（`assign` = 16）從 ω_7..ω_9 取 (c, o, a)，自 memory 位址 o 讀 Q = 80 個 32-byte hash：c ≥ C 回 CORE，呼叫者 service id ≠ χ_A[c] 回 HUH，a 不是合法 service id 回 WHO，成功才 φ[c] ← q 並把 χ_A[c] ← a（Owned Privileges，讓 assigner 可以轉手）。所以是整批覆寫單一 core 的 queue，不是逐格插入。`bless` 動的是 χ 的 privileges（只有 manager 能呼叫）。",
         "trap": "「誰能寫 φ」與「誰能寫 χ」不同：assign 由 per-core assigner 呼叫，bless 只屬於 manager。",
     },
     {
@@ -280,7 +219,7 @@ ITEMS = [
         "gpRef": "eq. B.1–B.2; §8.1",
         "difficulty": 2,
         "kind": "concept",
-        "tags": ["refine", "guarantee", "delta-0.8.0"],
+        "tags": ["refine", "guarantee"],
   "stemZh": "guarantor 在 refine 任何東西之前會先執行 Is-Authorized 邏輯 Ψ_I。那支程式實際上能觀察到什麼？",
   "optionsZh": [
    "只有它的兩個引數——work-package 與 core 索引（後者以 2 位元組編碼的引數交給 PVM）——加上 `fetch` 能從該 package 裡拉出來的東西、以及協定常數；完全沒有任何鏈上狀態，而且除了 `fetch` 之外，僅有的 host call 就是 gas 計數器與堆成長",
@@ -302,7 +241,7 @@ ITEMS = [
             "歷史查詢 Λ 是 Ψ_R 的專利（eq. B.5 的 Ω_H）；auth code 由 lookup anchor 解析是外部餵進來的。",
             "eq. B.1 只有 (P, N_C) 兩個參數、argument blob 就是 E_2(c)；能讀 pool 就不再是 stateless。",
         ],
-        "explanation": "eq. B.1：Ψ_I : (P, N_C) → (B ∪ E, N_G)，實際執行 Ψ_M(auth code, 0, G_I, E_2(c), F, ∅)，其中 G_I = 50,000,000、argument blob 就是 E_2(c)；auth code 解不出來（∅）回 BAD、長度 > W_A = 64,000 回 BIG。eq. B.2 的 dispatch F 只認三個 host call：gas、grow_heap、fetch，其他一律扣 M_∅ 並把 ω_7 設成 WHAT。GP 原文：\"totally stateless … we elide the host-call context since, being essentially stateless, it is always ∅\"。fetch（Ω_Y）在這裡除了 work-package 之外的參數全是 ∅，所以 selector 0（protocol constants）與 7–13（package 編碼、config、token、context、work-item metadata、payload）可用，selector 1–6 與 14/15（entropy、authorizer trace、extrinsics、import segments）一律回 NONE。正因為 Ψ_I 完全無狀態，每個 auditor 事後重跑必然得到相同結果。0.8.0 delta：堆積成長的 host call 由 0.7.2 的 `sbrk` 更名為 `grow_heap`（index 1，PR #508 的新 gas model 一起改），Go 端的 dispatch 表要跟著改。",
+        "explanation": "eq. B.1：Ψ_I : (P, N_C) → (B ∪ E, N_G)，實際執行 Ψ_M(auth code, 0, G_I, E_2(c), F, ∅)，其中 G_I = 50,000,000、argument blob 就是 E_2(c)；auth code 解不出來（∅）回 BAD、長度 > W_A = 64,000 回 BIG。eq. B.2 的 dispatch F 只認三個 host call：gas、grow_heap、fetch，其他一律扣 M_∅ 並把 ω_7 設成 WHAT。GP 原文：\"totally stateless … we elide the host-call context since, being essentially stateless, it is always ∅\"。fetch（Ω_Y）在這裡除了 work-package 之外的參數全是 ∅，所以 selector 0（protocol constants）與 7–13（package 編碼、config、token、context、work-item metadata、payload）可用，selector 1–6 與 14/15（entropy、authorizer trace、extrinsics、import segments）一律回 NONE。正因為 Ψ_I 完全無狀態，每個 auditor 事後重跑必然得到相同結果。",
         "trap": "Ψ_I 無狀態 ⇒ 授權邏輯不能讀鏈上餘額；要收錢只能靠 accumulate 那一端。",
     },
     {
@@ -347,14 +286,14 @@ ITEMS = [
         "difficulty": 3,
         "kind": "code",
         "tags": ["authorizer", "work-report"],
-  "stemZh": "這段 0.7.2 的程式碼實作的是 eq. 11.32 中 authorizer 的那一半。它有義務讀取哪一個 pool？而當成員測試失敗時，協定層級的後果是什麼？",
+  "stemZh": "這段程式碼實作的是 eq. 11.32 中 authorizer 的那一半。它有義務讀取哪一個 pool？而當成員測試失敗時，協定層級的後果是什麼？",
   "optionsZh": [
    "prior 的 pool，因為 posterior 那個要等 accumulation 之後才會從 posterior 佇列形成；而失敗只是一個普通的區塊有效性失敗——該 guarantee 不可能成為有效區塊的一部分，所以根本沒有 report 可以拿來懲罰誰，disputes 狀態也不會被寫入任何東西",
    "posterior 的 pool，因為該 report 正被納入這一塊、而 eq. 8.2 的輪替是在處理 guarantee 之前套用的；失敗則使該區塊無效，這也是為什麼依賴圖把 α′ 列在 ρ′ 的輸入之中而不是反過來",
    "哪個 pool 都可以，因為輪替只移除該 report 自己消耗掉的那個 authorizer；失敗會把該 report 的 guarantor 記為 culprit 寫進 disputes 狀態，好讓下個 epoch 的懲罰集合沒收他們，而他們的 Ed25519 金鑰會經由這個 header 自己的 offenders marker 進入 ψ_O",
    "prior 的 pool，但該 report 仍然會以空的 authorizer trace 被收進 availability assignments，並在 accumulation 時被靜默丟棄——這也是為什麼缺席的 authorizer 對 guarantor 毫無代價，而 ρ‡ 會一直持有該條目直到 U = 5 個 slot 的 assurance 逾時把它清掉"
   ],
-  "stem": "This 0.7.2 code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?",
+  "stem": "This code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?",
         "code": {
             "lang": "go",
             "caption": "internal/extrinsic/guarantee_controller.go:172-186 (ValidateWorkReports; gas checks elided)",

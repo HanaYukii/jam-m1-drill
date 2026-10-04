@@ -30,7 +30,7 @@ ITEMS = [
   "ι′ 來自 delegator service 的 accumulate 輸出（§12），與 π 無關；§5 的 header 也沒有 finality 欄位。",
   "π 是 App. D 的 C(13)、ψ 是 C(5)，兩者都在 state root 底下；untrackable 的活動也沒有被略過。",
  ],
- "explanation": "§13.1 開頭：「The JAM chain does not explicitly issue rewards—we leave this as a job to be done by the staking subsystem (in Polkadot's case envisioned as a system parachain—hosted without fees…)」，JAM 只負責「facilitate the arrival of information on validator activity in to the staking subsystem」，如同 punishment（ψ_o offenders）資訊一樣是給外部子系統的 oracle。可直接鏈上追蹤的是 block production、guarantor reports、availability assurance（對應 π_V 的 b/t/p/d、g、a）；GRANDPA、BEEFY 與 auditing 則「cannot」，改由 validator 互評——「validators vote on their impression of each other's efforts and a median may be accepted as the truth」，並且「With an assumption of 50% honest validators, this gives an adequate means of oraclizing this information」。§14.1 的 honest behavior 清單最後一項正是「submitting the correct amount of auditing work seen being done by other validators」。編碼上 π 落在 App. D 的 C(13)，0.8.0 起 π_V/π_L 還帶長度前綴（你們 PR #1034）。",
+ "explanation": "§13.1 開頭：「The JAM chain does not explicitly issue rewards—we leave this as a job to be done by the staking subsystem (in Polkadot's case envisioned as a system parachain—hosted without fees…)」，JAM 只負責「facilitate the arrival of information on validator activity in to the staking subsystem」，如同 punishment（ψ_o offenders）資訊一樣是給外部子系統的 oracle。可直接鏈上追蹤的是 block production、guarantor reports、availability assurance（對應 π_V 的 b/t/p/d、g、a）；GRANDPA、BEEFY 與 auditing 則「cannot」，改由 validator 互評——「validators vote on their impression of each other's efforts and a median may be accepted as the truth」，並且「With an assumption of 50% honest validators, this gives an adequate means of oraclizing this information」。§14.1 的 honest behavior 清單最後一項正是「submitting the correct amount of auditing work seen being done by other validators」。編碼上 π 落在 App. D 的 C(13)，π_V/π_L 帶長度前綴。",
  "trap": "JAM 不發獎勵、不追蹤 GRANDPA/BEEFY/audit；這些靠 validator voting 的 median，假設只需 50% 誠實。"
 },
 {
@@ -99,7 +99,7 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
    "payload 必須不帶長度前綴地附加上去，因為 Refine 是改用 fetch host call 取得它的，所以那個 ↕ 是多餘的；緊湊的 c 與 i、service 索引 w_s、H(p) 以及 gas 上限 w_g 都與 eq. B.5 相符"
   ],
   "stem": "Below is how the team's Ψ_R builds the argument blob a handed to Ψ_M. Check it against GP 0.8.0 eq. B.5: which components match, and which one is wrong?",
- "code": {"lang": "go", "caption": "PVM/refine_invocation.go (RefineInvoke, 0.7.2)", "src": """    // otherwise
+ "code": {"lang": "go", "caption": "PVM/refine_invocation.go (RefineInvoke)", "src": """    // otherwise
     var a []byte
     encoder := types.NewEncoder()
     // c
@@ -133,37 +133,8 @@ func C(item types.WorkItem, result types.WorkExecResult, gas types.Gas) types.Wo
   "H(p) 就是整包 package 的 hash；G_R 是 eq. 14.9 的 package 級 Σ w_g 上限，單一 item 傳的是 w_g。",
   "eq. B.5 的 ↕w_y 明確帶長度前綴，fetch selector 13 只是另一個取得管道，不能取消 ↕。",
  ],
- "explanation": "eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(↕z, code) = Λ(δ[w_s], (p_c)_t, w_c) 去掉 metadata 前綴取得，然後 (u, o, (m, e)) = Ψ_M(code, 0, w_g, a, F, (∅, []))。c、i、w_s 都是無下標的 E → 一般（compact）自然數編碼；w_y 帶長度前綴（↕）；H(p) 是整個 package 序列化後的 hash。你們的 code：c、i 用 EncodeUint（C.6 compact）正確；Payload 用 ByteSequence.Encode（帶長度）正確；H(p) = Blake2b(E(p)) 正確；gas 傳 workItem.RefineGasLimit（w_g）正確——唯一的錯處是 a 的第三段，任何依 GP 解析 refine args 的 service 會把 code hash 的前幾個 byte 當 service id、後面全部錯位；三個干擾項也都順帶宣稱那一段是對的。0.7.2 與 0.8.0 的公式相同（0.7.1 才加入 c）。",
+ "explanation": "eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(↕z, code) = Λ(δ[w_s], (p_c)_t, w_c) 去掉 metadata 前綴取得，然後 (u, o, (m, e)) = Ψ_M(code, 0, w_g, a, F, (∅, []))。c、i、w_s 都是無下標的 E → 一般（compact）自然數編碼；w_y 帶長度前綴（↕）；H(p) 是整個 package 序列化後的 hash。你們的 code：c、i 用 EncodeUint（C.6 compact）正確；Payload 用 ByteSequence.Encode（帶長度）正確；H(p) = Blake2b(E(p)) 正確；gas 傳 workItem.RefineGasLimit（w_g）正確——唯一的錯處是 a 的第三段，任何依 GP 解析 refine args 的 service 會把 code hash 的前幾個 byte 當 service id、後面全部錯位；三個干擾項也都順帶宣稱那一段是對的。",
  "trap": "Ψ_I：E_2(c) + G_I = 50M；Ψ_R：E(c, i, w_s, ↕w_y, H(p)) + w_g（Σ w_g < G_R = 5·10⁹）。"
-},
-{
- "id": "ch14-compute-report-signature",
- "lens": "演算法",
- "ch": "14", "section": "14.4 Computation of Work-Report", "gpRef": "eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31",
- "difficulty": 3, "kind": "delta", "tags": ["work-report", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0 重新定義了 work-report 的計算函數 Ξ。它的引數是什麼？在什麼條件下它才會以 E 失敗？",
-  "optionsZh": [
-   "Ξ(p, c, l, v) 收下 package、core、一個 segment-root 字典 l（每個被 h⊞ import 引用到的 work-package 雜湊各一項）以及 assurer 集合大小 v；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob、或 keys(l) 與那組 h⊞ 雜湊不符時才產生 ∇——某個 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束並不會讓 Ξ 失敗",
-   "Ξ(p, c) 一如 0.7.2 只收下 package 與 core；segment-root 字典是在計算期間從鏈上狀態 ρ 讀出的，而碎片數固定為 V = 1,023；只有在 Is-Authorized 的結果不是至多 W_R 個 octet 的 blob 時才產生 ∇——某個 work-item 的 Refine 失敗並不會讓 Ξ 失敗",
-   "Ξ(p, c, l, v) 收下 package、core、segment-root 字典 l 與 assurer 集合大小 v；在 Is-Authorized 的結果不合格、keys(l) 不符、或任何 work-item 的 Refine 以 ∞、☇、BAD 或 BIG 結束時都產生 ∇，如此 guarantor 就永遠不會為一份含有失敗項目的 report 簽名",
-   "Ξ(p, c, l, v) 收下 package、core、一個以 work-item 索引為 key、每個 import 一項的 segment-root 字典 l，以及 v，也就是該 report 上的 guarantor 簽章數（2 或 3）；只有在 Is-Authorized 的結果不合格、或編碼後的 report 超過 W_B = 13,791,360 個 octet 時才產生 ∇"
-  ],
-  "stem": "GP 0.8.0 redefines the work-report computation function Ξ. What are its arguments, and under exactly what conditions does it fail with E?",
- "options": [
-  "Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if keys(l) differ from the set of h⊞ hashes — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail",
-  "Ξ(p, c) as in 0.7.2 takes only the package and the core; the segment-root dictionary is read out of the on-chain state ρ during computation and the shard count is fixed at V = 1,023; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail",
-  "Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ if the Is-Authorized result is not a blob of at most W_R octets, if keys(l) differ from the set of h⊞ hashes, or if any work-item's Refine ends in ∞, ☇, BAD or BIG, so that a guarantor never signs a report holding a failed item",
-  "Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l keyed by work-ITEM index with one entry per import, and v, the number of guarantor signatures on the report (2 or 3); it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if the encoded report exceeds W_B = 13,791,360 octets"
- ],
- "answer": 0,
- "optNotes": [
-  "eq. 14.13 的 E 只有兩個 disjunct：Ψ_I 的結果不是 ≤ W_R 的 blob，或 K(l) 與 h⊞ 的 hash 集合不符。",
-  "0.8.0 的 Ξ 有四個參數；l 由 guarantor 自組並隨 report 上鏈，ρ 只存各 core pending 的 assignment。",
-  "item 失敗由 I 就地換成 error digest 與零 segment，the work-package continues to be valid as a whole。",
-  "l 的 key 是 work-package hash；v 是 assurer 集合大小，2–3 是 credential 長度；W_B 是 bundle 上限。",
- ],
- "explanation": "eq. 14.13：Ξ: (P, N_C, ⟨H → H⟩, N_V) → ℝ ∪ {∇}，(p, c, l, v) ↦ ∇ if E，否則 (s, c ↦ p_c, c, a ↦ p_a, t, l, d, g)。其中 (t, g) = Ψ_I(p, c)——Is-Authorized 必須先跑，「to ensure that the work-package warrants the needed core-time」；E = t ∉ B_{:W_R} ∨ K(l) ≠ {h | w ∈ p_w, (h⊞, n) ∈ w_i}。work-item 的 Refine 失敗（∞、☇、BAD、BIG、⊚ bad-exports、⊖ oversize）只會由 I 函數把該 digest 的 result 換成 error、exports 換成零 segment——「the work-package continues to be valid as a whole」。0.7.2 是 Ξ(p, c) 兩個參數，l 只以 keys(l) ≡ {…} 且 |l| ≤ 8 隱含定義；0.8.0（配合 #514 可變 validator 數）把 l 與 assurer 數 v 明確列為參數，v 再傳給 A（eq. 14.17–14.18）決定 erasure coding 的 shard 數，鏈上 eq. 11.31 要求 (w_s)_n = |κ′|。eq. 14.14：guarantor 要自行確認 l 的每一對 (h ↦ e) 真的對應（H(p) = h 且 Ξ(p, …)_s 的 segroot = e），否則「consider the work-package unable to be guaranteed」；auditor 直接沿用 report 裡的 l。你們 issue #1015/#1026：WorkPackageSpec 加 erasure_shards，Producer 設為 TotalShards。",
- "trap": "Ξ 失敗只有兩種：Is-Authorized 失敗、l 的 key 集合不對；item 失敗不會讓 Ξ 失敗。"
 },
 {
  "id": "ch14-paged-proofs",

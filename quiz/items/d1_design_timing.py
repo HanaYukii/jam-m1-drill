@@ -13,14 +13,14 @@ ITEMS = [
    "disputes 先清掉被判 bad 的 report，它才不會在同一個 block 變 available；assurance 再把 available 或 timeout 的 core 清空；guarantee 只能落在 ρ‡[c] = ∅ 的 core。若 E_G 先於 E_A，剛被釋放的 core 在這個 block 仍是滿的，新 guarantee 得等下一個 block",
    "順序只是 GP 為了公式好寫：三個 extrinsic 各自操作 ρ 的不同欄位，disputes 動 report hash、assurance 動 bitfield 計數、guarantee 動 timeslot，彼此不相依，所以任何順序算出的 ρ′ 都相同，只是中間值的符號 † 與 ‡ 會換位置",
    "guarantee 必須先進來、才有東西給 assurance 背書，所以正確順序其實是 E_G → E_A → E_D，同一個 block 內的 guarantee 就能被同一個 block 的 assurance 背書；GP 把 E_D 放最前面只是因為 verdict 的簽章驗證最貴，要早點拒絕壞 block",
-   "assurance 必須先於 disputes，因為 verdict 只能針對已經 available 的 report，未 available 的 report 資料拿不到、auditor 無從判定；把 E_D 放在最前是 0.8.0 的筆誤，實作上兩者可以交換而不影響 state root"
+   "assurance 必須先於 disputes，因為 verdict 只能針對已經 available 的 report，未 available 的 report 資料拿不到、auditor 無從判定；把 E_D 放在最前只是 GP 的筆誤，實作上兩者可以交換而不影響 state root"
   ],
   "stem": "ρ is updated three times within one block: ρ† (after E_D), ρ‡ (after E_A) and ρ′ (after E_G). Why that order, and what would break if E_G were processed before E_A?",
  "options": [
   "Disputes first, so a report judged bad is cleared before it can become available in the same block; assurances then free every core whose report became available or timed out; a guarantee may only land on a core with ρ‡[c] = ∅. With E_G before E_A, a core freed by this block's assurances would still look occupied, and a new guarantee for it would wait a block",
   "The order is only a presentational choice: the three extrinsics touch different fields of ρ — disputes the report hash, assurances the bitfield count, guarantees the timeslot — and none depends on another, so every ordering yields the same ρ′ and only the † and ‡ labels on the intermediate values would swap places",
   "Guarantees must come first so that there is something for assurances to attest, so the real order is E_G → E_A → E_D and a guarantee can be assured within the very block that carries it; the GP lists E_D first only because verdict signatures are the most expensive to verify and a bad block should be rejected early",
-  "Assurances must precede disputes because a verdict can only concern a report that is already available, since auditors cannot fetch the data of an unavailable one; listing E_D first is a 0.8.0 slip, and an implementation may swap the two without changing the state root"
+  "Assurances must precede disputes because a verdict can only concern a report that is already available, since auditors cannot fetch the data of an unavailable one; listing E_D first is an editorial slip, and an implementation may swap the two without changing the state root"
  ],
  "answer": 0,
  "optNotes": [
@@ -217,12 +217,12 @@ ITEMS = [
  ],
  "answer": 0,
  "optNotes": [
-   "對：§20.1「with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of… 341 work-packages per timeslot」；0.8.0 啟用 core 數 = |κ|/3。",
+   "對：§20.1「with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of… 341 work-packages per timeslot」；啟用 core 數 = |κ|/3。",
    "C = 341 是「最大」core 數，啟用數隨 |κ|/3 變；30 是總 audit 量 ÷ report 數，與 guarantor 招人無關。",
    "三位是 guarantor 不是 auditor；audited 的條件是 tranche 內所有應 audit 者都給正面判定，不是固定三次。",
    "0.5 GbE 是硬體假設，不是這兩個數字的來源；每 core 永遠 3 位 guarantor，變的是 core 數。"
  ],
- "explanation": "§20.1 原文一句話把三個數綁在一起：「In total, with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of trustlessly processing and integrating 341 work-packages per timeslot.」算法：每個 core 需要 3 位 guarantor，1023 人剛好分成 341 組，所以 C = 341 不是任意常數，是 1023 = 3 × 341 推出來的；audit 是「每人每 slot 平均 10 份」，全網每 slot 共 10 × 1023 次 audit，分攤到每 slot 最多 341 份 report，每份約 30 次。0.8.0 把 validator set 改成可變（eq. 6.8：3 的倍數、6 到 1023）之後，「每 core 3 人」不變，所以啟用的 core 數變成 |κ|/3：tiny config 6 人就是 2 個 core；而 eq. 11.28 也用 |κ′|/3 當 core index 的上界。每份 report 30 次 audit 這個目標值則來自 audit 的抽樣參數（§17 的 tranche 與 F = 2），不隨 set 大小縮放。口試若問「為什麼是 341」，答「1023 除以 3」就夠。",
+ "explanation": "§20.1 原文一句話把三個數綁在一起：「In total, with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of trustlessly processing and integrating 341 work-packages per timeslot.」算法：每個 core 需要 3 位 guarantor，1023 人剛好分成 341 組，所以 C = 341 不是任意常數，是 1023 = 3 × 341 推出來的；audit 是「每人每 slot 平均 10 份」，全網每 slot 共 10 × 1023 次 audit，分攤到每 slot 最多 341 份 report，每份約 30 次。validator set 的大小可變（eq. 6.8：3 的倍數、6 到 1023），但「每 core 3 人」不變，所以啟用的 core 數是 |κ|/3：tiny config 6 人就是 2 個 core；而 eq. 11.28 也用 |κ′|/3 當 core index 的上界。每份 report 30 次 audit 這個目標值則來自 audit 的抽樣參數（§17 的 tranche 與 F = 2），不隨 set 大小縮放。口試若問「為什麼是 341」，答「1023 除以 3」就夠。",
  "trap": "341 是算出來的，不是選出來的：1023 ÷ 3。"
 },
 {

@@ -57,7 +57,7 @@ ITEMS = [
    "無狀態的重活 vs 能寫狀態的輕活，正好對應 in-core 與 on-chain。",
    "兩者不是「先檢查後執行」；refine 就是在做真正的計算。",
    "請求來源不影響走哪個入口；work-package 一律先 refine 再 accumulate。",
-   "收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口（0.7.1 起併入）。"
+   "收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口。"
   ],
   "trap": "refine 重但不能寫狀態；accumulate 能寫狀態但必須輕。"
  },

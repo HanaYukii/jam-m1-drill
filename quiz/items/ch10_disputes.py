@@ -34,15 +34,15 @@ ITEMS = [
  "id": "ch10-verdict-structure",
  "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.2–10.4",
- "difficulty": 2, "kind": "delta", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
-  "stemZh": "依 GP 0.8.0，E_V 裡的一個 verdict 由什麼組成？必須帶幾個判定、對哪一組金鑰？一個 extrinsic 最多能放幾個 verdict？",
+ "difficulty": 2, "kind": "concept", "tags": ["dispute", "extrinsic"],
+  "stemZh": "E_V 裡的一個 verdict 由什麼組成？必須帶幾個判定、對哪一組金鑰？一個 extrinsic 最多能放幾個 verdict？",
   "optionsZh": [
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須恰好是 ⌊2|k|/3⌋+1，其中 a 是當前 epoch 時 k = κ、否則 k = λ；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments)；judgment 的數量必須至少是 ⌊2|k|/3⌋+1，且可以從 κ ∪ λ 合併後的集合中取；每份 extrinsic 沒有 verdict 數量上限",
    "每個 verdict 是 (report 雜湊, 該爭議被提起的 slot, judgments)；judgment 的數量必須恰好是 ⌊|k|/3⌋+1，其中 k 永遠是 posterior 的 κ′；每份 extrinsic 至多 N_V = 16 個 verdict",
    "每個 verdict 是 (report 雜湊, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, 一個對 report 雜湊的聚合 BLS 簽章)；簽署者必須是 k 當中的 ⌊2|k|/3⌋+1 位成員；每份 extrinsic 至多 N_V = 16 個 verdict"
   ],
-  "stem": "Per GP 0.8.0, what is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?",
+  "stem": "What is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?",
  "options": [
   "Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic",
   "Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number at least ⌊2|k|/3⌋+1 and may be drawn from κ ∪ λ combined; there is no per-extrinsic cap on verdicts",
@@ -52,11 +52,11 @@ ITEMS = [
  "answer": 0,
  "optNotes": [
   "epoch index、恰好 ⌊2|k|/3⌋+1 票、K(a) 二選一、N_V = 16 四點全中 eq. 10.2–10.4。",
-  "eq. 10.4 是「恰好」不是「至少」；K(a) 只取 κ 或 λ 之一；0.8.0 #525 正是新增 N_V = 16。",
+  "eq. 10.4 是「恰好」不是「至少」；K(a) 只取 κ 或 λ 之一；而且每個 extrinsic 有 N_V = 16 的上限。",
   "第二欄是 epoch index 而非 timeslot；⌊|k|/3⌋ 是 wonky 門檻；K(a) 取 prior 的 κ/λ 不是 κ′。",
   "judgment 是 [(⊤/⊥, N, Ed25519 sig)] 序列、每票須可個別驗證；BLS 只用於 Beefy commitment。",
  ],
- "explanation": "eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（0.8.0 PR #525 新增的硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。",
+ "explanation": "eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。",
  "trap": "epoch index 用 prior τ；票數是「恰好」不是「至少」。"
 },
 {
@@ -92,15 +92,15 @@ ITEMS = [
  "id": "ch10-culprits-faults",
  "lens": "機制",
  "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.6–10.7, 10.13",
- "difficulty": 3, "kind": "delta", "tags": ["dispute", "extrinsic", "delta-0.8.0"],
-  "stemZh": "在 GP 0.8.0 中，culprit（E_C）由什麼組成？fault（E_F）由什麼組成？誰的金鑰可以出現在 offender 裡？一個 good verdict 又需要什麼？",
+ "difficulty": 3, "kind": "concept", "tags": ["dispute", "extrinsic"],
+  "stemZh": "culprit（E_C）由什麼組成？fault（E_F）由什麼組成？誰的金鑰可以出現在 offender 裡？一個 good verdict 又需要什麼？",
   "optionsZh": [
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；一個 good verdict 仍需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 一致的 report（r ∈ ψ′_G ⇔ v）；offender 的金鑰必須落在 (κ ∪ λ) 的 Ed25519 金鑰扣除 ψ_O 之後的集合裡；bad verdict 需至少 2 個 culprit、good verdict 需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_G 的 report 加上該 guarantor 對 X_valid ⌢ r 的判定簽章；fault 指名一份位於 ψ′_W、其宣稱的有效性 v 與 verdict 相牴觸的 report；offender 的金鑰必須只落在 κ′ 的 Ed25519 金鑰裡；一個 good verdict 仍需至少 1 個 fault",
    "culprit 指名一份位於 ψ′_B 的 report 加上該 guarantor 對 X_G ⌢ r 的簽章；fault 指名一份其宣稱的有效性 v 與 verdict 相牴觸的 report（r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v）；已經在 ψ_O 裡的金鑰可以被再次提報以懲罰累犯；每一個 verdict——不論 good、bad 或 wonky——都需要至少 1 個 fault"
   ],
-  "stem": "In GP 0.8.0, what does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?",
+  "stem": "What does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?",
  "options": [
   "A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a good verdict still needs ≥ 1 fault",
   "A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v agrees with the verdict (r ∈ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a bad verdict needs ≥ 2 culprits and a good one ≥ 1 fault",
@@ -110,12 +110,12 @@ ITEMS = [
  "answer": 0,
  "optNotes": [
   "四個條件全中；關鍵是 fault 宣稱的 v 必須與 verdict 相反，good verdict 仍要 ≥ 1 個 fault。",
-  "「bad verdict 要 ≥ 2 culprits」是 0.7.2 的規則（0.8.0 #525 移除），且 fault 的 v 條件反了。",
+  "GP 對 bad verdict 沒有「≥ 2 culprits」這種要求，且 fault 的 v 條件反了。",
   "culprit 是 bad report 的 guarantor（r ∈ ψ′_B、簽 X_G），fault 不落在 ψ′_W，k 也要含 λ。",
   "k 的定義最後就寫著扣掉 ψ_O，重複上報使區塊無效；eq. 10.13 只對 (r, ⊤) 要求 fault。",
  ],
- "explanation": "eq. 10.6：∀(r, k, s) ∈ E_C：r ∈ ψ′_B ∧ k ∈ k ∧ s 是 k 對 X_G ⌢ r 的簽章（culprit = 曾 guarantee 一個壞 report 的人，用的正是他的 guarantee 簽章；X_G = $jam_guarantee，正是 eq. 11.28 那把簽章，所以 ρ 在 0.8.0 要存整個 guarantee 才 construct 得出來）。eq. 10.7：∀(r, v, k, s) ∈ E_F：r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v（fault 宣稱的 validity 必須與 verdict 相反：對 bad report 投 valid，或對 good report 投 invalid）。k = {κ ∪ λ 的 Ed25519 key} \\ ψ_O。eq. 10.13：∀(r, ⊤) ∈ v：∃(r, …) ∈ E_F——good verdict 至少要有一個 fault，因為 2/3+1 全投正票的 verdict 必然是有人先投了反票才會啟動 dispute。0.8.0 #525「remove culprits requirement」則拿掉了 bad verdict ≥ 2 culprits 的舊要求。",
- "trap": "你們 0.7.2 code 仍檢查 bad verdict ≥ 2 culprits（code-map 3.6.4）——0.8.0 要拿掉。"
+ "explanation": "eq. 10.6：∀(r, k, s) ∈ E_C：r ∈ ψ′_B ∧ k ∈ k ∧ s 是 k 對 X_G ⌢ r 的簽章（culprit = 曾 guarantee 一個壞 report 的人，用的正是他的 guarantee 簽章；X_G = $jam_guarantee，正是 eq. 11.28 那把簽章，所以 ρ 要存整個 guarantee 才 construct 得出來）。eq. 10.7：∀(r, v, k, s) ∈ E_F：r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v（fault 宣稱的 validity 必須與 verdict 相反：對 bad report 投 valid，或對 good report 投 invalid）。k = {κ ∪ λ 的 Ed25519 key} \\ ψ_O。eq. 10.13：∀(r, ⊤) ∈ v：∃(r, …) ∈ E_F——good verdict 至少要有一個 fault，因為 2/3+1 全投正票的 verdict 必然是有人先投了反票才會啟動 dispute。bad verdict 則沒有對應的 culprit 數量要求。",
+ "trap": "bad verdict 不要求 culprit 的數量；只有 good verdict 要求 ≥ 1 個 fault（eq. 10.13）。"
 },
 {
  "id": "ch10-ordering",
@@ -174,47 +174,6 @@ ITEMS = [
  ],
  "explanation": "eq. 10.14：∀c：ρ†[c] = ∅ 當 (H(ρ[c]_w), v) ∈ v 且 v ∈ {⊥, ∅}——GP：「Authoring a block with a non-positive verdict has the effect of cancelling its imminent accumulation」。eq. 10.15–10.18：ψ′_G/ψ′_B/ψ′_W 各自 ∪ 對應的 report hash（三者單調成長、永不清空，這正是「同一個 report 不能被重複 dispute」的基礎）；ψ′_O = ψ_O ∪ {culprit keys} ∪ {fault keys}。eq. 10.19：H_O ≡ [k | (…, k, …) ∈ E_C] ⌢ [k | ∈ E_F]，內容必須是「exactly the keys of all new offenders」，好讓輕客戶端從 header 直接讀出誰被罰。你們 ClearWorkReports 對 PositiveJudgmentsSum < 2V/3 的 verdict 清 ρ。",
  "trap": "ρ† 是 disputes 之後、assurances 之前的中間狀態；順序：ρ → ρ† (disputes) → ρ‡ (assurances) → ρ′ (guarantees)。"
-},
-{
- "id": "ch10-code-thresholds",
- "lens": "演算法",
- "ch": "10", "section": "10.2 Extrinsic", "gpRef": "eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi",
- "difficulty": 2, "kind": "code", "tags": ["balance", "dispute", "delta-0.8.0"],
-  "stemZh": "這是團隊的 verdict 分類程式碼。要符合 GP 0.8.0，必須改什麼？",
-  "optionsZh": [
-   "門檻必須依 |k| 計算，也就是由該 verdict 的 epoch index 所選出的那個 validator 集合（κ 或 λ）的長度，而不是用全域的 ValidatorsCount 常數",
-   "什麼都不必改：|κ| 在每一種設定下都固定為 1023 = 3C，所以 ValidatorsCount 永遠是拿來取三分之二與三分之一的正確長度",
-   "wonky 這個情況必須併進 default 的錯誤分支，因為 0.8.0 只記錄 good 與 bad 兩種 verdict，並且已把 ψ_W 從 disputes 狀態中完全移除",
-   "default 分支必須把其餘所有票數都歸類為 wonky，因為 0.8.0 把任何既非全體一致也非零的分裂都視為無法判定"
-  ],
-  "stem": "This is the team's verdict classification. What must change for GP 0.8.0 conformance?",
- "code": {"lang": "go", "caption": "internal/extrinsic/dispute_controller.go", "src": """for _, verdict := range verdictSumSequence {
-    switch verdict.PositiveJudgmentsSum {
-    case types.ValidatorsCount*2/3 + 1:
-        updates.Good = append(updates.Good, types.WorkReportHash(verdict.ReportHash))
-    case 0:
-        updates.Bad = append(updates.Bad, types.WorkReportHash(verdict.ReportHash))
-    case types.ValidatorsCount * 1 / 3:
-        updates.Wonky = append(updates.Wonky, types.WorkReportHash(verdict.ReportHash))
-    default:
-        return types.DisputesRecords{}, errors.New("bad_vote_split")
-    }
-}"""},
- "options": [
-  "The thresholds must be computed from |k|, the length of the validator set that the verdict's epoch index selects (κ or λ), rather than from the global ValidatorsCount constant",
-  "Nothing needs to change: |κ| is fixed at 1023 = 3C in every configuration, so ValidatorsCount is always the right length to take two-thirds and one-third of",
-  "The wonky case must be folded into the default error branch, because 0.8.0 records only good and bad verdicts and dropped ψ_W from the disputes state entirely",
-  "The default branch must classify every remaining vote count as wonky, because 0.8.0 treats any split that is neither unanimous nor zero as impossible to judge"
- ],
- "answer": 0,
- "optNotes": [
-  "0.8.0 允許 |κ| ≠ |λ|（#514），門檻必須跟著 K(a) 選到的那個集合的長度走。",
-  "§6.4 明說 validator 序列長度是 6 到 3C 之間的 3 的倍數，tiny 就是 6，並非固定 1023。",
-  "ψ_W 仍是 eq. 10.1 的第三個成員，⌊|k|/3⌋ 的 wonky case 也還在，0.8.0 沒有拿掉。",
-  "V 是部分函數；把 4 票、3 票也判成 wonky 會讓惡意 verdict 清掉別人的 pending report。",
- ],
- "explanation": "eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3⌋（wonky），**其中 k = K(a)，由 verdict 自己的 epoch index 決定是 κ 還是 λ**（eq. 10.3）。所以問題有兩層：**第一層**，0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），拿全域常數 ValidatorsCount 去算三分之二／三分之一已經不對。**第二層更細**：即使改成動態長度，也不能一律用 |κ|——若 verdict 指的是前一個 epoch，門檻要用 **|λ|** 算。兩個集合的大小在換屆時可能不同，這正是需要依 epoch index 取對應集合的原因。這屬於你們 issue #1037「support variable validator-set size」的範疇。**程式其餘部分是對的**：default 分支回傳 error，讓不合法的票數組合直接使區塊無效，而不是忽略該筆 verdict——這符合「三個門檻都是等式」的語意。**順帶釐清 0.8.0 在 §10 到底改了什麼**：只動了 culprits 的要求與 N_V／N_O 的數量上限，**三個門檻本身沒變**，變的是 |k| 從常數變成變數。",
- "trap": "同樣的 |κ| 依賴也出現在 assurances 的 2/3 門檻與 erasure shards 數。"
 },
 {
  "id": "ch10-rationale",

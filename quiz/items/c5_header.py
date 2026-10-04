@@ -169,7 +169,7 @@ ITEMS = [
   "It forces the index to be re-derived after disputes, since a punished validator's slot is reused; the cost is that two blocks in the same epoch may legitimately carry the same index for different authors",
  ],
  "answer": 0,
- "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——0.8.0 讓 |κ| 可變之後這個區別變得實質。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。",
+ "explanation": "eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——|κ| 可變（eq. 6.8）時這個區別就是實質的。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。",
  "optNotes": [
   "索引把解讀權綁在 κ′ 上、因而需要 epoch marker，這是這個設計最實質的連動。",
   "seal 本身就是用 κ′[H_I] 的金鑰驗的，不需要額外的成員資格證明；ring proof 用在 ticket，不在 seal。",

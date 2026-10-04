@@ -1,6 +1,6 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 333 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+Gray Paper **0.8.0** · 21 章速記 · 321 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
 線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-10-04
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
@@ -18,18 +18,18 @@ Gray Paper **0.8.0** · 21 章速記 · 333 題 · 92 條名詞解釋 · New-JAM
 - [附錄 N8 · 名詞與符號](#ch-n8) — 17 題
 - [§3 Notation](#ch-3) — 9 題
 - [§4 Overview](#ch-4) — 16 題
-- [§5 The Header](#ch-5) — 24 題
-- [§6 Safrole](#ch-6) — 37 題
-- [§7 Recent History](#ch-7) — 12 題
+- [§5 The Header](#ch-5) — 22 題
+- [§6 Safrole](#ch-6) — 36 題
+- [§7 Recent History](#ch-7) — 11 題
 - [§8 Authorization](#ch-8) — 10 題
 - [§9 Service Accounts](#ch-9) — 10 題
-- [§10 Disputes](#ch-10) — 12 題
-- [§11 Reporting & Assurance](#ch-11) — 25 題
-- [§12 Accumulation](#ch-12) — 23 題
-- [§13 Statistics](#ch-13) — 7 題
-- [§14 Work Packages & Reports](#ch-14) — 6 題
-- [附錄 A · PVM](#ch-a) — 11 題
-- [附錄 B · Host Calls](#ch-b) — 15 題
+- [§10 Disputes](#ch-10) — 11 題
+- [§11 Reporting & Assurance](#ch-11) — 23 題
+- [§12 Accumulation](#ch-12) — 22 題
+- [§13 Statistics](#ch-13) — 6 題
+- [§14 Work Packages & Reports](#ch-14) — 5 題
+- [附錄 A · PVM](#ch-a) — 10 題
+- [附錄 B · Host Calls](#ch-b) — 14 題
 - [附錄 C · Codec](#ch-c) — 2 題
 - [附錄 D · State Merklization](#ch-d) — 5 題
 - [附錄 E · General Merklization / MMR](#ch-e) — 4 題
@@ -1731,7 +1731,7 @@ service 就是 JAM 版的「帳戶」：它有 code、有 storage、有 balance�
 3. ❌ refine handles requests from other services and accumulate handles requests from users, so the split follows where the incoming request came from  
    請求來源不影響走哪個入口；work-package 一律先 refine 再 accumulate。
 4. ❌ refine runs when the service is called directly and accumulate runs when it receives a transfer, so the split follows how the service was reached  
-   收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口（0.7.1 起併入）。
+   收到轉帳的 service 走的也是 accumulate，沒有獨立的轉帳入口。
 
 > **陷阱**　refine 重但不能寫狀態；accumulate 能寫狀態但必須輕。
 
@@ -2255,7 +2255,7 @@ JAM 的分工很清楚：**它負責「認定」，不負責「沒收」**。被
 
 **標準答案**　Auditing loses its input: an auditor asked to re-run a report may find the data gone, so a dishonest guarantor could simply withhold it and never be contradicted
 
-三者是一條**依序相扣的鏈**：可得性保證資料救得回來 → 稽核靠那份資料重跑 → 爭議處理重跑後的歧見。抽掉第一環，第二環就懸空：auditor 被抽中去查某份 report，卻拿不到原始輸入，於是「查不出錯」與「沒有錯」變得無法區分。更糟的是這給了作惡者一個乾淨的策略——**簽一個假結果，然後把資料丟掉**。這正是為什麼 accumulate 必須等到 available 之後才發生：先確保查得了，再讓它生效。guarantor 的簽章一直都在 report 裡（0.8.0 起連簽章一起存進 ρ），所以證據不是問題。
+三者是一條**依序相扣的鏈**：可得性保證資料救得回來 → 稽核靠那份資料重跑 → 爭議處理重跑後的歧見。抽掉第一環，第二環就懸空：auditor 被抽中去查某份 report，卻拿不到原始輸入，於是「查不出錯」與「沒有錯」變得無法區分。更糟的是這給了作惡者一個乾淨的策略——**簽一個假結果，然後把資料丟掉**。這正是為什麼 accumulate 必須等到 available 之後才發生：先確保查得了，再讓它生效。guarantor 的簽章一直都在 report 裡（連簽章一起存進 ρ），所以證據不是問題。
 
 **逐項辨析**
 
@@ -2890,7 +2890,7 @@ JAM 只有一種節點身分：validator（full 設定 1023 個）。其餘四�
 
 **標準答案**　Invocation: one of the three ways the protocol runs the PVM (Ψ_I, Ψ_R, Ψ_A), each with its own host-call table. Host call: the only door out of the machine, triggered by ecalli. Gas: the compute budget, charged per basic block on entry. Basic block: a straight run of instructions ending in a jump or trap. Page fault: touching an unmapped page; the host may map it and resume. Inner PVM: a PVM started from inside refine to run, say, a parachain runtime
 
-**Invocation**（App. B）是「協定在什麼場合、給什麼 host call 表跑 PVM」：Ψ_I 授權、Ψ_R refine、Ψ_A accumulate，機器同一台，門不同。**Host call** 是程式執行 ecalli n 時暫停、把控制權交給 host 跑 Ω_n（讀 storage、轉帳、fetch…）再回來；PVM 沒有 I/O，這是唯一的門。**Gas** 是計算上限，0.8.0 起以 **basic block** 為單位在進入時預扣——basic block 是從入口到下一個跳躍／trap 的直線指令段，成本靜態可算。**Page fault** 是存取未映射的 4 KB page，機器停下並回報位址，host 可以把 page 映射上再繼續（不一定是錯誤）。**Inner PVM** 是 refine 專用：用 machine / peek / poke / invoke 這組 host call 在 PVM 裡再開一台 PVM，parachain 的 runtime 就是這樣在 JAM 上跑的。
+**Invocation**（App. B）是「協定在什麼場合、給什麼 host call 表跑 PVM」：Ψ_I 授權、Ψ_R refine、Ψ_A accumulate，機器同一台，門不同。**Host call** 是程式執行 ecalli n 時暫停、把控制權交給 host 跑 Ω_n（讀 storage、轉帳、fetch…）再回來；PVM 沒有 I/O，這是唯一的門。**Gas** 是計算上限，以 **basic block** 為單位在進入時預扣——basic block 是從入口到下一個跳躍／trap 的直線指令段，成本靜態可算。**Page fault** 是存取未映射的 4 KB page，機器停下並回報位址，host 可以把 page 映射上再繼續（不一定是錯誤）。**Inner PVM** 是 refine 專用：用 machine / peek / poke / invoke 這組 host call 在 PVM 裡再開一台 PVM，parachain 的 runtime 就是這樣在 JAM 上跑的。
 
 **逐項辨析**
 
@@ -3161,7 +3161,7 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 **標準答案**　A type declaration introduces each component with ∈ while a concrete value binds its fields with the tricolon, and either way a field is read back by subscripting its name; squaring the sequence-set says each of the two records is itself a sequence, one six-field entry per validator; the undecorated symbol is the prior state and the primed one the posterior — a convention the GP fixes not in §3 but alongside σ′ ≡ Υ(σ, B) — and dagger and double-dagger mark intermediate values inside a single transition that appear in neither σ nor σ′.
 
-§3.6 Tuples：「we may denote a tuple with two named natural components a and b as T = (a ∈ N, b ∈ N). We would denote an item t ∈ T through subscripting its name, thus for some t = (a ⦂ 3, b ⦂ 5), t_a = 3 and t_b = 5」——型別宣告用 ∈、具體值用 tricolon（⦂），欄位一律用**名字**下標讀取。tricolon 的位置也要記牢：§3.5 的 dictionary 用的是 ↦（k ↦ v），tricolon 只出現在 §3.6 具體 tuple 值的欄位綁定。eq. 13.2 的上標 2 則是把整個「序列集合」取平方：π_V 與 π_L **各自**都是一個序列，eq. 13.3 再釘死長度 |π_V| = |κ|、|π_L| = |λ|（0.8.0 改用 |κ|/|λ| 取代常數 V，根源是 eq. 6.8 的 𝕍 ≡ {3c | c ∈ N_{2…C+1}} 與 κ, λ ∈ ⟦𝕂⟧_𝕍——validator-set 大小在 0.8.0 是**可變**的）。最刁鑽的一點：prime 的意義**不是**在 §3 定義的——§3 只談 typography、sets、numbers、dictionaries、tuples、sequences、cryptography，通篇沒有 prime 字樣。它是在 §4 的 eq. 4.1 旁以文字定下的：「Where σ is the prior state, σ′ is the posterior state, B is some valid block and Υ is our block-level state-transition function」。dagger 同樣出自 §4 的 dependency graph 段落：「The only synchronous entanglements are visible through the intermediate components superscripted with a dagger」——π_V† / π_V‡ 是單次 transition 內部的中間值，既不在 eq. 4.4 的 σ 分量清單裡，也沒有自己的 state-trie key（π 整體只佔 C(13) 一把）。兩者先後見 eq. 13.4 的 π_V†（rollover **之前**：assurance 已加、尚未換代）與 eq. 13.5 產出的 π_V‡（rollover **之後**的起點）——把先後說反，正好會把 epoch 邊界那一塊的 counter 放錯 record。
+§3.6 Tuples：「we may denote a tuple with two named natural components a and b as T = (a ∈ N, b ∈ N). We would denote an item t ∈ T through subscripting its name, thus for some t = (a ⦂ 3, b ⦂ 5), t_a = 3 and t_b = 5」——型別宣告用 ∈、具體值用 tricolon（⦂），欄位一律用**名字**下標讀取。tricolon 的位置也要記牢：§3.5 的 dictionary 用的是 ↦（k ↦ v），tricolon 只出現在 §3.6 具體 tuple 值的欄位綁定。eq. 13.2 的上標 2 則是把整個「序列集合」取平方：π_V 與 π_L **各自**都是一個序列，eq. 13.3 再釘死長度 |π_V| = |κ|、|π_L| = |λ|（用 |κ|/|λ| 而不是常數 V，根源是 eq. 6.8 的 𝕍 ≡ {3c | c ∈ N_{2…C+1}} 與 κ, λ ∈ ⟦𝕂⟧_𝕍——validator-set 大小是**可變**的）。最刁鑽的一點：prime 的意義**不是**在 §3 定義的——§3 只談 typography、sets、numbers、dictionaries、tuples、sequences、cryptography，通篇沒有 prime 字樣。它是在 §4 的 eq. 4.1 旁以文字定下的：「Where σ is the prior state, σ′ is the posterior state, B is some valid block and Υ is our block-level state-transition function」。dagger 同樣出自 §4 的 dependency graph 段落：「The only synchronous entanglements are visible through the intermediate components superscripted with a dagger」——π_V† / π_V‡ 是單次 transition 內部的中間值，既不在 eq. 4.4 的 σ 分量清單裡，也沒有自己的 state-trie key（π 整體只佔 C(13) 一把）。兩者先後見 eq. 13.4 的 π_V†（rollover **之前**：assurance 已加、尚未換代）與 eq. 13.5 產出的 π_V‡（rollover **之後**的起點）——把先後說反，正好會把 epoch 邊界那一塊的 counter 放錯 record。
 
 **逐項辨析**
 
@@ -3185,13 +3185,13 @@ GP §3.8.1：「H denotes the set of 256-bit values equivalent to B_32. All hash
 
 ## §4 Overview　<sub>16 題</sub>
 
-### 4-1　GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. What has each one just absorbed?
+### 4-1　The GP's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. What has each one just absorbed?
 
-<sub>4.2.1 State Transition Dependency Graph — ●●○ · 概念 · eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18 · ⚠ 0.7.2→0.8.0</sub>
+<sub>4.2.1 State Transition Dependency Graph — ●●○ · 概念 · eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18</sub>
 
 **標準答案**　β_H† = β_H with the parent's posterior state root H_R written into its newest entry; ρ† = ρ after the disputes E_D; ρ‡ = ρ† after the assurances E_A; δ‡ = δ after accumulating R*, before E_P is folded in
 
-eq. 4.6 β_H† ≺ (H, β_H)：eq. 7.5 把 β_H 最後一筆的 state root（前一塊寫入時是 H_0）改為 H_R，即 parent 的 posterior root，要到本塊 header 才知道；eq. 4.12 ρ† ≺ (E_D, ρ)：disputes 先把 verdict 為 bad/wonky 的 report 從 core 清掉（eq. 10.14）；eq. 4.13 ρ‡ ≺ (E_A, ρ†)：assurances 讓 report 變 available（進入 R，eq. 11.17）或因 timeout 而移除（eq. 11.18）；eq. 4.14 ρ′ ≺ (E_G, ρ‡, κ, τ′)：最後才放入新 guarantee；eq. 4.16 (ω′, ξ′, δ‡, χ′, ι′, φ′, θ′, S) ≺ (R*, ω, ξ, δ, χ, ι, φ, τ, τ′)：accumulation 產出 δ‡（accumulation.tex 另稱 δ† 為 post-accumulation 的第一個中間態、δ‡ 為更新 last-accumulation 時戳 τ′ 後的第二個，overview 的圖只列 δ‡）；eq. 4.18 δ′ ≺ (E_P, δ‡, τ′)：preimage 最後併入。GP：「The latter two [4.17, 4.18] mark a merge and join in the dependency graph… the availability extrinsic may be fully processed and accumulation of work happen before the preimage lookup extrinsic is folded into state」。0.8.0 的符號也要跟上：新 available 的 report 序列寫作 R（R* 為 accumulatable，0.7.2 寫 W/R*），dagger 標在 β_H 上（β = (β_H, β_B)，belt β_B 不受 parent-root 修正影響）；你們 0.7.2 的 code 仍用 W/R*，`intermediateStates` 存 β†, ρ†, ρ‡, δ†, δ‡（chain_state.go）。
+eq. 4.6 β_H† ≺ (H, β_H)：eq. 7.5 把 β_H 最後一筆的 state root（前一塊寫入時是 H_0）改為 H_R，即 parent 的 posterior root，要到本塊 header 才知道；eq. 4.12 ρ† ≺ (E_D, ρ)：disputes 先把 verdict 為 bad/wonky 的 report 從 core 清掉（eq. 10.14）；eq. 4.13 ρ‡ ≺ (E_A, ρ†)：assurances 讓 report 變 available（進入 R，eq. 11.17）或因 timeout 而移除（eq. 11.18）；eq. 4.14 ρ′ ≺ (E_G, ρ‡, κ, τ′)：最後才放入新 guarantee；eq. 4.16 (ω′, ξ′, δ‡, χ′, ι′, φ′, θ′, S) ≺ (R*, ω, ξ, δ, χ, ι, φ, τ, τ′)：accumulation 產出 δ‡（accumulation.tex 另稱 δ† 為 post-accumulation 的第一個中間態、δ‡ 為更新 last-accumulation 時戳 τ′ 後的第二個，overview 的圖只列 δ‡）；eq. 4.18 δ′ ≺ (E_P, δ‡, τ′)：preimage 最後併入。GP：「The latter two [4.17, 4.18] mark a merge and join in the dependency graph… the availability extrinsic may be fully processed and accumulation of work happen before the preimage lookup extrinsic is folded into state」。符號提醒：新 available 的 report 序列寫作 R（R* 為 accumulatable），dagger 標在 β_H 上（β = (β_H, β_B)，belt β_B 不受 parent-root 修正影響）；你們的 code 把同一批 report 叫 W/R*，`intermediateStates` 存 β†, ρ†, ρ‡, δ†, δ‡（chain_state.go）。
 
 **逐項辨析**
 
@@ -3341,7 +3341,7 @@ eq. 4.4：σ ≡ (α, β, θ, γ, δ, η, ι, κ, λ, ρ, τ, φ, χ, ψ, π, ω
 
 **標準答案**　α′ must be computed after accumulation, because φ′ (the posterior authorizer queue) is only known once accumulate has run (the `assign` host call may change it)
 
-GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。**0.8.0 的變動**：這個「pool 更新在 accumulation 之後」是 issue #1020 處理的重點，0.7.2 的順序不同。
+GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。
 
 **逐項辨析**
 
@@ -3466,7 +3466,7 @@ GP §4.9.2：「In place of Ethereum's gas model for purchasing and measuring bl
 
 **標準答案**　A RISC-V (RV64EM) based register machine with 13 64-bit registers, little-endian, and a pageable 32-bit address space in 4096-octet pages
 
-GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 0.8.0 把 sbrk 改成 grow_heap host call：成本取決於運算元的指令會破壞 basic block 的靜態計價。
+GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 heap 成長做成 grow_heap host call 而不是指令：成本取決於運算元的指令會破壞 basic block 的靜態計價。
 
 **逐項辨析**
 
@@ -3586,7 +3586,7 @@ GP §4.3 原話：「Safrole, which governs the (not-necessarily forkless) exten
 
 <a id="ch-5"></a>
 
-## §5 The Header　<sub>24 題</sub>
+## §5 The Header　<sub>22 題</sub>
 
 ### 5-1　The team derives the unsigned header serialization by encoding the full header and truncating it. Why is that sound under GP 0.8.0's E(H) and E_U(H), and what is E_U's field order?
 
@@ -3622,7 +3622,7 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 
 **標準答案**　E(H) = E(E_U(H), H_S): the 96-octet seal is the last, fixed-size field, so cutting 96 bytes off E(H) yields exactly the seal's message; inside E_U the order is H_P, H_R, H_X, E_4(H_T), H_E (0/1 discriminator), H_W (0/1 discriminator), E_2(H_I), H_V, var(H_O)
 
-附錄 C.2：E(H) = E(E_U(H), H_S)，而 E_U(H) = E(H_P, H_R, H_X, E_4(H_T), E_epochmark(H_E), maybe(H_R), E_2(H_I), H_V, var(H_O))。H_V 仍留在 E_U 內（seal 簽到 H_V；H_V 的 VRF context 則含 Y(H_S)，而 VRF output 只由 key 與 context 決定、與 message 無關，所以不循環）。注意序列化順序與 eq. 5.1 的 tuple 順序不同：E_U 裡 E_2(H_I)、H_V 排在 H_O 之前，H_O 以 var（長度前綴）放在 E_U 最後；H_E 用 E(0) 或 E(1, η_0, η_1, var(k))，H_W 用 maybe（0 或 1 ⌢ 固定 E 張 ticket）。你們 Header.Encode 的欄位順序 Parent…AuthorIndex, EntropySource, OffendersMark, Seal 正是這個順序，所以 HeaderUSerialization 的做法正確。0.8.0 的小 delta：epoch marker 的 key 序列改為 var(k)（#1031）。
+附錄 C.2：E(H) = E(E_U(H), H_S)，而 E_U(H) = E(H_P, H_R, H_X, E_4(H_T), E_epochmark(H_E), maybe(H_R), E_2(H_I), H_V, var(H_O))。H_V 仍留在 E_U 內（seal 簽到 H_V；H_V 的 VRF context 則含 Y(H_S)，而 VRF output 只由 key 與 context 決定、與 message 無關，所以不循環）。注意序列化順序與 eq. 5.1 的 tuple 順序不同：E_U 裡 E_2(H_I)、H_V 排在 H_O 之前，H_O 以 var（長度前綴）放在 E_U 最後；H_E 用 E(0) 或 E(1, η_0, η_1, var(k))，H_W 用 maybe（0 或 1 ⌢ 固定 E 張 ticket）。你們 Header.Encode 的欄位順序 Parent…AuthorIndex, EntropySource, OffendersMark, Seal 正是這個順序，所以 HeaderUSerialization 的做法正確。
 
 **逐項辨析**
 
@@ -3643,18 +3643,18 @@ func HeaderUSerialization(header types.Header) (output types.ByteSequence, err e
 
 ### 5-2　A light client holds only a verified header H and wants to check that preimage blob d for service s was included in that block's E_P. Given H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)] (eq. 5.4–5.7), what is the minimal witness it needs and what is the shape of the check?
 
-<sub>5 The Header — ●●● · 概念 · eq. 5.4–5.7 · ⚠ 0.7.2→0.8.0</sub>
+<sub>5 The Header — ●●● · 概念 · eq. 5.4–5.7</sub>
 
 **標準答案**　The other four component hashes (h_T, h_g, h_A, h_D) plus the entire p sequence of (E_4(s_i), H(d_i)) pairs: it checks (E_4(s), H(d)) ∈ p and H(h_T ⌢ H(p) ⌢ h_g ⌢ h_A ⌢ h_D) = H_X — no other blob is needed, but p is a flat blob, not a log-size path
 
-eq. 5.4：H_X ≡ H(E(H#(a)))，H# 是把 H 逐項套用到序列 a 的每個元素（§3 notation：f^# 表示 map），所以 H_X = H(h_T ⌢ h_p ⌢ h_g ⌢ h_A ⌢ h_D)，其中 h_p = H(p)、p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])（eq. 5.6）。這是兩層結構：外層是 5 個 component hash 平鋪後再 hash，內層的 p 是一整個 blob。§5 說明：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——0.8.0 PR #524 把 p 從 E_P(E_P)（含完整 blob）改成 (service, blake(blob)) 的序列，證明時才不必附上其他 preimage 的 blob。你們 CreateExtrinsicHash（0.7.2）對 preimages 仍是 hash 整個 EncodeExtrinsicPreimages，升到 0.8.0 時要改成對 (E_4(s), H(d)) 序列取 hash（#1031）；guarantees 那一段（g，report 用 H(w) 代替）在 0.7.2 已經做對。
+eq. 5.4：H_X ≡ H(E(H#(a)))，H# 是把 H 逐項套用到序列 a 的每個元素（§3 notation：f^# 表示 map），所以 H_X = H(h_T ⌢ h_p ⌢ h_g ⌢ h_A ⌢ h_D)，其中 h_p = H(p)、p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])（eq. 5.6）。這是兩層結構：外層是 5 個 component hash 平鋪後再 hash，內層的 p 是一整個 blob。§5 說明：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——所以 p 不是 E_P(E_P)（含完整 blob），而是 (service, blake(blob)) 的序列，證明時才不必附上其他 preimage 的 blob；guarantees 那一段（g）同理，report 用 H(w) 代替。
 
 **逐項辨析**
 
 1. ❌ A log₂|E_P|-length Merkle path from the leaf H(d) up to H_X, because H_X is a binary Merkle root over every extrinsic item of the block, so the witness is O(log n) hashes and grows only logarithmically as the block fills up  
    H# 只是逐項 map 後平鋪再取一次 hash，不是二元 Merkle tree，p 內部沒有 log 長度的路徑。
 2. ❌ The complete E_P (every preimage blob of the block) together with the other four extrinsics in full, because H_X hashes the block's whole extrinsic serialization as one blob and cannot be recomputed from hashes alone  
-   那是 0.7.2 的情況；#524 之後 p 只帶 (service, blake(blob))，不必附上其他人的 blob。
+   p 只帶 (service, blake(blob)) 而不是 blob 本身，所以不必附上其他人的 blob。
 3. ✅ The other four component hashes (h_T, h_g, h_A, h_D) plus the entire p sequence of (E_4(s_i), H(d_i)) pairs: it checks (E_4(s), H(d)) ∈ p and H(h_T ⌢ H(p) ⌢ h_g ⌢ h_A ⌢ h_D) = H_X — no other blob is needed, but p is a flat blob, not a log-size path  
    witness = 四個 sibling hash + 整段 p（每項 36 bytes），大小隨區塊裡的 preimage 數線性成長。
 4. ❌ Only H(d), the service index s and the block's H_X, because eq. 5.6 commits each (service, preimage-hash) pair directly into H_X, so a single pair can be checked without touching the rest of E_P or any of the other four extrinsic components  
@@ -3691,45 +3691,7 @@ eq. 5.8：P(H)_t < H_T ∧ H_T·P ≤ T（P = 6 秒，T 為自 JAM Common Era �
 
 ---
 
-### 5-4　After fuzzer bug #825 (a header with H_I = 65535 panicked UpdateEtaPrime0 with 'index out of range [65535] with length 6' because the index was used before being validated), the team added this check. Is the bound it uses the one GP 0.8.0 specifies?
-
-<sub>5 The Header — ●●● · 程式碼 · eq. 5.10 & eq. 6.8 (valcount) · ⚠ 0.7.2→0.8.0</sub>
-
-```go
-	// Validate author_index out of range.
-	// NOTE: There is currently no official error code defined for this case.
-	// We may need to update this once the spec updates.
-	if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
-		errCode := SafroleErrorCode.AuthorIndexOutOfRange
-		return &errCode
-	}
-	return nil
-}
-```
-<sub>internal/stf/validate_header.go (ValidateNonVRFHeader, excerpt)</sub>
-
-**標準答案**　Not exactly: eq. 5.10 bounds H_I by |κ′| (the posterior active set, whose key also verifies H_S and H_V); the prior κ is equivalent only while |κ| = |κ′|, which holds today because the team never resizes the set, but 0.8.0 lets validator-set sizes differ across an epoch boundary (eq. 6.8)
-
-eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b——用的是 posterior active set（epoch 的第一個區塊由剛輪替進來的 κ′ = 舊 γ_P 出塊；#784/#791 就是因為用 prior κ/η 驗 seal 與 H_V 而失敗）。0.7.2 這裡的上界是常數 V；0.8.0（PR #514）改為 |κ′|，且 eq. 6.8 允許 validator 序列長度是 6 到 3C 之間任何 3 的倍數、designate 可以改變 ι 的長度。你們目前 |κ| ≡ |κ′| ≡ ValidatorsCount（offender 的 key 就地清零、不移除，issue #1037），所以 len(priorState.Kappa) 暫時等價；一旦支援變動大小，集合變大時會誤拒合法的 H_I ∈ [|κ|, |κ′|)，變小時會放過非法 index，接著在 η′_0 = H(η_0 ⌢ Y(H_V)) 或 seal 驗證取 κ′[H_I] 時再度 panic——正是 #825 的症狀。另一個重點：這個 bound check 必須排在所有使用 κ′[H_I] 的步驟（UpdateEtaPrime0、seal/VRF 驗證）之前——#825 的本質是「先用後驗」。
-
-**逐項辨析**
-
-1. ❌ Yes: eq. 5.10 defines H_I ∈ N_{|κ|} — the author must belong to the prior active set, because the block is built on the prior state and its seal is verified before the epoch's key rotation is applied, so len(priorState.Kappa) is exactly the spec bound and #825 needed nothing beyond moving the test ahead of UpdateEtaPrime0  
-   順序講反了：κ′ ≺ (H, τ, κ, γ) 先算出來、seal 驗證在其後，拿 κ′ 當上界沒有循環問題。
-2. ✅ Not exactly: eq. 5.10 bounds H_I by |κ′| (the posterior active set, whose key also verifies H_S and H_V); the prior κ is equivalent only while |κ| = |κ′|, which holds today because the team never resizes the set, but 0.8.0 lets validator-set sizes differ across an epoch boundary (eq. 6.8)  
-   eq. 5.10 的上界是 |κ′|；0.8.0 (#514) 起 |κ| 與 |κ′| 可在 epoch 交界不相等。
-3. ❌ Yes: the bound is the constant V (1023 full / 6 tiny); κ and κ′ always hold exactly V entries in every configuration, so either length works and the choice of set is purely cosmetic — the only substantive fix for #825 was ordering the range test before the index is dereferenced  
-   eq. 6.8 的 𝕍 ≡ {3c | 2 ≤ c ≤ C} 允許長度變動，「V 是常數」是 0.7.2 的寫法。
-4. ❌ No: H_I indexes the pending set γ_P, since the first block of an epoch is sealed by the incoming validators; the bound must therefore be |γ_P| read out of the prior Safrole state, because κ′ is only assigned once the seal has been verified and bounding H_I by it would be circular  
-   epoch 首塊時 κ′ 已經等於舊的 γ_P，index 的對象就是 κ′ 本身，不必繞道 γ_P。
-
-> **陷阱**　H_I 對 κ′ 取 index，bound 也是 |κ′|；0.8.0 之後不要再把 V 當常數用。
-
-<sub>`ch05-author-index-bound-set`</sub>
-
----
-
-### 5-5　H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?
+### 5-4　H_P is defined as the Blake2b hash of an encoding of the parent header. Which encoding is hashed, and what follows from that choice?
 
 <sub>5.1 The Header — ●●○ · 概念 · eq. 5.2</sub>
 
@@ -3752,7 +3714,7 @@ eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**
 
 ---
 
-### 5-6　A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?
+### 5-5　A node receives only a header, with neither the block body nor any chain state. Which checks can it complete, and which one is the first that it cannot?
 
 <sub>5.1–5.3 — ●●● · 概念 · §5; eq. 5.8; eq. 5.9</sub>
 
@@ -3777,7 +3739,7 @@ eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**
 
 ---
 
-### 5-7　The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?
+### 5-6　The GP says consensus over the genesis header and the state it represents is presumed rather than derived. Why must a chain definition contain such an assumption at all?
 
 <sub>5.1 The Header — ●●○ · 設計理由 · §5（genesis header 與 σ_g）</sub>
 
@@ -3800,7 +3762,7 @@ eq. 5.2：H_P ≡ Blake2b(E(P(H)))。這裡 P(H) 是父 header，E 是**完整**
 
 ---
 
-### 5-8　H_X hashes a sequence of five per-component hashes, and inside two of those components each item is itself reduced to a hash. What is that shape buying, and why are only those two treated that way?
+### 5-7　H_X hashes a sequence of five per-component hashes, and inside two of those components each item is itself reduced to a hash. What is that shape buying, and why are only those two treated that way?
 
 <sub>5.2 The Extrinsic Hash — ●●● · 設計理由 · eq. 5.4–5.7</sub>
 
@@ -3823,7 +3785,7 @@ H_X = H(E(H#(a)))，a 是五個 extrinsic 分量各自的雜湊。**這是一棵
 
 ---
 
-### 5-9　When a block is the first of a new epoch, its epoch marker is populated. What does that marker carry, and who is it for?
+### 5-8　When a block is the first of a new epoch, its epoch marker is populated. What does that marker carry, and who is it for?
 
 <sub>5.3 The Markers — ●●○ · 概念 · eq. 5.11；§6.6</sub>
 
@@ -3846,13 +3808,13 @@ H_X = H(E(H#(a)))，a 是五個 extrinsic 分量各自的雜湊。**這是一棵
 
 ---
 
-### 5-10　The header identifies its author by an index rather than by a public key. Beyond saving bytes, what does that choice force, and what does it cost?
+### 5-9　The header identifies its author by an index rather than by a public key. Beyond saving bytes, what does that choice force, and what does it cost?
 
 <sub>5.1 The Header — ●●○ · 設計理由 · eq. 5.10</sub>
 
 **標準答案**　It forces every verifier to already agree on the posterior active set, since the index means nothing without it; the cost is that a header cannot be interpreted in isolation, which is precisely why the epoch marker exists
 
-eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——0.8.0 讓 |κ| 可變之後這個區別變得實質。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。
+eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、不被序列化**。**省 32 個位元組只是表面**。真正的效果是：它把「這個 header 說的是誰」變成一個**相對於 κ′ 的問題**。索引本身不帶任何資訊——同一個 H_I = 3 在不同 epoch 指向不同的人。於是任何驗證者都必須**先同意同一份 posterior active set**，才能解讀這個 header。**代價就是 header 不能被單獨解讀**，而這正是 epoch marker 存在的理由：validator set 換人時，把新的金鑰序列放進 header，讓只看 header 的人也能跟上索引的意義。兩個設計是配套的——用索引省下的頻寬，一部分又還給了 marker，但 marker 每個 epoch 只出現一次，索引則是每塊都省，整體仍然划算。**實作上還有一個直接後果**：H_I 的上界是 **|κ′| 而不是 |κ|**，兩者只有在集合大小不變時才等價——|κ| 可變（eq. 6.8）時這個區別就是實質的。fuzzer bug #825 就踩在這裡：一個 H_I = 65535 的 header 在還沒做界限檢查前就被拿去索引，直接 panic。
 
 **逐項辨析**
 
@@ -3869,7 +3831,7 @@ eq. 5.10：H_I ∈ N_{|κ′|}，而 H_A ≡ κ′[H_I]_b **只是等價式、�
 
 ---
 
-### 5-11　The offenders marker is a plain sequence of Ed25519 keys, empty in almost every block, and it duplicates information that disputes processing already puts into state. Why carry it in the header?
+### 5-10　The offenders marker is a plain sequence of Ed25519 keys, empty in almost every block, and it duplicates information that disputes processing already puts into state. Why carry it in the header?
 
 <sub>5.3 The Markers — ●●○ · 設計理由 · eq. 5.11；§10</sub>
 
@@ -3892,7 +3854,7 @@ H_O ∈ ⟦ed25519 key⟧ 是一個**可以為空、但永遠不是 ∅** 的普
 
 ---
 
-### 5-12　Two of the three markers are optional and one is not. What does that asymmetry buy, given how often each is populated and how large each can get?
+### 5-11　Two of the three markers are optional and one is not. What does that asymmetry buy, given how often each is populated and how large each can get?
 
 <sub>5.3 The Markers — ●●○ · 概念 · eq. 5.11</sub>
 
@@ -3915,7 +3877,7 @@ H_O ∈ ⟦ed25519 key⟧ 是一個**可以為空、但永遠不是 ∅** 的普
 
 ---
 
-### 5-13　A block arrives mid-epoch carrying a populated epoch marker. How should a validator treat it, and what is the general principle behind that treatment?
+### 5-12　A block arrives mid-epoch carrying a populated epoch marker. How should a validator treat it, and what is the general principle behind that treatment?
 
 <sub>5.3 The Markers — ●●● · 概念 · §5.3；§6.6</sub>
 
@@ -3940,7 +3902,7 @@ marker 不是出塊者可以自由填寫的註記欄位：H_E 與 H_W 的**內�
 
 ---
 
-### 5-14　An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?
+### 5-13　An Ethereum header commits to the post-state, a receipts root and the gas consumed. A JAM header carries none of the three. Where does each of those roles go instead?
 
 <sub>5.1 The Header — ●●● · 設計理由 · eq. 5.1；§4</sub>
 
@@ -3963,7 +3925,7 @@ marker 不是出塊者可以自由填寫的註記欄位：H_E 與 H_W 的**內�
 
 ---
 
-### 5-15　GP eq. 5.1 defines the header H as a 10-tuple. List the ten fields — and name the one thing people expect in a block header that JAM deliberately leaves out.
+### 5-14　GP eq. 5.1 defines the header H as a 10-tuple. List the ten fields — and name the one thing people expect in a block header that JAM deliberately leaves out.
 
 <sub>5 The Header — ●○○ · 概念 · eq. 5.1</sub>
 
@@ -3988,7 +3950,7 @@ eq. 5.1：H ≡ (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S)，十個欄�
 
 ---
 
-### 5-16　Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?
+### 5-15　Unlike Ethereum and Polkadot, a JAM header commits to the PRIOR state root (H_R = M_σ(σ)) rather than the posterior one. What is the stated reason?
 
 <sub>5 The Header — ●○○ · 設計理由 · eq. 5.9 (H_r)</sub>
 
@@ -4013,32 +3975,7 @@ GP §5 原文：「This is a departure from both Polkadot and the Yellow Paper's
 
 ---
 
-### 5-17　GP 0.8.0 (PR #524) redefined the extrinsic hash H_X = H(E(H#(a))) with a = [E_T(E_T), p, g, E_A(E_A), E_D(E_D)]. How are the preimages (p) and guarantees (g) components formed?
-
-<sub>5 The Header — ●●● · 版本差異 · eq. 5.4–5.7 (H_x) · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　p encodes the sequence of (E_4(service), H(data)) pairs and g encodes the sequence of (H(work-report), E_4(slot), var(credential)) tuples, each sequence var-length prefixed
-
-eq. 5.4–5.7：H_X = H(E(H#(a)))，其中 a 是五個成分各自的承諾，**每個成分先被壓成自己的雜湊、再一起雜湊**。0.8.0（PR #524）重新定義了其中兩個：p = E(var[(E_4(s), H(d)) | (s, d) ∈ E_P])——preimage 存的是 (service index, blob 的雜湊)；g = E(var[(H(w), E_4(t), var(a)) | (w, t, a) ∈ E_G])——guarantee 存的是 (work-report 的雜湊, slot, 擔保簽章)。**GP 給的理由寫在 §5**：「taking care to allow for the possibility of reports and preimages to individually have their inclusion proven」——因為只放雜湊，第三方就能用一份 Merkle proof 證明「某個 preimage 或某份 report 確實在這個區塊裡」，而**不必附上整個 blob 或整份報告**。work-report 可以接近 48 KiB（W_R），preimage 更可能是任意大小，差別是實質的。**為什麼是兩層雜湊**：先各自 hash 再合併，讓每個成分成為獨立的承諾——證明某個 preimage 存在時，不需要揭露 tickets、assurances 或 disputes 的內容。這是「承諾結構跟隨證明需求」的典型設計，與 §7 的 β_B 用 MMR 是同一種思路。
-
-**逐項辨析**
-
-1. ❌ p and g are the full codec encodings of E_P and E_G exactly as the block body carries them, so a commits to every preimage blob and every complete work-report  
-   那樣 a 會扛著整包 blob 與整份 report，恰好毀掉「逐項證明 inclusion」的設計目的。
-2. ✅ p encodes the sequence of (E_4(service), H(data)) pairs and g encodes the sequence of (H(work-report), E_4(slot), var(credential)) tuples, each sequence var-length prefixed  
-   eq. 5.6–5.7 兩者都是 E(var[…]) 的形狀：序列每個元素先換成 hash 再編碼。
-3. ❌ p is the Blake2b hash of the concatenated preimage blobs and g is the Keccak hash of the concatenated work-reports, so a carries exactly one 32-octet leaf for each  
-   H# 是 blake-many（對序列每個元素各取一次 hash），且 Keccak 在 JAM 只用於 §18 的 BEEFY MMR。
-4. ❌ p and g are dropped from a, which is then the three-element sequence [E_T(E_T), E_A(E_A), E_D(E_D)]; preimages and guarantees are committed only via the prior state root  
-   eq. 5.5 的 a 是五個元素；preimages 與 guarantees 正是靠 H_X 而非 state root 進入 header。
-
-> **陷阱**　0.7.2→0.8.0 差異；H# 是 blake-many（對序列每個元素各取 hash 再 encode）。
-
-<sub>`ch05-extrinsic-hash-080`</sub>
-
----
-
-### 5-18　Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?
+### 5-16　Which condition must a block's timeslot H_T satisfy for the block to be considered valid right now?
 
 <sub>5 The Header — ●○○ · 概念 · eq. 5.8</sub>
 
@@ -4063,7 +4000,7 @@ eq. 5.8：**P(H)_T < H_T ∧ H_T · P ≤ 𝕋**。兩個條件的性質完全�
 
 ---
 
-### 5-19　The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?
+### 5-17　The block author index H_I is an index into which validator set, and how is the author's Bandersnatch key H_A obtained?
 
 <sub>5 The Header — ●●○ · 概念 · eq. 5.10 (H_i, H_a)</sub>
 
@@ -4088,13 +4025,13 @@ eq. 5.10：H_I ∈ N_{|κ′|}，H_A ≡ κ′[H_I]_b。兩個要點。**其一�
 
 ---
 
-### 5-20　The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?
+### 5-18　The GP only requires implementations to store headers of ancestors authored within the previous L = 14,400 timeslots (24 hours). Which on-chain check is the reason this ancestor set A is needed?
 
 <sub>5 The Header — ●●○ · 概念 · eq. 5.3 (ancestors A) & §11.4 lookup anchor</sub>
 
 **標準答案**　Verifying that a guarantee's lookup-anchor block (hash, timeslot and posterior state root) really occurs in the chain, which state σ on its own cannot attest
 
-eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個 slot（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的 slot 等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root（最後這項是 0.8.0 新增的）。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。
+eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），而 GP 只要求實作保存「過去 L = 14,400 個 slot（24 小時）內出塊的祖先 header」。**需要它的是 §11.4 的 lookup-anchor 檢查。**eq. 11.38 要求：對每個 refinement context，存在 h, h′ ∈ A 使得 h 的 slot 等於 context 的 lookup-anchor time、H(h) 等於 lookup-anchor hash、且 h′ 的 parent 是 H(h)、h′ 的 H_R 等於 context 記的 posterior state root。**為什麼狀態本身辦不到**：σ 只描述「現在長什麼樣」，不保留「哪些區塊曾經在鏈上」。β_H 只留最近 H = 8 塊，遠遠不夠涵蓋 24 小時。GP 自己點明：「this is one of the few conditions which cannot be checked purely with on-chain state and must be checked by virtue of retaining the series of the last L headers」——**全書少數必須靠鏈外保存資料才能驗的條件之一**。**對 M1 的意義**：fuzzer 的 Ancestry feature 就是在測這個，實作必須真的維護那份 header 序列。別把 L = 14,400（24 小時，lookup anchor）與 D = 19,200（32 小時，preimage expunge）搞混，兩者常被互換。
 
 **逐項辨析**
 
@@ -4113,7 +4050,7 @@ eq. 5.3 定義祖先集合 A（h ∈ A ⇔ h = H ∨ ∃i ∈ A : h = P(i)），
 
 ---
 
-### 5-21　Per eq. 5.11, what are the types of the three header markers H_E, H_W and H_O, and which of them are optional?
+### 5-19　Per eq. 5.11, what are the types of the three header markers H_E, H_W and H_O, and which of them are optional?
 
 <sub>5.1 The Markers — ●●○ · 概念 · eq. 5.11 (markers)</sub>
 
@@ -4138,7 +4075,7 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 ---
 
-### 5-22　The results of accumulate (δ‡, θ′ and so on) are never placed in the block. Since they are not in the block, how does the whole network reach consensus on what the state looks like after a report is accumulated, and at which step is a node that computed accumulate wrongly caught?
+### 5-20　The results of accumulate (δ‡, θ′ and so on) are never placed in the block. Since they are not in the block, how does the whole network reach consensus on what the state looks like after a report is accumulated, and at which step is a node that computed accumulate wrongly caught?
 
 <sub>4.1; 5.1 header; 12 — ●●○ · 概念 · eq. 4.1 (σ′ = Υ(σ, B)), eq. 5.1 (H_R), §12</sub>
 
@@ -4163,7 +4100,7 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 ---
 
-### 5-23　τ is the previous block's timeslot; τ′ = H_T is this block's. Which rules deliberately use the prior τ rather than H_T, and what is the principle behind the choice?
+### 5-21　τ is the previous block's timeslot; τ′ = H_T is this block's. Which rules deliberately use the prior τ rather than H_T, and what is the principle behind the choice?
 
 <sub>4.1; 6.3; 10.2; 11.3 — ●●○ · 設計理由 · §4.1 (τ′ ≺ H), §6.3 (e, m, e′, m′), eq. 6.25, eq. 10.2, eq. 11.18, eq. 11.28</sub>
 
@@ -4188,7 +4125,7 @@ eq. 5.11 的三個型別：**H_E ∈ ?(H, H, ⟦(bandersnatch, ed25519)⟧_V)**�
 
 ---
 
-### 5-24　A Polkadot relay-chain header is (parent hash, number, post-state root, extrinsics root, digest logs), with BABE's slot/VRF and the seal tucked inside the digest. Against JAM's ten-tuple header, what are the three most important structural differences, and the reason for each?
+### 5-22　A Polkadot relay-chain header is (parent hash, number, post-state root, extrinsics root, digest logs), with BABE's slot/VRF and the seal tucked inside the digest. Against JAM's ten-tuple header, what are the three most important structural differences, and the reason for each?
 
 <sub>5 The Header — ●●○ · 設計理由 · eq. 5.1, eq. 5.4–5.7 (H_X), eq. 5.10–5.11</sub>
 
@@ -4216,9 +4153,9 @@ eq. 5.1：H = (H_P, H_R, H_X, H_T, H_E, H_W, H_O, H_I, H_V, H_S)。逐項對照 
 
 <a id="ch-6"></a>
 
-## §6 Safrole　<sub>37 題</sub>
+## §6 Safrole　<sub>36 題</sub>
 
-### 6-1　This is the tail of the team's CreateNewTicketAccumulator (identical on main and on the 0.8.0 branch), reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?
+### 6-1　This is the tail of the team's CreateNewTicketAccumulator, reached after the new tickets passed the tail/attempt/proof/order/duplicate checks. A block at m′ = 300 carries 3 valid tickets whose ids are all HIGHER than every id in a saturated γ_A (|γ_A| = E). What does the GP require, and what does this code do?
 
 <sub>6.7 The Extrinsic and Tickets — ●●● · 程式碼 · eq. 6.35–6.36 — internal/safrole/extrinsic_tickets.go CreateNewTicketAccumulator</sub>
 
@@ -4331,9 +4268,9 @@ eq. 6.16/6.17：i = γ′_S[H_T mod E]（posterior 序列），H_S 由 H_A 簽�
 
 ---
 
-### 6-3　After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Is the bound it uses the one GP 0.8.0 specifies, and when would the difference show?
+### 6-3　After fuzzer bug #825 (panic 'index out of range [65535] with length 6' while computing η′_0), the team added this check to ValidateNonVRFHeader, which runs BEFORE UpdateSafrole. Is the bound it uses the one the GP specifies, and when would the difference show?
 
-<sub>6.4 Sealing and Entropy Accumulation — ●●● · 程式碼 · §5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader · ⚠ 0.7.2→0.8.0</sub>
+<sub>6.4 Sealing and Entropy Accumulation — ●●● · 程式碼 · §5 eq. 5.10 (H_I ∈ N_{|κ′|}), eq. 6.7–6.8, 6.14 — internal/stf/validate_header.go ValidateNonVRFHeader</sub>
 
 ```go
 // Validate author_index out of range.
@@ -4346,9 +4283,9 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
 ```
 <sub>internal/stf/validate_header.go (ValidateNonVRFHeader)</sub>
 
-**標準答案**　The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a 0.8.0 set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary
+**標準答案**　The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary
 
-§5 eq. 5.10：H_I ∈ N_{|κ′|}、H_A ≡ κ′[H_I]_b——邊界是 **posterior** κ′ 的長度。#825 的 panic（index out of range [65535] with length 6）就是 H_I 在 range check 之前被拿去索引 validator 陣列；Go 直接 panic 而不是回傳錯誤，fuzzer 視為 target crash。這段檢查放在 ValidateNonVRFHeader（UpdateSafrole 之前），手上只有 prior state，於是用 len(priorState.Kappa)；今天這是等價的，因為 codebase 裡 ι/γ_P/κ/λ 永遠都是 V 筆（offender 只被 Φ 歸零、不移除，#1037），|κ| = |κ′|。但 GP 0.8.0 eq. 6.7/6.8（PR #514）允許每個序列長度各自 ∈ N_V = {6, 9, …, 1023}，designate host call 也只要求 z ∈ N_V；當 |γ_P| ≠ |κ| 時，epoch 第一塊的 κ′ = γ_P（eq. 6.14）長度會變（eq. 11.18 也因此在 |κ| ≠ |κ′| 時清空 ρ‡），正確做法是先算出 κ′ 的長度（e′ > e 時取 |γ_P|，否則 |κ|）再檢查。錯誤碼方面 GP 與官方 enum 沒有對應值，你們暫用 AuthorIndexOutOfRange (13)。
+§5 eq. 5.10：H_I ∈ N_{|κ′|}、H_A ≡ κ′[H_I]_b——邊界是 **posterior** κ′ 的長度。#825 的 panic（index out of range [65535] with length 6）就是 H_I 在 range check 之前被拿去索引 validator 陣列；Go 直接 panic 而不是回傳錯誤，fuzzer 視為 target crash。這段檢查放在 ValidateNonVRFHeader（UpdateSafrole 之前），手上只有 prior state，於是用 len(priorState.Kappa)；今天這是等價的，因為 codebase 裡 ι/γ_P/κ/λ 永遠都是 V 筆（offender 只被 Φ 歸零、不移除，#1037），|κ| = |κ′|。但 GP eq. 6.7/6.8 允許每個序列長度各自 ∈ 𝕍 = {6, 9, …, 1023}，designate host call 也只要求 z ∈ 𝕍；當 |γ_P| ≠ |κ| 時，epoch 第一塊的 κ′ = γ_P（eq. 6.14）長度會變（eq. 11.18 也因此在 |κ| ≠ |κ′| 時清空 ρ‡），正確做法是先算出 κ′ 的長度（e′ > e 時取 |γ_P|，否則 |κ|）再檢查。錯誤碼方面 GP 與官方 enum 沒有對應值，你們暫用 AuthorIndexOutOfRange (13)。
 
 **逐項辨析**
 
@@ -4356,8 +4293,8 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
    eq. 5.10 寫的是 H_I ∈ N_{|κ′|}——邊界取的是 posterior κ′ 的長度，不是 prior κ。
 2. ❌ The check is unnecessary: an out-of-range H_I already fails the seal signature check and is reported as VrfSealInvalid, so the fuzzer's expected rejection is produced anyway; the real fix for #825 belonged inside UpdateEtaPrime0, where the panic was raised  
    根本走不到簽章驗證：索引 κ′[H_I] 時就先 panic，修法塞進 UpdateEtaPrime0 也治標不治本。
-3. ✅ The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a 0.8.0 set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary  
-   今天 |κ| = |κ′| 只因序列永遠是 V 筆；0.8.0 允許長度變動後，κ′ = γ_P 在邊界就會不同長。
+3. ✅ The GP bound is |κ′| (posterior), not |κ|; the check is equivalent today only because every key sequence here has exactly V entries (offenders are zeroed in place, #1037) — once a set-size change makes |γ_P| ≠ |κ|, a bound taken from the prior κ is wrong at the boundary  
+   今天 |κ| = |κ′| 只因序列永遠是 V 筆；長度一旦變動（eq. 6.8 允許），κ′ = γ_P 在邊界就會不同長。
 4. ❌ The bound should be |ι|, since at an epoch boundary the block author is drawn from the staging set that eq. 6.14 has just promoted into κ′; bounding by either the prior or the posterior κ would reject every author from the incoming set on the first block  
    eq. 6.14 在邊界把 ι 推進的是 γ′_P，κ′ 取的是舊 γ_P——ι 還要再過一個邊界才成為 κ。
 
@@ -4392,13 +4329,13 @@ if header.AuthorIndex >= types.ValidatorIndex(len(priorState.Kappa)) {
 
 ---
 
-### 6-5　Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal 0.8.0 configuration (eq. 6.8). Consider the first block of epoch e + 1. What does the ticket regime look like for the new epoch (entry-index bound, ring), what does H_E list, and who may seal that first block?
+### 6-5　Tiny parameters (E = 12). During epoch e the delegator service set the staging set ι to 9 validators while γ_P and κ still hold 6 — a legal configuration (eq. 6.8). Consider the first block of epoch e + 1. What does the ticket regime look like for the new epoch (entry-index bound, ring), what does H_E list, and who may seal that first block?
 
-<sub>6.3 Key Rotation / 6.7 The Extrinsic and Tickets — ●●● · 版本差異 · eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10 · ⚠ 0.7.2→0.8.0</sub>
+<sub>6.3 Key Rotation / 6.7 The Extrinsic and Tickets — ●●● · 概念 · eq. 6.7–6.8, 6.14, 6.28, 6.30; §5 eq. 5.10</sub>
 
 **標準答案**　Tickets submitted during epoch e + 1 need entry index < n = ⌈24/9⌉ = 3 and ring proofs against a 9-key γ′_Z; H_E lists 9 (k_b, k_e) pairs; but the block's H_I must be < 6 and its seal comes from κ′ = the old 6-member γ_P
 
-eq. 6.14：e′ > e 時 γ′_P = Φ(ι)（9 筆）、κ′ = γ_P（6 筆）、λ′ = κ、z = O([k_b | k ∈ γ′_P])——ring 有 9 個成員。eq. 6.30：n = ⌈2E/|γ′_P|⌉ = ⌈24/9⌉ = ⌈2.67⌉ = 3，entry index ∈ N_3 = {0, 1, 2}。eq. 6.28：H_E 列出 γ′_P 的 9 組 (k_b, k_e)。但本 epoch 出塊的是 κ′（舊的 6 人 γ_P）：§5 eq. 5.10 H_I ∈ N_{|κ′|} = N_6，seal 由 κ′[H_I]_b 簽（6.16/6.17），fallback F(η′_2, κ′) 的索引 mod 6；9 位新 validator 要到 epoch e + 2 才成為 κ。eq. 6.7/6.8（0.8.0 PR #514「Support smaller validator sets」）：ι、γ_P、κ、λ 各自 ∈ [K]_{N_V}、N_V = {3c | c ∈ N_{2..C+1}}。連帶影響：active core 數 = |κ′|/3，本 epoch 2 個、下個 epoch 3 個。你們的 code 目前撐不住這種鏈：GetVerifier 要求 len(gammaK) == ValidatorsCount，ValidateHeaderEpochMark 要求 len(em.Validators) == ValidatorsCount，兩者都會拒絕合法區塊——這就是 open issue #1037。
+eq. 6.14：e′ > e 時 γ′_P = Φ(ι)（9 筆）、κ′ = γ_P（6 筆）、λ′ = κ、z = O([k_b | k ∈ γ′_P])——ring 有 9 個成員。eq. 6.30：n = ⌈2E/|γ′_P|⌉ = ⌈24/9⌉ = ⌈2.67⌉ = 3，entry index ∈ N_3 = {0, 1, 2}。eq. 6.28：H_E 列出 γ′_P 的 9 組 (k_b, k_e)。但本 epoch 出塊的是 κ′（舊的 6 人 γ_P）：§5 eq. 5.10 H_I ∈ N_{|κ′|} = N_6，seal 由 κ′[H_I]_b 簽（6.16/6.17），fallback F(η′_2, κ′) 的索引 mod 6；9 位新 validator 要到 epoch e + 2 才成為 κ。eq. 6.7/6.8：ι、γ_P、κ、λ 各自 ∈ ⟦𝕂⟧_𝕍、𝕍 = {3c | c ∈ N_{2..C+1}}。連帶影響：active core 數 = |κ′|/3，本 epoch 2 個、下個 epoch 3 個。你們的 code 目前撐不住這種鏈：GetVerifier 要求 len(gammaK) == ValidatorsCount，ValidateHeaderEpochMark 要求 len(em.Validators) == ValidatorsCount，兩者都會拒絕合法區塊——這就是 open issue #1037。
 
 **逐項辨析**
 
@@ -4409,7 +4346,7 @@ eq. 6.14：e′ > e 時 γ′_P = Φ(ι)（9 筆）、κ′ = γ_P（6 筆）、
 3. ✅ Tickets submitted during epoch e + 1 need entry index < n = ⌈24/9⌉ = 3 and ring proofs against a 9-key γ′_Z; H_E lists 9 (k_b, k_e) pairs; but the block's H_I must be < 6 and its seal comes from κ′ = the old 6-member γ_P  
    ticket 規則跟著 γ′_P（9 人）走，seal 與 H_I 跟著 κ′（舊的 6 人 γ_P）走，兩者在這塊分家。
 4. ❌ The block is invalid: eq. 6.8 requires |ι| = |κ| at all times, so the validator count can only be changed by restarting from genesis with a new chainspec; designate would have returned HUH for z = 9  
-   eq. 6.7/6.8 沒有要求四個序列彼此等長；designate 只檢查 z ∈ N_V，11.18 更明文處理 |κ| ≠ |κ′|。
+   eq. 6.7/6.8 沒有要求四個序列彼此等長；designate 只檢查 z ∈ 𝕍，11.18 更明文處理 |κ| ≠ |κ′|。
 
 > **陷阱**　一句話：ticket 規則跟著 γ′_P（下個 epoch 的人），seal/author 規則跟著 κ′（這個 epoch 的人）。
 
@@ -4492,13 +4429,13 @@ eq. 6.31：m′ ≥ Y 時 |E_T| = 0，§6.7 末尾更指出此時 γ′_A = γ_A
 
 ---
 
-### 6-9　Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. What is each key used for in the protocol, and why has the epoch marker H_E carried the Ed25519 keys alongside the Bandersnatch keys since GP 0.6.4?
+### 6-9　Each validator key K bundles a Bandersnatch, an Ed25519 and a BLS public key. What is each key used for in the protocol, and why does the epoch marker H_E carry the Ed25519 keys alongside the Bandersnatch keys?
 
 <sub>6.3 Key Rotation / 6.6 The Markers — ●●○ · 概念 · eq. 6.10–6.13, 6.15, 6.28; §5 eq. 5.11; eq. 11.14, 11.28, 17.7, 18.1</sub>
 
 **標準答案**　Bandersnatch: ticket ring proofs, H_S, H_V, audit-selection VRFs; Ed25519: guarantees, assurances, judgments/culprits/faults, audit announcements, offender identity (ψ_O, H_O, Φ); BLS: BEEFY only. H_E carries Ed25519 keys so a header-only node can attribute every Ed25519-signed artefact and every H_O entry to a validator
 
-eq. 6.10–6.13：k_b Bandersnatch、k_e Ed25519、k_l BLS（144 bytes）、k_m metadata（opaque，不參與任何密碼學）。Bandersnatch：ticket ring proof（6.30，對 γ′_Z）、seal H_S（6.16/6.17）、entropy VRF H_V（6.18）、§17 auditing 的 VRF seed（s_0、s_n 用 κ[v]_b）。Ed25519：guarantee credentials（11.28）、assurances（11.14，κ[a]_e）、verdict 中的 judgments（§10 用 k[i]_e，k 取自 κ 或 λ）、culprits/faults（10.2 的 tuple 直接帶 Ed25519 key 與簽章）、audit announcements（17.7）、以及 offender 身分——ψ_O 是 Ed25519 key 的集合，H_O ∈ [H_E]（5.11），Φ 用 k_e ∈ ψ′_O 判斷（6.15）。BLS：只有 BEEFY（18.1，κ′[v]_bls 對 accumulation-output MMR 的 Keccak 簽章）。eq. 6.28：H_E = (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])；§6.6：marker 是給「do not synchronize the entire state」的節點用 header 鏈追蹤 validator 變化——只有 Bandersnatch 的話，這種節點能驗 seal，卻無法把 guarantee/assurance/judgment/announcement 或 H_O 裡的 Ed25519 key 對應到 validator，因此 0.6.4 把 Ed25519 key 加進 H_E（changelog：「Ed25519 keys in epoch marker」）；BLS 與 metadata 不在 H_E 內。你們的 EpochMarkValidatorKeys 就是 {Bandersnatch, Ed25519} 兩欄，ValidateHeaderEpochMark 兩者都比。
+eq. 6.10–6.13：k_b Bandersnatch、k_e Ed25519、k_l BLS（144 bytes）、k_m metadata（opaque，不參與任何密碼學）。Bandersnatch：ticket ring proof（6.30，對 γ′_Z）、seal H_S（6.16/6.17）、entropy VRF H_V（6.18）、§17 auditing 的 VRF seed（s_0、s_n 用 κ[v]_b）。Ed25519：guarantee credentials（11.28）、assurances（11.14，κ[a]_e）、verdict 中的 judgments（§10 用 k[i]_e，k 取自 κ 或 λ）、culprits/faults（10.2 的 tuple 直接帶 Ed25519 key 與簽章）、audit announcements（17.7）、以及 offender 身分——ψ_O 是 Ed25519 key 的集合，H_O ∈ [H_E]（5.11），Φ 用 k_e ∈ ψ′_O 判斷（6.15）。BLS：只有 BEEFY（18.1，κ′[v]_bls 對 accumulation-output MMR 的 Keccak 簽章）。eq. 6.28：H_E = (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P])；§6.6：marker 是給「do not synchronize the entire state」的節點用 header 鏈追蹤 validator 變化——只有 Bandersnatch 的話，這種節點能驗 seal，卻無法把 guarantee/assurance/judgment/announcement 或 H_O 裡的 Ed25519 key 對應到 validator，因此 H_E 也帶上 Ed25519 key；BLS 與 metadata 不在 H_E 內。你們的 EpochMarkValidatorKeys 就是 {Bandersnatch, Ed25519} 兩欄，ValidateHeaderEpochMark 兩者都比。
 
 **逐項辨析**
 
@@ -4592,32 +4529,7 @@ eq. 6.14：e′ > e 時 (γ′_P, κ′, λ′, γ′_Z) = (Φ(ι), γ_P, κ, z)
 
 ---
 
-### 6-13　GP 0.8.0 (PR #514) generalized the validator-set size. Which sizes are permitted for ι, γ_P, κ and λ?
-
-<sub>6.3 Key Rotation — ●●○ · 版本差異 · eq. 6.7–6.8 (valcount) · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　Any multiple of 3 between 6 and 3·C = 1023 inclusive (N_V ≡ {3c | c ∈ N_{2..C+1}})
-
-eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 1023**（C = 341 是 core 數）。§6.3 原文：「The length of each sequence is always a multiple of 3 between 6 and 3C.」**為什麼一定是 3 的倍數**：每個 active core 需要 3 名 guarantor，所以 validator 數與 core 數是 3:1 的關係，只有前 |κ′| / 3 個 core 會被指派工作（§11.3）。tiny 設定 |κ| = 6 就只有 2 個 core 在動。**這是 0.7.2 → 0.8.0 的重大變化（PR #514）**：原本 V 是一個常數，現在集合大小可變，於是一整批原本寫死的數字都得改成依 |κ| 計算——super-majority 門檻 ⌊2|κ|/3⌋+1、每位 validator 的 ticket 配額 n = ⌈2E/|γ′_P|⌉、erasure coding 的 shard 數 = |κ′|、verdict 的三個門檻（⌊2|k|/3⌋+1、0、⌊|k|/3⌋）。`designate` host call 也只檢查 z ∈ 𝕍，不再比對某個常數。**遷移時最容易漏的**就是散在各處的 `ValidatorsCount` 編譯期常數（你們的 issue #1037 在追這件事）——它們在 0.7.2 都成立，因為那時 |κ| 恆等於 V；0.8.0 之後必須換成 len(κ′)。注意 Φ 把 offender 歸零而非移除，所以 |κ| 在 epoch 內不會變動，只在換屆時才可能改變。
-
-**逐項辨析**
-
-1. ❌ Exactly 1023 validators always — the size is the fixed constant 3·C with C = 341 cores  
-   那是 0.7.2 的世界觀；0.8.0 之後 ι、γ_P、κ、λ 各自的長度都可以是 N_V 裡的任一值。
-2. ❌ Any size between 6 and 1023 inclusive, with no divisibility rule (N_V ≡ N_{6..3·C+1})  
-   「3 的倍數」是硬條件：每個 active core 固定配 3 個 guarantor，非 3 倍數會讓 |κ′|/3 不整除。
-3. ✅ Any multiple of 3 between 6 and 3·C = 1023 inclusive (N_V ≡ {3c | c ∈ N_{2..C+1}})  
-   eq. 6.8 的 N_V ≡ {3c | c ∈ N_{2…C+1}}，即 6, 9, 12, …, 1023。
-4. ❌ Any multiple of 3 between 3 and 3·C − 3 = 1020 inclusive (N_V ≡ {3c | c ∈ N_{1..C}})  
-   兩端各差一格：c 從 2 起算所以下界是 6，c 上限到 C+1 才使 3c 達到 3·C = 1023。
-
-> **陷阱**　tiny 模式 V=6、C=2；full V=1023、C=341（1023 = 3·341）。
-
-<sub>`ch06-valcount`</sub>
-
----
-
-### 6-14　How is the entropy accumulator η updated in each block, and on an epoch change?
+### 6-13　How is the entropy accumulator η updated in each block, and on an epoch change?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●○ · 概念 · eq. 6.22–6.24</sub>
 
@@ -4642,7 +4554,7 @@ eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 
 
 ---
 
-### 6-15　Each of η′_2 and η′_3 has specific uses in GP 0.8.0. What is each one used for?
+### 6-14　Each of η′_2 and η′_3 has specific uses in GP 0.8.0. What is each one used for?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●● · 概念 · eq. 6.16–6.18, 6.25, 6.30, 11.22</sub>
 
@@ -4667,7 +4579,7 @@ eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 
 
 ---
 
-### 6-16　When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. What are they?
+### 6-15　When γ′_S is a sequence of tickets, the seal H_S must satisfy three conditions (eq. 6.16), with i = γ′_S[H_T mod E]. What are they?
 
 <sub>6.4 Sealing and Entropy Accumulation — ●●● · 概念 · eq. 6.16 (ticket seal)</sub>
 
@@ -4692,7 +4604,7 @@ eq. 6.16（票券模式，i = γ′_S[H_T mod E]）三個條件：**i_y = Y(H_S)
 
 ---
 
-### 6-17　The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?
+### 6-16　The ticket accumulator γ_A retains the E lowest ticket identifiers in ascending order, and eq. 6.25 makes the next epoch's slot-sealer sequence Z(γ_A). How does a surviving ticket's rank in that ordering map to the slot it gets to seal?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 概念 · eq. 6.26 (Z)</sub>
 
@@ -4717,7 +4629,7 @@ eq. 6.26：Z(s) = [s_0, s_{|s|−1}, s_1, s_{|s|−2}, …]——從排序好的
 
 ---
 
-### 6-18　What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?
+### 6-17　What exactly does the epoch marker H_E contain in the first block of a new epoch (e′ > e)?
 
 <sub>6.6 The Markers — ●●○ · 概念 · eq. 6.28</sub>
 
@@ -4742,7 +4654,7 @@ eq. 6.28：H_E ≡ (η_0, η_1, [(k_b, k_e) | k ∈ γ′_P]) 當 e′ > e，否
 
 ---
 
-### 6-19　Under which exact condition is the winning-tickets marker H_W non-empty?
+### 6-18　Under which exact condition is the winning-tickets marker H_W non-empty?
 
 <sub>6.6 The Markers — ●●○ · 概念 · eq. 6.29</sub>
 
@@ -4767,20 +4679,20 @@ eq. 6.29：H_W ≡ Z(γ_A) 當 **e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E**，
 
 ---
 
-### 6-20　Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?
+### 6-19　What bounds apply to the tickets extrinsic E_T?
 
-<sub>6.7 The Extrinsic and Tickets — ●●○ · 版本差異 · eq. 6.30–6.32 · ⚠ 0.7.2→0.8.0</sub>
+<sub>6.7 The Extrinsic and Tickets — ●●○ · 概念 · eq. 6.30–6.32</sub>
 
 **標準答案**　|E_T| ≤ K = 16 when m′ < Y, otherwise |E_T| = 0; each entry index e < n where n = ⌈2E / |γ′_P|⌉ — so 2 in the full configuration (E = 600, |γ′_P| = 1023)
 
-三個限制，來源不同。**每位 validator 的配額**（eq. 6.30）：entry index r ∈ N_n，n = ⌈2E / |γ′_P|⌉。0.8.0（PR #527）把原本的常數 N 換成這條公式，理由 GP 明寫：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」——accumulator 要收滿 E = 600 張才能啟用票券模式，validator 少的時候若每人配額不變就永遠收不滿。full 設定：⌈2·600/1023⌉ = **2**；test-vector 的 tiny 設定（E = 12、|γ′_P| = 6）：⌈24/6⌉ = **4**（0.7.x 的 tiny 常數是 3，這是遷移時必須改的點）。**每塊的數量上限與時間窗**（eq. 6.31）：|E_T| ≤ K = 16 當 m′ < Y = 500；**m′ ≥ Y 時 |E_T| 必須為 0**——tail 期間完全不能再提票，不是「提了也不算」而是「提了區塊就無效」。**為什麼要有 tail**：投票必須在 epoch 結束前收攤，Z(γ_A) 才能在 eq. 6.29 的那一塊被公告成 H_W、並在下個 epoch 第一塊定案為 γ′_S。沒有這段緩衝，換屆時序列還在變動。注意 K = 16 是**每塊**上限而非每人，用意是限制單塊的驗簽成本（ring proof 驗證不便宜）。
+三個限制，來源不同。**每位 validator 的配額**（eq. 6.30）：entry index r ∈ N_n，n = ⌈2E / |γ′_P|⌉。配額隨人數調整，理由 GP 明寫：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」——accumulator 要收滿 E = 600 張才能啟用票券模式，validator 少的時候若每人配額不變就永遠收不滿。full 設定：⌈2·600/1023⌉ = **2**；test-vector 的 tiny 設定（E = 12、|γ′_P| = 6）：⌈24/6⌉ = **4**。**每塊的數量上限與時間窗**（eq. 6.31）：|E_T| ≤ K = 16 當 m′ < Y = 500；**m′ ≥ Y 時 |E_T| 必須為 0**——tail 期間完全不能再提票，不是「提了也不算」而是「提了區塊就無效」。**為什麼要有 tail**：投票必須在 epoch 結束前收攤，Z(γ_A) 才能在 eq. 6.29 的那一塊被公告成 H_W、並在下個 epoch 第一塊定案為 γ′_S。沒有這段緩衝，換屆時序列還在變動。注意 K = 16 是**每塊**上限而非每人，用意是限制單塊的驗簽成本（ring proof 驗證不便宜）。
 
 **逐項辨析**
 
 1. ✅ |E_T| ≤ K = 16 when m′ < Y, otherwise |E_T| = 0; each entry index e < n where n = ⌈2E / |γ′_P|⌉ — so 2 in the full configuration (E = 600, |γ′_P| = 1023)  
    eq. 6.31 的 m′ < Y 與 eq. 6.30 的 n = ⌈2E/|γ′_P|⌉ 都對上，full 配置算出來是 2。
 2. ❌ |E_T| ≤ K = 16 in every block including those in the tail; each entry index e < N = 2, a fixed constant that does not depend on the validator-set size (E = 600, |κ| = 1023)  
-   tail 期間必須是空 extrinsic；把上限寫成固定常數 N = 2 也是 0.7.2 的舊寫法。
+   tail 期間必須是空 extrinsic；entry index 的上限也不是固定常數，而是 n = ⌈2E/|γ′_P|⌉。
 3. ❌ |E_T| ≤ E = 600 summed across the whole epoch rather than per block; each entry index e < n where n = ⌈2E / |γ′_P|⌉ — so 2 in the full configuration (E = 600, |γ′_P| = 1023)  
    K 限制的是**單一區塊**的 extrinsic 大小；GP 對整個 epoch 的提交總量沒有直接上限。
 4. ❌ |E_T| ≤ K = 16 when m′ ≤ Y, otherwise |E_T| = 0; each entry index e < n where n = ⌈|γ′_P| / 2E⌉ — so 1 in the full configuration (E = 600, |γ′_P| = 1023)  
@@ -4792,7 +4704,7 @@ eq. 6.29：H_W ≡ Z(γ_A) 當 **e′ = e ∧ m < Y ≤ m′ ∧ |γ_A| = E**，
 
 ---
 
-### 6-21　State the rules for the new tickets n and the posterior accumulator γ′_A — and name the common misconception about which tickets survive.
+### 6-20　State the rules for the new tickets n and the posterior accumulator γ′_A — and name the common misconception about which tickets survive.
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 概念 · eq. 6.33–6.36</sub>
 
@@ -4817,7 +4729,7 @@ eq. 6.33：n 依 id 排序且唯一；6.34：n 的 id 與 γ_A 不相交；6.35�
 
 ---
 
-### 6-22　A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?
+### 6-21　A ticket proof p in E_T is a Bandersnatch ring-VRF proof. Against which ring root, with what context, and what is the ticket identifier?
 
 <sub>6.7 The Extrinsic and Tickets — ●●○ · 概念 · eq. 6.30, 6.32</sub>
 
@@ -4842,7 +4754,7 @@ eq. 6.30：p ∈ F̄^{X_T ⌢ η′_2 ++ r}_{γ′_Z}([])——四個要素缺�
 
 ---
 
-### 6-23　In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?
+### 6-22　In fallback mode (γ′_S is a sequence of Bandersnatch keys), which checks apply to the header?
 
 <sub>6.4 Sealing — ●●○ · 概念 · eq. 6.17–6.18</sub>
 
@@ -4867,7 +4779,7 @@ eq. 6.17（fallback 模式，γ′_S 每格直接是一把 Bandersnatch 公鑰�
 
 ---
 
-### 6-24　This is the team's implementation of γ′_S. Which prior and which posterior values does it read, and does that match eq. 6.25?
+### 6-23　This is the team's implementation of γ′_S. Which prior and which posterior values does it read, and does that match eq. 6.25?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 程式碼 · eq. 6.25 — internal/safrole/sealing.go UpdateSlotKeySequence</sub>
 
@@ -4905,7 +4817,7 @@ eq. 6.25 給 γ′_S 三種情形，這段程式要同時對上三處才算正�
 
 ---
 
-### 6-25　Read the team's FallbackKeySequence. Does it conform to eq. 6.27? If not, where exactly does it diverge?
+### 6-24　Read the team's FallbackKeySequence. Does it conform to eq. 6.27? If not, where exactly does it diverge?
 
 <sub>6.5 The Slot-Sealer Sequence — ●●○ · 程式碼 · eq. 6.27 — internal/safrole/slot_key_sequence.go</sub>
 
@@ -4924,14 +4836,14 @@ for i = 0; i < epochLength; i++ {
 
 **標準答案**　The hash is right — Blake2b is the GP's H and the first 4 octets are decoded little-endian — but eq. 6.27's cyclic subscript reduces modulo the length of the key sequence passed in, i.e. |κ′|, whereas the code reduces modulo the compile-time constant ValidatorsCount
 
-eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]。逐項對照程式碼：**H 是 Blake2b**——§3.8 定義 H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY。**取前 4 個位元組、little-endian 解碼**（decode_4）。這兩點程式都對，雖然註解寫 Keccak256 已經 stale，實際呼叫的是 Blake2bHashPartial。**真正的落差在 ⟲ 這個記號**：它是 §3.7 的模數下標 s[i]^⟲ ≡ s[i mod |s|]，對的是**傳入的金鑰序列長度** |k| = |κ′|；程式卻寫 `%= types.ValidatorsCount`，用的是編譯期常數。在 0.7.2 這沒問題（|κ| 恆等於 V），但 0.8.0 讓 |κ| 可變（eq. 6.8 的 𝕍）之後就必須換成 len(κ′)，否則在非滿編的設定下會索引越界或選錯人。這正是 issue #1037 那一類問題。**一個容易誤判為 bug 的行為**：取模會讓不同 slot 抽到同一位 validator——這是 F 的正常語意（可重複抽樣），不是缺陷；fallback 本來就沒有「每人一個 slot」的保證。
+eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]。逐項對照程式碼：**H 是 Blake2b**——§3.8 定義 H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY。**取前 4 個位元組、little-endian 解碼**（decode_4）。這兩點程式都對，雖然註解寫 Keccak256 已經 stale，實際呼叫的是 Blake2bHashPartial。**真正的落差在 ⟲ 這個記號**：它是 §3.7 的模數下標 s[i]^⟲ ≡ s[i mod |s|]，對的是**傳入的金鑰序列長度** |k| = |κ′|；程式卻寫 `%= types.ValidatorsCount`，用的是編譯期常數。只要 |κ| 恆等於 V 這就沒問題，但 |κ| 是可變的（eq. 6.8 的 𝕍），所以必須換成 len(κ′)，否則在非滿編的設定下會索引越界或選錯人。這正是 issue #1037 那一類問題。**一個容易誤判為 bug 的行為**：取模會讓不同 slot 抽到同一位 validator——這是 F 的正常語意（可重複抽樣），不是缺陷；fallback 本來就沒有「每人一個 slot」的保證。
 
 **逐項辨析**
 
 1. ✅ The hash is right — Blake2b is the GP's H and the first 4 octets are decoded little-endian — but eq. 6.27's cyclic subscript reduces modulo the length of the key sequence passed in, i.e. |κ′|, whereas the code reduces modulo the compile-time constant ValidatorsCount  
    Blake2b 與「前 4 octets、小端」都對；問題在 `%= ValidatorsCount` 用編譯期常數而非 len(κ′)。
 2. ❌ The hash is wrong — §3.8 reserves H for Blake2b-256 but eq. 6.27 calls for H_K, Keccak-256, exactly as the surviving comment says — while the modulus is right, since the cyclic subscript reduces over the fixed validator count that ValidatorsCount holds  
-   被 stale 註解帶偏：§3.8 的 H 就是 Blake2b-256，而對固定 validator 數取模在 0.8.0 也不成立。
+   被 stale 註解帶偏：§3.8 的 H 就是 Blake2b-256，而對固定 validator 數取模也不成立（|κ′| 可變）。
 3. ❌ The slice is wrong — eq. 6.27's subscript takes the LAST four octets of H(r ⌢ E_4(i)) and decodes them big-endian, so Blake2bHashPartial(·, 4) reads the wrong end — while the modulus over ValidatorsCount matches the equation's cyclic subscript exactly  
    兩處都錯：s_{…4} 取的是**前** 4 個元素，且 decode 與 E_n 一律小端。
 4. ❌ The reduction is spurious — decode_4 of four Blake2b octets already lands inside N_E and eq. 6.27 carries no modulus at all, so `%= ValidatorsCount` is an invented step that can map two distinct slots onto the same validator and break one-slot-one-author  
@@ -4943,7 +4855,7 @@ eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]�
 
 ---
 
-### 6-26　In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?
+### 6-25　In the team's UpdateEntropy, why is `eta[0]` overwritten with the posterior η′_0 AFTER the rotation loop, and what would go wrong if the loop ran after UpdateEtaPrime0 wrote into the same array?
 
 <sub>6.4 Sealing and Entropy — ●●○ · 程式碼 · eq. 6.23–6.24 — internal/safrole/sealing.go UpdateEntropy</sub>
 
@@ -4981,7 +4893,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-27　The state keeps three validator sets: ι (next), κ (current) and λ (previous). κ is obviously needed. Why is λ kept in state at all, and which checks read it?
+### 6-26　The state keeps three validator sets: ι (next), κ (current) and λ (previous). κ is obviously needed. Why is λ kept in state at all, and which checks read it?
 
 <sub>6.2 validator sets; 10.3; 11.3 — ●●○ · 設計理由 · eq. 6.14, eq. 10.4, eq. 11.23</sub>
 
@@ -5006,7 +4918,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-28　A ticket submitted during epoch e is proven with ring-VRF context η′_2, yet when that ticket seals a block in epoch e+1 the seal's context uses η′_3. Why do the subscripts differ, and what does the design guarantee?
+### 6-27　A ticket submitted during epoch e is proven with ring-VRF context η′_2, yet when that ticket seals a block in epoch e+1 the seal's context uses η′_3. Why do the subscripts differ, and what does the design guarantee?
 
 <sub>6.4 entropy; 6.6 tickets; 6.7 seal — ●●● · 設計理由 · eq. 6.22–6.24, eq. 6.16, eq. 6.30</sub>
 
@@ -5031,7 +4943,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-29　Within one block some checks read the prior κ and others the posterior κ′. Which reads which, and why the split?
+### 6-28　Within one block some checks read the prior κ and others the posterior κ′. Which reads which, and why the split?
 
 <sub>6.2; 11.2–11.3; 10.2 — ●●○ · 設計理由 · eq. 6.14, eq. 11.14 (assurance sig), eq. 11.17 (2/3|κ|), eq. 11.20 (M over κ′), eq. 6.16 (seal), §10.2 (K(a))</sub>
 
@@ -5056,7 +4968,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-30　η has four slots. Who reads each one, and why does no lottery ever consume the live accumulator η_0 directly?
+### 6-29　η has four slots. Who reads each one, and why does no lottery ever consume the live accumulator η_0 directly?
 
 <sub>6.4 Entropy — ●●○ · 設計理由 · eq. 6.22 and the §6.4 entropy update, eq. 6.16, eq. 6.27, eq. 6.30, eq. 11.20</sub>
 
@@ -5081,7 +4993,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-31　The delegator service calls designate in some block of epoch e, replacing ι with a new set of keys. In which epoch can those keys first seal a block, and through which steps?
+### 6-30　The delegator service calls designate in some block of epoch e, replacing ι with a new set of keys. In which epoch can those keys first seal a block, and through which steps?
 
 <sub>6.2; 9.4 (designate) — ●●○ · 設計理由 · eq. 6.14 (§6.2 rotation), eq. 6.30 (ring root γ′_Z over γ_P), §B (designate)</sub>
 
@@ -5093,8 +5005,8 @@ cs.GetPosteriorStates().SetEta(eta)
 
 1. ✅ Epoch e+2. designate writes ι′ in this block; the first block of e+1 rotates γ′_P = Φ(ι) and κ′ = the old γ_P, so the new keys are pending; during e+1 they submit tickets under γ′_Z, the ring root over γ_P; the first block of e+2 rotates again, κ′ = γ_P, and only then can they seal  
    對：eq. 6.14 每次 e′ > e 做一步 (γ′_P, κ′, λ′) = (Φ(ι), γ_P, κ)；ticket 對 γ′_Z（γ_P 的 ring root）證明，所以 pending 那一個 epoch正是投 ticket 的期間。
-2. ❌ Epoch e+1. Once designate has written ι′, the first block of epoch e+1 promotes ι straight to κ′, because 0.8.0 removed the pending layer to make the set size variable; the new keys already submit tickets during e in the fallback role and can seal from the start of e+1  
-   0.8.0 沒有拿掉 pending 層，eq. 6.14 仍是三段輪替；ι 裡的 key 在 e 期間不能投 ticket（ring root 不含它們）。
+2. ❌ Epoch e+1. Once designate has written ι′, the first block of epoch e+1 promotes ι straight to κ′, because the pending layer is skipped whenever the set size is variable; the new keys already submit tickets during e in the fallback role and can seal from the start of e+1  
+   pending 層不會被跳過，eq. 6.14 永遠是三段輪替；ι 裡的 key 在 e 期間不能投 ticket（ring root 不含它們）。
 3. ❌ Epoch e itself. designate is a host call inside accumulate, and ι′ takes effect within the same block, replacing κ′ immediately, because the delegator is a privileged service whose decision need not wait for a rotation; the very next slot's seal is verified against the new keys  
    designate 只寫 ι′，κ′ 只在 epoch 換檔時由 γ_P 升上來；沒有任何 host call 能直接改 κ。
 4. ❌ Epoch e+3. ι → γ_P → κ takes one epoch per step, plus the new keys must first spend an epoch in λ so that disputes have time to reach back to them, making three rotations in all; this is also why the state keeps λ  
@@ -5106,7 +5018,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-32　The seal of an epoch's first block is verified against κ′ — the very set this block rotates in. Why not against κ, and what does that imply for an implementation's header-validation flow?
+### 6-31　The seal of an epoch's first block is verified against κ′ — the very set this block rotates in. Why not against κ, and what does that imply for an implementation's header-validation flow?
 
 <sub>6.2; 6.7 Seal — ●●○ · 設計理由 · eq. 6.14 (§6.2), eq. 6.16, §5 (H_I < |κ′|)</sub>
 
@@ -5131,7 +5043,7 @@ cs.GetPosteriorStates().SetEta(eta)
 
 ---
 
-### 6-33　Polkadot 1.0 authors blocks with BABE; JAM uses Safrole. On the single question 'when and how is a slot's author decided', what is the fundamental difference, and what does it buy?
+### 6-32　Polkadot 1.0 authors blocks with BABE; JAM uses Safrole. On the single question 'when and how is a slot's author decided', what is the fundamental difference, and what does it buy?
 
 <sub>4.8 Epochs and Slots; 6 — ●●○ · 設計理由 · §4.8 prose (minimize forks), §6 prose, eq. 6.25</sub>
 
@@ -5156,7 +5068,7 @@ GP 對 Safrole 目標的原文（§4.8）：「through Safrole we aim to strictl
 
 ---
 
-### 6-34　Safrole publishes 'which ticket sits in which slot' but hides 'who holds that ticket' until the block is authored. BABE publishes neither. What does Safrole gain over BABE by splitting the two, and what does it keep?
+### 6-33　Safrole publishes 'which ticket sits in which slot' but hides 'who holds that ticket' until the block is authored. BABE publishes neither. What does Safrole gain over BABE by splitting the two, and what does it keep?
 
 <sub>6 (ring VRF); App. G — ●●○ · 設計理由 · §6 prose (anonymous), eq. 6.30, eq. 6.16 (H_I reveals at seal)</sub>
 
@@ -5181,7 +5093,7 @@ GP 對 Safrole 目標的原文（§4.8）：「through Safrole we aim to strictl
 
 ---
 
-### 6-35　BABE fills gaps with secondary slots: when no one wins a slot, a public, predictable secondary author steps in. How does Safrole's fallback differ in granularity and trigger, and what does each design protect?
+### 6-34　BABE fills gaps with secondary slots: when no one wins a slot, a public, predictable secondary author steps in. How does Safrole's fallback differ in granularity and trigger, and what does each design protect?
 
 <sub>6.5 Slot key sequence (fallback) — ●●○ · 設計理由 · eq. 6.25, eq. 6.27, eq. 6.16 (fallback seal case)</sub>
 
@@ -5206,13 +5118,13 @@ eq. 6.25 是全部：γ′_S 在 e′ = e + 1 時，若 m ≥ Y 且 |γ_A| = E�
 
 ---
 
-### 6-36　0.8.0 makes the tickets each validator may submit n = ⌈2E/|γ′_P|⌉, so fewer validators means more tickets each. What reason does the GP give, and why is the numerator 2E rather than E?
+### 6-35　Each validator may submit n = ⌈2E/|γ′_P|⌉ tickets, so fewer validators means more tickets each. What reason does the GP give, and why is the numerator 2E rather than E?
 
 <sub>6.6 Tickets extrinsic — ●●○ · 設計理由 · eq. 6.30 (n = ⌈2E/|γ′_P|⌉), §6.6 prose, eq. 6.25</sub>
 
 **標準答案**　Reason (§6.6): 'To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets'; eq. 6.25 uses tickets only when |γ_A| = E. 2E makes capacity twice the slot count, so the accumulator fills even if some validators are offline; full config n = 2, six validators n = 4
 
-§6.6 原文：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets.」關鍵字是 saturated。eq. 6.25 把 ticket 模式的條件寫死：只有當 |γ_A| = E（accumulator 剛好裝滿 E 張）且 m ≥ Y 時，下個 epoch 才用 Z(γ_A)；少一張都整個 epoch 退回 fallback F(η′_2, κ′)，匿名性沒了。所以「每個 epoch 至少要收到 E 張有效 ticket」是硬需求，而 ticket 只能由 validator 投，每人 n 張、|γ′_P| 個人，總容量 n·|γ′_P|。0.7.x 把 n 寫死為常數 N（full 設定 2），validator 數固定 1023 時 2 × 1023 = 2046 ≥ 600 沒問題；0.8.0 允許集合小到 6 人，若 n 仍是 2 就只有 12 張，永遠填不滿 E = 12 以外的任何設定——tiny 的 E 正好是 12，剛好夠但零裕度。改成 n = ⌈2E/|γ′_P|⌉ 之後，總容量 ≥ 2E，是需求的兩倍：容許約一半的 validator 離線、或 ticket 分數不佳被擠掉，accumulator 仍能填滿。2 這個係數 GP 沒有另外解釋，但從「容量 = 2 × 需求」讀出來就是安全裕度。full 設定 n = ⌈1200/1023⌉ = 2 與舊常數相同，所以對既有實作零改動；tiny 6 人 n = 4，這也是 ecosystem-notes 提醒的舊向量 tickets_per_validator: 3 已失效的原因。
+§6.6 原文：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets.」關鍵字是 saturated。eq. 6.25 把 ticket 模式的條件寫死：只有當 |γ_A| = E（accumulator 剛好裝滿 E 張）且 m ≥ Y 時，下個 epoch 才用 Z(γ_A)；少一張都整個 epoch 退回 fallback F(η′_2, κ′)，匿名性沒了。所以「每個 epoch 至少要收到 E 張有效 ticket」是硬需求，而 ticket 只能由 validator 投，每人 n 張、|γ′_P| 個人，總容量 n·|γ′_P|。若把 n 寫死為常數 2，validator 數固定 1023 時 2 × 1023 = 2046 ≥ 600 沒問題；但集合可以小到 6 人，若 n 仍是 2 就只有 12 張，永遠填不滿 E = 12 以外的任何設定——tiny 的 E 正好是 12，剛好夠但零裕度。改成 n = ⌈2E/|γ′_P|⌉ 之後，總容量 ≥ 2E，是需求的兩倍：容許約一半的 validator 離線、或 ticket 分數不佳被擠掉，accumulator 仍能填滿。2 這個係數 GP 沒有另外解釋，但從「容量 = 2 × 需求」讀出來就是安全裕度。full 設定 n = ⌈1200/1023⌉ = 2 與舊常數相同，所以對既有實作零改動；tiny 6 人 n = 4，這也是 ecosystem-notes 提醒的舊向量 tickets_per_validator: 3 已失效的原因。
 
 **逐項辨析**
 
@@ -5231,7 +5143,7 @@ eq. 6.25 是全部：γ′_S 在 e′ = e + 1 時，若 m ≥ Y 且 |γ_A| = E�
 
 ---
 
-### 6-37　An offender's key is replaced by an all-zero key by Φ at the next rotation rather than removed from the set. The GP states only the mechanism. What reason can be inferred from the other rules, and what effect does an all-zero key have inside the protocol?
+### 6-36　An offender's key is replaced by an all-zero key by Φ at the next rotation rather than removed from the set. The GP states only the mechanism. What reason can be inferred from the other rules, and what effect does an all-zero key have inside the protocol?
 
 <sub>6.2 (Φ) — ●●○ · 設計理由 · eq. 6.14 (Φ, §6.2), §6.2 prose, eq. 6.8 (|V| multiple of 3), eq. 11.20</sub>
 
@@ -5259,7 +5171,7 @@ GP 的原文只有一句（§6.2）：「Note that on epoch changes the posterio
 
 <a id="ch-7"></a>
 
-## §7 Recent History　<sub>12 題</sub>
+## §7 Recent History　<sub>11 題</sub>
 
 ### 7-1　Block N accumulates nothing that yields an output, so θ′ = []. What happens to the accumulation-output belt β_B and to the super-peak b written into block N's β_H entry?
 
@@ -5292,7 +5204,7 @@ GP 的原文只有一句（§6.2）：「Note that on epoch changes the posterio
 
 **標準答案**　A dictionary keyed by each work-package hash guaranteed in that block, whose value is that package's segment-root; at most C = 341 entries, because a block can report at most one work-report per core
 
-eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 把它建成 {((g_r)_s)_p ↦ ((g_r)_s)_e | g ∈ E_G}，也就是「本區塊 guarantee 的 work-package hash ↦ 該 package 的 segment-root（exports root）」。§7 原文說得很直白："the corresponding work-package hashes of each item reported (which is no more than the total number of cores, C = 341)" —— 上限來自每個 core 每個區塊至多一份 report（eq. 11.32 要求 ρ‡[w_c] = ∅）。團隊 0.7.2 對應的型別是 []ReportedWorkPackage{Hash, ExportsRoot}，其 Validate() 正是拿 CoresCount 當上限。
+eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 把它建成 {((g_r)_s)_p ↦ ((g_r)_s)_e | g ∈ E_G}，也就是「本區塊 guarantee 的 work-package hash ↦ 該 package 的 segment-root（exports root）」。§7 原文說得很直白："the corresponding work-package hashes of each item reported (which is no more than the total number of cores, C = 341)" —— 上限來自每個 core 每個區塊至多一份 report（eq. 11.32 要求 ρ‡[w_c] = ∅）。團隊對應的型別是 []ReportedWorkPackage{Hash, ExportsRoot}，其 Validate() 正是拿 CoresCount 當上限。
 
 **逐項辨析**
 
@@ -5342,7 +5254,7 @@ eq. 7.2 宣告 p ∈ D⟨H → H⟩（hash 對 hash 的 dictionary），eq. 7.8 
 
 **標準答案**　Each block Keccak-Merklizes the encoded θ′ into one root and appends that root to the belt β_B; the new β_H item stores only the belt's Keccak super-peak; validators then BLS-sign the domain-separated hash of the newest item's super-peak for each block they finalize
 
-eq. 7.6–7.7：s = [E_4(s) ⌢ E(h) | (s, h) ∈ θ′]，β′_B ≡ A(β_B, M_B(s, H_K), H_K)，全程用 Keccak，GP 原文的理由是 "to maximize compatibility with legacy systems"。eq. 7.8 新 item 的 b 欄位放 M_R(β′_B)，也就是 belt 的 super-peak（eq. E.10：先濾掉 ∅ peaks，只剩一個就直接回傳，否則以 $peak ⌢ M_R(前 n−1 個) ⌢ 最後一個 由右向左折疊）。beefy.tex eq. 18.1：F_v ≡ S^BLS_{κ′[v]_l}(X_B ⌢ last(β_H)_b)，X_B = $jam_beefy，對每個 finalized block 簽一次。把序列壓成單一 commitment 才能給第三方簡潔證明。GP 0.8.0 的用語是 MMB（Merkle mountain belt）／Accumulation Output Log，團隊 0.7.2 程式碼叫它 beefyBelt / BeefyRoot，是同一個東西。
+eq. 7.6–7.7：s = [E_4(s) ⌢ E(h) | (s, h) ∈ θ′]，β′_B ≡ A(β_B, M_B(s, H_K), H_K)，全程用 Keccak，GP 原文的理由是 "to maximize compatibility with legacy systems"。eq. 7.8 新 item 的 b 欄位放 M_R(β′_B)，也就是 belt 的 super-peak（eq. E.10：先濾掉 ∅ peaks，只剩一個就直接回傳，否則以 $peak ⌢ M_R(前 n−1 個) ⌢ 最後一個 由右向左折疊）。beefy.tex eq. 18.1：F_v ≡ S^BLS_{κ′[v]_l}(X_B ⌢ last(β_H)_b)，X_B = $jam_beefy，對每個 finalized block 簽一次。把序列壓成單一 commitment 才能給第三方簡潔證明。GP 的用語是 MMB（Merkle mountain belt）／Accumulation Output Log，團隊程式碼叫它 beefyBelt / BeefyRoot，是同一個東西。
 
 **逐項辨析**
 
@@ -5386,60 +5298,7 @@ eq. 7.5 的 β† ≡ β_H 只改「β_H 最後一個 item」的 s ← H_R，而
 
 ---
 
-### 7-6　This is the team's GP 0.7.2 encoder for one β_H item under state key C(3). A reviewer objects that GP 0.8.0 declares the item as ⟨h, s, b, t, p⟩ — state root ahead of the accumulation-output-log super-peak — so the encoder must have two fields swapped. Who is right?
-
-<sub>7 Recent History — ●●● · 程式碼 · eq. 7.2 & §D.1 state key C(3) · ⚠ 0.7.2→0.8.0</sub>
-
-```go
-func (bi *BlockInfo) Encode(e *Encoder) error {
-	// HeaderHash
-	if err := bi.HeaderHash.Encode(e); err != nil {
-		return err
-	}
-	// BeefyRoot
-	if err := bi.BeefyRoot.Encode(e); err != nil {
-		return err
-	}
-	// StateRoot
-	if err := bi.StateRoot.Encode(e); err != nil {
-		return err
-	}
-	// Reported
-	if err := e.EncodeLength(uint64(len(bi.Reported))); err != nil {
-		return err
-	}
-	for _, reportedWorkPackage := range bi.Reported {
-		if err := reportedWorkPackage.Encode(e); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-```
-<sub>internal/types/encode.go:1950-1980 (BlockInfo.Encode; log line elided)</sub>
-
-**標準答案**　The encoder's order is right: state serialization is fixed by C(3) in appendix D, which emits header hash, then super-peak, then state root, then the timeslot, then the reported map; the tuple in chapter 7 merely names the components. The real 0.8.0 gap is the missing 4-byte timeslot between the state root and the reported map
-
-兩個地方都是 0.8.0 原文，但講的是不同的事。eq. 7.2 用具名欄位宣告集合：β_H ∈ ⟦⟨h ∈ H, s ∈ H, b ∈ H, t ∈ N_T, p ∈ D⟨H → H⟩⟩⟧_:8。附錄 D 的 C(3) 才是序列化定義，它明寫成 E(var[⟨h, b, s, E_4(t), var(p)⟩ | … ∈ β_H], mmrencode(β_B))——super-peak 在 state root 前面。GP 具名 tuple 的欄位順序不等於 codec 順序，狀態這一塊以 D.1 為準；jam test vectors 的 history JSON（header_hash, mmr, state_root, reported）與團隊的 BlockInfo{HeaderHash, BeefyRoot, StateRoot, Reported} 都跟 D.1 一致，這段 0.7.2 程式碼的順序沒問題。真正要補的是 0.8.0 新增的 t：GP PR #526 把 anchor 的 timeslot 放進 refinement context，eq. 11.36 因此多比一項 x_n = y_t，團隊 PR #1031 就是在 state_root 與 reported 之間插入 4-byte timeslot。
-
-**逐項辨析**
-
-1. ✅ The encoder's order is right: state serialization is fixed by C(3) in appendix D, which emits header hash, then super-peak, then state root, then the timeslot, then the reported map; the tuple in chapter 7 merely names the components. The real 0.8.0 gap is the missing 4-byte timeslot between the state root and the reported map  
-   D.1 的 C(3) 明寫 ⟨h, b, s, E_4(t), var(p)⟩，b 排在 s 前面；真正缺的是 0.8.0 的 4-byte t。
-2. ❌ The reviewer is right: a state component is always serialized in the order its defining equation lists the fields, so C(3) needs header hash, state root, super-peak, timeslot, reported map; appendix D merely restates the tuple of chapter 7 and the two can never disagree, so as written the encoder produces the wrong C(3) preimage and therefore the wrong state root  
-   「附錄 D 只是重述第 7 章的 tuple」正是本題要打掉的直覺：D.1 是獨立定義，就是把 b 排在 s 前面。
-3. ❌ Both are wrong: C(3) holds only the encoded peak sequence of β_B, while the per-block items are committed through a marker in the header and otherwise kept off-chain by each node, so this encoder should not be feeding state serialization at all and whichever order it uses cannot move the state root  
-   header 只有 epoch／winners／offenders 三個 marker；C(3) 同時存整條 belt 與每一筆 item。
-4. ❌ The reviewer is right about the order and about the shape: 0.8.0 replaced the per-item super-peak with the full peak sequence, so each item must encode the whole belt where this code writes a single 32-byte hash, and eq. 11.36 compares an anchor against that sequence rather than against one commitment  
-   eq. 7.2 把 b 的型別寫成 b ∈ H（E.10 算出的單一 super-peak），eq. 11.36 也只比一個 32-byte 值。
-
-> **陷阱**　宣告順序 ≠ 編碼順序。C(3) 是 b 在 s 前面；照 chapter 7 的順序寫 codec，值全對也會 state root 不對。
-
-<sub>`c3-ch07-c3-field-order`</sub>
-
----
-
-### 7-7　β_B is a Merkle Mountain Range that grows by one root per block. Describe what the append does to the structure, and why the GP chose an MMR here rather than rebuilding a balanced Merkle tree each block.
+### 7-6　β_B is a Merkle Mountain Range that grows by one root per block. Describe what the append does to the structure, and why the GP chose an MMR here rather than rebuilding a balanced Merkle tree each block.
 
 <sub>7.4 The Accumulation Output Belt — ●●○ · 概念 · §7.4; §E.3</sub>
 
@@ -5462,18 +5321,18 @@ func (bi *BlockInfo) Encode(e *Encoder) error {
 
 ---
 
-### 7-8　In GP 0.8.0 the recent-history state is β ≡ (β_H, β_B). What does each recent block entry in β_H hold, and what is β_B?
+### 7-7　In GP 0.8.0 the recent-history state is β ≡ (β_H, β_B). What does each recent block entry in β_H hold, and what is β_B?
 
 <sub>7 Recent History — ●●○ · 概念 · eq. 7.1–7.4</sub>
 
 **標準答案**　Each β_H entry: (header hash h, state root s, accumulation-output-log super-peak b, timeslot t, dictionary p of reported work-package hash → segment root); β_B is the accumulation-output belt, an MMR of per-block accumulation-output roots
 
-β ≡ (β_H, β_B) 是兩個目的不同的東西被放在同一個狀態分量裡。**β_H（recent history）**（eq. 7.2）：β_H ∈ ⟦(h, s, b, t, p)⟧_{:H}，最多 H = 8 筆，每筆是h = header hash、s = state root、b = accumulation-output log 的 super-peak、t = timeslot（**0.8.0 新增**，配合 refinement context 的 anchor slot，PR #526）、p = 一個字典，把本塊 E_G 裡每個 work-package hash 映到它的 segment root（exports root）。**p 是最容易被忽略但用途最多的欄位**：後續 report 的重複檢查、prerequisite 檢查、segment-root lookup 全都要查它（§11）。**β_B（accumulation-output belt）**（eq. 7.3）：β_B ∈ ⟦?H⟧，是一個 MMR 的 peak 序列（∅ 代表該高度沒有 peak），用 Keccak 而不是 Blake2b。**兩者的時間尺度完全不同**：β_H 是滑動窗口，只留 8 筆、舊的直接丟；β_B 是 append-only、永不遺忘，因為它要支撐鏈外幾個月後回來驗的 BEEFY 證明。**θ 不在 β 裡**（eq. 7.4）：θ ∈ ⟦(N_S, H)⟧ 是**本塊**各 service 透過 `yield` 產出的 (service, hash) 序列，它是 β_B 這一輪的輸入，本身是獨立的狀態分量。
+β ≡ (β_H, β_B) 是兩個目的不同的東西被放在同一個狀態分量裡。**β_H（recent history）**（eq. 7.2）：β_H ∈ ⟦(h, s, b, t, p)⟧_{:H}，最多 H = 8 筆，每筆是h = header hash、s = state root、b = accumulation-output log 的 super-peak、t = timeslot（配合 refinement context 的 anchor slot）、p = 一個字典，把本塊 E_G 裡每個 work-package hash 映到它的 segment root（exports root）。**p 是最容易被忽略但用途最多的欄位**：後續 report 的重複檢查、prerequisite 檢查、segment-root lookup 全都要查它（§11）。**β_B（accumulation-output belt）**（eq. 7.3）：β_B ∈ ⟦?H⟧，是一個 MMR 的 peak 序列（∅ 代表該高度沒有 peak），用 Keccak 而不是 Blake2b。**兩者的時間尺度完全不同**：β_H 是滑動窗口，只留 8 筆、舊的直接丟；β_B 是 append-only、永不遺忘，因為它要支撐鏈外幾個月後回來驗的 BEEFY 證明。**θ 不在 β 裡**（eq. 7.4）：θ ∈ ⟦(N_S, H)⟧ 是**本塊**各 service 透過 `yield` 產出的 (service, hash) 序列，它是 β_B 這一輪的輸入，本身是獨立的狀態分量。
 
 **逐項辨析**
 
 1. ✅ Each β_H entry: (header hash h, state root s, accumulation-output-log super-peak b, timeslot t, dictionary p of reported work-package hash → segment root); β_B is the accumulation-output belt, an MMR of per-block accumulation-output roots  
-   eq. 7.2 的五個欄位（含 0.8.0 新增的 timeslot t）與 eq. 7.3 的 Keccak MMR belt 完全吻合。
+   eq. 7.2 的五個欄位（含 timeslot t）與 eq. 7.3 的 Keccak MMR belt 完全吻合。
 2. ❌ Each β_H entry: (header hash, posterior state root, extrinsic hash, timeslot); β_B is the set of BEEFY signatures gathered over the last H = 8 blocks, which is what lets a bridge prove finality without following the header chain  
    H_X 只存在 header（eq. 5.1），β 的 item 不含它；β_B 裝的全是 accumulation-output root，一個簽章都沒有。
 3. ❌ Each β_H entry: (header hash, state root, timeslot, list of the hashes of every work-report guaranteed in the block); β_B is the sequence of the last H = 8 block headers, retained so that a lookup-anchor can be resolved straight out of state  
@@ -5481,13 +5340,13 @@ func (bi *BlockInfo) Encode(e *Encoder) error {
 4. ❌ β_H is a single rolling hash committing to the last H = 8 headers, so recent history costs only 32 octets of state; β_B is the four-entry entropy accumulator, rotated at each epoch boundary and re-seeded from every header's VRF output  
    eq. 7.1–7.2 的 β_H 是最多 8 筆 tuple 的序列；四項的 entropy accumulator 是另一個狀態項 η。
 
-> **陷阱**　0.8.0 β_H 有 5 個欄位（多了 timeslot）；p 的 value 是 segment root 不是 report hash。
+> **陷阱**　β_H 每筆有 5 個欄位（含 timeslot）；p 的 value 是 segment root 不是 report hash。
 
 <sub>`ch07-beta-structure`</sub>
 
 ---
 
-### 7-9　Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?
+### 7-8　Why does the newest β_H entry get state root s = H_0 (the zero hash) at the end of block N, and how is it corrected?
 
 <sub>7 Recent History — ●●○ · 概念 · eq. 7.5 & 7.8</sub>
 
@@ -5512,7 +5371,7 @@ func (bi *BlockInfo) Encode(e *Encoder) error {
 
 ---
 
-### 7-10　The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?
+### 7-9　The accumulation-output belt β′_B = A(β_B, M_B(s, H_K), H_K) uses Keccak (H_K) rather than Blake2b. What is s and why Keccak?
 
 <sub>7 Recent History — ●●○ · 設計理由 · eq. 7.6–7.7</sub>
 
@@ -5537,7 +5396,7 @@ eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本
 
 ---
 
-### 7-11　What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?
+### 7-10　What is the primary purpose of retaining the H = 8 most recent blocks in β_H, according to the GP?
 
 <sub>7 Recent History — ●○○ · 概念 · §7 & eq. 11.36, 11.41–11.44</sub>
 
@@ -5562,7 +5421,7 @@ eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本
 
 ---
 
-### 7-12　The anchor check for E_G (eq. 11.36) compares the refinement context against β†, neither β nor β′. Why not β, and why not β′?
+### 7-11　The anchor check for E_G (eq. 11.36) compares the refinement context against β†, neither β nor β′. Why not β, and why not β′?
 
 <sub>7.1; 11.2 (anchor) — ●●○ · 設計理由 · eq. 7.5 (β†), eq. 4.6, eq. 11.36, eq. 4.17 (β′ ≺ θ′)</sub>
 
@@ -5576,7 +5435,7 @@ eq. 7.6：s = [E_4(service) ⌢ E(hash) | (service, hash) ∈ θ′]——把本
    對：eq. 7.5 β† = β 但最新項目的 s 改成 H_R；eq. 11.36 對 β† 比 (a, n, s, b)；依賴圖 β′ ≺ (H, E_G, β†, θ′) 表示 β′ 要等 accumulate。
 2. ❌ Not β: it holds only seven entries, the eighth of H = 8 appears only after this block appends, so using β would lose one usable anchor. Not β′: its state-root fields are all H_0 because posterior roots are only known a block later, so every anchor would fail against it  
    β 一直維持 8 筆（→^H 截斷），沒有「少一筆」的問題；β′ 只有最新一筆是 H_0，其他都已補正。
-3. ❌ In fact any of the three would do: the anchor compares only the header hash, the state-root field became optional in 0.8.0, and the GP writes β† merely so that the β† node in the dependency graph has a purpose; an implementation reading β or β′ gets the same state root  
+3. ❌ In fact any of the three would do: the anchor compares only the header hash, the state-root field is optional in the context, and the GP writes β† merely so that the β† node in the dependency graph has a purpose; an implementation reading β or β′ gets the same state root  
    eq. 11.36 明確比對 state root s 與 super-peak b，不只 header hash；state root 沒有改成選填。
 4. ❌ Not β: it is the previous block's posterior and may already have been overwritten by a forked-out block. Not β′: it has not yet been Merklized, so its state root is unknown. β† is the only version finalized by GRANDPA, which is why anchors must be checked against it  
    β 是 state 的一部分，跟 fork 與 GRANDPA 無關；β† 也不是「定案版本」，只是把父 block 的 root 補上。
@@ -5678,7 +5537,7 @@ eq. 8.3：F(c) ≡ α[c] ⊖ {(g_w)_a} 當 ∃g ∈ E_G 且該 guarantee 的 rep
 
 **標準答案**　Only the service currently registered as that core's assigner, and only from inside its accumulate execution, by calling `assign`, which replaces all Q = 80 entries of that one core's queue in a single call and may also hand the assigner role to another service
 
-§8.2 在 eq. 8.1 底下直接寫死："The portion of state φ may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service." 那個 privileged service 就是 χ_A[c]（per-core assigner）。host call Ω_A（`assign` = 16）從 ω_7..ω_9 取 (c, o, a)，自 memory 位址 o 讀 Q = 80 個 32-byte hash：c ≥ C 回 CORE，呼叫者 service id ≠ χ_A[c] 回 HUH，a 不是合法 service id 回 WHO，成功才 φ[c] ← q 並把 χ_A[c] ← a（Owned Privileges，讓 assigner 可以轉手）。所以是整批覆寫單一 core 的 queue，不是逐格插入。`bless` 動的是 χ 的 privileges（0.8.0 PR #519 起只有 manager 能呼叫）。
+§8.2 在 eq. 8.1 底下直接寫死："The portion of state φ may be altered only through an exogenous call made from the accumulate logic of an appropriately privileged service." 那個 privileged service 就是 χ_A[c]（per-core assigner）。host call Ω_A（`assign` = 16）從 ω_7..ω_9 取 (c, o, a)，自 memory 位址 o 讀 Q = 80 個 32-byte hash：c ≥ C 回 CORE，呼叫者 service id ≠ χ_A[c] 回 HUH，a 不是合法 service id 回 WHO，成功才 φ[c] ← q 並把 χ_A[c] ← a（Owned Privileges，讓 assigner 可以轉手）。所以是整批覆寫單一 core 的 queue，不是逐格插入。`bless` 動的是 χ 的 privileges（只有 manager 能呼叫）。
 
 **逐項辨析**
 
@@ -5724,11 +5583,11 @@ eq. 8.2：α′[c] ≡ ←(F(c) ⌢ φ′[c]^⟲[H_T])^O。索引的來源是 **
 
 ### 8-5　A guarantor runs the Is-Authorized logic Ψ_I before refining anything. What is that program actually able to observe?
 
-<sub>8.1 Authorizers and Authorizations — ●●○ · 概念 · eq. B.1–B.2; §8.1 · ⚠ 0.7.2→0.8.0</sub>
+<sub>8.1 Authorizers and Authorizations — ●●○ · 概念 · eq. B.1–B.2; §8.1</sub>
 
 **標準答案**　Its two arguments only — the work-package and the core index, the latter handed to the PVM as a 2-byte encoded argument — plus whatever `fetch` can pull out of that package, and the protocol constants; no chain state at all, and besides `fetch` the only host calls are the gas counter and heap growth
 
-eq. B.1：Ψ_I : (P, N_C) → (B ∪ E, N_G)，實際執行 Ψ_M(auth code, 0, G_I, E_2(c), F, ∅)，其中 G_I = 50,000,000、argument blob 就是 E_2(c)；auth code 解不出來（∅）回 BAD、長度 > W_A = 64,000 回 BIG。eq. B.2 的 dispatch F 只認三個 host call：gas、grow_heap、fetch，其他一律扣 M_∅ 並把 ω_7 設成 WHAT。GP 原文："totally stateless … we elide the host-call context since, being essentially stateless, it is always ∅"。fetch（Ω_Y）在這裡除了 work-package 之外的參數全是 ∅，所以 selector 0（protocol constants）與 7–13（package 編碼、config、token、context、work-item metadata、payload）可用，selector 1–6 與 14/15（entropy、authorizer trace、extrinsics、import segments）一律回 NONE。正因為 Ψ_I 完全無狀態，每個 auditor 事後重跑必然得到相同結果。0.8.0 delta：堆積成長的 host call 由 0.7.2 的 `sbrk` 更名為 `grow_heap`（index 1，PR #508 的新 gas model 一起改），Go 端的 dispatch 表要跟著改。
+eq. B.1：Ψ_I : (P, N_C) → (B ∪ E, N_G)，實際執行 Ψ_M(auth code, 0, G_I, E_2(c), F, ∅)，其中 G_I = 50,000,000、argument blob 就是 E_2(c)；auth code 解不出來（∅）回 BAD、長度 > W_A = 64,000 回 BIG。eq. B.2 的 dispatch F 只認三個 host call：gas、grow_heap、fetch，其他一律扣 M_∅ 並把 ω_7 設成 WHAT。GP 原文："totally stateless … we elide the host-call context since, being essentially stateless, it is always ∅"。fetch（Ω_Y）在這裡除了 work-package 之外的參數全是 ∅，所以 selector 0（protocol constants）與 7–13（package 編碼、config、token、context、work-item metadata、payload）可用，selector 1–6 與 14/15（entropy、authorizer trace、extrinsics、import segments）一律回 NONE。正因為 Ψ_I 完全無狀態，每個 auditor 事後重跑必然得到相同結果。
 
 **逐項辨析**
 
@@ -5772,7 +5631,7 @@ eq. 14.11：p_a ≡ H(p_u ⌢ p_f)（authorizer = auth code hash 與 config blob
 
 ---
 
-### 8-7　This 0.7.2 code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?
+### 8-7　This code implements the authorizer half of eq. 11.32. Which pool is it obliged to read, and what is the protocol-level consequence when the membership test fails?
 
 <sub>8.2 Pool and Queue — ●●● · 程式碼 · eq. 11.32 & eq. 8.2</sub>
 
@@ -5845,13 +5704,13 @@ eq. 8.1：**α ∈ ⟦⟦H⟧_{:O}⟧_C**，O = C_authpoolsize = 8——每個 c
 
 ---
 
-### 8-9　How is an authorizer identified in GP 0.8.0, and where is the authorization decision actually made?
+### 8-9　How is an authorizer identified, and where is the authorization decision actually made?
 
-<sub>8.1 Authorizers and Authorizations — ●●○ · 版本差異 · §8.1 & eq. 14.11 (§14.3; delta #522) · ⚠ 0.7.2→0.8.0</sub>
+<sub>8.1 Authorizers and Authorizations — ●●○ · 概念 · §8.1 & eq. 14.11 (§14.3; delta #522)</sub>
 
 **標準答案**　Authorizer = H(PVM code hash ⌢ configuration blob); the is-authorized decision is made entirely in-core by the guarantors (Ψ_I), while on-chain logic only checks that the authorizer is in the core's pool
 
-§8.1：「Authorizers are identified as the hash of their PVM code hash concatenated with their Configuration blob」（0.8.0 #522 統一了第 8 章與第 14 章的定義：work-package 帶 auth code hash h 與 config c，report 的 authorizer a = H(h ⌢ c)）。三個概念要分清：Token（隨 package 附的 opaque 資料）、Trace（成功授權時輸出的 opaque 資料，進 report 的 o 欄位）、Authorizer（在固定 gas G_I = 50M 下判斷是否授權的 PVM 邏輯）。「The process by which work-packages are determined to be authorized… happens entirely in-core」——不是 on-chain logic 的職責，鏈上只驗 w_a ∈ α[w_c]（eq. 11.32）。
+§8.1：「Authorizers are identified as the hash of their PVM code hash concatenated with their Configuration blob」（第 8 章與第 14 章是同一個定義：work-package 帶 auth code hash h 與 config c，report 的 authorizer a = H(h ⌢ c)）。三個概念要分清：Token（隨 package 附的 opaque 資料）、Trace（成功授權時輸出的 opaque 資料，進 report 的 o 欄位）、Authorizer（在固定 gas G_I = 50M 下判斷是否授權的 PVM 邏輯）。「The process by which work-packages are determined to be authorized… happens entirely in-core」——不是 on-chain logic 的職責，鏈上只驗 w_a ∈ α[w_c]（eq. 11.32）。
 
 **逐項辨析**
 
@@ -6110,7 +5969,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 
 **標準答案**　χ_M manager: may alter χ (bless) and grant gratis storage; χ_V delegator: may set ι (designate); χ_R registrar: may create services with indices below S = 2^16; χ_A assigners (one per core): may set φ[c] (assign); χ_Z: services that accumulate every block with a fixed gas allowance
 
-§9.4 與 eq. 9.9：χ_M（manager）可改變 χ 並授予 storage deposit credits（gratis）；χ_V（delegator）可設定 ι（下下個 epoch 的 validator keys，透過 `designate`）；χ_R（registrar）可建立 index < S = 2^16 的受保護 service；χ_A ∈ [N_S]_C 每個 core 一個 assigner，可改 φ[c]（`assign`）；χ_Z ∈ D⟨N_S→N_G⟩ always-accumulate 服務與其每塊的基本 gas。GP 的敘述順序本身就是記憶點：「manager … able to effect an alteration of χ … as well as bestow services with storage deposit credits. The next, χ_V, is able to set ι. Then χ_R alone is able to create new service accounts with indices in the protected range. The following, χ_A, are the service indices capable of altering the authorizer queue φ, one for each core.」0.8.0 (#519) 把 `bless` 限制為只有 manager 可呼叫——之前的漏洞：任意 service 可 bless 自己成 manager 再用 `new` 取得 gratis storage。
+§9.4 與 eq. 9.9：χ_M（manager）可改變 χ 並授予 storage deposit credits（gratis）；χ_V（delegator）可設定 ι（下下個 epoch 的 validator keys，透過 `designate`）；χ_R（registrar）可建立 index < S = 2^16 的受保護 service；χ_A ∈ [N_S]_C 每個 core 一個 assigner，可改 φ[c]（`assign`）；χ_Z ∈ D⟨N_S→N_G⟩ always-accumulate 服務與其每塊的基本 gas。GP 的敘述順序本身就是記憶點：「manager … able to effect an alteration of χ … as well as bestow services with storage deposit credits. The next, χ_V, is able to set ι. Then χ_R alone is able to create new service accounts with indices in the protected range. The following, χ_A, are the service indices capable of altering the authorizer queue φ, one for each core.」`bless` 只有 manager 可呼叫——否則任意 service 都能 bless 自己成 manager、再用 `new` 取得 gratis storage。
 
 **逐項辨析**
 
@@ -6123,7 +5982,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 4. ❌ χ_M manager: may alter χ (bless) and grant gratis storage; χ_V delegator: may set κ directly; χ_R registrar: may create services at any index; χ_A: one global assigner that sets φ for all cores; χ_Z: services that accumulate once per epoch  
    delegator 設的是 ι 而非 κ（要經 γ_k 才輪到 κ，eq. 6.14）；registrar 只限 index < 2^16，assigner 逐 core，χ_Z 每塊都跑。
 
-> **陷阱**　registrar 是 0.7.1 加入的（Small service IDs）；0.8.0 bless 只限 manager。
+> **陷阱**　registrar 管的是保留區間的 service ID（Small service IDs）；bless 只限 manager 呼叫。
 
 <sub>`ch09-privileges`</sub>
 
@@ -6182,7 +6041,7 @@ eq. 9.4：(a_m, a_c) = (m, c) 當 E(var(m), c) = a_p[a_c]，否則 (∅, ∅)。
 
 <a id="ch-10"></a>
 
-## §10 Disputes　<sub>12 題</sub>
+## §10 Disputes　<sub>11 題</sub>
 
 ### 10-1　The chain is still in its genesis epoch (prior τ < E, so ⌊τ/E⌋ = 0). Which verdict `Age` does this code accept although GP 0.8.0 (eq. 10.2–10.3) makes the block invalid — and against which key set would it then verify the judgments?
 
@@ -6324,20 +6183,20 @@ eq. 10.1：ψ ≡ (ψ_G, ψ_B, ψ_W, ψ_O)。**前三個都是 work-report hash 
 
 ---
 
-### 10-5　Per GP 0.8.0, what is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?
+### 10-5　What is a verdict in E_V made of, how many judgments must it carry and against which key set, and how many verdicts may one extrinsic hold?
 
-<sub>10.2 Extrinsic — ●●○ · 版本差異 · eq. 10.2–10.4 · ⚠ 0.7.2→0.8.0</sub>
+<sub>10.2 Extrinsic — ●●○ · 概念 · eq. 10.2–10.4</sub>
 
 **標準答案**　Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic
 
-eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（0.8.0 PR #525 新增的硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。
+eq. 10.2：E_V ∈ ⟦(report hash, epoch index, judgments)⟧_{:N_V}，**N_V = 16**（硬上限，E_C 與 E_F 也各有 N_O = 16）。加上限是為了讓單塊的驗簽成本有界。**epoch index 只能是 ⌊τ/E⌋ 或 ⌊τ/E⌋ − 1**——當前或前一個 epoch，不能更舊。eq. 10.3 據此選出對應的 validator 集合：K(a) = κ 當 a 是當前 epoch，否則是 λ。**這就是為什麼 λ（previous set）必須被保留**：跨 epoch 的爭議要用當時那組金鑰驗簽。**每個 verdict 必須恰好包含 ⌊2|k|/3⌋ + 1 個 judgment**（tiny：5；full：683）——注意是「恰好」，多一票少一票都不行，這與 eq. 10.12 三個門檻都是等式是同一個設計思路。每個 judgment 由 k[i]_e 對 **X ⌢ report hash** 簽名，X 是 `$jam_valid` 或 `$jam_invalid` 兩個 domain separator 之一。**為什麼每票要能個別驗證**：因為事後要靠這些簽章構造 fault（投錯邊的人）與 culprit（擔保過 bad report 的人）——若是聚合簽章就指認不出個別責任。你們的 Verdict.Validate 檢查票數等於 ValidatorsSuperMajority，方向正確。
 
 **逐項辨析**
 
 1. ✅ Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number exactly ⌊2|k|/3⌋+1 where k = κ if a is the current epoch else λ; at most N_V = 16 verdicts per extrinsic  
    epoch index、恰好 ⌊2|k|/3⌋+1 票、K(a) 二選一、N_V = 16 四點全中 eq. 10.2–10.4。
 2. ❌ Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, judgments); judgments must number at least ⌊2|k|/3⌋+1 and may be drawn from κ ∪ λ combined; there is no per-extrinsic cap on verdicts  
-   eq. 10.4 是「恰好」不是「至少」；K(a) 只取 κ 或 λ 之一；0.8.0 #525 正是新增 N_V = 16。
+   eq. 10.4 是「恰好」不是「至少」；K(a) 只取 κ 或 λ 之一；而且每個 extrinsic 有 N_V = 16 的上限。
 3. ❌ Each verdict is (report hash, the timeslot at which the dispute was raised, judgments); judgments must number exactly ⌊|k|/3⌋+1 where k is always the posterior set κ′; at most N_V = 16 verdicts per extrinsic  
    第二欄是 epoch index 而非 timeslot；⌊|k|/3⌋ 是 wonky 門檻；K(a) 取 prior 的 κ/λ 不是 κ′。
 4. ❌ Each verdict is (report hash, epoch index a ∈ {⌊τ/E⌋, ⌊τ/E⌋−1}, one aggregated BLS signature over the report hash); the signers must be ⌊2|k|/3⌋+1 members of k; at most N_V = 16 verdicts per extrinsic  
@@ -6374,26 +6233,26 @@ eq. 10.12 定義 V(a, j)：**⊤（good）當 t = ⌊2|k|/3⌋ + 1；⊥（bad�
 
 ---
 
-### 10-7　In GP 0.8.0, what does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?
+### 10-7　What does a culprit (E_C) consist of, what does a fault (E_F) consist of, whose keys may appear as offenders, and what does a good verdict require?
 
-<sub>10.2 Extrinsic — ●●● · 版本差異 · eq. 10.6–10.7, 10.13 · ⚠ 0.7.2→0.8.0</sub>
+<sub>10.2 Extrinsic — ●●● · 概念 · eq. 10.6–10.7, 10.13</sub>
 
 **標準答案**　A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a good verdict still needs ≥ 1 fault
 
-eq. 10.6：∀(r, k, s) ∈ E_C：r ∈ ψ′_B ∧ k ∈ k ∧ s 是 k 對 X_G ⌢ r 的簽章（culprit = 曾 guarantee 一個壞 report 的人，用的正是他的 guarantee 簽章；X_G = $jam_guarantee，正是 eq. 11.28 那把簽章，所以 ρ 在 0.8.0 要存整個 guarantee 才 construct 得出來）。eq. 10.7：∀(r, v, k, s) ∈ E_F：r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v（fault 宣稱的 validity 必須與 verdict 相反：對 bad report 投 valid，或對 good report 投 invalid）。k = {κ ∪ λ 的 Ed25519 key} \ ψ_O。eq. 10.13：∀(r, ⊤) ∈ v：∃(r, …) ∈ E_F——good verdict 至少要有一個 fault，因為 2/3+1 全投正票的 verdict 必然是有人先投了反票才會啟動 dispute。0.8.0 #525「remove culprits requirement」則拿掉了 bad verdict ≥ 2 culprits 的舊要求。
+eq. 10.6：∀(r, k, s) ∈ E_C：r ∈ ψ′_B ∧ k ∈ k ∧ s 是 k 對 X_G ⌢ r 的簽章（culprit = 曾 guarantee 一個壞 report 的人，用的正是他的 guarantee 簽章；X_G = $jam_guarantee，正是 eq. 11.28 那把簽章，所以 ρ 要存整個 guarantee 才 construct 得出來）。eq. 10.7：∀(r, v, k, s) ∈ E_F：r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v（fault 宣稱的 validity 必須與 verdict 相反：對 bad report 投 valid，或對 good report 投 invalid）。k = {κ ∪ λ 的 Ed25519 key} \ ψ_O。eq. 10.13：∀(r, ⊤) ∈ v：∃(r, …) ∈ E_F——good verdict 至少要有一個 fault，因為 2/3+1 全投正票的 verdict 必然是有人先投了反票才會啟動 dispute。bad verdict 則沒有對應的 culprit 數量要求。
 
 **逐項辨析**
 
 1. ✅ A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a good verdict still needs ≥ 1 fault  
    四個條件全中；關鍵是 fault 宣稱的 v 必須與 verdict 相反，good verdict 仍要 ≥ 1 個 fault。
 2. ❌ A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v agrees with the verdict (r ∈ ψ′_G ⇔ v); offender keys must lie in (κ ∪ λ)'s Ed25519 keys minus ψ_O; a bad verdict needs ≥ 2 culprits and a good one ≥ 1 fault  
-   「bad verdict 要 ≥ 2 culprits」是 0.7.2 的規則（0.8.0 #525 移除），且 fault 的 v 條件反了。
+   GP 對 bad verdict 沒有「≥ 2 culprits」這種要求，且 fault 的 v 條件反了。
 3. ❌ A culprit names a report in ψ′_G plus that guarantor's judgment signature over X_valid ⌢ r; a fault names a report in ψ′_W whose claimed validity v contradicts the verdict; offender keys must lie in κ′'s Ed25519 keys alone; a good verdict still needs ≥ 1 fault  
    culprit 是 bad report 的 guarantor（r ∈ ψ′_B、簽 X_G），fault 不落在 ψ′_W，k 也要含 λ。
 4. ❌ A culprit names a report in ψ′_B plus that guarantor's signature over X_G ⌢ r; a fault names a report whose claimed validity v contradicts the verdict (r ∈ ψ′_B ⇔ r ∉ ψ′_G ⇔ v); keys already in ψ_O may be re-reported to punish a repeat offender; every verdict, good, bad or wonky, needs ≥ 1 fault  
    k 的定義最後就寫著扣掉 ψ_O，重複上報使區塊無效；eq. 10.13 只對 (r, ⊤) 要求 fault。
 
-> **陷阱**　你們 0.7.2 code 仍檢查 bad verdict ≥ 2 culprits（code-map 3.6.4）——0.8.0 要拿掉。
+> **陷阱**　bad verdict 不要求 culprit 的數量；只有 good verdict 要求 ≥ 1 個 fault（eq. 10.13）。
 
 <sub>`ch10-culprits-faults`</sub>
 
@@ -6449,48 +6308,7 @@ eq. 10.14：∀c：ρ†[c] = ∅ 當 (H(ρ[c]_w), v) ∈ v 且 v ∈ {⊥, ∅}
 
 ---
 
-### 10-10　This is the team's verdict classification. What must change for GP 0.8.0 conformance?
-
-<sub>10.2 Extrinsic — ●●○ · 程式碼 · eq. 10.12 — internal/extrinsic/dispute_controller.go CompareVerdictsWithPsi · ⚠ 0.7.2→0.8.0</sub>
-
-```go
-for _, verdict := range verdictSumSequence {
-    switch verdict.PositiveJudgmentsSum {
-    case types.ValidatorsCount*2/3 + 1:
-        updates.Good = append(updates.Good, types.WorkReportHash(verdict.ReportHash))
-    case 0:
-        updates.Bad = append(updates.Bad, types.WorkReportHash(verdict.ReportHash))
-    case types.ValidatorsCount * 1 / 3:
-        updates.Wonky = append(updates.Wonky, types.WorkReportHash(verdict.ReportHash))
-    default:
-        return types.DisputesRecords{}, errors.New("bad_vote_split")
-    }
-}
-```
-<sub>internal/extrinsic/dispute_controller.go</sub>
-
-**標準答案**　The thresholds must be computed from |k|, the length of the validator set that the verdict's epoch index selects (κ or λ), rather than from the global ValidatorsCount constant
-
-eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3⌋（wonky），**其中 k = K(a)，由 verdict 自己的 epoch index 決定是 κ 還是 λ**（eq. 10.3）。所以問題有兩層：**第一層**，0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），拿全域常數 ValidatorsCount 去算三分之二／三分之一已經不對。**第二層更細**：即使改成動態長度，也不能一律用 |κ|——若 verdict 指的是前一個 epoch，門檻要用 **|λ|** 算。兩個集合的大小在換屆時可能不同，這正是需要依 epoch index 取對應集合的原因。這屬於你們 issue #1037「support variable validator-set size」的範疇。**程式其餘部分是對的**：default 分支回傳 error，讓不合法的票數組合直接使區塊無效，而不是忽略該筆 verdict——這符合「三個門檻都是等式」的語意。**順帶釐清 0.8.0 在 §10 到底改了什麼**：只動了 culprits 的要求與 N_V／N_O 的數量上限，**三個門檻本身沒變**，變的是 |k| 從常數變成變數。
-
-**逐項辨析**
-
-1. ✅ The thresholds must be computed from |k|, the length of the validator set that the verdict's epoch index selects (κ or λ), rather than from the global ValidatorsCount constant  
-   0.8.0 允許 |κ| ≠ |λ|（#514），門檻必須跟著 K(a) 選到的那個集合的長度走。
-2. ❌ Nothing needs to change: |κ| is fixed at 1023 = 3C in every configuration, so ValidatorsCount is always the right length to take two-thirds and one-third of  
-   §6.4 明說 validator 序列長度是 6 到 3C 之間的 3 的倍數，tiny 就是 6，並非固定 1023。
-3. ❌ The wonky case must be folded into the default error branch, because 0.8.0 records only good and bad verdicts and dropped ψ_W from the disputes state entirely  
-   ψ_W 仍是 eq. 10.1 的第三個成員，⌊|k|/3⌋ 的 wonky case 也還在，0.8.0 沒有拿掉。
-4. ❌ The default branch must classify every remaining vote count as wonky, because 0.8.0 treats any split that is neither unanimous nor zero as impossible to judge  
-   V 是部分函數；把 4 票、3 票也判成 wonky 會讓惡意 verdict 清掉別人的 pending report。
-
-> **陷阱**　同樣的 |κ| 依賴也出現在 assurances 的 2/3 門檻與 erasure shards 數。
-
-<sub>`ch10-code-thresholds`</sub>
-
----
-
-### 10-11　What are the stated purposes of the disputes system — and what does it pointedly NOT do itself?
+### 10-10　What are the stated purposes of the disputes system — and what does it pointedly NOT do itself?
 
 <sub>10 intro — ●○○ · 設計理由 · §10 intro paragraphs</sub>
 
@@ -6515,7 +6333,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 ---
 
-### 10-12　A validator's Ed25519 key enters ψ′_O in block N via a culprit or fault. What happens immediately, what happens at the next epoch change, and what never happens inside the JAM protocol?
+### 10-11　A validator's Ed25519 key enters ψ′_O in block N via a culprit or fault. What happens immediately, what happens at the next epoch change, and what never happens inside the JAM protocol?
 
 <sub>10.4; 6.2 (Φ); 5 (H_O) — ●●○ · 設計理由 · §10.3 (culprit/fault conditions, k ∉ ψ_O), eq. 10.14, eq. 10.18 (ψ′_O), eq. 6.14 (Φ), §5 (H_O)</sub>
 
@@ -6543,7 +6361,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 <a id="ch-11"></a>
 
-## §11 Reporting & Assurance　<sub>25 題</sub>
+## §11 Reporting & Assurance　<sub>23 題</sub>
 
 ### 11-1　Tiny config (|κ| = 6, U = 5), one core c = 0, no disputes. Block at slot 40: E_G carries guarantee g₁ for core 0. Block at slot 42: E_A has 4 assurances with bit 0 set. Block at slot 45: E_A has 3 assurances with bit 0 set and E_G carries an otherwise-valid guarantee g₂ for core 0. After the slot-45 block, what are ρ‡[0] and ρ′[0], and is g₁'s report ever accumulated?
 
@@ -6576,7 +6394,7 @@ eq. 10.12 的三個門檻是 ⌊2|k|/3⌋ + 1（good）、0（bad）、⌊|k|/3�
 
 **標準答案**　M* = (P(|λ′|, η′_3, 593), Φ(λ′)): the previous rotation (index 59) belonged to the previous epoch, so it is recomputed from λ′ and η′_3
 
-先看視窗：R(⌊603/10⌋ − 1) = 590 ≤ 595 ≤ 603 ✓。再看 rotation：⌊603/10⌋ = 60 ≠ ⌊595/10⌋ = 59 → 用 M*（eq. 11.28 的 otherwise）。eq. 11.23：(k, e) = (κ′, η′_2) 當 ⌊(τ′ − R)/E⌋ = ⌊τ′/E⌋，否則 (λ′, η′_3)。為什麼這樣才對：epoch 換屆時 λ′ = κ（eq. 6.14）、η′_3 = η_2（eq. 6.24），正好是上個 epoch 期間算 M 所用的 (κ′, η′_2)，所以 M* 精確重現 rotation 59 的分配；換屆後 η′_2 已是新 epoch 的 entropy，拿它配 λ′ 或 κ′ 都算不出當時的分配。注意 0.8.0 額外要求：即使用 M*，w_c 仍須 < |κ′|/3（posterior set）——「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」；且 Φ 用的是 ψ′_O，本塊新抓到的 offender 在 λ′ 裡也會被 null 掉。你們 GStarFunc：`(tau − R)/E == tau/E` 選 (η′_2, κ′) 否則 (η′_3, λ′)，再以 tau − R 呼叫 NewGuranatorAssignments——一致。
+先看視窗：R(⌊603/10⌋ − 1) = 590 ≤ 595 ≤ 603 ✓。再看 rotation：⌊603/10⌋ = 60 ≠ ⌊595/10⌋ = 59 → 用 M*（eq. 11.28 的 otherwise）。eq. 11.23：(k, e) = (κ′, η′_2) 當 ⌊(τ′ − R)/E⌋ = ⌊τ′/E⌋，否則 (λ′, η′_3)。為什麼這樣才對：epoch 換屆時 λ′ = κ（eq. 6.14）、η′_3 = η_2（eq. 6.24），正好是上個 epoch 期間算 M 所用的 (κ′, η′_2)，所以 M* 精確重現 rotation 59 的分配；換屆後 η′_2 已是新 epoch 的 entropy，拿它配 λ′ 或 κ′ 都算不出當時的分配。注意另一個要求：即使用 M*，w_c 仍須 < |κ′|/3（posterior set）——「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」；且 Φ 用的是 ψ′_O，本塊新抓到的 offender 在 λ′ 裡也會被 null 掉。你們 GStarFunc：`(tau − R)/E == tau/E` 選 (η′_2, κ′) 否則 (η′_3, λ′)，再以 tau − R 呼叫 NewGuranatorAssignments——一致。
 
 **逐項辨析**
 
@@ -6670,32 +6488,7 @@ eq. 11.42：∀w ∈ I, ∀p ∈ (w_x)_p ∪ keys(w_l)：p ∈ p ∪ {x | x ∈ 
 
 ---
 
-### 11-6　GP 0.8.0, C = 341, E = 600, R = 10. During epoch e the active set had |κ| = 12 (cores 0–3 active); at the epoch change the set shrinks to |κ′| = 9. The first block of the new epoch (τ′ = 600) carries a guarantee for core 3 with t = 595, signed by the three validators that M* assigns to core 3. Is that guarantee valid? Walk through the checks it meets or fails.
-
-<sub>11.4 Work Report Guarantees — ●●● · 版本差異 · eq. 11.18, 11.23, 11.28, 11.31 · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　Invalid: eq. 11.28 bounds w_c by |κ′|/3 = 3 even under M*, so core 3 is now inactive; eq. 11.31 wants (w_s)_v = |κ′| = 9, not the 12 chunks the report carries; and eq. 11.18 has already emptied ρ‡ because |κ| ≠ |κ′|
-
-這題把 0.8.0 因「validator 數可變」（eq. 6.8：|κ| ∈ {3c}）而新增的三條規則放在一起。(1) eq. 11.28：c[v] = w_c < |κ′|/3——用 **posterior** κ′ 的大小，且 GP 明說「Use of an inactive core is not permitted even if a timeslot in the previous rotation is used and the core was active then」，所以 core 3（|κ′|/3 = 3 → active 只有 0–2）即使透過 M* = (P(|λ′|, η′_3, 590), Φ(λ′)) 找得到合法簽署者也不行。(2) eq. 11.31：(w_s)_v = |κ′| = 9——每個 assurer 拿一個 chunk，chunk 數必須等於新的 assurer 數；為 12 個 validator 編的 report 對不上。(3) eq. 11.18：|κ| ≠ |κ′| 時 ρ‡ 全部清空（「Items cleared in this way can be viewed as having timed out early」）——舊集合留下的 pending report 也無法再被新集合 assure。0.7.2 沒有這些問題（V = 1023 = 3C 固定），你們 0.7.2 的 FilterAvailableReports 也沒有 size-change 條件（#1027 review 才補上），|κ′|/3 的 core 上限與 (w_s)_v = |κ′| 亦是 #1016/#1037 的範圍。
-
-**逐項辨析**
-
-1. ❌ Valid: M* reproduces the previous rotation's assignment, under which core 3 was active and 12 chunks were the right shard count; eq. 11.28's core bound is read against whichever set M* selects, and ρ‡ survives an epoch change untouched  
-   M/M* 只決定誰有資格簽；w_c 的上限永遠用 posterior κ′，ρ‡ 也會被 |κ| ≠ |κ′| 清空。
-2. ❌ Valid, but ρ′[3] is stamped with the guarantee's own slot t = 595 instead of τ′ = 600, so eq. 11.18's H_T ≥ t + U already holds at slot 600 and the assignment is dropped in the very block that created it  
-   eq. 11.46 的 timestamp 永遠是 τ′ = 600，600 ≥ 605 不成立，不會當場被清掉。
-3. ✅ Invalid: eq. 11.28 bounds w_c by |κ′|/3 = 3 even under M*, so core 3 is now inactive; eq. 11.31 wants (w_s)_v = |κ′| = 9, not the 12 chunks the report carries; and eq. 11.18 has already emptied ρ‡ because |κ| ≠ |κ′|  
-   三條 0.8.0 新規則同時命中：core 上限 |κ′|/3 = 3、shard 數要 9、且 ρ‡ 已因換屆清空。
-4. ❌ Invalid only because the signers come from λ′: eq. 11.23 lets M* fall back to the previous epoch's keys for assurances alone, so a guarantee in an epoch's first block needs κ′ signatures and w_c may be any core below C/3  
-   eq. 11.23 的 M* 本來就是 guarantor 的上一輪分配，λ′ 成員簽名合法；上限也不是 C/3。
-
-> **陷阱**　0.8.0 三個「跟著 |κ′| 走」的地方：active core 數 |κ′|/3、erasure shard 數 |κ′|、|κ| ≠ |κ′| 就清 ρ‡。
-
-<sub>`ch11-inactive-core-set-shrink`</sub>
-
----
-
-### 11-7　An assurance carries a bitfield with one bit per core plus a signature. What is actually signed, and what would break if the signature covered only the bitfield?
+### 11-6　An assurance carries a bitfield with one bit per core plus a signature. What is actually signed, and what would break if the signature covered only the bitfield?
 
 <sub>11.2 Assurances — ●●○ · 概念 · §11.2</sub>
 
@@ -6718,32 +6511,32 @@ eq. 11.14 把簽章訊息寫得很死：∀a ∈ E_A，a 的簽章必須是 **X_
 
 ---
 
-### 11-8　What does each entry of ρ (the availability assignments) hold in GP 0.8.0, and why did PR #494 change it?
+### 11-7　What does each entry of ρ (the availability assignments) hold, and what are the stored pieces needed for?
 
-<sub>11.1 State — ●●○ · 版本差異 · eq. 11.1 (ρ) · ⚠ 0.7.2→0.8.0</sub>
+<sub>11.1 State — ●●○ · 設計理由 · eq. 11.1 (ρ)</sub>
 
 **標準答案**　ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C — the whole guarantee, i.e. the work-report together with its 2–3 guarantor signatures, plus the slot at which it was reported
 
-eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可以是 ∅（沒有待處理的工作）或一組 (guarantee, slot)。**0.8.0（PR #494）的改動是把存的東西從 report 換成整份 guarantee**，也就是連 2–3 個 guarantor 簽章一起留著。GP 給了兩個理由：**其一，「To determine the guarantors to try directly fetching the bundle from」**——auditor 要重跑 refine 就得先拿到 work-package bundle，而最可能還持有完整 bundle 的就是當初擔保它的那幾位；有簽章才知道去找誰，否則只能靠 erasure coding 從 1/3 的 shard 慢慢重建，代價高得多。**其二，「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic」**——若這份 report 後來被判為 bad，那些簽章就是把擔保者列為 culprit 的證據。簽章丟了，就罰不到人。**t 是進鏈的 slot τ′**（不是 guarantee 自己帶的 slot），用來起算 U = 5 的 timeout。**連帶影響狀態序列化**：C(10) 從只存 report 變成 ↕(g, E_4(t))，這是遷移時必須同步改的地方。
+eq. 11.1：ρ ∈ ⟦?(g ∈ 𝔾, t ∈ N_T)⟧_C——每個 core 一格，可以是 ∅（沒有待處理的工作）或一組 (guarantee, slot)。**存的是整份 guarantee 而不只是 report**，也就是連 2–3 個 guarantor 簽章一起留著。GP 給了兩個理由：**其一，「To determine the guarantors to try directly fetching the bundle from」**——auditor 要重跑 refine 就得先拿到 work-package bundle，而最可能還持有完整 bundle 的就是當初擔保它的那幾位；有簽章才知道去找誰，否則只能靠 erasure coding 從 1/3 的 shard 慢慢重建，代價高得多。**其二，「In the case of a dispute, the guarantor signatures are needed to construct a disputes extrinsic」**——若這份 report 後來被判為 bad，那些簽章就是把擔保者列為 culprit 的證據。簽章丟了，就罰不到人。**t 是進鏈的 slot τ′**（不是 guarantee 自己帶的 slot），用來起算 U = 5 的 timeout。**狀態序列化也是這個形狀**：C(10) 對每個 core 存 ¿(g, E_4(t))，也就是 ∅ 或一組 (guarantee, slot)。
 
 **逐項辨析**
 
 1. ✅ ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot)?]_C — the whole guarantee, i.e. the work-report together with its 2–3 guarantor signatures, plus the slot at which it was reported  
-   0.8.0 (#494) 改存整個 guarantee，正是為了留住 guarantor 的身分與簽章。
-2. ❌ ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C — the report and its slot but no signatures, as in 0.7.2; guarantor identities are recovered from the guarantees recorded in β instead  
-   (w, t) 是 0.7.2 的型別；β 每筆只有 header hash、state root、super-peak、slot 與字典，無簽章可翻。
+   存的是整個 guarantee，正是為了留住 guarantor 的身分與簽章。
+2. ❌ ρ ∈ [(w ∈ ℝ work-report, t ∈ N_T timeslot)?]_C — the report and its slot but no signatures at all; guarantor identities are recovered from the guarantees recorded in β instead  
+   只存 report 就沒有簽章可用；β 每筆只有 header hash、state root、super-peak、slot 與字典，無簽章可翻。
 3. ❌ ρ ∈ [(h ∈ ℍ report hash, t ∈ N_T timeslot)?]_C — only a 32-octet commitment per core, the guarantee itself being held off-chain by the guarantors until the report accumulates  
    eq. 11.17 要把 (ρ†[c]_g)_w 這份完整 report 交給 accumulation，光有 hash 拼不回 digest。
 4. ❌ ρ ∈ [(g ∈ 𝔾 guarantee, t ∈ N_T timeslot, f ∈ bits[|κ|])?]_C — the guarantee, the slot, and a bitfield of assurances accumulated across blocks until the super-majority is reached  
    可用性是單一區塊內的統計：eq. 11.17 只對本塊 E_A 求和，state 裡沒有跨塊累加的 bitfield。
 
-> **陷阱**　遷移點：ρ 的型別與序列化都變了（issue #1012 樹）。
+> **陷阱**　ρ 存的是整份 guarantee（含簽章）而不只是 report；t 是進鏈的 slot τ′。
 
 <sub>`ch11-rho-state`</sub>
 
 ---
 
-### 11-9　A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. What does each field hold — and what is g commonly mistaken for?
+### 11-8　A work-report (eq. 11.2, of the set ℝ) is a tuple (s, c, c, a, t, l, d, g) — bold c is the refinement context, plain c the core index. What does each field hold — and what is g commonly mistaken for?
 
 <sub>11.1.1 Work Report — ●●○ · 概念 · eq. 11.2–11.3</sub>
 
@@ -6768,38 +6561,13 @@ eq. 11.2：ℝ ≡ (s, **c**, c, a, **t**, **l**, **d**, g)，八個欄位——
 
 ---
 
-### 11-10　Which fields does the refinement context (eq. 11.4, of the set ℂ) contain in GP 0.8.0 (PR #526)?
-
-<sub>11.1.2 Refinement Context — ●●○ · 版本差異 · eq. 11.4 · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　Anchor: header hash a, timeslot n, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t, posterior state root r; prerequisites p (a set of package hashes) — 8 fields
-
-eq. 11.4（0.8.0）：ℂ ≡ (a anchor hash, n anchor slot, s anchor posterior state root, b anchor accumulation-output super-peak, l lookup-anchor hash, t lookup-anchor slot, r lookup-anchor posterior state root, p prerequisites)。#526「Expose lookup anchor posterior root and anchor slot in refinement context」新增了 anchor 的 timeslot n 與 lookup anchor 的 posterior state root r。驗證：anchor 四元組要匹配 β† 的某筆（eq. 11.36：hash、state root、super-peak b、timeslot）；lookup anchor 的三元組要在 ancestors A 裡找到（eq. 11.38：h_T = t、H(h) = l、且其子塊 h′ 的 H_R = r）。你們 issue #1022 提到「8-field RefineContext」。
-
-**逐項辨析**
-
-1. ✅ Anchor: header hash a, timeslot n, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t, posterior state root r; prerequisites p (a set of package hashes) — 8 fields  
-   0.8.0 #526 補上的正是 anchor 的 timeslot n 與 lookup anchor 的 posterior state root r，共八欄。
-2. ❌ Anchor: header hash a, posterior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t; prerequisites p (a set of package hashes) — 6 fields, unchanged from 0.7.2  
-   (a, s, b, l, t, p) 六欄是 0.7.2 的型別；少了 n，eq. 11.36 就沒有 x_n = y_t 這一項可比。
-3. ❌ Anchor: header hash a, timeslot n, posterior state root s, BEEFY root b; lookup-anchor: header hash l, timeslot t, posterior state root r; core index c and prerequisites p (a set of package hashes) — 9 fields  
-   b 是 accumulation-output super-peak（BEEFY root 是舊名），而 core index 是 w_c、不在 ℂ 裡。
-4. ❌ Anchor: header hash a, timeslot n, prior state root s, accumulation-output-log super-peak b; lookup-anchor: header hash l, timeslot t, prior state root r; prerequisites p (a set of package hashes) — 8 fields  
-   兩個 root 都是 posterior：eq. 11.36 比 β† 那筆的 state root，eq. 11.38 比子塊 header 的 H_R。
-
-> **陷阱**　b 是 β 的 accumulation-output super-peak（Keccak MMR），不是 BEEFY root 這個舊名。
-
-<sub>`ch11-refinement-context`</sub>
-
----
-
-### 11-11　The availability specification (eq. 11.5) is s ≡ (p, l, u, v, e, n). What do u, v and e denote, and what constraint does eq. 11.31 place on v?
+### 11-9　The availability specification (eq. 11.5) is s ≡ (p, l, u, v, e, n). What do u, v and e denote, and what constraint does eq. 11.31 place on v?
 
 <sub>11.1.3 Availability — ●●○ · 概念 · eq. 11.5, 11.31</sub>
 
 **標準答案**　u = erasure root, the Merkle root over the v chunks that erasure-code the bundle plus exported segments; v = the erasure-chunk count, which eq. 11.31 forces to equal |κ′|; e = segment root, a constant-depth tree over the exported segment hashes; n = the segment count
 
-eq. 11.5：s ≡ (p, l, u, v, e, n)——p = work-package hash、l = bundle 長度、**u = erasure root**、**v = erasure chunk 數**、**e = segment root**、n = segment 數。**兩個 root 的分工是這題的核心**：u 承諾的是「審計所需的全部資料」——bundle 的 shard 加上匯出 segment 的 shard，auditor 靠它確認自己拿到的碎片沒被竄改；e 承諾的是「這份 package 匯出了哪些 segment」，用的是定深樹，讓**後續**的 package 在 import 這些 segment 時能驗證重建出來的內容正確。一個對內（稽核），一個對外（給下游引用）。**eq. 11.31 強制 v = |κ′|**，GP 的理由寫得很白：「As one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」。**0.8.0 之所以要明確檢查這件事**，是因為 validator 數變成可變（eq. 6.8 的 𝕍）——在 0.7.2 那是個常數，對不上根本不會發生；現在若 v 與 |κ′| 不符，就會有 assurer 分不到 chunk 或 chunk 沒人收，可得性門檻的計算跟著失真。注意用的是 **posterior 的 κ′**，因為 chunk 是發給接下來要背書的那一組。
+eq. 11.5：s ≡ (p, l, u, v, e, n)——p = work-package hash、l = bundle 長度、**u = erasure root**、**v = erasure chunk 數**、**e = segment root**、n = segment 數。**兩個 root 的分工是這題的核心**：u 承諾的是「審計所需的全部資料」——bundle 的 shard 加上匯出 segment 的 shard，auditor 靠它確認自己拿到的碎片沒被竄改；e 承諾的是「這份 package 匯出了哪些 segment」，用的是定深樹，讓**後續**的 package 在 import 這些 segment 時能驗證重建出來的內容正確。一個對內（稽核），一個對外（給下游引用）。**eq. 11.31 強制 v = |κ′|**，GP 的理由寫得很白：「As one chunk is distributed to each assurer, the number of chunks must equal the size of the assuring validator set」。**之所以要明確檢查這件事**，是因為 validator 數是可變的（eq. 6.8 的 𝕍）；若 v 與 |κ′| 不符，就會有 assurer 分不到 chunk 或 chunk 沒人收，可得性門檻的計算跟著失真。注意用的是 **posterior 的 κ′**，因為 chunk 是發給接下來要背書的那一組。
 
 **逐項辨析**
 
@@ -6818,7 +6586,7 @@ eq. 11.5：s ≡ (p, l, u, v, e, n)——p = work-package hash、l = bundle 長�
 
 ---
 
-### 11-12　A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). What does each error mean?
+### 11-10　A work-digest's result is either a blob or a member of the error set 𝔼 = {∞, ☇, BADEXPORTS, OVERSIZE, BAD, BIG} (eq. 11.7). What does each error mean?
 
 <sub>11.1.4 Work Digest — ●●○ · 概念 · eq. 11.6–11.7</sub>
 
@@ -6843,7 +6611,7 @@ eq. 11.7（錯誤集合是 𝔼，注意 𝕁 在 0.8.0 是 segment 的集合）
 
 ---
 
-### 11-13　What is an assurance in E_A made of, and what rules must the assurances extrinsic satisfy?
+### 11-11　What is an assurance in E_A made of, and what rules must the assurances extrinsic satisfy?
 
 <sub>11.2 Package Availability Assurances — ●●○ · 概念 · eq. 11.11–11.16</sub>
 
@@ -6868,18 +6636,18 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-14　When does a report become available (R), and when is a pending assignment cleared from ρ‡ in GP 0.8.0?
+### 11-12　When does a report become available (R), and when is a pending assignment cleared from ρ‡?
 
-<sub>11.2.2 Available Reports — ●●○ · 版本差異 · eq. 11.17–11.18 · ⚠ 0.7.2→0.8.0</sub>
+<sub>11.2.2 Available Reports — ●●○ · 概念 · eq. 11.17–11.18</sub>
 
 **標準答案**　Available iff the number of assurances with bit c set is > 2/3·|κ| (tiny: ≥ 5 of 6; full: ≥ 683); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)
 
-**成為 available（eq. 11.17）**：R ≡ [ρ†[c] 的 report | Σ_a a_f[c] > (2/3)·|κ|]——注意是**嚴格大於** 2/3，對整數而言等價於 ≥ ⌊2|κ|/3⌋ + 1。tiny（|κ| = 6）：> 4，也就是至少 **5**；full（|κ| = 1023）：> 682，也就是至少 **683**。門檻訂在這裡是因為 ELVES 的安全假設要求超過 2/3 的 validator 誠實且在線；而 erasure coding 只需 1/3 的 shard 就能重建，所以 2/3 的背書意味著「資料確實救得回來」。**清除 pending（eq. 11.18）**：ρ‡[c] = ∅ 當 **① 本來就空** ∨ **② 已經 available** ∨ **③ H_T ≥ t + U（逾時，U = C_assurancetimeoutperiod = 5 個 slot）** ∨ **④ |κ| ≠ |κ′|**。**第四個條件是 0.8.0 新增的**，而且理由很硬：validator 集合大小一變，erasure chunk 數（必須等於 |κ′|）與 assurer 集合就全部對不上了，那些 pending 的 report 再等下去也不可能湊到有效的背書——所以一律視同提早逾時。你們 0.7.2 的 FilterAvailableReports 只實作了逾時那條，缺的正是這個 size-change 條件。
+**成為 available（eq. 11.17）**：R ≡ [ρ†[c] 的 report | Σ_a a_f[c] > (2/3)·|κ|]——注意是**嚴格大於** 2/3，對整數而言等價於 ≥ ⌊2|κ|/3⌋ + 1。tiny（|κ| = 6）：> 4，也就是至少 **5**；full（|κ| = 1023）：> 682，也就是至少 **683**。門檻訂在這裡是因為 ELVES 的安全假設要求超過 2/3 的 validator 誠實且在線；而 erasure coding 只需 1/3 的 shard 就能重建，所以 2/3 的背書意味著「資料確實救得回來」。**清除 pending（eq. 11.18）**：ρ‡[c] = ∅ 當 **① 本來就空** ∨ **② 已經 available** ∨ **③ H_T ≥ t + U（逾時，U = C_assurancetimeoutperiod = 5 個 slot）** ∨ **④ |κ| ≠ |κ′|**。**第四個條件**的理由很硬：validator 集合大小一變，erasure chunk 數（必須等於 |κ′|）與 assurer 集合就全部對不上了，那些 pending 的 report 再等下去也不可能湊到有效的背書——所以一律視同提早逾時。
 
 **逐項辨析**
 
 1. ✅ Available iff the number of assurances with bit c set is > 2/3·|κ| (tiny: ≥ 5 of 6; full: ≥ 683); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)  
-   eq. 11.17 是嚴格大於 2/3，而 eq. 11.18 的第三個清除條件正是 0.8.0 新增的 |κ| ≠ |κ′|。
+   eq. 11.17 是嚴格大於 2/3，而 eq. 11.18 的第三個清除條件是 |κ| ≠ |κ′|。
 2. ❌ Available iff the number of assurances with bit c set is ≥ 2/3·|κ| (tiny: ≥ 4 of 6; full: ≥ 682); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U (U = 5 slots), or |κ| ≠ |κ′| (the validator-set size changed)  
    剛好 2/3 不夠：tiny 要 5 票、full 要 683 票，這裡各少了一票。
 3. ❌ Available iff the number of assurances with bit c set is > 2/3·|κ| (tiny: ≥ 5 of 6; full: ≥ 683); ρ‡[c] = ∅ if the report became available, or H_T ≥ t + U with U = 10 slots, or the epoch index has changed  
@@ -6893,20 +6661,20 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-15　How are validators assigned to cores for guaranteeing in GP 0.8.0?
+### 11-13　How are validators assigned to cores for guaranteeing in GP 0.8.0?
 
 <sub>11.3 Guarantor Assignments — ●●● · 概念 · eq. 11.19–11.23</sub>
 
 **標準答案**　P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the sequence [0,0,0,1,1,1,…] is Fisher-Yates shuffled with entropy e = η′_2, then rotated by the rotation index (R = 10 slots); M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — only cores < |κ′|/3 are active
 
-§11.3：C = 341 個 core 固定，但只有前 |κ′|/3 個是 active（每個 core 3 個 guarantor）。eq. 11.20：R(c, n) = [(x + n) mod (|c|/3) | x ∈ c]（rotation）；11.21：P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)，F 是附錄 F 的 Fisher-Yates shuffle；11.22：M ≡ (P(|κ′|, η′_2, τ′), Φ(κ′))——key 經 Φ 過濾，offender 會被拒（你們 BannedValidator = code 23）。用 η′_2 是為了避免 fork magnification：§11.3「to avoid the possibility of fork-magnification where uncertainty about chain state at the end of an epoch could give rise to two established forks」。11.23：M* 是上一個 rotation 的分配：若 τ′ − R 仍在同一 epoch 用 (κ′, η′_2)，否則用 (λ′, η′_3)。版本差異：0.7.2 的 base assignment 是 ⌊C·i/V⌋，0.8.0 改成 ⌊i/3⌋（因為 active cores = V/3）。
+§11.3：C = 341 個 core 固定，但只有前 |κ′|/3 個是 active（每個 core 3 個 guarantor）。eq. 11.20：R(c, n) = [(x + n) mod (|c|/3) | x ∈ c]（rotation）；11.21：P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋)，F 是附錄 F 的 Fisher-Yates shuffle；11.22：M ≡ (P(|κ′|, η′_2, τ′), Φ(κ′))——key 經 Φ 過濾，offender 會被拒（你們 BannedValidator = code 23）。用 η′_2 是為了避免 fork magnification：§11.3「to avoid the possibility of fork-magnification where uncertainty about chain state at the end of an epoch could give rise to two established forks」。11.23：M* 是上一個 rotation 的分配：若 τ′ − R 仍在同一 epoch 用 (κ′, η′_2)，否則用 (λ′, η′_3)。base assignment 是 ⌊i/3⌋，因為 active cores = |κ′|/3。
 
 **逐項辨析**
 
 1. ✅ P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the sequence [0,0,0,1,1,1,…] is Fisher-Yates shuffled with entropy e = η′_2, then rotated by the rotation index (R = 10 slots); M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — only cores < |κ′|/3 are active  
    base sequence ⌊i/3⌋、entropy η′_2、rotation index ⌊(t mod E)/R⌋ 三處都合 eq. 11.21。
 2. ❌ P(v, e, t) = R(F([⌊C·i/v⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋): the base sequence spreads the v validators over all C cores before the Fisher-Yates shuffle with entropy e = η′_2; M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — all C = 341 cores are active  
-   ⌊C·i/v⌋ 是 0.7.2 的寫法：|κ′| < 3C 時它會把 validator 撒到不存在的 active core 上。
+   ⌊C·i/v⌋ 不對：|κ′| < 3C 時它會把 validator 撒到不存在的 active core 上。
 3. ❌ P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), ⌊(t mod E)/R⌋), the shuffle taking entropy e = η′_1 and the rotation period being R = 600, i.e. one rotation per epoch; M = (P(|κ′|, η′_1, τ′), Φ(κ′)) — only cores < |κ′|/3 are active  
    §11.3 明說用 η′_2 而非 η′_1；R = 10 而非 600，一個 epoch 有 E/R = 60 次 rotation。
 4. ❌ P(v, e, t) = R(F([⌊i/3⌋ | i ∈ N_v], e), t mod R): the shuffled sequence is rotated once per slot, so each validator's core advances by one every block, with entropy e = η′_2; M = (P(|κ′|, η′_2, τ′), Φ(κ′)) — only cores < |κ′|/3 are active  
@@ -6918,7 +6686,7 @@ eq. 11.11：E_A ∈ [(a ∈ H, f ∈ B_C, v ∈ N_{|κ|}, s ∈ E)]；11.12：a 
 
 ---
 
-### 11-16　For a guarantee g = (w, t, a) in E_G: what is in the credential a, who may sign, how is the slot t bounded, what is signed, and how is the core bounded?
+### 11-14　For a guarantee g = (w, t, a) in E_G: what is in the credential a, who may sign, how is the slot t bounded, what is signed, and how is the core bounded?
 
 <sub>11.4 Work Report Guarantees — ●●● · 概念 · eq. 11.24–11.29</sub>
 
@@ -6943,7 +6711,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-17　Which on-chain checks apply to each incoming report w before it is placed in ρ′?
+### 11-15　Which on-chain checks apply to each incoming report w before it is placed in ρ′?
 
 <sub>11.4 Work Report Guarantees — ●●○ · 概念 · eq. 11.31–11.33</sub>
 
@@ -6968,7 +6736,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-18　What are the contextual validity requirements for reports in E_G — and what plausible-sounding requirement does the GP not actually impose?
+### 11-16　What are the contextual validity requirements for reports in E_G — and what plausible-sounding requirement does the GP not actually impose?
 
 <sub>11.4.1 Contextual Validity of Reports — ●●● · 概念 · eq. 11.35–11.45</sub>
 
@@ -6993,7 +6761,7 @@ eq. 11.24：G ≡ (w ∈ R, t ∈ N_T, a ∈ [(N, E)]_{2:3})；11.25–11.26：E
 
 ---
 
-### 11-19　After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?
+### 11-17　After processing E_G, what does ρ′[c] hold for a core that received a new guarantee g?
 
 <sub>11.5 Transitioning for Reports — ●○○ · 概念 · eq. 11.46</sub>
 
@@ -7016,9 +6784,9 @@ eq. 11.46：ρ′[c] ≡ (g, t: τ′) 當 ∃g ∈ E_G 使得該 guarantee 的 
 
 ---
 
-### 11-20　The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Is that the GP's threshold, and what does its correctness depend on?
+### 11-18　The team's availability check uses `totalAvailable[i] >= types.ValidatorsSuperMajority`. Is that the GP's threshold, and what does its correctness depend on?
 
-<sub>11.2.2 Available Reports — ●●○ · 程式碼 · eq. 11.17 — internal/extrinsic/assurance_controller.go · ⚠ 0.7.2→0.8.0</sub>
+<sub>11.2.2 Available Reports — ●●○ · 程式碼 · eq. 11.17 — internal/extrinsic/assurance_controller.go</sub>
 
 ```go
 for i := 0; i < types.CoresCount; i++ {
@@ -7035,7 +6803,7 @@ for i := 0; i < types.CoresCount; i++ {
 
 **標準答案**　It matches the GP's strict '> 2/3·|κ|' exactly when ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1 is derived from the live size of κ — 5 of 6 in tiny, 683 of 1023 in full — rather than from a compile-time constant
 
-eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的是 `>= ValidatorsSuperMajority`。**兩者等價的條件是 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1**：對整數而言 x > 2V/3 ⇔ x ≥ ⌊2V/3⌋ + 1。驗算：V = 6 → > 4 → ≥ **5**；V = 1023 → > 682 → ≥ **683**。所以這個寫法本身沒問題。**真正的風險在那個常數怎麼來的**：0.8.0 起 |κ| 可變（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），所以它必須從 **live 的 len(κ)** 算出來，不能是編譯期寫死的數字——這與 fallback 那題的 `%= types.ValidatorsCount` 是同一類問題（issue #1037）。**另外那個 `rhoDagger[i] == nil` 的檢查其實是多餘的但無害**：eq. 11.16 已經規定 assurance 的某一位只能在該 core 確實有 pending report 時才被設起來，所以走到這裡不會有「有人為空 core 背書」的情況。留著當防禦性檢查沒關係，但別誤以為 GP 要求在這裡做這個判斷——它其實屬於 extrinsic 驗證那一層。
+eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的是 `>= ValidatorsSuperMajority`。**兩者等價的條件是 ValidatorsSuperMajority = ⌊2|κ|/3⌋ + 1**：對整數而言 x > 2V/3 ⇔ x ≥ ⌊2V/3⌋ + 1。驗算：V = 6 → > 4 → ≥ **5**；V = 1023 → > 682 → ≥ **683**。所以這個寫法本身沒問題。**真正的風險在那個常數怎麼來的**：|κ| 是可變的（eq. 6.8 的 𝕍 允許 6 到 1023 的 3 的倍數），所以它必須從 **live 的 len(κ)** 算出來，不能是編譯期寫死的數字——這與 fallback 那題的 `%= types.ValidatorsCount` 是同一類問題（issue #1037）。**另外那個 `rhoDagger[i] == nil` 的檢查其實是多餘的但無害**：eq. 11.16 已經規定 assurance 的某一位只能在該 core 確實有 pending report 時才被設起來，所以走到這裡不會有「有人為空 core 背書」的情況。留著當防禦性檢查沒關係，但別誤以為 GP 要求在這裡做這個判斷——它其實屬於 extrinsic 驗證那一層。
 
 **逐項辨析**
 
@@ -7054,7 +6822,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
-### 11-21　ρ is updated three times within one block: ρ† (after E_D), ρ‡ (after E_A) and ρ′ (after E_G). Why that order, and what would break if E_G were processed before E_A?
+### 11-19　ρ is updated three times within one block: ρ† (after E_D), ρ‡ (after E_A) and ρ′ (after E_G). Why that order, and what would break if E_G were processed before E_A?
 
 <sub>4.1 dependency graph; 10.4; 11.3 — ●●○ · 設計理由 · eq. 4.12–4.14 (ρ†, ρ‡, ρ′), eq. 10.14, eq. 11.18</sub>
 
@@ -7070,7 +6838,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
    三者不是獨立的：11.18 讀 ρ†、guarantee 的 core_engaged 檢查讀 ρ‡，順序改變會改變哪些 guarantee 有效，state root 就不同。
 3. ❌ Guarantees must come first so that there is something for assurances to attest, so the real order is E_G → E_A → E_D and a guarantee can be assured within the very block that carries it; the GP lists E_D first only because verdict signatures are the most expensive to verify and a bad block should be rejected early  
    方向反了：assurance 背書的是「上個或更早 block」已經在 ρ 裡的 report，同一個 block 的 guarantee 還沒有 shard 可背書。
-4. ❌ Assurances must precede disputes because a verdict can only concern a report that is already available, since auditors cannot fetch the data of an unavailable one; listing E_D first is a 0.8.0 slip, and an implementation may swap the two without changing the state root  
+4. ❌ Assurances must precede disputes because a verdict can only concern a report that is already available, since auditors cannot fetch the data of an unavailable one; listing E_D first is an editorial slip, and an implementation may swap the two without changing the state root  
    verdict 針對的是 report hash，不需要它 available；而且依賴圖是規格的一部分，不是可交換的實作選擇。
 
 > **陷阱**　記口訣：清壞的 → 清完成的 → 填新的。三段各對應一個 extrinsic。
@@ -7079,7 +6847,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
-### 11-22　A report's prerequisites are checked twice: when the guarantee lands on-chain and again at accumulation. Which history does each check read (E_G, β's reported maps, ξ, ω), and why would ξ alone not do at guarantee time?
+### 11-20　A report's prerequisites are checked twice: when the guarantee lands on-chain and again at accumulation. Which history does each check read (E_G, β's reported maps, ξ, ω), and why would ξ alone not do at guarantee time?
 
 <sub>11.5 (prerequisites); 12.1 — ●●● · 設計理由 · eq. 11.42, §12.1 (R^Q, ω, ξ), eq. 7.x (β reported map)</sub>
 
@@ -7091,7 +6859,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 1. ✅ At guarantee time (eq. 11.42) a prerequisite must be in the same E_G or in β's reported maps of the last 8 blocks, proving it was reported. At accumulation (§12.1) the dependencies of R^Q and ω are struck out against ξ, proving it was accumulated. ξ alone will not do at guarantee time because a prerequisite is usually reported but not yet available, so it is not in ξ  
    對：eq. 11.42 的集合是 E_G 的 package hash ∪ β 各筆的 p（reported map）；§12.1 的 R^Q = E(…, ξ∪) 與 Q 都對「已 accumulate」的集合消依賴；ch11-prerequisite-window 那題就是 ξ 在 guarantee 時不被查的具體案例。
-2. ❌ Both checks read ξ: at guarantee time the prerequisite must already be in ξ (accumulated), and at accumulation ξ is used again to strike satisfied dependencies; β's reported maps serve auditors locating bundles and ω is just a buffer waiting for gas. The GP's mention of β in §11.5 is a 0.7.x leftover that the 0.8.0 editors simply forgot to remove  
+2. ❌ Both checks read ξ: at guarantee time the prerequisite must already be in ξ (accumulated), and at accumulation ξ is used again to strike satisfied dependencies; β's reported maps serve auditors locating bundles and ω is just a buffer waiting for gas. The GP's mention of β in §11.5 is an editorial leftover that plays no part in block validity at all  
    guarantee 時明確不查 ξ；β 的 reported map 是 §11 的 on-chain 檢查在讀（c3-ch07-reported-map-downstream）；ω 也不是「等 gas」而是等依賴。
 3. ❌ Guarantee time reads ω: the prerequisite must be some report in the ready queue; accumulation reads β to see whether the prerequisite was reported within the last 8 blocks. ξ is consulted only when ω is purged at an epoch boundary and plays no part in dependency decisions  
    ω 是 accumulate 階段的東西，guarantee 時不讀；β 在 accumulate 時不讀。整個對調了。
@@ -7104,7 +6872,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
-### 11-23　A guarantee's credential may be verified against M or M*. Why is M*, the previous rotation's assignment, needed at all, and why does it switch to λ′ and η′_3 only when that previous rotation lies in the previous epoch?
+### 11-21　A guarantee's credential may be verified against M or M*. Why is M*, the previous rotation's assignment, needed at all, and why does it switch to λ′ and η′_3 only when that previous rotation lies in the previous epoch?
 
 <sub>11.3 Guarantor assignments — ●●○ · 設計理由 · eq. 11.20–11.23, eq. 11.28 (slot window)</sub>
 
@@ -7120,7 +6888,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
    M* 是 §11 的 on-chain 檢查用的，audit 是 off-chain 且自己重建 bundle，不查指派表。
 3. ❌ Because M and M* are two ways of computing the same rotation: M with κ′, M* with λ′, both computed every block, and a credential is accepted if it matches either; that lets both the old and the new validator set sign during the rotation that straddles an epoch change, and η′_3 merely makes the two shuffles differ; outside that one rotation the two tables always agree and only M is consulted  
    credential 不是「符合任一即可」：t 在當前 rotation 對 M、在上一個 rotation 對 M*，由 t 決定，不能混。
-4. ❌ Because 0.8.0 made the set size variable: when |κ| ≠ |κ′| the shuffle of M changes completely, so M* recomputes with the previous set λ′ so that credentials signed by guarantors assigned before the shrink stay valid; when no epoch change occurs M* equals M and is only a safeguard  
+4. ❌ Because the set size can vary per epoch: when |κ| ≠ |κ′| the shuffle of M changes completely, so M* recomputes with the previous set λ′ so that credentials signed by guarantors assigned before the shrink stay valid; when no epoch change occurs M* equals M and is only a safeguard  
    集合大小改變時 eq. 11.18 直接清空 ρ‡、舊 report 作廢，不靠 M* 救；M* 的存在與集合可變無關。
 
 > **陷阱**　M* 不是備用算法，是「把時鐘撥回上一個 rotation」；跨 epoch 才需要連集合與 entropy 一起撥回去。
@@ -7129,24 +6897,24 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
-### 11-24　Assurance signatures are verified against κ[v] and the threshold is 2/3·|κ|, both the prior set, while guarantees use κ′. Why the asymmetry, and what happens to the reports waiting in ρ when |κ| ≠ |κ′|, and why?
+### 11-22　Assurance signatures are verified against κ[v] and the threshold is 2/3·|κ|, both the prior set, while guarantees use κ′. Why the asymmetry, and what happens to the reports waiting in ρ when |κ| ≠ |κ′|, and why?
 
 <sub>11.2 Assurances; 11.3 — ●●○ · 設計理由 · eq. 11.14, eq. 11.17, eq. 11.18, eq. 11.31</sub>
 
 **標準答案**　The report an assurance attests entered ρ in an earlier block and its shards were cut for the set size of that time (eq. 11.31), so signers and threshold belong to that set; a guarantee is work newly accepted in this block, hence κ′. When |κ| ≠ |κ′| the old shard counts no longer fit, so eq. 11.18 clears all of ρ‡ — timed out early
 
-看數字就懂：report 在 block N 被 guarantee 收進 ρ 時，eq. 11.31 要求它的 availability spec 宣告的 shard 數 (w_s)_v = |κ′|（block N 的 posterior set 大小），guarantor 也是照這個數切 erasure shard、分給那 |κ′| 個 validator。到了 block N+1、N+2 有人來 assurance，這些人就是「拿到 shard 的那批」，也就是 block N 的 κ′ = block N+1 的 κ。所以 eq. 11.13 對 κ[v] 驗簽、eq. 11.17 用 2/3|κ| 當門檻，兩者都在說「對切 shard 時的那個集合計票」。guarantee 相反，它是這個 block 新收的，shard 也是按這個 block 的 κ′ 切，所以用 κ′。當兩者不同——只會發生在 epoch 換檔且集合大小改變的 block——ρ 裡所有等待中的 report 的 shard 數都對不上新集合，沒辦法用新集合的人數算門檻，eq. 11.18 的第三個條件 |κ| ≠ |κ′| 就把 ρ‡ 全清，§11.2 原文：「Note that all items are cleared when the size of the active validator key set κ changes. Items cleared in this way can be viewed as having timed out early.」guarantor 要重新 guarantee、按新集合重切。這是 0.8.0 讓集合可變之後付出的代價，也是 ch11-inactive-core-set-shrink 那題的第三個判定依據。
+看數字就懂：report 在 block N 被 guarantee 收進 ρ 時，eq. 11.31 要求它的 availability spec 宣告的 shard 數 (w_s)_v = |κ′|（block N 的 posterior set 大小），guarantor 也是照這個數切 erasure shard、分給那 |κ′| 個 validator。到了 block N+1、N+2 有人來 assurance，這些人就是「拿到 shard 的那批」，也就是 block N 的 κ′ = block N+1 的 κ。所以 eq. 11.13 對 κ[v] 驗簽、eq. 11.17 用 2/3|κ| 當門檻，兩者都在說「對切 shard 時的那個集合計票」。guarantee 相反，它是這個 block 新收的，shard 也是按這個 block 的 κ′ 切，所以用 κ′。當兩者不同——只會發生在 epoch 換檔且集合大小改變的 block——ρ 裡所有等待中的 report 的 shard 數都對不上新集合，沒辦法用新集合的人數算門檻，eq. 11.18 的第三個條件 |κ| ≠ |κ′| 就把 ρ‡ 全清，§11.2 原文：「Note that all items are cleared when the size of the active validator key set κ changes. Items cleared in this way can be viewed as having timed out early.」guarantor 要重新 guarantee、按新集合重切。這是讓集合大小可變所付出的代價。
 
 **逐項辨析**
 
 1. ✅ The report an assurance attests entered ρ in an earlier block and its shards were cut for the set size of that time (eq. 11.31), so signers and threshold belong to that set; a guarantee is work newly accepted in this block, hence κ′. When |κ| ≠ |κ′| the old shard counts no longer fit, so eq. 11.18 clears all of ρ‡ — timed out early  
    對：eq. 11.13 簽章對 κ[a_v]_e、eq. 11.17 門檻 > 2/3|κ|、eq. 11.31 shard 數 = |κ′|（收納時）、eq. 11.18 在 |κ| ≠ |κ′| 時清空，§11.2 原文「Items cleared in this way can be viewed as having timed out early」。
-2. ❌ Using κ for assurances is a 0.7.x leftover; 0.8.0 meant both to use κ′ but kept κ for test-vector compatibility; when |κ| ≠ |κ′| the reports in ρ keep waiting, only the threshold becomes 2/3·|κ′|, and the shard-count mismatch is patched by the guarantors re-encoding  
-   不是殘留：0.8.0 明確用 κ；也沒有「重新編碼」這種機制，report 直接作廢。
+2. ❌ Using κ for assurances is a historical leftover; the GP meant both to use κ′ but kept κ for test-vector compatibility; when |κ| ≠ |κ′| the reports in ρ keep waiting, only the threshold becomes 2/3·|κ′|, and the shard-count mismatch is patched by the guarantors re-encoding  
+   不是殘留：GP 明確用 κ；也沒有「重新編碼」這種機制，report 直接作廢。
 3. ❌ Because assurances are signed on validators' behalf by the block author, whose key has a definite index in κ, whereas guarantors sign for themselves and therefore use the freshest κ′; when |κ| ≠ |κ′| the reports in ρ are moved into ω to be assured again in the next epoch  
    assurance 是每個 validator 自己簽的（每人一份，最多一份）；ω 是依賴等待區，跟 assurance 無關。
 4. ❌ There is no asymmetry: both use κ′, and the GP writes κ in eq. 11.13 because an assurance anchors on the parent block, so 'the parent's κ′' is the same thing as 'this block's κ'; a change of |κ| does not affect reports, since the erasure-coding shard count is the constant 1023 fixed by the full config  
-   eq. 11.13 就是寫 κ；shard 數不是常數，0.8.0 起等於收納時的 |κ′|（tiny 是 6）。
+   eq. 11.13 就是寫 κ；shard 數不是常數，等於收納時的 |κ′|（tiny 是 6）。
 
 > **陷阱**　assurance 對「切 shard 時的集合」計票；集合大小一變，等待中的 report 全部提早逾時。
 
@@ -7154,7 +6922,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 ---
 
-### 11-25　The availability timeout is H_T ≥ t + U. Whose time is t, why not the guarantee's own signed slot g_t, and how far apart can the two be?
+### 11-23　The availability timeout is H_T ≥ t + U. Whose time is t, why not the guarantee's own signed slot g_t, and how far apart can the two be?
 
 <sub>11.2–11.3 — ●●○ · 設計理由 · eq. 11.18 (H_T ≥ t + U), §11.4 (ρ′[c] = (g, τ′)), eq. 11.28</sub>
 
@@ -7165,7 +6933,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 **逐項辨析**
 
 1. ✅ t is the τ′ of the block that placed the report in ρ (ρ′[c] = (g, τ′)), not the guarantee's g_t. The timeout measures on-chain exposure to assurances, so the clock starts when the report enters ρ; g_t may precede inclusion by up to R = 10 slots, and with g_t a late guarantee could be timed out on arrival  
-   對：ρ′[c] 存的是 (g, τ′)，ch11-inactive-core-set-shrink 那題把「蓋 g_t 而非 τ′」列為錯誤選項；eq. 11.28 的視窗寬度是 R。
+   對：ρ′[c] 存的是 (g, τ′)，蓋的是進鏈的 τ′ 而不是 guarantee 自己的 g_t；eq. 11.28 的視窗寬度是 R。
 2. ❌ t is the guarantee's own signed slot g_t, because that is when the guarantors finished refining and began distributing shards, so the chance to assure starts then; the including block's τ′ is used only for statistics. The two differ by at most U = 5 slots in either direction  
    g_t 只用來決定對 M 還是 M* 驗；逾時看的是 ρ 裡記的收納時間。
 3. ❌ t is the anchor timeslot inside the refinement context, because the report's content was computed against the state of that moment and the timeout should run from when the data started ageing; it differs from the inclusion time by at most H = 8 blocks  
@@ -7182,7 +6950,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 <a id="ch-12"></a>
 
-## §12 Accumulation　<sub>23 題</sub>
+## §12 Accumulation　<sub>22 題</sub>
 
 ### 12-1　Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. What does an operand tuple carry in GP 0.8.0, and which of its fields differ between those two tuples?
 
@@ -7359,13 +7127,13 @@ eq. 12.18 的 e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p)：`provide` h
 
 ---
 
-### 12-8　Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and what does it hand back in GP 0.8.0?
+### 12-8　Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and what does it hand back?
 
-<sub>12.2 Execution — ●●● · 版本差異 · eq. 12.17 (Δ+), 12.24, 12.28 · ⚠ 0.7.2→0.8.0</sub>
+<sub>12.2 Execution — ●●● · 概念 · eq. 12.17 (Δ+), 12.24, 12.28</sub>
 
 **標準答案**　Yes. The GP's termination test is n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0, so Δ* is still invoked; its service set s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} reduces to the three destinations, which are accumulated on the transfers alone. The result is ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩, whose fifth component — the processed transfers — is what T(s) in eq. 12.28 counts
 
-**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是 0.7.1 之後「把 on_transfer 併進 accumulate」的結果**：收款方不再有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**0.8.0 的 Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。**0.7.2 只回傳四元組**，缺的正是這一項——這是遷移時必須補的差異，否則 accumulation statistics 的第二個欄位永遠是零。
+**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是「把 on_transfer 併進 accumulate」的結果**：收款方沒有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。少了這一項，accumulation statistics 的第二個欄位就永遠是零。
 
 **逐項辨析**
 
@@ -7375,7 +7143,7 @@ eq. 12.18 的 e_d′ = I((e_d ∪ n) ∖ m, ⋃_{s ∈ s} Δ(s)_p)：`provide` h
    漏掉 eq. 12.18 明列的第三段 {t_d | t ∈ t}，那是純收款服務進入 accumulate 的唯一途徑。
 3. ✅ Yes. The GP's termination test is n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0, so Δ* is still invoked; its service set s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} reduces to the three destinations, which are accumulated on the transfers alone. The result is ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩, whose fifth component — the processed transfers — is what T(s) in eq. 12.28 counts  
    終止條件是 n = i + |t| + |f|；s 縮成三個收款方，回傳五元組的 t ⌢ t† 正是 T(s) 的來源。
-4. ❌ Yes — the test n = i + |t| + |f| = 3 ≠ 0 fires and the three destinations are accumulated on the transfers alone — but Δ+ still returns the four-tuple ⟨n, e′, b, u⟩ exactly as in 0.7.2; the processed transfers that T(s) needs are recovered afterwards by diffing δ† against δ for balance movements, eq. 12.28 being defined over that reconstruction rather than over anything Δ+ hands back  
+4. ❌ Yes — the test n = i + |t| + |f| = 3 ≠ 0 fires and the three destinations are accumulated on the transfers alone — but Δ+ returns only the four-tuple ⟨n, e′, b, u⟩ with no transfers in it; the processed transfers that T(s) needs are recovered afterwards by diffing δ† against δ for balance movements, eq. 12.28 being defined over that reconstruction rather than over anything Δ+ hands back  
    餘額變化是淨額：同時有 digest、有轉入又有轉出的 service 根本數不出 transfer 筆數。
 
 > **陷阱**　Δ+ 的停機條件是 n = i + |t| + |f|；report 用完不代表結束，轉帳與 always-accumulate 也能把遞迴撐著。
@@ -7517,18 +7285,18 @@ eq. 12.18 對這兩個輸出都用了有序迭代記號：u = ⟦(s, Δ(s)_u) | 
 
 ### 12-13　What total gas budget g is handed to the outer accumulation Δ+ in a block, and how does Δ+ choose how many reports to accumulate in a round?
 
-<sub>12.3 Final State Integration — ●●● · 版本差異 · eq. 12.24 (g) & 12.17 (Δ+) · ⚠ 0.7.2→0.8.0</sub>
+<sub>12.3 Final State Integration — ●●● · 概念 · eq. 12.24 (g) & 12.17 (Δ+)</sub>
 
 **標準答案**　g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports + Σ gas of pending deferred transfers + Σ free-accumulation gas ≤ g, runs Δ* on them, then recurses with g* = g + Σ(new transfers' gas) − Σ gas actually used and an empty free-accumulation map
 
-eq. 12.24：g = max(G_T, G_A·C + Σ χ_Z gas)，G_T = 3.5·10^9、G_A = 10^7、C = 341。eq. 12.17：i = max i：Σ_{r ∈ r[..i], d ∈ r_d} d_g + Σ_{t ∈ t} t_g + Σ_{x ∈ values(f)} x ≤ g（0.8.0 #500「Account for gas reserved by transfer and always acc items」——預算現在把 transfer gas 與 free allowance 也算進去）；n = i + |t| + |f|；(e*, t*, b*, u*) = Δ*(e, t, r[..i], f)；遞迴 Δ+(g*, t*, r[i..], e*, {})，g* = g + Σ t* gas − Σ u* used。為什麼是這種「先估後扣」設計：§12.2 兩個相斥因素——實際 gas 只有執行後才知道（sequential），但同一 service 的 items 想合併成一次 PVM 呼叫以攤銷啟動成本（parallel）。
+eq. 12.24：g = max(G_T, G_A·C + Σ χ_Z gas)，G_T = 3.5·10^9、G_A = 10^7、C = 341。eq. 12.17：i = max i：Σ_{r ∈ r[..i], d ∈ r_d} d_g + Σ_{t ∈ t} t_g + Σ_{x ∈ values(f)} x ≤ g（預算把 transfer gas 與 free allowance 也算進去）；n = i + |t| + |f|；(e*, t*, b*, u*) = Δ*(e, t, r[..i], f)；遞迴 Δ+(g*, t*, r[i..], e*, {})，g* = g + Σ t* gas − Σ u* used。為什麼是這種「先估後扣」設計：§12.2 兩個相斥因素——實際 gas 只有執行後才知道（sequential），但同一 service 的 items 想合併成一次 PVM 呼叫以攤銷啟動成本（parallel）。
 
 **逐項辨析**
 
 1. ✅ g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports + Σ gas of pending deferred transfers + Σ free-accumulation gas ≤ g, runs Δ* on them, then recurses with g* = g + Σ(new transfers' gas) − Σ gas actually used and an empty free-accumulation map  
-   eq. 12.17 的預算測試（#500 之後）含 t_g 與 free allowance，遞迴時 f 傳空、g* 再加回 t* 的 gas。
+   eq. 12.17 的預算測試含 t_g 與 free allowance，遞迴時 f 傳空、g* 再加回 t* 的 gas。
 2. ❌ g = max(G_T, G_A·C + Σ_{x∈values(χ_Z)} x); Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits of those i reports alone ≤ g — transfer gas and free-accumulation gas play no part in the test — runs Δ* on them, then recurses with g* = g − Σ gas actually used, carrying the same free-accumulation map into every round  
-   描述的是 0.7.2 的行為：#500 之後 t_g 與 f 才納入判斷，eq. 12.17 遞迴也明確傳 ∅ 進去。
+   漏了兩項：t_g 與 f 都要納入 eq. 12.17 的判斷，遞迴時也明確傳 ∅ 進去。
 3. ❌ g = G_A·C = 3.41·10^9 exactly, with the always-accumulate allowances χ_Z drawn out of that same total; Δ+ picks the largest prefix i of the reports such that Σ digest gas-limits + Σ gas of pending deferred transfers ≤ g, runs Δ* on them, then recurses with g* = g − Σ gas actually used and the same free-accumulation map  
    eq. 12.24 是 max(G_T, G_A·C + Σ χ_Z)，χ_Z 是外加的；何況 3.41·10^9 < G_T，取 max 後就是 G_T。
 4. ❌ g = G_R = 5·10^9, the per-package refine allowance reused as the block's accumulation budget; Δ+ accumulates exactly one report per round rather than a prefix, subtracting that report's actual gas use from g each time, and halts as soon as a service's Accumulate panics, discarding the remaining reports and any transfers they produced  
@@ -7582,7 +7350,7 @@ eq. 12.23：g = f[s]（若無則 0）+ Σ_{t: t_d = s} t_g + Σ_{d: d_s = s} d_g
 3. ❌ g = δ[s]_g, the service's own minaccgas, capped at G_A = 10^7; i^T = the transfers to s (in order), i^U = one operand tuple per work-REPORT carrying at least one digest of s, not one per digest  
    a_g 是 §11 驗 report 時 d_g 的下限而非 accumulate 的額度；i^U 也是每個 digest 一筆而非每份 report。
 4. ❌ g = f[s] (free allowance, or 0) + Σ gas of deferred transfers destined to s + Σ accumulate gas-limits of s's digests across the round's reports; the argument sequence is i^U ⌢ i^T, this round's operand tuples coming ahead of any transfer carried over from the previous round  
-   順序反了：eq. 12.23 明寫 Ψ_A(…, i^T ⌢ i^U)，0.7.1 併掉 Ψ_T 後就靠位置區分兩類 input。
+   順序反了：eq. 12.23 明寫 Ψ_A(…, i^T ⌢ i^U)，沒有獨立的 Ψ_T，就靠位置區分兩類 input。
 
 > **陷阱**　digest 的 g 是 accumulate gas limit（guarantor 從 work-item 帶進來，鏈上檢查 ≥ a_g）。
 
@@ -7607,7 +7375,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 3. ❌ s source service, d the destination CORE index, a amount, m memo of W_T = 128 octets, g gas limit for the recipient's handling; nothing leaves the sender until the destination is actually accumulated, so a transfer aimed at a service deleted during the same round costs the sender nothing  
    d ∈ N_S 是 service 不是 core；Ω_T 成功時已把 balance 設為 b − a，收方消失錢也回不來。
 4. ❌ s source service, d destination, a amount, m memo of W_T = 128 octets, g gas limit for the recipient's handling; the sender is debited when `transfer` is called, and the destination is credited later in the same round by a separate on-transfer entry point Ψ_T that Δ* invokes once the digests are done  
-   0.7.1 就把 Ψ_T 併進 accumulate，0.8.0 只有 Ψ_A，而且交付是在下一輪而非同一輪。
+   沒有獨立的 Ψ_T（on_transfer 已併進 accumulate），只有 Ψ_A，而且交付是在下一輪而非同一輪。
 
 > **陷阱**　memo 固定 128 bytes；g 是給接收方處理這筆 transfer 的 gas，會計入下一輪預算。
 
@@ -7621,7 +7389,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 **標準答案**　θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n])
 
-Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.25）：θ′ ≡ [(s, h) ∈ b]，也就是Δ1 最終 output 非 ∅ 的 service 及其 hash；附錄 B.13 允許正常回傳的 32-byte blob 成為 output，並非一定要呼叫 `yield`——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數（**0.8.0 PR #502 才加回來的**）、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。此處只更新 last-accumulation record；不要與 `eject` 對 preimage request 歷史及 expunge period 的檢查混淆。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。
+Δ+ 回傳 (n, e′, b, u, t) 之後有一連串整合動作，**δ 要經過 δ† → δ‡ → δ′ 三個階段**。**n** = 這輪實際 accumulate 掉的 report 前綴長度；**e′** 裡包含新的 (δ†, ι′, φ′, χ′) —— accumulate 期間透過 host call 改動的東西都在這裡（eq. 12.26）。**b → θ′**（eq. 12.25）：θ′ ≡ [(s, h) ∈ b]，也就是Δ1 最終 output 非 ∅ 的 service 及其 hash；附錄 B.13 允許正常回傳的 32-byte blob 成為 output，並非一定要呼叫 `yield`——這份序列接著餵給 §7 的 accumulation-output belt。**統計 S**（eq. 12.27–12.28）：S ∈ D⟨N_S → (N, T, G)⟩——每個 service 記三個數：前 n 份 report 中屬於它的 digest 數、處理掉的 transfer 數、以及實際用掉的 gas。只記非 (0,0,0) 的。**δ‡**（eq. 12.29–12.30）：把 keys(S) 裡每個 service 的 a_a（最後 accumulate 時間）設為 τ′。此處只更新 last-accumulation record；不要與 `eject` 對 preimage request 歷史及 expunge period 的檢查混淆。**ξ 與 ω 的環狀更新**（eq. 12.31–12.33）：ξ′[E−1] = P(R*[..n])、其餘左移；ω′ 依 m = H_T mod E 更新。**注意 δ′ 還沒完成**——preimage 的整合（eq. 12.37）還在後面，δ‡ 只是中間態。
 
 **逐項辨析**
 
@@ -7630,7 +7398,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 2. ❌ θ′ = H(E(δ†)), a single commitment to the whole posterior service state; (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*), the whole accumulatable sequence  
    θ′ 是 accumulation output log 不是狀態雜湊；ξ′[E−1] 只收本塊真的做完的 R*[..n]。
 3. ❌ θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, G gas used), the transfer count having been dropped; δ‡ marks a_a = τ′ for every service in keys(δ†); ξ′[E−1] = P(R*[..n])  
-   0.8.0 的 S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。
+   S(s) 是 (N, T, G) 三元組；a_a = τ′ 只加在 keys(S) 上，沒被 accumulate 的帳戶不動。
 4. ❌ θ′ = the (service, hash) pairs in b (services with a nonempty final output); (δ†, ι′, φ′, χ′) come from e′; the accumulation statistics record per service (N items accumulated, T transfers processed, G gas used); δ‡ marks a_a = τ′ for every service that appears in the statistics; ξ′[E−1] = P(R*[..n]) and ω′ is emptied in full, so that no queued report ever survives a block  
    ω′ 當前槽寫入修剪後的新 queue，跳過的 slots 清空，其餘槽保留並經 E 修剪，不是整個 ω 清空。
 
@@ -7665,51 +7433,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-19　This is the team's prefix selection in Δ+. Compared with GP 0.8.0 eq. 12.17, what is missing?
-
-<sub>12.2 Execution — ●●● · 程式碼 · eq. 12.17 — internal/accumulation/accumulation.go OuterAccumulation · ⚠ 0.7.2→0.8.0</sub>
-
-```go
-gasSum := types.Gas(0)
-i := 0
-// Determine the maximal prefix of reports that fits within the gas limit
-for idx, report := range r {
-    for _, result := range report.Results {
-        gasSum += result.AccumulateGas
-    }
-    if gasSum <= g {
-        i = idx + 1
-    } else {
-        break
-    }
-}
-// n = |t| + i + |f|
-n := len(t) + i + len(f)
-```
-<sub>internal/accumulation/accumulation.go (OuterAccumulation, 0.7.2)</sub>
-
-**標準答案**　0.8.0 requires the budget test to include Σ gas of the pending deferred transfers t and Σ free-accumulation allowances f (Σ d_g + Σ t_g + Σ f ≤ g), so gasSum must start from those two sums rather than 0
-
-eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d_g + **Σ_{t ∈ t} t_g** + **Σ_{x ∈ values(f)} x** ≤ g }。**加粗的兩項就是 0.7.2 缺的**：待處理 deferred transfer 的 gas，與 always-accumulate 服務的免費額度。PR #500「Account for gas reserved by transfer and always acc items」把它們納入預算判斷——所以 gasSum 必須從這兩個總和起算，而不是從 0。**不加會怎樣**：這一輪選進來的 report 看起來還在預算內，但實際執行時還要付 transfer 的處理費與 always-acc 的額度，**總量就超過 g 了**。換句話說舊版是「事後才發現超支」，新版是「事前就把已承諾的支出算進去」。n = |t| + i + |f| 這條在兩版都一樣，沒有改。**背後的道理 §12.2 講得很清楚**：「Only after a work-item is accumulated can it be known if it uses less gas than the advertised limit」——宣告的 gas 只是上限，實際用量要等做完才知道，所以下一輪的預算得靠 g* = g + Σ t* 的 gas − Σ 實際用量 回饋修正。**這是一個「保守預估 + 事後結算」的模型**，預估這一步漏算任何一項都會讓保守性失效。
-
-**逐項辨析**
-
-1. ✅ 0.8.0 requires the budget test to include Σ gas of the pending deferred transfers t and Σ free-accumulation allowances f (Σ d_g + Σ t_g + Σ f ≤ g), so gasSum must start from those two sums rather than 0  
-   PR #500 把 t_g 與 always-accumulate 的 f 納入 eq. 12.17 的預算判斷，0.7.2 的 code 只加 d_g。
-2. ❌ The gas figures are the wrong ones: eq. 12.17 sums each digest's actual gas used d_u over the prefix rather than the declared limits d_g, since Δ* hands the real usage back before the budget is tested  
-   §12.2：實際用量只能在 Δ* 跑完後才知道；何況 digest 裡的 u 記的是 refine 用掉的 gas。
-3. ❌ The test must be applied per report rather than cumulatively: eq. 12.17 requires each individual report in r[..i] to satisfy Σ d_g ≤ G_A = 10^7, so the loop must break at the first report exceeding that per-report cap  
-   eq. 12.17 的測試是對整個前綴累加；單一 package 的 Σ w_a < G_A 是 §14.3 的封包合法性條件。
-4. ❌ The bound on i is wrong: eq. 12.17 takes i as a maximum over N_{|r|+1} so that i may reach |r|, whereas `i = idx + 1` inside the loop caps it at |r| − 1 and always leaves the final report for the next round  
-   idx 最大取到 |r| − 1，i = idx + 1 因此可以等於 |r|，與 i ∈ N_{|r|+1} 完全一致。
-
-> **陷阱**　你們 issue digest 提到：eq:accseq budget now includes transfer gas + free allowances。
-
-<sub>`ch12-code-outer-accumulation`</sub>
-
----
-
-### 12-20　The GP splits accumulation into two layers: Δ+ recurses over reports in order, and inside it Δ* aggregates everything belonging to one service into a single PVM invocation. §12.2 says this reconciles 'two slightly antagonistic factors'. What are they, and why does one sequential layer plus one parallel layer satisfy both?
+### 12-19　The GP splits accumulation into two layers: Δ+ recurses over reports in order, and inside it Δ* aggregates everything belonging to one service into a single PVM invocation. §12.2 says this reconciles 'two slightly antagonistic factors'. What are they, and why does one sequential layer plus one parallel layer satisfy both?
 
 <sub>12.2 Execution — ●●○ · 設計理由 · §12.2 prose; eq. 12.17 (Δ+), eq. 12.18 (Δ*)</sub>
 
@@ -7734,7 +7458,7 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 ---
 
-### 12-21　When service A calls transfer to service B inside accumulate, B does not receive it during the same execution; the transfer is 'deferred' to the next round. Why not make it a synchronous call, and after the deferral how does B get woken up and whose gas pays for handling it?
+### 12-20　When service A calls transfer to service B inside accumulate, B does not receive it during the same execution; the transfer is 'deferred' to the next round. Why not make it a synchronous call, and after the deferral how does B get woken up and whose gas pays for handling it?
 
 <sub>12.2 Execution; 20 Conclusion — ●●○ · 設計理由 · §12.2 prose, eq. 12.14 (𝕏), eq. 12.17, §20 Further Work</sub>
 
@@ -7759,7 +7483,7 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 ---
 
-### 12-22　A report is accumulated as soon as it becomes available, usually before its audit has completed — so the on-chain state has already been changed by a result nobody has verified yet. What makes that safe, and what happens to the state if the report later turns out to be bad?
+### 12-21　A report is accumulated as soon as it becomes available, usually before its audit has completed — so the on-chain state has already been changed by a result nobody has verified yet. What makes that safe, and what happens to the state if the report later turns out to be bad?
 
 <sub>17 Auditing; 19 Best Chain; 10 Disputes — ●●○ · 設計理由 · §17 prose, §19 (audited ∈ best-chain conditions), §10</sub>
 
@@ -7784,7 +7508,7 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 ---
 
-### 12-23　Polkadot's core runs the PVF and its output is the parachain's new state (head data / state root), which the relay chain merely records. JAM's core runs refine and outputs only a small digest, after which the service's accumulate still has to run on-chain to decide how the state changes. What does the extra step buy?
+### 12-22　Polkadot's core runs the PVF and its output is the parachain's new state (head data / state root), which the relay chain merely records. JAM's core runs refine and outputs only a small digest, after which the service's accumulate still has to run on-chain to decide how the state changes. What does the extra step buy?
 
 <sub>4.9 On Services and Accounts; 12 — ●●○ · 設計理由 · §4.9 prose (refinement vs accumulation), §12 prose, §2.1</sub>
 
@@ -7812,7 +7536,7 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 <a id="ch-13"></a>
 
-## §13 Statistics　<sub>7 題</sub>
+## §13 Statistics　<sub>6 題</sub>
 
 ### 13-1　Why does the JAM chain keep validator activity statistics at all, and what does the GP say about the activities that cannot be measured directly on-chain?
 
@@ -7820,7 +7544,7 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 **標準答案**　JAM issues no rewards itself but oracles activity data to a staking subsystem, as it does with punishment data; block production, guaranteeing and assurances are trackable on-chain, whereas GRANDPA, BEEFY and auditing are not and are instead covered by validators voting on each other's efforts, with a median accepted under a 50%-honest assumption
 
-§13.1 開頭：「The JAM chain does not explicitly issue rewards—we leave this as a job to be done by the staking subsystem (in Polkadot's case envisioned as a system parachain—hosted without fees…)」，JAM 只負責「facilitate the arrival of information on validator activity in to the staking subsystem」，如同 punishment（ψ_o offenders）資訊一樣是給外部子系統的 oracle。可直接鏈上追蹤的是 block production、guarantor reports、availability assurance（對應 π_V 的 b/t/p/d、g、a）；GRANDPA、BEEFY 與 auditing 則「cannot」，改由 validator 互評——「validators vote on their impression of each other's efforts and a median may be accepted as the truth」，並且「With an assumption of 50% honest validators, this gives an adequate means of oraclizing this information」。§14.1 的 honest behavior 清單最後一項正是「submitting the correct amount of auditing work seen being done by other validators」。編碼上 π 落在 App. D 的 C(13)，0.8.0 起 π_V/π_L 還帶長度前綴（你們 PR #1034）。
+§13.1 開頭：「The JAM chain does not explicitly issue rewards—we leave this as a job to be done by the staking subsystem (in Polkadot's case envisioned as a system parachain—hosted without fees…)」，JAM 只負責「facilitate the arrival of information on validator activity in to the staking subsystem」，如同 punishment（ψ_o offenders）資訊一樣是給外部子系統的 oracle。可直接鏈上追蹤的是 block production、guarantor reports、availability assurance（對應 π_V 的 b/t/p/d、g、a）；GRANDPA、BEEFY 與 auditing 則「cannot」，改由 validator 互評——「validators vote on their impression of each other's efforts and a median may be accepted as the truth」，並且「With an assumption of 50% honest validators, this gives an adequate means of oraclizing this information」。§14.1 的 honest behavior 清單最後一項正是「submitting the correct amount of auditing work seen being done by other validators」。編碼上 π 落在 App. D 的 C(13)，π_V/π_L 帶長度前綴。
 
 **逐項辨析**
 
@@ -7839,13 +7563,13 @@ eq. 12.17（0.8.0）：i = max{ i ∈ N_{|r|+1} : Σ_{r ∈ r[..i], d ∈ r_d} d
 
 ---
 
-### 13-2　GP 0.8.0 §13.1 derives the validator activity records in three ordered steps — π_V†, then (π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch (so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by validators 4 and 9, and its guarantee extrinsic E_G credits validator 22. Where do this block's own increments end up?
+### 13-2　§13.1 derives the validator activity records in three ordered steps — π_V†, then (π_V‡, π′_L), then π′_V — with e = ⌊τ/E⌋ and e′ = ⌊τ′/E⌋. Take the first block of a new epoch (so e′ ≠ e): its author is validator 7, its assurance extrinsic E_A carries assurances signed by validators 4 and 9, and its guarantee extrinsic E_G credits validator 22. Where do this block's own increments end up?
 
-<sub>13.1 Validator Activity — ●●● · 概念 · eq. 13.4–13.6 · ⚠ 0.7.2→0.8.0</sub>
+<sub>13.1 Validator Activity — ●●● · 概念 · eq. 13.4–13.6</sub>
 
 **標準答案**　The two assurance increments land in the last-epoch archive, because they are added to the prior record first and it is that already-incremented record which is moved across at the rollover; validator 7's block/ticket/preimage counters and validator 22's guarantee credit start from the freshly zeroed accumulator and so land in the current-epoch record. One block is deliberately split across the two records.
 
-eq. 13.4 先做 π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——assurance 是加在 **prior** 的 π_V 上。eq. 13.5 之後才做 epoch rollover：(π_V‡, π′_L) = (π_V†, π_L) when e′ = e，otherwise ([(0, …), …], π_V†)，其中 e = ⌊τ/E⌋（prior τ）、e′ = ⌊τ′/E⌋（posterior τ′ = H_T）。eq. 13.6 才從已歸零的 π_V‡ 出發：b += (v = H_I)、t += |E_T|、p += |E_P|、d += Σ_{d ∈ E_P}|d|（都只給 author）、g += (κ′[v] ∈ G)，這些落在 π′_V。因此同一塊的六個 counter 被刻意拆到兩個 record：a 記在舊 epoch、其餘五個記在新 epoch。「整塊都進新累加器」正是 0.7.2 的作法（也是 statistics.go 目前的行為，PR #1034 才修）。順帶一提，eq. 6.28 的 H_E 恰好在 e′ > e 時非 ∅，觸發時機與 eq. 13.5 的 e′ ≠ e 重合，但 §13 從不讀它——H_E 只帶 (η_0, η_1) 與 γ′_P 的金鑰序列。
+eq. 13.4 先做 π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[v]_a + (∃a ∈ E_A : a_v = v)——assurance 是加在 **prior** 的 π_V 上。eq. 13.5 之後才做 epoch rollover：(π_V‡, π′_L) = (π_V†, π_L) when e′ = e，otherwise ([(0, …), …], π_V†)，其中 e = ⌊τ/E⌋（prior τ）、e′ = ⌊τ′/E⌋（posterior τ′ = H_T）。eq. 13.6 才從已歸零的 π_V‡ 出發：b += (v = H_I)、t += |E_T|、p += |E_P|、d += Σ_{d ∈ E_P}|d|（都只給 author）、g += (κ′[v] ∈ G)，這些落在 π′_V。因此同一塊的六個 counter 被刻意拆到兩個 record：a 記在舊 epoch、其餘五個記在新 epoch。「整塊都進新累加器」是最容易寫錯的版本（statistics.go 原本就是這樣，PR #1034 才修）。順帶一提，eq. 6.28 的 H_E 恰好在 e′ > e 時非 ∅，觸發時機與 eq. 13.5 的 e′ ≠ e 重合，但 §13 從不讀它——H_E 只帶 (η_0, η_1) 與 γ′_P 的金鑰序列。
 
 **逐項辨析**
 
@@ -7864,20 +7588,20 @@ eq. 13.4 先做 π_V† ≡ π_V except ∀v ∈ N_{|κ|}：π_V†[v]_a = π_V[
 
 ---
 
-### 13-3　GP 0.8.0 updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a credential in both of them (one report under this rotation's assignment, one under the previous rotation's), validator 30 signed a credential in only one, and the block's author is validator 5. How does the g counter move?
+### 13-3　The GP updates the guarantee counter as π′_V[v]_g = π_V‡[v]_g + (κ′[v] ∈ G), where G is the reporters set of eq. 11.28. Suppose one block's E_G holds two guarantees: validator 12 signed a credential in both of them (one report under this rotation's assignment, one under the previous rotation's), validator 30 signed a credential in only one, and the block's author is validator 5. How does the g counter move?
 
 <sub>13.1 Validator Activity — ●●○ · 概念 · eq. 13.6 (g counter); eq. 11.28 (reporters set G)</sub>
 
 **標準答案**　Validator 12 moves by 1, validator 30 by 1, the author not at all — the added term is a Boolean membership test of the validator's Ed25519 key against a set of keys, so two credentials in the same block still yield a single step, and the index v is resolved through the posterior active set.
 
-eq. 11.28 定義 reporters set：k ∈ G ⟺ ∃(r, t, a) ∈ E_G, ∃(v, s) ∈ a : k = (k_v)_e——G 是 **Ed25519 公鑰的集合**（k 取自本 rotation 或前一 rotation 的 guarantor assignment）。eq. 13.6 的增量 (κ′[v] ∈ G) 是一個 Boolean，依 §3.7.3「⊤ = 1、⊥ = 0」的隱含轉換，同一塊裡簽兩份 report 也只能 +1（實作上就是先把 G 建成 reportersSet，再對每個 validator 最多 +1）。這裡有一個 GP 自身的矛盾必須知道：§13.1 的欄位說明寫「g: The number of reports guaranteed by the validator」，但依 eq. 13.6 的集合成員測試，g 每塊最多 +1，實際語意是「該 validator 在這一塊有沒有 guarantee 過 report」而不是 report 的筆數。考試以 eq. 13.6 為準，但要認得那句 prose——團隊在 0.7.0 時期（#710/#711）採用的正是這種 per-report 舊讀法。索引用的是 **posterior** 的 κ′（eq. 13.6 的 ∀v ∈ N_{|κ′|}），不是 prior 的 κ——注意 eq. 13.4 的 assurance 迴圈才是跑 N_{|κ|}，兩者刻意不同。
+eq. 11.28 定義 reporters set：k ∈ G ⟺ ∃(r, t, a) ∈ E_G, ∃(v, s) ∈ a : k = (k_v)_e——G 是 **Ed25519 公鑰的集合**（k 取自本 rotation 或前一 rotation 的 guarantor assignment）。eq. 13.6 的增量 (κ′[v] ∈ G) 是一個 Boolean，依 §3.7.3「⊤ = 1、⊥ = 0」的隱含轉換，同一塊裡簽兩份 report 也只能 +1（實作上就是先把 G 建成 reportersSet，再對每個 validator 最多 +1）。這裡有一個 GP 自身的矛盾必須知道：§13.1 的欄位說明寫「g: The number of reports guaranteed by the validator」，但依 eq. 13.6 的集合成員測試，g 每塊最多 +1，實際語意是「該 validator 在這一塊有沒有 guarantee 過 report」而不是 report 的筆數。考試以 eq. 13.6 為準，但要認得那句 prose——團隊早期（#710/#711）採用的正是這種 per-report 讀法。索引用的是 **posterior** 的 κ′（eq. 13.6 的 ∀v ∈ N_{|κ′|}），不是 prior 的 κ——注意 eq. 13.4 的 assurance 迴圈才是跑 N_{|κ|}，兩者刻意不同。
 
 **逐項辨析**
 
 1. ✅ Validator 12 moves by 1, validator 30 by 1, the author not at all — the added term is a Boolean membership test of the validator's Ed25519 key against a set of keys, so two credentials in the same block still yield a single step, and the index v is resolved through the posterior active set.  
    (κ′[v] ∈ G) 是集合成員的 Boolean，同一塊簽兩份也只 +1，且索引跑的是 N_{|κ′|}。
 2. ❌ Validator 12 moves by 2, validator 30 by 1, the author not at all — the added term counts credential signatures rather than testing membership, so a validator that signs in two guarantees of the same block takes two steps, and the index v is resolved through the posterior active set.  
-   來源是 §13.1 的 prose 與 0.7.0 的 per-report 舊讀法，與 eq. 13.6 的成員測試方向相反。
+   來源是 §13.1 的 prose 那種 per-report 讀法，與 eq. 13.6 的成員測試方向相反。
 3. ❌ Validator 12 moves by 1, validator 30 by 1, and the author additionally by 2 — the added term is a Boolean membership test, so each guarantor takes a single step, the author is separately credited one step per report the block carries, and the index v is resolved through the prior active set κ.  
    eq. 13.6 只有 b/t/p/d 帶 v = H_I 的條件，g 的式子裡沒有 author 的位置；索引也是 posterior κ′。
 4. ❌ Only the author moves, and by 2 — g records the reports the author brought on-chain, one step per report; the guarantors are credited through the assurance counter a instead, and because that counter is incremented against the prior record, their steps land in the archive whenever the block sits on an epoch boundary.  
@@ -7914,32 +7638,7 @@ eq. 11.28 定義 reporters set：k ∈ G ⟺ ∃(r, t, a) ∈ E_G, ∃(v, s) ∈
 
 ---
 
-### 13-5　π ≡ (π_V, π_L, π_C, π_S). In GP 0.8.0, what does a validator record count, in what order are the assurance credits, the epoch rollover and the author's credits applied, and who gets the guarantee credit?
-
-<sub>13.1 Validator Activity — ●●○ · 版本差異 · eq. 13.1–13.6 · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G
-
-eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|。eq. 13.4：π_V† = π_V 但 ∀v：a += (∃a ∈ E_A: a_v = v)——用 prior κ 的索引，**先**於 rollover；eq. 13.5：e′ = e 時 (π_V‡, π′_L) = (π_V†, π_L)，否則 ([0…], π_V†)；eq. 13.6：π′_V = π_V‡ 但 b += (v = H_I)、t += |E_T|（作者）、p += |E_P|、d += Σ|d|（作者）、g += (κ′[v] ∈ R)。0.8.0 把 assurance 的計入移到 rollover 之前（0.7.2 是一起算），你們 issue digest：「assurances credited before epoch rollover in 0.8.0」。§13 開頭：JAM 不直接發獎勵，只提供資料給 staking 子系統。
-
-**逐項辨析**
-
-1. ✅ Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G  
-   0.8.0 先做 eq. 13.4（assurance）再做 13.5（rollover），六個 counter 與各自的歸屬也都對。
-2. ❌ Each validator record has five counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g), assurances being tracked per core in π_C instead; on e′ ≠ e both π_V and π_L are zeroed so that the new epoch starts from nothing; then b/t/p/d are credited to the author H_I and g to every validator in the reporters set G  
-   eq. 13.2 明列六個欄位含 a；π_C 記的是每個 core 被打勾的次數；rollover 是 π_L ← π_V† 的交棒。
-3. ❌ Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited AFTER the epoch-rollover check, so on e′ ≠ e they land in the fresh π′_V instead of in π′_L; π_L then takes π_V rather than π_V†; b/t/p/d go to the author H_I and g to the reporters set G  
-   描述的是 0.7.2 的順序：0.8.0 邊界那塊的 assurance 會被封進 π′_L，而不是留在新的 π′_V。
-4. ❌ Each validator record has six counters (blocks b, tickets t, preimage count p, preimage size d, guarantees g, assurances a); assurances of this block are credited to π_V† BEFORE the epoch-rollover check; on e′ ≠ e, π_L ← π_V† and π_V resets; then b/t/p/d are credited to every validator whose signature appears in the matching extrinsic, and g to the block author H_I  
-   兩組規則對調了：b/t/p/d 全部只加在 H_I，g 才看 κ′[v] 是否落在 reporters set 裡。
-
-> **陷阱**　每個 validator 每塊最多 +1 assurance、+1 guarantee（存在性判斷，不是數量）。
-
-<sub>`ch13-validator-stats`</sub>
-
----
-
-### 13-6　Core statistics π_C and service statistics π_S are per-block (not per-epoch). What do the core statistics record, and over which set of reports is each field summed?
+### 13-5　Core statistics π_C and service statistics π_S are per-block (not per-epoch). What do the core statistics record, and over which set of reports is each field summed?
 
 <sub>13.2 Cores and Services — ●●● · 概念 · eq. 13.7, 13.9–13.12</sub>
 
@@ -7964,22 +7663,22 @@ eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|�
 
 ---
 
-### 13-7　Which services appear in π′_S for a block, and what does the accumulation entry hold?
+### 13-6　Which services appear in π′_S for a block, and what does the accumulation entry hold?
 
 <sub>13.2 Cores and Services — ●●○ · 概念 · eq. 13.8, 13.13–13.17</sub>
 
 **標準答案**　s = services with a digest in this block's reports ∪ services that received a preimage in E_P ∪ keys of the accumulation statistics; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)
 
-**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**版本沿革值得記，因為是 delta 考點**：0.7.1 拿掉了 `on_transfer` 的統計；0.8.0（PR #502）又把「處理掉的 transfer 數」加回 accumulation 那個三元組裡。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。
+**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。
 
 **逐項辨析**
 
 1. ✅ s = services with a digest in this block's reports ∪ services that received a preimage in E_P ∪ keys of the accumulation statistics; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)  
-   s^R ∪ s^P ∪ keys(S) 三個來源都算進去，且 0.8.0 的 accumulation 是 (N, T, G) 三元組。
+   s^R ∪ s^P ∪ keys(S) 三個來源都算進去，且 accumulation 是 (N, T, G) 三元組。
 2. ❌ s = every service in keys(δ), so π′_S carries one entry per existing account in every block; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)  
    π_S 是 per-block 的活動紀錄，沒活動的 service 根本不列，不會每個帳戶每塊都有一筆。
 3. ❌ s = the keys of the accumulation statistics only, so a service that was merely reported on or that received a preimage this block gets no entry at all; the entry holds provision (count, total size) from E_P, refinement (count, gas), imports/extrinsics/exports, and accumulation = (items N, gas G)  
-   本塊被 report 或收到 preimage 但沒 accumulate 者仍要列；(N, G) 是 0.7.2 的形狀。
+   本塊被 report 或收到 preimage 但沒 accumulate 者仍要列；accumulation 那格是 (N, T, G) 不是 (N, G)。
 4. ❌ s = every service touched since the start of the epoch, since π_S accumulates across an epoch and is cleared only when e′ ≠ e; the entry holds provision (count, total size) taken from the digests, refinement (count, gas), imports/extrinsics/exports, and accumulation = S(s) = (items N, transfers T, gas G) or (0,0,0)  
    §13.2 明說 core 與 service 統計 tracked only on a per-block basis；provision 的 (1, |d|) 對 E_P 求和。
 
@@ -7992,7 +7691,7 @@ eq. 13.1：π_V, π_L ∈ [(b, t, p, d, g, a)]，|π_V| = |κ|、|π_L| = |λ|�
 
 <a id="ch-14"></a>
 
-## §14 Work Packages & Reports　<sub>6 題</sub>
+## §14 Work Packages & Reports　<sub>5 題</sub>
 
 ### 14-1　A work-package (eq. 14.2, of the set ℙ) is ⟨j, h, u, f, c, w⟩. What does each field hold?
 
@@ -8099,11 +7798,11 @@ eq. 14.10 C：((s, c, y, a, e, i, x), l, u) ↦ (s, c, y ↦ H(y), g ↦ w_a, l,
     // ... (host-call context `addition` elided)
     result := Psi_M(StandardCodeFormat(code), 0, workItem.RefineGasLimit, a, RefineOmegas, addition)
 ```
-<sub>PVM/refine_invocation.go (RefineInvoke, 0.7.2)</sub>
+<sub>PVM/refine_invocation.go (RefineInvoke)</sub>
 
 **標準答案**　The third component of a must be the service index w_s as a compact natural, but the code appends the 32-octet code hash w_c; the compact c and i, the length-prefixed payload, H(p) over the encoded package and the gas limit w_g all match the GP
 
-eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(↕z, code) = Λ(δ[w_s], (p_c)_t, w_c) 去掉 metadata 前綴取得，然後 (u, o, (m, e)) = Ψ_M(code, 0, w_g, a, F, (∅, []))。c、i、w_s 都是無下標的 E → 一般（compact）自然數編碼；w_y 帶長度前綴（↕）；H(p) 是整個 package 序列化後的 hash。你們的 code：c、i 用 EncodeUint（C.6 compact）正確；Payload 用 ByteSequence.Encode（帶長度）正確；H(p) = Blake2b(E(p)) 正確；gas 傳 workItem.RefineGasLimit（w_g）正確——唯一的錯處是 a 的第三段，任何依 GP 解析 refine args 的 service 會把 code hash 的前幾個 byte 當 service id、後面全部錯位；三個干擾項也都順帶宣稱那一段是對的。0.7.2 與 0.8.0 的公式相同（0.7.1 才加入 c）。
+eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(↕z, code) = Λ(δ[w_s], (p_c)_t, w_c) 去掉 metadata 前綴取得，然後 (u, o, (m, e)) = Ψ_M(code, 0, w_g, a, F, (∅, []))。c、i、w_s 都是無下標的 E → 一般（compact）自然數編碼；w_y 帶長度前綴（↕）；H(p) 是整個 package 序列化後的 hash。你們的 code：c、i 用 EncodeUint（C.6 compact）正確；Payload 用 ByteSequence.Encode（帶長度）正確；H(p) = Blake2b(E(p)) 正確；gas 傳 workItem.RefineGasLimit（w_g）正確——唯一的錯處是 a 的第三段，任何依 GP 解析 refine args 的 service 會把 code hash 的前幾個 byte 當 service id、後面全部錯位；三個干擾項也都順帶宣稱那一段是對的。
 
 **逐項辨析**
 
@@ -8122,32 +7821,7 @@ eq. B.5 Ψ_R(c, i, p, r, ī, ς)：a = E(c, i, w_s, ↕w_y, H(p))，code 由 E(�
 
 ---
 
-### 14-4　GP 0.8.0 redefines the work-report computation function Ξ. What are its arguments, and under exactly what conditions does it fail with E?
-
-<sub>14.4 Computation of Work-Report — ●●● · 版本差異 · eq. 14.13–14.14 (Ξ, E, srlookup correspondence); eq. 14.17 (A with v); eq. 11.31 · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if keys(l) differ from the set of h⊞ hashes — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail
-
-eq. 14.13：Ξ: (P, N_C, ⟨H → H⟩, N_V) → ℝ ∪ {∇}，(p, c, l, v) ↦ ∇ if E，否則 (s, c ↦ p_c, c, a ↦ p_a, t, l, d, g)。其中 (t, g) = Ψ_I(p, c)——Is-Authorized 必須先跑，「to ensure that the work-package warrants the needed core-time」；E = t ∉ B_{:W_R} ∨ K(l) ≠ {h | w ∈ p_w, (h⊞, n) ∈ w_i}。work-item 的 Refine 失敗（∞、☇、BAD、BIG、⊚ bad-exports、⊖ oversize）只會由 I 函數把該 digest 的 result 換成 error、exports 換成零 segment——「the work-package continues to be valid as a whole」。0.7.2 是 Ξ(p, c) 兩個參數，l 只以 keys(l) ≡ {…} 且 |l| ≤ 8 隱含定義；0.8.0（配合 #514 可變 validator 數）把 l 與 assurer 數 v 明確列為參數，v 再傳給 A（eq. 14.17–14.18）決定 erasure coding 的 shard 數，鏈上 eq. 11.31 要求 (w_s)_n = |κ′|。eq. 14.14：guarantor 要自行確認 l 的每一對 (h ↦ e) 真的對應（H(p) = h 且 Ξ(p, …)_s 的 segroot = e），否則「consider the work-package unable to be guaranteed」；auditor 直接沿用 report 裡的 l。你們 issue #1015/#1026：WorkPackageSpec 加 erasure_shards，Producer 設為 TotalShards。
-
-**逐項辨析**
-
-1. ✅ Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if keys(l) differ from the set of h⊞ hashes — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail  
-   eq. 14.13 的 E 只有兩個 disjunct：Ψ_I 的結果不是 ≤ W_R 的 blob，或 K(l) 與 h⊞ 的 hash 集合不符。
-2. ❌ Ξ(p, c) as in 0.7.2 takes only the package and the core; the segment-root dictionary is read out of the on-chain state ρ during computation and the shard count is fixed at V = 1,023; it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets — a work-item whose Refine ends in ∞, ☇, BAD or BIG does not make Ξ fail  
-   0.8.0 的 Ξ 有四個參數；l 由 guarantor 自組並隨 report 上鏈，ρ 只存各 core pending 的 assignment。
-3. ❌ Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l (one entry per work-package hash referenced by an h⊞ import) and the assurer-set size v; it yields ∇ if the Is-Authorized result is not a blob of at most W_R octets, if keys(l) differ from the set of h⊞ hashes, or if any work-item's Refine ends in ∞, ☇, BAD or BIG, so that a guarantor never signs a report holding a failed item  
-   item 失敗由 I 就地換成 error digest 與零 segment，the work-package continues to be valid as a whole。
-4. ❌ Ξ(p, c, l, v) takes the package, the core, a segment-root dictionary l keyed by work-ITEM index with one entry per import, and v, the number of guarantor signatures on the report (2 or 3); it yields ∇ only if the Is-Authorized result is not a blob of at most W_R octets or if the encoded report exceeds W_B = 13,791,360 octets  
-   l 的 key 是 work-package hash；v 是 assurer 集合大小，2–3 是 credential 長度；W_B 是 bundle 上限。
-
-> **陷阱**　Ξ 失敗只有兩種：Is-Authorized 失敗、l 的 key 集合不對；item 失敗不會讓 Ξ 失敗。
-
-<sub>`ch14-compute-report-signature`</sub>
-
----
-
-### 14-5　Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. How is e computed, what does a paged proof contain, and where do both end up?
+### 14-4　Exported segments are committed to by the segments-root e of the availability specification and justified through paged proofs. How is e computed, what does a paged proof contain, and where do both end up?
 
 <sub>14.3.1 Exporting / 14.4.1 Availability Specifier — ●●○ · 概念 · eq. 14.12 (P), 14.18 (A: e = M(s), s♣); eq. E.4–E.6 (M, J_x, L_x); eq. 13.12</sub>
 
@@ -8172,7 +7846,7 @@ eq. 14.13：Ξ: (P, N_C, ⟨H → H⟩, N_V) → ℝ ∪ {∇}，(p, c, l, v) �
 
 ---
 
-### 14-6　A work-package's items refine one after another and the report has a size ceiling W_R. Is the ceiling applied per item or to the report as a whole, and what happens to an item that would cross it?
+### 14-5　A work-package's items refine one after another and the report has a size ceiling W_R. Is the ceiling applied per item or to the report as a whole, and what happens to an item that would cross it?
 
 <sub>14.4 Work Result Size — ●●○ · 概念 · §14; eq. 11.x (W_R)</sub>
 
@@ -8198,7 +7872,7 @@ eq. 14.13：Ξ: (P, N_C, ⟨H → H⟩, N_V) → ℝ ∪ {∇}，(p, c, l, v) �
 
 <a id="ch-a"></a>
 
-## 附錄 A · PVM　<sub>11 題</sub>
+## 附錄 A · PVM　<sub>10 題</sub>
 
 ### A-1　The PVM invocation Ψ returns an exit reason ε. What are the possible exit reasons, and what does each one carry?
 
@@ -8225,26 +7899,26 @@ eq. A.1：ε ∈ {∎, ☇, ∞} ∪ ({F̄, h̄} × N_R)，剛好五種。§A.1�
 
 ---
 
-### A-2　GP 0.8.0 (PR #508) introduced a new gas model. How is gas charged?
+### A-2　How does the PVM charge gas while a program runs?
 
-<sub>A.3 Basic Blocks & A.5 Single-Step — ●●● · 版本差異 · eq. A.5–A.8, A.54 · ⚠ 0.7.2→0.8.0</sub>
+<sub>A.3 Basic Blocks & A.5 Single-Step — ●●● · 概念 · eq. A.5–A.8, A.54</sub>
 
 **標準答案**　Per BASIC BLOCK, in advance: on the first step and whenever execution enters a basic block (or jumps back to its start), the whole block's cost ϱ^Δ is deducted; if the remaining gas is insufficient the machine exits with ∞ and the counter is unchanged; ϱ^Δ = max(cycles − 3, 1) from a simulated out-of-order CPU model
 
-§A.5：「On the very first step of execution, and every time the execution enters a new basic block or jumps back to the beginning of the current basic block, the gas counter of the machine is updated according to the gas cost function ϱ^Δ of the target basic block. No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance. In case there's not enough gas remaining… the execution is interrupted and the gas counter remains unchanged.」新增了「gas charged flag」（Ψ 的 bool 參數）以支援 host call 中斷後續跑不重複收費。eq. A.54：ϱ^Δ = max(cycles_final − 3, 1)，cycles 由 §A.9 的微架構模擬算出——初始狀態 (ı, 0, 4 decode slots, 5 starts, ⟨A 4, L 4, S 4, M 1, D 1⟩, ROB = []）、ROB 上限 32 筆；§A.10 有每條指令的 cycles/decode slots/exec units 表。basic block 的邊界 = terminator 指令（trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*）之後。你們 0.7.2 每指令 1 gas（GasCost = InstrCount），0.8.0 需重做（issue #1046）。
+§A.5：「On the very first step of execution, and every time the execution enters a new basic block or jumps back to the beginning of the current basic block, the gas counter of the machine is updated according to the gas cost function ϱ^Δ of the target basic block. No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance. In case there's not enough gas remaining… the execution is interrupted and the gas counter remains unchanged.」另有「gas charged flag」（Ψ 的 bool 參數）以支援 host call 中斷後續跑不重複收費。eq. A.54：ϱ^Δ = max(cycles_final − 3, 1)，cycles 由 §A.9 的微架構模擬算出——初始狀態 (ı, 0, 4 decode slots, 5 starts, ⟨A 4, L 4, S 4, M 1, D 1⟩, ROB = []）、ROB 上限 32 筆；§A.10 有每條指令的 cycles/decode slots/exec units 表。basic block 的邊界 = terminator 指令（trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*）之後。
 
 **逐項辨析**
 
 1. ✅ Per BASIC BLOCK, in advance: on the first step and whenever execution enters a basic block (or jumps back to its start), the whole block's cost ϱ^Δ is deducted; if the remaining gas is insufficient the machine exits with ∞ and the counter is unchanged; ϱ^Δ = max(cycles − 3, 1) from a simulated out-of-order CPU model  
    eq. A.8 在 ϱ < ϱ^Δ 時回 (∞, ϱ, ⊥)，counter 一分不動；ϱ^Δ = max(cycles − 3, 1) 即 eq. A.54。
-2. ❌ Per instruction, in arrears: each executed instruction costs 1 gas and the counter is decremented once it retires, exactly as in 0.7.x; when the deduction would take the counter below zero the machine exits with ∞ and the deduction stands, so the gas reported back is negative  
-   每指令 1 gas 是 0.7.2 的模型，已被 PR #508 取代；OOG 時 gas 不扣，更不會變負值。
+2. ❌ Per instruction, in arrears: each executed instruction costs 1 gas and the counter is decremented once it retires, whatever its opcode; when the deduction would take the counter below zero the machine exits with ∞ and the deduction stands, so the gas reported back is negative  
+   GP 不是每指令 1 gas，而是整個 basic block 預扣；OOG 時 gas 不扣，更不會變負值。
 3. ❌ Per instruction, in advance: before each instruction a fixed per-opcode price from the §A.10 table is deducted (ecalli 100, div_u_64 60, unlikely 40, move_reg 0); if the price cannot be paid the machine exits with ∞ and the counter is unchanged, and basic blocks play no part in gas accounting at all  
    §A.10 那張表給的是餵進管線模擬的 cycles 而非 gas 價格，且 GP 要求整個 block 預先收費。
 4. ❌ Per basic block, in arrears: ϱ^Δ is deducted once the block’s terminator has executed, so a block that panics half-way through costs nothing; ϱ^Δ is the number of instructions in the block, and a deduction that leaves the counter negative exits with ∞ carrying that negative value  
    時機與公式都錯：block 是預扣不是事後扣，ϱ^Δ 也不是指令數，照此 panic 的 block 免費。
 
-> **陷阱**　面試「PVM portion」極可能問 0.8.0 gas model；記住：block-level、預先扣、max(c−3,1)、不足則 OOG 且不扣。
+> **陷阱**　面試「PVM portion」極可能問 gas model；記住：block-level、預先扣、max(c−3,1)、不足則 OOG 且不扣。
 
 <sub>`appA-basic-blocks-gas`</sub>
 
@@ -8300,61 +7974,13 @@ eq. A.22 的 footnote：「The popular code generation backend LLVM requires and
 
 ---
 
-### A-5　Every conditional branch in the team's 0.7.2 interpreter (instBranch for 170–175 and the branch_*_imm handlers) resolves through this helper. What does GP 0.8.0 eq. A.21 require of a conditional branch's targets, and does this helper meet it?
+### A-5　The GP threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Is gas charged again on that resume? Explain what the flag does here, and how it differs from a fresh Ψ_H that starts mid-block.
 
-<sub>A.5 Single-Step State Transition (branch) — ●●● · 程式碼 · eq. A.21 (branch), A.5 (ϖ), A.2 (v_blob) · ⚠ 0.7.2→0.8.0</sub>
-
-```go
-func branch(pc ProgramCounter, b ProgramCounter, C bool, bitmask Bitmask, instruction ProgramCode) (ExitReason, ProgramCounter) {
-	switch {
-	case !C:
-		return ExitContinue, pc
-	case !bitmask.IsStartOfBasicBlock(b) && instruction.isOpcodeValid(b):
-		return ExitPanic, pc
-	default:
-		return ExitContinue, b
-	}
-}
-
-// instBranch (opcodes 170-175), after computing branchCondition:
-	reason, newPC := branch(pc, vX, branchCondition, interp.Program.Bitmasks, interp.Program.InstructionData)
-	if reason != ExitContinue {
-		pvmLogger.Errorf("instBranch branch error at pc: %d, opcode: %s", pc, zeta[opcode(interp.Program.InstructionData[pc])])
-		return ExitReason(reason), pc
-	}
-
-	return reason, newPC
-```
-<sub>PVM/branch.go (branch) + call site in PVM/instructions.go (instBranch)</sub>
-
-**標準答案**　0.8.0 panics whenever either target is not a basic-block start — the taken target b or the fall-through ı + 1 + skip(ı) — even when the condition is false; this helper validates only b, and only when C holds, so a not-taken branch with an invalid target continues here but must panic in 0.8.0
-
-eq. A.21：branch(b, C) ⟹ (ε, ı′) = (☇, ı) when b ∉ ϖ ∨ ı + 1 + skip(ı) ∉ ϖ；(▸, ı + 1 + skip(ı)) otherwhen ¬C；(▸, b) otherwise。GP 原文：「conditional jumps are valid if and only if both branches point to the start of a basic block (regardless of whether a branch is taken), otherwise a panic occurs」。你們的 branch() 先 `case !C: return ExitContinue, pc`——沒跳就完全不檢查，跳了才檢查 b（還加了 isOpcodeValid 條件，把跳到無效 opcode 的情況留給 trap 處理），這是 0.7.2「taken 才驗證」的語意；issues digest 的 #1046（PVM update 0.8.0）把「branch/jump dual-target validation」列為 App. A 的變更之一。實務上只要 blob 通過 v_blob，branch 的 fall-through 位置必然在 ϖ 裡（branch ∈ T，eq. A.5 的 ϖ 定義），唯一例外是 branch 是程式最後一條指令：ı + 1 + skip(ı) = |c| ∉ ϖ，0.8.0 不論條件真假都在 branch 本身 ☇（0.7.2 則是沒跳時掉出程式碼、執行 ζ 的 0 = trap 才 panic，且多扣一次 gas）。
-
-**逐項辨析**
-
-1. ✅ 0.8.0 panics whenever either target is not a basic-block start — the taken target b or the fall-through ı + 1 + skip(ı) — even when the condition is false; this helper validates only b, and only when C holds, so a not-taken branch with an invalid target continues here but must panic in 0.8.0  
-   eq. A.21 的第一個 case 不管 C 真假都要求兩個目標都在 ϖ，所以沒跳的無效 fall-through 也得 ☇。
-2. ❌ The helper is already 0.8.0-compliant: eq. A.21 validates b only on the taken path, because the fall-through ı + 1 + skip(ı) has already been proved by v_blob to be a bitmask-flagged, valid opcode and so is trivially a legal continuation; the extra isOpcodeValid clause is a harmless strengthening  
-   「通過 v_inst 的合法 opcode」與「∈ ϖ」是兩回事——ϖ 只收 0 或某個 terminator 的下一條。
-3. ❌ 0.8.0 still validates only the taken target, but now additionally requires it to be 2-octet aligned like a dynamic jump (b mod Z_A = 0 with Z_A = 2) and to appear somewhere in the jump table j, neither of which this helper checks; the fall-through path remains unvalidated in 0.8.0 too  
-   對齊與查 j 只出現在 eq. A.22 的 djump；靜態 branch 的條件只有兩個目標都 ∈ ϖ。
-4. ❌ 0.8.0 removed the runtime panic entirely: v_blob now walks every branch at deblob time and rejects the blob unless both of its targets lie in ϖ, so deblob returns error and Ψ panics before a single instruction runs; both the check on b and the isOpcodeValid clause are therefore dead code  
-   eq. A.2 的 v_blob/v_inst 只驗指令流形狀，一個跳躍目標都不看，runtime 的 ϖ 檢查省不得。
-
-> **陷阱**　0.8.0 口訣：branch 的兩個目標（taken 與 fall-through）都必須是 basic block 起點，不管有沒有跳。
-
-<sub>`b2-appA-branch-both-targets`</sub>
-
----
-
-### A-6　GP 0.8.0 threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Is gas charged again on that resume? Explain what the flag does here, and how it differs from a fresh Ψ_H that starts mid-block.
-
-<sub>A.5 Single-Step State Transition (gas charged flag) — ●●● · 概念 · eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine · ⚠ 0.7.2→0.8.0</sub>
+<sub>A.5 Single-Step State Transition (gas charged flag) — ●●● · 概念 · eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine</sub>
 
 **標準答案**　Nothing is charged again on that resume: ecalli is not a terminator, so flag* stays ⊤ and Ψ_1 skips the ϱ^Δ deduction; the flag becomes ⊥ only after a terminator executes (or on an out-of-gas exit), while a brand-new Ψ_H — which always starts with ⊥ — resuming at a mid-block ı charges the whole block ϱ^Δ(𝔏(ı)), not just the remaining suffix
 
-eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − ϱ^Δ(c, k, 𝔏(ı)), ⊤) otherwhen ϱ ≥ ϱ^Δ(c, k, 𝔏(ı))；(∞, ϱ, ⊥) otherwise。eq. A.11：flag* = ⊥ when flag′ = ⊥ ∨ (c_ı ∈ T ∧ ε* ∈ {▸} ∪ {h̄} × N_R)，否則 ⊤。T（§A.3）= trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*；ecalli（10）不在 T 裡，所以 ecalli 造成 h̄ exit 時 flag* = ⊤，Ψ（eq. A.1）把這個 flag′ 回傳，Ψ_H*（eq. A.38）以同一個 flag′ 續跑 → 不重複收費。flag 何時變 ⊥：執行了 terminator 且 ε* = ▸（下一步進新 block、或「jumps back to the beginning of the current basic block」都重新收費），以及 OOG（此時 ϱ 不變、ı* = ı）。𝔏（eq. A.6）= max(j ∈ ϖ : j ≤ ı) 是「含 ı 的 block 起點」，所以 flag = ⊥ 而 ı 在 block 中間時，扣的是整個 block 的 ϱ^Δ；Ψ_H ≡ Ψ_H*(…, ⊥, …)（eq. A.39）——每次新的 Ψ_H 都從 ⊥ 開始。App. B 也配合：machine 建立內層 PVM 時 flag 初始為 ⊥，invoke 把 Ψ 回傳的 flag′ 存回 m*[n]，內層 host call 後再 invoke 不會重扣；內層 OOG 後補 gas 再 invoke 才會重扣。這正是 #1046 review 的修正：「mid-block resume must charge the full containing block cost L(i) first — not just the suffix」。你們 0.7.2 沒有這個 flag（每指令 1 gas，SingleStepInvokeDecodedBlocks 逐條扣）。
+eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − ϱ^Δ(c, k, 𝔏(ı)), ⊤) otherwhen ϱ ≥ ϱ^Δ(c, k, 𝔏(ı))；(∞, ϱ, ⊥) otherwise。eq. A.11：flag* = ⊥ when flag′ = ⊥ ∨ (c_ı ∈ T ∧ ε* ∈ {▸} ∪ {h̄} × N_R)，否則 ⊤。T（§A.3）= trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*；ecalli（10）不在 T 裡，所以 ecalli 造成 h̄ exit 時 flag* = ⊤，Ψ（eq. A.1）把這個 flag′ 回傳，Ψ_H*（eq. A.38）以同一個 flag′ 續跑 → 不重複收費。flag 何時變 ⊥：執行了 terminator 且 ε* = ▸（下一步進新 block、或「jumps back to the beginning of the current basic block」都重新收費），以及 OOG（此時 ϱ 不變、ı* = ı）。𝔏（eq. A.6）= max(j ∈ ϖ : j ≤ ı) 是「含 ı 的 block 起點」，所以 flag = ⊥ 而 ı 在 block 中間時，扣的是整個 block 的 ϱ^Δ；Ψ_H ≡ Ψ_H*(…, ⊥, …)（eq. A.39）——每次新的 Ψ_H 都從 ⊥ 開始。App. B 也配合：machine 建立內層 PVM 時 flag 初始為 ⊥，invoke 把 Ψ 回傳的 flag′ 存回 m*[n]，內層 host call 後再 invoke 不會重扣；內層 OOG 後補 gas 再 invoke 才會重扣。這正是 #1046 review 的修正：「mid-block resume must charge the full containing block cost L(i) first — not just the suffix」。
 
 **逐項辨析**
 
@@ -8362,7 +7988,7 @@ eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − 
    ϱ^Δ 的引數是 𝔏(ı) 即 block 起點，GP 沒有 suffix 計價；eq. A.11 也只有兩種情況會清 flag。
 2. ✅ Nothing is charged again on that resume: ecalli is not a terminator, so flag* stays ⊤ and Ψ_1 skips the ϱ^Δ deduction; the flag becomes ⊥ only after a terminator executes (or on an out-of-gas exit), while a brand-new Ψ_H — which always starts with ⊥ — resuming at a mid-block ı charges the whole block ϱ^Δ(𝔏(ı)), not just the remaining suffix  
    ecalli 不在 §A.3 的 T 裡所以 flag* 維持 ⊤；而全新的 Ψ_H 從 ⊥ 開始、扣的是整個 𝔏(ı) block。
-3. ❌ The whole block ϱ^Δ(𝔏(ı″)) is charged a second time on every host-call resume, because 0.8.0 added ecalli to the terminator set T so that a host call always ends a basic block; the flag exists only so that the first block of a fresh Ψ_H is not charged twice over  
+3. ❌ The whole block ϱ^Δ(𝔏(ı″)) is charged a second time on every host-call resume, because ecalli is itself in the terminator set T so that a host call always ends a basic block; the flag exists only so that the first block of a fresh Ψ_H is not charged twice over  
    §A.3 的 T 只有 trap、fallthrough、jump、jump_ind、load_imm_jump(_ind) 與 branch_*，不含 ecalli。
 4. ❌ The flag matters only for out-of-gas resumption: on every other exit it is discarded and Ψ_H unconditionally charges ϱ^Δ of the block containing ı″ before continuing; on an ∞ exit it is set to ⊤ so that gas already deducted is not deducted again once more gas is supplied, and it is a parameter of Ψ_H* alone, never of Ψ itself  
    eq. A.8 的 OOG 支是 (∞, ϱ, ⊥)：flag 清成 ⊥ 且 gas 一分未扣；flag 也是 Ψ 本身的參數。
@@ -8373,7 +7999,7 @@ eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − 
 
 ---
 
-### A-7　In this implementation of load_imm_jump_ind the register write φ_A = ν_X happens even when the dynamic jump panics. Is that what GP 0.8.0 prescribes, and can the difference ever be observed?
+### A-6　In this implementation of load_imm_jump_ind the register write φ_A = ν_X happens even when the dynamic jump panics. Is that what GP 0.8.0 prescribes, and can the difference ever be observed?
 
 <sub>A.5.1 Instruction Tables (load_imm_jump_ind) & A.1 (Ψ on panic) — ●●● · 程式碼 · eq. A.34 table (opcode 180), A.22 (djump), A.1 (Ψ returns φ′ on ☇/∎), A.10; §B invoke</sub>
 
@@ -8424,13 +8050,13 @@ eq. A.34 表列 load_imm_jump_ind：djump((φ_B + ν_Y) mod 2^32)，φ′_A = ν
 
 ---
 
-### A-8　GP 0.8.0's deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. What conditions do these two validators actually enforce?
+### A-7　deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. What conditions do these two validators actually enforce?
 
-<sub>A.1 Basic Definition (deblob validity v_blob / v_inst) — ●●○ · 版本差異 · eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ) · ⚠ 0.7.2→0.8.0</sub>
+<sub>A.1 Basic Definition (deblob validity v_blob / v_inst) — ●●○ · 概念 · eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ)</sub>
 
 **標準答案**　|k| = |c|; walking the code from index 0 by 1 + skip(·), every visited octet is flagged in k and is a valid opcode (∈ U); the walk ends exactly at |k| with the last instruction a terminator (∈ T); and the entry point ı is itself a flagged, valid opcode
 
-eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1 + skip(ı) = |k| ∧ c_ı ∉ T；v_blob(c, k, ı + 1 + skip(ı)) otherwhen v_inst(c, k, ı)；⊥ otherwise。v_inst(c, k, ı) = |k| = |c| ∧ ı < |k| ∧ k_ı = 1 ∧ c_ı ∈ U。也就是從 0 開始沿 skip 走訪每條指令：每個落點都要是 bitmask 標記的合法 opcode、最後一條必須是 terminator、走訪要剛好停在 |k|（空程式因 ı > 0 條件而無效）；deblob 另外用 v_inst(c, k, ı) 驗證入口 ı。這是 0.8.0 的新規（issues digest #1046：「programs whose final block lacks a terminator are invalid (v_blob rule)」；PR #508 摘要：「blobs pre-validated」），動機是 block-based gas：ϱ^Δ 的模擬（eq. A.58 只有遇到 T 才把 x_ı 設為 ∅）需要每個 basic block 都有終點。0.7.2 沒有 v_blob，無效 opcode 或掉出程式碼末端是靠 ζ = c ⌢ [0, 0, …]（eq. A.4）的 trap 在 runtime 才 panic（會多扣 gas）；0.8.0 裡 ζ 的零填充只剩「最後一條指令缺少的引數 octet」這個用途。你們的 preDecodeBlocks 其實已在 deblob 時對「block 跑出程式末端」與無效 opcode 回 ExitPanic，MakeBitMasks 也驗 bitmask 長度，與 0.8.0 方向一致。
+eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1 + skip(ı) = |k| ∧ c_ı ∉ T；v_blob(c, k, ı + 1 + skip(ı)) otherwhen v_inst(c, k, ı)；⊥ otherwise。v_inst(c, k, ı) = |k| = |c| ∧ ı < |k| ∧ k_ı = 1 ∧ c_ı ∈ U。也就是從 0 開始沿 skip 走訪每條指令：每個落點都要是 bitmask 標記的合法 opcode、最後一條必須是 terminator、走訪要剛好停在 |k|（空程式因 ı > 0 條件而無效）；deblob 另外用 v_inst(c, k, ı) 驗證入口 ı。動機是 block-based gas（「programs whose final block lacks a terminator are invalid」）：ϱ^Δ 的模擬（eq. A.58 只有遇到 T 才把 x_ı 設為 ∅）需要每個 basic block 都有終點。有了 v_blob，ζ = c ⌢ [0, 0, …]（eq. A.4）的零填充只剩「最後一條指令缺少的引數 octet」這個用途。你們的 preDecodeBlocks 其實已在 deblob 時對「block 跑出程式末端」與無效 opcode 回 ExitPanic，MakeBitMasks 也驗 bitmask 長度，方向一致。
 
 **逐項辨析**
 
@@ -8449,7 +8075,7 @@ eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1
 
 ---
 
-### A-9　A multi-octet store straddles two pages: the first is writable, the second is not allocated. What does the PVM report, and why is the reported address defined the way it is?
+### A-8　A multi-octet store straddles two pages: the first is writable, the second is not allocated. What does the PVM report, and why is the reported address defined the way it is?
 
 <sub>A.4 Memory & Page Faults — ●●○ · 概念 · eq. A.9</sub>
 
@@ -8472,13 +8098,13 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 ---
 
-### A-10　The PVM has both statically-resolved jumps and indirect jumps computed from a register. What extra conditions must an indirect target satisfy, and what would break in the gas model if they were dropped?
+### A-9　The PVM has both statically-resolved jumps and indirect jumps computed from a register. What extra conditions must an indirect target satisfy, and what would break in the gas model if they were dropped?
 
 <sub>A.3 Basic Blocks & Control Transfer — ●●○ · 概念 · §A.3; §A.5</sub>
 
 **標準答案**　An indirect target must be aligned, non-zero, inside the jump table and land on a basic-block start; without the block-start requirement a program could enter a block below its first instruction and execute it without the block's gas ever being charged
 
-**靜態跳躍**（jump、load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析，沒有額外條件。**間接跳躍**（jump_ind、load_imm_jump_ind）的目標由暫存器算出來，執行前無法預知，所以 GP 加了四個條件：對齊 Z_A（= 2）、**非零**、落在 jump table 範圍內（a ≤ |j| · Z_A）、而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。**最後一條與 0.8.0 的 gas 模型直接相扣**：gas 是在「進入 basic block」時**整塊預先扣掉**的，金額由該 block 的指令靜態加總而來。如果可以從 block 的中間切進去，那段指令就會在**沒有被計價的情況下執行**——而且可以反覆這樣做，等於無限的免費計算，整個計價模型直接崩潰。**非零那條**是為了讓 0 保留給「無效目標」的語意（配合 ζ 補零後 opcode 0 = trap）。**對齊那條的理由 GP 自己說了**：是 LLVM 相容性——LLVM 產碼時假設動態跳躍目標有一定的對齊，順著它可以少一層轉換。**口試角度**：這題真正在問的是「為什麼間接跳躍需要比靜態跳躍更多的檢查」，答案是**靜態的可以在編譯期驗證，動態的只能在執行期驗證，而計價的完整性依賴這個驗證**。
+**靜態跳躍**（jump、load_imm_jump）帶的是有號的 PC 相對位移，組譯期就能解析，沒有額外條件。**間接跳躍**（jump_ind、load_imm_jump_ind）的目標由暫存器算出來，執行前無法預知，所以 GP 加了四個條件：對齊 Z_A（= 2）、**非零**、落在 jump table 範圍內（a ≤ |j| · Z_A）、而且 j[a/Z_A − 1] 必須是一個 **basic block 的起點**。**最後一條與 gas 模型直接相扣**：gas 是在「進入 basic block」時**整塊預先扣掉**的，金額由該 block 的指令靜態加總而來。如果可以從 block 的中間切進去，那段指令就會在**沒有被計價的情況下執行**——而且可以反覆這樣做，等於無限的免費計算，整個計價模型直接崩潰。**非零那條**是為了讓 0 保留給「無效目標」的語意（配合 ζ 補零後 opcode 0 = trap）。**對齊那條的理由 GP 自己說了**：是 LLVM 相容性——LLVM 產碼時假設動態跳躍目標有一定的對齊，順著它可以少一層轉換。**口試角度**：這題真正在問的是「為什麼間接跳躍需要比靜態跳躍更多的檢查」，答案是**靜態的可以在編譯期驗證，動態的只能在執行期驗證，而計價的完整性依賴這個驗證**。
 
 **逐項辨析**
 
@@ -8489,7 +8115,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 3. ❌ An indirect target must be the start of a function as recorded in the program's symbol table, which is what the jump table holds; the gas model is unaffected because indirect jumps carry their own gas cost as an immediate operand  
    jump table 存的是合法跳躍目標，不是符號表；指令也沒有攜帶 gas 立即數。
 4. ❌ An indirect target only has to be a multiple of the page size, so that a jump can never straddle a page; gas is charged per instruction retired rather than per block, so where control lands has no bearing on the accounting  
-   頁大小與控制流無關，而 0.8.0 早已不是每指令計價——這是 0.7.2 的模型。
+   頁大小與控制流無關，而且 gas 也不是每指令計價，而是整個 block 預扣。
 
 > **陷阱**　被問「為什麼間接跳躍要限制目標」時，先講 gas，再講 LLVM 對齊，順序反過來會顯得只背了條文。
 
@@ -8497,7 +8123,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 ---
 
-### A-11　0.8.0 charges gas for a whole basic block up front on entry. Why price by block rather than by instruction, and how does that decision relate to 'indirect jumps must land on a block start'?
+### A-10　The PVM charges gas for a whole basic block up front on entry. Why price by block rather than by instruction, and how does that decision relate to 'indirect jumps must land on a block start'?
 
 <sub>A.9 Gas Cost Model — ●●○ · 設計理由 · §A.9 prose, eq. A.54 (gas cost for block), eq. A.22 (jump-table alignment), §A.3 (basic blocks)</sub>
 
@@ -8525,7 +8151,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 <a id="ch-b"></a>
 
-## 附錄 B · Host Calls　<sub>15 題</sub>
+## 附錄 B · Host Calls　<sub>14 題</sub>
 
 ### B-1　A service calls `assign` to give core c a fresh authorizer queue and name a new assigner. Ω_A can refuse that call for four different reasons, tested in a fixed order. What is that order, and what kind of error does each constant name?
 
@@ -8558,7 +8184,7 @@ eq. A.9 把 page fault 的參數定義成「**被觸及的位址中最低的那�
 
 **標準答案**　Ψ_I (is-authorized, stateless): gas, grow_heap, fetch only; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, lookup, read, write, info, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT
 
-eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refine）：+ historical_lookup、export、machine、peek、poke、pages、invoke、expunge（inner PVM 與 D3L export）；eq. B.11（accumulate）：+ lookup/read/write/info（透過 G 包裝，讓對自身帳戶的變更同步進 context）、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide。分界的原理：in-core 的 refine 沒有共識狀態，只能做依 lookup-anchor 時間的 historical_lookup；accumulate 在鏈上，讀寫的是當下 partial state；is-authorized 則是 stateless，context 恆為 ∅。0.8.0（GP PR #508）把 sbrk 指令換成 grow_heap host call（index 1）並列進三張表。未知 id 走 F 的 default——扣 M_∅ = 1000 後 φ′_7 = WHAT 繼續執行，只有扣到 ϱ′ < 0 才 ∞。
+eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refine）：+ historical_lookup、export、machine、peek、poke、pages、invoke、expunge（inner PVM 與 D3L export）；eq. B.11（accumulate）：+ lookup/read/write/info（透過 G 包裝，讓對自身帳戶的變更同步進 context）、bless、assign、designate、checkpoint、new、upgrade、transfer、eject、query、solicit、forget、yield、provide。分界的原理：in-core 的 refine 沒有共識狀態，只能做依 lookup-anchor 時間的 historical_lookup；accumulate 在鏈上，讀寫的是當下 partial state；is-authorized 則是 stateless，context 恆為 ∅。grow_heap（index 1）三張表都有。未知 id 走 F 的 default——扣 M_∅ = 1000 後 φ′_7 = WHAT 繼續執行，只有扣到 ϱ′ < 0 才 ∞。
 
 **逐項辨析**
 
@@ -8569,7 +8195,7 @@ eq. B.2（is-authorized mutator F）：gas、grow_heap、fetch；eq. B.6（refin
 3. ❌ Ψ_I (is-authorized): gas, grow_heap, fetch, historical_lookup; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, lookup, read, invoke, expunge; Ψ_A (accumulate): gas, grow_heap, fetch, write, info, export, machine, peek, poke, pages, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; any other id costs M_∅ = 1000 gas and returns WHAT  
    inner PVM 與 D3L export 只在 eq. B.6；eq. B.2 的 is-authorized 是 stateless，連 accounts 都拿不到。
 4. ❌ Ψ_I (is-authorized, stateless): gas, fetch only; Ψ_R (refine): gas, grow_heap, fetch, historical_lookup, export, machine, peek, poke, pages, invoke, expunge; Ψ_A (accumulate): gas, fetch, lookup, read, write, info, bless, assign, designate, checkpoint, new, upgrade, transfer, eject, query, solicit, forget, yield, provide; grow_heap is refine-only since only in-core execution may resize RAM, and any other id panics (☇) with no gas charged  
-   grow_heap 三張表都有（0.8.0 用它取代 sbrk 指令），且未知 id 絕不是 ☇。
+   grow_heap 三張表都有，且未知 id 絕不是 ☇。
 
 > **陷阱**　read/write/lookup/info 在 accumulate 才有；refine 用 historical_lookup（依 lookup-anchor 時間）。
 
@@ -8677,32 +8303,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-7　Which privilege checks do bless, assign and designate perform in GP 0.8.0?
-
-<sub>B.7 — bless / assign / designate — ●●○ · 版本差異 · `bless` = 15, `assign` = 16, `designate` = 17 · ⚠ 0.7.2→0.8.0</sub>
-
-**標準答案**　bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 336-octet keys
-
-Ω_B（bless, 15）：讀 m, a（4C 個 u32 assigners）, v, r, o/n（z 的 (u32, u64) pairs）；x_s ≠ χ_M → HUH（0.8.0 #519 新增：只有 manager 能 bless）；m/v/r 不是有效 service id → WHO。Ω_A（assign, 16）：c ≥ C → CORE；x_s ≠ χ_A[c] → HUH；a 無效 → WHO；否則 φ[c] = Q = 80 個 32-octet hash，χ_A[c] = a（owned privilege：assigner 可把權限轉給別人）。Ω_D（designate, 17）：z ∉ N_V（不是 6..1023 的 3 倍數）或 x_s ≠ χ_V → HUH；否則 ι = 讀入的 z 個 336-octet key（32 Bandersnatch + 32 Ed25519 + 144 BLS + 128 metadata）。三把權限刻意分開：manager 管全域、每個 core 各有自己的 assigner、validator key 由 delegator 專管。這三者的變更經 Δ* 的 R() 合併規則整合。
-
-**逐項辨析**
-
-1. ✅ bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 336-octet keys  
-   三者分屬 χ_M、χ_A[c]、χ_V 三把獨立權限，且 assign 成功時會把 χ_A[c] 改寫成參數 a。
-2. ❌ bless: caller must be the current registrar χ_R (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → CORE, caller must be χ_A[c] (else HUH), writes the 80-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_M (else HUH), sets ι to z 336-octet keys  
-   張冠李戴：χ_R 只在 new 裡決定誰能指定 < S 的低位索引，designate 由 delegator χ_V 專屬。
-3. ❌ bless: caller must be the current manager χ_M (else HUH), sets (m, a[C], v, r, z); assign(c, o, a): c ≥ C → HUH, caller must be χ_A[c] (else CORE), writes the 32-entry queue φ[c] and a new assigner a; designate(o, z): z must be a valid validator count and caller must be χ_V (else HUH), sets ι to z 32-octet Ed25519 keys  
-   CORE = core index unknown 專對應 c ≥ C，權限不符一律 HUH；Q = 80、每把 key 336 octets。
-4. ❌ All three are gated on the manager alone: each returns HUH unless the caller is χ_M. bless additionally returns WHO when m, v or r is not a service index, assign additionally returns CORE for c ≥ C and writes the 80-entry queue φ[c], and designate additionally requires z ∈ N_V; χ_A[c] and χ_V are read-only and only bless can change them  
-   漏掉 owned privilege：assign 會寫入新的 χ_A[c]，core 指派權可以轉手而不必回頭找 manager。
-
-> **陷阱**　0.8.0 designate 也要驗 z 是合法 validator 數（#514）。
-
-<sub>`appB-bless-assign-designate`</sub>
-
----
-
-### B-8　What do `checkpoint`, `yield` and `provide` do inside accumulate?
+### B-7　What do `checkpoint`, `yield` and `provide` do inside accumulate?
 
 <sub>B.7 — checkpoint / yield / provide — ●●○ · 概念 · `checkpoint` = 18, `yield` = 26, `provide` = 27</sub>
 
@@ -8727,7 +8328,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-9　The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Under GP 0.8.0, what does the call return in φ′_7 on success, what happens if the write would push the threshold above the balance, and what did the pre-fix code get wrong?
+### B-8　The excerpt is the team's Ω_W (`write`) after fix #980. A service overwrites a key that currently holds a 100-octet value with a 5,000-octet value (φ_7…φ_10 = k_O, k_Z, v_O, v_Z). Under GP 0.8.0, what does the call return in φ′_7 on success, what happens if the write would push the threshold above the balance, and what did the pre-fix code get wrong?
 
 <sub>B.5 General Functions — write — ●●○ · 程式碼 · §B.5 `write` = 5 (Ω_W); eq. B.12 (G); eq. 9.8 (a_t)</sub>
 
@@ -8783,7 +8384,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-10　Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. What may the read do to B's account and what must it not do, and what went wrong before the guard?
+### B-9　Excerpt from the team's Ω_R (`read`) after fix #938, which added the `callerServiceID == serviceID` guard (s* = φ_7, or the caller when φ_7 = 2^64−1). Accumulating service A reads a storage key of service B, which is not accumulating in this block. What may the read do to B's account and what must it not do, and what went wrong before the guard?
 
 <sub>B.5 General Functions — read — ●●● · 程式碼 · §B.5 `read` = 4 (Ω_R); eq. B.11–B.12 (F, G)</sub>
 
@@ -8840,7 +8441,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-11　The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Where does this code diverge from GP 0.8.0's semantics for `pages`?
+### B-10　The excerpt is the team's `pages` (Ω_Z) acting on inner machine n over page range [p, p+c) with mode r (φ_7…φ_10 = n, p, c, r). Where does this code diverge from GP 0.8.0's semantics for `pages`?
 
 <sub>B.6 Refine Functions — pages — ●●● · 程式碼 · §B.6 `pages` = 12 (Ω_Z); App. I M_Z,* gas constants</sub>
 
@@ -8879,7 +8480,7 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 **標準答案**　Two semantic gaps: for r = 0 the GP zero-fills the range and makes it inaccessible (the code leaves it untouched), and for r ∈ {3, 4} the GP keeps the page contents and only changes the access mode to R or W (the code re-allocates zeroed pages instead)
 
-Ω_Z（pages = 12）：[n, p, c, r] = φ_7…φ_10；u = m[n]_u（n ∉ keys(m) → error）；u′ = u 但 value[p·Z_P..+c·Z_P] = [0, 0, …] 當 r < 3、否則保留原值；access[p..+c] = [∅…] 當 r = 0、[R…] 當 r ∈ {1, 3}、[W…] 當 r ∈ {2, 4}；(φ′_7, m′) = (WHO, m) 當 u = error；(HUH, m) 當 r > 4 ∨ p < 16 ∨ p + c ≥ 2^32/Z_P（= 2^20 頁；p < 16 保護最低的 64 KiB）；(HUH, m) 當 r > 2 ∧ access[p..+c] ∋ ∅（改權限只能對已配置的頁）；(OK, m′) 否則。語意上 r = 0 是「釋放」（歸零 + 不可存取）、1/2 是「配置」（歸零 + R/W）、3/4 是「改權限」（內容保留）；把內容留著等於把舊資料留在一個之後可能被重新配置的頁裡。0.8.0 的 gas 也依此分類：free M_Z,f,c + c·M_Z,f,p = 212 + 118/頁、alloc 275 + 121/頁、setmode 130 + 29/頁、無效 r 固定 M_Z,i = 80——三組常數正是因為三種操作成本不同。對照你們的程式：r = 0 什麼都沒做（GP 要歸零並設為不可存取）；r ≥ 3 先配置歸零頁再設 R/W（GP 要保留內容）——code-map 3.12.9 也標出這個分歧；而 WHO 先於 HUH 的順序與 GP 一致。額外注意：r > 2 的檢查把「頁索引 p、頁數 c」丟給 isReadable(start, offset, m)，而該函式（argument_invocation.go）以位元組位址計算 startPage = start / Z_P，所以檢查的是錯的頁——這條路徑沒有 conformance vectors 覆蓋，遷移 0.8.0 時值得補測。
+Ω_Z（pages = 12）：[n, p, c, r] = φ_7…φ_10；u = m[n]_u（n ∉ keys(m) → error）；u′ = u 但 value[p·Z_P..+c·Z_P] = [0, 0, …] 當 r < 3、否則保留原值；access[p..+c] = [∅…] 當 r = 0、[R…] 當 r ∈ {1, 3}、[W…] 當 r ∈ {2, 4}；(φ′_7, m′) = (WHO, m) 當 u = error；(HUH, m) 當 r > 4 ∨ p < 16 ∨ p + c ≥ 2^32/Z_P（= 2^20 頁；p < 16 保護最低的 64 KiB）；(HUH, m) 當 r > 2 ∧ access[p..+c] ∋ ∅（改權限只能對已配置的頁）；(OK, m′) 否則。語意上 r = 0 是「釋放」（歸零 + 不可存取）、1/2 是「配置」（歸零 + R/W）、3/4 是「改權限」（內容保留）；把內容留著等於把舊資料留在一個之後可能被重新配置的頁裡。gas 也依此分類：free M_Z,f,c + c·M_Z,f,p = 212 + 118/頁、alloc 275 + 121/頁、setmode 130 + 29/頁、無效 r 固定 M_Z,i = 80——三組常數正是因為三種操作成本不同。對照你們的程式：r = 0 什麼都沒做（GP 要歸零並設為不可存取）；r ≥ 3 先配置歸零頁再設 R/W（GP 要保留內容）——code-map 3.12.9 也標出這個分歧；而 WHO 先於 HUH 的順序與 GP 一致。額外注意：r > 2 的檢查把「頁索引 p、頁數 c」丟給 isReadable(start, offset, m)，而該函式（argument_invocation.go）以位元組位址計算 startPage = start / Z_P，所以檢查的是錯的頁——這條路徑沒有 conformance vectors 覆蓋，值得補測。
 
 **逐項辨析**
 
@@ -8898,20 +8499,20 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-12　GP 0.8.0 reworked how a host call is charged. Describe the shape of the new charge and what happens when a service invokes an index that is not available in its invocation.
+### B-11　How is a host call charged for gas? Describe the shape of the charge and what happens when a service invokes an index that is not available in its invocation.
 
-<sub>B.1 Host Call Gas — ●●○ · 版本差異 · §B（PR #517） · ⚠ 0.7.2→0.8.0</sub>
+<sub>B.1 Host Call Gas — ●●○ · 概念 · §B（PR #517）</sub>
 
 **標準答案**　Each call has a base cost plus, where it moves data, a term proportional to the number of KiB touched; an index that is unknown or unavailable is charged a default cost first, so a call with too little gas left exits out-of-gas rather than returning an error code
 
-0.8.0（PR #517）把 host call 的計價改成「**基本成本 + 資料量項**」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的線性部分（`grow_heap` 就是典型：常數項加上與新增頁數成正比的項）。**面試價值在它與兩件事的互動。****其一，先扣後做。** 不認得的、或在當前 invocation 不可用的 host call index，**會先被收一筆預設成本**，然後才判定它不可用。所以餘額不足時的結果是 **∞（out-of-gas，整個 invocation 收掉並回到最近的 checkpoint）**，而不是乖乖回一個 WHAT 錯誤碼。這是實作很容易寫反的地方——直覺會先檢查合法性再扣款，但規格是反過來的。**為什麼要這樣**：否則呼叫不存在的 index 就變成一個零成本的探測操作，可以用來免費地試探環境。**其二，兩層計價互相獨立。** 附錄 A 的 basic-block 預扣管的是指令，host call 的成本**不會**被算進 block 的預扣裡——這正是為什麼動態成本的操作必須做成 host call 而不是指令（0.8.0 移除 sbrk 就是這個原因）。
+host call 的計價是「**基本成本 + 資料量項**」：每個呼叫有自己的 base cost，會搬資料的再加上按 KiB 計的線性部分（`grow_heap` 就是典型：常數項加上與新增頁數成正比的項）。**面試價值在它與兩件事的互動。****其一，先扣後做。** 不認得的、或在當前 invocation 不可用的 host call index，**會先被收一筆預設成本**，然後才判定它不可用。所以餘額不足時的結果是 **∞（out-of-gas，整個 invocation 收掉並回到最近的 checkpoint）**，而不是乖乖回一個 WHAT 錯誤碼。這是實作很容易寫反的地方——直覺會先檢查合法性再扣款，但規格是反過來的。**為什麼要這樣**：否則呼叫不存在的 index 就變成一個零成本的探測操作，可以用來免費地試探環境。**其二，兩層計價互相獨立。** 附錄 A 的 basic-block 預扣管的是指令，host call 的成本**不會**被算進 block 的預扣裡——這正是為什麼動態成本的操作必須做成 host call 而不是指令（heap 成長做成 `grow_heap` host call 而不是指令，就是這個原因）。
 
 **逐項辨析**
 
 1. ✅ Each call has a base cost plus, where it moves data, a term proportional to the number of KiB touched; an index that is unknown or unavailable is charged a default cost first, so a call with too little gas left exits out-of-gas rather than returning an error code  
-   base + 每 KiB、以及不明 index 先扣預設成本導致可能 OOG，兩點都是 0.8.0 的規定。
+   base + 每 KiB、以及不明 index 先扣預設成本導致可能 OOG，兩點都是 GP 的規定。
 2. ❌ Each call costs the same flat amount regardless of the data it moves, which is what keeps a basic block's cost statically computable; an unknown index is free and simply returns WHAT, since charging for a call that did nothing would be unfair  
-   0.8.0 已經不是齊頭式定價；而且 block 的靜態成本與 host call 的成本本來就分屬兩層。
+   GP 不是齊頭式定價；而且 block 的靜態成本與 host call 的成本本來就分屬兩層。
 3. ❌ The cost is computed after the call from the gas the host actually consumed, so a call that moves more data naturally costs more; an unknown index returns WHAT and the machine charges nothing, leaving the counter untouched  
    事後依實際消耗計價無法跨實作重現，等於放棄確定性——GP 的成本一律是規格寫死的。
 4. ❌ Costs are declared by the service in its metadata and validated at registration, which lets a service bound its own worst case; an unknown index aborts the whole accumulation with a panic so that mistakes surface loudly during development  
@@ -8921,19 +8522,19 @@ eq. B.10：i_nextfree = check((decode_4(H(E(s, η′_0, H_T))) mod (2^32 − S �
 
 ---
 
-### B-13　GP 0.8.0 removes the sbrk instruction and provides heap growth as the grow_heap host call instead. What does the caller pass, and why is a host call the right home for this operation under the 0.8.0 gas model?
+### B-12　Heap growth is provided by the grow_heap host call rather than by an instruction. What does the caller pass, and why is a host call the right home for this operation under the basic-block gas model?
 
-<sub>B.2 grow_heap — ●●○ · 版本差異 · §B（PR #508 / #517） · ⚠ 0.7.2→0.8.0</sub>
+<sub>B.2 grow_heap — ●●○ · 設計理由 · §B（PR #508 / #517）</sub>
 
 **標準答案**　The caller names the heap end it wants and is charged in proportion to the pages newly made writable; an instruction whose cost depends on its operand would break the promise that a basic block's price can be computed statically before the block runs
 
-grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——refine、accumulate、on-transfer——都可以呼叫。呼叫者在 φ_7 放「想要的堆結尾」，計價是常數項加線性項：g = C_gas♊const + (φ_7 − h) · C_gas♊linear，h 是目前的堆結尾；若 φ_7 ≤ h（沒有實際成長）或 φ_7 > b（超過上界），就只扣常數項、什麼也不做。**為什麼要從指令搬成 host call**，理由跟 0.8.0 的 gas 模型直接相扣：附錄 A 改成**以 basic block 為單位、進入時預先扣款**，而「預扣」的前提是這個 block 的價格能在**執行之前靜態算出**——把 block 裡每條指令的固定成本加總即可。一條成本取決於運算元的指令會直接打破這個前提：你不執行就不知道這次 sbrk 要長幾頁，也就算不出預扣金額。搬成 host call 之後，分工變得乾淨：**指令層一律靜態可計價，動態成本統一走 host call 那條「先算價、再扣、再做」的路徑**。這也是 0.8.0 移除 sbrk 的原因（PR #508 引入 block-level gas、#517 收尾），不是因為 sbrk 本身有錯，而是它與新的計價模型不相容。相關名詞：ϱ 是 gas 計數器、ϖ 是 basic block（以 terminator 指令切分，正是計價與跳躍目標的單位）。
+grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——is-authorized、refine、accumulate——都可以呼叫。呼叫者在 φ_7 放「想要的堆結尾」，計價是常數項加線性項：g = C_gas♊const + (φ_7 − h) · C_gas♊linear，h 是目前的堆結尾；若 φ_7 ≤ h（沒有實際成長）或 φ_7 > b（超過上界），就只扣常數項、什麼也不做。**為什麼做成 host call 而不是指令**，理由跟 gas 模型直接相扣：附錄 A 的計價是**以 basic block 為單位、進入時預先扣款**，而「預扣」的前提是這個 block 的價格能在**執行之前靜態算出**——把 block 裡每條指令的固定成本加總即可。一條成本取決於運算元的指令會直接打破這個前提：你不執行就不知道這次要長幾頁，也就算不出預扣金額。做成 host call 之後，分工變得乾淨：**指令層一律靜態可計價，動態成本統一走 host call 那條「先算價、再扣、再做」的路徑**。所以「成長 heap 的指令」（傳統的 sbrk）在這個計價模型裡沒有位置——不是它本身有錯，而是它與 block 預扣不相容。相關名詞：ϱ 是 gas 計數器、ϖ 是 basic block（以 terminator 指令切分，正是計價與跳躍目標的單位）。
 
 **逐項辨析**
 
 1. ✅ The caller names the heap end it wants and is charged in proportion to the pages newly made writable; an instruction whose cost depends on its operand would break the promise that a basic block's price can be computed statically before the block runs  
-   指定結尾頁、按新增頁數計費，理由落在「block 價格必須靜態可算」，這正是 0.8.0 的連動。
-2. ❌ The caller passes the number of octets to add and is charged a flat amount; it was moved out of the instruction set purely for encoding space, since the opcode was needed for one of the new no-argument instructions introduced in 0.8.0  
+   指定結尾頁、按新增頁數計費，理由落在「block 價格必須靜態可算」。
+2. ❌ The caller passes the number of octets to add and is charged a flat amount; it is kept out of the instruction set purely for encoding space, since the opcode was needed for one of the no-argument instructions that the PVM also defines  
    動機不是編碼空間；把它留在指令集裡會直接破壞 block-level 預扣的前提。
 3. ❌ The caller passes a page count and the call is free, because the memory was already reserved when the program was initialized; making it a host call simply lets the host refuse growth when the machine is nested inside an inner PVM  
    記憶體不是初始化時就全部保留，否則 grow_heap 沒有存在意義，也不會需要計費。
@@ -8944,13 +8545,13 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 ---
 
-### B-14　fetch is a single host call, available in all three invocations, whose first argument selects which piece of data to read. Why did the GP fold this many data sources into one call instead of giving each its own index?
+### B-13　fetch is a single host call, available in all three invocations, whose first argument selects which piece of data to read. Why did the GP fold this many data sources into one call instead of giving each its own index?
 
 <sub>B.2 fetch — ●●○ · 概念 · §B</sub>
 
 **標準答案**　Because the host-call numbering is part of the ABI every deployed service compiles against: a selector argument lets new data sources be added without renumbering anything, while a new index per source would eventually force existing services to be rebuilt
 
-`fetch` 用 φ_10 當 **selector** 選擇要讀哪一種資料——協定常數、entropy、authorizer trace、extrinsic 與 import 的內容、work-package 的各個部分等等。三種 invocation（refine、accumulate、on-transfer）都能呼叫它，只是各自可取的來源不同。**收成一個呼叫的理由是 ABI 穩定性。** host call 的**編號是介面的一部分**——所有已部署的 service 在編譯時就把 `ecalli 3` 這種數字寫死在程式碼裡了。每多一種資料就配一個新編號，編號空間遲早要重新整理，而**重新編號會讓既有的 service 全部失效**，因為它們呼叫的還是舊數字。**這不是假想的風險**：0.8.0 移除 sbrk 導致後面的 opcode 位移，就是同一類痛的實例（雖然那是指令不是 host call）。**selector 則是資料層的參數**：新增一種來源只要多定義一個 selector 值，既有 service 完全不受影響，因為它們傳的還是自己那個值。**通則**：把「會持續增加的維度」放進參數而不是放進介面編號，這是任何長期演化的 ABI 都會做的取捨——代價是呼叫端要多傳一個參數、而且單一呼叫的語意變得比較複雜。
+`fetch` 用 φ_10 當 **selector** 選擇要讀哪一種資料——協定常數、entropy、authorizer trace、extrinsic 與 import 的內容、work-package 的各個部分等等。三種 invocation（refine、accumulate、on-transfer）都能呼叫它，只是各自可取的來源不同。**收成一個呼叫的理由是 ABI 穩定性。** host call 的**編號是介面的一部分**——所有已部署的 service 在編譯時就把 `ecalli 3` 這種數字寫死在程式碼裡了。每多一種資料就配一個新編號，編號空間遲早要重新整理，而**重新編號會讓既有的 service 全部失效**，因為它們呼叫的還是舊數字。**selector 則是資料層的參數**：新增一種來源只要多定義一個 selector 值，既有 service 完全不受影響，因為它們傳的還是自己那個值。**通則**：把「會持續增加的維度」放進參數而不是放進介面編號，這是任何長期演化的 ABI 都會做的取捨——代價是呼叫端要多傳一個參數、而且單一呼叫的語意變得比較複雜。
 
 **逐項辨析**
 
@@ -8967,7 +8568,7 @@ grow_heap 是 host call 編號 1（GP 寫作 Ω_♊），三種 invocation——
 
 ---
 
-### B-15　Ψ_A's context is a pair (x, y): x is the regular dimension, y the exceptional one. A service, during accumulate, does in order: write storage → checkpoint → transfer to another service → write storage again → panic. What does the invocation return, and what is y for?
+### B-14　Ψ_A's context is a pair (x, y): x is the regular dimension, y the exceptional one. A service, during accumulate, does in order: write storage → checkpoint → transfer to another service → write storage again → panic. What does the invocation return, and what is y for?
 
 <sub>B.4 Accumulate Invocation — ●●○ · 概念 · §B.4 prose (regular vs exceptional dimension), eq. B.7 (implications), collapse function C, Ω_C</sub>
 
@@ -9138,7 +8739,7 @@ func (w ServiceWrapper) StateKeyConstruct() (output types.StateKey) {
 
 **標準答案**　A four-octet marker is prepended before hashing — E_4(2^32−1) ⌢ k for storage, E_4(2^32−2) ⌢ h for a preimage, and E_4(l) ⌢ h for the lookup-meta of declared length l — and C(s, ·) then interleaves the four octets of n = E_4(s) with the first four octets of a = H(·), appending a_4 … a_26.
 
-§D.1 的 T(σ) 最後三列逐字寫著：∀⟨s ↦ a⟩ ∈ δ, ⟨k ↦ v⟩ ∈ a_s：C(s, E_4(2^32−1) ⌢ k) ↦ v；∀⟨h ↦ p⟩ ∈ a_p：C(s, E_4(2^32−2) ⌢ h) ↦ p；∀⟨(h, l) ↦ t⟩ ∈ a_l：C(s, E_4(l) ⌢ h) ↦ E(↕[E_4(x) for x ∈ t])。而第三形式的 C 本身是 (s, h) ↦ [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, a_5, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 的四個 byte 與雜湊的前四個 byte 交錯，之後接雜湊的第 4…26 byte，共 8 + 23 = 31 bytes。GP 接著保證：「Cryptographic hashing ensures that there will be no duplicate state-keys given that there are no duplicate inputs to C.」——不重複性靠的是 C 的**輸入**互斥，marker 就是把三個命名空間分開的手段；也因此 2^32−1 與 2^32−2 這兩個長度值等於被保留掉：只有當某個 service 同時存在一筆長度剛好是 2^32−1 的 lookup 請求、且其 hash 與某個 32-byte storage key 相同時才會撞上，而 0.8.0（PR #520）已把 preimage 長度收進 N_L ≡ N_{2^32}（注意這個型別**仍然包含** 2^32−1 與 2^32−2 兩個保留值，形式上並未排除碰撞，靠的是實務尺寸），實務上 preimage 遠小於 4 GiB，所以安全。
+§D.1 的 T(σ) 最後三列逐字寫著：∀⟨s ↦ a⟩ ∈ δ, ⟨k ↦ v⟩ ∈ a_s：C(s, E_4(2^32−1) ⌢ k) ↦ v；∀⟨h ↦ p⟩ ∈ a_p：C(s, E_4(2^32−2) ⌢ h) ↦ p；∀⟨(h, l) ↦ t⟩ ∈ a_l：C(s, E_4(l) ⌢ h) ↦ E(↕[E_4(x) for x ∈ t])。而第三形式的 C 本身是 (s, h) ↦ [n_0, a_0, n_1, a_1, n_2, a_2, n_3, a_3, a_4, a_5, …, a_26]，其中 n = E_4(s)、a = H(h)——service id 的四個 byte 與雜湊的前四個 byte 交錯，之後接雜湊的第 4…26 byte，共 8 + 23 = 31 bytes。GP 接著保證：「Cryptographic hashing ensures that there will be no duplicate state-keys given that there are no duplicate inputs to C.」——不重複性靠的是 C 的**輸入**互斥，marker 就是把三個命名空間分開的手段；也因此 2^32−1 與 2^32−2 這兩個長度值等於被保留掉：只有當某個 service 同時存在一筆長度剛好是 2^32−1 的 lookup 請求、且其 hash 與某個 32-byte storage key 相同時才會撞上，而 preimage 長度的型別是 N_L ≡ N_{2^32}（注意這個型別**仍然包含** 2^32−1 與 2^32−2 兩個保留值，形式上並未排除碰撞，靠的是實務尺寸），實務上 preimage 遠小於 4 GiB，所以安全。
 
 **逐項辨析**
 
@@ -9565,11 +9166,11 @@ eq. 6.14 的 key rotation 在 e′ > e 時把 (γ′_P, κ′, λ′, γ′_Z) �
 
 ### H-1　Appendix H says the coding rate 'is derived from' three separate considerations. What are the three, and why is the code built over GF(2¹⁶) rather than over single octets?
 
-<sub>H Erasure Coding — ●●○ · 設計理由 · eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority) · ⚠ 0.7.2→0.8.0</sub>
+<sub>H Erasure Coding — ●●○ · 設計理由 · eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority)</sub>
 
 **標準答案**　Reconstruction must survive almost two-thirds of the validators being malicious or incapacitated, which puts the data-shard count near v/3 + 1 and dovetails with the 2/3+1 assurance super-majority; the field is 16-bit, so one code word is an octet pair and the evaluation points can index up to v distinct validators; and twice the shard count must divide the 4,104-octet segment size so that a segment codes with no padding at all, which is why the count is the largest such value rather than exactly v/3 + 1.
 
-§H 開頭原文把三個理由並列：「This rate is derived from the fact we wish to be able to reconstruct even should almost two-thirds of the v validators be malicious or incapacitated, the 16-bit Galois field on which the erasure-code is based and the desire to support, for simplicity, encoding segments of size W_G without padding.」對應到 eq. H.1 的 𝒟(v) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})：上界 v/3+1 來自第一點（只要有 𝒟(v) 片就能重建，等於容忍將近 2/3 的節點消失，與 eq. 11.17 的 2/3+1 assurance 門檻互相搭配，而不是要求 2/3 的 chunk）；「2d 整除 4,104」來自第三點，所以 segment 用 k = W_G/(2𝒟(v)) 永遠是整數、完全不必 padding；而取 max 而非直接等於 v/3+1，正是因為整除條件會把它往下拉——GP 自己舉例「when v = 1022, the rate is approximately 1:4.5」——但要注意 1022 ∉ 𝕍（𝕍 只收 6 到 1023 之間 3 的倍數），這是個假想值：也只有在 v 不是 3 的倍數時，H.1 的上界該讀成 ⌊v/3⌋+1 還是 v/3+1 才會有差（取 ⌊1022/3⌋+1 = 341 才得到 𝒟 = 228、rate ≈ 1:4.48，與 GP 自己寫的 1:4.5 相符；讀成 342 則是 1:2.99）。對每個合法的 v 兩種讀法一致（v/3 ∈ ℕ），真正能驗證整除側條件確實會生效的合法案例是 v = 1002：v/3+1 = 335 不整除 2,052，𝒟(1002) = 228。至於為什麼是 GF(2¹⁶)：code word 就是一個 octet pair，validator i 被映成 field element ĩ = Σ i_j v_j（Cantor basis），evaluation point 必須每個 validator 各一個且互異，GF(2⁸) 只有 256 個點，連 1,023 個 validator 都編不完，這是 16-bit 最直接的必要性（§H 只把 16-bit GF 列為三項考量之一，並未替它們排序）。0.7.2 時這一切是寫死的 342:1023，0.8.0 才為了支援較小的 validator set 而變成以 v 為參數的函數。
+§H 開頭原文把三個理由並列：「This rate is derived from the fact we wish to be able to reconstruct even should almost two-thirds of the v validators be malicious or incapacitated, the 16-bit Galois field on which the erasure-code is based and the desire to support, for simplicity, encoding segments of size W_G without padding.」對應到 eq. H.1 的 𝒟(v) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})：上界 v/3+1 來自第一點（只要有 𝒟(v) 片就能重建，等於容忍將近 2/3 的節點消失，與 eq. 11.17 的 2/3+1 assurance 門檻互相搭配，而不是要求 2/3 的 chunk）；「2d 整除 4,104」來自第三點，所以 segment 用 k = W_G/(2𝒟(v)) 永遠是整數、完全不必 padding；而取 max 而非直接等於 v/3+1，正是因為整除條件會把它往下拉——GP 自己舉例「when v = 1022, the rate is approximately 1:4.5」——但要注意 1022 ∉ 𝕍（𝕍 只收 6 到 1023 之間 3 的倍數），這是個假想值：也只有在 v 不是 3 的倍數時，H.1 的上界該讀成 ⌊v/3⌋+1 還是 v/3+1 才會有差（取 ⌊1022/3⌋+1 = 341 才得到 𝒟 = 228、rate ≈ 1:4.48，與 GP 自己寫的 1:4.5 相符；讀成 342 則是 1:2.99）。對每個合法的 v 兩種讀法一致（v/3 ∈ ℕ），真正能驗證整除側條件確實會生效的合法案例是 v = 1002：v/3+1 = 335 不整除 2,052，𝒟(1002) = 228。至於為什麼是 GF(2¹⁶)：code word 就是一個 octet pair，validator i 被映成 field element ĩ = Σ i_j v_j（Cantor basis），evaluation point 必須每個 validator 各一個且互異，GF(2⁸) 只有 256 個點，連 1,023 個 validator 都編不完，這是 16-bit 最直接的必要性（§H 只把 16-bit GF 列為三項考量之一，並未替它們排序）。𝒟 寫成以 v 為參數的函數，正是為了支援較小的 validator set。
 
 **逐項辨析**
 
@@ -9949,7 +9550,7 @@ davxy/jam-conformance fuzz-proto README：「a synchronous request-response prot
 
 **標準答案**　It may be requested after submission to verify that team members are the legitimate authors (precluding generative AI) with definitive expertise on both the Gray Paper and their own codebase; the delivery template commits the team to a recorded interview by the Polkadot Technical Fellowship, ratified by an on-chain Fellowship remark, and failing to prove expertise may reduce the prize or disqualify the team
 
-jam.web3.foundation/rules 第 12 條原文：「An interview may be requested after submission to ensure team members are the legitimate authors of the code. This precludes the use of generative AI. The interview will seek to ensure the individual has definitive expertise on both the Graypaper and their own codebase. INABILITY TO PROVE THIS EXPERTISE MAY RESULT IN A REDUCED PRIZE OR FULL DISQUALIFICATION.」milestone-delivery 範本的聲明：「we agree to a recorded interview by the Polkadot Technical Fellowship on any matter arising from this milestone submission」與「this milestone submission will need to be ratified with an on-chain remark by the Polkadot Technical Fellowship before it can be merged」。周邊條款：T&C 6.1 允許 Foundation 在提交後要求面試以釐清；T&C 3.5 規定 conformance 以評估當時最新 GP release 為準（所以 0.8.0 差異必考）；T&C 8.4：M1 可在 GP 1.0 批准前付款（2026 年 2 月的 early acceptance 修訂），其餘里程碑不行；rule 5 另有獨立的效能測試（gas、trie/DB、簽章驗證、availability，由 W3F 在標準硬體上跑）；rule 20 要求通過所有相關公開與私有 conformance／performance 測試；rule 9 禁止實質使用生成式 AI；rule 6 clean-room。評審是 Polkadot Fellowship（排除涉入該實作的成員，Gav 的 HackMD）。實際流程（2026）：W3F fuzz（1M steps，GP 0.7.2）→ Parity audit → Fellowship 面試 → Fellows referendum（#595–#598 的 remark「approves in full」，暗示部分核准也可能）。
+jam.web3.foundation/rules 第 12 條原文：「An interview may be requested after submission to ensure team members are the legitimate authors of the code. This precludes the use of generative AI. The interview will seek to ensure the individual has definitive expertise on both the Graypaper and their own codebase. INABILITY TO PROVE THIS EXPERTISE MAY RESULT IN A REDUCED PRIZE OR FULL DISQUALIFICATION.」milestone-delivery 範本的聲明：「we agree to a recorded interview by the Polkadot Technical Fellowship on any matter arising from this milestone submission」與「this milestone submission will need to be ratified with an on-chain remark by the Polkadot Technical Fellowship before it can be merged」。周邊條款：T&C 6.1 允許 Foundation 在提交後要求面試以釐清；T&C 3.5 規定 conformance 以評估當時最新 GP release 為準（目前是 0.8.0）；T&C 8.4：M1 可在 GP 1.0 批准前付款（2026 年 2 月的 early acceptance 修訂），其餘里程碑不行；rule 5 另有獨立的效能測試（gas、trie/DB、簽章驗證、availability，由 W3F 在標準硬體上跑）；rule 20 要求通過所有相關公開與私有 conformance／performance 測試；rule 9 禁止實質使用生成式 AI；rule 6 clean-room。評審是 Polkadot Fellowship（排除涉入該實作的成員，Gav 的 HackMD）。實際流程（2026）：W3F fuzz（1M steps，GP 0.7.2）→ Parity audit → Fellowship 面試 → Fellows referendum（#595–#598 的 remark「approves in full」，暗示部分核准也可能）。
 
 **逐項辨析**
 
@@ -10024,12 +9625,12 @@ eq. 17.2：s_0 ∈ F_{κ[v]_b}^{X_U ⌢ Y(H_V)}([])，X_U = $jam_audit——VRF 
 
 **標準答案**　Cores = validators ÷ validators per core = 1023 ÷ 3 = 341; audits per report = audits per validator per slot × validators ÷ reports = 10 × 1023 ÷ 341 = 30. When the set shrinks the number of active cores becomes |κ| ÷ 3, while the 30 audits per report stay as they are
 
-§20.1 原文一句話把三個數綁在一起：「In total, with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of trustlessly processing and integrating 341 work-packages per timeslot.」算法：每個 core 需要 3 位 guarantor，1023 人剛好分成 341 組，所以 C = 341 不是任意常數，是 1023 = 3 × 341 推出來的；audit 是「每人每 slot 平均 10 份」，全網每 slot 共 10 × 1023 次 audit，分攤到每 slot 最多 341 份 report，每份約 30 次。0.8.0 把 validator set 改成可變（eq. 6.8：3 的倍數、6 到 1023）之後，「每 core 3 人」不變，所以啟用的 core 數變成 |κ|/3：tiny config 6 人就是 2 個 core；而 eq. 11.28 也用 |κ′|/3 當 core index 的上界。每份 report 30 次 audit 這個目標值則來自 audit 的抽樣參數（§17 的 tranche 與 F = 2），不隨 set 大小縮放。口試若問「為什麼是 341」，答「1023 除以 3」就夠。
+§20.1 原文一句話把三個數綁在一起：「In total, with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of trustlessly processing and integrating 341 work-packages per timeslot.」算法：每個 core 需要 3 位 guarantor，1023 人剛好分成 341 組，所以 C = 341 不是任意常數，是 1023 = 3 × 341 推出來的；audit 是「每人每 slot 平均 10 份」，全網每 slot 共 10 × 1023 次 audit，分攤到每 slot 最多 341 份 report，每份約 30 次。validator set 的大小可變（eq. 6.8：3 的倍數、6 到 1023），但「每 core 3 人」不變，所以啟用的 core 數是 |κ|/3：tiny config 6 人就是 2 個 core；而 eq. 11.28 也用 |κ′|/3 當 core index 的上界。每份 report 30 次 audit 這個目標值則來自 audit 的抽樣參數（§17 的 tranche 與 F = 2），不隨 set 大小縮放。口試若問「為什麼是 341」，答「1023 除以 3」就夠。
 
 **逐項辨析**
 
 1. ✅ Cores = validators ÷ validators per core = 1023 ÷ 3 = 341; audits per report = audits per validator per slot × validators ÷ reports = 10 × 1023 ÷ 341 = 30. When the set shrinks the number of active cores becomes |κ| ÷ 3, while the 30 audits per report stay as they are  
-   對：§20.1「with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of… 341 work-packages per timeslot」；0.8.0 啟用 core 數 = |κ|/3。
+   對：§20.1「with our stated target of 1,023 validators and three validators per core, along with requiring a mean of ten audits per validator per timeslot, and thus 30 audits per work-report, JAM is capable of… 341 work-packages per timeslot」；啟用 core 數 = |κ|/3。
 2. ❌ The core count is the protocol constant C = 341, fixed in §I independently of the validator count; 30 = 10 × 3 because each of a report's three guarantors recruits ten auditors of its own. When the set shrinks the core count is unchanged and every core keeps three guarantors, only the audits per report scale down to 10 × |κ| ÷ 1023  
    C = 341 是「最大」core 數，啟用數隨 |κ|/3 變；30 是總 audit 量 ÷ report 數，與 guarantor 招人無關。
 3. ❌ 341 = 1023 ÷ 3 because a report needs three independent audit judgments to count as audited, so 1023 validators can audit at most 341 reports at once; 30 = 3 × 10 is three guarantors times ten tranches each. When the set shrinks the tranches needed per report drop while the core count stays at 341  

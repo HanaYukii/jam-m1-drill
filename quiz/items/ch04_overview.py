@@ -86,7 +86,7 @@ ITEMS = [
   "prior 與 posterior 反了：eq. 11.32 檢查的是 w_a ∈ α[w_c]，用的是 prior pool。",
   "認錯了 host call 與權限：改 φ[c] 的是 core 的 assigner χ_A 用 assign，designate 是 χ_V 設 ι。",
  ],
- "explanation": "GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。**0.8.0 的變動**：這個「pool 更新在 accumulation 之後」是 issue #1020 處理的重點，0.7.2 的順序不同。",
+ "explanation": "GP §8.2 講得很直接：「Since α′ is dependent on φ′, practically speaking, this step must be computed after accumulation, the stage in which φ′ is defined.」**依賴圖不只是描述性的，它規定了計算順序。** α′ ≺ (H, E_G, φ′, α) 的四個輸入各有角色：H 提供 H_T（決定從 queue 的哪一格取）、E_G 決定哪些 authorizer hash 要從 pool 移除、φ′ 決定補進來的是什麼、α 是移除的基礎。**卡住順序的是 φ′**：authorizer queue 只能被具 assigner 權限（χ_A[c]）的 service 在 accumulate 期間透過 `assign` host call 修改，所以要等 accumulation 跑完才知道 φ′ 長什麼樣。**這也解釋了一個容易搞錯的時序**：guarantee 的 authorizer 檢查（eq. 11.32）用的是 **prior 的 α**，而 pool 的更新（eq. 8.2）用的是 **posterior 的 φ′**——一個在前一個在後，所以本塊 assign 進去的新 authorizer 最快要到下一塊才能用。你們的 STF（internal/stf/sft.go）也是在 accumulation 之後才做 α′，順序是對的。",
  "trap": "guarantee 驗證看 prior α；pool 更新用 posterior φ′。"
 },
 {
@@ -231,7 +231,7 @@ ITEMS = [
   "四項全反：暫存器是 64-bit、13 個、little-endian，位址空間是 32-bit 且分頁。",
   "與 GP 的簡化理由正好相反：密碼學與環境互動指令一律拿掉，能力改走 host call。",
  ],
- "explanation": "GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 0.8.0 把 sbrk 改成 grow_heap host call：成本取決於運算元的指令會破壞 basic block 的靜態計價。",
+ "explanation": "GP §4.7（The Virtual Machine and Gas）：PVM 以 RISC-V 的 **RV64EM** 為基礎，是一台簡單的暫存器機。**13 個 64 位元暫存器**——GP 的註腳解釋了為什麼不是 16：「three fewer than RISC-V's 16, however the amount that program code output by compilers uses is 13 since two are reserved for operating system use and the third is fixed as zero」。**little-endian**，記憶體是 2^32 個 octet 的可分頁 RAM，頁大小 Z_P = 2^12 = 4,096，每頁的權限是 mutable(W)、readable(R) 或 inaccessible(∅) 三選一。**刻意刪減的部分**同節也交代了：「the complex instructions for cryptographic operations are missing as are those which deal with environmental interactions」——密碼學運算不做成指令（改由 host call 提供，才能精準計價），與環境互動的指令也拿掉（PVM 必須是**確定性且無外界依賴**的，否則 auditor 重跑會得到不同結果）。**這條「確定性」要求是整個稽核機制的前提**，也是為什麼 heap 成長做成 grow_heap host call 而不是指令：成本取決於運算元的指令會破壞 basic block 的靜態計價。",
  "trap": "13 registers / 64-bit / 4 KiB pages / 32-bit addressing。"
 },
 {

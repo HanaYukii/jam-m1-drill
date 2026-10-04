@@ -22,13 +22,13 @@ ITEMS = [
  ],
  "answer": 0,
  "optNotes": [
-  "eq. 7.2 的五個欄位（含 0.8.0 新增的 timeslot t）與 eq. 7.3 的 Keccak MMR belt 完全吻合。",
+  "eq. 7.2 的五個欄位（含 timeslot t）與 eq. 7.3 的 Keccak MMR belt 完全吻合。",
   "H_X 只存在 header（eq. 5.1），β 的 item 不含它；β_B 裝的全是 accumulation-output root，一個簽章都沒有。",
   "eq. 7.8 建的 p 是 package hash ↦ segment root 的 dictionary，不是 report hash 清單；狀態裡從無 header 序列。",
   "eq. 7.1–7.2 的 β_H 是最多 8 筆 tuple 的序列；四項的 entropy accumulator 是另一個狀態項 η。",
  ],
- "explanation": "β ≡ (β_H, β_B) 是兩個目的不同的東西被放在同一個狀態分量裡。**β_H（recent history）**（eq. 7.2）：β_H ∈ ⟦(h, s, b, t, p)⟧_{:H}，最多 H = 8 筆，每筆是h = header hash、s = state root、b = accumulation-output log 的 super-peak、t = timeslot（**0.8.0 新增**，配合 refinement context 的 anchor slot，PR #526）、p = 一個字典，把本塊 E_G 裡每個 work-package hash 映到它的 segment root（exports root）。**p 是最容易被忽略但用途最多的欄位**：後續 report 的重複檢查、prerequisite 檢查、segment-root lookup 全都要查它（§11）。**β_B（accumulation-output belt）**（eq. 7.3）：β_B ∈ ⟦?H⟧，是一個 MMR 的 peak 序列（∅ 代表該高度沒有 peak），用 Keccak 而不是 Blake2b。**兩者的時間尺度完全不同**：β_H 是滑動窗口，只留 8 筆、舊的直接丟；β_B 是 append-only、永不遺忘，因為它要支撐鏈外幾個月後回來驗的 BEEFY 證明。**θ 不在 β 裡**（eq. 7.4）：θ ∈ ⟦(N_S, H)⟧ 是**本塊**各 service 透過 `yield` 產出的 (service, hash) 序列，它是 β_B 這一輪的輸入，本身是獨立的狀態分量。",
- "trap": "0.8.0 β_H 有 5 個欄位（多了 timeslot）；p 的 value 是 segment root 不是 report hash。"
+ "explanation": "β ≡ (β_H, β_B) 是兩個目的不同的東西被放在同一個狀態分量裡。**β_H（recent history）**（eq. 7.2）：β_H ∈ ⟦(h, s, b, t, p)⟧_{:H}，最多 H = 8 筆，每筆是h = header hash、s = state root、b = accumulation-output log 的 super-peak、t = timeslot（配合 refinement context 的 anchor slot）、p = 一個字典，把本塊 E_G 裡每個 work-package hash 映到它的 segment root（exports root）。**p 是最容易被忽略但用途最多的欄位**：後續 report 的重複檢查、prerequisite 檢查、segment-root lookup 全都要查它（§11）。**β_B（accumulation-output belt）**（eq. 7.3）：β_B ∈ ⟦?H⟧，是一個 MMR 的 peak 序列（∅ 代表該高度沒有 peak），用 Keccak 而不是 Blake2b。**兩者的時間尺度完全不同**：β_H 是滑動窗口，只留 8 筆、舊的直接丟；β_B 是 append-only、永不遺忘，因為它要支撐鏈外幾個月後回來驗的 BEEFY 證明。**θ 不在 β 裡**（eq. 7.4）：θ ∈ ⟦(N_S, H)⟧ 是**本塊**各 service 透過 `yield` 產出的 (service, hash) 序列，它是 β_B 這一輪的輸入，本身是獨立的狀態分量。",
+ "trap": "β_H 每筆有 5 個欄位（含 timeslot）；p 的 value 是 segment root 不是 report hash。"
 },
 {
  "id": "ch07-beta-dagger",
@@ -152,15 +152,15 @@ ITEMS = [
  "id": "ch08-authorizer-identity",
  "lens": "機制",
  "ch": "8", "section": "8.1 Authorizers and Authorizations", "gpRef": "§8.1 & eq. 14.11 (§14.3; delta #522)",
- "difficulty": 2, "kind": "delta", "tags": ["authorizer", "delta-0.8.0"],
-  "stemZh": "在 GP 0.8.0 中，一個 authorizer 是怎麼被識別的？授權的判定實際上在哪裡進行？",
+ "difficulty": 2, "kind": "concept", "tags": ["authorizer"],
+  "stemZh": "一個 authorizer 是怎麼被識別的？授權的判定實際上在哪裡進行？",
   "optionsZh": [
    "authorizer = H(PVM code hash ⌢ 設定 blob)；is-authorized 的判定完全由 guarantor 在 core 內進行（Ψ_I），鏈上邏輯只檢查該 authorizer 是否在該 core 的 pool 裡",
    "authorizer = 單獨的 is-authorized code hash，設定 blob 另外傳給 Ψ_I；出塊者在建構區塊時執行那段程式碼，其他 validator 則信任它公布的 trace",
    "authorizer = H(token ⌢ trace)，所以 pool 項目同時承諾了隨 package 提供的引數與它產生的輸出；因此每位 validator 在區塊匯入時都要重跑 Ψ_I 以重算該雜湊",
    "authorizer = coretime 購買者的 Ed25519 金鑰，所以 α[c] 是一份至多 O = 8 個買家金鑰的清單；guarantor 驗證的是其中之一對 work-package 雜湊的簽章，而不執行任何 PVM 程式碼"
   ],
-  "stem": "How is an authorizer identified in GP 0.8.0, and where is the authorization decision actually made?",
+  "stem": "How is an authorizer identified, and where is the authorization decision actually made?",
  "options": [
   "Authorizer = H(PVM code hash ⌢ configuration blob); the is-authorized decision is made entirely in-core by the guarantors (Ψ_I), while on-chain logic only checks that the authorizer is in the core's pool",
   "Authorizer = the is-authorized code hash alone, with the configuration blob passed to Ψ_I separately; the block author runs that code while building the block and other validators trust the trace it publishes",
@@ -174,7 +174,7 @@ ITEMS = [
   "把識別碼與執行結果搞混：authorizer 必須在任何執行之前就能拿去和 α[c] 比對。",
   "eq. 8.1 的 α 裝的是 hash；§8.1 定義 authorizer 是跑在 G_I = 50M gas 下的 PVM 邏輯，不是驗簽。",
  ],
- "explanation": "§8.1：「Authorizers are identified as the hash of their PVM code hash concatenated with their Configuration blob」（0.8.0 #522 統一了第 8 章與第 14 章的定義：work-package 帶 auth code hash h 與 config c，report 的 authorizer a = H(h ⌢ c)）。三個概念要分清：Token（隨 package 附的 opaque 資料）、Trace（成功授權時輸出的 opaque 資料，進 report 的 o 欄位）、Authorizer（在固定 gas G_I = 50M 下判斷是否授權的 PVM 邏輯）。「The process by which work-packages are determined to be authorized… happens entirely in-core」——不是 on-chain logic 的職責，鏈上只驗 w_a ∈ α[w_c]（eq. 11.32）。",
+ "explanation": "§8.1：「Authorizers are identified as the hash of their PVM code hash concatenated with their Configuration blob」（第 8 章與第 14 章是同一個定義：work-package 帶 auth code hash h 與 config c，report 的 authorizer a = H(h ⌢ c)）。三個概念要分清：Token（隨 package 附的 opaque 資料）、Trace（成功授權時輸出的 opaque 資料，進 report 的 o 欄位）、Authorizer（在固定 gas G_I = 50M 下判斷是否授權的 PVM 邏輯）。「The process by which work-packages are determined to be authorized… happens entirely in-core」——不是 on-chain logic 的職責，鏈上只驗 w_a ∈ α[w_c]（eq. 11.32）。",
  "trap": "on-chain 不執行 authorizer code；只查 pool。"
 },
 {

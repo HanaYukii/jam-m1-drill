@@ -125,14 +125,14 @@ ITEMS = [
  "optionsZh": [
   "不能是 β：最新一筆的 state root 還是 H_0，anchor 在父 block 的 report 會對不上，β† 補上 H_R 才對得上。不能是 β′：它要等 accumulate 產出 θ′ 才存在，而且含這個 block 自己，report 不可能 anchor 在收納它的 block 上",
   "不能是 β：β 只有 7 筆，H = 8 的第八筆要在這個 block 追加後才存在，用 β 會少一個可用的 anchor。不能是 β′：β′ 的 state root 欄位全部是 H_0，因為 posterior root 要下個 block 才知道，用它會讓所有 anchor 都對不上",
-  "其實三者都可以：anchor 只比對 header hash，state root 欄位在 0.8.0 已改為選填；GP 寫 β† 只是為了讓依賴圖上 β† 這個節點有用途，實作用 β 或 β′ 都會得到相同的 state root",
+  "其實三者都可以：anchor 只比對 header hash，state root 欄位只是選填；GP 寫 β† 只是為了讓依賴圖上 β† 這個節點有用途，實作用 β 或 β′ 都會得到相同的 state root",
   "不能是 β：β 是上個 block 的 posterior，可能已經被 fork 掉的 block 覆蓋。不能是 β′：β′ 尚未 Merklize，state root 還沒算出來。β† 是唯一經過 GRANDPA 定案的版本，所以 anchor 必須對它"
  ],
  "stem": "The anchor check for E_G (eq. 11.36) compares the refinement context against β†, neither β nor β′. Why not β, and why not β′?",
  "options": [
   "Not β: its newest entry still holds H_0 as state root, so a report anchored on the parent would fail the state-root match; β† writes H_R in and then it matches. Not β′: it exists only after accumulate has produced θ′, and it would contain this block itself, which a report cannot anchor on",
   "Not β: it holds only seven entries, the eighth of H = 8 appears only after this block appends, so using β would lose one usable anchor. Not β′: its state-root fields are all H_0 because posterior roots are only known a block later, so every anchor would fail against it",
-  "In fact any of the three would do: the anchor compares only the header hash, the state-root field became optional in 0.8.0, and the GP writes β† merely so that the β† node in the dependency graph has a purpose; an implementation reading β or β′ gets the same state root",
+  "In fact any of the three would do: the anchor compares only the header hash, the state-root field is optional in the context, and the GP writes β† merely so that the β† node in the dependency graph has a purpose; an implementation reading β or β′ gets the same state root",
   "Not β: it is the previous block's posterior and may already have been overwritten by a forked-out block. Not β′: it has not yet been Merklized, so its state root is unknown. β† is the only version finalized by GRANDPA, which is why anchors must be checked against it"
  ],
  "answer": 0,
@@ -198,14 +198,14 @@ ITEMS = [
  "stemZh": "report 的 prerequisite 會被檢查兩次：guarantee 上鏈時、accumulate 時。兩次各讀哪份歷史（E_G、β 的 reported map、ξ、ω）？為什麼 guarantee 時不能只查 ξ？",
  "optionsZh": [
   "guarantee 時（eq. 11.42）prerequisite 必須在同一個 E_G 或 β 最近 8 個 block 的 reported map 裡，證明它報過。accumulate 時（§12.1）R^Q 與 ω 的依賴對 ξ 消去，證明它做完了。guarantee 時只查 ξ 不夠，因為 prerequisite 通常已報但還沒 available，根本不在 ξ 裡",
-  "兩次都讀 ξ：guarantee 時 prerequisite 必須已在 ξ（已 accumulate），accumulate 時再用 ξ 把已滿足的依賴消掉；β 的 reported map 只給 audit 用來找 bundle，ω 只是等 gas 的緩衝區。GP 在 §11.5 寫 β 是 0.7.x 的殘留，0.8.0 的編輯只是忘了刪",
+  "兩次都讀 ξ：guarantee 時 prerequisite 必須已在 ξ（已 accumulate），accumulate 時再用 ξ 把已滿足的依賴消掉；β 的 reported map 只給 audit 用來找 bundle，ω 只是等 gas 的緩衝區。GP 在 §11.5 寫 β 只是編輯上的殘留，對區塊有效性沒有作用",
   "guarantee 時讀 ω：prerequisite 必須是 ready queue 裡的某個 report；accumulate 時讀 β，看 prerequisite 是否在最近 8 個 block 被 report 過。ξ 只在 epoch 邊界清理 ω 時用到，不參與任何依賴判定",
   "兩次都讀 β：guarantee 時要求 prerequisite 在 β 裡，accumulate 時再對 β 確認一次；ξ 與 ω 不參與依賴判定，它們是防止重複 accumulate 的去重表。只查 ξ 不行是因為 ξ 只存一個 epoch，太短"
  ],
  "stem": "A report's prerequisites are checked twice: when the guarantee lands on-chain and again at accumulation. Which history does each check read (E_G, β's reported maps, ξ, ω), and why would ξ alone not do at guarantee time?",
  "options": [
   "At guarantee time (eq. 11.42) a prerequisite must be in the same E_G or in β's reported maps of the last 8 blocks, proving it was reported. At accumulation (§12.1) the dependencies of R^Q and ω are struck out against ξ, proving it was accumulated. ξ alone will not do at guarantee time because a prerequisite is usually reported but not yet available, so it is not in ξ",
-  "Both checks read ξ: at guarantee time the prerequisite must already be in ξ (accumulated), and at accumulation ξ is used again to strike satisfied dependencies; β's reported maps serve auditors locating bundles and ω is just a buffer waiting for gas. The GP's mention of β in §11.5 is a 0.7.x leftover that the 0.8.0 editors simply forgot to remove",
+  "Both checks read ξ: at guarantee time the prerequisite must already be in ξ (accumulated), and at accumulation ξ is used again to strike satisfied dependencies; β's reported maps serve auditors locating bundles and ω is just a buffer waiting for gas. The GP's mention of β in §11.5 is an editorial leftover that plays no part in block validity at all",
   "Guarantee time reads ω: the prerequisite must be some report in the ready queue; accumulation reads β to see whether the prerequisite was reported within the last 8 blocks. ξ is consulted only when ω is purged at an epoch boundary and plays no part in dependency decisions",
   "Both checks read β: at guarantee time the prerequisite must be in β, and accumulation confirms against β once more; ξ and ω take no part in dependency decisions, being deduplication tables that prevent double accumulation. ξ alone would not do because it covers only one epoch, which is too short"
  ],
@@ -235,21 +235,21 @@ ITEMS = [
  "stemZh": "delegator service 在 epoch e 的某個 block 呼叫 designate，把 ι 換成一組新 key。這組 key 最早在哪個 epoch 能封 block？中間經過哪幾步？",
  "optionsZh": [
   "epoch e+2。designate 在本 block 寫入 ι′；e+1 的第一個 block 輪替 γ′_P = Φ(ι)、κ′ = 舊 γ_P，新 key 成為 pending；e+1 期間它們用 γ′_Z（γ_P 的 ring root）投 ticket；e+2 的第一個 block 再輪替 κ′ = γ_P，此時才能簽 block",
-  "epoch e+1。designate 寫入 ι′ 後，epoch e+1 的第一個 block 直接把 ι 升成 κ′，因為 0.8.0 為了讓集合大小可變，把 pending 這一層拿掉了；新 key 在 e 期間就以 fallback 的身分投 ticket，e+1 一開始就能 seal",
+  "epoch e+1。designate 寫入 ι′ 後，epoch e+1 的第一個 block 直接把 ι 升成 κ′，因為集合大小可變時，pending 這一層會被跳過；新 key 在 e 期間就以 fallback 的身分投 ticket，e+1 一開始就能 seal",
   "epoch e 當下。designate 是 accumulate 裡的 host call，ι′ 在同一個 block 生效並立刻取代 κ′，因為 delegator 是特權 service、它的決定不需要等輪替；下一個 slot 的 seal 就對新 key 驗",
   "epoch e+3。ι → γ_P → κ 各要一個 epoch，再加上新 key 必須先在 λ 待一個 epoch 讓 dispute 有時間追溯它們，所以總共三次輪替；這也是為什麼 state 要保留 λ"
  ],
  "stem": "The delegator service calls designate in some block of epoch e, replacing ι with a new set of keys. In which epoch can those keys first seal a block, and through which steps?",
  "options": [
   "Epoch e+2. designate writes ι′ in this block; the first block of e+1 rotates γ′_P = Φ(ι) and κ′ = the old γ_P, so the new keys are pending; during e+1 they submit tickets under γ′_Z, the ring root over γ_P; the first block of e+2 rotates again, κ′ = γ_P, and only then can they seal",
-  "Epoch e+1. Once designate has written ι′, the first block of epoch e+1 promotes ι straight to κ′, because 0.8.0 removed the pending layer to make the set size variable; the new keys already submit tickets during e in the fallback role and can seal from the start of e+1",
+  "Epoch e+1. Once designate has written ι′, the first block of epoch e+1 promotes ι straight to κ′, because the pending layer is skipped whenever the set size is variable; the new keys already submit tickets during e in the fallback role and can seal from the start of e+1",
   "Epoch e itself. designate is a host call inside accumulate, and ι′ takes effect within the same block, replacing κ′ immediately, because the delegator is a privileged service whose decision need not wait for a rotation; the very next slot's seal is verified against the new keys",
   "Epoch e+3. ι → γ_P → κ takes one epoch per step, plus the new keys must first spend an epoch in λ so that disputes have time to reach back to them, making three rotations in all; this is also why the state keeps λ"
  ],
  "answer": 0,
  "optNotes": [
   "對：eq. 6.14 每次 e′ > e 做一步 (γ′_P, κ′, λ′) = (Φ(ι), γ_P, κ)；ticket 對 γ′_Z（γ_P 的 ring root）證明，所以 pending 那一個 epoch正是投 ticket 的期間。",
-  "0.8.0 沒有拿掉 pending 層，eq. 6.14 仍是三段輪替；ι 裡的 key 在 e 期間不能投 ticket（ring root 不含它們）。",
+  "pending 層不會被跳過，eq. 6.14 永遠是三段輪替；ι 裡的 key 在 e 期間不能投 ticket（ring root 不含它們）。",
   "designate 只寫 ι′，κ′ 只在 epoch 換檔時由 γ_P 升上來；沒有任何 host call 能直接改 κ。",
   "λ 是「剛卸任」的集合，不是入職前的等待區；ι → γ_P → κ 只有兩次輪替。"
  ],
@@ -306,14 +306,14 @@ ITEMS = [
   "因為 guarantee 可以晚到：eq. 11.28 允許 t 落在上一個 rotation，當時的 guarantor 是那個 rotation 的指派，鏈上必須重算才能驗 credential。上一個 rotation 通常在同一個 epoch，重算只是 τ′ − R、集合與 entropy 不變；跨了 epoch 邊界，當時的集合與 entropy 已變成 λ′ 與 η′_3，M* 才改用它們",
   "因為 audit 要重跑上一個 rotation 的 report：auditor 需要知道當時是誰 guarantee 的，M* 就是給 audit 用的指派表；改用 λ′ 與 η′_3 是因為 audit 最多可以晚兩個 epoch，那時 κ′ 與 η′_2 早已不是當時的值",
   "因為 M 與 M* 是同一個 rotation 的兩種計算方式：M 用 κ′、M* 用 λ′，鏈上兩者都算一次，credential 只要符合其中之一就接受，這樣 epoch 換檔那一個 rotation 裡新舊兩組 validator 都能簽；η′_3 只是為了讓兩者的洗牌結果不同；除了那一個 rotation 之外兩張表永遠一致，只查 M",
-  "因為 0.8.0 讓集合大小可變：當 |κ| ≠ |κ′| 時 M 的洗牌結果整個改變，M* 用上個集合 λ′ 重算，讓縮減前指派的 guarantor 簽的 credential 仍然有效；不跨 epoch 時 M* 等於 M，只是保險"
+  "因為集合大小可以逐 epoch 改變：當 |κ| ≠ |κ′| 時 M 的洗牌結果整個改變，M* 用上個集合 λ′ 重算，讓縮減前指派的 guarantor 簽的 credential 仍然有效；不跨 epoch 時 M* 等於 M，只是保險"
  ],
  "stem": "A guarantee's credential may be verified against M or M*. Why is M*, the previous rotation's assignment, needed at all, and why does it switch to λ′ and η′_3 only when that previous rotation lies in the previous epoch?",
  "options": [
   "Because guarantees may arrive late: eq. 11.28 lets t fall in the previous rotation, whose guarantors were that rotation's assignment, so the chain must recompute it to verify the credential. Usually that rotation is in the same epoch and recomputing just means τ′ − R with the same set and entropy; across an epoch boundary the set and entropy of that time have become λ′ and η′_3, so only then does M* use them",
   "Because audits re-run reports from the previous rotation: an auditor needs to know who guaranteed them, and M* is the assignment table kept for auditing; it switches to λ′ and η′_3 because an audit may run up to two epochs late, by which time κ′ and η′_2 no longer hold the values of that time",
   "Because M and M* are two ways of computing the same rotation: M with κ′, M* with λ′, both computed every block, and a credential is accepted if it matches either; that lets both the old and the new validator set sign during the rotation that straddles an epoch change, and η′_3 merely makes the two shuffles differ; outside that one rotation the two tables always agree and only M is consulted",
-  "Because 0.8.0 made the set size variable: when |κ| ≠ |κ′| the shuffle of M changes completely, so M* recomputes with the previous set λ′ so that credentials signed by guarantors assigned before the shrink stay valid; when no epoch change occurs M* equals M and is only a safeguard"
+  "Because the set size can vary per epoch: when |κ| ≠ |κ′| the shuffle of M changes completely, so M* recomputes with the previous set λ′ so that credentials signed by guarantors assigned before the shrink stay valid; when no epoch change occurs M* equals M and is only a safeguard"
  ],
  "answer": 0,
  "optNotes": [
@@ -373,25 +373,25 @@ ITEMS = [
  "stemZh": "assurance 的簽章對 κ[v] 驗、門檻是 2/3·|κ|，都是 prior 的集合；guarantee 卻用 κ′。為什麼不對稱？當 |κ| ≠ |κ′| 時，ρ 裡等待中的 report 會怎樣、為什麼？",
  "optionsZh": [
   "assurance 背書的 report 是更早的 block 進 ρ 的，shard 依當時的集合大小切（eq. 11.31），所以簽的人與門檻都屬於那個集合；guarantee 是這個 block 新收的工作，所以用 κ′。|κ| ≠ |κ′| 時舊 shard 數對不上，eq. 11.18 把 ρ‡ 全清，視為提早逾時",
-  "assurance 用 κ 是 0.7.x 的殘留，0.8.0 本意是兩者都用 κ′，但為了相容測試向量沒有改；|κ| ≠ |κ′| 時 ρ 裡的 report 照常等待，只是門檻改成 2/3·|κ′|，shard 數的差異由 guarantor 重新編碼補上",
+  "assurance 用 κ 只是歷史殘留，GP 本意是兩者都用 κ′，但為了相容測試向量沒有改；|κ| ≠ |κ′| 時 ρ 裡的 report 照常等待，只是門檻改成 2/3·|κ′|，shard 數的差異由 guarantor 重新編碼補上",
   "因為 assurance 是由出塊者代簽的，出塊者的 key 在 κ 裡有明確 index，而 guarantor 是 validator 自己簽，要用最新的 κ′；|κ| ≠ |κ′| 時 ρ 的 report 會被搬進 ω 等待下個 epoch 再 assurance 一次",
   "沒有不對稱：兩者都用 κ′，GP 在 eq. 11.13 寫 κ 是因為 assurance 的 anchor 是父 block、所以「父 block 的 κ′」就等於「這個 block 的 κ」；|κ| ≠ |κ′| 時 report 不受影響，因為 erasure coding 的 shard 數是常數 1023，由 full 設定寫死"
  ],
  "stem": "Assurance signatures are verified against κ[v] and the threshold is 2/3·|κ|, both the prior set, while guarantees use κ′. Why the asymmetry, and what happens to the reports waiting in ρ when |κ| ≠ |κ′|, and why?",
  "options": [
   "The report an assurance attests entered ρ in an earlier block and its shards were cut for the set size of that time (eq. 11.31), so signers and threshold belong to that set; a guarantee is work newly accepted in this block, hence κ′. When |κ| ≠ |κ′| the old shard counts no longer fit, so eq. 11.18 clears all of ρ‡ — timed out early",
-  "Using κ for assurances is a 0.7.x leftover; 0.8.0 meant both to use κ′ but kept κ for test-vector compatibility; when |κ| ≠ |κ′| the reports in ρ keep waiting, only the threshold becomes 2/3·|κ′|, and the shard-count mismatch is patched by the guarantors re-encoding",
+  "Using κ for assurances is a historical leftover; the GP meant both to use κ′ but kept κ for test-vector compatibility; when |κ| ≠ |κ′| the reports in ρ keep waiting, only the threshold becomes 2/3·|κ′|, and the shard-count mismatch is patched by the guarantors re-encoding",
   "Because assurances are signed on validators' behalf by the block author, whose key has a definite index in κ, whereas guarantors sign for themselves and therefore use the freshest κ′; when |κ| ≠ |κ′| the reports in ρ are moved into ω to be assured again in the next epoch",
   "There is no asymmetry: both use κ′, and the GP writes κ in eq. 11.13 because an assurance anchors on the parent block, so 'the parent's κ′' is the same thing as 'this block's κ'; a change of |κ| does not affect reports, since the erasure-coding shard count is the constant 1023 fixed by the full config"
  ],
  "answer": 0,
  "optNotes": [
   "對：eq. 11.13 簽章對 κ[a_v]_e、eq. 11.17 門檻 > 2/3|κ|、eq. 11.31 shard 數 = |κ′|（收納時）、eq. 11.18 在 |κ| ≠ |κ′| 時清空，§11.2 原文「Items cleared in this way can be viewed as having timed out early」。",
-  "不是殘留：0.8.0 明確用 κ；也沒有「重新編碼」這種機制，report 直接作廢。",
+  "不是殘留：GP 明確用 κ；也沒有「重新編碼」這種機制，report 直接作廢。",
   "assurance 是每個 validator 自己簽的（每人一份，最多一份）；ω 是依賴等待區，跟 assurance 無關。",
-  "eq. 11.13 就是寫 κ；shard 數不是常數，0.8.0 起等於收納時的 |κ′|（tiny 是 6）。"
+  "eq. 11.13 就是寫 κ；shard 數不是常數，等於收納時的 |κ′|（tiny 是 6）。"
  ],
- "explanation": "看數字就懂：report 在 block N 被 guarantee 收進 ρ 時，eq. 11.31 要求它的 availability spec 宣告的 shard 數 (w_s)_v = |κ′|（block N 的 posterior set 大小），guarantor 也是照這個數切 erasure shard、分給那 |κ′| 個 validator。到了 block N+1、N+2 有人來 assurance，這些人就是「拿到 shard 的那批」，也就是 block N 的 κ′ = block N+1 的 κ。所以 eq. 11.13 對 κ[v] 驗簽、eq. 11.17 用 2/3|κ| 當門檻，兩者都在說「對切 shard 時的那個集合計票」。guarantee 相反，它是這個 block 新收的，shard 也是按這個 block 的 κ′ 切，所以用 κ′。當兩者不同——只會發生在 epoch 換檔且集合大小改變的 block——ρ 裡所有等待中的 report 的 shard 數都對不上新集合，沒辦法用新集合的人數算門檻，eq. 11.18 的第三個條件 |κ| ≠ |κ′| 就把 ρ‡ 全清，§11.2 原文：「Note that all items are cleared when the size of the active validator key set κ changes. Items cleared in this way can be viewed as having timed out early.」guarantor 要重新 guarantee、按新集合重切。這是 0.8.0 讓集合可變之後付出的代價，也是 ch11-inactive-core-set-shrink 那題的第三個判定依據。",
+ "explanation": "看數字就懂：report 在 block N 被 guarantee 收進 ρ 時，eq. 11.31 要求它的 availability spec 宣告的 shard 數 (w_s)_v = |κ′|（block N 的 posterior set 大小），guarantor 也是照這個數切 erasure shard、分給那 |κ′| 個 validator。到了 block N+1、N+2 有人來 assurance，這些人就是「拿到 shard 的那批」，也就是 block N 的 κ′ = block N+1 的 κ。所以 eq. 11.13 對 κ[v] 驗簽、eq. 11.17 用 2/3|κ| 當門檻，兩者都在說「對切 shard 時的那個集合計票」。guarantee 相反，它是這個 block 新收的，shard 也是按這個 block 的 κ′ 切，所以用 κ′。當兩者不同——只會發生在 epoch 換檔且集合大小改變的 block——ρ 裡所有等待中的 report 的 shard 數都對不上新集合，沒辦法用新集合的人數算門檻，eq. 11.18 的第三個條件 |κ| ≠ |κ′| 就把 ρ‡ 全清，§11.2 原文：「Note that all items are cleared when the size of the active validator key set κ changes. Items cleared in this way can be viewed as having timed out early.」guarantor 要重新 guarantee、按新集合重切。這是讓集合大小可變所付出的代價。",
  "trap": "assurance 對「切 shard 時的集合」計票；集合大小一變，等待中的 report 全部提早逾時。"
 },
 {
@@ -419,7 +419,7 @@ ITEMS = [
  ],
  "answer": 0,
  "optNotes": [
-  "對：ρ′[c] 存的是 (g, τ′)，ch11-inactive-core-set-shrink 那題把「蓋 g_t 而非 τ′」列為錯誤選項；eq. 11.28 的視窗寬度是 R。",
+  "對：ρ′[c] 存的是 (g, τ′)，蓋的是進鏈的 τ′ 而不是 guarantee 自己的 g_t；eq. 11.28 的視窗寬度是 R。",
   "g_t 只用來決定對 M 還是 M* 驗；逾時看的是 ρ 裡記的收納時間。",
   "anchor timeslot 用於 eq. 11.36 的 anchor 檢查，與逾時無關；差距上限也不是 H。",
   "沒有「第一次 assurance 才開始計時」的規則；ρ 記的就是收納時間，從那一刻起算。"
@@ -723,14 +723,14 @@ ITEMS = [
  "difficulty": 2,
  "kind": "rationale",
  "tags": ["ticket", "validator set"],
- "stemZh": "0.8.0 把每位 validator 能投的 ticket 數改成 n = ⌈2E/|γ′_P|⌉，validator 越少每人能投越多。GP 給的理由是什麼？為什麼分子是 2E 而不是 E？",
+ "stemZh": "每位 validator 能投的 ticket 數是 n = ⌈2E/|γ′_P|⌉，validator 越少每人能投越多。GP 給的理由是什麼？為什麼分子是 2E 而不是 E？",
  "optionsZh": [
   "理由（§6.6）：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」；eq. 6.25 只在 |γ_A| = E 時用 ticket 模式。2E 讓容量是 slot 數的兩倍，部分 validator 離線仍能填滿；full 設定 n = 2，六人 n = 4",
   "理由：讓每位 validator 的中籤機率相等。分子 2E 是因為 ticket 有兩個 entry index（0 和 1），每張 ticket 算兩次；validator 少的時候每人多投是為了補償他們在 ring 裡的匿名集合變小，讓每個 validator 一樣難被辨識",
   "理由：防止女巫攻擊。validator 越少，每個人越容易被辨識，所以讓每人投更多 ticket 來稀釋可辨識性；2E 是因為 GP 要求 accumulator 保留 2E 張再取前 E 張",
   "理由：與 core 數對齊。每個 core 需要兩張 ticket（一張 primary 一張 backup），2E 就是 2 × 每 epoch 的 slot 數；validator 少時每人多投是為了讓每個 core 都有備援"
  ],
- "stem": "0.8.0 makes the tickets each validator may submit n = ⌈2E/|γ′_P|⌉, so fewer validators means more tickets each. What reason does the GP give, and why is the numerator 2E rather than E?",
+ "stem": "Each validator may submit n = ⌈2E/|γ′_P|⌉ tickets, so fewer validators means more tickets each. What reason does the GP give, and why is the numerator 2E rather than E?",
  "options": [
   "Reason (§6.6): 'To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets'; eq. 6.25 uses tickets only when |γ_A| = E. 2E makes capacity twice the slot count, so the accumulator fills even if some validators are offline; full config n = 2, six validators n = 4",
   "Reason: to equalize each validator's chance of winning. The numerator is 2E because a ticket has two entry indices (0 and 1) and each ticket counts twice; with fewer validators each submits more to compensate for the smaller anonymity set in the ring, keeping every validator equally hard to identify",
@@ -744,7 +744,7 @@ ITEMS = [
   "accumulator 只保留 E 張（eq. 6.35 的 →^E），不是 2E；Sybil 不是 GP 給的理由。",
   "ticket 對應的是 slot 不是 core，也沒有 backup ticket 的概念。"
  ],
- "explanation": "§6.6 原文：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets.」關鍵字是 saturated。eq. 6.25 把 ticket 模式的條件寫死：只有當 |γ_A| = E（accumulator 剛好裝滿 E 張）且 m ≥ Y 時，下個 epoch 才用 Z(γ_A)；少一張都整個 epoch 退回 fallback F(η′_2, κ′)，匿名性沒了。所以「每個 epoch 至少要收到 E 張有效 ticket」是硬需求，而 ticket 只能由 validator 投，每人 n 張、|γ′_P| 個人，總容量 n·|γ′_P|。0.7.x 把 n 寫死為常數 N（full 設定 2），validator 數固定 1023 時 2 × 1023 = 2046 ≥ 600 沒問題；0.8.0 允許集合小到 6 人，若 n 仍是 2 就只有 12 張，永遠填不滿 E = 12 以外的任何設定——tiny 的 E 正好是 12，剛好夠但零裕度。改成 n = ⌈2E/|γ′_P|⌉ 之後，總容量 ≥ 2E，是需求的兩倍：容許約一半的 validator 離線、或 ticket 分數不佳被擠掉，accumulator 仍能填滿。2 這個係數 GP 沒有另外解釋，但從「容量 = 2 × 需求」讀出來就是安全裕度。full 設定 n = ⌈1200/1023⌉ = 2 與舊常數相同，所以對既有實作零改動；tiny 6 人 n = 4，這也是 ecosystem-notes 提醒的舊向量 tickets_per_validator: 3 已失效的原因。",
+ "explanation": "§6.6 原文：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets.」關鍵字是 saturated。eq. 6.25 把 ticket 模式的條件寫死：只有當 |γ_A| = E（accumulator 剛好裝滿 E 張）且 m ≥ Y 時，下個 epoch 才用 Z(γ_A)；少一張都整個 epoch 退回 fallback F(η′_2, κ′)，匿名性沒了。所以「每個 epoch 至少要收到 E 張有效 ticket」是硬需求，而 ticket 只能由 validator 投，每人 n 張、|γ′_P| 個人，總容量 n·|γ′_P|。若把 n 寫死為常數 2，validator 數固定 1023 時 2 × 1023 = 2046 ≥ 600 沒問題；但集合可以小到 6 人，若 n 仍是 2 就只有 12 張，永遠填不滿 E = 12 以外的任何設定——tiny 的 E 正好是 12，剛好夠但零裕度。改成 n = ⌈2E/|γ′_P|⌉ 之後，總容量 ≥ 2E，是需求的兩倍：容許約一半的 validator 離線、或 ticket 分數不佳被擠掉，accumulator 仍能填滿。2 這個係數 GP 沒有另外解釋，但從「容量 = 2 × 需求」讀出來就是安全裕度。full 設定 n = ⌈1200/1023⌉ = 2 與舊常數相同，所以對既有實作零改動；tiny 6 人 n = 4，這也是 ecosystem-notes 提醒的舊向量 tickets_per_validator: 3 已失效的原因。",
  "trap": "湊不滿就整個 epoch 沒匿名，所以容量抓兩倍。"
 },
 {
@@ -832,14 +832,14 @@ ITEMS = [
  "difficulty": 2,
  "kind": "rationale",
  "tags": ["gas", "basic block"],
- "stemZh": "0.8.0 把 gas 改成「進入 basic block 時預扣整塊」。為什麼以 block 而不是以指令為單位計價？這個決定跟「間接跳躍必須落在 block 起點」有什麼關係？",
+ "stemZh": "PVM 的 gas 是「進入 basic block 時預扣整塊」。為什麼以 block 而不是以指令為單位計價？這個決定跟「間接跳躍必須落在 block 起點」有什麼關係？",
  "optionsZh": [
   "因為 §A.9 的模型是對每個 basic block 模擬 CPU 微架構——decode slot、執行單元、reorder buffer；指令會重疊，只有整塊的成本有意義，而且它是靜態的，recompiler 只要在入口扣一次。既然在入口扣，控制流就只能從 block 起點進入，這就是 eq. A.21 要求目標在 ϖ 裡的原因",
   "因為指令太多，逐條查表太慢；以 block 為單位可以把查表次數減到約十分之一。跟間接跳躍的關係是：跳到 block 中間會讓計數器重複扣同一塊，所以禁止",
   "因為 gas 要跟 wall-clock 對齊，而 CPU 是一次執行一整個 cache line；basic block 大約等於一個 cache line。間接跳躍限制在起點是為了 cache 對齊，跟計價無關",
   "因為 host call 的成本是動態的，只有把 host call 排除在 block 之外、其餘指令整塊計價才能讓成本可預測。間接跳躍必須落在起點是因為 jump table 只存 block 起點的位址，這是編碼格式的限制，繼承自 RISC-V"
  ],
- "stem": "0.8.0 charges gas for a whole basic block up front on entry. Why price by block rather than by instruction, and how does that decision relate to 'indirect jumps must land on a block start'?",
+ "stem": "The PVM charges gas for a whole basic block up front on entry. Why price by block rather than by instruction, and how does that decision relate to 'indirect jumps must land on a block start'?",
  "options": [
   "Because §A.9's model simulates a CPU microarchitecture — decode slots, execution units, reorder buffer — per basic block; instructions overlap, so only a whole block's cost is meaningful, and it is static, so a recompiler deducts once per entry. Since the charge is on entry, control may enter only at block starts, hence eq. A.21's ϖ requirement",
   "Because there are too many instructions for a per-instruction table lookup to be fast; pricing by block cuts lookups to roughly a tenth. The link to indirect jumps is that jumping into the middle of a block would charge the same block twice, so it is forbidden",

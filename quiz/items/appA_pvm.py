@@ -34,30 +34,30 @@ ITEMS = [
  "id": "appA-basic-blocks-gas",
  "lens": "演算法",
  "ch": "A", "section": "A.3 Basic Blocks & A.5 Single-Step", "gpRef": "eq. A.5–A.8, A.54",
- "difficulty": 3, "kind": "delta", "tags": ["gas", "basic block", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0（PR #508）引入了新的 gas 模型。gas 是怎麼扣的？",
+ "difficulty": 3, "kind": "concept", "tags": ["gas", "basic block"],
+  "stemZh": "PVM 執行程式時，gas 是怎麼扣的？",
   "optionsZh": [
    "以 basic block 為單位、事先扣款：在第一步、以及每當執行進入一個 basic block（或跳回它的起點）時，整個 block 的成本 ϱ^Δ 會被扣掉；若剩餘 gas 不足，機器以 ∞ 退出且計數器維持不變；ϱ^Δ = max(cycles − 3, 1)，來自一個模擬的亂序 CPU 模型",
-   "以指令為單位、事後扣款：每條執行過的指令花費 1 gas，計數器在該指令退休時遞減，與 0.7.x 完全相同；當扣款會讓計數器低於零時，機器以 ∞ 退出且該筆扣款仍然成立，所以回報的 gas 是負數",
+   "以指令為單位、事後扣款：每條執行過的指令花費 1 gas，計數器在該指令退休時遞減，不論是哪一條指令；當扣款會讓計數器低於零時，機器以 ∞ 退出且該筆扣款仍然成立，所以回報的 gas 是負數",
    "以指令為單位、事先扣款：每條指令執行前，依 §A.10 的表扣掉該 opcode 的固定價格（ecalli 100、div_u_64 60、unlikely 40、move_reg 0）；付不出價格就以 ∞ 退出且計數器不變，而 basic block 在 gas 計算中完全不起作用",
    "以 basic block 為單位、事後扣款：ϱ^Δ 要等該 block 的 terminator 執行完才扣，所以中途 panic 的 block 完全不花錢；ϱ^Δ 是該 block 的指令數，而讓計數器變成負值的扣款會以 ∞ 退出並帶著那個負值"
   ],
-  "stem": "GP 0.8.0 (PR #508) introduced a new gas model. How is gas charged?",
+  "stem": "How does the PVM charge gas while a program runs?",
  "options": [
   "Per BASIC BLOCK, in advance: on the first step and whenever execution enters a basic block (or jumps back to its start), the whole block's cost ϱ^Δ is deducted; if the remaining gas is insufficient the machine exits with ∞ and the counter is unchanged; ϱ^Δ = max(cycles − 3, 1) from a simulated out-of-order CPU model",
-  "Per instruction, in arrears: each executed instruction costs 1 gas and the counter is decremented once it retires, exactly as in 0.7.x; when the deduction would take the counter below zero the machine exits with ∞ and the deduction stands, so the gas reported back is negative",
+  "Per instruction, in arrears: each executed instruction costs 1 gas and the counter is decremented once it retires, whatever its opcode; when the deduction would take the counter below zero the machine exits with ∞ and the deduction stands, so the gas reported back is negative",
   "Per instruction, in advance: before each instruction a fixed per-opcode price from the §A.10 table is deducted (ecalli 100, div_u_64 60, unlikely 40, move_reg 0); if the price cannot be paid the machine exits with ∞ and the counter is unchanged, and basic blocks play no part in gas accounting at all",
   "Per basic block, in arrears: ϱ^Δ is deducted once the block’s terminator has executed, so a block that panics half-way through costs nothing; ϱ^Δ is the number of instructions in the block, and a deduction that leaves the counter negative exits with ∞ carrying that negative value"
  ],
  "answer": 0,
  "optNotes": [
    "eq. A.8 在 ϱ < ϱ^Δ 時回 (∞, ϱ, ⊥)，counter 一分不動；ϱ^Δ = max(cycles − 3, 1) 即 eq. A.54。",
-   "每指令 1 gas 是 0.7.2 的模型，已被 PR #508 取代；OOG 時 gas 不扣，更不會變負值。",
+   "GP 不是每指令 1 gas，而是整個 basic block 預扣；OOG 時 gas 不扣，更不會變負值。",
    "§A.10 那張表給的是餵進管線模擬的 cycles 而非 gas 價格，且 GP 要求整個 block 預先收費。",
    "時機與公式都錯：block 是預扣不是事後扣，ϱ^Δ 也不是指令數，照此 panic 的 block 免費。",
  ],
- "explanation": "§A.5：「On the very first step of execution, and every time the execution enters a new basic block or jumps back to the beginning of the current basic block, the gas counter of the machine is updated according to the gas cost function ϱ^Δ of the target basic block. No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance. In case there's not enough gas remaining… the execution is interrupted and the gas counter remains unchanged.」新增了「gas charged flag」（Ψ 的 bool 參數）以支援 host call 中斷後續跑不重複收費。eq. A.54：ϱ^Δ = max(cycles_final − 3, 1)，cycles 由 §A.9 的微架構模擬算出——初始狀態 (ı, 0, 4 decode slots, 5 starts, ⟨A 4, L 4, S 4, M 1, D 1⟩, ROB = []）、ROB 上限 32 筆；§A.10 有每條指令的 cycles/decode slots/exec units 表。basic block 的邊界 = terminator 指令（trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*）之後。你們 0.7.2 每指令 1 gas（GasCost = InstrCount），0.8.0 需重做（issue #1046）。",
- "trap": "面試「PVM portion」極可能問 0.8.0 gas model；記住：block-level、預先扣、max(c−3,1)、不足則 OOG 且不扣。"
+ "explanation": "§A.5：「On the very first step of execution, and every time the execution enters a new basic block or jumps back to the beginning of the current basic block, the gas counter of the machine is updated according to the gas cost function ϱ^Δ of the target basic block. No instruction is allowed to execute within a basic block unless the gas cost for the entire basic block has been charged in advance. In case there's not enough gas remaining… the execution is interrupted and the gas counter remains unchanged.」另有「gas charged flag」（Ψ 的 bool 參數）以支援 host call 中斷後續跑不重複收費。eq. A.54：ϱ^Δ = max(cycles_final − 3, 1)，cycles 由 §A.9 的微架構模擬算出——初始狀態 (ı, 0, 4 decode slots, 5 starts, ⟨A 4, L 4, S 4, M 1, D 1⟩, ROB = []）、ROB 上限 32 筆；§A.10 有每條指令的 cycles/decode slots/exec units 表。basic block 的邊界 = terminator 指令（trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*）之後。",
+ "trap": "面試「PVM portion」極可能問 gas model；記住：block-level、預先扣、max(c−3,1)、不足則 OOG 且不扣。"
 },
 {
  "id": "appA-memory-access",

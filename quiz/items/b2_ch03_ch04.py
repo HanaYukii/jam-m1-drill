@@ -197,15 +197,15 @@ ITEMS = [
  "id": "ch04-dagger-intermediate-states",
  "lens": "時機",
  "ch": "4", "section": "4.2.1 State Transition Dependency Graph", "gpRef": "eq. 4.6, 4.12, 4.13, 4.14, 4.16, 4.17, 4.18",
- "difficulty": 2, "kind": "concept", "tags": ["guarantee", "dependency", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。它們各自剛吸收了什麼？",
+ "difficulty": 2, "kind": "concept", "tags": ["guarantee", "dependency"],
+  "stemZh": "GP 的依賴圖點名了四個帶 dagger 上標的中間狀態：β_H†、ρ†、ρ‡ 與 δ‡。它們各自剛吸收了什麼？",
   "optionsZh": [
    "β_H† = β_H 在本塊的 guarantee E_G 被附加到最新條目之後；ρ† = ρ 在處理 assurance E_A 之後；ρ‡ = ρ† 在處理 guarantee E_G 之後；δ‡ = δ 在 preimage E_P 被整合之後、accumulation 執行之前",
    "β_H† = β_H 把父區塊的 posterior state root H_R 寫進它最新的條目之後；ρ† = ρ 在處理 disputes E_D 之後；ρ‡ = ρ† 在處理 assurance E_A 之後；δ‡ = δ 在 accumulate 完 R* 之後、E_P 被併入之前",
    "β_H† = β_H 在 accumulation-output log θ′ 被承諾進 belt 之後；ρ† = ρ 在處理 guarantee E_G 之後；ρ‡ = ρ† 在處理 disputes E_D 之後；δ‡ = δ 在 E_P 被整合之後、deferred transfer 被套用之前",
    "β_H† = β_H 寫入 H_R 之後；ρ† = ρ 在 E_A 之後；ρ‡ = ρ† 在 E_D 之後；δ‡ = δ 在 E_P 之後——disputes 與 assurance 的先後無關緊要，因為兩者都只是從 ρ 移除條目"
   ],
-  "stem": "GP 0.8.0's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. What has each one just absorbed?",
+  "stem": "The GP's dependency graph names four dagger-superscripted intermediate states: β_H†, ρ†, ρ‡ and δ‡. What has each one just absorbed?",
  "options": [
   "β_H† = β_H after this block's guarantees E_G are appended to the newest entry; ρ† = ρ after the assurances E_A; ρ‡ = ρ† after the guarantees E_G; δ‡ = δ after the preimages E_P are integrated, before accumulation runs",
   "β_H† = β_H with the parent's posterior state root H_R written into its newest entry; ρ† = ρ after the disputes E_D; ρ‡ = ρ† after the assurances E_A; δ‡ = δ after accumulating R*, before E_P is folded in",
@@ -219,7 +219,7 @@ ITEMS = [
   "belt β_B 由 θ′ 更新、與 dagger 無關；ρ 的兩步也把 E_D 與 E_G 對調了。",
   "E_D 與 E_A 不可交換：assurance 只能對 ρ†[c] ≠ ∅ 的 core 設 bit（eq. 11.15）。",
  ],
- "explanation": "eq. 4.6 β_H† ≺ (H, β_H)：eq. 7.5 把 β_H 最後一筆的 state root（前一塊寫入時是 H_0）改為 H_R，即 parent 的 posterior root，要到本塊 header 才知道；eq. 4.12 ρ† ≺ (E_D, ρ)：disputes 先把 verdict 為 bad/wonky 的 report 從 core 清掉（eq. 10.14）；eq. 4.13 ρ‡ ≺ (E_A, ρ†)：assurances 讓 report 變 available（進入 R，eq. 11.17）或因 timeout 而移除（eq. 11.18）；eq. 4.14 ρ′ ≺ (E_G, ρ‡, κ, τ′)：最後才放入新 guarantee；eq. 4.16 (ω′, ξ′, δ‡, χ′, ι′, φ′, θ′, S) ≺ (R*, ω, ξ, δ, χ, ι, φ, τ, τ′)：accumulation 產出 δ‡（accumulation.tex 另稱 δ† 為 post-accumulation 的第一個中間態、δ‡ 為更新 last-accumulation 時戳 τ′ 後的第二個，overview 的圖只列 δ‡）；eq. 4.18 δ′ ≺ (E_P, δ‡, τ′)：preimage 最後併入。GP：「The latter two [4.17, 4.18] mark a merge and join in the dependency graph… the availability extrinsic may be fully processed and accumulation of work happen before the preimage lookup extrinsic is folded into state」。0.8.0 的符號也要跟上：新 available 的 report 序列寫作 R（R* 為 accumulatable，0.7.2 寫 W/R*），dagger 標在 β_H 上（β = (β_H, β_B)，belt β_B 不受 parent-root 修正影響）；你們 0.7.2 的 code 仍用 W/R*，`intermediateStates` 存 β†, ρ†, ρ‡, δ†, δ‡（chain_state.go）。",
+ "explanation": "eq. 4.6 β_H† ≺ (H, β_H)：eq. 7.5 把 β_H 最後一筆的 state root（前一塊寫入時是 H_0）改為 H_R，即 parent 的 posterior root，要到本塊 header 才知道；eq. 4.12 ρ† ≺ (E_D, ρ)：disputes 先把 verdict 為 bad/wonky 的 report 從 core 清掉（eq. 10.14）；eq. 4.13 ρ‡ ≺ (E_A, ρ†)：assurances 讓 report 變 available（進入 R，eq. 11.17）或因 timeout 而移除（eq. 11.18）；eq. 4.14 ρ′ ≺ (E_G, ρ‡, κ, τ′)：最後才放入新 guarantee；eq. 4.16 (ω′, ξ′, δ‡, χ′, ι′, φ′, θ′, S) ≺ (R*, ω, ξ, δ, χ, ι, φ, τ, τ′)：accumulation 產出 δ‡（accumulation.tex 另稱 δ† 為 post-accumulation 的第一個中間態、δ‡ 為更新 last-accumulation 時戳 τ′ 後的第二個，overview 的圖只列 δ‡）；eq. 4.18 δ′ ≺ (E_P, δ‡, τ′)：preimage 最後併入。GP：「The latter two [4.17, 4.18] mark a merge and join in the dependency graph… the availability extrinsic may be fully processed and accumulation of work happen before the preimage lookup extrinsic is folded into state」。符號提醒：新 available 的 report 序列寫作 R（R* 為 accumulatable），dagger 標在 β_H 上（β = (β_H, β_B)，belt β_B 不受 parent-root 修正影響）；你們的 code 把同一批 report 叫 W/R*，`intermediateStates` 存 β†, ρ†, ρ‡, δ†, δ‡（chain_state.go）。",
  "trap": "口訣：β_H† 補 root；ρ† 判、ρ‡ 保、ρ′ 收；δ‡ 算完帳、δ′ 才收 preimage。"
 },
 {

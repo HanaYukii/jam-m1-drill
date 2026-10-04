@@ -137,7 +137,6 @@ table.cmp td.src{font-family:var(--mono);font-size:11.5px;color:var(--muted);min
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line-2);background:transparent;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--ink-2)}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
-.chip.amber[aria-pressed="true"]{background:var(--amber-soft);border-color:var(--amber)}
 .search{width:100%;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);border-radius:7px;padding:7px 10px;font-size:13px}
 .rail .foot{margin-top:auto;font-size:11px;color:var(--muted);line-height:1.5}
 .rail .foot button{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:11px}
@@ -157,7 +156,6 @@ table.cmp td.src{font-family:var(--mono);font-size:11.5px;color:var(--muted);min
 .meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:12px}
 .tag{border:1px solid var(--line-2);border-radius:5px;padding:1px 7px;font-family:var(--mono);font-size:11px;color:var(--ink-2);background:var(--surface-2)}
 .tag.chtag{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
-.tag.delta{background:var(--amber-soft);border-color:var(--amber);color:var(--ink)}
 .tag.kind{text-transform:uppercase;letter-spacing:.04em}
 .tag.lens{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
 .dots{display:inline-flex;gap:3px;vertical-align:middle}
@@ -329,7 +327,6 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           <button class="chip" data-kind="code" aria-pressed="false">code</button>
           <button class="chip" data-kind="calc" aria-pressed="false">calc</button>
           <button class="chip" data-kind="rationale" aria-pressed="false">rationale</button>
-          <button class="chip amber" data-kind="delta" aria-pressed="false">0.8.0 delta</button>
         </div>
         <div class="chips">
           <button class="chip" id="unseenFirst" aria-pressed="true">未做過優先</button>
@@ -405,11 +402,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           && !(it.alsoCh || []).includes(state.chapter)) return false;
       if (state.diffs.size && !state.diffs.has(it.difficulty)) return false;
       if (state.lenses.size && !state.lenses.has(it.lens || '機制')) return false;
-      if (state.kinds.size){
-        const isDelta = it.tags.includes('delta-0.8.0') || it.kind === 'delta';
-        const hit = (state.kinds.has('delta') && isDelta) || state.kinds.has(it.kind);
-        if (!hit) return false;
-      }
+      if (state.kinds.size && !state.kinds.has(it.kind)) return false;
       if (state.query){
         const q = state.query.toLowerCase();
         const hay = [it.stem, it.stemZh || '', it.section, it.gpRef, it.tags.join(' '), it.id,
@@ -433,7 +426,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     h += '<span class="tag chtag">'+esc(chTag(it.ch))+' · '+esc(chName(it.ch))+'</span>';
     (it.alsoCh||[]).forEach(k => { h += '<span class="tag xch" title="跨章節：這題也算在該章">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
     (it.refCh||[]).forEach(k => { h += '<span class="tag refch" title="詳解引用到的章節（GP ref）">'+esc(chTag(k))+' · '+esc(chName(k))+'</span>'; });
-    const tgs = (it.tags||[]).filter(x => x !== 'delta-0.8.0');
+    const tgs = it.tags || [];
     if (tgs.length){ h += '<span class="hdr-k">重點</span>'; tgs.forEach(tg => { h += '<span class="tag tg">'+esc(tg)+'</span>'; }); }
     return h + '</div>';
   }
@@ -480,7 +473,6 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   }
   function dots(d){ return '<span class="dots" title="難度 '+d+'/3">'+[1,2,3].map(i=>'<i class="'+(i<=d?'on':'')+'"></i>').join('')+'</span>'; }
   function metaRow(it){
-    const isDelta = it.tags.includes('delta-0.8.0') || it.kind === 'delta';
     return '<div class="meta">'
       + '<span class="tag chtag">'+esc(chTag(it.ch))+' · '+esc(chName(it.ch))+'</span>'
       + ((it.alsoCh||[]).length ? '<span class="tag xch" title="'+esc('也涵蓋：'+it.alsoCh.map(chName).join('、'))+'">跨章節</span>' : '')
@@ -488,7 +480,6 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
       + dots(it.difficulty)
       + '<span class="tag lens">'+esc(it.lens || '機制')+'</span>'
       + '<span class="tag kind">'+esc(it.kind)+'</span>'
-      + (isDelta ? '<span class="tag delta">0.7.2 → 0.8.0</span>' : '')
       + '</div>';
   }
   function questionBody(it, order, opts){

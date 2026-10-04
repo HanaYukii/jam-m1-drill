@@ -366,18 +366,16 @@ ITEMS = [
     "section": "12.2 Execution",
     "gpRef": "eq. 12.17 (Δ+), 12.24, 12.28",
     "difficulty": 3,
-    "kind": "delta",
-    "tags": ["accumulate", "transfer", "delta-0.8.0"],
-  "stemZh": "在 Δ+ 的遞迴中途，剩餘的 report 序列已空，但前一輪 Δ* 產出了三筆 deferred transfer t，而交給這次呼叫的 free-accumulation 映射是 ∅。Δ+ 還會做事嗎？在 GP 0.8.0 中它又交回什麼？",
+    "kind": "concept",
+    "tags": ["accumulate", "transfer"],
+  "stemZh": "在 Δ+ 的遞迴中途，剩餘的 report 序列已空，但前一輪 Δ* 產出了三筆 deferred transfer t，而交給這次呼叫的 free-accumulation 映射是 ∅。Δ+ 還會做事嗎？它又交回什麼？",
   "optionsZh": [
    "不會。GP 的終止測試是前綴長度 i，而在 r = ⟦⟧ 時符合 gas 的最大前綴是 i = 0，所以基底情形 ⟨0, e, ∅, ⟦⟧, ⟦⟧⟩ 觸發、Δ* 從未被呼叫；那三筆待處理的 transfer 會透過 ω 帶進下一個區塊，這正是 ω 被定型成可以與延後的 report 並存的原因，而它們的 gas 會對照下一塊的預算 g 而非這一塊重新計費",
    "會——測試 n = i + |t| + |f| = 3 ≠ 0 觸發——但這一輪是空轉：Δ* 的 service 集合只有 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f)，所以在 r[..i] 為空且 f = ∅ 時它也是空的，那三筆 transfer 被丟棄，只有先前 `transfer` host call 已入帳的餘額存活進 δ†；因此 u 與 b 都空手而回，那三個目的地對 eq. 12.28 的 T(s) 毫無貢獻",
    "會。GP 的終止測試是 n = i + |t| + |f| = 0 + 3 + 0 = 3 ≠ 0，所以 Δ* 仍然會被呼叫；它的 service 集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成那三個目的地，而它們只憑那些 transfer 被 accumulate。結果是 ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩，其第五個成分——已處理的 transfer——正是 eq. 12.28 中 T(s) 所計數的東西",
-   "會——測試 n = 3 ≠ 0 觸發、那三個目的地只憑 transfer 被 accumulate——但 Δ+ 仍然像 0.7.2 一樣回傳四元組 ⟨n, e′, b, u⟩；T(s) 所需的已處理 transfer 是事後靠比對 δ† 與 δ 的餘額移動還原出來的，eq. 12.28 是定義在那個還原之上、而不是定義在 Δ+ 交回的任何東西之上"
+   "會——測試 n = 3 ≠ 0 觸發、那三個目的地只憑 transfer 被 accumulate——但 Δ+ 只回傳不含 transfer 的四元組 ⟨n, e′, b, u⟩；T(s) 所需的已處理 transfer 是事後靠比對 δ† 與 δ 的餘額移動還原出來的，eq. 12.28 是定義在那個還原之上、而不是定義在 Δ+ 交回的任何東西之上"
   ],
-  "stem": "Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three "
-            "deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and "
-            "what does it hand back in GP 0.8.0?",
+  "stem": "Mid-recursion inside Δ+, the remaining report sequence is empty but the previous Δ* round emitted three deferred transfers t, and the free-accumulation map handed to this call is ∅. Does Δ+ do any more work, and what does it hand back?",
     "options": [
         "No. The GP's termination test is the prefix length i, and with r = ⟦⟧ the maximal gas-fitting prefix is "
         "i = 0, so the base case ⟨0, e, ∅, ⟦⟧, ⟦⟧⟩ fires and Δ* is never invoked; the three pending transfers are "
@@ -395,10 +393,7 @@ ITEMS = [
         "transfers alone. The result is ⟨i + j, e′, b* ∪ b, u* ⌢ u, t ⌢ t†⟩, whose fifth component — the processed "
         "transfers — is what T(s) in eq. 12.28 counts",
 
-        "Yes — the test n = i + |t| + |f| = 3 ≠ 0 fires and the three destinations are accumulated on the "
-        "transfers alone — but Δ+ still returns the four-tuple ⟨n, e′, b, u⟩ exactly as in 0.7.2; the processed "
-        "transfers that T(s) needs are recovered afterwards by diffing δ† against δ for balance movements, "
-        "eq. 12.28 being defined over that reconstruction rather than over anything Δ+ hands back",
+        "Yes — the test n = i + |t| + |f| = 3 ≠ 0 fires and the three destinations are accumulated on the transfers alone — but Δ+ returns only the four-tuple ⟨n, e′, b, u⟩ with no transfers in it; the processed transfers that T(s) needs are recovered afterwards by diffing δ† against δ for balance movements, eq. 12.28 being defined over that reconstruction rather than over anything Δ+ hands back",
     ],
     "answer": 2,
     "optNotes": [
@@ -407,7 +402,7 @@ ITEMS = [
         "終止條件是 n = i + |t| + |f|；s 縮成三個收款方，回傳五元組的 t ⌢ t† 正是 T(s) 的來源。",
         "餘額變化是淨額：同時有 digest、有轉入又有轉出的 service 根本數不出 transfer 筆數。",
     ],
-    "explanation": "**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是 0.7.1 之後「把 on_transfer 併進 accumulate」的結果**：收款方不再有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**0.8.0 的 Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。**0.7.2 只回傳四元組**，缺的正是這一項——這是遷移時必須補的差異，否則 accumulation statistics 的第二個欄位永遠是零。",
+    "explanation": "**Δ+ 的終止條件不是「還有沒有 report」，而是 n = i + |t| + |f|。**本題 i = 0（沒有 report 了）、|t| = 3（三筆待處理的 deferred transfer）、|f| = 0，所以 n = 3 ≠ 0，**Δ+ 會再跑一輪 Δ***。這一輪的服務集合 s = {d_s | r ∈ r, d ∈ r_d} ∪ K(f) ∪ {t_d | t ∈ t} 退化成只剩三個收款方，它們**純粹因為收到轉帳而被 accumulate**。此時 Δ1 給它們的 gas 是 g = U(f[s], 0) + Σ_{t_d = s} t_g + Σ digests——只剩中間那一項（收款方在 transfer 裡宣告的處理額度）。**這正是「把 on_transfer 併進 accumulate」的結果**：收款方沒有獨立的入口函數，而是以「沒有 digest、只有 transfer」的形式跑同一個 accumulate。**Δ+ 回傳五元組** ⟨i + j, e′, b* ∪ b, u* ⌢ u, **t ⌢ t†**⟩，最後那一項是「本次遞迴實際處理掉的 transfer 序列」，eq. 12.28 的 T(s) 就是靠它計數（統計裡的 transfer 數）。少了這一項，accumulation statistics 的第二個欄位就永遠是零。",
     "trap": "Δ+ 的停機條件是 n = i + |t| + |f|；report 用完不代表結束，轉帳與 always-accumulate 也能把遞迴撐著。",
 },
 

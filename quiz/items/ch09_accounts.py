@@ -115,8 +115,8 @@ ITEMS = [
    "eq. 9.9 的五個成分全是 service index，既不是 κ 也不是審計者集合；accumulate 的 gas 也沒有誰替別人付。",
    "delegator 設的是 ι 而非 κ（要經 γ_k 才輪到 κ，eq. 6.14）；registrar 只限 index < 2^16，assigner 逐 core，χ_Z 每塊都跑。",
  ],
- "explanation": "§9.4 與 eq. 9.9：χ_M（manager）可改變 χ 並授予 storage deposit credits（gratis）；χ_V（delegator）可設定 ι（下下個 epoch 的 validator keys，透過 `designate`）；χ_R（registrar）可建立 index < S = 2^16 的受保護 service；χ_A ∈ [N_S]_C 每個 core 一個 assigner，可改 φ[c]（`assign`）；χ_Z ∈ D⟨N_S→N_G⟩ always-accumulate 服務與其每塊的基本 gas。GP 的敘述順序本身就是記憶點：「manager … able to effect an alteration of χ … as well as bestow services with storage deposit credits. The next, χ_V, is able to set ι. Then χ_R alone is able to create new service accounts with indices in the protected range. The following, χ_A, are the service indices capable of altering the authorizer queue φ, one for each core.」0.8.0 (#519) 把 `bless` 限制為只有 manager 可呼叫——之前的漏洞：任意 service 可 bless 自己成 manager 再用 `new` 取得 gratis storage。",
- "trap": "registrar 是 0.7.1 加入的（Small service IDs）；0.8.0 bless 只限 manager。"
+ "explanation": "§9.4 與 eq. 9.9：χ_M（manager）可改變 χ 並授予 storage deposit credits（gratis）；χ_V（delegator）可設定 ι（下下個 epoch 的 validator keys，透過 `designate`）；χ_R（registrar）可建立 index < S = 2^16 的受保護 service；χ_A ∈ [N_S]_C 每個 core 一個 assigner，可改 φ[c]（`assign`）；χ_Z ∈ D⟨N_S→N_G⟩ always-accumulate 服務與其每塊的基本 gas。GP 的敘述順序本身就是記憶點：「manager … able to effect an alteration of χ … as well as bestow services with storage deposit credits. The next, χ_V, is able to set ι. Then χ_R alone is able to create new service accounts with indices in the protected range. The following, χ_A, are the service indices capable of altering the authorizer queue φ, one for each core.」`bless` 只有 manager 可呼叫——否則任意 service 都能 bless 自己成 manager、再用 `new` 取得 gratis storage。",
+ "trap": "registrar 管的是保留區間的 service ID（Small service IDs）；bless 只限 manager 呼叫。"
 },
 {
  "id": "ch09-preimage-vs-storage",

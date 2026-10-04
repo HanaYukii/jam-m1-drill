@@ -60,35 +60,6 @@ ITEMS = [
  "trap": "常考：ι 什麼時候變成 κ？答：下下個 epoch（先進 γ_P，再進 κ）。"
 },
 {
- "id": "ch06-valcount",
- "lens": "機制",
- "ch": "6", "section": "6.3 Key Rotation", "gpRef": "eq. 6.7–6.8 (valcount)",
- "difficulty": 2, "kind": "delta", "tags": ["validator set", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0（PR #514）把 validator 集合的大小一般化了。ι、γ_P、κ 與 λ 允許哪些大小？",
-  "optionsZh": [
-   "永遠恰好 1023 位 validator——這個大小是固定常數 3·C，其中 C = 341 個 core",
-   "6 到 1023 之間的任何大小（含端點），沒有整除規則（N_V ≡ N_{6..3·C+1}）",
-   "6 到 3·C = 1023 之間任何 3 的倍數（含端點）（N_V ≡ {3c | c ∈ N_{2..C+1}}）",
-   "3 到 3·C − 3 = 1020 之間任何 3 的倍數（含端點）（N_V ≡ {3c | c ∈ N_{1..C}}）"
-  ],
-  "stem": "GP 0.8.0 (PR #514) generalized the validator-set size. Which sizes are permitted for ι, γ_P, κ and λ?",
- "options": [
-  "Exactly 1023 validators always — the size is the fixed constant 3·C with C = 341 cores",
-  "Any size between 6 and 1023 inclusive, with no divisibility rule (N_V ≡ N_{6..3·C+1})",
-  "Any multiple of 3 between 6 and 3·C = 1023 inclusive (N_V ≡ {3c | c ∈ N_{2..C+1}})",
-  "Any multiple of 3 between 3 and 3·C − 3 = 1020 inclusive (N_V ≡ {3c | c ∈ N_{1..C}})"
- ],
- "answer": 2,
- "optNotes": [
-  "那是 0.7.2 的世界觀；0.8.0 之後 ι、γ_P、κ、λ 各自的長度都可以是 N_V 裡的任一值。",
-  "「3 的倍數」是硬條件：每個 active core 固定配 3 個 guarantor，非 3 倍數會讓 |κ′|/3 不整除。",
-  "eq. 6.8 的 N_V ≡ {3c | c ∈ N_{2…C+1}}，即 6, 9, 12, …, 1023。",
-  "兩端各差一格：c 從 2 起算所以下界是 6，c 上限到 C+1 才使 3c 達到 3·C = 1023。",
- ],
- "explanation": "eq. 6.8：𝕍 ≡ {3c | c ∈ N_{2…C+1}}——**3 的倍數，從 6 到 3C = 1023**（C = 341 是 core 數）。§6.3 原文：「The length of each sequence is always a multiple of 3 between 6 and 3C.」**為什麼一定是 3 的倍數**：每個 active core 需要 3 名 guarantor，所以 validator 數與 core 數是 3:1 的關係，只有前 |κ′| / 3 個 core 會被指派工作（§11.3）。tiny 設定 |κ| = 6 就只有 2 個 core 在動。**這是 0.7.2 → 0.8.0 的重大變化（PR #514）**：原本 V 是一個常數，現在集合大小可變，於是一整批原本寫死的數字都得改成依 |κ| 計算——super-majority 門檻 ⌊2|κ|/3⌋+1、每位 validator 的 ticket 配額 n = ⌈2E/|γ′_P|⌉、erasure coding 的 shard 數 = |κ′|、verdict 的三個門檻（⌊2|k|/3⌋+1、0、⌊|k|/3⌋）。`designate` host call 也只檢查 z ∈ 𝕍，不再比對某個常數。**遷移時最容易漏的**就是散在各處的 `ValidatorsCount` 編譯期常數（你們的 issue #1037 在追這件事）——它們在 0.7.2 都成立，因為那時 |κ| 恆等於 V；0.8.0 之後必須換成 len(κ′)。注意 Φ 把 offender 歸零而非移除，所以 |κ| 在 epoch 內不會變動，只在換屆時才可能改變。",
- "trap": "tiny 模式 V=6、C=2；full V=1023、C=341（1023 = 3·341）。"
-},
-{
  "id": "ch06-entropy-update",
  "lens": "時機",
  "ch": "6", "section": "6.4 Sealing and Entropy Accumulation", "gpRef": "eq. 6.22–6.24",
@@ -267,15 +238,15 @@ ITEMS = [
  "id": "ch06-ticket-extrinsic-limits",
  "lens": "機制",
  "ch": "6", "section": "6.7 The Extrinsic and Tickets", "gpRef": "eq. 6.30–6.32",
- "difficulty": 2, "kind": "delta", "tags": ["ticket", "extrinsic", "delta-0.8.0"],
-  "stemZh": "依 GP 0.8.0，tickets extrinsic E_T 受哪些界限約束？",
+ "difficulty": 2, "kind": "concept", "tags": ["ticket", "extrinsic"],
+  "stemZh": "tickets extrinsic E_T 受哪些界限約束？",
   "optionsZh": [
    "m′ < Y 時 |E_T| ≤ K = 16，否則 |E_T| = 0；每個 entry index e < n，其中 n = ⌈2E / |γ′_P|⌉——所以 full 設定下是 2（E = 600、|γ′_P| = 1023）",
    "每一塊都是 |E_T| ≤ K = 16，包含 tail 期間的區塊；每個 entry index e < N = 2，這是一個不依賴 validator 集合大小的固定常數（E = 600、|κ| = 1023）",
    "|E_T| ≤ E = 600，而且是整個 epoch 加總而非每塊計算；每個 entry index e < n，其中 n = ⌈2E / |γ′_P|⌉——所以 full 設定下是 2（E = 600、|γ′_P| = 1023）",
    "m′ ≤ Y 時 |E_T| ≤ K = 16，否則 |E_T| = 0；每個 entry index e < n，其中 n = ⌈|γ′_P| / 2E⌉——所以 full 設定下是 1（E = 600、|γ′_P| = 1023）"
   ],
-  "stem": "Per GP 0.8.0, what bounds apply to the tickets extrinsic E_T?",
+  "stem": "What bounds apply to the tickets extrinsic E_T?",
  "options": [
   "|E_T| ≤ K = 16 when m′ < Y, otherwise |E_T| = 0; each entry index e < n where n = ⌈2E / |γ′_P|⌉ — so 2 in the full configuration (E = 600, |γ′_P| = 1023)",
   "|E_T| ≤ K = 16 in every block including those in the tail; each entry index e < N = 2, a fixed constant that does not depend on the validator-set size (E = 600, |κ| = 1023)",
@@ -285,11 +256,11 @@ ITEMS = [
  "answer": 0,
  "optNotes": [
   "eq. 6.31 的 m′ < Y 與 eq. 6.30 的 n = ⌈2E/|γ′_P|⌉ 都對上，full 配置算出來是 2。",
-  "tail 期間必須是空 extrinsic；把上限寫成固定常數 N = 2 也是 0.7.2 的舊寫法。",
+  "tail 期間必須是空 extrinsic；entry index 的上限也不是固定常數，而是 n = ⌈2E/|γ′_P|⌉。",
   "K 限制的是**單一區塊**的 extrinsic 大小；GP 對整個 epoch 的提交總量沒有直接上限。",
   "m′ = Y 那一塊已在 tail 內；比例倒過來更會變成 validator 越多、每人配額越少。",
  ],
- "explanation": "三個限制，來源不同。**每位 validator 的配額**（eq. 6.30）：entry index r ∈ N_n，n = ⌈2E / |γ′_P|⌉。0.8.0（PR #527）把原本的常數 N 換成這條公式，理由 GP 明寫：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」——accumulator 要收滿 E = 600 張才能啟用票券模式，validator 少的時候若每人配額不變就永遠收不滿。full 設定：⌈2·600/1023⌉ = **2**；test-vector 的 tiny 設定（E = 12、|γ′_P| = 6）：⌈24/6⌉ = **4**（0.7.x 的 tiny 常數是 3，這是遷移時必須改的點）。**每塊的數量上限與時間窗**（eq. 6.31）：|E_T| ≤ K = 16 當 m′ < Y = 500；**m′ ≥ Y 時 |E_T| 必須為 0**——tail 期間完全不能再提票，不是「提了也不算」而是「提了區塊就無效」。**為什麼要有 tail**：投票必須在 epoch 結束前收攤，Z(γ_A) 才能在 eq. 6.29 的那一塊被公告成 H_W、並在下個 epoch 第一塊定案為 γ′_S。沒有這段緩衝，換屆時序列還在變動。注意 K = 16 是**每塊**上限而非每人，用意是限制單塊的驗簽成本（ring proof 驗證不便宜）。",
+ "explanation": "三個限制，來源不同。**每位 validator 的配額**（eq. 6.30）：entry index r ∈ N_n，n = ⌈2E / |γ′_P|⌉。配額隨人數調整，理由 GP 明寫：「To ensure the accumulator can be saturated, when there are fewer validators, each validator is permitted more tickets」——accumulator 要收滿 E = 600 張才能啟用票券模式，validator 少的時候若每人配額不變就永遠收不滿。full 設定：⌈2·600/1023⌉ = **2**；test-vector 的 tiny 設定（E = 12、|γ′_P| = 6）：⌈24/6⌉ = **4**。**每塊的數量上限與時間窗**（eq. 6.31）：|E_T| ≤ K = 16 當 m′ < Y = 500；**m′ ≥ Y 時 |E_T| 必須為 0**——tail 期間完全不能再提票，不是「提了也不算」而是「提了區塊就無效」。**為什麼要有 tail**：投票必須在 epoch 結束前收攤，Z(γ_A) 才能在 eq. 6.29 的那一塊被公告成 H_W、並在下個 epoch 第一塊定案為 γ′_S。沒有這段緩衝，換屆時序列還在變動。注意 K = 16 是**每塊**上限而非每人，用意是限制單塊的驗簽成本（ring proof 驗證不便宜）。",
  "trap": "條件是 m′ < Y（本塊的 phase），K = 16 是每個區塊的上限，不是每個 epoch。"
 },
 {
@@ -448,11 +419,11 @@ posteriorState.SetGammaS(newGammaS)"""},
  "answer": 0,
  "optNotes": [
   "Blake2b 與「前 4 octets、小端」都對；問題在 `%= ValidatorsCount` 用編譯期常數而非 len(κ′)。",
-  "被 stale 註解帶偏：§3.8 的 H 就是 Blake2b-256，而對固定 validator 數取模在 0.8.0 也不成立。",
+  "被 stale 註解帶偏：§3.8 的 H 就是 Blake2b-256，而對固定 validator 數取模也不成立（|κ′| 可變）。",
   "兩處都錯：s_{…4} 取的是**前** 4 個元素，且 decode 與 E_n 一律小端。",
   "忽略了 6.27 外層的 ⟲：decode_4 的值域是 0…2³²−1，不取模必然越界。",
  ],
- "explanation": "eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]。逐項對照程式碼：**H 是 Blake2b**——§3.8 定義 H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY。**取前 4 個位元組、little-endian 解碼**（decode_4）。這兩點程式都對，雖然註解寫 Keccak256 已經 stale，實際呼叫的是 Blake2bHashPartial。**真正的落差在 ⟲ 這個記號**：它是 §3.7 的模數下標 s[i]^⟲ ≡ s[i mod |s|]，對的是**傳入的金鑰序列長度** |k| = |κ′|；程式卻寫 `%= types.ValidatorsCount`，用的是編譯期常數。在 0.7.2 這沒問題（|κ| 恆等於 V），但 0.8.0 讓 |κ| 可變（eq. 6.8 的 𝕍）之後就必須換成 len(κ′)，否則在非滿編的設定下會索引越界或選錯人。這正是 issue #1037 那一類問題。**一個容易誤判為 bug 的行為**：取模會讓不同 slot 抽到同一位 validator——這是 F 的正常語意（可重複抽樣），不是缺陷；fallback 本來就沒有「每人一個 slot」的保證。",
+ "explanation": "eq. 6.27：F(r, k) = [ k[decode_4(H(r ⌢ E_4(i))_{…4})]^⟲ _b | i ∈ N_E ]。逐項對照程式碼：**H 是 Blake2b**——§3.8 定義 H ≡ Blake2b-256；H_K 才是 Keccak，只用在 accumulation-output belt 與 BEEFY。**取前 4 個位元組、little-endian 解碼**（decode_4）。這兩點程式都對，雖然註解寫 Keccak256 已經 stale，實際呼叫的是 Blake2bHashPartial。**真正的落差在 ⟲ 這個記號**：它是 §3.7 的模數下標 s[i]^⟲ ≡ s[i mod |s|]，對的是**傳入的金鑰序列長度** |k| = |κ′|；程式卻寫 `%= types.ValidatorsCount`，用的是編譯期常數。只要 |κ| 恆等於 V 這就沒問題，但 |κ| 是可變的（eq. 6.8 的 𝕍），所以必須換成 len(κ′)，否則在非滿編的設定下會索引越界或選錯人。這正是 issue #1037 那一類問題。**一個容易誤判為 bug 的行為**：取模會讓不同 slot 抽到同一位 validator——這是 F 的正常語意（可重複抽樣），不是缺陷；fallback 本來就沒有「每人一個 slot」的保證。",
  "trap": "面試官可能直接問：你們 fallback 用哪個 hash？答 Blake2b，並指出註解錯誤。"
 },
 {

@@ -17,7 +17,10 @@ CHAPTERS = {
     "A": "PVM", "B": "Host Calls", "C": "Codec", "D": "State Merklization", "E": "General Merklization / MMR",
     "F": "Shuffling", "G": "Bandersnatch VRF", "H": "Erasure Coding", "ARCH": "Architecture & Rationale",
 }
-KINDS = {"concept", "code", "calc", "delta", "rationale"}
+KINDS = {"concept", "code", "calc", "rationale"}
+# The bank is pinned to GP 0.8.0. "0.7.2 did X, 0.8.0 does Y" trivia was removed on request;
+# this keeps older version numbers out of everything shown as part of the question.
+OLD_VERSION = re.compile(r"(?<![\d.])0\.[0-7]\.(?:\d+|x)(?!\d)")
 REQUIRED = ["id", "ch", "section", "gpRef", "difficulty", "kind", "tags", "stem", "options", "answer", "explanation"]
 OPTIONAL = ["code", "trap", "optNotes", "alsoCh", "stemZh", "optionsZh", "lens"]
 LENSES = {"設計", "時機", "對比", "演算法", "機制"}
@@ -155,7 +158,7 @@ def validate(items, srcs):
             if k not in it:
                 errors.append(f"{where}: missing field {k}")
         if "lens" in it and it["lens"] not in LENSES:
-            err(f"{fn}:{it.get('id')}: unknown lens {it['lens']!r}")
+            errors.append(f"{where}: unknown lens {it['lens']!r}")
         extra = set(it.keys()) - set(REQUIRED) - set(OPTIONAL)
         if extra:
             errors.append(f"{where}: unknown fields {sorted(extra)}")
@@ -238,6 +241,10 @@ def validate(items, srcs):
                 errors.append(f"{where}: correct option is conspicuously the longest ({k} vs {max(rest)}) — thicken the distractors")
             if k < min(rest) and k / min(rest) <= 0.87:
                 errors.append(f"{where}: correct option is conspicuously the shortest ({k} vs {min(rest)}) — level the options")
+        shown = [it.get("stem", ""), it.get("stemZh", ""), it.get("trap", "")] + list(opts) \
+            + list(it.get("optionsZh") or []) + list(it.get("optNotes") or [])
+        if "delta-0.8.0" in (it.get("tags") or []) or any(OLD_VERSION.search(t or "") for t in shown):
+            errors.append(f"{where}: version-comparison framing (an older GP version, or the delta tag) in stem/options/notes/trap")
         # "all of the above"-style options are discouraged
         for o in opts:
             if re.search(r"all of the above|none of the above", o, re.I):
@@ -256,13 +263,11 @@ def report(items):
     by_kind = collections.Counter(i["kind"] for i in items)
     by_diff = collections.Counter(i["difficulty"] for i in items)
     by_ans = collections.Counter(i["answer"] for i in items)
-    delta = sum(1 for i in items if "delta-0.8.0" in i.get("tags", []))
     print(f"items: {len(items)}")
     print("by chapter:", ", ".join(f"{k}={by_ch[k]}" for k in CHAPTERS if by_ch[k]))
     print("by kind:", dict(by_kind))
     print("by difficulty:", dict(by_diff))
     print("answer position (pre-shuffle):", dict(by_ans))
-    print("delta-0.8.0 tagged:", delta)
 
 if __name__ == "__main__":
     items, srcs = load_items()

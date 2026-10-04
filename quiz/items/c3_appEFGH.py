@@ -319,7 +319,7 @@ ITEMS = [
         "gpRef": "eq. H.1 (𝒟) and the §H opening paragraph; eq. 6.8 (𝕍); eq. 11.17 (availability super-majority)",
         "difficulty": 2,
         "kind": "rationale",
-        "tags": ["erasure coding", "delta-0.8.0"],
+        "tags": ["erasure coding"],
   "stemZh": "附錄 H 說編碼比率是「derived from」三項各自獨立的考量。這三項是什麼？這個編碼又為什麼建立在 GF(2¹⁶) 而不是單一 octet 之上？",
   "optionsZh": [
    "重建必須能在將近三分之二的 validator 惡意或失能時仍然存活，這把資料碎片數壓在 v/3 + 1 附近、並與 2/3+1 的 assurance 超級多數彼此契合；欄位是 16 位元的，所以一個碼字就是一對 octet、而其取值點可以索引到多達 v 個相異的 validator；再者碎片數的兩倍必須整除 4,104 個 octet 的 segment 大小，好讓一個 segment 編碼時完全不需要填補——這正是碎片數取「最大的那個合格值」而不是恰好 v/3 + 1 的原因",
@@ -341,7 +341,7 @@ ITEMS = [
           "v = 1002 時 335 不整除 2,052（𝒟 = 228）；GF(2⁸) 只有 256 個點，連 1,023 個 validator 都編不完。",
           "算術就錯了：1,366 × 3 = 4,098 尚餘 6；Blake2b 輸出 32 octets 與選 GF(2¹⁶) 也毫無因果關係。",
         ],
-        "explanation": "§H 開頭原文把三個理由並列：「This rate is derived from the fact we wish to be able to reconstruct even should almost two-thirds of the v validators be malicious or incapacitated, the 16-bit Galois field on which the erasure-code is based and the desire to support, for simplicity, encoding segments of size W_G without padding.」對應到 eq. H.1 的 𝒟(v) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})：上界 v/3+1 來自第一點（只要有 𝒟(v) 片就能重建，等於容忍將近 2/3 的節點消失，與 eq. 11.17 的 2/3+1 assurance 門檻互相搭配，而不是要求 2/3 的 chunk）；「2d 整除 4,104」來自第三點，所以 segment 用 k = W_G/(2𝒟(v)) 永遠是整數、完全不必 padding；而取 max 而非直接等於 v/3+1，正是因為整除條件會把它往下拉——GP 自己舉例「when v = 1022, the rate is approximately 1:4.5」——但要注意 1022 ∉ 𝕍（𝕍 只收 6 到 1023 之間 3 的倍數），這是個假想值：也只有在 v 不是 3 的倍數時，H.1 的上界該讀成 ⌊v/3⌋+1 還是 v/3+1 才會有差（取 ⌊1022/3⌋+1 = 341 才得到 𝒟 = 228、rate ≈ 1:4.48，與 GP 自己寫的 1:4.5 相符；讀成 342 則是 1:2.99）。對每個合法的 v 兩種讀法一致（v/3 ∈ ℕ），真正能驗證整除側條件確實會生效的合法案例是 v = 1002：v/3+1 = 335 不整除 2,052，𝒟(1002) = 228。至於為什麼是 GF(2¹⁶)：code word 就是一個 octet pair，validator i 被映成 field element ĩ = Σ i_j v_j（Cantor basis），evaluation point 必須每個 validator 各一個且互異，GF(2⁸) 只有 256 個點，連 1,023 個 validator 都編不完，這是 16-bit 最直接的必要性（§H 只把 16-bit GF 列為三項考量之一，並未替它們排序）。0.7.2 時這一切是寫死的 342:1023，0.8.0 才為了支援較小的 validator set 而變成以 v 為參數的函數。",
+        "explanation": "§H 開頭原文把三個理由並列：「This rate is derived from the fact we wish to be able to reconstruct even should almost two-thirds of the v validators be malicious or incapacitated, the 16-bit Galois field on which the erasure-code is based and the desire to support, for simplicity, encoding segments of size W_G without padding.」對應到 eq. H.1 的 𝒟(v) ≡ max({d | d ∈ N_{v/3+2}, W_G mod 2d = 0})：上界 v/3+1 來自第一點（只要有 𝒟(v) 片就能重建，等於容忍將近 2/3 的節點消失，與 eq. 11.17 的 2/3+1 assurance 門檻互相搭配，而不是要求 2/3 的 chunk）；「2d 整除 4,104」來自第三點，所以 segment 用 k = W_G/(2𝒟(v)) 永遠是整數、完全不必 padding；而取 max 而非直接等於 v/3+1，正是因為整除條件會把它往下拉——GP 自己舉例「when v = 1022, the rate is approximately 1:4.5」——但要注意 1022 ∉ 𝕍（𝕍 只收 6 到 1023 之間 3 的倍數），這是個假想值：也只有在 v 不是 3 的倍數時，H.1 的上界該讀成 ⌊v/3⌋+1 還是 v/3+1 才會有差（取 ⌊1022/3⌋+1 = 341 才得到 𝒟 = 228、rate ≈ 1:4.48，與 GP 自己寫的 1:4.5 相符；讀成 342 則是 1:2.99）。對每個合法的 v 兩種讀法一致（v/3 ∈ ℕ），真正能驗證整除側條件確實會生效的合法案例是 v = 1002：v/3+1 = 335 不整除 2,052，𝒟(1002) = 228。至於為什麼是 GF(2¹⁶)：code word 就是一個 octet pair，validator i 被映成 field element ĩ = Σ i_j v_j（Cantor basis），evaluation point 必須每個 validator 各一個且互異，GF(2⁸) 只有 256 個點，連 1,023 個 validator 都編不完，這是 16-bit 最直接的必要性（§H 只把 16-bit GF 列為三項考量之一，並未替它們排序）。𝒟 寫成以 v 為參數的函數，正是為了支援較小的 validator set。",
         "trap": "「三分之一容錯」講的是 chunk 門檻 𝒟(v) ≈ v/3+1（任 1/3 即可重建），「三分之二」講的是 assurance 的 super-majority——兩個門檻方向相反，別對調。",
     },
 ]

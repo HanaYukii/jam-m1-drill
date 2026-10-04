@@ -5,70 +5,22 @@
 # panicking djump, cross-page fault address, v_blob, opcode renumbering / unlikely.
 ITEMS = [
 {
- "id": "b2-appA-branch-both-targets",
- "lens": "演算法",
- "ch": "A", "section": "A.5 Single-Step State Transition (branch)", "gpRef": "eq. A.21 (branch), A.5 (ϖ), A.2 (v_blob)",
- "difficulty": 3, "kind": "code", "tags": ["PVM", "delta-0.8.0"],
-  "stemZh": "團隊 0.7.2 直譯器裡的每一條條件分支（170–175 的 instBranch 以及 branch_*_imm 處理常式）都經由這個輔助函數解析。GP 0.8.0 的 eq. A.21 對條件分支的目標要求什麼？這個輔助函數符合嗎？",
-  "optionsZh": [
-   "0.8.0 只要任一個目標不是 basic block 的起點就 panic——不論是被採取的目標 b、還是落空路徑 ı + 1 + skip(ı)——即使條件為假也一樣；而這個輔助函數只驗證 b、而且只在條件 C 成立時才驗，所以一個「未被採取但目標無效」的分支在這裡會繼續執行，在 0.8.0 卻必須 panic",
-   "這個輔助函數已經符合 0.8.0：eq. A.21 只在被採取的路徑上驗證 b，因為落空路徑 ı + 1 + skip(ı) 已經由 v_blob 證明過是被 bitmask 標記的合法 opcode、因此顯然是合法的續行點；額外那個 isOpcodeValid 子句只是無害的加強",
-   "0.8.0 仍然只驗證被採取的目標，但現在另外要求它像動態跳躍一樣做 2 位元組對齊（b mod Z_A = 0，Z_A = 2）並且要出現在 jump table j 裡，而這兩點該輔助函數都沒檢查；落空路徑在 0.8.0 也一樣不受驗證",
-   "0.8.0 完全移除了執行期的 panic：v_blob 現在會在 deblob 階段走訪每一條分支，除非它的兩個目標都落在 ϖ 裡否則拒絕該 blob，所以 deblob 會回傳 error、Ψ 在執行任何一條指令之前就 panic；因此對 b 的檢查與 isOpcodeValid 子句都是死碼"
-  ],
-  "stem": "Every conditional branch in the team's 0.7.2 interpreter (instBranch for 170–175 and the branch_*_imm handlers) resolves through this helper. What does GP 0.8.0 eq. A.21 require of a conditional branch's targets, and does this helper meet it?",
- "code": {"lang": "go", "caption": "PVM/branch.go (branch) + call site in PVM/instructions.go (instBranch)", "src": """func branch(pc ProgramCounter, b ProgramCounter, C bool, bitmask Bitmask, instruction ProgramCode) (ExitReason, ProgramCounter) {
-	switch {
-	case !C:
-		return ExitContinue, pc
-	case !bitmask.IsStartOfBasicBlock(b) && instruction.isOpcodeValid(b):
-		return ExitPanic, pc
-	default:
-		return ExitContinue, b
-	}
-}
-
-// instBranch (opcodes 170-175), after computing branchCondition:
-	reason, newPC := branch(pc, vX, branchCondition, interp.Program.Bitmasks, interp.Program.InstructionData)
-	if reason != ExitContinue {
-		pvmLogger.Errorf("instBranch branch error at pc: %d, opcode: %s", pc, zeta[opcode(interp.Program.InstructionData[pc])])
-		return ExitReason(reason), pc
-	}
-
-	return reason, newPC"""},
- "options": [
-  "0.8.0 panics whenever either target is not a basic-block start — the taken target b or the fall-through ı + 1 + skip(ı) — even when the condition is false; this helper validates only b, and only when C holds, so a not-taken branch with an invalid target continues here but must panic in 0.8.0",
-  "The helper is already 0.8.0-compliant: eq. A.21 validates b only on the taken path, because the fall-through ı + 1 + skip(ı) has already been proved by v_blob to be a bitmask-flagged, valid opcode and so is trivially a legal continuation; the extra isOpcodeValid clause is a harmless strengthening",
-  "0.8.0 still validates only the taken target, but now additionally requires it to be 2-octet aligned like a dynamic jump (b mod Z_A = 0 with Z_A = 2) and to appear somewhere in the jump table j, neither of which this helper checks; the fall-through path remains unvalidated in 0.8.0 too",
-  "0.8.0 removed the runtime panic entirely: v_blob now walks every branch at deblob time and rejects the blob unless both of its targets lie in ϖ, so deblob returns error and Ψ panics before a single instruction runs; both the check on b and the isOpcodeValid clause are therefore dead code"
- ],
- "answer": 0,
- "optNotes": [
-   "eq. A.21 的第一個 case 不管 C 真假都要求兩個目標都在 ϖ，所以沒跳的無效 fall-through 也得 ☇。",
-   "「通過 v_inst 的合法 opcode」與「∈ ϖ」是兩回事——ϖ 只收 0 或某個 terminator 的下一條。",
-   "對齊與查 j 只出現在 eq. A.22 的 djump；靜態 branch 的條件只有兩個目標都 ∈ ϖ。",
-   "eq. A.2 的 v_blob/v_inst 只驗指令流形狀，一個跳躍目標都不看，runtime 的 ϖ 檢查省不得。",
- ],
- "explanation": "eq. A.21：branch(b, C) ⟹ (ε, ı′) = (☇, ı) when b ∉ ϖ ∨ ı + 1 + skip(ı) ∉ ϖ；(▸, ı + 1 + skip(ı)) otherwhen ¬C；(▸, b) otherwise。GP 原文：「conditional jumps are valid if and only if both branches point to the start of a basic block (regardless of whether a branch is taken), otherwise a panic occurs」。你們的 branch() 先 `case !C: return ExitContinue, pc`——沒跳就完全不檢查，跳了才檢查 b（還加了 isOpcodeValid 條件，把跳到無效 opcode 的情況留給 trap 處理），這是 0.7.2「taken 才驗證」的語意；issues digest 的 #1046（PVM update 0.8.0）把「branch/jump dual-target validation」列為 App. A 的變更之一。實務上只要 blob 通過 v_blob，branch 的 fall-through 位置必然在 ϖ 裡（branch ∈ T，eq. A.5 的 ϖ 定義），唯一例外是 branch 是程式最後一條指令：ı + 1 + skip(ı) = |c| ∉ ϖ，0.8.0 不論條件真假都在 branch 本身 ☇（0.7.2 則是沒跳時掉出程式碼、執行 ζ 的 0 = trap 才 panic，且多扣一次 gas）。",
- "trap": "0.8.0 口訣：branch 的兩個目標（taken 與 fall-through）都必須是 basic block 起點，不管有沒有跳。"
-},
-{
  "id": "b2-appA-gas-charged-flag",
  "lens": "演算法",
  "ch": "A", "section": "A.5 Single-Step State Transition (gas charged flag)", "gpRef": "eq. A.8 (ε^ϱ, ϱ*, flag′), A.11 (flag*), A.6 (𝔏), A.39 (Ψ_H starts with ⊥); §B invoke/machine",
- "difficulty": 3, "kind": "concept", "tags": ["gas", "PVM", "host call", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0 在 Ψ 中貫穿了一個布林的「gas charged」旗標。某個 basic block 的中間有一條 ecalli；該 host call 回傳 ▸，Ψ_H 從 ı″ = ı′ + 1 + skip(ı′) 繼續。這次繼續會再扣一次 gas 嗎？說明旗標在這裡的作用，以及它與一個從 block 中間起跑的全新 Ψ_H 有何不同。",
+ "difficulty": 3, "kind": "concept", "tags": ["gas", "PVM", "host call"],
+  "stemZh": "GP 在 Ψ 中貫穿了一個布林的「gas charged」旗標。某個 basic block 的中間有一條 ecalli；該 host call 回傳 ▸，Ψ_H 從 ı″ = ı′ + 1 + skip(ı′) 繼續。這次繼續會再扣一次 gas 嗎？說明旗標在這裡的作用，以及它與一個從 block 中間起跑的全新 Ψ_H 有何不同。",
   "optionsZh": [
    "只有該 block 的後段會被重新計費：每一種非 ▸ 的退出（包含 host call）都會把旗標清成 ⊥，接著 Ψ_1 只對 ı″ 到該 block terminator 之間的指令計價，所以被 n 次 host call 打斷的 block 花費是它的 ϱ^Δ 加上 n 次部分重計",
    "在那次恢復時什麼都不會再被扣：ecalli 不是 terminator，所以 flag* 維持 ⊤ 而 Ψ_1 略過 ϱ^Δ 的扣款；旗標只有在 terminator 執行之後（或在 out-of-gas 退出時）才變成 ⊥；而一個全新的 Ψ_H——它總是以 ⊥ 起始——若從 block 中段的 ı 恢復，會扣掉整個 block 的 ϱ^Δ(𝔏(ı)) 而不是只扣剩餘的後段",
-   "每次 host call 恢復時都會把整個 block 的 ϱ^Δ(𝔏(ı″)) 再扣一次，因為 0.8.0 把 ecalli 加進了 terminator 集合 T，使 host call 總是結束一個 basic block；那個旗標的存在只是為了讓全新 Ψ_H 的第一個 block 不被重複計費兩次",
+   "每次 host call 恢復時都會把整個 block 的 ϱ^Δ(𝔏(ı″)) 再扣一次，因為 ecalli 本身就在 terminator 集合 T 裡，使 host call 總是結束一個 basic block；那個旗標的存在只是為了讓全新 Ψ_H 的第一個 block 不被重複計費兩次",
    "那個旗標只在 out-of-gas 的恢復時才有意義：在其他每一種退出上它都會被丟棄，而 Ψ_H 會在繼續之前無條件扣掉含有 ı″ 之 block 的 ϱ^Δ；在 ∞ 退出時它被設為 ⊤，好讓已扣的 gas 在補充 gas 之後不會再被扣一次；而且它只是 Ψ_H* 的參數，從不屬於 Ψ 本身"
   ],
-  "stem": "GP 0.8.0 threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Is gas charged again on that resume? Explain what the flag does here, and how it differs from a fresh Ψ_H that starts mid-block.",
+  "stem": "The GP threads a boolean 'gas charged' flag through Ψ. A basic block has an ecalli in its middle; the host call returns ▸ and Ψ_H resumes at ı″ = ı′ + 1 + skip(ı′). Is gas charged again on that resume? Explain what the flag does here, and how it differs from a fresh Ψ_H that starts mid-block.",
  "options": [
   "Only the suffix of the block is re-charged: every non-▸ exit — a host call included — clears the flag to ⊥, and Ψ_1 then prices just the instructions from ı″ up to the block’s terminator, so a block interrupted by n host calls costs its ϱ^Δ plus n partial re-charges",
   "Nothing is charged again on that resume: ecalli is not a terminator, so flag* stays ⊤ and Ψ_1 skips the ϱ^Δ deduction; the flag becomes ⊥ only after a terminator executes (or on an out-of-gas exit), while a brand-new Ψ_H — which always starts with ⊥ — resuming at a mid-block ı charges the whole block ϱ^Δ(𝔏(ı)), not just the remaining suffix",
-  "The whole block ϱ^Δ(𝔏(ı″)) is charged a second time on every host-call resume, because 0.8.0 added ecalli to the terminator set T so that a host call always ends a basic block; the flag exists only so that the first block of a fresh Ψ_H is not charged twice over",
+  "The whole block ϱ^Δ(𝔏(ı″)) is charged a second time on every host-call resume, because ecalli is itself in the terminator set T so that a host call always ends a basic block; the flag exists only so that the first block of a fresh Ψ_H is not charged twice over",
   "The flag matters only for out-of-gas resumption: on every other exit it is discarded and Ψ_H unconditionally charges ϱ^Δ of the block containing ı″ before continuing; on an ∞ exit it is set to ⊤ so that gas already deducted is not deducted again once more gas is supplied, and it is a parameter of Ψ_H* alone, never of Ψ itself"
  ],
  "answer": 1,
@@ -78,7 +30,7 @@ ITEMS = [
    "§A.3 的 T 只有 trap、fallthrough、jump、jump_ind、load_imm_jump(_ind) 與 branch_*，不含 ecalli。",
    "eq. A.8 的 OOG 支是 (∞, ϱ, ⊥)：flag 清成 ⊥ 且 gas 一分未扣；flag 也是 Ψ 本身的參數。",
  ],
- "explanation": "eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − ϱ^Δ(c, k, 𝔏(ı)), ⊤) otherwhen ϱ ≥ ϱ^Δ(c, k, 𝔏(ı))；(∞, ϱ, ⊥) otherwise。eq. A.11：flag* = ⊥ when flag′ = ⊥ ∨ (c_ı ∈ T ∧ ε* ∈ {▸} ∪ {h̄} × N_R)，否則 ⊤。T（§A.3）= trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*；ecalli（10）不在 T 裡，所以 ecalli 造成 h̄ exit 時 flag* = ⊤，Ψ（eq. A.1）把這個 flag′ 回傳，Ψ_H*（eq. A.38）以同一個 flag′ 續跑 → 不重複收費。flag 何時變 ⊥：執行了 terminator 且 ε* = ▸（下一步進新 block、或「jumps back to the beginning of the current basic block」都重新收費），以及 OOG（此時 ϱ 不變、ı* = ı）。𝔏（eq. A.6）= max(j ∈ ϖ : j ≤ ı) 是「含 ı 的 block 起點」，所以 flag = ⊥ 而 ı 在 block 中間時，扣的是整個 block 的 ϱ^Δ；Ψ_H ≡ Ψ_H*(…, ⊥, …)（eq. A.39）——每次新的 Ψ_H 都從 ⊥ 開始。App. B 也配合：machine 建立內層 PVM 時 flag 初始為 ⊥，invoke 把 Ψ 回傳的 flag′ 存回 m*[n]，內層 host call 後再 invoke 不會重扣；內層 OOG 後補 gas 再 invoke 才會重扣。這正是 #1046 review 的修正：「mid-block resume must charge the full containing block cost L(i) first — not just the suffix」。你們 0.7.2 沒有這個 flag（每指令 1 gas，SingleStepInvokeDecodedBlocks 逐條扣）。",
+ "explanation": "eq. A.8：(ε^ϱ, ϱ*, flag′) = (▸, ϱ, ⊤) when flag = ⊤；(▸, ϱ − ϱ^Δ(c, k, 𝔏(ı)), ⊤) otherwhen ϱ ≥ ϱ^Δ(c, k, 𝔏(ı))；(∞, ϱ, ⊥) otherwise。eq. A.11：flag* = ⊥ when flag′ = ⊥ ∨ (c_ı ∈ T ∧ ε* ∈ {▸} ∪ {h̄} × N_R)，否則 ⊤。T（§A.3）= trap、fallthrough、jump、jump_ind、load_imm_jump(_ind)、所有 branch_*；ecalli（10）不在 T 裡，所以 ecalli 造成 h̄ exit 時 flag* = ⊤，Ψ（eq. A.1）把這個 flag′ 回傳，Ψ_H*（eq. A.38）以同一個 flag′ 續跑 → 不重複收費。flag 何時變 ⊥：執行了 terminator 且 ε* = ▸（下一步進新 block、或「jumps back to the beginning of the current basic block」都重新收費），以及 OOG（此時 ϱ 不變、ı* = ı）。𝔏（eq. A.6）= max(j ∈ ϖ : j ≤ ı) 是「含 ı 的 block 起點」，所以 flag = ⊥ 而 ı 在 block 中間時，扣的是整個 block 的 ϱ^Δ；Ψ_H ≡ Ψ_H*(…, ⊥, …)（eq. A.39）——每次新的 Ψ_H 都從 ⊥ 開始。App. B 也配合：machine 建立內層 PVM 時 flag 初始為 ⊥，invoke 把 Ψ 回傳的 flag′ 存回 m*[n]，內層 host call 後再 invoke 不會重扣；內層 OOG 後補 gas 再 invoke 才會重扣。這正是 #1046 review 的修正：「mid-block resume must charge the full containing block cost L(i) first — not just the suffix」。",
  "trap": "flag 只被「執行完的 terminator」與「OOG」清成 ⊥；ecalli 不是 terminator，host call 續跑不重扣。"
 },
 {
@@ -136,15 +88,15 @@ func instLoadImmJumpInd(interp *Interpreter, pc ProgramCounter, skipLength Progr
  "id": "b2-appA-vblob-terminator",
  "lens": "演算法",
  "ch": "A", "section": "A.1 Basic Definition (deblob validity v_blob / v_inst)", "gpRef": "eq. A.2 (deblob, v_blob, v_inst), A.3 (skip), A.4 (ζ), A.5 (ϖ)",
- "difficulty": 2, "kind": "delta", "tags": ["PVM", "delta-0.8.0"],
-  "stemZh": "GP 0.8.0 的 deblob(p, ı) 會回傳 error——而 Ψ 隨即在未執行任何指令的情況下 panic——除非 v_blob(c, k, 0) 與 v_inst(c, k, ı) 同時成立。這兩個驗證器實際上強制了哪些條件？",
+ "difficulty": 2, "kind": "concept", "tags": ["PVM"],
+  "stemZh": "deblob(p, ı) 會回傳 error——而 Ψ 隨即在未執行任何指令的情況下 panic——除非 v_blob(c, k, 0) 與 v_inst(c, k, ı) 同時成立。這兩個驗證器實際上強制了哪些條件？",
   "optionsZh": [
    "只強制 |k| = |c| 以及每個 jump-table 項目都指向某個 basic block 的起點；opcode 的合法性留給執行期處理，屆時未知的 opcode 行為等同 opcode 0 而 trap，而進入點 ı 不論落在哪裡都被接受，因為 Ψ 會從 k 重新推導出最近的 opcode 邊界",
    "強制每個分支與跳躍目標都落在 ϖ 裡、且沒有任何指令長於 16 個 octet，兩者都在對程式碼的單次走訪中確立；最後一條指令可以是任何東西，因為 ζ 會用零填補程式碼，所以跑過尾端就只是執行 opcode 0 而 trap",
    "|k| = |c|；從索引 0 開始以 1 + skip(·) 走訪程式碼，每一個被造訪的 octet 都在 k 中被標記且是合法的 opcode（∈ U）；該次走訪恰好結束在 |k|，且最後一條指令是 terminator（∈ T）；而進入點 ı 本身也必須是一個被標記的合法 opcode",
    "強制程式碼中至少含有一條 ecalli、並以一個跳往 halt 哨兵 2^32 − 2^16 的 jump_ind 結尾，好讓每支程式都有明確定義的返回宿主路徑；bitmask 本身不需要檢查，因為 k 是在 deblob 解碼時由每個 opcode 的長度重新產生的"
   ],
-  "stem": "GP 0.8.0's deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. What conditions do these two validators actually enforce?",
+  "stem": "deblob(p, ı) returns error — and Ψ then panics without executing anything — unless v_blob(c, k, 0) and v_inst(c, k, ı) both hold. What conditions do these two validators actually enforce?",
  "options": [
   "Only that |k| = |c| and that every jump-table entry points at a basic-block start; opcode validity is left to execution time, where an unknown opcode behaves like opcode 0 and traps, and the entry point ı is accepted wherever it lands, since Ψ re-derives the nearest opcode boundary from k",
   "That every branch and jump target lies in ϖ and that no instruction is longer than 16 octets, both established during a single walk of the code; the final instruction may be anything, because ζ pads the code with zeros so that running off the end simply executes opcode 0 and traps",
@@ -158,7 +110,7 @@ func instLoadImmJumpInd(interp *Interpreter, pc ProgramCounter, skipLength Progr
    "四項正是 eq. A.2 的 v_blob 與 v_inst：|k| = |c|、沿途皆合法 opcode、剛好停在 |k|、尾端 ∈ T。",
    "GP 沒有這兩條結構要求；k 是 blob 實際傳來的欄位，正因指令長度隱含才需要它，無法反推。",
  ],
- "explanation": "eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1 + skip(ı) = |k| ∧ c_ı ∉ T；v_blob(c, k, ı + 1 + skip(ı)) otherwhen v_inst(c, k, ı)；⊥ otherwise。v_inst(c, k, ı) = |k| = |c| ∧ ı < |k| ∧ k_ı = 1 ∧ c_ı ∈ U。也就是從 0 開始沿 skip 走訪每條指令：每個落點都要是 bitmask 標記的合法 opcode、最後一條必須是 terminator、走訪要剛好停在 |k|（空程式因 ı > 0 條件而無效）；deblob 另外用 v_inst(c, k, ı) 驗證入口 ı。這是 0.8.0 的新規（issues digest #1046：「programs whose final block lacks a terminator are invalid (v_blob rule)」；PR #508 摘要：「blobs pre-validated」），動機是 block-based gas：ϱ^Δ 的模擬（eq. A.58 只有遇到 T 才把 x_ı 設為 ∅）需要每個 basic block 都有終點。0.7.2 沒有 v_blob，無效 opcode 或掉出程式碼末端是靠 ζ = c ⌢ [0, 0, …]（eq. A.4）的 trap 在 runtime 才 panic（會多扣 gas）；0.8.0 裡 ζ 的零填充只剩「最後一條指令缺少的引數 octet」這個用途。你們的 preDecodeBlocks 其實已在 deblob 時對「block 跑出程式末端」與無效 opcode 回 ExitPanic，MakeBitMasks 也驗 bitmask 長度，與 0.8.0 方向一致。",
+ "explanation": "eq. A.2：v_blob(c, k, ı) = ⊤ when ı > 0 ∧ ı = |k|；⊥ otherwhen ı + 1 + skip(ı) = |k| ∧ c_ı ∉ T；v_blob(c, k, ı + 1 + skip(ı)) otherwhen v_inst(c, k, ı)；⊥ otherwise。v_inst(c, k, ı) = |k| = |c| ∧ ı < |k| ∧ k_ı = 1 ∧ c_ı ∈ U。也就是從 0 開始沿 skip 走訪每條指令：每個落點都要是 bitmask 標記的合法 opcode、最後一條必須是 terminator、走訪要剛好停在 |k|（空程式因 ı > 0 條件而無效）；deblob 另外用 v_inst(c, k, ı) 驗證入口 ı。動機是 block-based gas（「programs whose final block lacks a terminator are invalid」）：ϱ^Δ 的模擬（eq. A.58 只有遇到 T 才把 x_ı 設為 ∅）需要每個 basic block 都有終點。有了 v_blob，ζ = c ⌢ [0, 0, …]（eq. A.4）的零填充只剩「最後一條指令缺少的引數 octet」這個用途。你們的 preDecodeBlocks 其實已在 deblob 時對「block 跑出程式末端」與無效 opcode 回 ExitPanic，MakeBitMasks 也驗 bitmask 長度，方向一致。",
  "trap": "v_blob 驗的是「指令流的形狀」（合法 opcode + terminator 收尾），不驗跳躍目標；跳錯位置仍是 runtime panic。"
 },
 ]

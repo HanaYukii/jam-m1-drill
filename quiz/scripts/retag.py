@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Assign each item 2–3 tags from a fixed vocabulary of GP terms (plus delta-0.8.0 if present).
+"""Assign each item 2–3 tags from a fixed vocabulary of GP terms.
 Usage: python3 scripts/retag.py [--dry]   — rewrites "tags": [...] in items/*.py in place.
 Greek-letter patterns are matched case-sensitively (ψ ≠ Ψ, ξ ≠ Ξ); ASCII patterns ignore case."""
 import sys, importlib, pkgutil, re, io, collections, os
@@ -9,7 +9,7 @@ VOCAB = [
  ('accumulate', r'accumulat|Δ\+|Δ\*|Δ1|operand tuple|R\*'),
  ('refine', r'\brefin|Ψ_R'),
  ('guarantee', r'guarant|\bρ'),
- ('assurance', r'assur|\bavailab'),
+ ('assurance', r'assur|(?<!not )\bavailab'),
  ('audit', r'\baudit'),
  ('dispute', r'disput|verdict|judg|culprit|(?<!page )\bfaults?\b|offender|\bψ'),
  ('ticket', r'ticket|γ_A|γ′_A'),
@@ -90,7 +90,6 @@ def choose(it):
         for c, s in ranked:
             if c not in out and s >= 1 and len(out) < 2: out.append(c)
     if not out: out = [FALLBACK.get(it['ch'], 'core')]
-    if 'delta-0.8.0' in it.get('tags', []): out.append('delta-0.8.0')
     return out
 def set_tags(path, item_id, tags):
     src = io.open(path, encoding='utf-8').read()
@@ -108,4 +107,4 @@ if __name__ == '__main__':
             tg = choose(it); n += 1
             for x in tg: dist[x] += 1
             if not dry: set_tags(f'items/{m.name}.py', it['id'], tg)
-    print(f'{n} items; vocab used {len([k for k in dist if k != "delta-0.8.0"])}')
+    print(f'{n} items; vocab used {len(dist)}')
