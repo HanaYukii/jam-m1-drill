@@ -1,7 +1,7 @@
 # JAM M1 Drill — 問答講義
 
-Gray Paper **0.8.0** · 21 章速記 · 321 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
-線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-10-04
+Gray Paper **0.8.0** · 21 章速記 · 345 題 · 92 條名詞解釋 · New-JAMneration M1 面試準備  
+線上互動版：<https://hanayukii.github.io/jam-m1-drill/> · 匯出於 2026-10-22
 
 > 讀法：先把題目自己講一遍（口試考的是講得出來，不是認得出來），再看標準答案與詳解。
 
@@ -25,7 +25,7 @@ Gray Paper **0.8.0** · 21 章速記 · 321 題 · 92 條名詞解釋 · New-JAM
 - [§9 Service Accounts](#ch-9) — 10 題
 - [§10 Disputes](#ch-10) — 11 題
 - [§11 Reporting & Assurance](#ch-11) — 23 題
-- [§12 Accumulation](#ch-12) — 22 題
+- [§12 Accumulation](#ch-12) — 46 題
 - [§13 Statistics](#ch-13) — 6 題
 - [§14 Work Packages & Reports](#ch-14) — 5 題
 - [附錄 A · PVM](#ch-a) — 10 題
@@ -6950,7 +6950,7 @@ eq. 11.17 寫的是 **Σ_a a_f[c] > (2/3)|κ|**（嚴格大於），程式寫的
 
 <a id="ch-12"></a>
 
-## §12 Accumulation　<sub>22 題</sub>
+## §12 Accumulation　<sub>46 題</sub>
 
 ### 12-1　Δ1 builds i^U as one operand tuple per work-digest of service s, taken from the round's reports in order. Two of s's digests sit in different reports r₁ and r₂. What does an operand tuple carry in GP 0.8.0, and which of its fields differ between those two tuples?
 
@@ -7433,7 +7433,607 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-19　The GP splits accumulation into two layers: Δ+ recurses over reports in order, and inside it Δ* aggregates everything belonging to one service into a single PVM invocation. §12.2 says this reconciles 'two slightly antagonistic factors'. What are they, and why does one sequential layer plus one parallel layer satisfy both?
+### 12-19　Which division of responsibilities correctly connects dependency ordering to service execution in §12?
+
+<sub>12.1 History and Queuing; 12.2 Execution — ●○○ · 概念 · §12.1 Q; §12.2 Δ+, Δ*, Δ1</sub>
+
+**標準答案**　Q orders dependency-ready candidates; Δ+ chooses a gas-bounded prefix; Δ* groups by service; Δ1 prepares each service's call
+
+§12 的主線可以沿著資料交接來記：Q 先產生依賴上可排列的候選順序，組成 R*；Δ+ 依 gas 選出本輪 report 前綴；Δ* 將其中的 digest 與收到的 transfers 按 service 分組；Δ1 才整理該 service 的 gas 與輸入，交給執行介面。Q 的候選排序不代表已經執行，也不會扣 gas。
+
+**逐項辨析**
+
+1. ✅ Q orders dependency-ready candidates; Δ+ chooses a gas-bounded prefix; Δ* groups by service; Δ1 prepares each service's call  
+   依賴排序、gas 前綴、service 分組、單一 service 準備的四個責任依序對齊。
+2. ❌ Q chooses a gas-bounded prefix; Δ+ orders dependency-ready candidates; Δ* groups by service; Δ1 prepares each service's call  
+   Q 不管理 gas；外層 Δ+ 才根據 gas 預算選取 report 前綴。
+3. ❌ Q orders dependency-ready candidates; Δ+ groups by service; Δ* chooses the next gas-bounded report prefix; Δ1 prepares each service's call  
+   Δ+ 負責選前綴，Δ* 負責 service 分組，這裡把兩者交換了。
+4. ❌ Q orders dependency-ready candidates; Δ+ chooses a report prefix; Δ* invokes each work-item separately; Δ1 combines all services into one call  
+   同一 service 的多個 work-item 會聚合；不同 services 不合成一個 Δ1 呼叫。
+
+> **陷阱**　先依賴、再 gas、再按 service 分組。
+
+<sub>`ch12-study-01-function-responsibilities`</sub>
+
+---
+
+### 12-20　An accumulation call returns a posterior partial state e′. What does 'partial' tell you about this result?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 partial state and Δ+</sub>
+
+**標準答案**　It contains the state components used and mutable by accumulation; posterior describes its stage, not its global scope
+
+§12.2 定義 partial state 的依據是範圍：service accounts δ、staging keys ι、authorizer queues φ 與 privileges χ 都在其中。它可以作為輸入、中間結果或輸出；prime 只標示當下定義中的輸出版本。e′ 仍不是全域 σ′，也不是把沒執行的 service 帳戶全部刪掉。
+
+**逐項辨析**
+
+1. ✅ It contains the state components used and mutable by accumulation; posterior describes its stage, not its global scope  
+   partial 說明狀態範圍，prior／posterior 說明轉移前後的階段。
+2. ❌ It contains a full global state whose execution is incomplete; posterior means the remaining components will be computed later  
+   partial 不等於計算只完成一半；完整算出的輸出仍可保持這個範圍。
+3. ❌ It contains the accounts of only the services called in this round; all other service accounts are omitted from the resulting state  
+   δ 是 service-account dictionary，不限於本輪被呼叫的 service 集合。
+4. ❌ It contains only prior-state values; a value stops being partial once its call has finished and it becomes posterior  
+   partial state 同樣能表示 posterior 值；兩個分類維度彼此獨立。
+
+> **陷阱**　partial 是範圍，posterior 是階段。
+
+<sub>`ch12-study-02-partial-state-scope`</sub>
+
+---
+
+### 12-21　A market service and an oracle service run in the same Δ* round. Can a faster oracle invocation make its new state visible to the market's input snapshot?
+
+<sub>12.2 Execution — ●●○ · 概念 · §12.2 Δ*: acc(s) = Δ1(e, t, r, f, s)</sub>
+
+**標準答案**　No; both calls start from the same e, and their accepted changes are merged into the state supplied to a later round
+
+§12.2 對每個 service 都定義 acc(s) = Δ1(e, t, r, f, s)，其中 e 是同一份輸入。執行快慢不參與狀態可見性的規則。Δ* 合併結果得到 e* 後，Δ+ 的下一輪才接收 e*；因此同輪共享輸入快照、不同輪依序交接狀態。service ID 的排序用於確定性收集結果，不是同輪逐服務串行更新。
+
+**逐項辨析**
+
+1. ✅ No; both calls start from the same e, and their accepted changes are merged into the state supplied to a later round  
+   同輪各呼叫共用輸入 e，合併後的 e* 會被傳給後續輪次。
+2. ❌ Yes; whichever call finishes first publishes its state immediately, and later reads by the other call use that state  
+   按實際完成時間公布狀態會改變語義，公式沒有這個可見性規則。
+3. ❌ Yes; sorting the service identifiers makes the smaller identifier's changes visible to the larger identifier in the round  
+   確定性排序不會把各 service 的輸入換成前一個 service 的輸出。
+4. ❌ No; all rounds in the block must retain the original e, and accepted changes become readable only in the next block  
+   Δ+ 會把 e* 帶往同一區塊的下一輪，不必固定等到下一區塊。
+
+> **陷阱**　同輪讀同一份 e；下一輪接收合併後的 e*。
+
+<sub>`ch12-study-03-round-snapshot`</sub>
+
+---
+
+### 12-22　A newly available report declares one prerequisite whose package hash is already in ξ. It has no other dependencies and has not itself been accumulated. Which route does it take?
+
+<sub>12.1 History and Queuing — ●●○ · 概念 · §12.1 definitions of R!, R^Q and E</sub>
+
+**標準答案**　It enters R^Q, where the historical dependency is removed; its remaining dependency set can then be empty
+
+§12.1 的分組條件看 report 原本是否有 prerequisites 或 segment-root lookup 依賴。原本有依賴就走 R^Q，再由 E 將 ξ 中已滿足的依賴移除。所以 R^Q 裡可以出現剩餘依賴為空的項目；這不會把它重新分類成 R!。若自己的 package hash 在已累積集合裡才會移除整筆項目，不能把 prerequisite hash 當作自己的 hash。
+
+**逐項辨析**
+
+1. ✅ It enters R^Q, where the historical dependency is removed; its remaining dependency set can then be empty  
+   分組先看原始依賴，E 再修剪歷史上已滿足的依賴。
+2. ❌ It enters R! because its dependency is already satisfied; the queue route contains only currently unresolved reports  
+   R! 的條件是原本沒有依賴，而非目前依賴已全部滿足。
+3. ❌ It enters R^Q with the dependency retained until the next block; ξ cannot discharge dependencies in this block  
+   建立 R^Q 時就會使用 ξ 的聯集解除已滿足的依賴。
+4. ❌ It is discarded as already accumulated because a prerequisite hash is in ξ; no queue entry is created for it  
+   依賴的 package 已累積，不等於這份 report 自己也已累積。
+
+> **陷阱**　原本有依賴與現在仍有依賴，是兩件事。
+
+<sub>`ch12-study-04-satisfied-but-queued`</sub>
+
+---
+
+### 12-23　Q receives reports [p, q, r]: p has no remaining dependency, q depends only on p, and r depends on unavailable package x. What does Q do?
+
+<sub>12.1 History and Queuing — ●●○ · 概念 · §12.1 accumulation priority queue Q</sub>
+
+**標準答案**　It returns [p, q] as an ordered candidate sequence, without executing either report or recording either in ξ
+
+§12.1 的 Q 先取剩餘依賴為空的 p，再用 p 的 package hash 修剪工作清單，使 q 也可接在後面；缺少 x 的 r 仍不能加入。這是建立候選順序時的依賴推演，沒有執行 service，也沒有修改持久化的 ξ。之後 Δ+ 還要決定實際能處理多長的 report 前綴。
+
+**逐項辨析**
+
+1. ✅ It returns [p, q] as an ordered candidate sequence, without executing either report or recording either in ξ  
+   Q 可以排列同一候選序列內的前後依賴，但不做實際 accumulation。
+2. ❌ It returns only [p] as a candidate sequence, because q must wait for a later block to see p in history  
+   Q 的遞迴會以已選候選的 hash 解除後續依賴，不強制隔一個區塊。
+3. ❌ It executes p, records p in ξ, then executes q; r remains waiting for its unavailable dependency x  
+   執行與歷史整合在後續步驟；Q 只計算候選序列。
+4. ❌ It returns [p, q, r] as an ordered candidate sequence, leaving all dependency checks to the gas scheduler  
+   r 的依賴尚無法解除；gas 排程不能代替這一層依賴檢查。
+
+> **陷阱**　Q 裡的『選出』不等於鏈上的『已累積』。
+
+<sub>`ch12-study-05-q-is-planning`</sub>
+
+---
+
+### 12-24　While reading R* = R! ⌢ Q(q), how should you distinguish the separately defined R^Q from the call Q(q)?
+
+<sub>12.1 History and Queuing — ●○○ · 概念 · §12.1 R^Q, Q and R*</sub>
+
+**標準答案**　R^Q holds new queued report/dependency pairs; Q(q) returns an ordered report sequence; ⌢ joins two sequences
+
+在 §12.1，R^Q 的上標是 queue 路線的分類標記，這份資料包含 report 與剩餘依賴的配對。Q 則是函式，從整理後的 queue q 排出 report 序列；q 會綜合舊 queue 與新的 R^Q。最後用串接符號 ⌢ 把 R! 與 Q(q) 接成 R*。純文字的 ^ 用來標上標位置，與串接符號不同。
+
+**逐項辨析**
+
+1. ✅ R^Q holds new queued report/dependency pairs; Q(q) returns an ordered report sequence; ⌢ joins two sequences  
+   資料類別、排程函式與序列串接操作，在這個選項中各自對齊。
+2. ❌ R^Q is the report sequence returned by Q; Q(q) names the persistent history; ⌢ joins two sets of package hashes  
+   R^Q 是 Q 的資料來源之一；持久化累積歷史是 ξ，不是 Q(q)。
+3. ❌ R^Q holds the new reports with no original dependencies; Q(q) groups reports by service; ⌢ joins two sequences  
+   原本無依賴的是 R!；按 service 分組則是 Δ* 的責任。
+4. ❌ R^Q holds reports already executed this block; Q(q) returns their actual gas usage; ⌢ merges their state changes  
+   這些都仍在候選整理階段，尚未有本輪執行結果或實際 gas。
+
+> **陷阱**　R^Q 是資料，Q(…) 是函式，⌢ 才是 concat。
+
+<sub>`ch12-study-06-q-label-and-function`</sub>
+
+---
+
+### 12-25　The next report in R* exceeds the remaining gas reservation budget, but a later report would fit. There are no incoming transfers or free allowances. What can Δ+ select?
+
+<sub>12.2 Execution — ●●○ · 概念 · §12.2 Δ+ longest admissible prefix</sub>
+
+**標準答案**　It selects no further reports, because admissible selections are prefixes of the remaining sequence, not arbitrary subsets
+
+§12.2 的 Δ+ 取符合預算的最長 report 前綴，而不是做任意子集合的裝箱。下一份的預留額已放不下時，任何包含更後方 report 的前綴也放不下；本題又沒有 transfers 或 free allowances 可處理，所以呼叫停止。實際 gas 只能在執行後得知，不能用可能較省的猜測來放寬本輪准入。
+
+**逐項辨析**
+
+1. ✅ It selects no further reports, because admissible selections are prefixes of the remaining sequence, not arbitrary subsets  
+   前綴規則保留候選順序；第一份放不下就不能跳到後方挑選。
+2. ❌ It skips the expensive report and selects the later one, because dependency ordering no longer matters after R* is built  
+   R* 的順序仍是 Δ+ 選前綴的依據，並未在建立後失去作用。
+3. ❌ It starts the expensive report with the remaining budget, because actual usage might turn out below its declared reservation  
+   本輪先按 gas limits 判定可納入範圍，不能先超額試跑再看消耗。
+4. ❌ It sorts the remaining reports by their gas limits before selecting a prefix, so cheaper reports always enter the block first  
+   Δ+ 沒有按 gas limit 重新排序 reports 的步驟。
+
+> **陷阱**　選最長可容納前綴，不是選最便宜子集合。
+
+<sub>`ch12-study-07-prefix-not-cheapest`</sub>
+
+---
+
+### 12-26　Ignore transfers and free allowances. With budget 100, two reports each reserve 60. The first round executes only the first and actually uses 20. What happens next?
+
+<sub>12.2 Execution — ●●○ · 概念 · §12.2 Δ+ gas accounting</sub>
+
+**標準答案**　Δ+ can select the second report in another round with budget 80, using the partial state merged by the first round
+
+本題特意省略 transfer gas 與 free allowances，讓兩個時點更清楚：選本輪時看預留上限，下一輪預算則扣實際消耗。因此第一輪後剩餘 80，第二份的 60 就放得下。§12.2 的遞迴也會傳遞 e*，後續仍使用 Δ* 分組；並沒有另切一套最後逐 report fallback。完整公式還要計入新 transfers 的 gas 項，不能直接套用本題的簡化算式。
+
+**逐項辨析**
+
+1. ✅ Δ+ can select the second report in another round with budget 80, using the partial state merged by the first round  
+   實際消耗決定下一輪餘額，且遞迴使用本輪合併的狀態。
+2. ❌ Δ+ cannot select the second report because the first reservation leaves only 40, even though execution used less gas  
+   預留額用於准入，不是下一輪永久扣除的實際消耗。
+3. ❌ Δ+ can select the second report with budget 80, but must use the original block input state rather than the first round's result  
+   Δ+ 的遞迴參數含 e*，不會每輪重置成區塊初始狀態。
+4. ❌ Δ+ switches to a separate per-report fallback with budget 80, bypassing the service-grouping function for all remaining work  
+   後續輪次仍呼叫 Δ*，沒有另一套繞過 service 分組的 fallback。
+
+> **陷阱**　本輪准入看 limit；下一輪接續看 actual usage。
+
+<sub>`ch12-study-08-unused-gas-next-round`</sub>
+
+---
+
+### 12-27　Three reports selected in one Δ* round each contain a digest for the same DEX service. How is that service's work organized?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 Δ* service set and Δ1</sub>
+
+**標準答案**　One Δ1 call collects that service's matching digests across all three reports and prepares their combined input and gas
+
+§12.2 先把相關 service IDs 放進集合，再對每個 service 定義一次 acc(s)。Δ1 會掃描本輪選定 reports，收集全部屬於 s 的 digests，所以 report 邊界不等於 service 呼叫邊界。聚合保留服務歸屬，也保留 report 與其內 digest 的原始順序；其他 service 的資料會交給各自的呼叫。
+
+**逐項辨析**
+
+1. ✅ One Δ1 call collects that service's matching digests across all three reports and prepares their combined input and gas  
+   同一輪以 service 為分組單位，跨 report 的相同 service 輸入會聚合。
+2. ❌ Three Δ1 calls each collect one report's digest, because report boundaries must also be service invocation boundaries  
+   本輪不是每份 report 各啟動一次相同 service。
+3. ❌ One Δ1 call collects every digest in all three reports, including those belonging to other services, under the DEX identifier  
+   Δ1 會按 digest 的 service ID 篩選，不會把其他服務的工作混進來。
+4. ❌ Only the first matching digest is handled this round; the other two require separate later rounds despite already being selected  
+   本輪已選 reports 裡符合 service 的 digests 都會被整理成這次輸入。
+
+> **陷阱**　report 是排程單位；service 是本輪執行分組單位。
+
+<sub>`ch12-study-09-one-service-one-round`</sub>
+
+---
+
+### 12-28　Δ1 passes i^T ⌢ i^U as one input sequence. Transfers and operand tuples have different fields. How is this type-correct?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 operand tuple U, deferred transfer X and Δ1</sub>
+
+**標準答案**　Each element belongs to the union of the two types; concatenation preserves transfer entries before operand-tuple entries
+
+§12.2 在定義 operand tuple 與 deferred transfer 後，指出兩者的聯集構成 accumulation 輸入的元素型別。可以用 List<Transfer | OperandTuple> 理解：清單可容納兩類元素，但各元素仍保有自己的資料結構。⌢ 串接的是清單，不是合併欄位，也不是把轉帳偽裝成 work-report 的 digest。
+
+**逐項辨析**
+
+1. ✅ Each element belongs to the union of the two types; concatenation preserves transfer entries before operand-tuple entries  
+   聯集型別讓同一序列容納兩類元素，concat 同時保留順序。
+2. ❌ Each transfer is converted into an operand tuple first; concatenation therefore carries only ordinary work-report result entries  
+   transfer 保持自己的資料種類，不需要先轉成 work-report 的 operand。
+3. ❌ The fields of a transfer are paired with fields of one operand tuple; concatenation produces one larger record per pair  
+   這是清單串接，不是將兩種結構逐項配對或合成一筆紀錄。
+4. ❌ The input is a set of untyped blobs after concatenation; both the element type and the ordering may be discarded by the service  
+   輸入是有型別區別的序列；集合去序與抹除種類不是此式的語義。
+
+> **陷阱**　concat 接清單，union 說明每個元素可以是哪種型別。
+
+<sub>`ch12-study-10-union-inputs`</sub>
+
+---
+
+### 12-29　For service s, report r1 has digests [s1, other, s2] and later report r2 has [s3]. One incoming transfer t targets s. What is the assembled input order?
+
+<sub>12.2 Execution — ●●○ · 概念 · §12.2 Δ1 definitions of i^T and i^U</sub>
+
+**標準答案**　[t, operand(s1), operand(s2), operand(s3)], retaining report order and each report's matching digest order
+
+§12.2 的 i^U 使用兩層有序遍歷：先依本輪 report 序列，再依每份 report 的 digests，並篩選 service ID 等於 s 的項目。本題的其他服務會被跳過，但符合者的相對順序不變。最後組合 i^T ⌢ i^U，所以收到的 transfer t 在前，接著才是 s1、s2、s3 各自的 operand tuple。
+
+**逐項辨析**
+
+1. ✅ [t, operand(s1), operand(s2), operand(s3)], retaining report order and each report's matching digest order  
+   先 transfers，再按 reports 與 digests 的既有順序放入 matching operands。
+2. ❌ [operand(s1), operand(s2), operand(s3), t], retaining digest order but placing incoming transfers after report work  
+   串接式是 i^T ⌢ i^U，收到的 transfers 位於 report operands 之前。
+3. ❌ [t, operand(s1), operand(s3), operand(s2)], interleaving the reports so each report contributes one digest in turn  
+   原文是巢狀有序遍歷，不會在不同 reports 之間輪流交錯取項。
+4. ❌ [t, operand(s3), operand(s2), operand(s1)], reversing the digest sequence because the newest report takes precedence  
+   沒有新 report 優先或反轉 digest 順序的規則。
+
+> **陷阱**　篩掉其他 service，不打亂留下的相對順序。
+
+<sub>`ch12-study-11-operand-order`</sub>
+
+---
+
+### 12-30　A prediction-market service issues a deferred transfer to pay an oracle service. At the §12 protocol level, what identifies the sender and receiver?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 deferred transfer definition and Δ+ recursion</sub>
+
+**標準答案**　Service identifiers; the transfer carries an amount, memo and gas allowance into the recipient's later accumulation round
+
+§12.2 的 deferred transfer 由 source service、destination service、amount、memo 與 gas 組成。市場與 oracle 是這個例子裡的服務角色；用戶在 dApp 裡的業務操作則由 service 自己定義。這筆 transfer 由 accumulation 產生，交給後續輪次直接當作輸入，不必另外跑一份 work-package／work-report 流程，也不保證要隔到下一區塊。
+
+**逐項辨析**
+
+1. ✅ Service identifiers; the transfer carries an amount, memo and gas allowance into the recipient's later accumulation round  
+   source 與 destination 的型別都是 service ID，後續輪次處理接收輸入。
+2. ❌ User wallet addresses; the transfer is a signed user transaction that must create a fresh work-package before accumulation  
+   此資料型別沒有使用者簽名與錢包地址，也不要求另建 work-package。
+3. ❌ Core identifiers; the transfer pays the receiving core and changes which guarantors are assigned to execute the oracle  
+   core 負責分配計算資源；它不是這筆服務間轉帳的收付款帳戶。
+4. ❌ Work-package hashes; the transfer settles a dependency between packages without identifying either participating service  
+   package hashes 用於依賴等識別，不能取代 transfer 的來源與目的 service。
+
+> **陷阱**　服務間的後續轉帳輸入，不等於使用者新提交的交易格式。
+
+<sub>`ch12-study-12-transfer-parties`</sub>
+
+---
+
+### 12-31　The privilege state names the same service as both manager and delegator. Does the §12 partial-state definition itself forbid this?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 partial-state privilege fields</sub>
+
+**標準答案**　No; these are role fields containing service identifiers, and the definition does not require the role holders to be distinct
+
+§12.2 的 partial state 將 manager、delegator、registrar 表示為 service IDs，assigners 是逐 core 的 service ID 序列，always-accumulate 則是 service→gas 的 dictionary。這些欄位描述職責與額度，並沒有加上角色 ID 必須互異的限制。因此不能把特權類別的數量，直接解讀成必須建立相同數量且彼此獨立的帳戶。
+
+**逐項辨析**
+
+1. ✅ No; these are role fields containing service identifiers, and the definition does not require the role holders to be distinct  
+   角色欄位可以指向相同 ID；是否共用由狀態配置決定。
+2. ❌ Yes; the five privilege categories each require one unique service, and any repeated identifier makes the partial state invalid  
+   特權類別不等於五個唯一帳戶，always-accumulate 本身也不是單一角色 ID。
+3. ❌ Yes; a service may hold several assigner slots but may never share a manager or delegator role with another privilege field  
+   partial-state 定義沒有加入這種只限制部分角色共用的條件。
+4. ❌ No; manager and delegator are always aliases for one mandatory account, so different identifiers would instead be invalid  
+   允許共用不等於強制共用；manager 與 delegator 也可以是不同 services。
+
+> **陷阱**　角色數量，不等於必須有多少個不同帳戶。
+
+<sub>`ch12-study-13-roles-not-distinct-accounts`</sub>
+
+---
+
+### 12-32　During the first round, the manager adds service s to the always-accumulate dictionary. s has no report digest or incoming transfer in the following round. Does the edit alone schedule s then?
+
+<sub>12.2 Execution — ●●● · 概念 · §12.2 Δ+ recursive free-accumulation parameter; §12.3 initial call</sub>
+
+**標準答案**　No; later Δ+ calls receive an empty free-accumulation map, so the changed privilege dictionary alone does not grant another round's allowance
+
+§12.3 的初次呼叫把輸入狀態的 always-accumulate dictionary 作為 f 傳入；§12.2 的每次遞迴則明確把 f 換成空映射。e* 會繼續傳遞，但不代表 f 也從新的 privileges 重新取得。本題 s 又沒有 digest 或 transfer，所以不能只因本輪剛加入 dictionary 就在下一輪獲得新的 free allowance。
+
+**逐項辨析**
+
+1. ✅ No; later Δ+ calls receive an empty free-accumulation map, so the changed privilege dictionary alone does not grant another round's allowance  
+   特權狀態可更新，但本區塊後續輪次的 f 仍由公式固定為空映射。
+2. ❌ Yes; every Δ+ call rereads the latest privilege dictionary, so a new always-accumulate entry immediately supplies free gas in the following round  
+   遞迴沒有每輪重讀 χ 的 always-accumulate 額度；那會重複分配預算。
+3. ❌ Yes; Δ* automatically schedules all service identifiers mentioned anywhere in partial state, even if reports, transfers and the free map omit them  
+   相關 service 集合取 digest targets、transfer destinations 與 keys(f)，不是所有狀態 ID。
+4. ❌ No; the privilege edit must be rejected because the always-accumulate dictionary cannot be changed during the accumulation phase of a block  
+   允許改 dictionary；未立即得到下一輪額度的原因是 f 的傳遞規則。
+
+> **陷阱**　e* 會更新，free-accumulation 參數 f 不會每輪補發。
+
+<sub>`ch12-study-14-free-gas-not-refilled`</sub>
+
+---
+
+### 12-33　Where do permitted changes to privilege roles enter the §12 accumulation flow?
+
+<sub>12.2 Execution — ●○○ · 概念 · §12.2 Δ1 results and Δ* privilege integration</sub>
+
+**標準答案**　Services return changes through their single-service execution results; Δ* selects and merges the relevant privilege fields into partial state
+
+privileges 本來就是 §12.2 partial state 的一部分。各 service 的單一服務執行結果可以包含允許的變更，Δ* 再從指定角色的結果中挑選相關欄位並按合併規則形成新狀態；Δ+ 將這份狀態帶往下一輪。Q 管依賴、ready queue 管等待工作、preimage integration 管資料提供，三者都不是特權角色指派的替代階段。
+
+**逐項辨析**
+
+1. ✅ Services return changes through their single-service execution results; Δ* selects and merges the relevant privilege fields into partial state  
+   變更來自服務執行結果，並在 Δ* 的狀態合併階段納入。
+2. ❌ Q derives new role holders from the dependency graph before gas scheduling; Δ* only receives the already-final privilege assignments  
+   Q 不執行 service，也不會依 report 依賴關係指派特權角色。
+3. ❌ The ready queue replaces role holders when it expires old reports; service execution and partial-state merging cannot alter privileges  
+   queue 到期與角色變更是不同規則，不能互相替代。
+4. ❌ Preimage integration assigns role holders after all rounds; the manager's execution result only provides an advisory output hash  
+   preimage integration 寫入被請求的資料，不負責決定角色持有者。
+
+> **陷阱**　改特權也走『service 執行 → Δ* 合併 partial state』。
+
+<sub>`ch12-study-15-privilege-change-stage`</sub>
+
+---
+
+### 12-34　An assigner role initially names service 10. The manager's returned field still names 10, while service 10's result hands the role to 20. Which merged identifier is selected?
+
+<sub>12.2 Execution — ●●○ · 概念 · §12.2 privilege merge R(o, a, b)</sub>
+
+**標準答案**　20, because the manager's returned value equals the original value, so the role holder's handoff is selected
+
+§12.2 的 R(o, a, b) 以欄位的值比較是否變更：a = o 時選 b，否則選 a。這裡原始 o = 10，manager 結果 a = 10，原持有者的結果 b = 20，因此選 20。規則不是偵測 manager 是否曾嘗試寫入，而是比較回傳欄位是否真的不同；也不是一律由 manager 覆蓋所有交接。
+
+**逐項辨析**
+
+1. ✅ 20, because the manager's returned value equals the original value, so the role holder's handoff is selected  
+   a 與 o 相等，符合 R 選取 b 的分支，因此採用交接值 20。
+2. ❌ 10, because any value returned by the manager takes precedence, even when it is unchanged from the original value  
+   manager 的值有變更才優先，未變更時會採原角色持有者的結果。
+3. ❌ 10, because only the manager can change an assigner identifier and the current holder cannot hand off its role  
+   合併規則明確保留原角色持有者自行交接的路徑。
+4. ❌ Neither identifier, because two service results contain the same privilege field and that always invalidates the block  
+   特權欄位的這種雙來源合併有明確規則，不是自動衝突無效。
+
+> **陷阱**　比較回傳值是否改變，不是 manager 一律覆蓋。
+
+<sub>`ch12-study-16-handoff-value-comparison`</sub>
+
+---
+
+### 12-35　A service's accepted accumulation result changes its storage but has no accumulation-output commitment. How can the round's e* and b* reflect this?
+
+<sub>12.2 Execution; 12.3 Final State Integration — ●○○ · 概念 · §12.2 Δ* outputs e*, b*; §12.3 θ′</sub>
+
+**標準答案**　e* includes the accepted state change, while b* has no output pair for this invocation; the two outputs serve different purposes
+
+§12.2 的 Δ* 同時回傳更新後的 partial state 與 service-indexed output commitments。e* 的 service-account 部分承接採用的帳戶變更；b* 則只蒐集非空 output 的 (service, hash) 配對，後續形成 θ′。題目已指定沒有 output commitment，因此這次呼叫可以改變 e*，卻不為 b* 增加一筆。兩者不能當作完整狀態與其自動 hash 的固定配對。
+
+**逐項辨析**
+
+1. ✅ e* includes the accepted state change, while b* has no output pair for this invocation; the two outputs serve different purposes  
+   狀態變更與可選的 output commitment 是分別收集的結果。
+2. ❌ e* discards the storage change because every accepted state update must have a matching service-and-hash pair in b*  
+   §12 沒有要求每筆可採用狀態變更都必須提供 output hash。
+3. ❌ b* automatically contains the service's entire storage map, while e* records only the hash of that map after the update  
+   e* 包含 partial state，b* 才是 service／hash 配對，並不存 storage map。
+4. ❌ b* automatically contains a newly computed global state root, because any service storage change is itself an output commitment  
+   b* 收集服務提供的 output commitments，不會自動生成全域 state root。
+
+> **陷阱**　e* 是狀態；b* 是服務輸出的 hash 配對。
+
+<sub>`ch12-study-17-state-vs-output-commitment`</sub>
+
+---
+
+### 12-36　R* is [p, q, r], and Δ+ returns n = 2 for this block. p came from an old queue entry. What is added to the newest entry of ξ′?
+
+<sub>12.3 Final State Integration — ●○○ · 概念 · §12.3 ξ′ last entry; §12.1 P</sub>
+
+**標準答案**　The work-package hashes corresponding to p and q, including the report selected from the old queue
+
+§12.3 以 ξ′ 最新一格 = P(R* 的前 n 份) 更新歷史。n = 2 表示本區塊實際累積的 report 前綴是 p、q，無論它們是新 available 還是從舊 queue 選出。§12.1 的 P 擷取的是 report 內對應的 work-package hash；r 雖在候選序列中，但未落入已執行前綴，因此不能宣告為已累積。
+
+**逐項辨析**
+
+1. ✅ The work-package hashes corresponding to p and q, including the report selected from the old queue  
+   取實際前綴的 package hashes，來源是否舊 queue 不影響登記。
+2. ❌ The work-package hashes corresponding to p, q and r, because all three were admitted to the candidate sequence  
+   候選序列不保證全部執行；r 在本題的實際前綴之外。
+3. ❌ Only the work-package hash corresponding to q, because a report from the old queue cannot enter this block's history  
+   歷史記錄本區塊累積的工作，不限於本區塊新 available 的工作。
+4. ❌ The hashes of the report objects p and q themselves, rather than the package hashes recorded inside those reports  
+   P 擷取 package hash，不能改用整個 report 物件的 hash。
+
+> **陷阱**　歷史記實際前綴的 package hashes，不記所有候選。
+
+<sub>`ch12-study-18-history-selected-prefix`</sub>
+
+---
+
+### 12-37　A new block skips several timeslots relative to its parent. Do ξ and ω advance in exactly the same way?
+
+<sub>12.3 Final State Integration — ●●○ · 概念 · §12.3 history and ready-queue updates</sub>
+
+**標準答案**　No; ξ shifts by one entry for the block transition, while ω uses the current slot index and clears the skipped-slot positions
+
+§12.3 對 ξ 的式子是舊格 i+1 移到新格 i，最後一格放本區塊累積的 package hashes，因此每次區塊轉移移一格。ω 則以當前 timeslot 對 epoch 長度取模定位，對跳過 slots 的位置清空，其他存續位置再修剪已滿足的依賴。兩者雖有相同長度常數，索引與老化方式仍不同。
+
+**逐項辨析**
+
+1. ✅ No; ξ shifts by one entry for the block transition, while ω uses the current slot index and clears the skipped-slot positions  
+   ξ 的區塊轉移更新與 ω 的 slot 索引更新，在公式中分別定義。
+2. ❌ Yes; both shift once for every skipped slot and insert an empty entry for each slot that did not contain a block  
+   ξ 沒有因每個缺席 slot 額外插入空歷史格的步驟。
+3. ❌ Yes; both shift by one entry for the block transition and keep all skipped-slot positions untouched until an epoch boundary  
+   ω 會清空跳過 slots 對應的位置，不能一律保留到 epoch 邊界。
+4. ❌ No; ξ keeps all entries until the next epoch, while ω is completely emptied whenever a block follows a timeslot gap  
+   ξ 每個區塊更新；ω 也只按規則更新對應位置，不因任意 gap 全部清空。
+
+> **陷阱**　相同的容量，不代表相同的時間索引。
+
+<sub>`ch12-study-19-slot-gap-history-queue`</sub>
+
+---
+
+### 12-38　An existing always-accumulate service receives no work-item or transfer, but its invocation consumes positive gas. Assuming it remains in δ†, is its last-accumulation timestamp updated?
+
+<sub>12.3 Final State Integration — ●●○ · 概念 · §12.3 S(s), accumulation statistics and last-accumulation timestamp</sub>
+
+**標準答案**　Yes; its statistics tuple is (0, 0, positive gas), so it appears in the statistics and its timestamp is set to τ′
+
+§12.3 的 S(s) 包含 work-item 數、processed transfer 數與實際 gas。只要不是 (0,0,0) 就列入統計。題目的 gas 為正，所以即使前兩項為零，該 service 仍在統計的 keys 裡，δ†→δ‡ 時會更新 last-accumulation record。不能把『有 work-item』誤當成唯一條件，也不能替所有閒置帳戶一律更新時間。
+
+**逐項辨析**
+
+1. ✅ Yes; its statistics tuple is (0, 0, positive gas), so it appears in the statistics and its timestamp is set to τ′  
+   非零 gas 使統計三元組非零，符合更新該服務時間戳的條件。
+2. ❌ No; the timestamp is updated only when the number of accumulated work-items is positive, regardless of gas usage  
+   統計納入條件看整個三元組，不只看 work-item 數量。
+3. ❌ No; the timestamp is updated only when a deferred transfer arrives, because that is the event that activates the account  
+   transfer 並不是唯一觸發來源；always-accumulate 也能有實際執行。
+4. ❌ Yes; every account remaining in δ† receives the new timestamp, including accounts with no inputs and no execution at all  
+   時間戳只對出現在累積統計的 services 更新，不是所有帳戶。
+
+> **陷阱**　看統計是否非零，不只看有沒有 report。
+
+<sub>`ch12-study-20-gas-only-statistics`</sub>
+
+---
+
+### 12-39　Which ordering correctly places δ†, δ‡ and δ′ within the current block's service-account transition?
+
+<sub>12.3 Final State Integration; 12.4 Preimage Integration — ●○○ · 概念 · §12.3 δ† and δ‡; §12.4 δ′</sub>
+
+**標準答案**　δ† follows the accumulation rounds; δ‡ also has last-accumulation timestamps updated; δ′ also integrates still-useful extrinsic preimages
+
+§12.3 從全部 Δ+ 輪次完成的 partial state 拆出 δ†，此時本次 accumulation 的轉帳效果已經在輪次中整合。接著依統計更新相關 service 的最後累積時間，得到 δ‡。§12.4 才以 δ‡ 為輸入整合 preimage extrinsic 中仍有用的資料，得到 δ′。這些都是帳戶狀態在同一區塊轉移內的不同階段，不是全域 state、hash 或前幾個區塊。
+
+**逐項辨析**
+
+1. ✅ δ† follows the accumulation rounds; δ‡ also has last-accumulation timestamps updated; δ′ also integrates still-useful extrinsic preimages  
+   三個記號分別對應輪次完成、時間戳更新與 extrinsic preimage 整合。
+2. ❌ δ† follows report availability; δ‡ executes all deferred transfers as a separate phase; δ′ then runs the service accumulation rounds  
+   deferred transfers 在 accumulation 輪次中處理，δ‡ 這一步是時間戳更新。
+3. ❌ δ† is the full prior global state; δ‡ is its hash after accumulation; δ′ is the service-account map reconstructed from that hash  
+   δ 系列是 service-account state，dagger 不把資料轉成全域 state 或 hash。
+4. ❌ δ† already includes this block's preimage extrinsic; δ‡ runs accumulation using those new preimages; δ′ updates the final timestamps  
+   本區塊 preimage extrinsic 的最後整合發生在 accumulation 之後。
+
+> **陷阱**　δ† → 補 last-accumulation 時間 → δ‡ → 整合 preimages → δ′。
+
+<sub>`ch12-study-21-account-state-stages`</sub>
+
+---
+
+### 12-40　A service had no request for blob d in prior δ, but creates one during this block's accumulation. Can that new request alone justify including (service, d) in this block's preimage extrinsic?
+
+<sub>12.4 Preimage Integration — ●●○ · 概念 · §12.4 preimage extrinsic validity against prior δ</sub>
+
+**標準答案**　No; extrinsic validity checks whether d was requested and not yet provided in prior δ, before this block's accumulation
+
+§12.4 對每個 extrinsic 項目呼叫 Y(prior δ, service, data)，要求輸入狀態裡已有尚未滿足的請求。後續整合雖然使用 δ‡，並不會回頭讓原本不合法的 extrinsic 變合法。因此新請求不能替同一區塊的 extrinsic 補上 prior 條件；這與 accumulation 透過另一條路徑提供 preimages 的規則要分開看。
+
+**逐項辨析**
+
+1. ✅ No; extrinsic validity checks whether d was requested and not yet provided in prior δ, before this block's accumulation  
+   驗證的時間點固定是 prior δ，新建請求不能改寫這個輸入狀態條件。
+2. ❌ Yes; extrinsic validity is checked only after accumulation, so any request appearing in δ‡ is enough for inclusion  
+   δ‡ 是最後整合的輸入，不是 extrinsic 最初合法性檢查所用的狀態。
+3. ❌ Yes; the manager can make all newly requested preimages valid immediately by including the requester in always-accumulate  
+   always-accumulate 額度不會繞過 preimage extrinsic 的 prior-state 條件。
+4. ❌ No; a preimage must have been requested at least one full epoch earlier, even if the request already existed in prior δ  
+   此條件沒有要求請求至少早一整個 epoch；關鍵是 prior 已請求且未提供。
+
+> **陷阱**　整合時存在，不代表驗證所用的 prior 裡已存在。
+
+<sub>`ch12-study-22-new-request-not-prior`</sub>
+
+---
+
+### 12-41　A new report had no dependencies, belongs to R!, was not already in ω, and is not accumulated due to the gas limit. Does §12 automatically append it to ω′ as leftover work?
+
+<sub>12.3 Final State Integration — ●●○ · 概念 · §12.1 R! and R^Q; §12.3 ω′ update</sub>
+
+**標準答案**　No; the new-slot queue entries come from pruned R^Q, while surviving old entries are pruned separately; ω is not a universal leftover queue
+
+§12.3 的 ω′ 更新式，當前 slot 放的是 E(R^Q, 本區塊已累積 hashes)，其他存續 slots 則對舊 queue 做 E 修剪。公式沒有將 R* 的全部未執行後綴統一追加的動作。本題 report 在 R!、也不在舊 queue，所以不能從『gas 不夠』推導出它一定被寫入 ω′；未執行更不能冒充已累積而寫進 ξ′。
+
+**逐項辨析**
+
+1. ✅ No; the new-slot queue entries come from pruned R^Q, while surviving old entries are pruned separately; ω is not a universal leftover queue  
+   更新式依 queue 路線保存項目，並沒有所有 gas leftovers 的共同入口。
+2. ❌ Yes; every suffix of R* left by Δ+ is appended to the current slot of ω′, regardless of which branch originally supplied its reports  
+   ω′ 的新項目來源是 R^Q，不是 Δ+ 留下的整段 R* 後綴。
+3. ❌ Yes; every report in R! is copied into ω′ before gas scheduling, so the unprocessed one necessarily survives as an old queue entry  
+   原本無依賴的 R! 不會在排程前全部複製成持久化 queue 項目。
+4. ❌ No; any report omitted because of gas is recorded in ξ′ as already processed, which prevents it from needing a queue entry  
+   ξ′ 只記實際累積前綴，不能把 gas 不足未處理者標成已完成。
+
+> **陷阱**　ω 留的是 queue 路線工作，不能直接等同所有 gas leftovers。
+
+<sub>`ch12-study-23-queue-not-all-leftovers`</sub>
+
+---
+
+### 12-42　Despite the intended collision avoidance, two different services' accumulation results both introduce a new account with the same service ID. How must the block be treated?
+
+<sub>12.2 Execution — ●●● · 概念 · §12.2 account-result merging after Δ*</sub>
+
+**標準答案**　The block is invalid; the merge cannot silently choose one of the competing newly created accounts
+
+§12.2 在 Δ* 的帳戶變更合併後，明確說不同 services 不能貢獻相同的新增、修改或移除索引；新 ID 雖然會被選成避免碰撞，極低機率的碰撞若發生，區塊仍必須判為 invalid。這與 privilege 欄位具有 manager 優先／持有者交接的專用合併規則不同，不能套用任意覆蓋來解決帳戶 ID 衝突。
+
+**逐項辨析**
+
+1. ✅ The block is invalid; the merge cannot silently choose one of the competing newly created accounts  
+   原文明確指定新 ID 碰撞的後果是區塊無效。
+2. ❌ The account created by the smaller source service ID wins; the other result is silently removed during the merge  
+   service ID 排序沒有授權較小來源覆蓋另一個新建帳戶。
+3. ❌ The account created by the invocation that finishes first wins; physical execution order resolves the collision  
+   實體完成順序不能決定共識結果，且原文沒有這種衝突處理。
+4. ❌ Both accounts are retained under that ID; the receiving service selects which account record it means on its next call  
+   service-account dictionary 的同一個 key 不能保留兩個可選帳戶值。
+
+> **陷阱**　特權欄位有專用合併規則；新帳戶 ID 碰撞則使區塊無效。
+
+<sub>`ch12-study-24-new-service-id-collision`</sub>
+
+---
+
+### 12-43　The GP splits accumulation into two layers: Δ+ recurses over reports in order, and inside it Δ* aggregates everything belonging to one service into a single PVM invocation. §12.2 says this reconciles 'two slightly antagonistic factors'. What are they, and why does one sequential layer plus one parallel layer satisfy both?
 
 <sub>12.2 Execution — ●●○ · 設計理由 · §12.2 prose; eq. 12.17 (Δ+), eq. 12.18 (Δ*)</sub>
 
@@ -7458,7 +8058,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-20　When service A calls transfer to service B inside accumulate, B does not receive it during the same execution; the transfer is 'deferred' to the next round. Why not make it a synchronous call, and after the deferral how does B get woken up and whose gas pays for handling it?
+### 12-44　When service A calls transfer to service B inside accumulate, B does not receive it during the same execution; the transfer is 'deferred' to the next round. Why not make it a synchronous call, and after the deferral how does B get woken up and whose gas pays for handling it?
 
 <sub>12.2 Execution; 20 Conclusion — ●●○ · 設計理由 · §12.2 prose, eq. 12.14 (𝕏), eq. 12.17, §20 Further Work</sub>
 
@@ -7483,7 +8083,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-21　A report is accumulated as soon as it becomes available, usually before its audit has completed — so the on-chain state has already been changed by a result nobody has verified yet. What makes that safe, and what happens to the state if the report later turns out to be bad?
+### 12-45　A report is accumulated as soon as it becomes available, usually before its audit has completed — so the on-chain state has already been changed by a result nobody has verified yet. What makes that safe, and what happens to the state if the report later turns out to be bad?
 
 <sub>17 Auditing; 19 Best Chain; 10 Disputes — ●●○ · 設計理由 · §17 prose, §19 (audited ∈ best-chain conditions), §10</sub>
 
@@ -7508,7 +8108,7 @@ eq. 12.14：T ≡ (s, d, a, m, g)——source service、destination、amount、*
 
 ---
 
-### 12-22　Polkadot's core runs the PVF and its output is the parachain's new state (head data / state root), which the relay chain merely records. JAM's core runs refine and outputs only a small digest, after which the service's accumulate still has to run on-chain to decide how the state changes. What does the extra step buy?
+### 12-46　Polkadot's core runs the PVF and its output is the parachain's new state (head data / state root), which the relay chain merely records. JAM's core runs refine and outputs only a small digest, after which the service's accumulate still has to run on-chain to decide how the state changes. What does the extra step buy?
 
 <sub>4.9 On Services and Accounts; 12 — ●●○ · 設計理由 · §4.9 prose (refinement vs accumulation), §12 prose, §2.1</sub>
 

@@ -3,7 +3,7 @@
 Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, built for the
 [New-JAMneration](https://github.com/New-JAMneration/JAM-Protocol) team.
 
-- **321 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–13, appendices A–H,
+- **345 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–13, appendices A–H,
   plus architecture / design-rationale / off-chain-protocol items.
 - **92-entry glossary** of GP 0.8.0 symbols and terms (state components, data structures, PVM,
   cryptography, constants, ecosystem), searchable and cross-linked.
@@ -30,6 +30,11 @@ from the browser.
 
 Everything is one self-contained `index.html` — no build step, no backend. Progress lives in the
 visitor's own browser (`localStorage`).
+
+For focused chapter 12 practice, select **12 Accumulation** and search **第12章專練** (or
+`ch12-study`). These 24 short, bilingual questions cover notation, report dependencies, gas rounds,
+partial-state timing, deferred transfers and privilege merging. Use practice mode for instant
+per-option feedback, or Q&A mode to rehearse an answer before revealing it.
 
 ## Deploy
 
@@ -58,8 +63,8 @@ scripts/build.py      # -> dist/questions.json, dist/jam-m1-drill.html
 scripts/smoke.mjs     # headless Chromium pass over both themes and both layouts
 ```
 
-`REVIEW.md` records the adversarial review: every item was re-answered from the Gray Paper LaTeX
-source by an independent checker that never saw the author's explanation.
+`REVIEW.md` records the earlier adversarial review. Newly added drills are checked against the
+pinned Gray Paper source and the content gates; they are not covered by that historical blind review.
 
 ## Accuracy
 

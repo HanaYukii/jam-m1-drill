@@ -1,6 +1,6 @@
 {
  "meta": {
-  "bankVersion": "bank v1.0 (2026-10-04)",
+  "bankVersion": "bank v1.0 (2026-10-22)",
   "gpVersion": "Gray Paper 0.8.0",
   "team": "New-JAMneration M1 interview prep",
   "chapters": [
@@ -150,7 +150,7 @@
     "group": "Interview extras"
    }
   ],
-  "count": 321,
+  "count": 345,
   "glossaryCats": {
    "state": "狀態與區塊",
    "block": "狀態與區塊",
@@ -8067,6 +8067,917 @@
    ],
    "explanation": "**哪些 service 會出現**（eq. 13.13）：三個來源的聯集——s^R（本塊 report 裡有 digest 的）∪ s^P（本塊 E_P 有提供 preimage 的）∪ keys(S)（有 accumulate 活動的）。**π_S 是 per-block 的，所以沒有任何活動的 service 根本不會出現**在這一塊的統計裡，不是記成零。這與 π_V／π_L 不同——後者是跨 epoch 累積、在 e′ ≠ e 時整批換手。**每筆記什麼**（eq. 13.14–13.17）：p（provision）= 對本塊 E_P 中屬於它的每筆累加 (1, |d|)；r（refinement）= digest 的筆數與 refine 用掉的 gas；i、x、z、e = import／extrinsic／export 的計數；a（accumulation）= S(s) = (item 數, transfer 數, gas)，沒有活動則是 (0, 0, 0)。**為什麼要分這麼細**：這些數字是未來計費與獎勵分配的依據——refine 與 accumulate 的成本結構完全不同（一個 in-core、一個 on-chain），混在一起就無法分別定價。",
    "trap": "π_S 的 accumulation 是 (N, T, G) 三元組。"
+  },
+  {
+   "id": "ch12-study-01-function-responsibilities",
+   "ch": "12",
+   "section": "12.1 History and Queuing; 12.2 Execution",
+   "gpRef": "§12.1 Q; §12.2 Δ+, Δ*, Δ1",
+   "lens": "機制",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "flow"
+   ],
+   "stem": "Which division of responsibilities correctly connects dependency ordering to service execution in §12?",
+   "stemZh": "從整理依賴到分服務執行，第 12 章各函式的分工何者正確？",
+   "options": [
+    "Q chooses a gas-bounded prefix; Δ+ orders dependency-ready candidates; Δ* groups by service; Δ1 prepares each service's call",
+    "Q orders dependency-ready candidates; Δ+ chooses a report prefix; Δ* invokes each work-item separately; Δ1 combines all services into one call",
+    "Q orders dependency-ready candidates; Δ+ groups by service; Δ* chooses the next gas-bounded report prefix; Δ1 prepares each service's call",
+    "Q orders dependency-ready candidates; Δ+ chooses a gas-bounded prefix; Δ* groups by service; Δ1 prepares each service's call"
+   ],
+   "optionsZh": [
+    "Q 依 gas 選前綴；Δ+ 整理依賴候選順序；Δ* 按 service 分組；Δ1 準備單一 service 的呼叫",
+    "Q 整理依賴候選順序；Δ+ 挑 report 前綴；Δ* 對每個 work-item 分別呼叫；Δ1 把所有 service 併成一次呼叫",
+    "Q 整理依賴候選順序；Δ+ 按 service 分組；Δ* 挑下一批符合 gas 的 report 前綴；Δ1 準備單一 service 的呼叫",
+    "Q 整理依賴候選順序；Δ+ 依 gas 選前綴；Δ* 按 service 分組；Δ1 準備單一 service 的呼叫"
+   ],
+   "answer": 3,
+   "explanation": "§12 的主線可以沿著資料交接來記：Q 先產生依賴上可排列的候選順序，組成 R*；Δ+ 依 gas 選出本輪 report 前綴；Δ* 將其中的 digest 與收到的 transfers 按 service 分組；Δ1 才整理該 service 的 gas 與輸入，交給執行介面。Q 的候選排序不代表已經執行，也不會扣 gas。",
+   "optNotes": [
+    "Q 不管理 gas；外層 Δ+ 才根據 gas 預算選取 report 前綴。",
+    "同一 service 的多個 work-item 會聚合；不同 services 不合成一個 Δ1 呼叫。",
+    "Δ+ 負責選前綴，Δ* 負責 service 分組，這裡把兩者交換了。",
+    "依賴排序、gas 前綴、service 分組、單一 service 準備的四個責任依序對齊。"
+   ],
+   "trap": "先依賴、再 gas、再按 service 分組。"
+  },
+  {
+   "id": "ch12-study-02-partial-state-scope",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 partial state and Δ+",
+   "lens": "對比",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "partial-state",
+    "prior/posterior"
+   ],
+   "stem": "An accumulation call returns a posterior partial state e′. What does 'partial' tell you about this result?",
+   "stemZh": "某次 accumulation 呼叫回傳 posterior partial state e′。這裡的 partial 究竟表示什麼？",
+   "options": [
+    "It contains the state components used and mutable by accumulation; posterior describes its stage, not its global scope",
+    "It contains a full global state whose execution is incomplete; posterior means the remaining components will be computed later",
+    "It contains only prior-state values; a value stops being partial once its call has finished and it becomes posterior",
+    "It contains the accounts of only the services called in this round; all other service accounts are omitted from the resulting state"
+   ],
+   "optionsZh": [
+    "它包含 accumulation 所需且可變動的狀態部分；posterior 描述階段，不會把範圍變成全域 state",
+    "它包含尚未算完的完整全域 state；posterior 表示其餘部分會在稍後補算，現在仍是不完整結果",
+    "它只能包含 prior state 的值；等呼叫結束成為 posterior，這個值就不再算 partial state",
+    "它只包含本輪有被呼叫的 service 帳戶；其他 service 帳戶都會從回傳的狀態資料裡省略"
+   ],
+   "answer": 0,
+   "explanation": "§12.2 定義 partial state 的依據是範圍：service accounts δ、staging keys ι、authorizer queues φ 與 privileges χ 都在其中。它可以作為輸入、中間結果或輸出；prime 只標示當下定義中的輸出版本。e′ 仍不是全域 σ′，也不是把沒執行的 service 帳戶全部刪掉。",
+   "optNotes": [
+    "partial 說明狀態範圍，prior／posterior 說明轉移前後的階段。",
+    "partial 不等於計算只完成一半；完整算出的輸出仍可保持這個範圍。",
+    "partial state 同樣能表示 posterior 值；兩個分類維度彼此獨立。",
+    "δ 是 service-account dictionary，不限於本輪被呼叫的 service 集合。"
+   ],
+   "trap": "partial 是範圍，posterior 是階段。"
+  },
+  {
+   "id": "ch12-study-03-round-snapshot",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ*: acc(s) = Δ1(e, t, r, f, s)",
+   "lens": "時機",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "parallel",
+    "state-visibility"
+   ],
+   "stem": "A market service and an oracle service run in the same Δ* round. Can a faster oracle invocation make its new state visible to the market's input snapshot?",
+   "stemZh": "市場 service 與 oracle service 在同一輪 Δ* 執行。oracle 比較早跑完，市場 service 的輸入快照會因此看到 oracle 本輪的新狀態嗎？",
+   "options": [
+    "Yes; sorting the service identifiers makes the smaller identifier's changes visible to the larger identifier in the round",
+    "No; both calls start from the same e, and their accepted changes are merged into the state supplied to a later round",
+    "Yes; whichever call finishes first publishes its state immediately, and later reads by the other call use that state",
+    "No; all rounds in the block must retain the original e, and accepted changes become readable only in the next block"
+   ],
+   "optionsZh": [
+    "會；service ID 排序會讓較小 ID 的變更，在這一輪裡直接成為較大 ID 可讀取的狀態",
+    "不會；兩個呼叫都從同一份 e 出發，採用的變更合併後，才成為後續輪次收到的狀態",
+    "會；先結束的呼叫立即公布狀態，另一個呼叫在稍後讀取時，就會改讀這份新狀態",
+    "不會；整個區塊的所有輪次都固定讀原始 e，採用的變更只能等到下一個區塊才能被讀取"
+   ],
+   "answer": 1,
+   "explanation": "§12.2 對每個 service 都定義 acc(s) = Δ1(e, t, r, f, s)，其中 e 是同一份輸入。執行快慢不參與狀態可見性的規則。Δ* 合併結果得到 e* 後，Δ+ 的下一輪才接收 e*；因此同輪共享輸入快照、不同輪依序交接狀態。service ID 的排序用於確定性收集結果，不是同輪逐服務串行更新。",
+   "optNotes": [
+    "確定性排序不會把各 service 的輸入換成前一個 service 的輸出。",
+    "同輪各呼叫共用輸入 e，合併後的 e* 會被傳給後續輪次。",
+    "按實際完成時間公布狀態會改變語義，公式沒有這個可見性規則。",
+    "Δ+ 會把 e* 帶往同一區塊的下一輪，不必固定等到下一區塊。"
+   ],
+   "trap": "同輪讀同一份 e；下一輪接收合併後的 e*。"
+  },
+  {
+   "id": "ch12-study-04-satisfied-but-queued",
+   "ch": "12",
+   "section": "12.1 History and Queuing",
+   "gpRef": "§12.1 definitions of R!, R^Q and E",
+   "lens": "機制",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "R^Q",
+    "dependencies"
+   ],
+   "stem": "A newly available report declares one prerequisite whose package hash is already in ξ. It has no other dependencies and has not itself been accumulated. Which route does it take?",
+   "stemZh": "一份新 available 的 report 宣告了一個 prerequisite，其 package hash 已在 ξ；沒有其他依賴，而且這份 report 本身尚未累積。它走哪一條路？",
+   "options": [
+    "It enters R! because its dependency is already satisfied; the queue route contains only currently unresolved reports",
+    "It is discarded as already accumulated because a prerequisite hash is in ξ; no queue entry is created for it",
+    "It enters R^Q, where the historical dependency is removed; its remaining dependency set can then be empty",
+    "It enters R^Q with the dependency retained until the next block; ξ cannot discharge dependencies in this block"
+   ],
+   "optionsZh": [
+    "它直接進 R!，因為依賴已滿足；queue 路線只包含目前仍有未解依賴的 reports",
+    "它被當成已累積而整筆丟棄，因為 prerequisite hash 在 ξ 裡，所以不建立 queue 項目",
+    "它走 R^Q 路線，先移除歷史上已滿足的依賴，因此留下的依賴集合可以是空的",
+    "它進 R^Q 但保留依賴到下個區塊；ξ 裡的歷史不能用來解除本區塊的依賴"
+   ],
+   "answer": 2,
+   "explanation": "§12.1 的分組條件看 report 原本是否有 prerequisites 或 segment-root lookup 依賴。原本有依賴就走 R^Q，再由 E 將 ξ 中已滿足的依賴移除。所以 R^Q 裡可以出現剩餘依賴為空的項目；這不會把它重新分類成 R!。若自己的 package hash 在已累積集合裡才會移除整筆項目，不能把 prerequisite hash 當作自己的 hash。",
+   "optNotes": [
+    "R! 的條件是原本沒有依賴，而非目前依賴已全部滿足。",
+    "依賴的 package 已累積，不等於這份 report 自己也已累積。",
+    "分組先看原始依賴，E 再修剪歷史上已滿足的依賴。",
+    "建立 R^Q 時就會使用 ξ 的聯集解除已滿足的依賴。"
+   ],
+   "trap": "原本有依賴與現在仍有依賴，是兩件事。"
+  },
+  {
+   "id": "ch12-study-05-q-is-planning",
+   "ch": "12",
+   "section": "12.1 History and Queuing",
+   "gpRef": "§12.1 accumulation priority queue Q",
+   "lens": "演算法",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "Q",
+    "dependencies"
+   ],
+   "stem": "Q receives reports [p, q, r]: p has no remaining dependency, q depends only on p, and r depends on unavailable package x. What does Q do?",
+   "stemZh": "Q 收到依序排列的 reports [p, q, r]：p 沒有剩餘依賴，q 只依賴 p，r 依賴目前缺席的 package x。Q 會做什麼？",
+   "options": [
+    "It returns [p, q] as an ordered candidate sequence, without executing either report or recording either in ξ",
+    "It returns [p, q, r] as an ordered candidate sequence, leaving all dependency checks to the gas scheduler",
+    "It executes p, records p in ξ, then executes q; r remains waiting for its unavailable dependency x",
+    "It returns only [p] as a candidate sequence, because q must wait for a later block to see p in history"
+   ],
+   "optionsZh": [
+    "它回傳有順序的候選 [p, q]，但不執行這兩份 report，也不把它們寫進 ξ",
+    "它回傳有順序的候選 [p, q, r]，把所有依賴檢查都留給後面的 gas 排程器處理",
+    "它先執行 p 並把 p 寫入 ξ，再執行 q；r 則繼續等待目前缺席的依賴 x",
+    "它只回傳候選 [p]，因為 q 必須等到後面的區塊，在歷史裡看到 p 才能排入"
+   ],
+   "answer": 0,
+   "explanation": "§12.1 的 Q 先取剩餘依賴為空的 p，再用 p 的 package hash 修剪工作清單，使 q 也可接在後面；缺少 x 的 r 仍不能加入。這是建立候選順序時的依賴推演，沒有執行 service，也沒有修改持久化的 ξ。之後 Δ+ 還要決定實際能處理多長的 report 前綴。",
+   "optNotes": [
+    "Q 可以排列同一候選序列內的前後依賴，但不做實際 accumulation。",
+    "r 的依賴尚無法解除；gas 排程不能代替這一層依賴檢查。",
+    "執行與歷史整合在後續步驟；Q 只計算候選序列。",
+    "Q 的遞迴會以已選候選的 hash 解除後續依賴，不強制隔一個區塊。"
+   ],
+   "trap": "Q 裡的『選出』不等於鏈上的『已累積』。"
+  },
+  {
+   "id": "ch12-study-06-q-label-and-function",
+   "ch": "12",
+   "section": "12.1 History and Queuing",
+   "gpRef": "§12.1 R^Q, Q and R*",
+   "lens": "對比",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "notation",
+    "R^Q"
+   ],
+   "stem": "While reading R* = R! ⌢ Q(q), how should you distinguish the separately defined R^Q from the call Q(q)?",
+   "stemZh": "讀到 R* = R! ⌢ Q(q) 時，先前定義的 R^Q 與這裡的 Q(q) 應如何區分？",
+   "options": [
+    "R^Q is the report sequence returned by Q; Q(q) names the persistent history; ⌢ joins two sets of package hashes",
+    "R^Q holds new queued report/dependency pairs; Q(q) returns an ordered report sequence; ⌢ joins two sequences",
+    "R^Q holds the new reports with no original dependencies; Q(q) groups reports by service; ⌢ joins two sequences",
+    "R^Q holds reports already executed this block; Q(q) returns their actual gas usage; ⌢ merges their state changes"
+   ],
+   "optionsZh": [
+    "R^Q 是 Q 已經回傳的 report 序列；Q(q) 是持久化歷史的名稱；⌢ 聯集兩組 package hashes",
+    "R^Q 存新 queue 的 report／依賴配對；Q(q) 回傳排好序的 reports；⌢ 串接兩份序列",
+    "R^Q 存原本完全沒依賴的新 reports；Q(q) 把 reports 按 service 分組；⌢ 串接兩份序列",
+    "R^Q 存本區塊已執行完的 reports；Q(q) 回傳它們實際使用的 gas；⌢ 合併它們的狀態變更"
+   ],
+   "answer": 1,
+   "explanation": "在 §12.1，R^Q 的上標是 queue 路線的分類標記，這份資料包含 report 與剩餘依賴的配對。Q 則是函式，從整理後的 queue q 排出 report 序列；q 會綜合舊 queue 與新的 R^Q。最後用串接符號 ⌢ 把 R! 與 Q(q) 接成 R*。純文字的 ^ 用來標上標位置，與串接符號不同。",
+   "optNotes": [
+    "R^Q 是 Q 的資料來源之一；持久化累積歷史是 ξ，不是 Q(q)。",
+    "資料類別、排程函式與序列串接操作，在這個選項中各自對齊。",
+    "原本無依賴的是 R!；按 service 分組則是 Δ* 的責任。",
+    "這些都仍在候選整理階段，尚未有本輪執行結果或實際 gas。"
+   ],
+   "trap": "R^Q 是資料，Q(…) 是函式，⌢ 才是 concat。"
+  },
+  {
+   "id": "ch12-study-07-prefix-not-cheapest",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ+ longest admissible prefix",
+   "lens": "演算法",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "gas",
+    "prefix"
+   ],
+   "stem": "The next report in R* exceeds the remaining gas reservation budget, but a later report would fit. There are no incoming transfers or free allowances. What can Δ+ select?",
+   "stemZh": "R* 下一份 report 的 gas 預留額超過剩餘預算，但後面有一份較便宜的 report 放得下。沒有收到的 transfers，也沒有 free allowances。Δ+ 可以怎麼選？",
+   "options": [
+    "It sorts the remaining reports by their gas limits before selecting a prefix, so cheaper reports always enter the block first",
+    "It selects no further reports, because admissible selections are prefixes of the remaining sequence, not arbitrary subsets",
+    "It starts the expensive report with the remaining budget, because actual usage might turn out below its declared reservation",
+    "It skips the expensive report and selects the later one, because dependency ordering no longer matters after R* is built"
+   ],
+   "optionsZh": [
+    "它先按 gas limit 將剩餘 reports 重新排序，再選前綴，因此便宜 reports 一定優先進入區塊",
+    "它不再選取 reports，因為允許的選擇是剩餘序列的前綴，不能任意挑後面的子集合",
+    "它用剩餘預算先開始昂貴 report，因為實際消耗可能小於宣告的預留額，應該先試跑",
+    "它跳過昂貴 report、選後面便宜的，因為 R* 建好之後，原本的依賴排序就不再重要"
+   ],
+   "answer": 1,
+   "explanation": "§12.2 的 Δ+ 取符合預算的最長 report 前綴，而不是做任意子集合的裝箱。下一份的預留額已放不下時，任何包含更後方 report 的前綴也放不下；本題又沒有 transfers 或 free allowances 可處理，所以呼叫停止。實際 gas 只能在執行後得知，不能用可能較省的猜測來放寬本輪准入。",
+   "optNotes": [
+    "Δ+ 沒有按 gas limit 重新排序 reports 的步驟。",
+    "前綴規則保留候選順序；第一份放不下就不能跳到後方挑選。",
+    "本輪先按 gas limits 判定可納入範圍，不能先超額試跑再看消耗。",
+    "R* 的順序仍是 Δ+ 選前綴的依據，並未在建立後失去作用。"
+   ],
+   "trap": "選最長可容納前綴，不是選最便宜子集合。"
+  },
+  {
+   "id": "ch12-study-08-unused-gas-next-round",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ+ gas accounting",
+   "lens": "演算法",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "gas",
+    "rounds"
+   ],
+   "stem": "Ignore transfers and free allowances. With budget 100, two reports each reserve 60. The first round executes only the first and actually uses 20. What happens next?",
+   "stemZh": "忽略 transfers 與 free allowances。預算 100，兩份 reports 各預留 60。第一輪只選了第一份，實際用了 20。接下來怎麼做？",
+   "options": [
+    "Δ+ can select the second report in another round with budget 80, using the partial state merged by the first round",
+    "Δ+ switches to a separate per-report fallback with budget 80, bypassing the service-grouping function for all remaining work",
+    "Δ+ can select the second report with budget 80, but must use the original block input state rather than the first round's result",
+    "Δ+ cannot select the second report because the first reservation leaves only 40, even though execution used less gas"
+   ],
+   "optionsZh": [
+    "Δ+ 可以在下一輪用剩餘預算 80 選第二份，並使用第一輪合併後的 partial state",
+    "Δ+ 改走另一套逐 report 的 fallback，用預算 80 處理後續工作，並跳過按 service 分組的函式",
+    "Δ+ 可以用預算 80 選第二份，但必須重新使用區塊原始輸入狀態，不能接續第一輪結果",
+    "Δ+ 不能再選第二份，因為第一份的預留額已讓預算只剩 40，實際省下的 gas 不會返還"
+   ],
+   "answer": 0,
+   "explanation": "本題特意省略 transfer gas 與 free allowances，讓兩個時點更清楚：選本輪時看預留上限，下一輪預算則扣實際消耗。因此第一輪後剩餘 80，第二份的 60 就放得下。§12.2 的遞迴也會傳遞 e*，後續仍使用 Δ* 分組；並沒有另切一套最後逐 report fallback。完整公式還要計入新 transfers 的 gas 項，不能直接套用本題的簡化算式。",
+   "optNotes": [
+    "實際消耗決定下一輪餘額，且遞迴使用本輪合併的狀態。",
+    "後續輪次仍呼叫 Δ*，沒有另一套繞過 service 分組的 fallback。",
+    "Δ+ 的遞迴參數含 e*，不會每輪重置成區塊初始狀態。",
+    "預留額用於准入，不是下一輪永久扣除的實際消耗。"
+   ],
+   "trap": "本輪准入看 limit；下一輪接續看 actual usage。"
+  },
+  {
+   "id": "ch12-study-09-one-service-one-round",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ* service set and Δ1",
+   "lens": "機制",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "service",
+    "grouping"
+   ],
+   "stem": "Three reports selected in one Δ* round each contain a digest for the same DEX service. How is that service's work organized?",
+   "stemZh": "同一輪 Δ* 選到三份 reports，每份都有同一個 DEX service 的 digest。這個 service 的工作如何安排？",
+   "options": [
+    "One Δ1 call collects every digest in all three reports, including those belonging to other services, under the DEX identifier",
+    "One Δ1 call collects that service's matching digests across all three reports and prepares their combined input and gas",
+    "Three Δ1 calls each collect one report's digest, because report boundaries must also be service invocation boundaries",
+    "Only the first matching digest is handled this round; the other two require separate later rounds despite already being selected"
+   ],
+   "optionsZh": [
+    "一個 Δ1 呼叫收集三份 reports 的所有 digests，連其他 services 的也一起放在 DEX 的 ID 下處理",
+    "一個 Δ1 呼叫收集三份 reports 中屬於此 service 的 digests，一起準備輸入與 gas",
+    "三個 Δ1 呼叫各收一份 report 的 digest，因為 report 的邊界也必須是 service 呼叫的邊界",
+    "本輪只處理第一個符合的 digest；另外兩個即使已被選入，也必須各自等待後續輪次才能處理"
+   ],
+   "answer": 1,
+   "explanation": "§12.2 先把相關 service IDs 放進集合，再對每個 service 定義一次 acc(s)。Δ1 會掃描本輪選定 reports，收集全部屬於 s 的 digests，所以 report 邊界不等於 service 呼叫邊界。聚合保留服務歸屬，也保留 report 與其內 digest 的原始順序；其他 service 的資料會交給各自的呼叫。",
+   "optNotes": [
+    "Δ1 會按 digest 的 service ID 篩選，不會把其他服務的工作混進來。",
+    "同一輪以 service 為分組單位，跨 report 的相同 service 輸入會聚合。",
+    "本輪不是每份 report 各啟動一次相同 service。",
+    "本輪已選 reports 裡符合 service 的 digests 都會被整理成這次輸入。"
+   ],
+   "trap": "report 是排程單位；service 是本輪執行分組單位。"
+  },
+  {
+   "id": "ch12-study-10-union-inputs",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 operand tuple U, deferred transfer X and Δ1",
+   "lens": "對比",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "operand-tuple",
+    "union-type"
+   ],
+   "stem": "Δ1 passes i^T ⌢ i^U as one input sequence. Transfers and operand tuples have different fields. How is this type-correct?",
+   "stemZh": "Δ1 把 i^T ⌢ i^U 當作一份輸入序列，但 transfer 與 operand tuple 的欄位不同。型別上如何理解？",
+   "options": [
+    "The fields of a transfer are paired with fields of one operand tuple; concatenation produces one larger record per pair",
+    "The input is a set of untyped blobs after concatenation; both the element type and the ordering may be discarded by the service",
+    "Each transfer is converted into an operand tuple first; concatenation therefore carries only ordinary work-report result entries",
+    "Each element belongs to the union of the two types; concatenation preserves transfer entries before operand-tuple entries"
+   ],
+   "optionsZh": [
+    "transfer 的欄位與一個 operand tuple 的欄位配成一組；串接後每一組都成為一筆更大的資料紀錄",
+    "串接後的輸入是不帶型別的 blob 集合；元素種類與原始順序都可以由 service 直接丟棄，不影響語義",
+    "每筆 transfer 先轉成 operand tuple；因此串接後只有一般 work-report 結果項目，沒有不同種類的元素",
+    "每個元素屬於兩種型別的聯集；串接保留 transfer 項目在前、operand tuple 項目在後的順序"
+   ],
+   "answer": 3,
+   "explanation": "§12.2 在定義 operand tuple 與 deferred transfer 後，指出兩者的聯集構成 accumulation 輸入的元素型別。可以用 List<Transfer | OperandTuple> 理解：清單可容納兩類元素，但各元素仍保有自己的資料結構。⌢ 串接的是清單，不是合併欄位，也不是把轉帳偽裝成 work-report 的 digest。",
+   "optNotes": [
+    "這是清單串接，不是將兩種結構逐項配對或合成一筆紀錄。",
+    "輸入是有型別區別的序列；集合去序與抹除種類不是此式的語義。",
+    "transfer 保持自己的資料種類，不需要先轉成 work-report 的 operand。",
+    "聯集型別讓同一序列容納兩類元素，concat 同時保留順序。"
+   ],
+   "trap": "concat 接清單，union 說明每個元素可以是哪種型別。"
+  },
+  {
+   "id": "ch12-study-11-operand-order",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ1 definitions of i^T and i^U",
+   "lens": "演算法",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "operand-tuple",
+    "ordering"
+   ],
+   "stem": "For service s, report r1 has digests [s1, other, s2] and later report r2 has [s3]. One incoming transfer t targets s. What is the assembled input order?",
+   "stemZh": "對 service s，先到的 report r1 含 digests [s1, 其他服務, s2]，後面的 r2 含 [s3]；另外有一筆寄給 s 的 transfer t。組好的輸入順序是什麼？",
+   "options": [
+    "[t, operand(s1), operand(s2), operand(s3)], retaining report order and each report's matching digest order",
+    "[operand(s1), operand(s2), operand(s3), t], retaining digest order but placing incoming transfers after report work",
+    "[t, operand(s1), operand(s3), operand(s2)], interleaving the reports so each report contributes one digest in turn",
+    "[t, operand(s3), operand(s2), operand(s1)], reversing the digest sequence because the newest report takes precedence"
+   ],
+   "optionsZh": [
+    "[t, operand(s1), operand(s2), operand(s3)]，保留 report 順序與各 report 內符合的 digest 順序",
+    "[operand(s1), operand(s2), operand(s3), t]，保留 digest 順序，但把收到的 transfers 放在 report 工作後面",
+    "[t, operand(s1), operand(s3), operand(s2)]，輪流從每份 report 各取一個 digest，交錯組成最後的輸入序列",
+    "[t, operand(s3), operand(s2), operand(s1)]，因為較新的 report 優先，所以將原本的 digest 序列完全反轉"
+   ],
+   "answer": 0,
+   "explanation": "§12.2 的 i^U 使用兩層有序遍歷：先依本輪 report 序列，再依每份 report 的 digests，並篩選 service ID 等於 s 的項目。本題的其他服務會被跳過，但符合者的相對順序不變。最後組合 i^T ⌢ i^U，所以收到的 transfer t 在前，接著才是 s1、s2、s3 各自的 operand tuple。",
+   "optNotes": [
+    "先 transfers，再按 reports 與 digests 的既有順序放入 matching operands。",
+    "串接式是 i^T ⌢ i^U，收到的 transfers 位於 report operands 之前。",
+    "原文是巢狀有序遍歷，不會在不同 reports 之間輪流交錯取項。",
+    "沒有新 report 優先或反轉 digest 順序的規則。"
+   ],
+   "trap": "篩掉其他 service，不打亂留下的相對順序。"
+  },
+  {
+   "id": "ch12-study-12-transfer-parties",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 deferred transfer definition and Δ+ recursion",
+   "lens": "對比",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "deferred-transfer",
+    "service"
+   ],
+   "stem": "A prediction-market service issues a deferred transfer to pay an oracle service. At the §12 protocol level, what identifies the sender and receiver?",
+   "stemZh": "預測市場 service 產生一筆 deferred transfer，付費給 oracle service。在第 12 章的協定層，寄件人與收件人是由什麼識別？",
+   "options": [
+    "Work-package hashes; the transfer settles a dependency between packages without identifying either participating service",
+    "User wallet addresses; the transfer is a signed user transaction that must create a fresh work-package before accumulation",
+    "Core identifiers; the transfer pays the receiving core and changes which guarantors are assigned to execute the oracle",
+    "Service identifiers; the transfer carries an amount, memo and gas allowance into the recipient's later accumulation round"
+   ],
+   "optionsZh": [
+    "work-package hashes；它只結算兩個 packages 之間的依賴，不必識別實際參與的兩個 services",
+    "使用者錢包地址；它是一筆簽名交易，必須先另建新的 work-package，之後才能進入 accumulation",
+    "core IDs；它把費用付給接收的 core，並改變哪些 guarantors 被指派去執行 oracle 的工作",
+    "service IDs；轉帳帶著金額、memo 與 gas 額度，進入接收 service 後續輪次的 accumulation"
+   ],
+   "answer": 3,
+   "explanation": "§12.2 的 deferred transfer 由 source service、destination service、amount、memo 與 gas 組成。市場與 oracle 是這個例子裡的服務角色；用戶在 dApp 裡的業務操作則由 service 自己定義。這筆 transfer 由 accumulation 產生，交給後續輪次直接當作輸入，不必另外跑一份 work-package／work-report 流程，也不保證要隔到下一區塊。",
+   "optNotes": [
+    "package hashes 用於依賴等識別，不能取代 transfer 的來源與目的 service。",
+    "此資料型別沒有使用者簽名與錢包地址，也不要求另建 work-package。",
+    "core 負責分配計算資源；它不是這筆服務間轉帳的收付款帳戶。",
+    "source 與 destination 的型別都是 service ID，後續輪次處理接收輸入。"
+   ],
+   "trap": "服務間的後續轉帳輸入，不等於使用者新提交的交易格式。"
+  },
+  {
+   "id": "ch12-study-13-roles-not-distinct-accounts",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 partial-state privilege fields",
+   "lens": "機制",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "privileges"
+   ],
+   "stem": "The privilege state names the same service as both manager and delegator. Does the §12 partial-state definition itself forbid this?",
+   "stemZh": "privileges 裡的 manager 與 delegator 指向同一個 service。第 12 章的 partial-state 定義本身禁止這件事嗎？",
+   "options": [
+    "Yes; the five privilege categories each require one unique service, and any repeated identifier makes the partial state invalid",
+    "No; manager and delegator are always aliases for one mandatory account, so different identifiers would instead be invalid",
+    "No; these are role fields containing service identifiers, and the definition does not require the role holders to be distinct",
+    "Yes; a service may hold several assigner slots but may never share a manager or delegator role with another privilege field"
+   ],
+   "optionsZh": [
+    "禁止；五種特權類別各自需要一個獨立 service，只要 ID 重複就會使 partial state 無效",
+    "不禁止；因為 manager 與 delegator 必定是同一個固定帳戶的別名，兩者 ID 不同反而使狀態無效",
+    "不禁止；這些是存放 service ID 的角色欄位，同一個 service 可以兼任，定義沒有要求持有者必須互不相同",
+    "禁止；service 可以同時持有多個 assigner 位置，但 manager 或 delegator 不能與其他特權欄位共用 ID"
+   ],
+   "answer": 2,
+   "explanation": "§12.2 的 partial state 將 manager、delegator、registrar 表示為 service IDs，assigners 是逐 core 的 service ID 序列，always-accumulate 則是 service→gas 的 dictionary。這些欄位描述職責與額度，並沒有加上角色 ID 必須互異的限制。因此不能把特權類別的數量，直接解讀成必須建立相同數量且彼此獨立的帳戶。",
+   "optNotes": [
+    "特權類別不等於五個唯一帳戶，always-accumulate 本身也不是單一角色 ID。",
+    "允許共用不等於強制共用；manager 與 delegator 也可以是不同 services。",
+    "角色欄位可以指向相同 ID；是否共用由狀態配置決定。",
+    "partial-state 定義沒有加入這種只限制部分角色共用的條件。"
+   ],
+   "trap": "角色數量，不等於必須有多少個不同帳戶。"
+  },
+  {
+   "id": "ch12-study-14-free-gas-not-refilled",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ+ recursive free-accumulation parameter; §12.3 initial call",
+   "lens": "時機",
+   "difficulty": 3,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "always-accumulate",
+    "gas"
+   ],
+   "stem": "During the first round, the manager adds service s to the always-accumulate dictionary. s has no report digest or incoming transfer in the following round. Does the edit alone schedule s then?",
+   "stemZh": "第一輪中，manager 把 service s 加進 always-accumulate dictionary。下一輪 s 沒有 report digest，也沒有收到 transfer。光靠這次修改，下一輪就會排入 s 嗎？",
+   "options": [
+    "No; later Δ+ calls receive an empty free-accumulation map, so the changed privilege dictionary alone does not grant another round's allowance",
+    "Yes; every Δ+ call rereads the latest privilege dictionary, so a new always-accumulate entry immediately supplies free gas in the following round",
+    "No; the privilege edit must be rejected because the always-accumulate dictionary cannot be changed during the accumulation phase of a block",
+    "Yes; Δ* automatically schedules all service identifiers mentioned anywhere in partial state, even if reports, transfers and the free map omit them"
+   ],
+   "optionsZh": [
+    "不會；後續 Δ+ 呼叫的 free-accumulation 映射是空的，改過的特權 dictionary 本身不會再發一次額度",
+    "會；每次 Δ+ 都重讀最新的特權 dictionary，所以新的 always-accumulate 項目在下一輪立即得到 free gas",
+    "不會；因為 always-accumulate dictionary 在 accumulation 階段禁止修改，所以這次特權變更必須被拒絕",
+    "會；Δ* 會自動執行 partial state 裡任何地方提到的 service，即使 reports、transfers 與 free map 都沒列它"
+   ],
+   "answer": 0,
+   "explanation": "§12.3 的初次呼叫把輸入狀態的 always-accumulate dictionary 作為 f 傳入；§12.2 的每次遞迴則明確把 f 換成空映射。e* 會繼續傳遞，但不代表 f 也從新的 privileges 重新取得。本題 s 又沒有 digest 或 transfer，所以不能只因本輪剛加入 dictionary 就在下一輪獲得新的 free allowance。",
+   "optNotes": [
+    "特權狀態可更新，但本區塊後續輪次的 f 仍由公式固定為空映射。",
+    "遞迴沒有每輪重讀 χ 的 always-accumulate 額度；那會重複分配預算。",
+    "允許改 dictionary；未立即得到下一輪額度的原因是 f 的傳遞規則。",
+    "相關 service 集合取 digest targets、transfer destinations 與 keys(f)，不是所有狀態 ID。"
+   ],
+   "trap": "e* 會更新，free-accumulation 參數 f 不會每輪補發。"
+  },
+  {
+   "id": "ch12-study-15-privilege-change-stage",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 Δ1 results and Δ* privilege integration",
+   "lens": "時機",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "privileges",
+    "flow"
+   ],
+   "stem": "Where do permitted changes to privilege roles enter the §12 accumulation flow?",
+   "stemZh": "被允許的特權角色變更，是在第 12 章 flow 的哪一段納入狀態？",
+   "options": [
+    "The ready queue replaces role holders when it expires old reports; service execution and partial-state merging cannot alter privileges",
+    "Services return changes through their single-service execution results; Δ* selects and merges the relevant privilege fields into partial state",
+    "Q derives new role holders from the dependency graph before gas scheduling; Δ* only receives the already-final privilege assignments",
+    "Preimage integration assigns role holders after all rounds; the manager's execution result only provides an advisory output hash"
+   ],
+   "optionsZh": [
+    "ready queue 在舊 reports 到期時替換角色；service 執行與 partial-state 合併都不能改動 privileges",
+    "services 的單一服務執行結果帶回變更；Δ* 依規則選取並合併相關特權欄位到 partial state",
+    "Q 在 gas 排程前依依賴圖推導新角色；Δ* 只會收到已經定案的特權指派，不參與合併",
+    "所有輪次結束後，由 preimage 整合指派角色；manager 的執行結果只提供一個參考用的 output hash"
+   ],
+   "answer": 1,
+   "explanation": "privileges 本來就是 §12.2 partial state 的一部分。各 service 的單一服務執行結果可以包含允許的變更，Δ* 再從指定角色的結果中挑選相關欄位並按合併規則形成新狀態；Δ+ 將這份狀態帶往下一輪。Q 管依賴、ready queue 管等待工作、preimage integration 管資料提供，三者都不是特權角色指派的替代階段。",
+   "optNotes": [
+    "queue 到期與角色變更是不同規則，不能互相替代。",
+    "變更來自服務執行結果，並在 Δ* 的狀態合併階段納入。",
+    "Q 不執行 service，也不會依 report 依賴關係指派特權角色。",
+    "preimage integration 寫入被請求的資料，不負責決定角色持有者。"
+   ],
+   "trap": "改特權也走『service 執行 → Δ* 合併 partial state』。"
+  },
+  {
+   "id": "ch12-study-16-handoff-value-comparison",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 privilege merge R(o, a, b)",
+   "lens": "演算法",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "privileges",
+    "handoff"
+   ],
+   "stem": "An assigner role initially names service 10. The manager's returned field still names 10, while service 10's result hands the role to 20. Which merged identifier is selected?",
+   "stemZh": "某個 assigner 角色原本是 service 10。manager 回傳的欄位仍是 10，而 service 10 的結果把角色交給 20。合併後採用哪個 ID？",
+   "options": [
+    "Neither identifier, because two service results contain the same privilege field and that always invalidates the block",
+    "20, because the manager's returned value equals the original value, so the role holder's handoff is selected",
+    "10, because any value returned by the manager takes precedence, even when it is unchanged from the original value",
+    "10, because only the manager can change an assigner identifier and the current holder cannot hand off its role"
+   ],
+   "optionsZh": [
+    "兩者都不採用，因為兩個 service 的結果包含同一個特權欄位，就一定使整個區塊無效",
+    "採用 20，因為 manager 回傳值等於原始值，所以選擇原角色持有者交接後的 ID",
+    "採用 10，因為只要是 manager 回傳的欄位就一定優先，即使它與原始值完全相同",
+    "採用 10，因為只有 manager 可以修改 assigner ID，原持有者沒有交接自己的角色的能力"
+   ],
+   "answer": 1,
+   "explanation": "§12.2 的 R(o, a, b) 以欄位的值比較是否變更：a = o 時選 b，否則選 a。這裡原始 o = 10，manager 結果 a = 10，原持有者的結果 b = 20，因此選 20。規則不是偵測 manager 是否曾嘗試寫入，而是比較回傳欄位是否真的不同；也不是一律由 manager 覆蓋所有交接。",
+   "optNotes": [
+    "特權欄位的這種雙來源合併有明確規則，不是自動衝突無效。",
+    "a 與 o 相等，符合 R 選取 b 的分支，因此採用交接值 20。",
+    "manager 的值有變更才優先，未變更時會採原角色持有者的結果。",
+    "合併規則明確保留原角色持有者自行交接的路徑。"
+   ],
+   "trap": "比較回傳值是否改變，不是 manager 一律覆蓋。"
+  },
+  {
+   "id": "ch12-study-17-state-vs-output-commitment",
+   "ch": "12",
+   "section": "12.2 Execution; 12.3 Final State Integration",
+   "gpRef": "§12.2 Δ* outputs e*, b*; §12.3 θ′",
+   "lens": "對比",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "outputs",
+    "partial-state"
+   ],
+   "stem": "A service's accepted accumulation result changes its storage but has no accumulation-output commitment. How can the round's e* and b* reflect this?",
+   "stemZh": "某 service 被採用的 accumulation 結果改了 storage，卻沒有提供 accumulation-output commitment。這一輪的 e* 與 b* 如何反映？",
+   "options": [
+    "e* discards the storage change because every accepted state update must have a matching service-and-hash pair in b*",
+    "e* includes the accepted state change, while b* has no output pair for this invocation; the two outputs serve different purposes",
+    "b* automatically contains a newly computed global state root, because any service storage change is itself an output commitment",
+    "b* automatically contains the service's entire storage map, while e* records only the hash of that map after the update"
+   ],
+   "optionsZh": [
+    "e* 必須丟掉這次 storage 變更，因為每個被採用的狀態更新，都要在 b* 有對應的 service／hash 配對",
+    "e* 包含被採用的帳戶與 storage 變更，而 b* 沒有這次呼叫的 service／hash 配對；這兩份輸出用途不同",
+    "b* 自動加入新計算的全域 state root，因為任何 service storage 變更，本身就等於 output commitment",
+    "b* 自動包含這個 service 的整份 storage map，而 e* 只記錄更新之後這份 map 的 hash"
+   ],
+   "answer": 1,
+   "explanation": "§12.2 的 Δ* 同時回傳更新後的 partial state 與 service-indexed output commitments。e* 的 service-account 部分承接採用的帳戶變更；b* 則只蒐集非空 output 的 (service, hash) 配對，後續形成 θ′。題目已指定沒有 output commitment，因此這次呼叫可以改變 e*，卻不為 b* 增加一筆。兩者不能當作完整狀態與其自動 hash 的固定配對。",
+   "optNotes": [
+    "§12 沒有要求每筆可採用狀態變更都必須提供 output hash。",
+    "狀態變更與可選的 output commitment 是分別收集的結果。",
+    "b* 收集服務提供的 output commitments，不會自動生成全域 state root。",
+    "e* 包含 partial state，b* 才是 service／hash 配對，並不存 storage map。"
+   ],
+   "trap": "e* 是狀態；b* 是服務輸出的 hash 配對。"
+  },
+  {
+   "id": "ch12-study-18-history-selected-prefix",
+   "ch": "12",
+   "section": "12.3 Final State Integration",
+   "gpRef": "§12.3 ξ′ last entry; §12.1 P",
+   "lens": "時機",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "history",
+    "R*"
+   ],
+   "stem": "R* is [p, q, r], and Δ+ returns n = 2 for this block. p came from an old queue entry. What is added to the newest entry of ξ′?",
+   "stemZh": "R* 是 [p, q, r]，本區塊 Δ+ 回傳 n = 2；其中 p 原本是舊 queue 的項目。ξ′ 最新一格加入什麼？",
+   "options": [
+    "The hashes of the report objects p and q themselves, rather than the package hashes recorded inside those reports",
+    "The work-package hashes corresponding to p and q, including the report selected from the old queue",
+    "Only the work-package hash corresponding to q, because a report from the old queue cannot enter this block's history",
+    "The work-package hashes corresponding to p, q and r, because all three were admitted to the candidate sequence"
+   ],
+   "optionsZh": [
+    "p 與 q 這兩個 report 物件本身的 hashes，而不是各 report 內記載的 work-package hashes",
+    "p 與 q 對應的 work-package hashes，其中也包括從舊 queue 選來的那份 report",
+    "只加入 q 對應的 work-package hash，因為舊 queue 來的 report 不能寫進本區塊的歷史",
+    "p、q、r 對應的 work-package hashes，因為三份都已進候選序列，所以都算本區塊已累積"
+   ],
+   "answer": 1,
+   "explanation": "§12.3 以 ξ′ 最新一格 = P(R* 的前 n 份) 更新歷史。n = 2 表示本區塊實際累積的 report 前綴是 p、q，無論它們是新 available 還是從舊 queue 選出。§12.1 的 P 擷取的是 report 內對應的 work-package hash；r 雖在候選序列中，但未落入已執行前綴，因此不能宣告為已累積。",
+   "optNotes": [
+    "P 擷取 package hash，不能改用整個 report 物件的 hash。",
+    "取實際前綴的 package hashes，來源是否舊 queue 不影響登記。",
+    "歷史記錄本區塊累積的工作，不限於本區塊新 available 的工作。",
+    "候選序列不保證全部執行；r 在本題的實際前綴之外。"
+   ],
+   "trap": "歷史記實際前綴的 package hashes，不記所有候選。"
+  },
+  {
+   "id": "ch12-study-19-slot-gap-history-queue",
+   "ch": "12",
+   "section": "12.3 Final State Integration",
+   "gpRef": "§12.3 history and ready-queue updates",
+   "lens": "時機",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "history",
+    "ready-queue",
+    "timeslot"
+   ],
+   "stem": "A new block skips several timeslots relative to its parent. Do ξ and ω advance in exactly the same way?",
+   "stemZh": "新區塊的 timeslot 與父區塊之間跳過了幾個 slots。ξ 與 ω 的更新方式完全一樣嗎？",
+   "options": [
+    "No; ξ shifts by one entry for the block transition, while ω uses the current slot index and clears the skipped-slot positions",
+    "Yes; both shift once for every skipped slot and insert an empty entry for each slot that did not contain a block",
+    "No; ξ keeps all entries until the next epoch, while ω is completely emptied whenever a block follows a timeslot gap",
+    "Yes; both shift by one entry for the block transition and keep all skipped-slot positions untouched until an epoch boundary"
+   ],
+   "optionsZh": [
+    "不一樣；ξ 在這次區塊轉移左移一格，ω 則使用當前 slot 索引，並清空跳過 slots 對應的位置",
+    "一樣；兩者都會依跳過的 slot 數移動，對每個沒有區塊的 slot 各插入一個空項目",
+    "不一樣；ξ 會原封不動保留到下個 epoch，ω 則只要遇到任何 slot gap，就會整份清空",
+    "一樣；兩者都只隨區塊轉移移動一格，所有跳過 slots 對應的位置都保留到 epoch 邊界才處理"
+   ],
+   "answer": 0,
+   "explanation": "§12.3 對 ξ 的式子是舊格 i+1 移到新格 i，最後一格放本區塊累積的 package hashes，因此每次區塊轉移移一格。ω 則以當前 timeslot 對 epoch 長度取模定位，對跳過 slots 的位置清空，其他存續位置再修剪已滿足的依賴。兩者雖有相同長度常數，索引與老化方式仍不同。",
+   "optNotes": [
+    "ξ 的區塊轉移更新與 ω 的 slot 索引更新，在公式中分別定義。",
+    "ξ 沒有因每個缺席 slot 額外插入空歷史格的步驟。",
+    "ξ 每個區塊更新；ω 也只按規則更新對應位置，不因任意 gap 全部清空。",
+    "ω 會清空跳過 slots 對應的位置，不能一律保留到 epoch 邊界。"
+   ],
+   "trap": "相同的容量，不代表相同的時間索引。"
+  },
+  {
+   "id": "ch12-study-20-gas-only-statistics",
+   "ch": "12",
+   "section": "12.3 Final State Integration",
+   "gpRef": "§12.3 S(s), accumulation statistics and last-accumulation timestamp",
+   "lens": "時機",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "statistics",
+    "always-accumulate"
+   ],
+   "stem": "An existing always-accumulate service receives no work-item or transfer, but its invocation consumes positive gas. Assuming it remains in δ†, is its last-accumulation timestamp updated?",
+   "stemZh": "一個既有 always-accumulate service 沒有收到 work-item 或 transfer，但這次呼叫用了正數 gas。假設它仍存在於 δ†，最後累積時間會更新嗎？",
+   "options": [
+    "Yes; its statistics tuple is (0, 0, positive gas), so it appears in the statistics and its timestamp is set to τ′",
+    "No; the timestamp is updated only when a deferred transfer arrives, because that is the event that activates the account",
+    "Yes; every account remaining in δ† receives the new timestamp, including accounts with no inputs and no execution at all",
+    "No; the timestamp is updated only when the number of accumulated work-items is positive, regardless of gas usage"
+   ],
+   "optionsZh": [
+    "會；它的統計是 (0, 0, 正數 gas)，因此列入統計，最後累積時間會被設成 τ′",
+    "不會；只有收到 deferred transfer 才更新時間，因為轉帳才是啟動這個帳戶的事件",
+    "會；δ† 裡所有還存在的帳戶都會更新時間，包括完全沒有輸入也沒有執行的帳戶",
+    "不會；只有累積的 work-item 數量大於零才更新時間，不論單純執行用了多少 gas"
+   ],
+   "answer": 0,
+   "explanation": "§12.3 的 S(s) 包含 work-item 數、processed transfer 數與實際 gas。只要不是 (0,0,0) 就列入統計。題目的 gas 為正，所以即使前兩項為零，該 service 仍在統計的 keys 裡，δ†→δ‡ 時會更新 last-accumulation record。不能把『有 work-item』誤當成唯一條件，也不能替所有閒置帳戶一律更新時間。",
+   "optNotes": [
+    "非零 gas 使統計三元組非零，符合更新該服務時間戳的條件。",
+    "transfer 並不是唯一觸發來源；always-accumulate 也能有實際執行。",
+    "時間戳只對出現在累積統計的 services 更新，不是所有帳戶。",
+    "統計納入條件看整個三元組，不只看 work-item 數量。"
+   ],
+   "trap": "看統計是否非零，不只看有沒有 report。"
+  },
+  {
+   "id": "ch12-study-21-account-state-stages",
+   "ch": "12",
+   "section": "12.3 Final State Integration; 12.4 Preimage Integration",
+   "gpRef": "§12.3 δ† and δ‡; §12.4 δ′",
+   "lens": "時機",
+   "difficulty": 1,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "notation",
+    "prior/posterior"
+   ],
+   "stem": "Which ordering correctly places δ†, δ‡ and δ′ within the current block's service-account transition?",
+   "stemZh": "在目前區塊的 service-account 轉移中，δ†、δ‡ 與 δ′ 的位置何者正確？",
+   "options": [
+    "δ† is the full prior global state; δ‡ is its hash after accumulation; δ′ is the service-account map reconstructed from that hash",
+    "δ† already includes this block's preimage extrinsic; δ‡ runs accumulation using those new preimages; δ′ updates the final timestamps",
+    "δ† follows report availability; δ‡ executes all deferred transfers as a separate phase; δ′ then runs the service accumulation rounds",
+    "δ† follows the accumulation rounds; δ‡ also has last-accumulation timestamps updated; δ′ also integrates still-useful extrinsic preimages"
+   ],
+   "optionsZh": [
+    "δ† 是完整的 prior global state；δ‡ 是 accumulation 後的全域 hash；δ′ 則是從這個 hash 重建的 service-account map",
+    "δ† 已包含本區塊的 preimage extrinsic；δ‡ 使用這些新 preimages 跑 accumulation；δ′ 最後才補上各服務的時間戳",
+    "δ† 是 reports 變成 available 後的狀態；δ‡ 才獨立執行所有 deferred transfers；δ′ 最後才跑 service accumulation",
+    "δ† 是各輪 accumulation 後的帳戶狀態；δ‡ 再更新最後累積時間；δ′ 再整合 extrinsic 中仍有用的 preimages"
+   ],
+   "answer": 3,
+   "explanation": "§12.3 從全部 Δ+ 輪次完成的 partial state 拆出 δ†，此時本次 accumulation 的轉帳效果已經在輪次中整合。接著依統計更新相關 service 的最後累積時間，得到 δ‡。§12.4 才以 δ‡ 為輸入整合 preimage extrinsic 中仍有用的資料，得到 δ′。這些都是帳戶狀態在同一區塊轉移內的不同階段，不是全域 state、hash 或前幾個區塊。",
+   "optNotes": [
+    "δ 系列是 service-account state，dagger 不把資料轉成全域 state 或 hash。",
+    "本區塊 preimage extrinsic 的最後整合發生在 accumulation 之後。",
+    "deferred transfers 在 accumulation 輪次中處理，δ‡ 這一步是時間戳更新。",
+    "三個記號分別對應輪次完成、時間戳更新與 extrinsic preimage 整合。"
+   ],
+   "trap": "δ† → 補 last-accumulation 時間 → δ‡ → 整合 preimages → δ′。"
+  },
+  {
+   "id": "ch12-study-22-new-request-not-prior",
+   "ch": "12",
+   "section": "12.4 Preimage Integration",
+   "gpRef": "§12.4 preimage extrinsic validity against prior δ",
+   "lens": "時機",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "preimage",
+    "prior/posterior"
+   ],
+   "stem": "A service had no request for blob d in prior δ, but creates one during this block's accumulation. Can that new request alone justify including (service, d) in this block's preimage extrinsic?",
+   "stemZh": "prior δ 裡，某 service 尚未請求 blob d；它在本區塊 accumulation 才建立請求。光靠這個新請求，能讓 (service, d) 合法出現在本區塊的 preimage extrinsic 嗎？",
+   "options": [
+    "No; a preimage must have been requested at least one full epoch earlier, even if the request already existed in prior δ",
+    "Yes; the manager can make all newly requested preimages valid immediately by including the requester in always-accumulate",
+    "No; extrinsic validity checks whether d was requested and not yet provided in prior δ, before this block's accumulation",
+    "Yes; extrinsic validity is checked only after accumulation, so any request appearing in δ‡ is enough for inclusion"
+   ],
+   "optionsZh": [
+    "不能；preimage 的請求至少要早一整個 epoch，即使請求本來已存在於 prior δ 也仍需等待",
+    "可以；manager 把請求者加進 always-accumulate，就能讓這次新請求的 preimages 立即合法",
+    "不能；extrinsic 合法性要檢查 accumulation 前的 prior δ，當時是否已請求且尚未提供 d",
+    "可以；extrinsic 合法性只在 accumulation 後檢查，所以只要請求出現在 δ‡ 就足以被納入"
+   ],
+   "answer": 2,
+   "explanation": "§12.4 對每個 extrinsic 項目呼叫 Y(prior δ, service, data)，要求輸入狀態裡已有尚未滿足的請求。後續整合雖然使用 δ‡，並不會回頭讓原本不合法的 extrinsic 變合法。因此新請求不能替同一區塊的 extrinsic 補上 prior 條件；這與 accumulation 透過另一條路徑提供 preimages 的規則要分開看。",
+   "optNotes": [
+    "此條件沒有要求請求至少早一整個 epoch；關鍵是 prior 已請求且未提供。",
+    "always-accumulate 額度不會繞過 preimage extrinsic 的 prior-state 條件。",
+    "驗證的時間點固定是 prior δ，新建請求不能改寫這個輸入狀態條件。",
+    "δ‡ 是最後整合的輸入，不是 extrinsic 最初合法性檢查所用的狀態。"
+   ],
+   "trap": "整合時存在，不代表驗證所用的 prior 裡已存在。"
+  },
+  {
+   "id": "ch12-study-23-queue-not-all-leftovers",
+   "ch": "12",
+   "section": "12.3 Final State Integration",
+   "gpRef": "§12.1 R! and R^Q; §12.3 ω′ update",
+   "lens": "機制",
+   "difficulty": 2,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "ready-queue",
+    "gas"
+   ],
+   "stem": "A new report had no dependencies, belongs to R!, was not already in ω, and is not accumulated due to the gas limit. Does §12 automatically append it to ω′ as leftover work?",
+   "stemZh": "某個新 report 原本沒有依賴，屬於 R!，也不在舊 ω 裡；這次因 gas 限制沒有累積。第 12 章會自動把它當剩餘工作追加到 ω′ 嗎？",
+   "options": [
+    "No; the new-slot queue entries come from pruned R^Q, while surviving old entries are pruned separately; ω is not a universal leftover queue",
+    "No; any report omitted because of gas is recorded in ξ′ as already processed, which prevents it from needing a queue entry",
+    "Yes; every suffix of R* left by Δ+ is appended to the current slot of ω′, regardless of which branch originally supplied its reports",
+    "Yes; every report in R! is copied into ω′ before gas scheduling, so the unprocessed one necessarily survives as an old queue entry"
+   ],
+   "optionsZh": [
+    "不會；新 slot 的項目來自修剪後的 R^Q，存續舊項目另外修剪；ω 並不是所有剩餘工作的通用 queue",
+    "不會；凡是因 gas 而未處理的 report，都會直接登記到 ξ′ 當成已完成，因此不需要另外建立 queue 項目",
+    "會；Δ+ 留下的整段 R* 後綴都會追加到 ω′ 當前 slot，不論這些 reports 原本是從哪條路線來的",
+    "會；所有 R! 都在 gas 排程前複製到 ω′，所以沒處理到的 report 必然以舊 queue 項目的形式留下"
+   ],
+   "answer": 0,
+   "explanation": "§12.3 的 ω′ 更新式，當前 slot 放的是 E(R^Q, 本區塊已累積 hashes)，其他存續 slots 則對舊 queue 做 E 修剪。公式沒有將 R* 的全部未執行後綴統一追加的動作。本題 report 在 R!、也不在舊 queue，所以不能從『gas 不夠』推導出它一定被寫入 ω′；未執行更不能冒充已累積而寫進 ξ′。",
+   "optNotes": [
+    "更新式依 queue 路線保存項目，並沒有所有 gas leftovers 的共同入口。",
+    "ξ′ 只記實際累積前綴，不能把 gas 不足未處理者標成已完成。",
+    "ω′ 的新項目來源是 R^Q，不是 Δ+ 留下的整段 R* 後綴。",
+    "原本無依賴的 R! 不會在排程前全部複製成持久化 queue 項目。"
+   ],
+   "trap": "ω 留的是 queue 路線工作，不能直接等同所有 gas leftovers。"
+  },
+  {
+   "id": "ch12-study-24-new-service-id-collision",
+   "ch": "12",
+   "section": "12.2 Execution",
+   "gpRef": "§12.2 account-result merging after Δ*",
+   "lens": "機制",
+   "difficulty": 3,
+   "kind": "concept",
+   "tags": [
+    "第12章專練",
+    "ch12-study",
+    "merge",
+    "service-id"
+   ],
+   "stem": "Despite the intended collision avoidance, two different services' accumulation results both introduce a new account with the same service ID. How must the block be treated?",
+   "stemZh": "雖然新 service ID 的選擇會避免碰撞，假設兩個不同 services 的 accumulation 結果仍新增了同一個 ID 的帳戶。這個區塊應如何處理？",
+   "options": [
+    "The block is invalid; the merge cannot silently choose one of the competing newly created accounts",
+    "The account created by the invocation that finishes first wins; physical execution order resolves the collision",
+    "Both accounts are retained under that ID; the receiving service selects which account record it means on its next call",
+    "The account created by the smaller source service ID wins; the other result is silently removed during the merge"
+   ],
+   "optionsZh": [
+    "區塊無效；合併不能默默在這兩個互相衝突的新帳戶之間選一個留下",
+    "由實際先執行完的呼叫所建帳戶獲勝；碰撞用實體執行完成順序來解決",
+    "同一 ID 下保留兩個帳戶；等接收 service 下一次被呼叫時，才自行選擇要使用哪一筆",
+    "由來源 service ID 較小者建立的帳戶獲勝；另一份結果會在合併時被靜默移除"
+   ],
+   "answer": 0,
+   "explanation": "§12.2 在 Δ* 的帳戶變更合併後，明確說不同 services 不能貢獻相同的新增、修改或移除索引；新 ID 雖然會被選成避免碰撞，極低機率的碰撞若發生，區塊仍必須判為 invalid。這與 privilege 欄位具有 manager 優先／持有者交接的專用合併規則不同，不能套用任意覆蓋來解決帳戶 ID 衝突。",
+   "optNotes": [
+    "原文明確指定新 ID 碰撞的後果是區塊無效。",
+    "實體完成順序不能決定共識結果，且原文沒有這種衝突處理。",
+    "service-account dictionary 的同一個 key 不能保留兩個可選帳戶值。",
+    "service ID 排序沒有授權較小來源覆蓋另一個新建帳戶。"
+   ],
+   "trap": "特權欄位有專用合併規則；新帳戶 ID 碰撞則使區塊無效。"
   },
   {
    "id": "d1-rho-three-stages-order",
