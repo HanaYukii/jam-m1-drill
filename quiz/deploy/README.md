@@ -3,7 +3,7 @@
 Interview-prep drill for the **JAM Prize Milestone 1 examination interview**, built for the
 [New-JAMneration](https://github.com/New-JAMneration/JAM-Protocol) team.
 
-- **345 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–13, appendices A–H,
+- **383 multiple-choice questions** over Gray Paper **0.8.0** — chapters 3–14, appendices A–H,
   plus architecture / design-rationale / off-chain-protocol items.
 - **92-entry glossary** of GP 0.8.0 symbols and terms (state components, data structures, PVM,
   cryptography, constants, ecosystem), searchable and cross-linked.
@@ -35,6 +35,11 @@ For focused chapter 12 practice, select **12 Accumulation** and search **第12�
 `ch12-study`). These 24 short, bilingual questions cover notation, report dependencies, gas rounds,
 partial-state timing, deferred transfers and privilege merging. Use practice mode for instant
 per-option feedback, or Q&A mode to rehearse an answer before revealing it.
+
+For chapter-by-chapter notation and function practice, search **符號函式專練** (or
+`notation-functions`) and select a chapter. This adds two bilingual questions to each of the other
+19 chapters/appendices (§3–11, §13–14 and A–H), with six relevant questions from the chapter 12 set
+included in the same filter. The focus is each symbol's role, function inputs/outputs, and state timing.
 
 ## Deploy
 

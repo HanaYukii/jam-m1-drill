@@ -12,7 +12,7 @@ ITEMS = [
         "ch": "12", "section": "12.1 History and Queuing; 12.2 Execution",
         "gpRef": "§12.1 Q; §12.2 Δ+, Δ*, Δ1", "lens": "機制",
         "difficulty": 1, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "flow"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "flow"],
         "stem": "Which division of responsibilities correctly connects dependency ordering to service execution in §12?",
         "stemZh": "從整理依賴到分服務執行，第 12 章各函式的分工何者正確？",
         "options": [
@@ -42,7 +42,7 @@ ITEMS = [
         "ch": "12", "section": "12.2 Execution",
         "gpRef": "§12.2 partial state and Δ+", "lens": "對比",
         "difficulty": 1, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "partial-state", "prior/posterior"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "partial-state", "prior/posterior"],
         "stem": "An accumulation call returns a posterior partial state e′. What does 'partial' tell you about this result?",
         "stemZh": "某次 accumulation 呼叫回傳 posterior partial state e′。這裡的 partial 究竟表示什麼？",
         "options": [
@@ -72,7 +72,7 @@ ITEMS = [
         "ch": "12", "section": "12.2 Execution",
         "gpRef": "§12.2 Δ*: acc(s) = Δ1(e, t, r, f, s)", "lens": "時機",
         "difficulty": 2, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "parallel", "state-visibility"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "parallel", "state-visibility"],
         "stem": "A market service and an oracle service run in the same Δ* round. Can a faster oracle invocation make its new state visible to the market's input snapshot?",
         "stemZh": "市場 service 與 oracle service 在同一輪 Δ* 執行。oracle 比較早跑完，市場 service 的輸入快照會因此看到 oracle 本輪的新狀態嗎？",
         "options": [
@@ -162,7 +162,7 @@ ITEMS = [
         "ch": "12", "section": "12.1 History and Queuing",
         "gpRef": "§12.1 R^Q, Q and R*", "lens": "對比",
         "difficulty": 1, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "notation", "R^Q"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "notation", "R^Q"],
         "stem": "While reading R* = R! ⌢ Q(q), how should you distinguish the separately defined R^Q from the call Q(q)?",
         "stemZh": "讀到 R* = R! ⌢ Q(q) 時，先前定義的 R^Q 與這裡的 Q(q) 應如何區分？",
         "options": [
@@ -282,7 +282,7 @@ ITEMS = [
         "ch": "12", "section": "12.2 Execution",
         "gpRef": "§12.2 operand tuple U, deferred transfer X and Δ1", "lens": "對比",
         "difficulty": 1, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "operand-tuple", "union-type"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "operand-tuple", "union-type"],
         "stem": "Δ1 passes i^T ⌢ i^U as one input sequence. Transfers and operand tuples have different fields. How is this type-correct?",
         "stemZh": "Δ1 把 i^T ⌢ i^U 當作一份輸入序列，但 transfer 與 operand tuple 的欄位不同。型別上如何理解？",
         "options": [
@@ -612,7 +612,7 @@ ITEMS = [
         "ch": "12", "section": "12.3 Final State Integration; 12.4 Preimage Integration",
         "gpRef": "§12.3 δ† and δ‡; §12.4 δ′", "lens": "時機",
         "difficulty": 1, "kind": "concept",
-        "tags": ["第12章專練", "ch12-study", "notation", "prior/posterior"],
+        "tags": ["第12章專練", "ch12-study", "符號函式專練", "notation-functions", "notation", "prior/posterior"],
         "stem": "Which ordering correctly places δ†, δ‡ and δ′ within the current block's service-account transition?",
         "stemZh": "在目前區塊的 service-account 轉移中，δ†、δ‡ 與 δ′ 的位置何者正確？",
         "options": [
