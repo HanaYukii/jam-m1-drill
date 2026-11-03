@@ -1,0 +1,383 @@
+全 JAM 宏觀面試 100 題（群組題目版）
+Gray Paper v0.8.0 · 20 輪，每輪 5 題
+https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex
+
+
+【JAM 宏觀面試｜第 01 輪】JAM 想解決的問題
+§1-2 · The problem JAM solves · Q001-Q005
+
+Q001  一批外部訂單進入 JAM 後，怎麼一路變成鏈上 DEX 的狀態變更？
+How does a batch of external orders become a change to a DEX's on-chain state?
+
+Q002  如果 DEX 和借貸服務各有自己的鏈，跨鏈使用一筆成交結果時會多出什麼信任問題？
+What extra trust question arises when a lending chain uses a trade executed on a separately secured DEX chain?
+
+Q003  同一個 DEX 有十批可獨立驗簽的訂單。哪些工作適合平行，哪些決定必須看到共享帳本？
+A DEX has ten batches of orders whose signatures can be checked independently. Which work can run in parallel, and which decisions need shared state?
+
+Q004  DEX 與預測市場的交易規則不同，JAM 怎麼同時支援兩者？
+How can JAM host both a DEX and a prediction market when their transaction rules differ?
+
+Q005  如果每個驗證者都重跑每一批工作，增加驗證者為什麼很難提升吞吐量？JAM 改變了哪一步？
+Why does adding validators do little for throughput if everyone repeats every workload? What does JAM change?
+
+
+【JAM 宏觀面試｜第 02 輪】從規格讀出狀態轉移
+§3-4 · Reading the state transition · Q006-Q010
+
+Q006  兩個獨立實作收到同一個區塊。要先對齊哪個輸入，才有理由要求它們算出相同的 state root？
+Two independent clients import the same block. What other input must match for them to produce the same state root?
+
+Q007  規格在同一頁寫了 prior、帶 dagger 的值和 prime。實作者要怎麼判斷某次檢查該讀哪個版本？
+How do you tell whether a check should read the prior, dagger-marked or prime version of a value?
+
+Q008  把一串待處理的 reports 改存進無序集合，可能在哪裡改變鏈上結果？
+How could storing an ordered sequence of reports in an unordered set change the chain result?
+
+Q009  兩個開發團隊把區塊驗證步驟排成不同順序，什麼情況下兩者仍可能都正確？
+When can two clients evaluate block-transition components in different orders and both be correct?
+
+Q010  某個區塊沒有使用者訂單。它仍可能讓哪些協定工作往前走？
+What protocol work can a block advance even if it carries no user orders?
+
+
+【JAM 宏觀面試｜第 03 輪】區塊頭能證明什麼
+§5 · What a block header commits to · Q011-Q015
+
+Q011  同步節點同時檢查 parent hash 和 prior state root。它們各自固定了什麼？
+What do the parent hash and prior state root each establish for a syncing node?
+
+Q012  JAM 為什麼把前一個狀態根放進 header？這對出塊流程有什麼好處？
+Why does a JAM header carry the prior state root, and how does that help block production?
+
+Q013  有人只給你 header 和一份 work-report。要怎麼驗證這份 report 確實被該區塊收錄？
+Given a header and a work-report, how can you verify that the block included that report?
+
+Q014  父區塊後跳過好幾個 slot 才出現下一個區塊。節點應怎麼判斷它的時間是否合法？
+A child block arrives after several empty slots. How should a node evaluate its timeslot?
+
+Q015  其他節點如何從 header 得知驗證者換屆、下期出塊票券或新違規者等關鍵變動？
+How does a header communicate epoch changes, winning tickets and newly identified offenders?
+
+
+【JAM 宏觀面試｜第 04 輪】誰有資格出塊
+§6 · Who gets to author blocks · Q016-Q020
+
+Q016  Safrole 已經指定某個 slot 的作者。為什麼之後還要 GRANDPA？
+If Safrole assigns an author to a slot, what work remains for GRANDPA?
+
+Q017  為什麼可以先公布中選票券，又不必提前公開每張票屬於哪個驗證者？
+How can winning tickets be public while the identities of their holders remain hidden in advance?
+
+Q018  換 epoch 時，如果票券競賽未能產生可用的完整排程，鏈靠什麼繼續出塊？
+How can the chain continue if the ticket contest fails to yield a usable schedule for the next epoch?
+
+Q019  一個服務今天提出下期的驗證者名單，為什麼不能立刻用新名單驗今天的區塊？
+Why would a newly proposed validator list be inappropriate for verifying today's blocks?
+
+Q020  分配驗證者任務需要隨機性。不同節點怎麼拿到相同的隨機來源？
+How do nodes obtain a common source of randomness for validator assignments?
+
+
+【JAM 宏觀面試｜第 05 輪】報告怎麼連回歷史
+§7 · How reports refer to history · Q021-Q025
+
+Q021  一份新 report 聲稱它參照某個近期區塊。節點用什麼來核對這個 anchor？
+How does a node check a new report's claim about its recent anchor block?
+
+Q022  後一份工作聲稱「套件 P 產生的 segments root 是 S」。節點為什麼能核對這組對應？
+How can a node verify a claim that package P produced segments root S?
+
+Q023  如果兩個節點現在看到的服務資料已不同，日後重跑舊工作時要讀哪個版本？
+If a service's data has changed, which version should a validator use when reproducing earlier work?
+
+Q024  在 recent history 找到套件 P 的 hash，就能斷定它已被累積嗎？
+Does finding a package hash in recent history prove that the package was accumulated?
+
+Q025  外部系統只想驗證某個服務發布的累積輸出。JAM 如何把這類輸出留成可供證明的歷史？
+How does JAM preserve a provable history of outputs published by services during accumulation?
+
+
+【JAM 宏觀面試｜第 06 輪】誰可以使用 coretime
+§8 · Who may use coretime · Q026-Q030
+
+Q026  團隊今天就想買下週的 coretime，當時還不知道使用者會送哪些訂單。為什麼辦得到？
+How can a team buy next week's coretime before it knows which orders users will submit?
+
+Q027  一份工作聲稱自己有權使用某個 core。誰提供授權證據，誰判斷，成功後會留下什麼？
+Who supplies evidence that a package may use a core, who evaluates it, and what does success produce?
+
+Q028  執行 authorizer 得到成功結果後，為什麼鏈上還要檢查該 core 的 authorizer pool？
+Why check the core's authorizer pool on-chain after the authorizer has approved the package?
+
+Q029  一個合法 authorizer 寫在 pool 裡，怎麼避免同一筆授權一直被重用，又讓長期未用的授權退出？
+How does a pool consume an authorization that was used, while also retiring stale entries?
+
+Q030  某個 core 想改未來接受工作的政策。誰能改排程，這項變動何時進入 pool 計算？
+Who can change a core's future authorization schedule, and when does the pool use it?
+
+
+【JAM 宏觀面試｜第 07 輪】服務帳戶與資料所有權
+§9 · Service accounts and data ownership · Q031-Q035
+
+Q031  DEX 的下一批工作換到另一個 core。原本的訂單簿和帳戶資料存在哪裡？
+A DEX moves its next workload to another core. Where do its order book and account data live?
+
+Q032  服務想永久多存一百萬筆很小的資料，JAM 如何讓狀態空間的占用反映在成本上？
+How does JAM make a service account for the cost of storing a million small entries?
+
+Q033  服務剛升級程式。要重跑一份升級前建立的 work-item，怎麼知道該執行哪份程式碼？
+A service has upgraded. How can a validator identify the code for a work-item created before the upgrade?
+
+Q034  服務想按需取得一份大型文件。從提出 preimage 請求到原文進入帳戶，中間要符合什麼條件？
+How does a service request a large document by hash and later receive the bytes through a block preimage extrinsic?
+
+Q035  DEX 使用者轉了 500 枚應用代幣，跟 JAM 服務帳戶之間轉移 500 單位餘額，各改到哪份帳？
+Which ledger changes for a transfer of 500 DEX tokens versus a transfer of 500 units between JAM services?
+
+
+【JAM 宏觀面試｜第 08 輪】出現爭議時，鏈採信什麼
+§10 · How a dispute becomes chain evidence · Q036-Q040
+
+Q036  一名稽核者認為 report 算錯了。它簽署的 judgment 和可以納入區塊的 verdict 有何差別？
+How does one auditor's signed judgment differ from a verdict that a block can include?
+
+Q037  同一份爭議報告隔天又被提交。保留 good、bad、wonky 這些歷史紀錄有什麼作用？
+Why retain good, bad and wonky report histories when a disputed report might reappear later?
+
+Q038  一份 report 還在某個 core 上等 assurance，此時鏈上出現 bad 或 wonky verdict。排程要怎麼處理？
+A report is still awaiting assurance when a bad or wonky verdict is recorded. What happens to the assignment?
+
+Q039  一個人簽了錯誤的 guarantee，另一個人簽了與裁決相反的 judgment。鏈上如何區分責任？
+How does the chain distinguish guaranteeing an invalid report from issuing a judgment that contradicts the verdict?
+
+Q040  已查到違規驗證者的金鑰。從認定違規到實際處分，JAM 和上層制度各負責什麼？
+After an offending validator is identified, what does JAM record and who can impose economic penalties?
+
+
+【JAM 宏觀面試｜第 09 輪】報告上鏈與資料可用
+§11 · Reporting and data availability · Q041-Q045
+
+Q041  一份 report 有足夠的 guarantor 簽名。區塊作者為什麼還要看它對應的 core 是否空著？
+Why must a block author check that a core is free even when a report has enough guarantor signatures?
+
+Q042  「已有人擔保這份 report」和「它已 available」分別需要什麼證據？
+What evidence distinguishes a guaranteed report from an available report?
+
+Q043  可用性聲明只列出哪些 core 的資料已收到。為何簽名還要綁定 parent hash？
+Why bind an assurance to the parent hash when its bitfield already names the cores?
+
+Q044  Guarantors 簽完後剛好輪替，報告送到區塊作者時該用哪一組指派來驗簽？
+Guarantors rotate just after signing. Which assignment should a block author use to verify their report?
+
+Q045  某個 core 的報告一直收不到足夠的 assurances。協定怎麼讓 core 能繼續接工作？
+How can a core return to service if its pending report never receives enough assurances?
+
+
+【JAM 宏觀面試｜第 10 輪】計算結果何時動到帳本
+§12 · When computation changes the ledger · Q046-Q050
+
+Q046  B 的成交結果依賴 A 的清算，但 B 先變成 available。為什麼不能只按資料到達順序寫入帳本？
+Settlement B depends on A but becomes available first. Why would arrival order be unsafe for the ledger?
+
+Q047  依賴排序已把 A 和 B 都列進候選，但本區塊只處理了 A。哪一個能記進完成歷史？
+Dependency ordering selects both A and B as candidates, but the block processes only A. Which one enters accumulated history?
+
+Q048  排在前面的 report 很貴，後面的很便宜。節點可以自行跳過前者來提高 gas 利用率嗎？
+Can a node skip an expensive report at the front and process a cheaper one behind it?
+
+Q049  同一區塊有多份 reports、也有多個 services。協定怎麼分配 gas、平行執行，又合併成一個結果？
+How does a block budget several reports, execute services in parallel and merge their results?
+
+Q050  這個區塊沒有任何 work-item 指向服務 S。它還可能因哪些事情執行 accumulate？
+What can trigger accumulation for service S when no work-item targets it in this block?
+
+
+【JAM 宏觀面試｜第 11 輪】同一區塊裡的輪次與紀錄
+§12-13 · Rounds and accounting within a block · Q051-Q055
+
+Q051  DEX 在 accumulation 中送出 deferred transfer。收款服務最早什麼時候可以處理它？
+A DEX emits a deferred transfer during accumulation. When can the receiving service process it?
+
+Q052  Manager 在本輪把某個 core 的 assigner 從 A 換成 B。本輪採用誰輸出的 queue，B 何時能行使新角色？
+The manager replaces core assigner A with B in this round. Whose queue is merged now, and when can B exercise the role?
+
+Q053  想比較驗證者一段時間的貢獻，又想分析某個區塊的服務負載，為何要看不同時間尺度的統計？
+Why use different time windows to compare validator contributions and diagnose one block's service load?
+
+Q054  如果 JAM 沒有直接替每次工作發獎勵，為什麼鏈上仍要記錄驗證者活動？
+Why record validator activity on-chain if JAM does not pay each reward directly?
+
+Q055  某服務在這個區塊有 refinement gas 紀錄，accumulation 的工作量卻是零。怎麼解釋？
+How can a service show refinement gas in a block but no accumulation work?
+
+
+【JAM 宏觀面試｜第 12 輪】Work-package 裡究竟裝什麼
+§14 · What a work-package carries · Q056-Q060
+
+Q056  一個 work-item 能不能放一百筆 DEX 訂單？JAM 怎麼知道這些位元組的意思？
+Can one work-item carry a hundred DEX orders, and who decides what those bytes mean?
+
+Q057  一個被成功評估的 work-package 裡有三個 items，分別給兩個服務。會產生幾份 report，結果怎麼分送？
+A successfully evaluated package contains three items targeting two services. How many reports result, and how are the outputs routed?
+
+Q058  某個 item 的 refine 耗盡 gas。這會怎麼反映在報告裡，審核報告正確性時該比對什麼？
+An item runs out of gas during refinement. How does that affect its digest and the check on report correctness?
+
+Q059  為什麼同一個 work-item 要分別聲明 refinement 和 accumulation 的 gas limit？
+Why give one work-item separate gas limits for refinement and accumulation?
+
+Q060  服務 B 只需要服務 A 先前產出的一段大型資料，下一份工作怎麼取得並驗證它？
+How can service B reuse and verify one piece of a large output previously produced by service A?
+
+
+【JAM 宏觀面試｜第 13 輪】Guarantor 實際承諾什麼
+§15 · What a guarantor commits to · Q061-Q065
+
+Q061  Guarantor 的簽名交給區塊作者後，其他人能從這個簽名追究哪一項承諾？
+What claim can others hold a guarantor accountable for after its signature reaches a block author?
+
+Q062  某個 active core 的一名 guarantor 暫時離線，另外兩位算出相同的報告。這份工作還有機會上鏈嗎？
+One guarantor for an active core is offline. Can the other two still produce an includable guarantee if they agree?
+
+Q063  Guarantor 準備花很多算力跑 refine。有哪些便宜的檢查值得先做，為什麼？
+Which cheap checks should a guarantor make before an expensive refinement, and why?
+
+Q064  同一個 core 的 guarantors 各自拿到不同套件。如果互不協調，可能浪費什麼工作？
+What work is wasted if guarantors on the same core independently choose different packages?
+
+Q065  Guarantor 已經把 report 送給區塊作者。為什麼它還要向驗證者網路分發資料？
+After giving the report to a block author, why must guarantors also distribute data to the validator network?
+
+
+【JAM 宏觀面試｜第 14 輪】資料能不能取回
+§16 · Can the data be recovered? · Q066-Q070
+
+Q066  驗證者準備對一個 core 簽 assurance。它在簽名前要親自取得並核對什麼？
+What must a validator obtain and check before signing an assurance for a core?
+
+Q067  對同一份 work-package，稽核用的 bundle 與留給後續工作的匯出資料，為什麼有不同保存需求？
+Why do the auditable bundle and a package's exported data have different retention needs?
+
+Q068  舊工作匯出的資料還在保存期內，但驗證者已經換屆。要向哪一批人請求分片？
+An export is still within its retention window, but validators have rotated. Which set should a node fetch shards from?
+
+Q069  一個有 Merkle 證明的分片，和足夠多個能還原資料的分片，分別解決哪個問題？
+What does proving one shard establish, and what does collecting enough distinct shards establish?
+
+Q070  一份報告需要超過三分之二的 availability assurances，但重建時只取部分分片。這兩個門檻各保護什麼？
+Why can availability require a validator supermajority even though recovery uses only a subset of shards?
+
+
+【JAM 宏觀面試｜第 15 輪】為什麼抽查能建立信任
+§17 · Why sampled audits work · Q071-Q075
+
+Q071  一份 report 已經 available。Auditor 親自重跑時，能多回答哪個安全問題？
+Once a report is available, what additional security question can an auditor answer by re-executing it?
+
+Q072  每份工作平常只有少數人稽核。攻擊者為什麼很難先挑一批可以買通的人，讓無效結果過關？
+If only a sample normally audits each package, why is it hard to preselect and bribe everyone who will check it?
+
+Q073  全規模設定下，每位驗證者初始抽十個 core。為什麼一份 report 平均約有三十次稽核？
+At full scale, each validator initially samples ten cores. Why does a report receive about thirty audits on average?
+
+Q074  已宣布的稽核遲遲沒有回覆，和有人明確發出負面 judgment，接下來的處理有何不同？
+How does a missing announced judgment differ from an explicit negative judgment in subsequent auditing?
+
+Q075  預測市場使用外部比分資料。計算結果達到 finality 之後，使用者能信任哪一段，比分真實性又依賴誰？
+A prediction market reads an external score. After finality, what can users trust, and who vouches for the real-world score?
+
+
+【JAM 宏觀面試｜第 16 輪】最終性與跨鏈證明
+§18-19 · Finality and external proofs · Q076-Q080
+
+Q076  另一條鏈想驗證 JAM 的最終結果，卻不想重播整條鏈。BEEFY 在這裡提供什麼？
+A bridge wants evidence of a finalized JAM result without replaying the whole chain. What does BEEFY provide?
+
+Q077  橋接端已驗證一個 BEEFY 承諾，還想確認某個服務發布的個別輸出。兩份證據要怎麼接起來？
+A bridge has verified a BEEFY commitment. How does it connect that commitment to one service output?
+
+Q078  節點看到兩個競爭鏈頭。比較哪條鏈比較好之前，要先排除哪些候選？
+Before comparing two chain heads, which candidates must a node rule out?
+
+Q079  兩條分支都符合候選條件，較長的一條卻有許多 fallback blocks。最佳鏈怎麼選？
+Both forks are acceptable, but the longer one has many fallback blocks. How is the best chain chosen?
+
+Q080  兩個驗證者投給相同的 header，算出的 post-state root 卻不同。GRANDPA 會把票算在一起嗎？
+Two validators vote for the same header but attach different post-state roots. Do those votes support the same target?
+
+
+【JAM 宏觀面試｜第 17 輪】效能、設計取捨與範圍
+§20-22 · Performance and design trade-offs · Q081-Q085
+
+Q081  有人用理論 TPS 比較 JAM 和其他鏈。要把這個數字用到你的 DEX，至少要先問哪些工作負載假設？
+Before applying a theoretical JAM TPS estimate to a DEX, which workload assumptions would you check?
+
+Q082  有人主張未來能把 Polkadot parachains 放進 JAM。這個設計主張要靠什麼實驗才能估算實際吞吐量？
+What evidence would turn a design for hosting parachains on JAM into a credible throughput estimate?
+
+Q083  團隊打算實作 coretime 銷售與 staking 獎勵。Gray Paper 已提供哪些底層能力，哪些政策要另行定義？
+Which protocol capabilities can a coretime market or staking system use, and which policies must it define itself?
+
+Q084  JAM 沿用的 ELVES 與 Sassafras 思路，各在保護哪一件事？
+What distinct problems do the ELVES and Sassafras ideas inherited by JAM address?
+
+Q085  設計跨服務交易時，怎麼判斷「同步呼叫另一個服務」是否是 v0.8.0 已能依賴的行為？
+Can a v0.8.0 service design rely on synchronous calls to another service during accumulation?
+
+
+【JAM 宏觀面試｜第 18 輪】同一套 PVM，三種執行情境
+App. A-B · One PVM, different invocation contexts · Q086-Q090
+
+Q086  同一支程式在慢機器上跑了兩倍久。兩個節點為什麼仍應在相同位置耗盡 gas？
+The same program takes twice as long on a slower computer. Why should both nodes exhaust gas at the same point?
+
+Q087  一個陌生服務嘗試寫入沒有寫入權限的記憶體。為什麼這也屬於共識規格？
+Why must consensus specify what happens when unknown service code writes to an inaccessible page?
+
+Q088  Refine 和 accumulate 跑在同一套 PVM 上。為什麼服務在兩個入口能對鏈上狀態做的事不同？
+Why do refine and accumulate have different powers over chain state if both run on the PVM?
+
+Q089  資料很大的時候，為什麼 invocation 讓服務按需取資料，而不在啟動時把所有輸入一次塞進 RAM？
+Why let service code fetch large inputs on demand instead of loading everything into RAM at startup?
+
+Q090  服務在 accumulate 中先做部分更新，再耗盡 gas。有 checkpoint 和沒有 checkpoint，會怎樣影響保留的效果？
+How can a checkpoint affect what survives if an accumulation invocation later runs out of gas?
+
+
+【JAM 宏觀面試｜第 19 輪】把狀態與資料變成可驗證的承諾
+App. C-E · Encoding and Merkle commitments · Q091-Q095
+
+Q091  兩個團隊對同一個 header 的欄位值完全同意，卻算出不同的 hash。除了 hash 函式，還要查哪裡？
+Two teams agree on every header field but compute different hashes. Besides the hash function, what should they compare?
+
+Q092  兩段可變長度資料接在一起，接收方靠什麼找出分界並還原原值？
+How can a decoder recover field boundaries when two variable-length values are encoded next to each other?
+
+Q093  兩台節點把服務存在不同資料庫、資料列插入順序也不同。它們如何仍能得到同一個 state root？
+How can clients with different databases and insertion orders still obtain the same state root?
+
+Q094  輕節點要查「某個 storage key 的值」和「某筆服務輸出有沒有出現在清單裡」，該分別對哪種根驗證？
+Which commitment should a light client use for a storage value versus membership in a service-output list?
+
+Q095  每個區塊都追加一個輸出根，為什麼用 Merkle mountain 結構適合維護這段歷史？
+Why use a Merkle mountain structure for a history that gains an output root each block?
+
+
+【JAM 宏觀面試｜第 20 輪】把各章接成一個可驗證的系統
+App. F-I · Putting the protocol together · Q096-Q100
+
+Q096  驗證者指派需要洗牌。如果每個節點各用自己的隨機產生器洗一次，其他人還怎麼驗證指派？
+How can every node verify a shuffled assignment instead of drawing its own unrelated permutation?
+
+Q097  簽署一份 guarantee、證明匿名出塊票券、簽署 BEEFY 承諾，為什麼需要三種不同的驗證方式？
+Why verify a guarantee, an anonymous ticket and a BEEFY commitment in different ways?
+
+Q098  如果改成每位驗證者都留完整 bundle，和現行把糾刪碼分片分散保存相比，取捨在哪？
+What trade-off changes if every validator stores a full bundle instead of an erasure-coded shard?
+
+Q099  兩個實作用了相同公式，卻把 epoch 長度設成不同值。為什麼可能演變成共識分歧？要去哪核對？
+How could different epoch-length settings cause consensus divergence even with identical formulas, and where would you check the value?
+
+Q100  使用者說「這筆 DEX 訂單已成交，結果也已確定」。你會怎麼從工作狀態一路驗到這筆具體成交？
+How would you verify the claim that a particular DEX order both filled and reached finality?

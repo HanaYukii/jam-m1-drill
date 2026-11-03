@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build the JAM M1 Drill: items/*.py -> dist/questions.json, dist/artifact.html (fragment), dist/jam-m1-drill.html (standalone)."""
-import json, os, sys, random, datetime, re
+import json, os, sys, random, datetime, re, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from validate import load_items, validate, CHAPTERS, load_terms, validate_terms, GLOSS_CATS, load_sheets, validate_sheets, load_pages, validate_pages
 
@@ -168,6 +168,11 @@ def main():
     full = "<!doctype html>\n<html lang=\"zh-Hant\">\n<head>\n<meta charset=\"utf-8\">\n" + head + "\n</head>\n<body>\n" + body + "\n</body>\n</html>\n"
     with open(os.path.join(DIST, "jam-m1-drill.html"), "w", encoding="utf-8") as f:
         f.write(full)
+    # Keep the downloadable handouts alongside both the deployed and offline site.
+    macro_dist = os.path.join(DIST, "macro")
+    os.makedirs(macro_dist, exist_ok=True)
+    for name in ("jam-100-questions.txt", "jam-100-answers.pdf"):
+        shutil.copyfile(os.path.join(ROOT, "..", "macro", name), os.path.join(macro_dist, name))
     import export_md; export_md.main()
     print(f"built {len(items)} items, {len(terms)} glossary terms, {len(sheets)} cheat sheets -> dist/ (artifact.html {len(frag)//1024} KiB, jam-m1-drill.html {len(full)//1024} KiB)")
     ans = [0,0,0,0]

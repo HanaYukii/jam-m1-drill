@@ -2,9 +2,11 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
+import assert from 'node:assert/strict';
 
 const file = 'file://' + path.resolve('dist/jam-m1-drill.html');
-const browser = await chromium.launch();
+const chromiumOptions = process.env.JAM_CHROMIUM_PATH ? {executablePath:process.env.JAM_CHROMIUM_PATH} : {};
+const browser = await chromium.launch(chromiumOptions);
 const results = { errors: [], steps: [] };
 for (const scheme of ['light', 'dark']) {
   const ctx = await browser.newContext({ colorScheme: scheme, viewport: { width: 1280, height: 900 } });
@@ -83,7 +85,7 @@ console.log(JSON.stringify(results, null, 1));
 
 // glossary smoke test
 {
-  const browser2 = await chromium.launch();
+  const browser2 = await chromium.launch(chromiumOptions);
   const ctx = await browser2.newContext({ colorScheme: 'light', viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
   const errs = [];
@@ -177,5 +179,49 @@ console.log(JSON.stringify(results, null, 1));
   await page.waitForTimeout(250);
   console.log('page no h-overflow @420:', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   console.log('page errors:', JSON.stringify(errs));
+
+  // Independent oral rounds: navigation, answer reveal, sharing and narrow screens.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator('.modes button[data-mode="macro"]').click();
+  assert.equal(new URL(page.url()).hash, '#macro');
+  const numbers = [];
+  for (let i = 0; i < 20; i++) {
+    await page.locator('#macroRound').selectOption(String(i));
+    const ids = await page.locator('.macro-card').evaluateAll(cards => cards.map(c => Number(c.dataset.number)));
+    assert.equal(ids.length, 5);
+    numbers.push(...ids);
+  }
+  assert.deepEqual(numbers, Array.from({length:100}, (_,i) => i+1));
+  await page.reload();
+  assert.equal(new URL(page.url()).hash, '#macro-20');
+  assert.equal(await page.locator('.macro-card[open]').count(), 0);
+  const last = page.locator('.macro-card[data-number="100"]');
+  await last.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await last.locator('.qa-ans').isVisible(), true);
+  assert.match(await last.locator('.qa-ans').innerText(), /已 finalized[\s\S]*finalized state/);
+  assert.equal(await page.locator('#macroNext').isDisabled(), true);
+  const prompts = fs.readFileSync('dist/macro/jam-100-questions.txt','utf8').trimEnd().split('\n\n\n').at(-1);
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {configurable:true,
+    value:{writeText: async text => { window.__copiedRound = text; }}}));
+  await page.locator('#macroCopy').click();
+  assert.equal(await page.evaluate(() => window.__copiedRound), prompts);
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {configurable:true, value:undefined}));
+  await page.locator('#macroCopy').click();
+  assert.equal(await page.locator('#macroManual').inputValue(), prompts);
+  assert.equal(await page.locator('#macroManual').isVisible(), true);
+  for (const width of [320,375]) {
+    await page.setViewportSize({width,height:850});
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1),true);
+  }
+  await page.screenshot({path:'dist/shot-macro-mobile.png',fullPage:true});
+  await page.locator('#macroPrev').click();
+  assert.equal(await page.locator('#macroRound').inputValue(),'18');
+  await page.setViewportSize({width:1280,height:900});
+  await page.locator('.modes button[data-mode="practice"]').click();
+  assert.equal(new URL(page.url()).hash,'');
+  assert.equal(await page.locator('.stem').first().isVisible(),true);
+  console.log('macro: 20 rounds, 100 unique questions, deep link, bilingual reveal, clipboard and fallback, 320/375px OK');
+  assert.deepEqual(errs, []);
   await browser2.close();
 }

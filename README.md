@@ -41,6 +41,14 @@ For chapter-by-chapter notation and function practice, search **符號函式專�
 19 chapters/appendices (§3–11, §13–14 and A–H), with six relevant questions from the chapter 12 set
 included in the same filter. The focus is each symbol's role, function inputs/outputs, and state timing.
 
+## Full-protocol oral interview rounds
+
+[全 JAM 宏觀面試 100 題](https://hanayukii.github.io/jam-m1-drill/#macro) is a separate oral practice section. It spans Gray Paper v0.8.0 §§1–22 and appendices A–I in 20 rounds of five. Each prompt and short answer appears in Traditional Chinese and English. Select a round, rehearse, then expand the answer and its source links. A round has its own shareable URL, for example [round 10](https://hanayukii.github.io/jam-m1-drill/#macro-10).
+
+Use **複製本輪題目** to copy just five bilingual prompts. The [group TXT](https://hanayukii.github.io/jam-m1-drill/macro/jam-100-questions.txt) contains all 100 prompts. The [PDF handout](https://hanayukii.github.io/jam-m1-drill/macro/jam-100-answers.pdf) includes the answers, a clickable contents page and references.
+
+Edit the bilingual source in `quiz/pages/macro_interview.py`. After changing it, regenerate the files in `macro/` with `python3 quiz/scripts/export_macro.py` (ReportLab, with macOS Heiti TC by default). On other platforms supply embeddable Traditional Chinese TrueType fonts via `--font-regular` and `--font-medium`. Then run the standard content validation and site build.
+
 ## Deploy
 
 Live at **https://hanayukii.github.io/jam-m1-drill/** — GitHub Pages serves `main` at `/ (root)`,

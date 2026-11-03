@@ -62,7 +62,7 @@ def validate_sheets(sheets):
     return errors
 
 PAGE_DIR = os.path.join(ROOT, "pages")
-PAGE_BLOCKS = {"p", "list", "table", "callout", "links"}
+PAGE_BLOCKS = {"p", "list", "table", "callout", "links", "oral"}
 
 def load_pages():
     """Long-form reference pages (pages/*.py, each exporting PAGE). Rendered by the app as their own tab."""
@@ -74,10 +74,43 @@ def load_pages():
         pages.append(mod.PAGE)
     return pages
 
+def validate_macro(page):
+    errors = []
+    sources = page.get("sources", {})
+    sections = page.get("sections", [])
+    expected = {str(i) for i in range(1, 23)} | set("ABCDEFGHI")
+    used, questions_zh, questions_en = set(), set(), set()
+    if len(sections) != 20 or set(sources) != expected:
+        errors.append("macro interview needs 20 rounds and a source for each section and appendix")
+    for key, source in sources.items():
+        if not source.get("title") or not source.get("url", "").startswith("https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/text/"):
+            errors.append(f"macro interview: invalid v0.8.0 source for {key}")
+    for i, section in enumerate(sections):
+        if len(section.get("blocks", [])) != 5 or not section.get("en") or not section.get("scope"):
+            errors.append(f"macro round {i+1} needs a chapter range, English title and five oral questions")
+        for j, q in enumerate(section.get("blocks", [])):
+            n = 5*i+j+1
+            if q.get("kind") != "oral" or q.get("number") != n:
+                errors.append(f"macro round {i+1} expects Q{n:03d}")
+            for key in ("questionZh", "questionEn", "answerZh", "answerEn"):
+                if not isinstance(q.get(key), str) or not q[key].strip():
+                    errors.append(f"macro Q{n:03d}: missing {key}")
+            refs = q.get("refs", [])
+            if not refs or set(refs) - expected:
+                errors.append(f"macro Q{n:03d}: invalid chapter references")
+            used.update(refs)
+            questions_zh.add(q.get("questionZh"))
+            questions_en.add(q.get("questionEn"))
+    if used != expected or len(questions_zh) != 100 or len(questions_en) != 100:
+        errors.append("macro interview must cover all sections with 100 distinct bilingual questions")
+    return errors
+
 def validate_pages(pages):
     errors, seen = [], set()
     for pg in pages:
         w = "page " + str(pg.get("id"))
+        if pg.get("id") == "macro-interview":
+            errors.extend(validate_macro(pg))
         for k in ("id", "title", "lead", "checked", "sections"):
             if not pg.get(k): errors.append(f"{w}: missing {k}")
         if pg.get("id") in seen: errors.append(f"{w}: duplicate id")

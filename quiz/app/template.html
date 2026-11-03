@@ -57,7 +57,8 @@ code,pre,.mono{font-family:var(--mono)}
 .rail h2{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
 .chapters{display:flex;flex-direction:column;gap:2px}
 .rail[data-mode="gloss"] .chapters-block,.rail[data-mode="gloss"] .filters,
-.rail[data-mode="evo"] .chapters-block,.rail[data-mode="evo"] .filters{display:none}
+.rail[data-mode="evo"] .chapters-block,.rail[data-mode="evo"] .filters,
+.rail[data-mode="macro"] .chapters-block,.rail[data-mode="macro"] .filters{display:none}
 .modes button:nth-child(5):last-child,.modes button:nth-child(7):last-child{grid-column:span 2}
 /* reference page (新舊對照) */
 .card.page{max-width:1180px}
@@ -92,6 +93,26 @@ table.cmp td.src{font-family:var(--mono);font-size:11.5px;color:var(--muted);min
 .card.qa.open .qa-caret{transform:rotate(180deg)}
 .qa-ans{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid var(--accent);line-height:1.65}
 .qa-ans b{display:block;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.macro-head,.macro-card{margin-bottom:12px}
+.macro-head h2{margin:0 0 4px;font-size:22px}
+.macro-head p,.macro-en{color:var(--ink-2)}
+.macro-head p{margin:0 0 14px}
+.macro-actions,.macro-controls,.macro-refs{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.macro-actions a{text-decoration:none}
+.macro-controls{margin:16px 0 6px}
+.macro-controls select{max-width:100%;min-width:0;flex:1 1 220px;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:7px;padding:8px;font:inherit}
+.macro-caption{font-size:13px;color:var(--ink-2);min-height:1.6em}
+.macro-card summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+.macro-card summary .macro-en{display:block;font-size:14px;font-weight:400;margin:4px 0 0}
+.macro-card .qa-ans p{margin:0}
+.macro-card .qa-ans .macro-en{margin-top:6px}
+.macro-refs{font-size:12px;color:var(--muted);margin-top:9px}
+.macro-card .macro-no{font:12px var(--mono);color:var(--accent);margin-right:.6em}
+.macro-copy-text{width:100%;min-height:10em;font:14px var(--sans)}
+@media (max-width:560px){
+  .macro-controls{display:grid;grid-template-columns:1fr 1fr}
+  .macro-controls select{grid-column:1/-1;grid-row:1;width:100%}
+}
 .sheet h2{font-size:20px;margin:0 0 6px}
 .sheet .sheet-one{color:var(--ink-2);line-height:1.7;margin:0 0 4px}
 .sheet section{margin-top:20px}
@@ -301,6 +322,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           <button role="tab" data-mode="review" aria-pressed="false">錯題本</button>
           <button role="tab" data-mode="gloss" aria-pressed="false">名詞</button>
           <button role="tab" data-mode="evo" aria-pressed="false">新舊對照</button>
+          <button role="tab" data-mode="macro" aria-pressed="false">宏觀面試 100 題</button>
         </div>
       </div>
       <div class="chapters-block">
@@ -358,6 +380,8 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   const SYMS  = DATA.symbols || {};
   const SHEETS = DATA.sheets || [];
   const PAGES = DATA.pages || [];
+  const MACRO = PAGES.find(page => page.id === 'macro-interview');
+  let macroRound = 0;
   const GCATS = META.glossaryCats || {};
   const CHAPTERS = META.chapters; // [{key,name,group}]
   const STORE_KEY = 'jam-m1-drill-v1';
@@ -576,6 +600,10 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   // ---------- status strip ----------
   function renderStatus(){
     const el = $('#status');
+    if (state.mode === 'macro'){
+      el.innerHTML = '<span class="stat"><b>全 JAM 宏觀面試</b></span><span>Gray Paper 0.8.0 · §§1–22 · 附錄 A–I</span>';
+      return;
+    }
     const list = baseFilter();
     const m = masteryOf(list);
     const total = ITEMS.length;
@@ -914,6 +942,72 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     };
   }
 
+  // ---------- full-protocol oral rounds, separate from the multiple-choice bank ----------
+  function macroHash(index){ return index ? '#macro-' + (index+1) : '#macro'; }
+  function macroIndex(hash){
+    const match = /^#macro(?:-(\d{1,2}))?$/.exec(hash);
+    if (!match) return null;
+    const index = Number(match[1] || 1)-1;
+    return index >= 0 && index < MACRO.sections.length ? index : 0;
+  }
+  function macroNumber(n){ return 'Q' + String(n).padStart(3, '0'); }
+  function macroRoundText(round){
+    const qs = round.blocks;
+    return '【JAM 宏觀面試｜第 '+String(macroRound+1).padStart(2,'0')+' 輪】'+round.title+'\n'
+      + round.scope+' · '+round.en+' · '+macroNumber(qs[0].number)+'-'+macroNumber(qs[qs.length-1].number)+'\n\n'
+      + qs.map(q => macroNumber(q.number)+'  '+q.questionZh+'\n'+q.questionEn).join('\n\n');
+  }
+  function renderMacro(){
+    const rounds = MACRO.sections;
+    const round = rounds[macroRound];
+    const options = rounds.map((s,i) => '<option value="'+i+'"'+(i===macroRound?' selected':'')+'>'
+      + String(i+1).padStart(2,'0')+' · '+esc(s.scope)+' '+esc(s.title)+'</option>').join('');
+    let h = '<div class="card macro-head"><h2>'+esc(MACRO.title)+'</h2><p>'+esc(MACRO.lead)+'</p>'
+      + '<div class="macro-actions"><a class="btn" href="macro/jam-100-questions.txt" download>下載群組題目 TXT</a>'
+      + '<a class="btn" href="macro/jam-100-answers.pdf" download>下載雙語短答 PDF</a>'
+      + '<button class="btn ghost" id="macroCopy" type="button">複製本輪題目</button></div>'
+      + '<div class="macro-controls"><button class="btn" id="macroPrev" type="button"'+(macroRound===0?' disabled':'')+'>上一輪</button>'
+      + '<select id="macroRound" aria-label="選擇面試輪次">'+options+'</select>'
+      + '<button class="btn" id="macroNext" type="button"'+(macroRound===rounds.length-1?' disabled':'')+'>下一輪</button></div>'
+      + '<div class="macro-caption">第 '+(macroRound+1)+' / '+rounds.length+' 輪 · <span lang="en">'+esc(round.en)+'</span></div>'
+      + '<span role="status" id="macroNotice"></span><textarea class="macro-copy-text" id="macroManual" aria-label="本輪中英文題目" readonly hidden></textarea></div>';
+    for (const q of round.blocks){
+      const refs = q.refs.map(key => {
+        const src = MACRO.sources[key];
+        return '<a href="'+esc(src.url)+'" title="'+esc(src.title)+'" target="_blank" rel="noopener">'+esc(chTag(key))+'</a>';
+      }).join(' ');
+      h += '<details class="card macro-card" data-number="'+q.number+'"><summary><span class="macro-no">'+macroNumber(q.number)+'</span>'
+         + esc(q.questionZh)+'<span class="macro-en" lang="en">'+esc(q.questionEn)+'</span></summary>'
+         + '<div class="qa-ans"><b>參考短答</b><p>'+esc(q.answerZh)+'</p><p class="macro-en" lang="en">'+esc(q.answerEn)+'</p></div>'
+         + '<div class="macro-refs">Gray Paper '+refs+'</div></details>';
+    }
+    $('#content').innerHTML = h;
+    const go = index => {
+      macroRound = index;
+      history.replaceState(null, '', macroHash(index));
+      renderMacro();
+      $('#macroRound').focus({preventScroll:true});
+    };
+    $('#macroPrev').onclick = () => go(macroRound-1);
+    $('#macroNext').onclick = () => go(macroRound+1);
+    $('#macroRound').onchange = e => go(Number(e.target.value));
+    $('#macroCopy').onclick = async () => {
+      const text = macroRoundText(round);
+      const feedback = $('#macroNotice'), box = $('#macroManual');
+      try {
+        await navigator.clipboard.writeText(text);
+        feedback.textContent = '已複製本輪 5 題。';
+        box.hidden = true;
+      } catch {
+        feedback.textContent = '已選取本輪題目，可直接複製。';
+        box.value = text;
+        box.hidden = false;
+        box.focus();
+        box.select();
+      }
+    };
+  }
+
   // ---------- 速記 cheat sheet ----------
   // ---------- reference page: content lives in pages/*.py, validated at build time ----------
   function renderPage(id){
@@ -986,7 +1080,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     if (m === 'practice') buildQueue();
     renderAll();
   }
-  function renderAll(){ renderChapters(); renderStatus(); if (state.mode==='practice') renderPractice(); else if (state.mode==='qa') renderQA(); else if (state.mode==='sheet') renderSheet(); else if (state.mode==='mock') renderMock(); else if (state.mode==='gloss') renderGloss(); else if (state.mode==='evo') renderPage('polkadot-evolution'); else renderReview(); }
+  function renderAll(){ renderChapters(); renderStatus(); if (state.mode==='practice') renderPractice(); else if (state.mode==='qa') renderQA(); else if (state.mode==='sheet') renderSheet(); else if (state.mode==='mock') renderMock(); else if (state.mode==='gloss') renderGloss(); else if (state.mode==='evo') renderPage('polkadot-evolution'); else if (state.mode==='macro') renderMacro(); else renderReview(); }
 
   $('#chapters').addEventListener('click', e => {
     const b = e.target.closest('.ch'); if (!b) return;
@@ -994,7 +1088,12 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     if (state.mode==='practice') buildQueue(); else if (state.mode==='mock') state.mock = null;
     renderAll();
   });
-  $$('.modes button').forEach(b=> b.onclick = ()=> setMode(b.dataset.mode));
+  $$('.modes button').forEach(b=> b.onclick = ()=> {
+    const mode = b.dataset.mode;
+    if (mode === 'macro') history.replaceState(null, '', macroHash(macroRound));
+    else if (state.mode === 'macro') history.replaceState(null, '', location.pathname+location.search+(mode==='evo'?'#evo':''));
+    setMode(mode);
+  });
   $$('#diffChips .chip').forEach(b=> b.onclick = ()=>{ const d=+b.dataset.diff; if (state.diffs.has(d)) state.diffs.delete(d); else state.diffs.add(d); b.setAttribute('aria-pressed', state.diffs.has(d)); refilter(); });
   $$('#lensChips .chip').forEach(b=> b.onclick = ()=>{ const l=b.dataset.lens; if (state.lenses.has(l)) state.lenses.delete(l); else state.lenses.add(l); b.setAttribute('aria-pressed', state.lenses.has(l)); refilter(); });
   $$('#kindChips .chip').forEach(b=>{ if (!ITEMS.some(it => it.kind === b.dataset.kind)) b.remove(); });  // no dead filters
@@ -1019,7 +1118,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   };
   document.addEventListener('keydown', e => {
     if (e.target.matches('input,textarea')) return;
-    if (state.mode === 'gloss' || state.mode === 'qa' || state.mode === 'sheet' || state.mode === 'evo') return;
+    if (state.mode === 'gloss' || state.mode === 'qa' || state.mode === 'sheet' || state.mode === 'evo' || state.mode === 'macro') return;
     if (e.key >= '1' && e.key <= '4'){
       const btn = $$('#content .opt')[+e.key-1]; if (btn && !btn.disabled){ btn.click(); e.preventDefault(); }
     } else if (e.key === 'Enter' || e.key === 'ArrowRight'){
@@ -1034,7 +1133,14 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   $('#footMeta').innerHTML = esc(META.bankVersion)+' · '+ITEMS.length+' 題 · '+esc(META.gpVersion)+'<br>題目預設英文（貼近面試），可切換中文；詳解繁中。選項每次隨機排列。<br>「名詞」分頁收錄 '+TERMS.length+' 條 GP 0.8.0 符號與術語。<br>進度存於此瀏覽器（localStorage）。';
   $('#brandSub').textContent = META.gpVersion+' · '+META.team;
   $('#rail').dataset.mode = state.mode;
+  function openRoute(){
+    const index = macroIndex(location.hash);
+    if (index !== null){ macroRound = index; setMode('macro'); }
+    else if (location.hash === '#evo') setMode('evo');
+    else if (state.mode === 'macro') setMode('practice');
+  }
   buildQueue(); renderAll();
-  if (location.hash === '#evo') setMode('evo');
+  openRoute();
+  window.addEventListener('hashchange', openRoute);
 })();
 </script>
