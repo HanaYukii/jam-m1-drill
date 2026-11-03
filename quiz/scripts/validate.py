@@ -98,6 +98,10 @@ def validate_macro(page):
             refs = q.get("refs", [])
             if not refs or set(refs) - expected:
                 errors.append(f"macro Q{n:03d}: invalid chapter references")
+            passages = q.get("passages")
+            if (not isinstance(passages, dict) or not passages or set(passages) - set(refs)
+                    or any(type(line) is not int or line < 1 for line in passages.values())):
+                errors.append(f"macro Q{n:03d}: expected a positive source line for a cited chapter")
             used.update(refs)
             questions_zh.add(q.get("questionZh"))
             questions_en.add(q.get("questionEn"))

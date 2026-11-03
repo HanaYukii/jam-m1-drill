@@ -322,7 +322,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
           <button role="tab" data-mode="review" aria-pressed="false">錯題本</button>
           <button role="tab" data-mode="gloss" aria-pressed="false">名詞</button>
           <button role="tab" data-mode="evo" aria-pressed="false">新舊對照</button>
-          <button role="tab" data-mode="macro" aria-pressed="false">宏觀面試 100 題</button>
+          <button role="tab" data-mode="macro" aria-pressed="false">規格口試 100 題</button>
         </div>
       </div>
       <div class="chapters-block">
@@ -601,7 +601,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function renderStatus(){
     const el = $('#status');
     if (state.mode === 'macro'){
-      el.innerHTML = '<span class="stat"><b>全 JAM 宏觀面試</b></span><span>Gray Paper 0.8.0 · §§1–22 · 附錄 A–I</span>';
+      el.innerHTML = '<span class="stat"><b>全 JAM 規格口試</b></span><span>Gray Paper 0.8.0 · §§1–22 · 附錄 A–I</span>';
       return;
     }
     const list = baseFilter();
@@ -953,7 +953,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
   function macroNumber(n){ return 'Q' + String(n).padStart(3, '0'); }
   function macroRoundText(round){
     const qs = round.blocks;
-    return '【JAM 宏觀面試｜第 '+String(macroRound+1).padStart(2,'0')+' 輪】'+round.title+'\n'
+    return '【'+MACRO.title+'｜第 '+String(macroRound+1).padStart(2,'0')+' 輪】'+round.title+'\n'
       + round.scope+' · '+round.en+' · '+macroNumber(qs[0].number)+'-'+macroNumber(qs[qs.length-1].number)+'\n\n'
       + qs.map(q => macroNumber(q.number)+'  '+q.questionZh+'\n'+q.questionEn).join('\n\n');
   }
@@ -974,7 +974,9 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
     for (const q of round.blocks){
       const refs = q.refs.map(key => {
         const src = MACRO.sources[key];
-        return '<a href="'+esc(src.url)+'" title="'+esc(src.title)+'" target="_blank" rel="noopener">'+esc(chTag(key))+'</a>';
+        const line = q.passages[key];
+        const href = line ? src.url.split('#')[0]+'#L'+line : src.url;
+        return '<a href="'+esc(href)+'" title="'+esc(src.title)+'" target="_blank" rel="noopener">'+esc(chTag(key))+'</a>';
       }).join(' ');
       h += '<details class="card macro-card" data-number="'+q.number+'"><summary><span class="macro-no">'+macroNumber(q.number)+'</span>'
          + esc(q.questionZh)+'<span class="macro-en" lang="en">'+esc(q.questionEn)+'</span></summary>'

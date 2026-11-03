@@ -199,7 +199,12 @@ console.log(JSON.stringify(results, null, 1));
   await last.locator('summary').focus();
   await page.keyboard.press('Enter');
   assert.equal(await last.locator('.qa-ans').isVisible(), true);
-  assert.match(await last.locator('.qa-ans').innerText(), /已 finalized[\s\S]*finalized state/);
+  const oralPage = JSON.parse(fs.readFileSync('dist/questions.json','utf8')).pages.find(p => p.id === 'macro-interview');
+  const expected = oralPage.sections.at(-1).blocks.at(-1);
+  assert.deepEqual(await last.locator('.qa-ans p').allTextContents(),[expected.answerZh, expected.answerEn]);
+  const primary = expected.refs[0];
+  assert.equal(await last.locator('.macro-refs a').first().getAttribute('href'),
+    oralPage.sources[primary].url.split('#')[0]+'#L'+expected.passages[primary]);
   assert.equal(await page.locator('#macroNext').isDisabled(), true);
   const prompts = fs.readFileSync('dist/macro/jam-100-questions.txt','utf8').trimEnd().split('\n\n\n').at(-1);
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {configurable:true,

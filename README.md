@@ -43,7 +43,7 @@ included in the same filter. The focus is each symbol's role, function inputs/ou
 
 ## Full-protocol oral interview rounds
 
-[全 JAM 宏觀面試 100 題](https://hanayukii.github.io/jam-m1-drill/#macro) is a separate oral practice section. It spans Gray Paper v0.8.0 §§1–22 and appendices A–I in 20 rounds of five. Each prompt and short answer appears in Traditional Chinese and English. Select a round, rehearse, then expand the answer and its source links. A round has its own shareable URL, for example [round 10](https://hanayukii.github.io/jam-m1-drill/#macro-10).
+[JAM Gray Paper 口試 100 題](https://hanayukii.github.io/jam-m1-drill/#macro) is a separate set of oral questions about protocol roles, state changes, evidence and failure cases. It spans Gray Paper v0.8.0 §§1–22 and appendices A–I in 20 rounds of five. Each prompt and short answer appears in Traditional Chinese and English. Select a round, rehearse, then expand the answer and follow the chapter links to the relevant passages in the pinned specification. A round has its own shareable URL, for example [round 10](https://hanayukii.github.io/jam-m1-drill/#macro-10).
 
 Use **複製本輪題目** to copy just five bilingual prompts. The [group TXT](https://hanayukii.github.io/jam-m1-drill/macro/jam-100-questions.txt) contains all 100 prompts. The [PDF handout](https://hanayukii.github.io/jam-m1-drill/macro/jam-100-answers.pdf) includes the answers, a clickable contents page and references.
 

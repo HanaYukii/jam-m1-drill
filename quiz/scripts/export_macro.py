@@ -12,7 +12,7 @@ from macro_interview import PAGE
 
 def round_text(section, index):
     questions = section["blocks"]
-    heading = (f"【JAM 宏觀面試｜第 {index:02d} 輪】{section['title']}\n"
+    heading = (f"【{PAGE['title']}｜第 {index:02d} 輪】{section['title']}\n"
                f"{section['scope']} · {section['en']} · Q{questions[0]['number']:03d}-Q{questions[-1]['number']:03d}")
     return heading + "\n\n" + "\n\n".join(
         f"Q{q['number']:03d}  {q['questionZh']}\n{q['questionEn']}" for q in questions)
@@ -82,7 +82,7 @@ def export_pdf(filename, font_regular, font_medium):
     fullest = max(sum(prepared[q["number"]][0] for q in s["blocks"]) for s in sections)
     page_h = max(790, math.ceil((fullest + 97 + 40 + 4 * 13) / 10) * 10)
     pdf = Canvas(str(filename), pagesize=(width, page_h), pageCompression=1, invariant=1)
-    pdf.setTitle("JAM 宏觀面試 100 題 | Bilingual interview notes")
+    pdf.setTitle(PAGE["title"] + " | Bilingual interview notes")
     pdf.setAuthor("JAM M1 Drill")
     pdf.setSubject("Gray Paper v0.8.0 | 20 rounds | 100 bilingual questions and short answers")
 
@@ -151,7 +151,10 @@ def export_pdf(filename, font_regular, font_medium):
                 tag = "§"+ref if ref.isdigit() else "App. "+ref
                 label(x, y-8, tag, size=8.8, color=muted)
                 end = x+pdfmetrics.stringWidth(tag, "Helvetica", 8.8)
-                pdf.linkURL(PAGE["sources"][ref]["url"], (x-2,y-12,end+2,y+3), relative=0)
+                url = PAGE["sources"][ref]["url"]
+                if ref in q["passages"]:
+                    url = url.split("#")[0] + f"#L{q['passages'][ref]}"
+                pdf.linkURL(url, (x-2,y-12,end+2,y+3), relative=0)
                 x = end+10
             y -= 17
             for lines, font, size, leading, indent, before, color in rows:
