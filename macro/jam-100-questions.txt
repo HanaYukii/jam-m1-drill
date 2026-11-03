@@ -25,8 +25,8 @@ Which JAM stages correspond to ELVES backing, approval and inclusion? Which stag
 【JAM Gray Paper 口試 100 題｜第 02 輪】從規格讀出狀態轉移
 §3-4 · Reading the state transition · Q006-Q010
 
-Q006  兩個獨立實作收到同一個區塊。要先對齊哪個輸入，才有理由要求它們算出相同的 state root？
-Two independent clients import the same block. What other input must match for them to produce the same state root?
+Q006  同一區塊有兩份 guarantee，分別擔保不同的套件，卻指向同一個 core。驗塊節點能留第一份，繼續執行這個區塊嗎？
+Two guarantees in one block cover different packages but name the same core. Can a node keep the first and apply the rest of the block?
 
 Q007  同一個區塊有 disputes 也有 assurances。檢查 assurance bit 時，要讀哪個版本的 availability assignments？
 When a block contains both disputes and assurances, which version of the availability assignments is used to check an assurance bit?
@@ -56,8 +56,8 @@ Given a header and a work-report, how can you verify that the block included tha
 Q014  父區塊後跳過好幾個 slot 才出現下一個區塊。節點應怎麼判斷它的時間是否合法？
 A child block arrives after several empty slots. How should a node evaluate its timeslot?
 
-Q015  其他節點如何從 header 得知驗證者換屆、下期出塊票券或新違規者等關鍵變動？
-How does a header communicate epoch changes, winning tickets and newly identified offenders?
+Q015  同一個 epoch 內，父、子區塊剛好跨過票券提交截止點。若原本的票池還差一張才滿，header 要放 winning-tickets marker 嗎？已集滿時呢？
+A parent and child block straddle the ticket deadline in the same epoch. Does the child include a winning-tickets marker if the ticket accumulator is one short? What if it is full?
 
 
 【JAM Gray Paper 口試 100 題｜第 04 輪】誰有資格出塊
@@ -307,23 +307,23 @@ Q080  兩個驗證者投給相同的 header，算出的 post-state root 卻不�
 Two validators vote for the same header but attach different post-state roots. Do those votes support the same target?
 
 
-【JAM Gray Paper 口試 100 題｜第 17 輪】效能、設計取捨與範圍
-§20-22 · Performance and design trade-offs · Q081-Q085
+【JAM Gray Paper 口試 100 題｜第 17 輪】從規則看 JAM 的分工
+§20-22 · How JAM divides responsibility · Q081-Q085
 
 Q081  Gray Paper 如何區分 spatial parallelism 與 temporal parallelism？兩者怎麼讓 JAM 在同一段時間完成更多計算？
 How do spatial and temporal parallelism each contribute to JAM's performance model?
 
-Q082  §21 對「以 JAM service 驗證 parachains」提出什麼設計判斷？哪個問題仍需要原型實測？
-What does the conclusion say about validating parachains through a JAM service, and what still requires prototyping?
+Q082  套件 B 匯入 A 的 segment，沒有另列 prerequisite。用 A 的 package hash 引用，或直接給 segments root，哪種寫法會讓 accumulation 把 A 當成 B 的依賴？
+B imports a segment from A without listing A as a prerequisite. Does importing by A's package hash make B depend on A for accumulation? What if B uses the segments root directly?
 
 Q083  Coretime 與 staking 的哪些部分屬於 Gray Paper 定義的狀態轉移，哪些政策留給上層系統？
 What do the specified transitions support for coretime and staking, and which policies are left to higher-level systems?
 
-Q084  JAM 沿用的 ELVES 與 Sassafras 思路，各在保護哪一件事？
-What distinct problems do the ELVES and Sassafras ideas inherited by JAM address?
+Q084  一份 report 只有一位 guarantor 簽名。同一個 core 的另一位 guarantor 正好是區塊作者。他簽的 Safrole block seal 能算第二份擔保嗎？
+A report has one guarantor signature. Another guarantor assigned to that core authors the block. Can the author's Safrole seal count as the second guarantee signature?
 
-Q085  v0.8.0 定義的跨服務 transfer 何時交付？結論提到的 synchronous calls 是現行規則，還是後續研究？
-When are cross-service transfers delivered in v0.8.0, and what is the status of synchronous calls in the conclusion?
+Q085  同一輪中，service 9 先執行完，送一筆 deferred transfer 給 B。Service 2 也送了兩筆給 B。下一輪 B 會依什麼順序收到這三筆？
+In one round, service 9 finishes first and sends B one deferred transfer. Service 2 sends B two. In what order does B receive the three transfers next round?
 
 
 【JAM Gray Paper 口試 100 題｜第 18 輪】同一套 PVM，三種執行情境
@@ -351,8 +351,8 @@ App. C-E · Encoding and Merkle commitments · Q091-Q095
 Q091  兩個團隊對同一個 header 的欄位值完全同意，卻算出不同的 hash。除了 hash 函式，還要查哪裡？
 Two teams agree on every header field but compute different hashes. Besides the hash function, what should they compare?
 
-Q092  兩段可變長度資料接在一起，接收方靠什麼找出分界並還原原值？
-How can a decoder recover field boundaries when two variable-length values are encoded next to each other?
+Q092  一個 work-item 的 refine 成功但回傳空資料，另一個因 gas 耗盡而失敗。節點從 work-digest 的編碼怎麼分辨？
+One work-item returns an empty blob from refine. Another runs out of gas. How can a node tell the outcomes apart in the encoded work-digests?
 
 Q093  兩台節點把服務存在不同資料庫、資料列插入順序也不同。它們如何仍能得到同一個 state root？
 How can clients with different databases and insertion orders still obtain the same state root?
@@ -373,11 +373,11 @@ How can every node verify a shuffled assignment instead of drawing its own unrel
 Q097  簽署一份 guarantee、證明匿名出塊票券、簽署 BEEFY 承諾，為什麼需要三種不同的驗證方式？
 Why verify a guarantee, an anonymous ticket and a BEEFY commitment in different ways?
 
-Q098  如果改成每位驗證者都留完整 bundle，和現行把糾刪碼分片分散保存相比，取捨在哪？
-What trade-off changes if every validator stores a full bundle instead of an erasure-coded shard?
+Q098  驗證者已收到自己的 bundle shard，但少了一個 exported segment 的 shard。它能把這個 core 的 assurance bit 設為 1 嗎？
+A validator has its bundle shard but is missing its shard for one exported segment. Can it set the assurance bit for that core?
 
-Q099  兩個實作用了相同公式，卻把 epoch 長度設成不同值。為什麼可能演變成共識分歧？要去哪核對？
-How could different epoch-length settings cause consensus divergence even with identical formulas, and where would you check the value?
+Q099  父區塊還在 epoch e，下一個區塊已是 e+2。即使 e 的票券已集滿，Safrole 會用那些票券還是 fallback keys 驗證 block seal？
+The parent is in epoch e and the next block is in e+2. Even if the ticket accumulator in e was full, does Safrole verify the seal using those tickets or fallback keys?
 
 Q100  一條尚未 finalized 的分支已累積某份 report，此時有人提出負面 judgment。何時要排除這條分支？投 GRANDPA 票前還須滿足什麼？
 An unfinalized branch has accumulated a report that now gets a negative judgment. When is that branch disregarded, and what must hold before a GRANDPA vote?

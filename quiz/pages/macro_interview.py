@@ -93,7 +93,8 @@ PAGE = {
     },
     "22": {
       "title": "Acknowledgements",
-      "url": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/text/ack.tex#L1"
+      "url": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/text/ack.tex#L1",
+      "label": "§22 (background)"
     },
     "A": {
       "title": "Polkadot Virtual Machine",
@@ -237,16 +238,17 @@ PAGE = {
           "kind": "oral",
           "number": 6,
           "refs": [
-            "3",
+            "11",
             "4"
           ],
           "passages": {
-            "4": 5
+            "11": 276,
+            "4": 8
           },
-          "questionZh": "兩個獨立實作收到同一個區塊。要先對齊哪個輸入，才有理由要求它們算出相同的 state root？",
-          "questionEn": "Two independent clients import the same block. What other input must match for them to produce the same state root?",
-          "answerZh": "兩者要從相同的 prior state 開始。依協定執行同一個區塊，應得到同一個 post-state 與狀態根。",
-          "answerEn": "They must start from the same prior state. Applying the specified transition to that state and block must produce the same post-state and root."
+          "questionZh": "同一區塊有兩份 guarantee，分別擔保不同的套件，卻指向同一個 core。驗塊節點能留第一份，繼續執行這個區塊嗎？",
+          "questionEn": "Two guarantees in one block cover different packages but name the same core. Can a node keep the first and apply the rest of the block?",
+          "answerZh": "不能。Guarantees 必須按 core index 嚴格遞增，每個 core 最多出現一次。重複就使整個區塊無效。",
+          "answerEn": "No. Guarantees must appear in strictly increasing order of core index. A repeated core makes the entire block invalid."
         },
         {
           "kind": "oral",
@@ -384,17 +386,17 @@ PAGE = {
           "kind": "oral",
           "number": 15,
           "refs": [
-            "5",
             "6",
-            "10"
+            "5"
           ],
           "passages": {
+            "6": 261,
             "5": 70
           },
-          "questionZh": "其他節點如何從 header 得知驗證者換屆、下期出塊票券或新違規者等關鍵變動？",
-          "questionEn": "How does a header communicate epoch changes, winning tickets and newly identified offenders?",
-          "answerZh": "協定在指定條件下寫入對應的 markers。接收方依狀態轉移核對這些公告，下一期排程與新違規者因此有共同依據。",
-          "answerEn": "The header carries the corresponding markers when their conditions apply. Nodes check them against the transition, giving them a shared record of schedules and new offenders."
+          "questionZh": "同一個 epoch 內，父、子區塊剛好跨過票券提交截止點。若原本的票池還差一張才滿，header 要放 winning-tickets marker 嗎？已集滿時呢？",
+          "questionEn": "A parent and child block straddle the ticket deadline in the same epoch. Does the child include a winning-tickets marker if the ticket accumulator is one short? What if it is full?",
+          "answerZh": "差一張就留空。在這個截止點，只有原本的 ticket accumulator 已滿，才放入依 outside-in 順序排列的中選票券。",
+          "answerEn": "If one ticket is missing, the marker is empty. At that crossing, a full prior accumulator produces the winning tickets in outside-in order."
         }
       ]
     },
@@ -1522,8 +1524,8 @@ PAGE = {
     },
     {
       "id": "round-17",
-      "title": "效能、設計取捨與範圍",
-      "en": "Performance and design trade-offs",
+      "title": "從規則看 JAM 的分工",
+      "en": "How JAM divides responsibility",
       "scope": "§20-22",
       "blocks": [
         {
@@ -1546,17 +1548,17 @@ PAGE = {
           "kind": "oral",
           "number": 82,
           "refs": [
-            "21",
-            "20"
+            "14",
+            "12"
           ],
           "passages": {
-            "20": 83,
-            "21": 12
+            "14": 88,
+            "12": 46
           },
-          "questionZh": "§21 對「以 JAM service 驗證 parachains」提出什麼設計判斷？哪個問題仍需要原型實測？",
-          "questionEn": "What does the conclusion say about validating parachains through a JAM service, and what still requires prototyping?",
-          "answerZh": "作者認為這個模型能承載驗證 parachains 的服務。用 PVM 計量執行時能達到多少吞吐量，仍須用原型與實際工作量驗證。",
-          "answerEn": "The design is expected to support a service that validates parachains. The throughput achievable under PVM metering remains a question for prototyping and measurement."
+          "questionZh": "套件 B 匯入 A 的 segment，沒有另列 prerequisite。用 A 的 package hash 引用，或直接給 segments root，哪種寫法會讓 accumulation 把 A 當成 B 的依賴？",
+          "questionEn": "B imports a segment from A without listing A as a prerequisite. Does importing by A's package hash make B depend on A for accumulation? What if B uses the segments root directly?",
+          "answerZh": "用帶標記的 package hash。Guarantor 把它對應到的 segments root 記入 B 的 report，accumulation 會把這張對照表的鍵列為依賴。若直接給 root，要指定先後就須另列 A 為 prerequisite。",
+          "answerEn": "The tagged package hash does. The guarantor records it in B's segment-root lookup, whose keys are dependencies. With a direct root, B must list A as a prerequisite to require that order."
         },
         {
           "kind": "oral",
@@ -1580,38 +1582,35 @@ PAGE = {
           "kind": "oral",
           "number": 84,
           "refs": [
-            "2",
+            "11",
             "6",
-            "17",
             "22"
           ],
           "passages": {
-            "2": 7,
-            "6": 4,
+            "11": 287,
+            "6": 144,
             "22": 3
           },
-          "questionZh": "JAM 沿用的 ELVES 與 Sassafras 思路，各在保護哪一件事？",
-          "questionEn": "What distinct problems do the ELVES and Sassafras ideas inherited by JAM address?",
-          "answerZh": "ELVES 的擔保、抽查與爭議機制支持平行工作的安全性。Safrole 借用並簡化 Sassafras 的思路，安排誰有資格出塊。",
-          "answerEn": "ELVES supplies the security pattern for backing, auditing and disputing parallel work. Safrole adapts Sassafras ideas to determine who may author blocks."
+          "questionZh": "一份 report 只有一位 guarantor 簽名。同一個 core 的另一位 guarantor 正好是區塊作者。他簽的 Safrole block seal 能算第二份擔保嗎？",
+          "questionEn": "A report has one guarantor signature. Another guarantor assigned to that core authors the block. Can the author's Safrole seal count as the second guarantee signature?",
+          "answerZh": "不能。Block seal 簽的是省去 seal 欄位的 header。這位作者若要當第二位擔保人，必須另外簽署包含該 report hash 的擔保訊息。",
+          "answerEn": "No. The seal signs the header with the seal field omitted. To supply the second signature, the author must separately sign the guarantee message for that report hash."
         },
         {
           "kind": "oral",
           "number": 85,
           "refs": [
-            "21",
             "12",
-            "B"
+            "3"
           ],
           "passages": {
-            "12": 165,
-            "21": 17,
-            "B": 122
+            "12": 208,
+            "3": 123
           },
-          "questionZh": "v0.8.0 定義的跨服務 transfer 何時交付？結論提到的 synchronous calls 是現行規則，還是後續研究？",
-          "questionEn": "When are cross-service transfers delivered in v0.8.0, and what is the status of synchronous calls in the conclusion?",
-          "answerZh": "已定義的 deferred transfer 由後續 accumulation round 交給目的服務。Accumulate 中同步呼叫另一個服務則列在 further work。",
-          "answerEn": "A deferred transfer reaches the destination service in a later accumulation round. Synchronous calls between services during accumulation are listed as further work."
+          "questionZh": "同一輪中，service 9 先執行完，送一筆 deferred transfer 給 B。Service 2 也送了兩筆給 B。下一輪 B 會依什麼順序收到這三筆？",
+          "questionEn": "In one round, service 9 finishes first and sends B one deferred transfer. Service 2 sends B two. In what order does B receive the three transfers next round?",
+          "answerZh": "先是 service 2 的兩筆，依原本送出的順序，最後是 service 9 的那筆。平行累積按發送端 service ID 由小到大串接各自的 transfer 序列。",
+          "answerEn": "B receives service 2's two transfers in issue order, then service 9's. Parallel accumulation concatenates each sender's sequence in ascending service ID order."
         }
       ]
     },
@@ -1721,16 +1720,17 @@ PAGE = {
           "kind": "oral",
           "number": 92,
           "refs": [
-            "3",
-            "C"
+            "C",
+            "11"
           ],
           "passages": {
-            "C": 5
+            "C": 298,
+            "11": 114
           },
-          "questionZh": "兩段可變長度資料接在一起，接收方靠什麼找出分界並還原原值？",
-          "questionEn": "How can a decoder recover field boundaries when two variable-length values are encoded next to each other?",
-          "answerZh": "依雙方共用的型別結構和 codec 規則，對需要長度資訊的欄位使用規定的長度前綴。固定長度欄位則由其型別決定邊界。",
-          "answerEn": "The shared type structure and codec specify where lengths must be encoded. Length prefixes delimit variable fields where required, while fixed-size types provide their own boundaries."
+          "questionZh": "一個 work-item 的 refine 成功但回傳空資料，另一個因 gas 耗盡而失敗。節點從 work-digest 的編碼怎麼分辨？",
+          "questionEn": "One work-item returns an empty blob from refine. Another runs out of gas. How can a node tell the outcomes apart in the encoded work-digests?",
+          "answerZh": "先看結果的標記。成功分支帶有長度和輸出，空資料的長度是零。Out-of-gas 有自己的錯誤標記，後面沒有輸出資料。",
+          "answerEn": "Read the result tag. Success carries a length-prefixed blob, even when its length is zero. Out-of-gas has its own error tag and carries no blob."
         },
         {
           "kind": "oral",
@@ -1827,32 +1827,34 @@ PAGE = {
           "number": 98,
           "refs": [
             "16",
+            "11",
             "H"
           ],
           "passages": {
-            "H": 24
+            "16": 3,
+            "11": 149,
+            "H": 16
           },
-          "questionZh": "如果改成每位驗證者都留完整 bundle，和現行把糾刪碼分片分散保存相比，取捨在哪？",
-          "questionEn": "What trade-off changes if every validator stores a full bundle instead of an erasure-coded shard?",
-          "answerZh": "完整複本方便單點讀取，代價是反覆傳送與保存整份資料。分片把負擔分散，讀取方需取得足夠的不同有效分片再重建。",
-          "answerEn": "Full replicas allow direct local reads but duplicate storage and transmission. Sharding spreads that cost, while recovery requires enough distinct valid shards."
+          "questionZh": "驗證者已收到自己的 bundle shard，但少了一個 exported segment 的 shard。它能把這個 core 的 assurance bit 設為 1 嗎？",
+          "questionEn": "A validator has its bundle shard but is missing its shard for one exported segment. Can it set the assurance bit for that core?",
+          "answerZh": "不能，這個 bit 要留為 0。它必須持有自己的 bundle shard 和每個 exported segment 對應的 shard，並驗過它們的 Merkle proofs。",
+          "answerEn": "No. That bit stays zero. The validator must hold its bundle shard and its shard for every exported segment, and verify their Merkle proofs."
         },
         {
           "kind": "oral",
           "number": 99,
           "refs": [
-            "3",
             "6",
             "I"
           ],
           "passages": {
-            "6": 31,
-            "I": 263
+            "6": 201,
+            "I": 294
           },
-          "questionZh": "兩個實作用了相同公式，卻把 epoch 長度設成不同值。為什麼可能演變成共識分歧？要去哪核對？",
-          "questionEn": "How could different epoch-length settings cause consensus divergence even with identical formulas, and where would you check the value?",
-          "answerZh": "同一個 slot 可能被放進不同 epoch，造成輪替時點或有效金鑰不同。用該版 Appendix I 的常數索引及對應章節核對網路參數。",
-          "answerEn": "The same slot may land in different epochs, changing rotation timing and valid keys. Check the version's constants in Appendix I and their definitions in the relevant section."
+          "questionZh": "父區塊還在 epoch e，下一個區塊已是 e+2。即使 e 的票券已集滿，Safrole 會用那些票券還是 fallback keys 驗證 block seal？",
+          "questionEn": "The parent is in epoch e and the next block is in e+2. Even if the ticket accumulator in e was full, does Safrole verify the seal using those tickets or fallback keys?",
+          "answerZh": "用 fallback keys。只有剛好前進一個 epoch、父區塊已在票券截止後的時段，而且原票池已滿，才用那批票券。跳過整個 epoch 就不符合第一項。",
+          "answerEn": "Use fallback keys. Using tickets requires a one-epoch advance, a parent in the closing period, and a full prior ticket accumulator. Skipping a whole epoch fails the first condition."
         },
         {
           "kind": "oral",

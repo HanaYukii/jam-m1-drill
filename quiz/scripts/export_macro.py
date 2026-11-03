@@ -148,10 +148,11 @@ def export_pdf(filename, font_regular, font_medium):
             label(margin, y-8, f"Q{q['number']:03d}", "Helvetica-Bold", 9.2, teal)
             x = margin+35
             for ref in q["refs"]:
-                tag = "§"+ref if ref.isdigit() else "App. "+ref
+                source = PAGE["sources"][ref]
+                tag = source.get("label") or ("§"+ref if ref.isdigit() else "App. "+ref)
                 label(x, y-8, tag, size=8.8, color=muted)
                 end = x+pdfmetrics.stringWidth(tag, "Helvetica", 8.8)
-                url = PAGE["sources"][ref]["url"]
+                url = source["url"]
                 if ref in q["passages"]:
                     url = url.split("#")[0] + f"#L{q['passages'][ref]}"
                 pdf.linkURL(url, (x-2,y-12,end+2,y+3), relative=0)

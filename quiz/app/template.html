@@ -976,7 +976,7 @@ table.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-al
         const src = MACRO.sources[key];
         const line = q.passages[key];
         const href = line ? src.url.split('#')[0]+'#L'+line : src.url;
-        return '<a href="'+esc(href)+'" title="'+esc(src.title)+'" target="_blank" rel="noopener">'+esc(chTag(key))+'</a>';
+        return '<a href="'+esc(href)+'" title="'+esc(src.title)+'" target="_blank" rel="noopener">'+esc(src.label || chTag(key))+'</a>';
       }).join(' ');
       h += '<details class="card macro-card" data-number="'+q.number+'"><summary><span class="macro-no">'+macroNumber(q.number)+'</span>'
          + esc(q.questionZh)+'<span class="macro-en" lang="en">'+esc(q.questionEn)+'</span></summary>'
