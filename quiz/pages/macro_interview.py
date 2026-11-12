@@ -2,9 +2,9 @@
 
 PAGE = {
   "id": "macro-interview",
-  "title": "JAM Gray Paper 口試 100 題",
+  "title": "JAM Gray Paper 口試 105 題",
   "lead": "每輪五題。先口述協定規則，再展開中英文短答，點章號可對照原文。",
-  "checked": "2026-11-04",
+  "checked": "2026-11-12",
   "sourceIndex": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex",
   "sources": {
     "1": {
@@ -153,9 +153,9 @@ PAGE = {
             "12": 25,
             "15": 8
           },
-          "questionZh": "從 work-package 開始，誰把工作做成 work-report？報告已獲擔保後，還缺哪些條件才能進入 accumulation？",
+          "questionZh": "誰負責執行 work-package 並產生 work-report？報告獲得擔保後，還要滿足哪些條件才能進入累積（accumulation）？",
           "questionEn": "Who turns a work-package into a work-report, and what must happen after it is guaranteed before it can be accumulated?",
-          "answerZh": "該 core 的 guarantors 檢查授權、執行各 work-item 的 refine，並簽署報告。Guarantee 納入區塊且通過可用性門檻後，依賴順序與 gas 預算決定何時累積這份報告。",
+          "answerZh": "被指派給該 core 的 guarantors 檢查授權、執行各 work-item 的 refine，並簽署報告。Guarantee 上鏈後，報告還要取得足夠的可用性聲明，並排進符合依賴順序、gas 預算足以處理的前綴。",
           "answerEn": "The core's guarantors check authorization, refine the items and sign the report. After inclusion of its guarantee, the report must become available and fit in the affordable prefix of the dependency-ordered candidates."
         },
         {
@@ -205,7 +205,7 @@ PAGE = {
             "11": 287,
             "15": 8
           },
-          "questionZh": "Gray Paper 分開定義驗證者的鏈外工作與鏈上 STF。以 guarantee 為例，產生報告和驗證區塊各要做什麼？",
+          "questionZh": "以一份 guarantee 為例，guarantor 在鏈外做哪些工作？節點驗證區塊時又要檢查什麼？",
           "questionEn": "For a guarantee, what belongs to the validator's off-chain work, and what belongs to the block state transition?",
           "answerZh": "Guarantors 在鏈外執行 refinement 並為 report 簽名。驗塊節點核對 guarantee 的簽名、core 指派、授權與背景等條件，通過後建立待確認的 availability assignment。",
           "answerEn": "Guarantors refine and sign the report off-chain. During block validation, nodes check the guarantee's signatures, assignment, authorization and context before recording a pending availability assignment."
@@ -278,7 +278,7 @@ PAGE = {
           "passages": {
             "12": 162
           },
-          "questionZh": "把一串待處理的 reports 改存進無序集合，可能在哪裡改變鏈上結果？",
+          "questionZh": "如果把已排好順序的報告存進無序集合，為什麼最後的鏈上狀態可能不同？",
           "questionEn": "How could storing an ordered sequence of reports in an unordered set change the chain result?",
           "answerZh": "有 gas 限制時，順序決定哪段前綴能執行。若兩個節點以不同順序取出報告，就可能更新出不同的狀態。",
           "answerEn": "Under a gas limit, order determines which prefix can run. Nodes that iterate over reports in different orders could produce different states."
@@ -310,7 +310,7 @@ PAGE = {
             "4": 17,
             "5": 25
           },
-          "questionZh": "JAM 的 block extrinsic 分成哪五類資料？各自讓區塊能處理哪件協定工作？",
+          "questionZh": "一個區塊的 extrinsic 包含哪五類資料？每一類用來做什麼？",
           "questionEn": "What are the five parts of the block extrinsic, and which protocol task does each serve?",
           "answerZh": "Tickets 提交出塊票券，disputes 提交裁決與違規證據，preimages 提供已請求的資料。Assurances 聲明驗證者持有對應分片，guarantees 提交 work-reports 及其擔保簽名。",
           "answerEn": "Tickets submit sealing tickets, disputes carry verdicts and offense evidence, and preimages supply requested bytes. Assurances attest to shard possession, and guarantees introduce signed work-reports."
@@ -332,8 +332,8 @@ PAGE = {
           "passages": {
             "5": 3
           },
-          "questionZh": "同步節點同時檢查 parent hash 和 prior state root。它們各自固定了什麼？",
-          "questionEn": "What do the parent hash and prior state root each establish for a syncing node?",
+          "questionZh": "節點同步區塊時，parent hash 指向哪個區塊？prior state root 對應哪個時點的狀態？",
+          "questionEn": "Which block does the parent hash identify, and which state does the prior state root commit to?",
           "answerZh": "Parent hash 指定要接在哪個父區塊。Prior state root 承諾執行本區塊的起始狀態，也就是父區塊執行後的狀態。",
           "answerEn": "The parent hash identifies the preceding block. The prior state root commits to this block's starting state, which is its parent's post-state."
         },
@@ -377,7 +377,7 @@ PAGE = {
           "passages": {
             "5": 48
           },
-          "questionZh": "父區塊後跳過好幾個 slot 才出現下一個區塊。節點應怎麼判斷它的時間是否合法？",
+          "questionZh": "父區塊與子區塊之間有幾個空 slot。節點如何判斷子區塊的 slot 是否有效？",
           "questionEn": "A child block arrives after several empty slots. How should a node evaluate its timeslot?",
           "answerZh": "子區塊的 slot 必須比父區塊晚，且已到本地時鐘允許驗證的時間。中間可以空 slot，因此高度不能代替時槽。",
           "answerEn": "Its slot must be later than its parent's and admissible under the current clock. Slots may be empty, so block height cannot stand in for the slot index."
@@ -395,8 +395,8 @@ PAGE = {
           },
           "questionZh": "同一個 epoch 內，父、子區塊剛好跨過票券提交截止點。若原本的票池還差一張才滿，header 要放 winning-tickets marker 嗎？已集滿時呢？",
           "questionEn": "A parent and child block straddle the ticket deadline in the same epoch. Does the child include a winning-tickets marker if the ticket accumulator is one short? What if it is full?",
-          "answerZh": "差一張就留空。在這個截止點，只有原本的 ticket accumulator 已滿，才放入依 outside-in 順序排列的中選票券。",
-          "answerEn": "If one ticket is missing, the marker is empty. At that crossing, a full prior accumulator produces the winning tickets in outside-in order."
+          "answerZh": "還差一張就留空。若跨過截止點時原本的票池已滿，則從票券序列的頭、尾交替取票（outside-in），把排好的票券放進 marker。",
+          "answerEn": "If one ticket is missing, the marker is empty. If the prior accumulator is full at the cutoff crossing, the marker lists the tickets by alternating between the front and back of the sequence."
         }
       ]
     },
@@ -519,7 +519,7 @@ PAGE = {
           "passages": {
             "11": 412
           },
-          "questionZh": "後一份工作聲稱「套件 P 產生的 segments root 是 S」。節點為什麼能核對這組對應？",
+          "questionZh": "一份報告引用套件 P 的 segments root。節點根據什麼紀錄核對這個 root？",
           "questionEn": "How can a node verify a claim that package P produced segments root S?",
           "answerZh": "近期歷史保留已報告的 package hash 到 segments root 的對應，當前區塊的報告也可提供依據。節點用這些紀錄核對引用。",
           "answerEn": "Recent history records package hashes and their reported segment roots. Reports in the current block can also establish the mapping used for this check."
@@ -537,8 +537,8 @@ PAGE = {
             "9": 75,
             "11": 57
           },
-          "questionZh": "一個 work-report 同時有 anchor 和 lookup anchor。哪個固定近期鏈背景？重跑 refinement 查 preimage 時又要看哪個？",
-          "questionEn": "What is the difference between the anchor and the lookup anchor in a work-report's refinement context?",
+          "questionZh": "Work-report 裡的 anchor 和 lookup anchor 各有什麼用途？重跑 refinement 時，哪一個決定查詢 preimage 的歷史時點？",
+          "questionEn": "What does each anchor in a work-report establish? Which one fixes the historical preimage lookup when refinement is replayed?",
           "answerZh": "Anchor 讓節點以近期歷史核對報告引用的區塊與承諾。Lookup anchor 固定查詢服務程式與 preimages 的歷史時點，讓重跑能看到當時的資料。",
           "answerEn": "The anchor ties the report to a recent block and its commitments. The lookup anchor fixes the historical view for code and preimage lookups during reproduction."
         },
@@ -569,7 +569,7 @@ PAGE = {
           "passages": {
             "7": 28
           },
-          "questionZh": "外部系統只想驗證某個服務發布的累積輸出。JAM 如何把這類輸出留成可供證明的歷史？",
+          "questionZh": "外部系統日後若要證明某個服務曾發布一筆累積輸出，JAM 在每個區塊留下什麼紀錄？",
           "questionEn": "How does JAM preserve a provable history of outputs published by services during accumulation?",
           "answerZh": "每個區塊把服務識別碼與輸出雜湊組成序列，對它取根，再把根追加到 accumulation output log。之後可針對那筆輸出建立包含證明。",
           "answerEn": "Each block commits to its sequence of service IDs and output hashes. The block-level root is appended to the accumulation output log, supporting later inclusion proofs."
@@ -593,9 +593,9 @@ PAGE = {
             "4": 260,
             "8": 5
           },
-          "questionZh": "Authorization 把 coretime 的分配和哪個決定分開？對一份具體 work-package，誰判斷它能否在指定 core 執行？",
+          "questionZh": "分配 coretime 和核准某份 work-package 是兩個決定。套件送來時，由誰判斷它能否使用指定的 core？",
           "questionEn": "Which decision does authorization separate from allocating coretime, and who decides whether a particular package may run?",
-          "answerZh": "Coretime 可以先分配。具體工作送達時，該 core 接受的 authorizer 依 work-package 及其 token 執行授權判斷。",
+          "answerZh": "Coretime 可以先分配。實際提交套件時，由該 core 接受的 authorizer 程式根據套件及其 token 判斷是否放行。",
           "answerEn": "Coretime can be allocated first. When a particular package is submitted, an authorizer accepted for the core evaluates the package and its token."
         },
         {
@@ -608,7 +608,7 @@ PAGE = {
           "passages": {
             "8": 9
           },
-          "questionZh": "一份工作聲稱自己有權使用某個 core。誰提供授權證據，誰判斷，成功後會留下什麼？",
+          "questionZh": "Work-package 用什麼證明自己有權使用某個 core？誰檢查這份證據？成功時會留下什麼？",
           "questionEn": "Who supplies evidence that a package may use a core, who evaluates it, and what does success produce?",
           "answerZh": "套件帶入 token，authorizer 程式執行授權判斷。成功時產生 trace，供後續報告描述這次授權。",
           "answerEn": "The package supplies a token. The authorizer evaluates the request and, on success, returns a trace that is carried in the report."
@@ -640,7 +640,7 @@ PAGE = {
             "8": 24,
             "I": 277
           },
-          "questionZh": "Authorizer pool 已滿八項，現在要從 queue 補入一項。有使用該 core 的 guarantee 和沒有 guarantee 時，各移除哪一項？",
+          "questionZh": "某個 core 的 authorizer pool 已滿，現在要從 queue 補入一項。如果本區塊收錄了這個 core 的 guarantee，會移除哪一項？如果沒收錄呢？",
           "questionEn": "A core's authorizer pool is full. When a queue entry is appended, which entry leaves if the block has a guarantee for that core, and which leaves if it does not?",
           "answerZh": "有 guarantee 時，先移除其 authorizer hash 在 pool 中最早的匹配項，再補入新項。沒有 guarantee 時直接補入，超過八項就淘汰最前面的舊項。",
           "answerEn": "A guarantee first consumes the oldest pool entry matching its authorizer hash, making room for the new entry. Without a guarantee, appending overflows the full pool and evicts its oldest entry."
@@ -658,7 +658,7 @@ PAGE = {
             "9": 164,
             "12": 243
           },
-          "questionZh": "某個 core 想改未來接受工作的政策。誰能改排程，這項變動何時進入 pool 計算？",
+          "questionZh": "誰可以更改某個 core 的授權排程？節點更新 authorizer pool 時，會讀到哪一版 queue？",
           "questionEn": "Who can change a core's future authorization schedule, and when does the pool use it?",
           "answerZh": "該 core 的特權 assigner 可在 accumulation 改 authorizer queue。區塊計算新 pool 時，按目前 slot 從更新後的 queue 取值。",
           "answerEn": "The core's privileged assigner may change the queue during accumulation. The pool update selects the current slot's entry from that updated queue."
@@ -744,7 +744,7 @@ PAGE = {
             "9": 164,
             "12": 178
           },
-          "questionZh": "哪些服務可以改 staging validator keys，哪些可以改 authorizer queue？權限是全體 core 共用，還是按 core 指派？",
+          "questionZh": "誰有權更新 staging validator keys？誰有權更新 authorizer queue？哪一項權限是逐個 core 指派的？",
           "questionEn": "Who may change the staging validator keys and the authorizer queues? Which authority is assigned per core?",
           "answerZh": "Delegator 可更新整組 staging validator keys。每個 core 則有自己的 assigner，負責該 core 的 authorizer queue，兩種角色都記在 privileges 狀態中。",
           "answerEn": "The delegator can update the staging validator keys. Each core has an assigner for its own authorizer queue. Both roles are identified in the privileges state."
@@ -768,7 +768,7 @@ PAGE = {
             "10": 26,
             "17": 9
           },
-          "questionZh": "一名稽核者認為 report 算錯了。它簽署的 judgment 和可以納入區塊的 verdict 有何差別？",
+          "questionZh": "一名稽核者認為報告算錯了。這名稽核者簽署的 judgment，和區塊能收錄的 verdict 有什麼差別？",
           "questionEn": "How does one auditor's signed judgment differ from a verdict that a block can include?",
           "answerZh": "Judgment 是單一驗證者對報告的判斷。Verdict 彙整符合規則的驗證者簽名及票數，讓所有節點可重算裁決。",
           "answerEn": "A judgment is one validator's signed assessment. A verdict collects the required judgments so all nodes can verify the signers, votes and outcome."
@@ -798,9 +798,9 @@ PAGE = {
             "10": 119,
             "11": 173
           },
-          "questionZh": "一份 report 還在某個 core 上等 assurance，此時鏈上出現 bad 或 wonky verdict。排程要怎麼處理？",
+          "questionZh": "某份報告還在等可用性聲明（assurance），就收到 bad 或 wonky 裁決。該 core 原本的 availability assignment 會怎麼變？",
           "questionEn": "A report is still awaiting assurance when a bad or wonky verdict is recorded. What happens to the assignment?",
-          "answerZh": "該 core 上與報告相符的 pending availability assignment 會被清除，這份報告不會循這個指派進入可用報告序列。",
+          "answerZh": "節點清除這份報告在該 core 上的待確認指派。這份報告也就無法再透過這次指派取得可用狀態。",
           "answerEn": "The matching pending availability assignment is cleared. That assignment can no longer move the report into the sequence of newly available reports."
         },
         {
@@ -934,8 +934,8 @@ PAGE = {
             "12": 64,
             "14": 88
           },
-          "questionZh": "Report B 依賴套件 A。A 已在先前區塊累積，和 A 在本區塊才排到 B 前面，排序時怎麼區分？",
-          "questionEn": "Report B depends on package A. How does ordering handle A having been accumulated earlier versus A being selected ahead of B in this block?",
+          "questionZh": "報告 B 依賴套件 A。若 A 在先前區塊已累積，節點如何消除這項依賴？若 A 是本區塊才排在 B 前面，又如何解鎖 B？",
+          "questionEn": "Report B depends on package A. How is the dependency cleared if A was accumulated in an earlier block? How can A unlock B during ordering in the current block?",
           "answerZh": "先用 accumulated history 移除過去已滿足的依賴。排本區塊的候選順序時，先選出的 A 也能解鎖 B。區塊完成後，只有實際執行的前綴進入歷史。",
           "answerEn": "Accumulated history clears dependencies satisfied in earlier blocks. Selecting A earlier in this block's candidate order can also unlock B. Only the prefix actually processed is recorded in history."
         },
@@ -1042,8 +1042,8 @@ PAGE = {
           "passages": {
             "13": 84
           },
-          "questionZh": "想比較驗證者一段時間的貢獻，又想分析某個區塊的服務負載，為何要看不同時間尺度的統計？",
-          "questionEn": "Why use different time windows to compare validator contributions and diagnose one block's service load?",
+          "questionZh": "比較驗證者的貢獻時，要看多久的統計？查看某個區塊的服務負載時，又要看哪一份紀錄？",
+          "questionEn": "Over what period are validator contributions measured? Which statistics describe service load in a single block?",
           "answerZh": "Validator activity 按 epoch 累積，保留當期與前一期紀錄。Core 和 service 的統計則描述單一區塊。",
           "answerEn": "Validator activity accumulates over an epoch, with current and previous records retained. Core and service statistics describe individual blocks."
         },
@@ -1115,7 +1115,7 @@ PAGE = {
             "12": 289,
             "14": 186
           },
-          "questionZh": "一個被成功評估的 work-package 裡有三個 items，分別給兩個服務。會產生幾份 report，結果怎麼分送？",
+          "questionZh": "一個 work-package 有三個 work-items，目標分屬兩個服務。成功執行後會產生幾份 work-report？累積時如何把結果交給這兩個服務？",
           "questionEn": "A successfully evaluated package contains three items targeting two services. How many reports result, and how are the outputs routed?",
           "answerZh": "對這次評估產生一份 work-report，內含每個 item 各自的 digest。累積時，這些結果依目標 service 分組送入執行。",
           "answerEn": "That evaluation yields one report containing a digest per item. Accumulation groups the relevant results by their target service."
@@ -1185,8 +1185,8 @@ PAGE = {
           "passages": {
             "15": 23
           },
-          "questionZh": "Guarantor 的簽名交給區塊作者後，其他人能從這個簽名追究哪一項承諾？",
-          "questionEn": "What claim can others hold a guarantor accountable for after its signature reaches a block author?",
+          "questionZh": "Guarantor 簽署一份 work-report，代表它願意為哪件事負責？其他驗證者如何核對這項承諾？",
+          "questionEn": "What claim does a guarantor make by signing a work-report, and how can other validators check it?",
           "answerZh": "簽名綁定具體 work-report 的雜湊，表示這名驗證者擔保該報告忠實反映規定的計算。日後可重算並核對這個承諾。",
           "answerEn": "The signature binds the guarantor to a particular report hash and its claimed computation. Others can reproduce the work and hold the signer to that claim."
         },
@@ -1218,7 +1218,7 @@ PAGE = {
             "11": 347,
             "15": 28
           },
-          "questionZh": "Guarantor 準備花很多算力跑 refine。有哪些便宜的檢查值得先做，為什麼？",
+          "questionZh": "Guarantor 開始執行耗費算力的 refinement 之前，可以先做哪些成本較低的檢查？為什麼？",
           "questionEn": "Which cheap checks should a guarantor make before an expensive refinement, and why?",
           "answerZh": "先檢查授權、對應 core 的 pool 與報告背景是否可能符合納入規則。即使計算結果正確，不合納入條件也可能白做。",
           "answerEn": "Check authorization, core-pool membership and contextual eligibility first. An accurately computed report can still be ineligible for inclusion."
@@ -1320,9 +1320,9 @@ PAGE = {
             "16": 9,
             "H": 24
           },
-          "questionZh": "一個有 Merkle 證明的分片，和足夠多個能還原資料的分片，分別解決哪個問題？",
+          "questionZh": "驗證一個分片的 Merkle proof 能確認什麼？取得足夠多個不同的有效分片後，又能做什麼？",
           "questionEn": "What does proving one shard establish, and what does collecting enough distinct shards establish?",
-          "answerZh": "證明用來驗證分片確實位於承諾的位置。收集達門檻的不同有效分片，糾刪解碼才可還原整份資料。",
+          "answerZh": "Merkle proof 能證明分片位於承諾中的指定位置。取得達到重建門檻的不同有效分片後，就可以解碼並還原完整資料。",
           "answerEn": "The proof authenticates the shard at its committed position. A sufficient set of distinct valid shards lets the erasure decoder recover the full data."
         },
         {
@@ -1337,7 +1337,7 @@ PAGE = {
             "11": 180,
             "H": 12
           },
-          "questionZh": "一份報告需要超過三分之二的 availability assurances，但重建時只取部分分片。這兩個門檻各保護什麼？",
+          "questionZh": "為什麼協定要求超過三分之二的驗證者聲明持有分片，但還原資料只需要其中一部分分片？",
           "questionEn": "Why can availability require a validator supermajority even though recovery uses only a subset of shards?",
           "answerZh": "聲明門檻是協定認定資料已分散持有的條件。重建門檻是編碼的數學性質，決定需要多少個不同的有效分片才能解碼。",
           "answerEn": "The assurance threshold is the protocol's evidence of distribution. The recovery threshold is a property of the code that determines how many distinct valid shards suffice to decode."
@@ -1361,8 +1361,8 @@ PAGE = {
             "17": 77,
             "G": 5
           },
-          "questionZh": "Auditing 是驗證者自行決定要不要做嗎？它如何證明自己被選中，發出 announcement 後又承諾了什麼？",
-          "questionEn": "How are auditing duties determined, and what does a validator commit to when it announces an audit?",
+          "questionZh": "誰決定一名驗證者要稽核哪些報告？驗證者如何證明自己被選中？公告後必須完成哪件事？",
+          "questionEn": "How are a validator's audit duties determined? How does it prove its selection, and what must it do after announcing an audit?",
           "answerZh": "驗證者依 VRF 規則決定自己應檢查哪些 reports，並隨公告提供選取證明。已公告的 audit 必須完成，且須發布簽署的 judgment。",
           "answerEn": "Each validator derives its audit duties using the protocol's VRF rules and proves its selection when announcing. An announced audit must be completed and a signed judgment published."
         },
@@ -1411,9 +1411,9 @@ PAGE = {
             "10": 7,
             "17": 75
           },
-          "questionZh": "已宣布的稽核遲遲沒有回覆，和有人明確發出負面 judgment，接下來的處理有何不同？",
-          "questionEn": "How does a missing announced judgment differ from an explicit negative judgment in subsequent auditing?",
-          "answerZh": "缺席會讓後續 tranche 依 VRF 規則選出額外稽核工作。看到負面 judgment 時，所有驗證者都應就該報告稽核並提出判斷。",
+          "questionZh": "一位稽核者公告要檢查報告，卻遲遲沒有交出判斷。這跟有人明確判定報告無效，分別會讓哪些驗證者加入稽核？",
+          "questionEn": "Who is called on to audit when an announced auditor fails to respond? How does that change if someone judges the report invalid?",
+          "answerZh": "已公告的稽核逾時，後續批次（tranche）會依 VRF 規則增派稽核者。若有人簽署負面 judgment，所有驗證者都應重算這份報告並提出判斷。",
           "answerEn": "A no-show can assign additional checks through VRF rules in later tranches. A negative judgment requires all validators to audit that report and issue a judgment."
         },
         {
@@ -1469,7 +1469,7 @@ PAGE = {
             "18": 4,
             "E": 267
           },
-          "questionZh": "從一筆服務輸出到 BEEFY 簽署的歷史承諾，中間有哪兩層包含關係？",
+          "questionZh": "要用 BEEFY 的承諾驗證一筆服務輸出，先要證明這筆輸出屬於哪個區塊紀錄？再怎麼把這個紀錄連到已簽署的承諾？",
           "questionEn": "What two inclusion relationships connect a single service output to the history commitment signed by BEEFY?",
           "answerZh": "先證明服務 ID 與輸出 hash 包含在該區塊的輸出根。再證明這個區塊輸出根包含在已簽署承諾所涵蓋的 accumulation output log。",
           "answerEn": "First prove that the service ID and output hash belong to the block's output root. Then prove that the root belongs to the accumulation output log covered by the signed commitment."
@@ -1485,7 +1485,7 @@ PAGE = {
           "passages": {
             "19": 8
           },
-          "questionZh": "節點看到兩個競爭鏈頭。比較哪條鏈比較好之前，要先排除哪些候選？",
+          "questionZh": "兩條分支各有一個鏈頭。節點比較分支優先順序前，哪些條件會讓候選鏈頭先被排除？",
           "questionEn": "Before comparing two chain heads, which candidates must a node rule out?",
           "answerZh": "候選須延續已 finalized 的區塊，通過本地的 audited 條件，且未確定的路徑不可包含已觀察到的同 slot 雙重出塊。",
           "answerEn": "A candidate must descend from the finalized block, satisfy the local audit condition and have no observed equivocation in its unfinalized ancestry."
@@ -1644,8 +1644,8 @@ PAGE = {
           "passages": {
             "A": 168
           },
-          "questionZh": "一個陌生服務嘗試寫入沒有寫入權限的記憶體。為什麼這也屬於共識規格？",
-          "questionEn": "Why must consensus specify what happens when unknown service code writes to an inaccessible page?",
+          "questionZh": "服務程式嘗試寫入沒有寫入權限的記憶體頁面。為什麼每個 PVM 實作都必須以相同方式處理？",
+          "questionEn": "Why must all PVM implementations handle a write to a page without write permission in the same way?",
           "answerZh": "PVM 定義自己的記憶體、頁面權限及相應的 fault 行為。獨立實作要觀察到同樣的機器結果，才可一致處理這次 invocation。",
           "answerEn": "The PVM defines its memory, page permissions and resulting fault behavior. Independent clients must observe the same machine outcome to handle the invocation consistently."
         },
@@ -1689,9 +1689,9 @@ PAGE = {
           "passages": {
             "B": 142
           },
-          "questionZh": "服務在 accumulate 中先做部分更新，再耗盡 gas。有 checkpoint 和沒有 checkpoint，會怎樣影響保留的效果？",
+          "questionZh": "服務在 accumulate 中更新了狀態，隨後耗盡 gas。執行途中有沒有建立 checkpoint，會如何影響哪些更新能保留？",
           "questionEn": "How can a checkpoint affect what survives if an accumulation invocation later runs out of gas?",
-          "answerZh": "異常結束時會選用 exceptional context。Checkpoint 可把當時的效果存入該 context，之後尚未 checkpoint 的變更不會因此一併保留。",
+          "answerZh": "耗盡 gas 時，協定採用異常結束時保留的執行狀態。建立 checkpoint 會把當時的變更存入這份狀態，之後尚未存入的變更會捨棄。",
           "answerEn": "An exceptional exit selects the exceptional context. A checkpoint can save effects there, while later changes that were not checkpointed do not automatically survive."
         }
       ]
@@ -1711,7 +1711,7 @@ PAGE = {
           "passages": {
             "C": 120
           },
-          "questionZh": "兩個團隊對同一個 header 的欄位值完全同意，卻算出不同的 hash。除了 hash 函式，還要查哪裡？",
+          "questionZh": "兩個實作看到的 header 欄位值都相同，算出的 hash 卻不同。除了確認雜湊函式相同，還應該比對什麼？",
           "questionEn": "Two teams agree on every header field but compute different hashes. Besides the hash function, what should they compare?",
           "answerZh": "先比對送進雜湊函式的完整位元組。協定 codec 的欄位順序、整數表示與長度編碼都會影響承諾。",
           "answerEn": "Compare the exact bytes passed to the hash function. Field order, integer representation and length encoding in the protocol codec all affect the commitment."
@@ -1741,7 +1741,7 @@ PAGE = {
           "passages": {
             "D": 7
           },
-          "questionZh": "兩台節點把服務存在不同資料庫、資料列插入順序也不同。它們如何仍能得到同一個 state root？",
+          "questionZh": "兩個節點用不同資料庫保存相同的服務狀態，寫入順序也不同。它們怎麼算出相同的 state root？",
           "questionEn": "How can clients with different databases and insertion orders still obtain the same state root?",
           "answerZh": "先依協定把狀態映成標準的 state keys 與值，再按同一棵 Merkle trie 的規則取根。相同邏輯狀態便有相同承諾。",
           "answerEn": "Both map the logical state to the specified keys and values, then apply the same Merkle trie construction. The commitment is determined by that mapping."
@@ -1798,7 +1798,7 @@ PAGE = {
             "11": 224,
             "F": 14
           },
-          "questionZh": "驗證者指派需要洗牌。如果每個節點各用自己的隨機產生器洗一次，其他人還怎麼驗證指派？",
+          "questionZh": "驗證者與 core 的配對需要洗牌。不同節點要共用哪些輸入與規則，才能各自重算出同一份指派？",
           "questionEn": "How can every node verify a shuffled assignment instead of drawing its own unrelated permutation?",
           "answerZh": "協定指定相同的輸入順序、seed 和洗牌演算法。各自重算會得到同一個排列，因此同一份簽名能對上同一個指派。",
           "answerEn": "Nodes use the specified input order, seed and shuffle algorithm. They reconstruct the same permutation and can check a signature against the same assignment."
@@ -1873,6 +1873,84 @@ PAGE = {
           "questionEn": "An unfinalized branch has accumulated a report that now gets a negative judgment. When is that branch disregarded, and what must hold before a GRANDPA vote?",
           "answerZh": "一票負評會觸發全體稽核。節點得知至少三分之一驗證者判該 report 無效時，會排除已累積它的分支。GRANDPA 的投票目標還必須滿足本地 audited 與其他選鏈條件。",
           "answerEn": "One negative judgment triggers auditing by all validators. A node that sees at least one-third of validators judge a report invalid disregards branches that accumulated it. Its GRANDPA target must also satisfy the audit and chain-selection rules."
+        }
+      ]
+    },
+    {
+      "id": "round-21",
+      "title": "用幾句話介紹 JAM 的五個機制",
+      "en": "Explain five JAM mechanisms",
+      "scope": "§8, 11-12, 15-17",
+      "blocks": [
+        {
+          "kind": "oral",
+          "number": 101,
+          "refs": [
+            "17"
+          ],
+          "passages": {
+            "17": 9
+          },
+          "questionZh": "請簡介 JAM 的稽核（auditing）。誰重算哪一份工作？最後要對什麼作出判斷？",
+          "questionEn": "How does auditing work in JAM? Who repeats the computation, and what do they judge?",
+          "answerZh": "當報告變為可用時，依協定抽中的驗證者取回可供稽核的 bundle，重跑套件並比對 work-report，再簽署判斷。若有人判定報告無效，所有驗證者都要參與稽核。",
+          "answerEn": "When a report becomes available, selected validators fetch the auditable bundle, rerun the package and compare the resulting report with the guaranteed one. They sign a judgment. A negative judgment calls all validators into the audit."
+        },
+        {
+          "kind": "oral",
+          "number": 102,
+          "refs": [
+            "8"
+          ],
+          "passages": {
+            "8": 11
+          },
+          "questionZh": "請簡介工作授權（authorization）。一份 work-package 憑什麼使用某個 core？",
+          "questionEn": "How does authorization determine whether a work-package may use a particular core?",
+          "answerZh": "每個 core 都有自己的 authorizer pool。套件指定的 authorizer 必須在該 core 可接受的範圍內，且授權程式必須接受套件提供的 token。",
+          "answerEn": "Each core has an authorizer pool. The package must use an authorizer accepted by that core, and the authorizer program must approve the package using its token."
+        },
+        {
+          "kind": "oral",
+          "number": 103,
+          "refs": [
+            "15"
+          ],
+          "passages": {
+            "15": 8
+          },
+          "questionZh": "請簡介擔保（guaranteeing）。誰把 work-package 變成一份區塊可以收錄的報告？",
+          "questionEn": "How does guaranteeing turn a work-package into a report that can be included in a block?",
+          "answerZh": "指派給該 core 的 guarantors 檢查授權並執行 refinement，產生 work-report。至少兩位指派成員簽署同一份報告後，區塊作者才能把它作為 guarantee 提交。",
+          "answerEn": "The guarantors assigned to the core check authorization and run refinement to produce a work-report. At least two assigned guarantors must sign the same report before a block author can include its guarantee."
+        },
+        {
+          "kind": "oral",
+          "number": 104,
+          "refs": [
+            "16"
+          ],
+          "passages": {
+            "16": 3
+          },
+          "questionZh": "請簡介可用性聲明（availability assurance）。驗證者簽名時聲明自己持有什麼？這對稽核者有什麼用？",
+          "questionEn": "What is an availability assurance? What does the signer hold, and how does that help auditors?",
+          "answerZh": "驗證者聲明自己已取得並驗證指定的 bundle 分片，以及每個匯出 segment 對應的分片。稽核者可以收集足夠的 bundle 分片，重建資料並重跑工作。",
+          "answerEn": "The signer attests to holding its verified bundle shard and its shard for each exported segment. Auditors can collect enough bundle shards to reconstruct the inputs and replay the work."
+        },
+        {
+          "kind": "oral",
+          "number": 105,
+          "refs": [
+            "12"
+          ],
+          "passages": {
+            "12": 151
+          },
+          "questionZh": "請簡介累積（accumulation）。各 core 的計算結果如何改變鏈上的服務狀態？",
+          "questionEn": "What is accumulation? How do results computed on different cores change on-chain service state?",
+          "answerZh": "節點依套件依賴排列可用報告，再按 gas 預算選出能處理的前綴。各服務的 accumulate 收到屬於自己的工作結果，執行後的變更合併進鏈上狀態。",
+          "answerEn": "Nodes order available reports by package dependencies and take a prefix that fits the gas budget. Each service receives its own work results in accumulate, and the resulting changes are merged into chain state."
         }
       ]
     }
