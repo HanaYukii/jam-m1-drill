@@ -17658,7 +17658,7 @@
  "pages": [
   {
    "id": "macro-interview",
-   "title": "JAM Gray Paper 口試 105 題",
+   "title": "JAM Gray Paper 口試 135 題",
    "lead": "每輪五題。先口述協定規則，再展開中英文短答，點章號可對照原文。",
    "checked": "2026-11-12",
    "sourceIndex": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex",
@@ -19607,6 +19607,482 @@
        "questionEn": "What is accumulation? How do results computed on different cores change on-chain service state?",
        "answerZh": "節點依套件依賴排列可用報告，再按 gas 預算選出能處理的前綴。各服務的 accumulate 收到屬於自己的工作結果，執行後的變更合併進鏈上狀態。",
        "answerEn": "Nodes order available reports by package dependencies and take a prefix that fits the gas budget. Each service receives its own work results in accumulate, and the resulting changes are merged into chain state."
+      }
+     ]
+    },
+    {
+     "id": "round-22",
+     "title": "出塊與最終性",
+     "en": "Block production and finality",
+     "scope": "§5-6, 19",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 106,
+       "refs": [
+        "6",
+        "19"
+       ],
+       "passages": {
+        "6": 4,
+        "19": 3
+       },
+       "questionZh": "Safrole 和 GRANDPA 在 JAM 裡各負責什麼？",
+       "questionEn": "What roles do Safrole and GRANDPA play in JAM?",
+       "answerZh": "Safrole 安排每個時槽由誰出塊，讓鏈可以延伸。GRANDPA 透過驗證者投票確定共同歷史，使節點能把那段歷史視為最終結果。",
+       "answerEn": "Safrole schedules who may produce a block in each slot so the chain can grow. GRANDPA uses validator votes to finalize a shared history."
+      },
+      {
+       "kind": "oral",
+       "number": 107,
+       "refs": [
+        "6"
+       ],
+       "passages": {
+        "6": 21
+       },
+       "questionZh": "什麼是 slot 和 epoch？為什麼 JAM 同時需要這兩種時間單位？",
+       "questionEn": "What are slots and epochs, and what does JAM use each for?",
+       "answerZh": "Slot 是一次出塊機會，可以留空。一段固定數量的 slots 組成一個 epoch，協定以 epoch 為單位輪替驗證者集合與出塊排程。",
+       "answerEn": "A slot is an opportunity to produce a block and can be empty. A fixed number of slots forms an epoch, the unit used to rotate validator sets and block-production schedules."
+      },
+      {
+       "kind": "oral",
+       "number": 108,
+       "refs": [
+        "6"
+       ],
+       "passages": {
+        "6": 282
+       },
+       "questionZh": "Safrole 的票券（ticket）是用來做什麼的？",
+       "questionEn": "What is a ticket used for in Safrole?",
+       "answerZh": "驗證者提交票券，競爭下一個 epoch 的出塊資格。正常排程下，中選票券對應到特定時槽，持有人可在該時槽證明資格並封塊。",
+       "answerEn": "Validators submit tickets to compete for block-production slots in the next epoch. Under the regular schedule, a winning ticket lets its holder prove eligibility and seal a block in the assigned slot."
+      },
+      {
+       "kind": "oral",
+       "number": 109,
+       "refs": [
+        "5",
+        "6"
+       ],
+       "passages": {
+        "5": 3,
+        "6": 144
+       },
+       "questionZh": "收到一個區塊時，節點為什麼要驗證 block seal？",
+       "questionEn": "Why does a node verify the seal on an incoming block?",
+       "answerZh": "節點用 seal 核對簽署者是否有權在這個時槽出塊，也確認簽署的是眼前這份 header。",
+       "answerEn": "The seal lets the node check that the signer was entitled to author this slot and signed this particular header."
+      },
+      {
+       "kind": "oral",
+       "number": 110,
+       "refs": [
+        "19"
+       ],
+       "passages": {
+        "19": 8
+       },
+       "questionZh": "什麼是最佳鏈（best chain）？它和已經最終確定的區塊有什麼關係？",
+       "questionEn": "What is the best chain, and how does it relate to the latest finalized block?",
+       "answerZh": "節點從延續已確定歷史、符合稽核等條件的分支中選出要延伸的一條。隨著新區塊到來，前端的選擇可以改變，但仍須接在已確定的歷史上。",
+       "answerEn": "A node chooses which eligible branch to extend among descendants of the finalized block, subject to checks such as auditing. Its preferred tip can change as blocks arrive while preserving finalized history."
+      }
+     ]
+    },
+    {
+     "id": "round-23",
+     "title": "讀懂一個區塊",
+     "en": "Reading a JAM block",
+     "scope": "§3-5, 7",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 111,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 3
+       },
+       "questionZh": "用一句話說，JAM 的狀態轉移函數（STF）做什麼？",
+       "questionEn": "In one sentence, what does the JAM state-transition function do?",
+       "answerZh": "它以執行前的狀態和一個有效區塊為輸入，依協定規則算出執行後的狀態。",
+       "answerEn": "It takes the prior state and a valid block and applies the protocol rules to compute the post-state."
+      },
+      {
+       "kind": "oral",
+       "number": 112,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 14
+       },
+       "questionZh": "區塊的 header 和 extrinsic 各提供哪一類資訊？",
+       "questionEn": "What kinds of information do the header and the extrinsic carry?",
+       "answerZh": "Header 標明區塊接在哪裡、由誰在何時產生，並承諾區塊內容。Extrinsic 帶入本區塊要處理的協定資料，例如票券、擔保與可用性聲明。",
+       "answerEn": "The header identifies the parent, author and slot and commits to the block contents. The extrinsic carries protocol inputs to process, such as tickets, guarantees and assurances."
+      },
+      {
+       "kind": "oral",
+       "number": 113,
+       "refs": [
+        "5"
+       ],
+       "passages": {
+        "5": 56
+       },
+       "questionZh": "為什麼 JAM 可以一邊處理區塊，一邊計算狀態根？",
+       "questionEn": "How does JAM overlap block processing with state-root computation?",
+       "answerZh": "Header 引用父區塊執行後的狀態根。本區塊算出的新根可由子區塊引用，因此區塊執行和計算根的工作可以重疊。",
+       "answerEn": "A header references the state root after its parent. A child can reference the new root produced by this block, allowing block execution and root computation to overlap."
+      },
+      {
+       "kind": "oral",
+       "number": 114,
+       "refs": [
+        "7"
+       ],
+       "passages": {
+        "7": 3
+       },
+       "questionZh": "鏈上為什麼要保留 recent history？",
+       "questionEn": "Why does JAM keep recent history in state?",
+       "answerZh": "節點用近期區塊與已提交套件的紀錄核對新報告。這讓節點能辨認引用過期背景的報告，也能檢查套件是否已被報告過。",
+       "answerEn": "Nodes check incoming reports against records of recent blocks and reported packages. This helps them detect stale references and packages already reported."
+      },
+      {
+       "kind": "oral",
+       "number": 115,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 47
+       },
+       "questionZh": "讀 Gray Paper 時，prior state、intermediate state 和 post-state 分別指哪個時點？",
+       "questionEn": "When reading the Gray Paper, what do prior, intermediate and post-state refer to?",
+       "answerZh": "Prior state 是套用區塊前的狀態。Intermediate state 是其中某些步驟完成後、供後續步驟使用的值。Post-state 是整個區塊處理完的結果。",
+       "answerEn": "Prior state is the state before applying the block. An intermediate value reflects the steps completed so far and can feed later steps. Post-state is the result after the whole block."
+      }
+     ]
+    },
+    {
+     "id": "round-24",
+     "title": "服務如何保存資料",
+     "en": "How services keep data",
+     "scope": "§9",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 116,
+       "refs": [
+        "9"
+       ],
+       "passages": {
+        "9": 3
+       },
+       "questionZh": "JAM 裡的 service account 是什麼？",
+       "questionEn": "What is a service account in JAM?",
+       "answerZh": "每個服務以 service ID 識別。它的帳戶記錄餘額、程式碼雜湊、儲存資料與 preimage 等資訊，讓節點能找到程式並保存它的狀態。",
+       "answerEn": "A service has an account identified by its service ID. The account records its balance, code hash, storage and preimage data so nodes can find its program and maintain its state."
+      },
+      {
+       "kind": "oral",
+       "number": 117,
+       "refs": [
+        "9"
+       ],
+       "passages": {
+        "9": 38
+       },
+       "questionZh": "Service ID 和 code hash 各識別什麼？服務升級時差在哪裡？",
+       "questionEn": "What do a service ID and a code hash identify when a service upgrades?",
+       "answerZh": "Service ID 識別服務本身，可以在升級前後保持相同。Code hash 指定某一份程式內容，程式更新後帳戶會引用新的 hash。",
+       "answerEn": "The service ID identifies the service and can stay the same across an upgrade. The code hash identifies specific program contents, so the account references a new hash when its code changes."
+      },
+      {
+       "kind": "oral",
+       "number": 118,
+       "refs": [
+        "9"
+       ],
+       "passages": {
+        "9": 67
+       },
+       "questionZh": "在 JAM 裡，什麼是 preimage？服務為什麼會用 hash 查它？",
+       "questionEn": "What is a preimage in JAM, and why would a service look one up by hash?",
+       "answerZh": "Preimage 是雜湊後會得到指定 hash 的原始資料。服務可以先用短小的 hash 指定內容，之後再查回對應的原始位元組。",
+       "answerEn": "A preimage is the original data that hashes to a given value. A service can refer to the content by a compact hash and later look up the corresponding bytes."
+      },
+      {
+       "kind": "oral",
+       "number": 119,
+       "refs": [
+        "9"
+       ],
+       "passages": {
+        "9": 102
+       },
+       "questionZh": "請用一句話區分 solicit 和 provide。",
+       "questionEn": "How would you distinguish soliciting a preimage from providing it?",
+       "answerZh": "Solicit 是服務登記想取得哪個 hash、哪個長度的資料。Provide 是交付符合請求的原始內容。",
+       "answerEn": "To solicit is to register a request for data of a particular hash and length. To provide is to supply the bytes matching that request."
+      },
+      {
+       "kind": "oral",
+       "number": 120,
+       "refs": [
+        "9"
+       ],
+       "passages": {
+        "9": 135
+       },
+       "questionZh": "服務帳戶的 threshold balance 有什麼用途？",
+       "questionEn": "What purpose does a service account's threshold balance serve?",
+       "answerZh": "它把服務占用的儲存資源換算成帳戶需要保留的餘額。節點會把儲存項目數與資料大小都納入計算。",
+       "answerEn": "It links the balance an account must maintain to its storage footprint. Nodes account for both the number of stored entries and the amount of data."
+      }
+     ]
+    },
+    {
+     "id": "round-25",
+     "title": "工作如何打包與傳遞",
+     "en": "Packaging work and passing data",
+     "scope": "§11, 14",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 121,
+       "refs": [
+        "14"
+       ],
+       "passages": {
+        "14": 59
+       },
+       "questionZh": "Work-item 和 work-package 各代表什麼？",
+       "questionEn": "What do a work-item and a work-package represent?",
+       "answerZh": "一個 item 指定一個服務和交給它的工作。一個 package 把一個或多個 items 放在一起評估，其中的 items 可以屬於不同服務。",
+       "answerEn": "An item names one service and supplies work for it. A package groups one or more items for evaluation, and those items can target different services."
+      },
+      {
+       "kind": "oral",
+       "number": 122,
+       "refs": [
+        "11"
+       ],
+       "passages": {
+        "11": 91
+       },
+       "questionZh": "Work-report 和 work-digest 是什麼關係？",
+       "questionEn": "How are a work-report and a work-digest related?",
+       "answerZh": "Report 記錄整個套件的評估結果和共用背景。每個 item 在其中各有一份 digest，描述目標服務、執行結果或錯誤等資訊。",
+       "answerEn": "The report records the evaluation of the whole package and its shared context. Each item has a digest in that report identifying its target service and its result or error."
+      },
+      {
+       "kind": "oral",
+       "number": 123,
+       "refs": [
+        "14"
+       ],
+       "passages": {
+        "14": 59
+       },
+       "questionZh": "在一個 work-item 裡，payload 是交給誰解讀的？",
+       "questionEn": "Who interprets the payload in a work-item?",
+       "answerZh": "目標服務的 refine 程式解讀 payload。JAM 提供傳入這些位元組的格式，具體內容代表什麼由服務定義。",
+       "answerEn": "The target service's refine program interprets the payload. JAM specifies how the bytes are supplied, while the service defines what they mean."
+      },
+      {
+       "kind": "oral",
+       "number": 124,
+       "refs": [
+        "14"
+       ],
+       "passages": {
+        "14": 37
+       },
+       "questionZh": "什麼是 segment？兩份工作怎麼透過它傳遞資料？",
+       "questionEn": "What is a segment, and how can two packages use one to pass data?",
+       "answerZh": "Segment 是固定大小的資料片段。一份工作可以匯出片段，後續工作再依引用取得並驗證需要的片段。",
+       "answerEn": "A segment is a fixed-size unit of data. One package can export segments, and later work can reference, retrieve and verify the segments it needs."
+      },
+      {
+       "kind": "oral",
+       "number": 125,
+       "refs": [
+        "14"
+       ],
+       "passages": {
+        "14": 168
+       },
+       "questionZh": "請簡介 D³L。它替後續工作保存什麼？",
+       "questionEn": "What is D³L, and what does it preserve for later work?",
+       "answerZh": "D³L 是 JAM 的分散式資料儲存機制，用來保存工作匯出的 segments。後續工作可以在保存期內取回資料，當作自己的輸入。",
+       "answerEn": "D³L is JAM's distributed data lake for exported segments. Later work can retrieve those segments during the retention period and use them as inputs."
+      }
+     ]
+    },
+    {
+     "id": "round-26",
+     "title": "爭議與驗證者紀錄",
+     "en": "Disputes and validator records",
+     "scope": "§6, 10, 13",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 126,
+       "refs": [
+        "10"
+       ],
+       "passages": {
+        "10": 3
+       },
+       "questionZh": "JAM 為什麼需要爭議處理機制（disputes）？",
+       "questionEn": "Why does JAM need a disputes mechanism?",
+       "answerZh": "驗證者可能對同一份報告的有效性有不同判斷。鏈可以核對簽署的裁決與違規證據，讓各節點依同一套規則更新紀錄。",
+       "answerEn": "Validators may disagree about a report's validity. The chain checks signed verdicts and evidence of offenses so nodes update their records under common rules."
+      },
+      {
+       "kind": "oral",
+       "number": 127,
+       "refs": [
+        "10"
+       ],
+       "passages": {
+        "10": 24
+       },
+       "questionZh": "從一名驗證者的 judgment 到鏈上 verdict，中間多了什麼？",
+       "questionEn": "What turns an individual validator's judgment into a verdict the chain can process?",
+       "answerZh": "Judgment 是一名驗證者簽署的有效或無效判斷。Verdict 彙集針對同一份報告的簽署判斷，並須符合協定規定的票數與組成。",
+       "answerEn": "A judgment is one validator's signed opinion on validity. A verdict brings together signed judgments about the same report and must meet the protocol's voting and composition rules."
+      },
+      {
+       "kind": "oral",
+       "number": 128,
+       "refs": [
+        "10"
+       ],
+       "passages": {
+        "10": 17
+       },
+       "questionZh": "為什麼裁決結果除了 good 和 bad，還有 wonky？",
+       "questionEn": "Why does JAM distinguish wonky reports from good and bad ones?",
+       "answerZh": "規格把一種正反票分裂的結果另列為 wonky。節點保存這個分類，遇到相關待確認的報告時可以依裁決清除指派。",
+       "answerEn": "The protocol classifies a particular split of positive and negative votes as wonky. Nodes retain that classification and can clear a matching pending assignment."
+      },
+      {
+       "kind": "oral",
+       "number": 129,
+       "refs": [
+        "13"
+       ],
+       "passages": {
+        "13": 5
+       },
+       "questionZh": "JAM 會記錄哪些看得見的驗證者活動？這些紀錄有什麼用？",
+       "questionEn": "Which observable validator activities does JAM record, and what are the records for?",
+       "answerZh": "例如出塊、擔保報告和提交可用性聲明。這些鏈上紀錄讓上層的 staking 系統有共同資料可用來決定獎勵。",
+       "answerEn": "Examples include authoring blocks, guaranteeing reports and submitting assurances. These on-chain records give a higher-level staking system shared data for reward decisions."
+      },
+      {
+       "kind": "oral",
+       "number": 130,
+       "refs": [
+        "6"
+       ],
+       "passages": {
+        "6": 90
+       },
+       "questionZh": "驗證者集合為什麼分成 staging、pending 和 active？",
+       "questionEn": "Why does JAM distinguish staging, pending and active validator sets?",
+       "answerZh": "Staging 用來準備未來的人選，pending 是等待生效的集合，active 則負責當期職務。分階段輪替讓節點能提前知道下一期的驗證者。",
+       "answerEn": "Staging prepares future candidates, pending holds the set waiting to take effect, and active carries current duties. Rotation in stages lets nodes know the upcoming validator set in advance."
+      }
+     ]
+    },
+    {
+     "id": "round-27",
+     "title": "從執行到對外證明",
+     "en": "Execution and external proofs",
+     "scope": "§18, App. A-E",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 131,
+       "refs": [
+        "A"
+       ],
+       "passages": {
+        "A": 1
+       },
+       "questionZh": "PVM 在 JAM 裡扮演什麼角色？",
+       "questionEn": "What role does the PVM play in JAM?",
+       "answerZh": "PVM 定義執行服務程式的共同規則。只要程式、輸入、gas 和主機環境相同，不同節點就應得到相同的執行結果。",
+       "answerEn": "The PVM defines common rules for running service code. Given the same program, inputs, gas and host environment, nodes should obtain the same execution result."
+      },
+      {
+       "kind": "oral",
+       "number": 132,
+       "refs": [
+        "B"
+       ],
+       "passages": {
+        "B": 270
+       },
+       "questionZh": "PVM 程式為什麼需要 host calls？",
+       "questionEn": "Why does a PVM program need host calls?",
+       "answerZh": "程式透過 host calls 向 JAM 執行環境請求操作，例如讀資料或更新服務儲存。可用的操作取決於目前是哪一種呼叫情境。",
+       "answerEn": "Host calls let code request operations from its JAM execution environment, such as reading data or updating service storage. The available operations depend on the invocation context."
+      },
+      {
+       "kind": "oral",
+       "number": 133,
+       "refs": [
+        "C"
+       ],
+       "passages": {
+        "C": 1
+       },
+       "questionZh": "為什麼 JAM 要統一規定資料的序列化方式？",
+       "questionEn": "Why does JAM specify a common serialization format?",
+       "answerZh": "節點要對相同資料產生相同的位元組，才能一致地計算雜湊、驗證簽名和交換資料。",
+       "answerEn": "Nodes need to encode the same data into the same bytes to agree on hashes, verify signatures and exchange data."
+      },
+      {
+       "kind": "oral",
+       "number": 134,
+       "refs": [
+        "D",
+        "E"
+       ],
+       "passages": {
+        "D": 121,
+        "E": 169
+       },
+       "questionZh": "Merkle root 如何幫助只拿到部分資料的驗證者？",
+       "questionEn": "How does a Merkle root help someone verify just part of the data?",
+       "answerZh": "它用一個短雜湊承諾整份資料結構。只要有對應的證明，驗證者就能把某個值一路核對到已知的根。",
+       "answerEn": "A short hash commits to the whole structure. With the appropriate proof, a verifier can check an individual value against the known root."
+      },
+      {
+       "kind": "oral",
+       "number": 135,
+       "refs": [
+        "18",
+        "19"
+       ],
+       "passages": {
+        "18": 4,
+        "19": 3
+       },
+       "questionZh": "如果 JAM 已經有 GRANDPA，BEEFY 又替誰解決什麼問題？",
+       "questionEn": "If JAM already has GRANDPA, who benefits from BEEFY and why?",
+       "answerZh": "GRANDPA 在 JAM 內確定鏈上歷史。BEEFY 讓驗證者對已確定區塊的輸出歷史承諾簽名，外部系統就能用可聚合的簽名核對這份承諾。",
+       "answerEn": "GRANDPA finalizes JAM's chain history. BEEFY validators sign an output-history commitment for finalized blocks, giving external systems an aggregatable signature proof to verify."
       }
      ]
     }

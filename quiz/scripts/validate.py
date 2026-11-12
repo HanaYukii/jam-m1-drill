@@ -80,8 +80,8 @@ def validate_macro(page):
     sections = page.get("sections", [])
     expected = {str(i) for i in range(1, 23)} | set("ABCDEFGHI")
     used, questions_zh, questions_en = set(), set(), set()
-    if len(sections) != 21 or set(sources) != expected:
-        errors.append("macro interview needs 21 rounds and a source for each section and appendix")
+    if len(sections) != 27 or set(sources) != expected:
+        errors.append("macro interview needs 27 rounds and a source for each section and appendix")
     for key, source in sources.items():
         if not source.get("title") or not source.get("url", "").startswith("https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/text/"):
             errors.append(f"macro interview: invalid v0.8.0 source for {key}")
@@ -105,8 +105,8 @@ def validate_macro(page):
             used.update(refs)
             questions_zh.add(q.get("questionZh"))
             questions_en.add(q.get("questionEn"))
-    if used != expected or len(questions_zh) != 105 or len(questions_en) != 105:
-        errors.append("macro interview must cover all sections with 105 distinct bilingual questions")
+    if used != expected or len(questions_zh) != 135 or len(questions_en) != 135:
+        errors.append("macro interview must cover all sections with 135 distinct bilingual questions")
     return errors
 
 def validate_pages(pages):
