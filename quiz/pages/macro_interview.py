@@ -2,9 +2,9 @@
 
 PAGE = {
   "id": "macro-interview",
-  "title": "JAM Gray Paper 口試 135 題",
+  "title": "JAM Gray Paper 口試 140 題",
   "lead": "每輪五題。先口述協定規則，再展開中英文短答，點章號可對照原文。",
-  "checked": "2026-11-12",
+  "checked": "2026-11-14",
   "sourceIndex": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex",
   "sources": {
     "1": {
@@ -2427,6 +2427,92 @@ PAGE = {
           "questionEn": "If JAM already has GRANDPA, who benefits from BEEFY and why?",
           "answerZh": "GRANDPA 在 JAM 內確定鏈上歷史。BEEFY 讓驗證者對已確定區塊的輸出歷史承諾簽名，外部系統就能用可聚合的簽名核對這份承諾。",
           "answerEn": "GRANDPA finalizes JAM's chain history. BEEFY validators sign an output-history commitment for finalized blocks, giving external systems an aggregatable signature proof to verify."
+        }
+      ]
+    },
+    {
+      "id": "round-28",
+      "title": "為什麼 JAM 這樣設計？",
+      "en": "Why JAM is designed this way",
+      "scope": "§1, 4, 8, 14, 16-17, 19-20",
+      "blocks": [
+        {
+          "kind": "oral",
+          "number": 136,
+          "refs": [
+            "1",
+            "20"
+          ],
+          "passages": {
+            "1": 24,
+            "20": 115
+          },
+          "questionZh": "如果各個 core 都能平行運算，為什麼還要讓結果回到同一份服務狀態？",
+          "questionEn": "If cores can compute in parallel, why bring their results back into one shared state?",
+          "answerZh": "平行運算讓不同工作可以同時進行。結果匯入共同的鏈上狀態後，後續工作就能依賴同一份已累積的結果，服務的狀態也不必永久分散在各個 core。",
+          "answerEn": "Parallel computation lets independent work proceed at the same time. Bringing results into shared chain state lets later work rely on the same accumulated outcomes without permanently splitting service state across cores."
+        },
+        {
+          "kind": "oral",
+          "number": 137,
+          "refs": [
+            "4",
+            "8"
+          ],
+          "passages": {
+            "4": 260,
+            "8": 11
+          },
+          "questionZh": "有人想把輸入交給服務。為什麼 JAM 不要求這個人一定也是購買 coretime 的人？",
+          "questionEn": "Why can someone submit input to a service even if someone else bought the coretime?",
+          "answerZh": "Coretime 可以事先購買。實際要跑哪份工作，由該 core 接受的 authorizer 依自己的規則判斷，因此提交者和購買者可以是不同的人。",
+          "answerEn": "Coretime can be purchased in advance. An authorizer accepted by the core decides whether to admit a particular package, so the input provider and the purchaser can be different parties."
+        },
+        {
+          "kind": "oral",
+          "number": 138,
+          "refs": [
+            "14",
+            "16"
+          ],
+          "passages": {
+            "14": 168,
+            "16": 7
+          },
+          "questionZh": "一份工作產生大量資料，後面的工作還要用。JAM 如何讓它們共用資料，又控制寫入鏈上狀態的資料量？",
+          "questionEn": "How can later work reuse a large output while keeping bulk data out of on-chain state?",
+          "answerZh": "前一份工作把資料匯出成 segments，由 D³L 分散保存。報告承諾這些片段的 root，後續工作就能取回所需片段並核對證明。",
+          "answerEn": "The first package exports segments to the distributed data lake. Its report commits to their root, so later work can fetch the segments it needs and verify their proofs."
+        },
+        {
+          "kind": "oral",
+          "number": 139,
+          "refs": [
+            "17",
+            "19"
+          ],
+          "passages": {
+            "17": 157,
+            "19": 8
+          },
+          "questionZh": "區塊已通過狀態轉移規則的檢查。為什麼驗證者投 GRANDPA 票前還要確認它已通過稽核？",
+          "questionEn": "A block passes the state-transition checks. Why must a validator also consider it audited before voting for it in GRANDPA?",
+          "answerZh": "驗塊時可以核對擔保簽名，但簽名本身無法證明 refinement 算對了。稽核透過重算檢查結果。本區塊中新變為可用的報告都達到稽核條件，才符合這項投票要求。",
+          "answerEn": "Block validation checks guarantee signatures. Auditors replay the work to check the computation itself. Every report that became available in the block must meet the audit condition before the block meets this voting requirement."
+        },
+        {
+          "kind": "oral",
+          "number": 140,
+          "refs": [
+            "4"
+          ],
+          "passages": {
+            "4": 145
+          },
+          "questionZh": "PVM 以 RISC-V 為基礎，對寫服務的人和實作節點的人各有什麼好處？",
+          "questionEn": "How does basing the PVM on RISC-V help both service developers and node implementers?",
+          "answerZh": "寫服務的人可以沿用 LLVM 等編譯工具，以 Rust 或 C++ 開發。對節點實作者來說，簡單的指令集也方便把 PVM 程式高效率地轉譯成常見處理器的機器碼。",
+          "answerEn": "Service developers can use established compiler tools such as LLVM with languages like Rust or C++. For node implementers, the simple instruction set makes efficient recompilation to common processors practical."
         }
       ]
     }

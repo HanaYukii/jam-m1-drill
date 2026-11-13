@@ -1,9 +1,9 @@
-JAM Gray Paper 口試 135 題（群組題目版）
-Gray Paper v0.8.0 · 27 輪，每輪 5 題
+JAM Gray Paper 口試 140 題（群組題目版）
+Gray Paper v0.8.0 · 28 輪，每輪 5 題
 https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex
 
 
-【JAM Gray Paper 口試 135 題｜第 01 輪】從 work-package 到鏈上狀態
+【JAM Gray Paper 口試 140 題｜第 01 輪】從 work-package 到鏈上狀態
 §1-2 · From work-package to chain state · Q001-Q005
 
 Q001  誰負責執行 work-package 並產生 work-report？報告獲得擔保後，還要滿足哪些條件才能進入累積（accumulation）？
@@ -22,7 +22,7 @@ Q005  JAM 沿用 Polkadot 的 ELVES。Backing、approval、inclusion 在 JAM 各
 Which JAM stages correspond to ELVES backing, approval and inclusion? Which stage applies the results to chain state?
 
 
-【JAM Gray Paper 口試 135 題｜第 02 輪】從規格讀出狀態轉移
+【JAM Gray Paper 口試 140 題｜第 02 輪】從規格讀出狀態轉移
 §3-4 · Reading the state transition · Q006-Q010
 
 Q006  同一區塊有兩份 guarantee，分別擔保不同的套件，卻指向同一個 core。驗塊節點能留第一份，繼續執行這個區塊嗎？
@@ -41,7 +41,7 @@ Q010  一個區塊的 extrinsic 包含哪五類資料？每一類用來做什麼
 What are the five parts of the block extrinsic, and which protocol task does each serve?
 
 
-【JAM Gray Paper 口試 135 題｜第 03 輪】區塊頭能證明什麼
+【JAM Gray Paper 口試 140 題｜第 03 輪】區塊頭能證明什麼
 §5 · What a block header commits to · Q011-Q015
 
 Q011  節點同步區塊時，parent hash 指向哪個區塊？prior state root 對應哪個時點的狀態？
@@ -60,7 +60,7 @@ Q015  同一個 epoch 內，父、子區塊剛好跨過票券提交截止點。�
 A parent and child block straddle the ticket deadline in the same epoch. Does the child include a winning-tickets marker if the ticket accumulator is one short? What if it is full?
 
 
-【JAM Gray Paper 口試 135 題｜第 04 輪】誰有資格出塊
+【JAM Gray Paper 口試 140 題｜第 04 輪】誰有資格出塊
 §6 · Who gets to author blocks · Q016-Q020
 
 Q016  Safrole 已經指定某個 slot 的作者。為什麼之後還要 GRANDPA？
@@ -79,7 +79,7 @@ Q020  分配驗證者任務需要隨機性。不同節點怎麼拿到相同的�
 How do nodes obtain a common source of randomness for validator assignments?
 
 
-【JAM Gray Paper 口試 135 題｜第 05 輪】報告怎麼連回歷史
+【JAM Gray Paper 口試 140 題｜第 05 輪】報告怎麼連回歷史
 §7 · How reports refer to history · Q021-Q025
 
 Q021  一份新 report 聲稱它參照某個近期區塊。節點用什麼來核對這個 anchor？
@@ -98,7 +98,7 @@ Q025  外部系統日後若要證明某個服務曾發布一筆累積輸出，JA
 How does JAM preserve a provable history of outputs published by services during accumulation?
 
 
-【JAM Gray Paper 口試 135 題｜第 06 輪】誰可以使用 coretime
+【JAM Gray Paper 口試 140 題｜第 06 輪】誰可以使用 coretime
 §8 · Who may use coretime · Q026-Q030
 
 Q026  分配 coretime 和核准某份 work-package 是兩個決定。套件送來時，由誰判斷它能否使用指定的 core？
@@ -117,7 +117,7 @@ Q030  誰可以更改某個 core 的授權排程？節點更新 authorizer pool 
 Who can change a core's future authorization schedule, and when does the pool use it?
 
 
-【JAM Gray Paper 口試 135 題｜第 07 輪】服務帳戶、儲存與特權
+【JAM Gray Paper 口試 140 題｜第 07 輪】服務帳戶、儲存與特權
 §9 · Service accounts, storage and privileges · Q031-Q035
 
 Q031  給定 service ID，服務帳戶記錄哪些狀態？節點如何從帳戶裡的 code hash 找到可執行的程式？
@@ -136,7 +136,7 @@ Q035  誰有權更新 staging validator keys？誰有權更新 authorizer queue�
 Who may change the staging validator keys and the authorizer queues? Which authority is assigned per core?
 
 
-【JAM Gray Paper 口試 135 題｜第 08 輪】出現爭議時，鏈採信什麼
+【JAM Gray Paper 口試 140 題｜第 08 輪】出現爭議時，鏈採信什麼
 §10 · How a dispute becomes chain evidence · Q036-Q040
 
 Q036  一名稽核者認為報告算錯了。這名稽核者簽署的 judgment，和區塊能收錄的 verdict 有什麼差別？
@@ -155,7 +155,7 @@ Q040  已查到違規驗證者的金鑰。從認定違規到實際處分，JAM �
 After an offending validator is identified, what does JAM record and who can impose economic penalties?
 
 
-【JAM Gray Paper 口試 135 題｜第 09 輪】報告上鏈與資料可用
+【JAM Gray Paper 口試 140 題｜第 09 輪】報告上鏈與資料可用
 §11 · Reporting and data availability · Q041-Q045
 
 Q041  一份 report 有足夠的 guarantor 簽名。區塊作者為什麼還要看它對應的 core 是否空著？
@@ -174,7 +174,7 @@ Q045  某個 core 的報告一直收不到足夠的 assurances。協定怎麼讓
 How can a core return to service if its pending report never receives enough assurances?
 
 
-【JAM Gray Paper 口試 135 題｜第 10 輪】報告何時能進入 accumulation
+【JAM Gray Paper 口試 140 題｜第 10 輪】報告何時能進入 accumulation
 §12 · When reports can be accumulated · Q046-Q050
 
 Q046  報告 B 依賴套件 A。若 A 在先前區塊已累積，節點如何消除這項依賴？若 A 是本區塊才排在 B 前面，又如何解鎖 B？
@@ -193,7 +193,7 @@ Q050  這個區塊沒有任何 work-item 指向服務 S。它還可能因哪些�
 What can trigger accumulation for service S when no work-item targets it in this block?
 
 
-【JAM Gray Paper 口試 135 題｜第 11 輪】同一區塊裡的輪次與紀錄
+【JAM Gray Paper 口試 140 題｜第 11 輪】同一區塊裡的輪次與紀錄
 §12-13 · Rounds and accounting within a block · Q051-Q055
 
 Q051  服務 A 在一輪 accumulate 中對 B 發出 deferred transfer。誰把它交給 B，B 最早在哪一輪收到？
@@ -212,7 +212,7 @@ Q055  某服務在這個區塊有 refinement gas 紀錄，accumulation 的工作
 How can a service show refinement gas in a block but no accumulation work?
 
 
-【JAM Gray Paper 口試 135 題｜第 12 輪】Work-package 裡究竟裝什麼
+【JAM Gray Paper 口試 140 題｜第 12 輪】Work-package 裡究竟裝什麼
 §14 · What a work-package carries · Q056-Q060
 
 Q056  一個 work-item 如何指定要執行的服務？Payload 和 manifest 各為 refinement 提供哪些資訊？
@@ -231,7 +231,7 @@ Q060  服務 B 只需要服務 A 先前產出的一段大型資料，下一份�
 How can service B reuse and verify one piece of a large output previously produced by service A?
 
 
-【JAM Gray Paper 口試 135 題｜第 13 輪】Guarantor 實際承諾什麼
+【JAM Gray Paper 口試 140 題｜第 13 輪】Guarantor 實際承諾什麼
 §15 · What a guarantor commits to · Q061-Q065
 
 Q061  Guarantor 簽署一份 work-report，代表它願意為哪件事負責？其他驗證者如何核對這項承諾？
@@ -250,7 +250,7 @@ Q065  Guarantor 已經把 report 送給區塊作者。為什麼它還要向驗�
 After giving the report to a block author, why must guarantors also distribute data to the validator network?
 
 
-【JAM Gray Paper 口試 135 題｜第 14 輪】資料能不能取回
+【JAM Gray Paper 口試 140 題｜第 14 輪】資料能不能取回
 §16 · Can the data be recovered? · Q066-Q070
 
 Q066  驗證者準備對一個 core 簽 assurance。它在簽名前要親自取得並核對什麼？
@@ -269,7 +269,7 @@ Q070  為什麼協定要求超過三分之二的驗證者聲明持有分片，�
 Why can availability require a validator supermajority even though recovery uses only a subset of shards?
 
 
-【JAM Gray Paper 口試 135 題｜第 15 輪】稽核職責與 audited 判定
+【JAM Gray Paper 口試 140 題｜第 15 輪】稽核職責與 audited 判定
 §17 · Audit duties and the audited condition · Q071-Q075
 
 Q071  誰決定一名驗證者要稽核哪些報告？驗證者如何證明自己被選中？公告後必須完成哪件事？
@@ -288,7 +288,7 @@ Q075  節點何時可把一份 work-report 視為 audited？要把整個 block �
 When can a node consider a work-report audited, and which reports must pass for the block to be audited?
 
 
-【JAM Gray Paper 口試 135 題｜第 16 輪】最終性與跨鏈證明
+【JAM Gray Paper 口試 140 題｜第 16 輪】最終性與跨鏈證明
 §18-19 · Finality and external proofs · Q076-Q080
 
 Q076  GRANDPA 已經確定區塊，為什麼還有 BEEFY 簽章？驗證者在什麼時候簽、簽的是哪個承諾？
@@ -307,7 +307,7 @@ Q080  兩個驗證者投給相同的 header，算出的 post-state root 卻不�
 Two validators vote for the same header but attach different post-state roots. Do those votes support the same target?
 
 
-【JAM Gray Paper 口試 135 題｜第 17 輪】從規則看 JAM 的分工
+【JAM Gray Paper 口試 140 題｜第 17 輪】從規則看 JAM 的分工
 §20-22 · How JAM divides responsibility · Q081-Q085
 
 Q081  Gray Paper 如何區分 spatial parallelism 與 temporal parallelism？兩者怎麼讓 JAM 在同一段時間完成更多計算？
@@ -326,7 +326,7 @@ Q085  同一輪中，service 9 先執行完，送一筆 deferred transfer 給 B�
 In one round, service 9 finishes first and sends B one deferred transfer. Service 2 sends B two. In what order does B receive the three transfers next round?
 
 
-【JAM Gray Paper 口試 135 題｜第 18 輪】同一套 PVM，三種執行情境
+【JAM Gray Paper 口試 140 題｜第 18 輪】同一套 PVM，三種執行情境
 App. A-B · One PVM, different invocation contexts · Q086-Q090
 
 Q086  同一支程式在慢機器上跑了兩倍久。兩個節點為什麼仍應在相同位置耗盡 gas？
@@ -345,7 +345,7 @@ Q090  服務在 accumulate 中更新了狀態，隨後耗盡 gas。執行途中�
 How can a checkpoint affect what survives if an accumulation invocation later runs out of gas?
 
 
-【JAM Gray Paper 口試 135 題｜第 19 輪】把狀態與資料變成可驗證的承諾
+【JAM Gray Paper 口試 140 題｜第 19 輪】把狀態與資料變成可驗證的承諾
 App. C-E · Encoding and Merkle commitments · Q091-Q095
 
 Q091  兩個實作看到的 header 欄位值都相同，算出的 hash 卻不同。除了確認雜湊函式相同，還應該比對什麼？
@@ -364,7 +364,7 @@ Q095  每個區塊都追加一個輸出根，為什麼用 Merkle mountain 結構
 Why use a Merkle mountain structure for a history that gains an output root each block?
 
 
-【JAM Gray Paper 口試 135 題｜第 20 輪】把各章接成一個可驗證的系統
+【JAM Gray Paper 口試 140 題｜第 20 輪】把各章接成一個可驗證的系統
 App. F-I · Putting the protocol together · Q096-Q100
 
 Q096  驗證者與 core 的配對需要洗牌。不同節點要共用哪些輸入與規則，才能各自重算出同一份指派？
@@ -383,7 +383,7 @@ Q100  一條尚未 finalized 的分支已累積某份 report，此時有人提�
 An unfinalized branch has accumulated a report that now gets a negative judgment. When is that branch disregarded, and what must hold before a GRANDPA vote?
 
 
-【JAM Gray Paper 口試 135 題｜第 21 輪】用幾句話介紹 JAM 的五個機制
+【JAM Gray Paper 口試 140 題｜第 21 輪】用幾句話介紹 JAM 的五個機制
 §8, 11-12, 15-17 · Explain five JAM mechanisms · Q101-Q105
 
 Q101  請簡介 JAM 的稽核（auditing）。誰重算哪一份工作？最後要對什麼作出判斷？
@@ -402,7 +402,7 @@ Q105  請簡介累積（accumulation）。各 core 的計算結果如何改變�
 What is accumulation? How do results computed on different cores change on-chain service state?
 
 
-【JAM Gray Paper 口試 135 題｜第 22 輪】出塊與最終性
+【JAM Gray Paper 口試 140 題｜第 22 輪】出塊與最終性
 §5-6, 19 · Block production and finality · Q106-Q110
 
 Q106  Safrole 和 GRANDPA 在 JAM 裡各負責什麼？
@@ -421,7 +421,7 @@ Q110  什麼是最佳鏈（best chain）？它和已經最終確定的區塊有�
 What is the best chain, and how does it relate to the latest finalized block?
 
 
-【JAM Gray Paper 口試 135 題｜第 23 輪】讀懂一個區塊
+【JAM Gray Paper 口試 140 題｜第 23 輪】讀懂一個區塊
 §3-5, 7 · Reading a JAM block · Q111-Q115
 
 Q111  用一句話說，JAM 的狀態轉移函數（STF）做什麼？
@@ -440,7 +440,7 @@ Q115  讀 Gray Paper 時，prior state、intermediate state 和 post-state 分�
 When reading the Gray Paper, what do prior, intermediate and post-state refer to?
 
 
-【JAM Gray Paper 口試 135 題｜第 24 輪】服務如何保存資料
+【JAM Gray Paper 口試 140 題｜第 24 輪】服務如何保存資料
 §9 · How services keep data · Q116-Q120
 
 Q116  JAM 裡的 service account 是什麼？
@@ -459,7 +459,7 @@ Q120  服務帳戶的 threshold balance 有什麼用途？
 What purpose does a service account's threshold balance serve?
 
 
-【JAM Gray Paper 口試 135 題｜第 25 輪】工作如何打包與傳遞
+【JAM Gray Paper 口試 140 題｜第 25 輪】工作如何打包與傳遞
 §11, 14 · Packaging work and passing data · Q121-Q125
 
 Q121  Work-item 和 work-package 各代表什麼？
@@ -478,7 +478,7 @@ Q125  請簡介 D³L。它替後續工作保存什麼？
 What is D³L, and what does it preserve for later work?
 
 
-【JAM Gray Paper 口試 135 題｜第 26 輪】爭議與驗證者紀錄
+【JAM Gray Paper 口試 140 題｜第 26 輪】爭議與驗證者紀錄
 §6, 10, 13 · Disputes and validator records · Q126-Q130
 
 Q126  JAM 為什麼需要爭議處理機制（disputes）？
@@ -497,7 +497,7 @@ Q130  驗證者集合為什麼分成 staging、pending 和 active？
 Why does JAM distinguish staging, pending and active validator sets?
 
 
-【JAM Gray Paper 口試 135 題｜第 27 輪】從執行到對外證明
+【JAM Gray Paper 口試 140 題｜第 27 輪】從執行到對外證明
 §18, App. A-E · Execution and external proofs · Q131-Q135
 
 Q131  PVM 在 JAM 裡扮演什麼角色？
@@ -514,3 +514,22 @@ How does a Merkle root help someone verify just part of the data?
 
 Q135  如果 JAM 已經有 GRANDPA，BEEFY 又替誰解決什麼問題？
 If JAM already has GRANDPA, who benefits from BEEFY and why?
+
+
+【JAM Gray Paper 口試 140 題｜第 28 輪】為什麼 JAM 這樣設計？
+§1, 4, 8, 14, 16-17, 19-20 · Why JAM is designed this way · Q136-Q140
+
+Q136  如果各個 core 都能平行運算，為什麼還要讓結果回到同一份服務狀態？
+If cores can compute in parallel, why bring their results back into one shared state?
+
+Q137  有人想把輸入交給服務。為什麼 JAM 不要求這個人一定也是購買 coretime 的人？
+Why can someone submit input to a service even if someone else bought the coretime?
+
+Q138  一份工作產生大量資料，後面的工作還要用。JAM 如何讓它們共用資料，又控制寫入鏈上狀態的資料量？
+How can later work reuse a large output while keeping bulk data out of on-chain state?
+
+Q139  區塊已通過狀態轉移規則的檢查。為什麼驗證者投 GRANDPA 票前還要確認它已通過稽核？
+A block passes the state-transition checks. Why must a validator also consider it audited before voting for it in GRANDPA?
+
+Q140  PVM 以 RISC-V 為基礎，對寫服務的人和實作節點的人各有什麼好處？
+How does basing the PVM on RISC-V help both service developers and node implementers?

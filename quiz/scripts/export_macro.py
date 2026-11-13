@@ -84,7 +84,7 @@ def export_pdf(filename, font_regular, font_medium):
     pdf = Canvas(str(filename), pagesize=(width, page_h), pageCompression=1, invariant=1)
     pdf.setTitle(PAGE["title"] + " | Bilingual interview notes")
     pdf.setAuthor("JAM M1 Drill")
-    pdf.setSubject("Gray Paper v0.8.0 | 27 rounds | 135 bilingual questions and short answers")
+    pdf.setSubject("Gray Paper v0.8.0 | 28 rounds | 140 bilingual questions and short answers")
 
     def label(x, y, value, font="Helvetica", size=10, color=ink, right=False):
         pdf.setFont(font, size)
@@ -116,7 +116,7 @@ def export_pdf(filename, font_regular, font_medium):
     pdf.addOutlineEntry("目錄 / Contents", "index")
     top("INTERVIEW QUESTIONS   /   ZH + EN")
     label(margin, page_h-77, PAGE["title"], "InterviewTCMedium", 25)
-    label(margin, page_h-101, "135 questions on the JAM protocol", "Helvetica", 15, muted)
+    label(margin, page_h-101, "140 questions on the JAM protocol", "Helvetica", 15, muted)
     label(margin, page_h-131, "中英文口述題與短答，每輪五題。", "InterviewTC", 12)
     label(margin, page_h-151, "點輪次可跳頁。每題上方的章號連到 v0.8.0 原文。", "InterviewTC", 10.5, muted)
     index_top = page_h-174
@@ -182,7 +182,7 @@ def main():
     parser.add_argument("--font-medium", type=Path, default=Path("/System/Library/Fonts/STHeiti Medium.ttc"))
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    title = PAGE["title"] + "（群組題目版）\nGray Paper v0.8.0 · 27 輪，每輪 5 題\n" + PAGE["sourceIndex"]
+    title = PAGE["title"] + "（群組題目版）\nGray Paper v0.8.0 · 28 輪，每輪 5 題\n" + PAGE["sourceIndex"]
     rounds = [round_text(section, i) for i, section in enumerate(PAGE["sections"], 1)]
     (args.out / "jam-100-questions.txt").write_text(title + "\n\n\n" + "\n\n\n".join(rounds) + "\n", encoding="utf-8")
     export_pdf(args.out / "jam-100-answers.pdf", args.font_regular, args.font_medium)

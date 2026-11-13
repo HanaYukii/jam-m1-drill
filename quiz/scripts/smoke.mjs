@@ -185,17 +185,17 @@ console.log(JSON.stringify(results, null, 1));
   await page.locator('.modes button[data-mode="macro"]').click();
   assert.equal(new URL(page.url()).hash, '#macro');
   const numbers = [];
-  for (let i = 0; i < 27; i++) {
+  for (let i = 0; i < 28; i++) {
     await page.locator('#macroRound').selectOption(String(i));
     const ids = await page.locator('.macro-card').evaluateAll(cards => cards.map(c => Number(c.dataset.number)));
     assert.equal(ids.length, 5);
     numbers.push(...ids);
   }
-  assert.deepEqual(numbers, Array.from({length:135}, (_,i) => i+1));
+  assert.deepEqual(numbers, Array.from({length:140}, (_,i) => i+1));
   await page.reload();
-  assert.equal(new URL(page.url()).hash, '#macro-27');
+  assert.equal(new URL(page.url()).hash, '#macro-28');
   assert.equal(await page.locator('.macro-card[open]').count(), 0);
-  const last = page.locator('.macro-card[data-number="135"]');
+  const last = page.locator('.macro-card[data-number="140"]');
   await last.locator('summary').focus();
   await page.keyboard.press('Enter');
   assert.equal(await last.locator('.qa-ans').isVisible(), true);
@@ -221,12 +221,12 @@ console.log(JSON.stringify(results, null, 1));
   }
   await page.screenshot({path:'dist/shot-macro-mobile.png',fullPage:true});
   await page.locator('#macroPrev').click();
-  assert.equal(await page.locator('#macroRound').inputValue(),'25');
+  assert.equal(await page.locator('#macroRound').inputValue(),'26');
   await page.setViewportSize({width:1280,height:900});
   await page.locator('.modes button[data-mode="practice"]').click();
   assert.equal(new URL(page.url()).hash,'');
   assert.equal(await page.locator('.stem').first().isVisible(),true);
-  console.log('macro: 27 rounds, 135 unique questions, deep link, bilingual reveal, clipboard and fallback, 320/375px OK');
+  console.log('macro: 28 rounds, 140 unique questions, deep link, bilingual reveal, clipboard and fallback, 320/375px OK');
   assert.deepEqual(errs, []);
   await browser2.close();
 }
