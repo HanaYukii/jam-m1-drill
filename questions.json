@@ -17658,7 +17658,7 @@
  "pages": [
   {
    "id": "macro-interview",
-   "title": "JAM Gray Paper 口試 140 題",
+   "title": "JAM Gray Paper 口試 160 題",
    "lead": "每輪五題。先口述協定規則，再展開中英文短答，點章號可對照原文。",
    "checked": "2026-11-14",
    "sourceIndex": "https://github.com/gavofyork/graypaper/blob/07f041dabd073f9018b418e9ee72e79dd2185401/graypaper.tex",
@@ -20169,6 +20169,334 @@
        "questionEn": "How does basing the PVM on RISC-V help both service developers and node implementers?",
        "answerZh": "寫服務的人可以沿用 LLVM 等編譯工具，以 Rust 或 C++ 開發。對節點實作者來說，簡單的指令集也方便把 PVM 程式高效率地轉譯成常見處理器的機器碼。",
        "answerEn": "Service developers can use established compiler tools such as LLVM with languages like Rust or C++. For node implementers, the simple instruction set makes efficient recompilation to common processors practical."
+      }
+     ]
+    },
+    {
+     "id": "round-29",
+     "title": "哪些工作適合放在 core？",
+     "en": "Choosing what runs in-core",
+     "scope": "§4, 12, 14, 20",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 141,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 237
+       },
+       "questionZh": "如果每個驗證者都執行所有 work-packages，增加驗證者能提高多少運算吞吐量？",
+       "questionEn": "If every validator ran every work-package, how much compute throughput would adding validators buy?",
+       "answerZh": "每台機器仍要在相同時間內完成全部工作，光增加副本無法提高這個上限。JAM 把不同套件分給不同 core，才讓獨立工作能同時進行。",
+       "answerEn": "Each machine would still have to finish the entire workload in the same time. JAM assigns different packages to different cores so independent work can run concurrently."
+      },
+      {
+       "kind": "oral",
+       "number": 142,
+       "refs": [
+        "4",
+        "12"
+       ],
+       "passages": {
+        "4": 254,
+        "12": 289
+       },
+       "questionZh": "一項工作要檢查大量輸入，最後只更新一筆服務紀錄。你會怎麼分配 refine 和 accumulate 的工作？",
+       "questionEn": "A job checks a large input and then updates one service record. How would you split it between refine and accumulate?",
+       "answerZh": "讓 refine 檢查大量輸入，輸出更新紀錄所需的精簡結果。再由 accumulate 讀取目前的服務狀態，套用這項結果。",
+       "answerEn": "Use refine to check the large input and return the small result needed for the update. Then let accumulate apply it to the current service state."
+      },
+      {
+       "kind": "oral",
+       "number": 143,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 245
+       },
+       "questionZh": "為什麼 refine 查資料時，不能直接讀每個節點當下看到的最新鏈頭？",
+       "questionEn": "Why would it be a problem for refine to read whichever chain head its node currently sees?",
+       "answerZh": "不同節點可能看到不同鏈頭，日後重跑也可能讀到不同資料。Lookup anchor 把歷史查詢固定在指定區塊，讓稽核者能重現相同的輸入。",
+       "answerEn": "Nodes can see different heads, and a later replay may see different data. The lookup anchor ties historical lookups to a particular block so auditors can reproduce the inputs."
+      },
+      {
+       "kind": "oral",
+       "number": 144,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 258
+       },
+       "questionZh": "Guarantor 和 auditor 的工作不同。兩者的安全性依靠哪一群參與者？",
+       "questionEn": "Guarantors and auditors do different jobs. Which group provides security for both?",
+       "answerZh": "兩種職務都由 JAM 的驗證者承擔。指派給 core 的驗證者先擔保報告，依稽核規則選出的驗證者再重算並提出判斷。",
+       "answerEn": "Both roles draw on JAM's validator set. Validators assigned to a core guarantee the report, and validators selected for auditing replay the work and issue judgments."
+      },
+      {
+       "kind": "oral",
+       "number": 145,
+       "refs": [
+        "20",
+        "12"
+       ],
+       "passages": {
+        "20": 12,
+        "12": 162
+       },
+       "questionZh": "即使所有 core 都滿載，為什麼也不能直接拿 core 數推算每個區塊能完成幾次服務更新？",
+       "questionEn": "Even with every core busy, why does the core count alone tell us little about how many service updates a block completes?",
+       "answerZh": "Core 數描述可以平行處理多少套件。一份套件可以包含多個 items，而報告能否在這一塊累積，還取決於可用性、依賴與 gas 預算。",
+       "answerEn": "Core count describes parallel package capacity. A package can contain several items, and availability, dependencies and the gas budget determine which reports a block can accumulate."
+      }
+     ]
+    },
+    {
+     "id": "round-30",
+     "title": "授權如何表達不同的政策？",
+     "en": "How authorization expresses policy",
+     "scope": "§4, 8, 14",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 146,
+       "refs": [
+        "8"
+       ],
+       "passages": {
+        "8": 11
+       },
+       "questionZh": "兩個 core 使用相同的授權程式，但設定不同。協定怎麼區分這兩套政策？",
+       "questionEn": "Two cores use the same authorization code with different configurations. How does JAM distinguish the policies?",
+       "answerZh": "Authorizer 的識別值同時取決於程式碼雜湊和設定資料。設定不同就會得到不同的 authorizer hash，各 core 可以各自決定接受哪一個。",
+       "answerEn": "The authorizer identifier commits to both the code hash and the configuration. Different configurations yield different authorizer hashes, and each core has its own pool of accepted hashes."
+      },
+      {
+       "kind": "oral",
+       "number": 147,
+       "refs": [
+        "8"
+       ],
+       "passages": {
+        "8": 9
+       },
+       "questionZh": "JAM 為什麼把 token 的內容留給 authorizer 解讀？",
+       "questionEn": "Why does JAM leave the meaning of a token to the authorizer?",
+       "answerZh": "不同的政策可以要求不同的授權證據。套件把 token 交給指定程式解讀，因此協定可以支援多種准入規則。",
+       "answerEn": "Different policies can require different evidence. A package supplies the token to the designated program, allowing the protocol to support multiple admission rules."
+      },
+      {
+       "kind": "oral",
+       "number": 148,
+       "refs": [
+        "8",
+        "14"
+       ],
+       "passages": {
+        "8": 9,
+        "14": 228
+       },
+       "questionZh": "授權成功後，trace 還會交給誰用？",
+       "questionEn": "After authorization succeeds, who else can use its trace?",
+       "answerZh": "Trace 是授權程式回傳的資料。Guarantor 把它傳給各 work-item 的 refine，也把它放進 work-report，讓後續處理能取得同一份授權結果。",
+       "answerEn": "The trace is data returned by the authorizer. The guarantor passes it to each item's refine invocation and includes it in the work-report for later processing."
+      },
+      {
+       "kind": "oral",
+       "number": 149,
+       "refs": [
+        "8"
+       ],
+       "passages": {
+        "8": 15
+       },
+       "questionZh": "用「現在能用」和「之後能用」來解釋 authorizer pool 與 queue，兩者各管什麼？",
+       "questionEn": "How do the authorizer pool and queue distinguish what a core accepts now from what it will accept later?",
+       "answerZh": "Pool 列出這個 core 目前可接受的 authorizers。Queue 提供之後要補入 pool 的項目，所以更新排程和實際取得授權是不同步驟。",
+       "answerEn": "The pool lists the authorizers the core currently accepts. The queue supplies entries for future pool updates, so scheduling a policy and authorizing a package are separate steps."
+      },
+      {
+       "kind": "oral",
+       "number": 150,
+       "refs": [
+        "4"
+       ],
+       "passages": {
+        "4": 252
+       },
+       "questionZh": "服務帳戶本身有一把能替它簽署所有操作的私鑰嗎？服務若要驗證使用者，誰訂規則？",
+       "questionEn": "Does a service account have a private key that signs all its actions? Who defines user authentication for a service?",
+       "answerZh": "服務帳戶依程式邏輯執行。服務可以在自己的邏輯中要求使用者簽名，並決定簽名授權哪些操作。",
+       "answerEn": "A service account acts through its code. A service can require user signatures in its own logic and define which actions those signatures authorize."
+      }
+     ]
+    },
+    {
+     "id": "round-31",
+     "title": "一份報告怎麼獨立重驗？",
+     "en": "Replaying a report independently",
+     "scope": "§11, 14-17",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 151,
+       "refs": [
+        "14",
+        "17"
+       ],
+       "passages": {
+        "14": 168,
+        "17": 20
+       },
+       "questionZh": "如果只把 work-package 本身交給稽核者，重跑時還可能缺哪些輸入？",
+       "questionEn": "If an auditor receives only the work-package, which inputs might still be missing for replay?",
+       "answerZh": "套件可能只引用外部資料或匯入的 segments。可供稽核的 bundle 還帶有對應資料和可驗證的匯入片段，使稽核者能重建當時的工作。",
+       "answerEn": "A package may only reference external data or imported segments. The auditable bundle also carries the external data and justified imports needed to reproduce the work."
+      },
+      {
+       "kind": "oral",
+       "number": 152,
+       "refs": [
+        "17"
+       ],
+       "passages": {
+        "17": 26
+       },
+       "questionZh": "稽核者要檢查一次 refine 的匯出結果，為什麼可以自己產生那些 segments？",
+       "questionEn": "Why can an auditor regenerate the exported segments when checking a refinement?",
+       "answerZh": "匯出片段是執行的輸出。稽核者用相同套件與輸入重跑 refine，就能重建匯出結果並核對報告中的承諾。",
+       "answerEn": "Exports are outputs of execution. Replaying refine with the same package and inputs regenerates the segments so the auditor can check the report's commitment."
+      },
+      {
+       "kind": "oral",
+       "number": 153,
+       "refs": [
+        "17"
+       ],
+       "passages": {
+        "17": 130
+       },
+       "questionZh": "原 guarantor 願意直接提供完整 bundle，稽核者可以省下哪一步？還要檢查什麼？",
+       "questionEn": "If the original guarantor supplies the full bundle, which step can an auditor save, and what must still be checked?",
+       "answerZh": "可以省下收集分片再重建 bundle 的工作。稽核者仍須核對該 bundle 與報告的承諾相符，並獨立重算結果。",
+       "answerEn": "It can save fetching shards and reconstructing the bundle. The auditor must still verify that the bundle matches the report's commitment and independently reproduce the result."
+      },
+      {
+       "kind": "oral",
+       "number": 154,
+       "refs": [
+        "17"
+       ],
+       "passages": {
+        "17": 77
+       },
+       "questionZh": "稽核者為什麼要先公告自己抽中了哪份報告，而不是算完才發結果？",
+       "questionEn": "Why announce an audit assignment before publishing its result?",
+       "answerZh": "公告和選取證明讓其他驗證者知道應該等誰的判斷。若承諾的判斷遲遲未到，後續批次就能安排額外檢查。",
+       "answerEn": "The announcement and selection proof tell other validators whose judgment to expect. A missing judgment can then trigger additional checks in later tranches."
+      },
+      {
+       "kind": "oral",
+       "number": 155,
+       "refs": [
+        "11",
+        "17"
+       ],
+       "passages": {
+        "11": 32,
+        "17": 20
+       },
+       "questionZh": "兩個套件剛好得到相同的服務輸出。稽核時只比對這段輸出就夠了嗎？",
+       "questionEn": "Two packages happen to produce the same service output. Is comparing those output bytes enough to audit a report?",
+       "answerZh": "還要核對重算出的整份報告。報告也綁定套件、執行背景與資料承諾，相同的輸出位元組可以來自不同工作。",
+       "answerEn": "The auditor must compare the reproduced report as a whole. It also binds the package, execution context and data commitments, and different jobs can produce the same output bytes."
+      }
+     ]
+    },
+    {
+     "id": "round-32",
+     "title": "從可用資料到鏈上結果",
+     "en": "From available data to chain state",
+     "scope": "§7, 11-12, 14, 17-19",
+     "blocks": [
+      {
+       "kind": "oral",
+       "number": 156,
+       "refs": [
+        "12"
+       ],
+       "passages": {
+        "12": 32
+       },
+       "questionZh": "如果節點只保存等待累積的報告，卻忘了哪些套件已經累積，下一塊會缺少什麼資訊？",
+       "questionEn": "If a node kept waiting reports but forgot which packages had accumulated, what information would the next block lack?",
+       "answerZh": "它會失去判斷哪些舊依賴已滿足的依據。累積歷史記錄近期已完成的套件，queue 則保留待處理的報告及其尚未滿足的依賴。",
+       "answerEn": "It would lose the record needed to clear previously satisfied dependencies. Accumulation history records recently completed packages, while the queue retains waiting reports and their outstanding dependencies."
+      },
+      {
+       "kind": "oral",
+       "number": 157,
+       "refs": [
+        "14",
+        "12"
+       ],
+       "passages": {
+        "14": 88,
+        "12": 46
+       },
+       "questionZh": "B 只要求 A 先累積，並不需要 A 的任何輸出資料。B 要怎麼表達這個關係？",
+       "questionEn": "B needs A to accumulate first but consumes none of A's output. How can B express this relationship?",
+       "answerZh": "B 可以把 A 的 package hash 列為 prerequisite。這會建立累積順序，不必為了表達先後關係而匯入 segment。",
+       "answerEn": "B can list A's package hash as a prerequisite. That establishes an accumulation dependency without importing a segment merely to express ordering."
+      },
+      {
+       "kind": "oral",
+       "number": 158,
+       "refs": [
+        "12"
+       ],
+       "passages": {
+        "12": 162
+       },
+       "questionZh": "兩個區塊的 gas 預算相同，為什麼能累積的報告數可能不同？",
+       "questionEn": "Why can two blocks with the same gas budget accumulate different numbers of reports?",
+       "answerZh": "各報告指定的累積 gas 不同，待處理的轉帳與 always-accumulate 服務也占用預算。每輪實際耗用的 gas 還會影響下一輪可用額度。",
+       "answerEn": "Reports request different amounts of accumulation gas. Incoming transfers and always-accumulate services also claim budget, and actual spending affects how much remains for the next round."
+      },
+      {
+       "kind": "oral",
+       "number": 159,
+       "refs": [
+        "17",
+        "19"
+       ],
+       "passages": {
+        "17": 157,
+        "19": 8
+       },
+       "questionZh": "同一時間，兩個誠實節點可能對某個區塊是否已通過稽核有不同看法嗎？",
+       "questionEn": "Can two honest nodes temporarily disagree on whether a block is audited?",
+       "answerZh": "可以。各節點依自己已收到的公告與簽署判斷套用同一組稽核規則。訊息到達時間不同，就可能先後達到投票條件。",
+       "answerEn": "Yes. Each node applies the same audit rules to the announcements and signed judgments it has received. Different arrival times can make nodes eligible to vote at different times."
+      },
+      {
+       "kind": "oral",
+       "number": 160,
+       "refs": [
+        "7",
+        "18"
+       ],
+       "passages": {
+        "7": 3,
+        "18": 4
+       },
+       "questionZh": "外部系統只想核對某個服務曾輸出一個 hash，需要重跑整個 work-package 嗎？",
+       "questionEn": "Must an external system replay the entire work-package to verify that a service published a particular hash?",
+       "answerZh": "它可以核對包含證明，把服務 ID 與輸出 hash 連回已由 BEEFY 簽署的輸出歷史承諾。這條證明回答的是該輸出是否被收錄。",
+       "answerEn": "It can verify inclusion proofs linking the service ID and output hash to a BEEFY-signed output-history commitment. The proof establishes that the output was included."
       }
      ]
     }
